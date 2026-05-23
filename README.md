@@ -6,7 +6,7 @@
     </picture>
   </a>
   <h1>js-helper-modules</h1>
-  <p><strong>JavaScript helper modules for the Superloom framework. Published as <code>@superloomdev/*</code> on GitHub Packages.</strong></p>
+  <p><strong>JavaScript helper modules for the Superloom framework.</strong></p>
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
   [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
