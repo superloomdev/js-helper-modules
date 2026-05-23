@@ -14,7 +14,7 @@
     "helper-crypto": "npm:@superloomdev/js-server-helper-crypto@^1.0.0",
     "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0",
     "helper-sql-mysql": "npm:@superloomdev/js-server-helper-sql-mysql@^1.0.0",
-    "helper-auth": "file:../../js-server-helper-auth",
+    "helper-auth": "npm:@superloomdev/js-server-helper-auth@^1.0.0",
     "helper-auth-store-mysql": "file:../"
   },
   "scripts": {
