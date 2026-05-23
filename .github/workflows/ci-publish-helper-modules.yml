@@ -182,7 +182,7 @@ jobs:
 
   test-utils:
     needs: [detect]
-    if: contains(needs.detect.outputs.test_modules, 'js-helper-utils')
+    if: contains(needs.detect.outputs.test_modules, 'helper-modules-core/js-helper-utils')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -207,7 +207,7 @@ jobs:
       needs['test-utils'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-helper-utils')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-core/js-helper-utils')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -246,7 +246,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-helper-debug')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-core/js-helper-debug')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -271,7 +271,7 @@ jobs:
       needs['test-debug'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-helper-debug')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-core/js-helper-debug')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -310,7 +310,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-helper-time')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-core/js-helper-time')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -335,7 +335,7 @@ jobs:
       needs['test-time'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-helper-time')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-core/js-helper-time')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -374,7 +374,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-helper-money')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-core/js-helper-money')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -399,7 +399,7 @@ jobs:
       needs['test-money'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-helper-money')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-core/js-helper-money')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -438,7 +438,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-client-helper-crypto')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-client/js-client-helper-crypto')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -463,7 +463,7 @@ jobs:
       needs['test-client-crypto'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-client-helper-crypto')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-client/js-client-helper-crypto')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -502,7 +502,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-crypto')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-crypto')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -527,7 +527,7 @@ jobs:
       needs['test-server-crypto'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-crypto')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-crypto')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -566,7 +566,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-instance')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-instance')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -591,7 +591,7 @@ jobs:
       needs['test-instance'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-instance')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-instance')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -630,7 +630,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-http')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-http')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -655,7 +655,7 @@ jobs:
       needs['test-http'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-http')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-http')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -694,7 +694,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-storage-aws-s3-url-signer')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-storage-aws-s3-url-signer')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -719,7 +719,7 @@ jobs:
       needs['test-storage-aws-s3-url-signer'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-storage-aws-s3-url-signer')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-storage-aws-s3-url-signer')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -758,7 +758,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-sql-sqlite')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-sql-sqlite')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -783,7 +783,7 @@ jobs:
       needs['test-sql-sqlite'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-sql-sqlite')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-sql-sqlite')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -822,7 +822,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-storage-aws-s3')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-storage-aws-s3')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -852,7 +852,7 @@ jobs:
       needs['test-storage-aws-s3'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-storage-aws-s3')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-storage-aws-s3')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -891,7 +891,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-nosql-aws-dynamodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-nosql-aws-dynamodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -920,7 +920,7 @@ jobs:
       needs['test-nosql-aws-dynamodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-nosql-aws-dynamodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-nosql-aws-dynamodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -959,7 +959,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-nosql-mongodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-nosql-mongodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -986,7 +986,7 @@ jobs:
       needs['test-nosql-mongodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-nosql-mongodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-nosql-mongodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1025,7 +1025,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-queue-aws-sqs')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-queue-aws-sqs')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1054,7 +1054,7 @@ jobs:
       needs['test-queue-aws-sqs'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-queue-aws-sqs')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-queue-aws-sqs')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1093,7 +1093,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-sql-mysql')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-sql-mysql')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1124,7 +1124,7 @@ jobs:
       needs['test-sql-mysql'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-sql-mysql')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-sql-mysql')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1163,7 +1163,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-sql-postgres')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-sql-postgres')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1193,7 +1193,7 @@ jobs:
       needs['test-sql-postgres'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-sql-postgres')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-sql-postgres')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1233,7 +1233,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-verify-store-sqlite')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-verify-store-sqlite')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1258,7 +1258,7 @@ jobs:
       needs['test-verify-store-sqlite'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-verify-store-sqlite')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-verify-store-sqlite')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1298,7 +1298,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-verify-store-postgres')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-verify-store-postgres')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1323,7 +1323,7 @@ jobs:
       needs['test-verify-store-postgres'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-verify-store-postgres')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-verify-store-postgres')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1363,7 +1363,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-verify-store-mysql')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-verify-store-mysql')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1388,7 +1388,7 @@ jobs:
       needs['test-verify-store-mysql'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-verify-store-mysql')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-verify-store-mysql')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1428,7 +1428,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-verify-store-mongodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-verify-store-mongodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1453,7 +1453,7 @@ jobs:
       needs['test-verify-store-mongodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-verify-store-mongodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-verify-store-mongodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1493,7 +1493,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-verify-store-dynamodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-verify-store-dynamodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1521,7 +1521,7 @@ jobs:
       needs['test-verify-store-dynamodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-verify-store-dynamodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-verify-store-dynamodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1562,7 +1562,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'src/helper-modules-server/js-server-helper-verify')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-verify')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1587,7 +1587,7 @@ jobs:
       needs['test-verify'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'src/helper-modules-server/js-server-helper-verify')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-verify')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1627,7 +1627,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'src/helper-modules-server/js-server-helper-logger')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-logger')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1652,7 +1652,7 @@ jobs:
       needs['test-logger'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'src/helper-modules-server/js-server-helper-logger')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-logger')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1692,7 +1692,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-logger-store-sqlite')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-logger-store-sqlite')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1717,7 +1717,7 @@ jobs:
       needs['test-logger-store-sqlite'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-logger-store-sqlite')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-logger-store-sqlite')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1757,7 +1757,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-logger-store-postgres')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-logger-store-postgres')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1782,7 +1782,7 @@ jobs:
       needs['test-logger-store-postgres'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-logger-store-postgres')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-logger-store-postgres')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1822,7 +1822,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-logger-store-mysql')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-logger-store-mysql')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1847,7 +1847,7 @@ jobs:
       needs['test-logger-store-mysql'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-logger-store-mysql')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-logger-store-mysql')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1887,7 +1887,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-logger-store-dynamodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-logger-store-dynamodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1915,7 +1915,7 @@ jobs:
       needs['test-logger-store-dynamodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-logger-store-dynamodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-logger-store-dynamodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1955,7 +1955,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-logger-store-mongodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-logger-store-mongodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1980,7 +1980,7 @@ jobs:
       needs['test-logger-store-mongodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-logger-store-mongodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-logger-store-mongodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2020,7 +2020,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'src/helper-modules-server/js-server-helper-auth')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-auth')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2045,7 +2045,7 @@ jobs:
       needs['test-auth'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'src/helper-modules-server/js-server-helper-auth')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-auth')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2085,7 +2085,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-auth-store-sqlite')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-auth-store-sqlite')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2110,7 +2110,7 @@ jobs:
       needs['test-auth-store-sqlite'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-auth-store-sqlite')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-auth-store-sqlite')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2150,7 +2150,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-auth-store-postgres')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-auth-store-postgres')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2175,7 +2175,7 @@ jobs:
       needs['test-auth-store-postgres'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-auth-store-postgres')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-auth-store-postgres')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2215,7 +2215,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-auth-store-mysql')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-auth-store-mysql')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2240,7 +2240,7 @@ jobs:
       needs['test-auth-store-mysql'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-auth-store-mysql')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-auth-store-mysql')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2280,7 +2280,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-auth-store-mongodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-auth-store-mongodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2305,7 +2305,7 @@ jobs:
       needs['test-auth-store-mongodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-auth-store-mongodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-auth-store-mongodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2345,7 +2345,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-auth-store-dynamodb')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-auth-store-dynamodb')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2373,7 +2373,7 @@ jobs:
       needs['test-auth-store-dynamodb'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-auth-store-dynamodb')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-auth-store-dynamodb')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2413,7 +2413,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-http-gateway"')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-http-gateway')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2438,7 +2438,7 @@ jobs:
       needs['test-http-gateway'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-http-gateway"')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-http-gateway')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2478,7 +2478,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-http-gateway-adapter-aws-apigateway')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-http-gateway-adapter-aws-apigateway')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2503,7 +2503,7 @@ jobs:
       needs['test-http-gateway-adapter-aws-apigateway'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-http-gateway-adapter-aws-apigateway')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-http-gateway-adapter-aws-apigateway')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -2543,7 +2543,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-http-gateway-adapter-express')
+      contains(needs.detect.outputs.test_modules, 'helper-modules-server/js-server-helper-http-gateway-adapter-express')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -2568,7 +2568,7 @@ jobs:
       needs['test-http-gateway-adapter-express'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-http-gateway-adapter-express')
+      contains(needs.detect.outputs.publish_modules, 'helper-modules-server/js-server-helper-http-gateway-adapter-express')
     runs-on: ubuntu-latest
     permissions:
       contents: read
