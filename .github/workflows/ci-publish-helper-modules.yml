@@ -630,7 +630,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-http"')
+      contains(needs.detect.outputs.test_modules, 'js-server-helper-http')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -655,7 +655,7 @@ jobs:
       needs['test-http'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-http"')
+      contains(needs.detect.outputs.publish_modules, 'js-server-helper-http')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -822,7 +822,7 @@ jobs:
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(needs.detect.outputs.test_modules, 'js-server-helper-storage-aws-s3"')
+      contains(needs.detect.outputs.test_modules, 'js-server-helper-storage-aws-s3')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -852,7 +852,7 @@ jobs:
       needs['test-storage-aws-s3'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(needs.detect.outputs.publish_modules, 'js-server-helper-storage-aws-s3"')
+      contains(needs.detect.outputs.publish_modules, 'js-server-helper-storage-aws-s3')
     runs-on: ubuntu-latest
     permissions:
       contents: read
