@@ -1,0 +1,13 @@
+{
+  "name": "@superloomdev/js-helper-modules",
+  "description": "Workspace root for Superloom JavaScript helper modules.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1"
+  }
+}
