@@ -13,7 +13,7 @@
 
 </div>
 
-## What's Here      
+## What's Here       
 
 30+ independently versioned helper modules across **databases** (Postgres, MySQL, SQLite, MongoDB, DynamoDB), **storage and queues** (S3, SQS), **auth and verification** (sessions, JWT, one-time codes with hot-swappable store adapters), **observability** (structured logging, compliance-friendly action logs), and **utilities** (crypto, HTTP, time, instance lifecycle).
 
