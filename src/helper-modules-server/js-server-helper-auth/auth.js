@@ -88,8 +88,8 @@ module.exports = function loader (shared_libs, config) {
   };
 
   // Build the public interface, closing over Lib, CONFIG, ERRORS,
-  // Validators, store, and Parts.
-  return createInterface(Lib, CONFIG, ERRORS, Validators, store, Parts);
+  // Validators, Parts, and store.
+  return createInterface(Lib, CONFIG, ERRORS, Validators, Parts, store);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -105,12 +105,12 @@ and CONFIG passed in - no module-level mutable state.
 @param {Object} CONFIG     - Merged configuration
 @param {Object} ERRORS     - Error catalog for this module
 @param {Object} Validators - Singleton validators from auth.validators.js
-@param {Object} store      - Resolved storage backend interface
 @param {Object} Parts      - Constructed parts (RecordShape, AuthId, ...)
+@param {Object} store      - Resolved storage backend interface
 
 @return {Object} - The public Auth interface
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS, Validators, store, Parts) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store) {
 
   const RecordShape = Parts.RecordShape;
   const AuthId = Parts.AuthId;
