@@ -8,21 +8,15 @@
 // consulted. If no source has a value, returns null and the caller
 // surfaces an INVALID_TOKEN error.
 //
-// TODO (temporary exception): cookie utilities live in parts/cookie.js.
-// TokenSource self-requires that part so every parts factory has the
-// uniform `(Lib, CONFIG, ERRORS)` signature. Once Lib.HTTP ships and
-// absorbs cookie parsing, this self-require + the cookie part go away.
+// Inbound cookies are read from instance.http_request.cookies (already
+// parsed by the HTTP gateway adapter before the request reaches auth).
 'use strict';
-
-const cookieFactory = require('./cookie');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Factory loader. Builds the Cookie part this TokenSource depends on
-(temporary self-require - see top-of-file TODO) and hands it to
-createInterface alongside the standard parts-factory triple.
+Factory loader.
 
 @param {Object} Lib - Dependency container (Utils)
 @param {Object} CONFIG - Merged module configuration
@@ -32,12 +26,7 @@ createInterface alongside the standard parts-factory triple.
 *********************************************************************/
 module.exports = function loader (Lib, CONFIG, ERRORS) {
 
-  // Temporary self-require of the cookie part. Lib.HTTP will absorb
-  // cookie parsing in a future pass, at which point this self-require
-  // and the cookie part go away.
-  const Cookie = cookieFactory(Lib, CONFIG, ERRORS);
-
-  return createInterface(Lib, CONFIG, ERRORS, Cookie);
+  return createInterface(Lib, CONFIG, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -46,18 +35,15 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Build the public TokenSource interface. Closes over the Cookie part
-so readAuthId can call into composeCookieName / parseCookieHeader
-without re-constructing them on every call.
+Build the public TokenSource interface.
 
 @param {Object} Lib - Dependency container (Utils)
 @param {Object} CONFIG - Merged module configuration (unused here)
 @param {Object} ERRORS - Error catalog for this module (unused here)
-@param {Object} Cookie - Constructed Cookie part
 
 @return {Object} - Public TokenSource interface
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS, Cookie) {
+const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line no-unused-vars
 
 
   ///////////////////////////Public Functions START//////////////////////////////
@@ -99,14 +85,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Cookie) {
 
       }
 
-      // Priority 3: Cookie
+      // Priority 3: Cookie — read from the pre-parsed cookies map on instance.http_request
       if (
         !Lib.Utils.isNullOrUndefined(options.cookie_prefix) &&
         !Lib.Utils.isNullOrUndefined(options.tenant_id)
       ) {
 
-        const cookie_name = Cookie.composeCookieName(options.cookie_prefix, options.tenant_id);
-        const cookie_value = TokenSource.readCookie(headers, cookie_name);
+        const cookie_name = options.cookie_prefix + options.tenant_id;
+        const cookie_value = TokenSource.readCookie(instance, cookie_name);
         if (cookie_value !== null) {
           return cookie_value;
         }
@@ -192,28 +178,27 @@ const createInterface = function (Lib, CONFIG, ERRORS, Cookie) {
 
 
     /********************************************************************
-    Read a cookie value from the request's Cookie header.
+    Read a cookie value from the pre-parsed cookies map on the request instance.
+    The HTTP gateway adapter populates instance.http_request.cookies before
+    any application code runs.
 
-    @param {Object} headers - Lower-cased request headers map
+    @param {Object} instance - Request instance with http_request.cookies
     @param {String} cookie_name - The cookie name to find
 
     @return {String|null} - The cookie value or null
     *********************************************************************/
-    readCookie: function (headers, cookie_name) {
+    readCookie: function (instance, cookie_name) {
 
-      // Return null early if the Cookie header is absent or empty
-      const cookie_header = headers['cookie'];
+      // Return null if the cookies map is missing or the name is not present
       if (
-        Lib.Utils.isNullOrUndefined(cookie_header) ||
-        !Lib.Utils.isString(cookie_header) ||
-        Lib.Utils.isEmptyString(cookie_header)
+        Lib.Utils.isNullOrUndefined(instance) ||
+        Lib.Utils.isNullOrUndefined(instance.http_request) ||
+        Lib.Utils.isNullOrUndefined(instance.http_request.cookies)
       ) {
         return null;
       }
 
-      // Parse the header and look up the target cookie by name
-      const parsed = Cookie.parseCookieHeader(cookie_header);
-      const value = parsed[cookie_name];
+      const value = instance.http_request.cookies[cookie_name];
 
       // Return null if the cookie is absent or came out as an empty string
       if (

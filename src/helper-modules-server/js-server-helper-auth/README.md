@@ -24,7 +24,7 @@ Storage backends are independent packages. Install only the adapter for the data
 
 - **Pre-tested at every release.** A shared store contract suite (`_test/store-contract-suite.js`) runs every adapter through the same end-to-end coverage on every push. Auth's own unit tests use an in-process memory fixture, so the package itself runs offline. Your project trusts the wrapper instead of re-verifying session plumbing on each release.
 
-- **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) and split into single-purpose `parts/` helpers (policy, auth-id, cookie, jwt, token-source, record-shape). A reviewer can read the entry-point top to bottom and follow the dispatches without ever getting lost in dense logic. Open `auth.js` and `parts/` to see the structure.
+- **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) and split into single-purpose `parts/` helpers (policy, auth-id, jwt, token-source, record-shape). A reviewer can read the entry-point top to bottom and follow the dispatches without ever getting lost in dense logic. Open `auth.js` and `parts/` to see the structure.
 
 - **Built-in observability.** Every store call is timed against the active request via `Lib.Debug.performanceAuditLog`. Slow-store review, request profiling, and the toggle to silence it in production are all built in. No instrumentation code to write.
 
@@ -37,7 +37,7 @@ Auth instance
  ├─ CONFIG.STORE         (store adapter factory, e.g. require('...auth-store-postgres'))
  ├─ CONFIG.STORE_CONFIG  (table_name / collection_name + lib_sql / lib_mongodb / lib_dynamodb)
  ├─ CONFIG.ACTOR_TYPE    ('user', 'admin', 'merchant', ...)
- ├─ parts/               (stateless helpers: policy, auth-id, cookie, jwt, token-source, ...)
+ ├─ parts/               (stateless helpers: policy, auth-id, jwt, token-source, record-shape)
  └─ Store                (instantiated from CONFIG.STORE; reads/writes sessions)
 ```
 
@@ -95,7 +95,7 @@ The loader pattern, including the full `Lib` container shape, is documented in [
 
 This module has no external dependencies.
 
-It expects four peer modules in the `Lib` container (Utils, Debug, Crypto, Instance) and one optional peer adapter package for your storage backend. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+It expects five peer modules in the `Lib` container (Utils, Debug, Crypto, Instance, HttpGateway) and one optional peer adapter package for your storage backend. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 

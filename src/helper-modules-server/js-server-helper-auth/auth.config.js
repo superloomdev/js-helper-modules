@@ -84,14 +84,7 @@ module.exports = {
   // `${COOKIE_PREFIX}${tenant_id}` so multiple tenants on one domain
   // don't collide.
   // Required when reading/writing cookies.
-  COOKIE_PREFIX: null,
-
-  // Cookie attributes applied to every Set-Cookie written by this instance.
-  COOKIE_OPTIONS: {
-    http_only: true,
-    secure: true,
-    same_site: 'lax',
-    path: '/'
-  }
+  COOKIE_PREFIX: null
 
 };
+

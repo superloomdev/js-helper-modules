@@ -20,7 +20,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 | Pattern | Behaviour |
 |---|---|
-| **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` for timestamps, calls `Lib.Debug.performanceAuditLog` against `instance.time_ms` on every store call, and (for cookie-driven flows) reads `instance.http_request` and writes through `instance.http_response` |
+| **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` for timestamps, calls `Lib.Debug.performanceAuditLog` against `instance.time_ms` on every store call, and (for cookie-driven flows) reads `instance.http_request.cookies` (already parsed by the HTTP gateway) |
 | **Never throws on operational failures** | HTTP errors, store driver failures, expired tokens, malformed tokens, cap rejections, and mismatched actor types all return `{ success: false, error }`. The only thrown errors are `TypeError`s on **programmer** mistakes (missing required option, reserved characters in `actor_id`, identity-field mutation) which surface in development |
 | **`success` is the discriminator** | Branch once on `result.success`. On success, read the named fields (`session`, `auth_id`, `access_token`, etc.). On failure, read `result.error.type` and `result.error.message` |
 | **One instance per `actor_type`** | The Auth instance is bound to the `ACTOR_TYPE` it was constructed with. Sessions stored under another `actor_type` are rejected by `verifySession` with `ACTOR_TYPE_MISMATCH` even when the token is otherwise valid |
@@ -43,6 +43,7 @@ Every async function resolves to an object with this shape (named fields vary by
 | `targets` | `array` | Subset of sessions with `push_provider` and `push_token` set |
 | `removed_count` / `deleted_count` | `number` | Number of records affected |
 | `access_token` / `refresh_token` | `string` | JWT-mode credentials |
+| `cookies` | `object \| null` | Cookie descriptor built by `Lib.HttpGateway.buildCookie()`. Present on `createSession`, `removeSession`, `removeAllSessions` when `COOKIE_PREFIX` is configured. Pass to `Lib.HttpGateway.returnHttpResponse` as the `cookies` argument. `null` when `COOKIE_PREFIX` is not set |
 | `claims` | `object` | Decoded JWT claims (on `verifyJwt`) |
 
 ---
@@ -51,7 +52,7 @@ Every async function resolves to an object with this shape (named fields vary by
 
 ### `createSession(instance, options)` *(async)*
 
-Validates options, runs the limit policy (list-then-filter), batch-deletes evicted sessions, inserts the new session record, and writes the cookie. In JWT mode also mints and returns the access and refresh tokens.
+Validates options, runs the limit policy (list-then-filter), batch-deletes evicted sessions, and inserts the new session record. Returns a cookie descriptor in `cookies` when `COOKIE_PREFIX` is configured — pass it to `Lib.HttpGateway.returnHttpResponse`. In JWT mode also mints and returns the access and refresh tokens.
 
 | Option | Type | Required | Description |
 |---|---|---|---|
@@ -71,7 +72,7 @@ Validates options, runs the limit policy (list-then-filter), batch-deletes evict
 | `client_user_agent` | `string` | No | HTTP `User-Agent` at login time |
 | `custom_data` | `object` | No | Arbitrary JSON stored verbatim with the session |
 
-**Returns** `{ success, session, auth_id, error }` in DB mode. In JWT mode also `{ access_token, refresh_token }`.
+**Returns** `{ success, auth_id, session, cookies, error }` in DB mode. In JWT mode also `{ access_token, refresh_token }`. `cookies` is `null` when `COOKIE_PREFIX` is not configured.
 
 Possible errors: `LIMIT_REACHED` (when caps are hit and `LIMITS.evict_oldest_on_limit` is `false`), `SERVICE_UNAVAILABLE` (store failure).
 
@@ -94,7 +95,7 @@ Possible errors: `INVALID_TOKEN` (malformed token, missing row, wrong secret), `
 
 ### `removeSession(instance, options)` *(async)*
 
-Deletes one session row and clears the cookie. Idempotent: a missing session is still `{ success: true }`.
+Deletes one session row. Returns a clear-cookie descriptor (`ttl: 0`) in `cookies` when `COOKIE_PREFIX` is configured. Idempotent: a missing session is still `{ success: true }`.
 
 | Option | Type | Required | Description |
 |---|---|---|---|
@@ -102,7 +103,7 @@ Deletes one session row and clears the cookie. Idempotent: a missing session is 
 | `actor_id` | `string` | Yes | |
 | `token_key` | `string` | Yes | The 16-char identifier portion of the session (not the full `auth_id`) |
 
-**Returns** `{ success, error }`.
+**Returns** `{ success, cookies, error }`. `cookies` is `null` when `COOKIE_PREFIX` is not configured.
 
 ### `removeOtherSessions(instance, options)` *(async)*
 
@@ -118,14 +119,14 @@ Deletes one session row and clears the cookie. Idempotent: a missing session is 
 
 ### `removeAllSessions(instance, options)` *(async)*
 
-Deletes every session for the actor. Used by account-compromise flows. Also clears the cookie.
+Deletes every session for the actor. Used by account-compromise flows. Returns a clear-cookie descriptor (`ttl: 0`) in `cookies` when `COOKIE_PREFIX` is configured.
 
 | Option | Type | Required | Description |
 |---|---|---|---|
 | `tenant_id` | `string` | Yes | |
 | `actor_id` | `string` | Yes | |
 
-**Returns** `{ success, removed_count, error }`.
+**Returns** `{ success, removed_count, cookies, error }`. `cookies` is `null` when `COOKIE_PREFIX` is not configured.
 
 ---
 

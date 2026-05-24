@@ -9,15 +9,14 @@ const { describe, it } = require('node:test');
 
 const { Lib } = require('./loader')();
 
-const AuthLoader    = require('../auth.js');
-const MemoryStore   = require('./memory-store');
-const ERRORS = require('../auth.errors');
-const CONFIG_STUB = {};
+const AuthLoader         = require('../auth.js');
+const MemoryStoreFactory = require('./memory-store');
+const ERRORS             = require('../auth.errors');
+const CONFIG_STUB        = {};
 
 const PolicyFactory      = require('../parts/policy.js');
 const RecordShapeFactory = require('../parts/record-shape.js');
 const AuthIdFactory      = require('../parts/auth-id.js');
-const CookieFactory      = require('../parts/cookie.js');
 const TokenSourceFactory = require('../parts/token-source.js');
 
 
@@ -61,7 +60,7 @@ describe('loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(function () {
-      AuthLoader(Lib, { STORE: MemoryStore, ACTOR_TYPE: 'user' });
+      AuthLoader(Lib, { STORE: MemoryStoreFactory, ACTOR_TYPE: 'user' });
     }, /CONFIG\.STORE_CONFIG is required/);
 
   });
@@ -69,7 +68,7 @@ describe('loader validation', function () {
   it('throws when ACTOR_TYPE is missing', function () {
 
     assert.throws(function () {
-      AuthLoader(Lib, { STORE: MemoryStore, STORE_CONFIG: valid_store_config });
+      AuthLoader(Lib, { STORE: MemoryStoreFactory, STORE_CONFIG: valid_store_config });
     }, /CONFIG\.ACTOR_TYPE is required/);
 
   });
@@ -79,7 +78,7 @@ describe('loader validation', function () {
     // Missing JWT block entirely
     assert.throws(function () {
       AuthLoader(Lib, {
-        STORE: MemoryStore,
+        STORE: MemoryStoreFactory,
         STORE_CONFIG: valid_store_config,
         ACTOR_TYPE: 'user',
         ENABLE_JWT: true,
@@ -92,7 +91,7 @@ describe('loader validation', function () {
     // Signing key too short
     assert.throws(function () {
       AuthLoader(Lib, {
-        STORE: MemoryStore,
+        STORE: MemoryStoreFactory,
         STORE_CONFIG: valid_store_config,
         ACTOR_TYPE: 'user',
         ENABLE_JWT: true,
@@ -229,63 +228,6 @@ describe('parts/record-shape', function () {
 
 
 // ============================================================================
-// COOKIE
-// ============================================================================
-
-describe('parts/cookie', function () {
-
-  const Cookie = CookieFactory(Lib, CONFIG_STUB, ERRORS);
-
-  it('serializeCookie writes name=value and the standard attributes', function () {
-
-    const header = Cookie.serializeCookie('sl_user_T', 'value', {
-      max_age: 600, http_only: true, secure: true, same_site: 'lax'
-    });
-
-    assert.match(header, /^sl_user_T=value/);
-    assert.match(header, /Max-Age=600/);
-    assert.match(header, /Path=\//);
-    assert.match(header, /HttpOnly/);
-    assert.match(header, /Secure/);
-    assert.match(header, /SameSite=Lax/);
-
-  });
-
-  it('parseCookieHeader returns a name->value map', function () {
-
-    const m = Cookie.parseCookieHeader('a=1; b=two; c=three');
-    assert.deepEqual(m, { a: '1', b: 'two', c: 'three' });
-
-  });
-
-  it('parseCookieHeader tolerates whitespace and equal-signs in values', function () {
-
-    const m = Cookie.parseCookieHeader('  k =val=ue ');
-    assert.equal(m.k, 'val=ue');
-
-  });
-
-  it('setCookieOnResponse stamps instance.http_response.cookies', function () {
-
-    const instance = buildInstance(0);
-    Cookie.setCookieOnResponse(instance, 'sl_user_T', 'val', { max_age: 600 });
-    assert.match(instance.http_response.cookies['sl_user_T'], /^sl_user_T=val/);
-
-  });
-
-  it('clearCookieOnResponse sets Max-Age=0', function () {
-
-    const instance = buildInstance(0);
-    Cookie.clearCookieOnResponse(instance, 'sl_user_T', {});
-    assert.match(instance.http_response.cookies['sl_user_T'], /Max-Age=0/);
-
-  });
-
-});
-
-
-
-// ============================================================================
 // TOKEN SOURCE (priority chain)
 // ============================================================================
 
@@ -297,10 +239,8 @@ describe('parts/token-source', function () {
 
     const instance = buildInstance(0);
     instance.http_request = {
-      headers: {
-        authorization: 'Bearer bearer-value',
-        cookie: 'sl_user_T=cookie-value'
-      }
+      headers: { authorization: 'Bearer bearer-value' },
+      cookies: { sl_user_T: 'cookie-value' }
     };
 
     const auth_id = TokenSource.readAuthId(instance, {
@@ -314,7 +254,8 @@ describe('parts/token-source', function () {
 
     const instance = buildInstance(0);
     instance.http_request = {
-      headers: { cookie: 'sl_user_T=cookie-value' }
+      headers: {},
+      cookies: { sl_user_T: 'cookie-value' }
     };
 
     const auth_id = TokenSource.readAuthId(instance, {
@@ -327,7 +268,7 @@ describe('parts/token-source', function () {
   it('returns null when neither source is present', function () {
 
     const instance = buildInstance(0);
-    instance.http_request = { headers: {} };
+    instance.http_request = { headers: {}, cookies: {} };
     const auth_id = TokenSource.readAuthId(instance, {
       cookie_prefix: 'sl_user_', tenant_id: 'T'
     });
@@ -339,14 +280,122 @@ describe('parts/token-source', function () {
 
     const instance = buildInstance(0);
     instance.http_request = {
-      headers: { authorization: 'Basic ' + Buffer.from('user:pass').toString('base64') }
+      headers: { authorization: 'Basic ' + Buffer.from('user:pass').toString('base64') },
+      cookies: {}
     };
     const auth_id = TokenSource.readAuthId(instance, {});
     assert.equal(auth_id, null);
 
   });
 
+  it('returns null when http_request.cookies is absent', function () {
+
+    const instance = buildInstance(0);
+    instance.http_request = { headers: {} };
+    const auth_id = TokenSource.readAuthId(instance, {
+      cookie_prefix: 'sl_user_', tenant_id: 'T'
+    });
+    assert.equal(auth_id, null);
+
+  });
+
 });
+
+
+
+// ============================================================================
+// SESSION LIFECYCLE — cookie descriptor (uses in-process memory store)
+// ============================================================================
+
+describe('createSession / removeSession cookie descriptor', function () {
+
+  const valid_base_config = {
+    STORE: MemoryStoreFactory,
+    STORE_CONFIG: {},
+    ACTOR_TYPE: 'user',
+    TTL_SECONDS: 3600,
+    LIMITS: { total_max: 5, evict_oldest_on_limit: true }
+  };
+
+  it('createSession returns cookies: null when COOKIE_PREFIX is not set', async function () {
+
+    const Auth = AuthLoader(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+    const result = await Auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+
+    assert.equal(result.success, true);
+    assert.equal(result.cookies, null);
+
+  });
+
+  it('createSession returns a cookie descriptor when COOKIE_PREFIX is set', async function () {
+
+    const Auth = AuthLoader(Lib, Object.assign({}, valid_base_config, { COOKIE_PREFIX: 'sl_user_' }));
+    const instance = buildInstance(1000);
+    const result = await Auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+
+    assert.equal(result.success, true);
+    assert.ok(result.cookies, 'cookies should be present');
+    assert.ok(result.cookies['sl_user_T'], 'descriptor keyed by cookie name');
+    assert.equal(result.cookies['sl_user_T'].value, result.auth_id);
+    assert.equal(result.cookies['sl_user_T'].ttl, 3600);
+
+  });
+
+  it('removeSession returns a clear-cookie descriptor (ttl=0) when COOKIE_PREFIX is set', async function () {
+
+    const Auth = AuthLoader(Lib, Object.assign({}, valid_base_config, { COOKIE_PREFIX: 'sl_user_' }));
+    const instance = buildInstance(1000);
+
+    // Create a session first so we have a token_key to remove
+    const create_result = await Auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+    assert.equal(create_result.success, true);
+
+    const { actor_id, token_key } = require('../parts/auth-id')(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
+    const remove_result = await Auth.removeSession(instance, {
+      tenant_id: 'T', actor_id: actor_id, token_key: token_key
+    });
+
+    assert.equal(remove_result.success, true);
+    assert.ok(remove_result.cookies, 'cookies should be present');
+    assert.ok(remove_result.cookies['sl_user_T'], 'descriptor keyed by cookie name');
+    assert.equal(remove_result.cookies['sl_user_T'].value, '');
+    assert.equal(remove_result.cookies['sl_user_T'].ttl, 0);
+
+  });
+
+  it('removeSession returns cookies: null when COOKIE_PREFIX is not set', async function () {
+
+    const Auth = AuthLoader(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    const create_result = await Auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+    const { actor_id, token_key } = require('../parts/auth-id')(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
+    const remove_result = await Auth.removeSession(instance, {
+      tenant_id: 'T', actor_id: actor_id, token_key: token_key
+    });
+
+    assert.equal(remove_result.success, true);
+    assert.equal(remove_result.cookies, null);
+
+  });
+
+});
+
+
+
 
 
 

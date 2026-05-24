@@ -8,7 +8,6 @@ Loader pattern, every configuration key, the per-backend `STORE_CONFIG` shape, p
 - [Configuration Keys](#configuration-keys)
 - [`STORE_CONFIG` by Backend](#store_config-by-backend)
 - [JWT Mode](#jwt-mode)
-- [Cookie Options](#cookie-options)
 - [Limit Policy](#limit-policy)
 - [Environment Variables](#environment-variables)
 - [Peer Dependencies](#peer-dependencies)
@@ -34,7 +33,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 Loader call semantics:
 
-- **First argument: `Lib`.** A container exposing peer modules. Auth reads `Lib.Utils` (type checks, validation), `Lib.Debug` (logging, performance audit), `Lib.Crypto` (token generation, SHA-256 hashing), and `Lib.Instance` (request lifecycle, `instance.time`). The chosen store adapter brings its own peer requirement on the corresponding driver module (`Lib.Postgres`, `Lib.MongoDB`, etc.).
+- **First argument: `Lib`.** A container exposing peer modules. Auth reads `Lib.Utils` (type checks, validation), `Lib.Debug` (logging, performance audit), `Lib.Crypto` (token generation, SHA-256 hashing), `Lib.Instance` (request lifecycle, `instance.time`), and `Lib.HttpGateway` (cookie descriptor building). The chosen store adapter brings its own peer requirement on the corresponding driver module (`Lib.Postgres`, `Lib.MongoDB`, etc.).
 - **Second argument: config overrides.** Merged on top of `auth.config.js` defaults. Required keys (`STORE`, `STORE_CONFIG`, `ACTOR_TYPE`) throw `TypeError` at loader time when absent. JWT-required keys (`JWT.signing_key`, `JWT.issuer`, `JWT.audience`) throw at loader time when `ENABLE_JWT: true` and they are still `null`.
 - **One instance per `actor_type`.** Calling the loader twice with the same `ACTOR_TYPE` and a different `TTL_SECONDS` is allowed but rarely useful. The common pattern is one loader call per actor type, with each instance scoped to a different `table_name` or `collection_name`.
 
@@ -62,8 +61,7 @@ All keys are merged over `auth.config.js` defaults. Keys with a `null` default a
 | `LIMITS` | `object` | `{ total_max: 20, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: true }` | No | Session-limit policy. See [Limit Policy](#limit-policy) |
 | `ENABLE_JWT` | `boolean` | `false` | No | Enable JWT mode. When `true`, `JWT.signing_key`, `JWT.issuer`, and `JWT.audience` become required |
 | `JWT` | `object` | See [JWT Mode](#jwt-mode) | When `ENABLE_JWT: true` | JWT signing and lifetime settings |
-| `COOKIE_PREFIX` | `string` | `null` | When using cookies | Cookie name prefix. Full cookie name is `${COOKIE_PREFIX}${tenant_id}`. Required for any flow that reads or writes cookies |
-| `COOKIE_OPTIONS` | `object` | `{ http_only: true, secure: true, same_site: 'lax', path: '/' }` | No | Cookie attributes applied to every `Set-Cookie` written by this instance. See [Cookie Options](#cookie-options) |
+| `COOKIE_PREFIX` | `string` | `null` | When using cookies | Cookie name prefix. Full cookie name is `${COOKIE_PREFIX}${tenant_id}`. Required for any flow that reads or writes cookies. Cookie attributes (httpOnly, secure, sameSite, path) are applied by the gateway's `buildCookie` defaults, not configurable here |
 
 ---
 
@@ -119,19 +117,6 @@ Enable with `ENABLE_JWT: true`. When enabled, `createSession` additionally retur
 
 ---
 
-## Cookie Options
-
-| `COOKIE_OPTIONS.*` key | Type | Default | Description |
-|---|---|---|---|
-| `http_only` | `boolean` | `true` | Sets the `HttpOnly` attribute. Prevents JS access to the cookie |
-| `secure` | `boolean` | `true` | Sets the `Secure` attribute. Cookie is only sent over HTTPS |
-| `same_site` | `string` | `'lax'` | Sets the `SameSite` attribute. `'lax'`, `'strict'`, or `'none'` |
-| `path` | `string` | `'/'` | Cookie `Path` attribute |
-
-`COOKIE_PREFIX` is set separately at the top level of `CONFIG`. The full cookie name is `${COOKIE_PREFIX}${tenant_id}`, so two tenants on the same domain do not collide.
-
----
-
 ## Limit Policy
 
 `createSession` runs the list-then-filter policy before every insert.
@@ -171,6 +156,7 @@ The auth module itself reads no environment variables. All configuration flows t
 | `@superloomdev/js-helper-debug` | Structured logging, performance audit (`Lib.Debug`) |
 | `@superloomdev/js-server-helper-crypto` | Token generation (UUID, random hex strings), SHA-256 hashing, HMAC for JWT (`Lib.Crypto`) |
 | `@superloomdev/js-server-helper-instance` | Per-request lifecycle, `instance.time`, background routines (`Lib.Instance`) |
+| `@superloomdev/js-server-helper-http-gateway` | Cookie descriptor building via `buildCookie`. Serialization into `Set-Cookie` headers happens at the gateway boundary, not inside auth (`Lib.HttpGateway`) |
 
 The chosen storage adapter package brings its own peer dependency on the relevant database driver helper (`js-server-helper-sql-postgres`, `js-server-helper-nosql-mongodb`, `js-server-helper-nosql-aws-dynamodb`, ...).
 
@@ -178,7 +164,7 @@ The chosen storage adapter package brings its own peer dependency on the relevan
 
 ## Direct Dependencies
 
-None. The module's `package.json` declares no `dependencies`. JWT signing and verification use Node's built-in `crypto` module (consumed indirectly via `Lib.Crypto`). The supply chain you audit ends at this package and its four peers plus the chosen adapter.
+None. The module's `package.json` declares no `dependencies`. JWT signing and verification use Node's built-in `crypto` module (consumed indirectly via `Lib.Crypto`). The supply chain you audit ends at this package and its five peers plus the chosen adapter.
 
 ---
 
@@ -197,8 +183,9 @@ cd _test && npm install && npm test
 Coverage:
 
 - Loader validation. Every required config key. `STORE` must be a function. JWT-mode required keys
-- Pure helpers. `auth-id`, `record-shape`, `cookie`, `token-source`
+- Pure helpers. `auth-id`, `record-shape`, `token-source` (reads `instance.http_request.cookies`)
 - Pure policy. Every cap tier. LRU eviction. `evict_oldest_on_limit: false` path. Same-installation replacement priority
+- Session lifecycle cookie descriptor. `createSession` returns `cookies` descriptor when `COOKIE_PREFIX` is set. `removeSession` + `removeAllSessions` return clear-cookie descriptor (`ttl: 0`)
 - JWT mode. `createSession` issuance. `verifyJwt`. `refreshSessionJwt` rotation and single-use enforcement. Expiry. Cross-actor-type rejection
 
 **Shared store contract suite.** `_test/store-contract-suite.js` contains the end-to-end coverage that every adapter runs against its real backend. It is **not exported** from the auth package. Each adapter ships its own copy as a local file in its own `_test/` directory. The copy acts as a snapshot of the exact contract shape the adapter was built against, making version-compatibility audits straightforward.

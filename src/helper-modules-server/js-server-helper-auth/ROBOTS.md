@@ -1,6 +1,6 @@
 # js-server-helper-auth
 
-Session lifecycle and authentication feature module. Multi-instance per `actor_type`. Five storage adapters (sqlite, postgres, mysql, mongodb, dynamodb). Two operating modes: DB-mode (default) and JWT-mode (`ENABLE_JWT: true`, HS256 + rotating refresh tokens, RFC 6819). List-then-filter session-limit policy enforced uniformly across all backends. Never throws on operational failures; `TypeError` on programmer errors only.
+Session lifecycle and authentication feature module. Multi-instance per `actor_type`. Five storage adapters (sqlite, postgres, mysql, mongodb, dynamodb). Two operating modes: DB-mode (default) and JWT-mode (`ENABLE_JWT: true`, HS256 + rotating refresh tokens, RFC 6819). List-then-filter session-limit policy enforced uniformly across all backends. Cookie handling delegated to `Lib.HttpGateway` — auth builds a descriptor object, the gateway serializes it. Never throws on operational failures; `TypeError` on programmer errors only.
 
 ## Type
 Server helper. Class E (feature module with adapters). Offline test tier (in-process memory store fixture).
@@ -10,6 +10,7 @@ Server helper. Class E (feature module with adapters). Offline test tier (in-pro
 - `@superloomdev/js-helper-debug` - injected as `Lib.Debug`
 - `@superloomdev/js-server-helper-crypto` - injected as `Lib.Crypto`
 - `@superloomdev/js-server-helper-instance` - injected as `Lib.Instance`
+- `@superloomdev/js-server-helper-http-gateway` - injected as `Lib.HttpGateway` (cookie descriptor building via `buildCookie`; serialization into `Set-Cookie` headers happens at the gateway boundary, not inside auth)
 
 The chosen storage adapter brings its own peer requirement on the driver helper (`Lib.Postgres`, `Lib.MongoDB`, `Lib.DynamoDB`, etc.).
 
@@ -58,8 +59,7 @@ Lib.AuthAdmin = AuthLoader(Lib, { ACTOR_TYPE: 'admin', STORE: require('...auth-s
 | `JWT.access_token_ttl_seconds` | Number | `900` | 15 minutes |
 | `JWT.refresh_token_ttl_seconds` | Number | `2592000` | 30 days |
 | `JWT.rotate_refresh_token` | Boolean | `true` | RFC 6819 single-use rotation |
-| `COOKIE_PREFIX` | String | `null` | Full cookie name = `${COOKIE_PREFIX}${tenant_id}` |
-| `COOKIE_OPTIONS` | Object | `{ http_only: true, secure: true, same_site: 'lax', path: '/' }` | |
+| `COOKIE_PREFIX` | String | `null` | Full cookie name = `${COOKIE_PREFIX}${tenant_id}`. Cookie attributes (httpOnly, secure, sameSite, path) are applied by `Lib.HttpGateway.buildCookie` defaults |
 
 ## STORE_CONFIG by Backend
 
@@ -71,12 +71,28 @@ Lib.AuthAdmin = AuthLoader(Lib, { ACTOR_TYPE: 'admin', STORE: require('...auth-s
 | `auth-store-mongodb` | `collection_name`, `lib_mongodb` (Lib.MongoDB instance) |
 | `auth-store-dynamodb` | `table_name`, `lib_dynamodb` (Lib.DynamoDB instance) |
 
+## Cookie Descriptor Pattern
+
+When `COOKIE_PREFIX` is configured, `createSession`, `removeSession`, and `removeAllSessions` return a `cookies` field in their result. This is a cookie descriptor object built by `Lib.HttpGateway.buildCookie()`:
+
+```javascript
+// createSession result.cookies shape (when COOKIE_PREFIX is set):
+{ 'sl_user_T': { value: auth_id, ttl: CONFIG.TTL_SECONDS, options: {} } }
+
+// removeSession / removeAllSessions result.cookies shape (clear):
+{ 'sl_user_T': { value: '', ttl: 0, options: {} } }
+```
+
+Pass the descriptor directly to `Lib.HttpGateway.returnHttpResponse` as the `cookies` argument. The gateway serializes it into a `Set-Cookie` response header. `cookies` is `null` when `COOKIE_PREFIX` is not set.
+
+Inbound cookies are read from `instance.http_request.cookies` (already parsed by the HTTP gateway adapter before auth is called). No raw `Cookie` header parsing occurs inside this module.
+
 ## Public Functions
 
 ### Session lifecycle
 
-createSession(instance, options) → { success, session, auth_id, [access_token, refresh_token], error } | async:yes
-  Validates options, runs limit policy (list-then-filter), batch-deletes evictions, inserts new session, writes cookie. In JWT mode also mints access_token + refresh_token.
+createSession(instance, options) → { success, auth_id, session, cookies, [access_token, refresh_token], error } | async:yes
+  Validates options, runs limit policy (list-then-filter), batch-deletes evictions, inserts new session. Returns cookie descriptor in `cookies` when COOKIE_PREFIX is set. In JWT mode also mints access_token + refresh_token.
   - options.tenant_id (required), options.actor_id (required; no `-` or `#`)
   - options.install_id (optional; matches existing session for atomic same-device replacement)
   - options.install_platform (required: web|ios|android|macos|windows|linux|other)
@@ -86,20 +102,20 @@ createSession(instance, options) → { success, session, auth_id, [access_token,
   - Errors: AUTH_LIMIT_REACHED, AUTH_SERVICE_UNAVAILABLE
 
 verifySession(instance, options) → { success, session, error } | async:yes
-  Reads token from Authorization: Bearer or cookie. Hydrates `instance.session`. Schedules a throttled background refresh of last_active_at + expires_at.
+  Reads token from Authorization: Bearer header or `instance.http_request.cookies[cookie_name]`. Hydrates `instance.session`. Schedules a throttled background refresh of last_active_at + expires_at.
   - options.tenant_id (required), options.auth_id (optional override)
   - Errors: AUTH_INVALID_TOKEN, AUTH_SESSION_EXPIRED, AUTH_ACTOR_TYPE_MISMATCH, AUTH_SERVICE_UNAVAILABLE
 
-removeSession(instance, options) → { success, error } | async:yes
-  Delete one session and clear the cookie. Idempotent.
+removeSession(instance, options) → { success, cookies, error } | async:yes
+  Delete one session. Returns clear-cookie descriptor (ttl: 0) in `cookies` when COOKIE_PREFIX is set. Idempotent.
   - options.tenant_id, actor_id, token_key (all required)
 
 removeOtherSessions(instance, options) → { success, removed_count, error } | async:yes
   Delete all sessions for the actor except `keep_token_key`. Useful after password reset.
   - options.tenant_id, actor_id, keep_token_key (all required)
 
-removeAllSessions(instance, options) → { success, removed_count, error } | async:yes
-  Delete every session for the actor (account compromise / password reset). Clears the cookie.
+removeAllSessions(instance, options) → { success, removed_count, cookies, error } | async:yes
+  Delete every session for the actor (account compromise / password reset). Returns clear-cookie descriptor (ttl: 0) in `cookies` when COOKIE_PREFIX is set.
   - options.tenant_id, actor_id (both required)
 
 ### Session inventory
@@ -220,6 +236,7 @@ Access patterns:
 - **`instance` is always first argument.** Every function reads `instance.time` for timestamps, routes timing through `Lib.Debug.performanceAuditLog`
 - **One Auth instance per actor_type.** Sessions never cross types - `verifySession` rejects mismatches with `AUTH_ACTOR_TYPE_MISMATCH`
 - **Tenant scoping is mandatory.** Every store function requires tenant_id
+- **Cookie handling delegated to gateway.** Auth builds `cookies` descriptor via `Lib.HttpGateway.buildCookie()`; caller passes it to `Lib.HttpGateway.returnHttpResponse`. Inbound cookies read from `instance.http_request.cookies` (pre-parsed by adapter)
 - **STORE_CONFIG is extracted internally.** The adapter pulls its slice from `CONFIG.STORE_CONFIG`; caller passes the full config object
 - **Token secret never stored.** Only SHA-256 hash (`token_secret_hash`). Wrong-secret lookups return null, not an error - no timing oracle
 - **Throttled last_active_at.** `verifySession` writes back at most once per `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` (default 600s) via `Lib.Instance.backgroundRoutine`

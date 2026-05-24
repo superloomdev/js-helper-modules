@@ -38,7 +38,7 @@ Factory loader. One call returns one independent Auth instance for one
 actor_type. Validates the config + builds the store at construction so
 misconfiguration fails fast at startup, not on first request.
 
-@param {Object} shared_libs - Lib container with Utils, Debug, Crypto, Instance
+@param {Object} shared_libs - Lib container with Utils, Debug, Crypto, Instance, HttpGateway
 @param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public interface for this Auth instance
@@ -51,7 +51,8 @@ module.exports = function loader (shared_libs, config) {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
     Crypto: shared_libs.Crypto,
-    Instance: shared_libs.Instance
+    Instance: shared_libs.Instance,
+    HttpGateway: shared_libs.HttpGateway
   };
 
   // Merge overrides over defaults
@@ -82,7 +83,6 @@ module.exports = function loader (shared_libs, config) {
     RecordShape: require('./parts/record-shape')(Lib, CONFIG, ERRORS),
     AuthId: require('./parts/auth-id')(Lib, CONFIG, ERRORS),
     Policy: require('./parts/policy')(Lib, CONFIG, ERRORS),
-    Cookie: require('./parts/cookie')(Lib, CONFIG, ERRORS),
     TokenSource: require('./parts/token-source')(Lib, CONFIG, ERRORS),
     Jwt: require('./parts/jwt')(Lib, CONFIG, ERRORS)
   };
@@ -115,7 +115,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
   const RecordShape = Parts.RecordShape;
   const AuthId = Parts.AuthId;
   const Policy = Parts.Policy;
-  const Cookie = Parts.Cookie;
   const TokenSource = Parts.TokenSource;
   const Jwt = Parts.Jwt;
 
@@ -129,13 +128,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
     /********************************************************************
     Create a new session for an actor. Enforces tier limits + same-install
-    replacement via the list-then-filter algorithm. Stamps a Set-Cookie
-    on the response if instance.http_response is present.
+    replacement via the list-then-filter algorithm. Returns a cookie descriptor
+    in `cookies` when COOKIE_PREFIX is configured — pass it to
+    Lib.HttpGateway.returnHttpResponse as the cookies argument.
 
     @param {Object} instance - Request instance (provides time + lifecycle)
     @param {Object} options - See parts/validators.js validateCreateSessionOptions
 
-    @return {Promise<Object>} - { success, auth_id, session, error }
+    @return {Promise<Object>} - { success, auth_id, session, cookies, error }
     *********************************************************************/
     createSession: async function (instance, options) {
 
@@ -271,18 +271,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         token_secret: token_secret
       });
 
-      // Stamp the Set-Cookie header if a cookie prefix is configured
+      // Build the outbound cookie descriptor when a cookie prefix is configured
+      let cookies = null;
       if (
         !Lib.Utils.isNullOrUndefined(CONFIG.COOKIE_PREFIX) &&
         Lib.Utils.isString(CONFIG.COOKIE_PREFIX) &&
         !Lib.Utils.isEmptyString(CONFIG.COOKIE_PREFIX)
       ) {
-        Cookie.setCookieOnResponse(
-          instance,
-          Cookie.composeCookieName(CONFIG.COOKIE_PREFIX, options.tenant_id),
-          auth_id,
-          Object.assign({}, CONFIG.COOKIE_OPTIONS, { max_age: CONFIG.TTL_SECONDS })
-        );
+        const cookie_name = CONFIG.COOKIE_PREFIX + options.tenant_id;
+        cookies = Lib.HttpGateway.buildCookie(null, cookie_name, auth_id, CONFIG.TTL_SECONDS);
       }
 
       // Mint access + refresh tokens for JWT mode. Refresh token is the
@@ -303,13 +300,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         refresh_token = options.actor_id + '-' + token_key + '-' + refresh_token_plaintext;
       }
 
-      // Return the new session and wire-format credentials
+      // Return the new session, wire-format credentials, and cookie descriptor
       return {
         success: true,
         auth_id: auth_id,
         access_token: access_token,
         refresh_token: refresh_token,
         session: record,
+        cookies: cookies,
         error: null
       };
 
@@ -478,22 +476,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         };
       }
 
-      // Clear the cookie if a prefix is configured
+      // Build a clear-cookie descriptor when a cookie prefix is configured
+      let cookies = null;
       if (
         !Lib.Utils.isNullOrUndefined(CONFIG.COOKIE_PREFIX) &&
         Lib.Utils.isString(CONFIG.COOKIE_PREFIX) &&
         !Lib.Utils.isEmptyString(CONFIG.COOKIE_PREFIX)
       ) {
-        Cookie.clearCookieOnResponse(
-          instance,
-          Cookie.composeCookieName(CONFIG.COOKIE_PREFIX, options.tenant_id),
-          CONFIG.COOKIE_OPTIONS
-        );
+        const cookie_name = CONFIG.COOKIE_PREFIX + options.tenant_id;
+        cookies = Lib.HttpGateway.buildCookie(null, cookie_name, '', 0);
       }
 
-      // Report success
+      // Report success with clear-cookie descriptor
       return {
         success: true,
+        cookies: cookies,
         error: null
       };
 
@@ -629,23 +626,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         };
       }
 
-      // Clear the cookie if a prefix is configured (best-effort)
+      // Build a clear-cookie descriptor when a cookie prefix is configured
+      let cookies = null;
       if (
         !Lib.Utils.isNullOrUndefined(CONFIG.COOKIE_PREFIX) &&
         Lib.Utils.isString(CONFIG.COOKIE_PREFIX) &&
         !Lib.Utils.isEmptyString(CONFIG.COOKIE_PREFIX)
       ) {
-        Cookie.clearCookieOnResponse(
-          instance,
-          Cookie.composeCookieName(CONFIG.COOKIE_PREFIX, options.tenant_id),
-          CONFIG.COOKIE_OPTIONS
-        );
+        const cookie_name = CONFIG.COOKIE_PREFIX + options.tenant_id;
+        cookies = Lib.HttpGateway.buildCookie(null, cookie_name, '', 0);
       }
 
-      // Report how many sessions were removed
+      // Report how many sessions were removed with clear-cookie descriptor
       return {
         success: true,
         removed_count: list_result.records.length,
+        cookies: cookies,
         error: null
       };
 

@@ -35,6 +35,16 @@ module.exports = function loader () {
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
+  // Stub gateway — auth tests only need buildCookie; real serialization
+  // is tested inside js-server-helper-http-gateway's own test suite.
+  Lib.HttpGateway = {
+    buildCookie: function (existing, name, value, ttl) {
+      const descriptor = existing ? Object.assign({}, existing) : {};
+      descriptor[name] = { value: value, ttl: ttl, options: {} };
+      return descriptor;
+    }
+  };
+
 
   return { Lib: Lib };
 
