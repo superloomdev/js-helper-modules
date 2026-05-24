@@ -112,7 +112,9 @@ module.exports = function runSharedStoreSuite (args) {
         token_key: created.session.token_key
       });
       assert.equal(removed.success, true);
-      assert.match(remove_instance.http_response.cookies['sl_user_tenant-A'], /Max-Age=0/);
+      assert.ok(removed.cookies && removed.cookies['sl_user_tenant-A'], 'clear-cookie descriptor present');
+      assert.equal(removed.cookies['sl_user_tenant-A'].value, '');
+      assert.equal(removed.cookies['sl_user_tenant-A'].ttl, 0);
 
       const verified = await auth.verifySession(buildInstance(1500), {
         auth_id: created.auth_id,
@@ -197,7 +199,9 @@ module.exports = function runSharedStoreSuite (args) {
       });
       assert.equal(result.success, true);
       assert.equal(result.removed_count, 2);
-      assert.match(remove_instance.http_response.cookies['sl_user_tenant-A'], /Max-Age=0/);
+      assert.ok(result.cookies && result.cookies['sl_user_tenant-A'], 'clear-cookie descriptor present');
+      assert.equal(result.cookies['sl_user_tenant-A'].value, '');
+      assert.equal(result.cookies['sl_user_tenant-A'].ttl, 0);
 
       const list = await auth.listSessions(buildInstance(1500), {
         tenant_id: 'tenant-A', actor_id: 'actor1'

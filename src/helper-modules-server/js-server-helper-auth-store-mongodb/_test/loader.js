@@ -44,6 +44,13 @@ module.exports = function loader () {
 
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.HttpGateway = {
+    buildCookie: function (existing, name, value, ttl) {
+      const descriptor = existing ? Object.assign({}, existing) : {};
+      descriptor[name] = { value: value, ttl: ttl, options: {} };
+      return descriptor;
+    }
+  };
   Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
 
 
