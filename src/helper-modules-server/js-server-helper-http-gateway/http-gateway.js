@@ -162,17 +162,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
     /********************************************************************
     Send an HTTP response back through the runtime callback.
-    Merges default headers (Cache-Control, Content-Type) with any cookies
-    set on instance.http_response.cookies, then adds caller-supplied headers.
+    Merges default headers (Cache-Control, Content-Type) with caller-
+    supplied headers, serializes any cookie descriptors into Set-Cookie
+    header strings, then fires the response with the body.
+
+    Param order mirrors the HTTP response sequence:
+      status → headers → cookies → body
 
     @param {Object}  instance         - Per-request instance
     @param {Integer} status           - HTTP status code
     @param {Object}  [headers]        - Optional additional response headers
+    @param {Object}  [cookies]        - Optional cookie descriptor object
+                                        built by buildCookie()
     @param {Object}  [body]           - Optional response body
 
     @return {Boolean} - Always true
     *********************************************************************/
-    returnHttpResponse: function (instance, status, headers, body) {
+    returnHttpResponse: function (instance, status, headers, cookies, body) {
 
       // Default headers
       const final_headers = {
@@ -180,14 +186,35 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
         'Content-Type': 'application/json'
       };
 
-      // Merge any Set-Cookie values attached to the instance
-      if (Object.keys(instance.http_response.cookies).length > 0) {
-        Object.assign(final_headers, instance.http_response.cookies);
-      }
-
-      // Merge caller-supplied headers last (they win over defaults)
+      // Merge caller-supplied headers (they win over defaults)
       if (!Lib.Utils.isNullOrUndefined(headers)) {
         Object.assign(final_headers, headers);
+      }
+
+      // Serialize cookie descriptors into Set-Cookie header strings
+      if (!Lib.Utils.isNullOrUndefined(cookies)) {
+
+        const ua = HttpGateway.getRequestUserAgent(instance);
+
+        Object.keys(cookies).forEach(function (name) {
+
+          const c = cookies[name];
+
+          const opts = Object.assign(
+            { httpOnly: true, secure: true, sameSite: 'lax', path: '/' },
+            c.options,
+            { maxAge: c.ttl }
+          );
+
+          // Omit SameSite=None for browsers known to mishandle it
+          if (opts.sameSite === 'none' && Parts.Cookies.isSameSiteNoneIncompatible(ua)) {
+            delete opts.sameSite;
+          }
+
+          final_headers['Set-Cookie'] = Parts.Cookies.serialize(name, c.value, opts);
+
+        });
+
       }
 
       const response = adapter.buildHttpResponseObject(status, final_headers, body);
@@ -322,35 +349,41 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
 
     /********************************************************************
-    Set a cookie on the HTTP response. The serialized Set-Cookie string
-    is stored in instance.http_response.cookies and flushed by
-    returnHttpResponse when the response is sent.
+    Build a cookie descriptor object (or add to an existing one).
+    The descriptor is a plain object keyed by cookie name — pass it as
+    the 4th argument (cookies) to returnHttpResponse for serialization.
 
-    SameSite=None is omitted for browsers known to mishandle it
-    (iOS 12, macOS 10.14 Safari, UC Browser < 12.13.2, Chromium 51-66).
+    Cookie name is used as the key, so a second call with the same name
+    overwrites the first (natural dedup / override).
 
-    @param {Object} instance     - Per-request instance
-    @param {String} cookie_name  - Cookie name
-    @param {String} cookie_value - Cookie value
-    @param {Number} cookie_life  - Lifetime in seconds (maxAge)
+    ttl = 0  means expire/clear the cookie immediately (Max-Age=0).
+    ttl > 0  sets a persistent cookie that expires after that many seconds.
 
-    @return {void}
+    @param {Object|null} existing    - Previous buildCookie result to append
+                                       to, or null to start a fresh object
+    @param {String}      name        - Cookie name
+    @param {String}      value       - Cookie value ('' to clear)
+    @param {Number}      ttl         - Lifetime in seconds (0 = expire now)
+    @param {Object}      [options]   - Optional attribute overrides
+    @param {Boolean}     [options.httpOnly]  - Default: true
+    @param {Boolean}     [options.secure]    - Default: true
+    @param {String}      [options.sameSite]  - Default: 'lax'
+    @param {String}      [options.path]      - Default: '/'
+    @param {String}      [options.domain]    - Default: unset
+
+    @return {Object} - Cookie descriptor object
     *********************************************************************/
-    setCookie: function (instance, cookie_name, cookie_value, cookie_life) {
+    buildCookie: function (existing, name, value, ttl, options) {
 
-      const options = Parts.Cookies.buildCookieOptions(cookie_life);
+      const descriptor = Lib.Utils.isNullOrUndefined(existing) ? {} : Object.assign({}, existing);
 
-      const ua = HttpGateway.getRequestUserAgent(instance);
+      descriptor[name] = {
+        value  : value,
+        ttl    : ttl,
+        options: options || {}
+      };
 
-      if (!Parts.Cookies.isSameSiteNoneIncompatible(ua)) {
-        options.sameSite = 'none';
-      }
-
-      instance.http_response.cookies['Set-Cookie'] = Parts.Cookies.serialize(
-        cookie_name,
-        cookie_value,
-        options
-      );
+      return descriptor;
 
     },
 

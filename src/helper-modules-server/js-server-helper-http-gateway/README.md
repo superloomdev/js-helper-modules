@@ -17,7 +17,7 @@ Your application code reads `instance.http_request` and calls `returnHttpRespons
 
 - **Typed parameter extraction.** `setArgsFromRequest` reads from GET, POST, HEADER, PATH, or FIXED sources. It typecasts (string to Number, Boolean, JSON), trims, validates, and sanitizes in one declarative pass. It returns `[null, args]` on success or `[null, false]` on validation failure. No conditional chains scattered across handler code.
 
-- **Cookie management with browser-compatibility handling.** `setCookie` automatically omits the `SameSite=None` attribute for browsers that mishandle it (iOS 12, macOS 10.14 Safari, UC Browser, Chromium 51-66). Applications set cookies by name without managing browser quirks.
+- **Cookie management with browser-compatibility handling.** `buildCookie` returns a plain descriptor object (no serialization). `returnHttpResponse` serializes it into `Set-Cookie` headers at the gateway boundary, automatically omitting the `SameSite=None` attribute for browsers that mishandle it (iOS 12, macOS 10.14 Safari, UC Browser, Chromium 51-66). Applications build cookie descriptors without managing browser quirks or header strings.
 
 - **Runtime adapters are separate packages.** Install only the adapter for your runtime. The module has no AWS SDK or Express dependency. A future adapter for a new runtime does not change any application code.
 
@@ -45,7 +45,7 @@ The loader validates configuration at construction time and throws on misconfigu
 1. Initialize the per-request instance: `Lib.Instance.initialize()`
 2. Populate HTTP data: `Gateway.initHttpRequestData(instance, raw_request, raw_context, callback)`
 3. Extract typed parameters: `Gateway.setArgsFromRequest(instance, params)`
-4. Send response: `Gateway.returnHttpResponse(instance, status, headers, body)`
+4. Send response: `Gateway.returnHttpResponse(instance, status, headers, cookies, body)`
 
 ### Runtime adapters
 
@@ -60,7 +60,7 @@ Install only the adapter for your runtime.
 
 ### SameSite=None cookie compatibility
 
-`setCookie` automatically manages the `SameSite=None` attribute based on the request's `User-Agent` header. Several browser families have known bugs that cause them to reject or mishandle cookies set with `SameSite=None`:
+`returnHttpResponse` automatically manages the `SameSite=None` attribute when serializing the `cookies` descriptor. If a cookie's `options.sameSite` is `'none'`, it checks the request `User-Agent` header. Several browser families have known bugs that cause them to reject or mishandle cookies set with `SameSite=None`:
 
 | Affected client | Bug |
 |-----------------|-----|
@@ -69,9 +69,9 @@ Install only the adapter for your runtime.
 | UC Browser below 12.13.2 | Drops the cookie entirely when `SameSite=None` is present |
 | Chromium 51-66 | Drops any cookie with an unrecognised `SameSite` value |
 
-For these clients, `setCookie` serializes the cookie without any `SameSite` attribute. Modern browsers (Chromium 67+, Safari 13+, Firefox 79+) receive `SameSite=None; Secure` as intended by RFC 6265bis.
+For these clients, `returnHttpResponse` serializes the cookie without any `SameSite` attribute. Modern browsers (Chromium 67+, Safari 13+, Firefox 79+) receive `SameSite=None; Secure` as intended by RFC 6265bis.
 
-If you set cookies yourself using raw `Set-Cookie` headers rather than `setCookie`, you are responsible for this UA check.
+If you set cookies yourself using raw `Set-Cookie` headers rather than `buildCookie` + `returnHttpResponse`, you are responsible for this UA check.
 
 ### Multipart or form-data not supported
 

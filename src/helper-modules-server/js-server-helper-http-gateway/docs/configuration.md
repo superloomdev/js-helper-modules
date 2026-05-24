@@ -132,7 +132,8 @@ The test suite covers:
 - `initHttpRequestData` and `isHttpInstance`
 - `setArgsFromRequest` (all methods, types, validators, edge cases)
 - `returnHttpResponse`, `returnHttpStatus`, `returnHttpRedirect`, `returnHttpRedirect404`
-- `setCookie` (including SameSite=None omission for incompatible user-agents)
+- `buildCookie` (fresh, accumulate, override, clear ttl=0, immutability)
+- `returnHttpResponse` with cookies 5th param (Set-Cookie serialized at gateway, SameSite=None UA guard)
 - `getRequestIPAddress`, `getRequestUserAgent`, `getRequestOrigin`
 - `getRequestCountryCode` (adapter-delegated)
 - `getHttpTime`
@@ -168,9 +169,7 @@ instance.http_request = {
   cookies: { /* parsed Cookie header */ }
 };
 
-instance.http_response = {
-  cookies: { /* Set-Cookie headers to be sent */ }
-};
+instance.http_response = {};
 
 instance.gateway_response_callback = Function;
 ```

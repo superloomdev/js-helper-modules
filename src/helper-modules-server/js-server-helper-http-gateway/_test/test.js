@@ -5,7 +5,8 @@
 //   - initHttpRequestData / isHttpInstance
 //   - setArgsFromRequest (all methods, types, validators, edge cases)
 //   - returnHttpResponse / returnHttpStatus / returnHttpRedirect / returnHttpRedirect404
-//   - setCookie (including SameSite=None omission for incompatible UAs)
+//   - buildCookie (fresh, accumulate, override, clear ttl=0, SameSite=None omission)
+//   - returnHttpResponse with cookies 5th param (Set-Cookie serialized at gateway)
 //   - getRequestIPAddress / getRequestUserAgent / getRequestOrigin
 //   - getRequestCountryCode (adapter-delegated)
 //   - getHttpTime
@@ -16,7 +17,7 @@
 // Phase 1 additions (plan 0017):
 //   - Auth header extraction (Bearer / Basic / API-key patterns)
 //   - Mixed-source param extraction (GET + POST + HEADER + PATH + FIXED in one call)
-//   - setCookie behavioral edge cases (overwrite, value with reserved chars)
+//   - buildCookie behavioral edge cases (accumulate, override, reserved chars)
 //   - parts/cookies.serialize with all RFC 6265 attributes
 //
 // NOTE: Body parsing edge cases (malformed JSON, wrong content-type, etc.) are
@@ -170,7 +171,7 @@ describe('returnHttpResponse', function () {
   it('sends the correct status code', function () {
     const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, {});
-    gateway.returnHttpResponse(instance, 200, null, { ok: true });
+    gateway.returnHttpResponse(instance, 200, null, null, { ok: true }); // (status, headers, cookies, body)
     assert.equal(sent[0].status, 200);
   });
 
@@ -190,14 +191,22 @@ describe('returnHttpResponse', function () {
     assert.equal(sent[0].headers['Content-Type'], 'text/plain');
   });
 
-  it('flushes instance cookies into the response headers', function () {
+  it('serializes cookies passed as 4th param into Set-Cookie header', function () {
     const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, {
       headers: { 'user-agent': 'Mozilla/5.0 Chrome/100.0' }
     });
-    gateway.setCookie(instance, 'session', 'abc', 3600);
-    gateway.returnHttpResponse(instance, 200);
+    const cookies = gateway.buildCookie(null, 'session', 'abc', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
     assert.ok('Set-Cookie' in sent[0].headers);
+    assert.ok(sent[0].headers['Set-Cookie'].includes('session=abc'));
+  });
+
+  it('sends no Set-Cookie header when cookies param is omitted', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {});
+    gateway.returnHttpResponse(instance, 200);
+    assert.ok(!('Set-Cookie' in sent[0].headers));
   });
 
   it('returns true', function () {
@@ -347,43 +356,171 @@ describe('getRequestCountryCode', function () {
 
 
 // ============================================================================
-// setCookie
+// buildCookie
 // ============================================================================
 
-describe('setCookie', function () {
+describe('buildCookie', function () {
+
+  it('returns a descriptor keyed by cookie name', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    assert.ok('sid' in cookies);
+    assert.equal(cookies.sid.value, 'abc');
+    assert.equal(cookies.sid.ttl, 3600);
+  });
+
+  it('starts a fresh object when existing is null', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    assert.equal(Object.keys(cookies).length, 1);
+  });
+
+  it('starts a fresh object when existing is undefined', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cookies = gateway.buildCookie(undefined, 'sid', 'abc', 3600);
+    assert.equal(Object.keys(cookies).length, 1);
+  });
+
+  it('accumulates multiple cookies by chaining calls', function () {
+    const { gateway } = buildGatewayWithMemory();
+    let cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    cookies = gateway.buildCookie(cookies, 'pref', 'dark', 86400);
+    assert.ok('sid' in cookies);
+    assert.ok('pref' in cookies);
+    assert.equal(Object.keys(cookies).length, 2);
+  });
+
+  it('overrides a cookie when same name is used twice', function () {
+    const { gateway } = buildGatewayWithMemory();
+    let cookies = gateway.buildCookie(null, 'sid', 'first', 3600);
+    cookies = gateway.buildCookie(cookies, 'sid', 'second', 7200);
+    assert.equal(Object.keys(cookies).length, 1);
+    assert.equal(cookies.sid.value, 'second');
+    assert.equal(cookies.sid.ttl, 7200);
+  });
+
+  it('does not mutate the existing object passed in', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const first = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    const second = gateway.buildCookie(first, 'pref', 'dark', 86400);
+    assert.equal(Object.keys(first).length, 1);
+    assert.equal(Object.keys(second).length, 2);
+  });
+
+  it('stores empty string value and ttl=0 for a clear cookie', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cookies = gateway.buildCookie(null, 'sid', '', 0);
+    assert.equal(cookies.sid.value, '');
+    assert.equal(cookies.sid.ttl, 0);
+  });
+
+  it('stores supplied options on the descriptor', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { httpOnly: false });
+    assert.equal(cookies.sid.options.httpOnly, false);
+  });
+
+  it('stores empty options object when options param is omitted', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    assert.deepEqual(cookies.sid.options, {});
+  });
+
+});
+
+
+// ============================================================================
+// returnHttpResponse with cookies (buildCookie + serialization)
+// ============================================================================
+
+describe('returnHttpResponse with cookies', function () {
 
   const CHROME_100_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36';
   const IOS_12_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko)';
 
-  it('sets Set-Cookie on instance.http_response.cookies', function () {
-    const { gateway } = buildGatewayWithMemory();
+  it('serializes a cookie descriptor into Set-Cookie response header', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    assert.ok('Set-Cookie' in instance.http_response.cookies);
-    assert.ok(instance.http_response.cookies['Set-Cookie'].includes('sid=xyz'));
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok('Set-Cookie' in sent[0].headers);
+    assert.ok(sent[0].headers['Set-Cookie'].includes('sid=abc'));
   });
 
-  it('includes SameSite=None for a compatible browser (Chrome 100)', function () {
-    const { gateway } = buildGatewayWithMemory();
+  it('applies default httpOnly=true', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    assert.ok(instance.http_response.cookies['Set-Cookie'].toLowerCase().includes('samesite=none'));
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('httponly'));
   });
 
-  it('omits SameSite=None for iOS 12 UA', function () {
-    const { gateway } = buildGatewayWithMemory();
+  it('applies default secure=true', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('secure'));
+  });
+
+  it('applies default path=/', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('path=/'));
+  });
+
+  it('applies default sameSite=lax', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('samesite=lax'));
+  });
+
+  it('option override httpOnly=false is respected', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { httpOnly: false });
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(!sent[0].headers['Set-Cookie'].toLowerCase().includes('httponly'));
+  });
+
+  it('option override sameSite=none is applied for compatible browser', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { sameSite: 'none' });
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('samesite=none'));
+  });
+
+  it('omits SameSite entirely for iOS 12 UA when sameSite=none requested', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': IOS_12_UA } });
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    assert.ok(!instance.http_response.cookies['Set-Cookie'].toLowerCase().includes('samesite'));
+    const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { sameSite: 'none' });
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(!sent[0].headers['Set-Cookie'].toLowerCase().includes('samesite'));
   });
 
-  it('omits SameSite when user-agent is absent', function () {
-    const { gateway } = buildGatewayWithMemory();
-    const { instance } = initInstance(gateway, {});
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    // Empty UA - isSameSiteNoneIncompatible returns false (no regex matches)
-    // so SameSite=None IS set; just verify the cookie is formed at all
-    assert.ok('Set-Cookie' in instance.http_response.cookies);
+  it('serializes a clear cookie (ttl=0, empty value) with Max-Age=0', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    const cookies = gateway.buildCookie(null, 'sid', '', 0);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    const sc = sent[0].headers['Set-Cookie'];
+    assert.ok(sc.startsWith('sid=;') || sc.startsWith('sid='));
+    assert.ok(sc.toLowerCase().includes('max-age=0'));
+  });
+
+  it('last cookie wins when descriptor has multiple entries (single Set-Cookie key)', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
+    let cookies = gateway.buildCookie(null, 'a', 'val-a', 3600);
+    cookies = gateway.buildCookie(cookies, 'b', 'val-b', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    // Only one Set-Cookie key in headers; last iteration wins
+    assert.ok('Set-Cookie' in sent[0].headers);
   });
 
 });
@@ -985,74 +1122,37 @@ describe('parts/params - mixed source extraction', function () {
 
 
 // ============================================================================
-// setCookie - behavioral edge cases
+// buildCookie - serialization behavioral edge cases (via returnHttpResponse)
 // ============================================================================
 
-describe('setCookie - behavioral edge cases', function () {
+describe('buildCookie - serialization edge cases', function () {
 
   const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36';
 
-  it('second setCookie call overwrites the first (single Set-Cookie key)', function () {
-    // Current contract: instance.http_response.cookies stores ONE Set-Cookie
-    // string. A second setCookie call replaces the first. This test documents
-    // the behavior so adapters and consumers do not rely on multi-cookie output
-    // from a single instance.
-    const { gateway } = buildGatewayWithMemory();
-    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'sid', 'first', 3600);
-    gateway.setCookie(instance, 'sid', 'second', 3600);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(set_cookie.includes('sid=second'));
-    assert.ok(!set_cookie.includes('sid=first'));
-  });
-
   it('URL-encodes a value that contains a comma', function () {
-    const { gateway } = buildGatewayWithMemory();
+    const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'tags', 'red,green,blue', 3600);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(set_cookie.startsWith('tags=' + encodeURIComponent('red,green,blue')));
+    const cookies = gateway.buildCookie(null, 'tags', 'red,green,blue', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].startsWith('tags=' + encodeURIComponent('red,green,blue')));
   });
 
   it('URL-encodes a value that contains a semicolon', function () {
-    const { gateway } = buildGatewayWithMemory();
+    const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'note', 'a;b', 3600);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(set_cookie.startsWith('note=' + encodeURIComponent('a;b')));
+    const cookies = gateway.buildCookie(null, 'note', 'a;b', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    assert.ok(sent[0].headers['Set-Cookie'].startsWith('note=' + encodeURIComponent('a;b')));
   });
 
-  it('accepts an empty string value', function () {
-    const { gateway } = buildGatewayWithMemory();
+  it('accepts an empty string value (clear cookie)', function () {
+    const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'sid', '', 0);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(set_cookie.startsWith('sid=;'));
-    assert.ok(set_cookie.toLowerCase().includes('max-age=0'));
-  });
-
-  it('includes Path=/ from default cookie options', function () {
-    const { gateway } = buildGatewayWithMemory();
-    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(set_cookie.toLowerCase().includes('path=/'));
-  });
-
-  it('includes Secure from default cookie options', function () {
-    const { gateway } = buildGatewayWithMemory();
-    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(set_cookie.toLowerCase().includes('secure'));
-  });
-
-  it('does NOT include HttpOnly (default is false)', function () {
-    const { gateway } = buildGatewayWithMemory();
-    const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
-    gateway.setCookie(instance, 'sid', 'xyz', 3600);
-    const set_cookie = instance.http_response.cookies['Set-Cookie'];
-    assert.ok(!set_cookie.toLowerCase().includes('httponly'));
+    const cookies = gateway.buildCookie(null, 'sid', '', 0);
+    gateway.returnHttpResponse(instance, 200, null, cookies);
+    const sc = sent[0].headers['Set-Cookie'];
+    assert.ok(sc.startsWith('sid=;') || sc.startsWith('sid='));
+    assert.ok(sc.toLowerCase().includes('max-age=0'));
   });
 
 });

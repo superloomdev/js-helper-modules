@@ -109,9 +109,9 @@ if (!args) {
 
 ## Response Functions
 
-### returnHttpResponse(instance, status, headers, body)
+### returnHttpResponse(instance, status, headers, cookies, body)
 
-Send an HTTP response back through the runtime callback. Merges default headers with any cookies set on `instance.http_response.cookies`, then adds caller-supplied headers.
+Send an HTTP response back through the runtime callback. Param order mirrors the HTTP response sequence: status → headers → cookies → body. Merges default headers with caller-supplied headers, then serializes the `cookies` descriptor into `Set-Cookie` header strings before firing the response.
 
 **Parameters:**
 
@@ -120,13 +120,20 @@ Send an HTTP response back through the runtime callback. Merges default headers 
 | `instance` | `Object` | Yes | Per-request instance |
 | `status` | `Integer` | Yes | HTTP status code |
 | `headers` | `Object` | No | Additional response headers |
+| `cookies` | `Object` | No | Cookie descriptor built by `buildCookie()` |
 | `body` | `Object` | No | Response body (serialized as JSON) |
 
 **Returns:** `Boolean` (always `true`)
 
-**Example:**
+**Example — plain response (no cookies):**
 ```javascript
-return Gateway.returnHttpResponse(instance, 200, null, { ok: true, data: result });
+return Gateway.returnHttpResponse(instance, 200, null, null, { ok: true, data: result });
+```
+
+**Example — response with a cookie:**
+```javascript
+const cookies = Gateway.buildCookie(null, 'session', token, 86400);
+return Gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
 ```
 
 ---
@@ -245,26 +252,56 @@ Get the viewer country code from the request. Availability depends on the adapte
 
 ## Utilities
 
-### setCookie(instance, cookie_name, cookie_value, cookie_life)
+### buildCookie(existing, name, value, ttl, options)
 
-Set a cookie on the HTTP response. The serialized Set-Cookie string is stored in `instance.http_response.cookies` and flushed by `returnHttpResponse` when the response is sent.
+Build a cookie descriptor object, or add a new entry to an existing one. The descriptor is a plain object keyed by cookie name. Pass it as the `cookies` argument to `returnHttpResponse` for serialization into `Set-Cookie` headers.
 
-SameSite=None is automatically omitted for browsers known to mishandle it (iOS 12, macOS 10.14 Safari, UC Browser below 12.13.2, Chromium 51-66).
+Cookie name is used as the object key, so a second call with the same name overwrites the first — natural dedup and override. Serialization (including default attributes and SameSite=None UA detection) happens inside `returnHttpResponse`, not here.
 
 **Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `instance` | `Object` | Yes | Per-request instance |
-| `cookie_name` | `String` | Yes | Cookie name |
-| `cookie_value` | `String` | Yes | Cookie value |
-| `cookie_life` | `Number` | Yes | Lifetime in seconds (maxAge) |
+| `existing` | `Object\|null` | Yes | Previous `buildCookie` result to append to, or `null` to start fresh |
+| `name` | `String` | Yes | Cookie name |
+| `value` | `String` | Yes | Cookie value. Use `''` to clear |
+| `ttl` | `Number` | Yes | Lifetime in seconds. `0` = expire/clear immediately |
+| `options` | `Object` | No | Attribute overrides applied at serialization |
 
-**Returns:** `void`
+**`options` keys** (all optional — these override the gateway defaults):
 
-**Example:**
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `httpOnly` | `Boolean` | `true` | Restrict cookie to HTTP only (no JS access) |
+| `secure` | `Boolean` | `true` | HTTPS-only |
+| `sameSite` | `String` | `'lax'` | `'lax'` \| `'strict'` \| `'none'` |
+| `path` | `String` | `'/'` | Cookie path scope |
+| `domain` | `String` | unset | Cookie domain scope |
+
+**Returns:** `Object` (cookie descriptor)
+
+**Example — set one cookie:**
 ```javascript
-Gateway.setCookie(instance, 'session', sessionToken, 86400); // 24 hours
+const cookies = Gateway.buildCookie(null, 'session', token, 86400);
+Gateway.returnHttpResponse(instance, 200, null, cookies, body);
+```
+
+**Example — accumulate two cookies:**
+```javascript
+let cookies = Gateway.buildCookie(null, 'session', token, 86400);
+cookies = Gateway.buildCookie(cookies, 'pref', 'dark', 2592000);
+Gateway.returnHttpResponse(instance, 200, null, cookies, body);
+```
+
+**Example — clear a cookie (ttl = 0):**
+```javascript
+const cookies = Gateway.buildCookie(null, 'session', '', 0);
+Gateway.returnHttpResponse(instance, 200, null, cookies, null);
+```
+
+**Example — override httpOnly to allow JS access:**
+```javascript
+const cookies = Gateway.buildCookie(null, 'csrf', token, 3600, { httpOnly: false });
 ```
 
 ---
@@ -347,7 +384,7 @@ Return the viewer country code if the runtime can supply it (for example, CloudF
 
 ## SameSite=None Compatibility
 
-The `setCookie` function automatically manages the `SameSite=None` attribute based on the request's `User-Agent` header. The following browser families have known bugs that cause them to reject or mishandle cookies set with `SameSite=None`:
+`returnHttpResponse` automatically manages the `SameSite=None` attribute when serializing the `cookies` descriptor. If a cookie's `options.sameSite` is `'none'`, it checks the request `User-Agent` header. The following browser families have known bugs that cause them to reject or mishandle cookies set with `SameSite=None`:
 
 | Affected client | Bug |
 |-----------------|-----|
@@ -356,7 +393,9 @@ The `setCookie` function automatically manages the `SameSite=None` attribute bas
 | UC Browser below 12.13.2 | Drops the cookie entirely when `SameSite=None` is present |
 | Chromium 51-66 | Drops any cookie with an unrecognised `SameSite` value |
 
-For these clients, `setCookie` serializes the cookie without any `SameSite` attribute. Modern browsers (Chromium 67+, Safari 13+, Firefox 79+) receive `SameSite=None; Secure` as intended by RFC 6265bis.
+For these clients, `returnHttpResponse` serializes the cookie without any `SameSite` attribute. Modern browsers (Chromium 67+, Safari 13+, Firefox 79+) receive `SameSite=None; Secure` as intended by RFC 6265bis.
+
+The default `sameSite` applied by the gateway is `'lax'`, which is safe for all browsers. Only set `sameSite: 'none'` in `buildCookie` options if you specifically need cross-site cookie access.
 
 This detection is based on the [Chromium SameSite incompatible clients list](https://www.chromium.org/updates/same-site/incompatible-clients).
 

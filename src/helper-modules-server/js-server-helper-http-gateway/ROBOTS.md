@@ -1,7 +1,9 @@
 # @superloomdev/js-server-helper-http-gateway
 
-**Class:** B (Extended Utility - Node.js runtime only)
-**Scope:** Incoming HTTP gateway for Node.js servers. Normalizes raw runtime request data (AWS API Gateway event, Express req) into a per-request instance object and writes responses back through the same runtime.
+**Class:** B (Extended Utility — Node.js runtime only)
+**Scope:** Incoming HTTP gateway for Node.js servers. Normalizes raw runtime request data
+(AWS API Gateway event, Express req) into a per-request instance and writes responses back
+through runtime-specific adapters.
 
 ---
 
@@ -18,7 +20,7 @@ const Gateway = GatewayLoader(Lib, {
 
 **Config validation:** Throws at construction time if `ADAPTER` is missing or not a function.
 
-**Peer dependencies in Lib:** Utils, Debug, Instance
+**Peer dependencies in Lib:** `Utils`, `Debug`, `Instance`
 
 ---
 
@@ -27,11 +29,11 @@ const Gateway = GatewayLoader(Lib, {
 ### Request Lifecycle
 
 ```javascript
-// Initialize HTTP request data in instance from raw runtime data
+// Populate instance with normalized request data from raw runtime input
 Gateway.initHttpRequestData(instance, raw_request, raw_context, response_callback);
 // Returns: void
 
-// Check if instance was initialized with HTTP request data
+// Returns true if instance was initialized with HTTP request data
 Gateway.isHttpInstance(instance);
 // Returns: Boolean
 ```
@@ -39,110 +41,135 @@ Gateway.isHttpInstance(instance);
 ### Parameter Extraction
 
 ```javascript
-// Build typed, validated args from instance.http_request
+// Build typed, validated args object from instance.http_request
 Gateway.setArgsFromRequest(instance, params);
 // Returns: [null, args] | [null, false] | [err, false]
+```
 
-// Param descriptor shape:
-// {
-//   method: 'GET' | 'POST' | 'PATH' | 'HEADER' | 'FIXED',
-//   name: String,           // key in source location
-//   rename: String,          // output key name
-//   value: *,                // literal value (FIXED only)
-//   required: Boolean,
-//   default: *,
-//   is_number: Boolean,      // typecast to Number
-//   is_boolean: Boolean,     // typecast via Boolean(Number(v))
-//   is_json: Boolean,        // JSON.parse
-//   trim: Boolean,           // trim whitespace, empty->null
-//   json_func: Function,     // transform after JSON.parse
-//   sanatize_func: Function, // sanitization function
-//   validate_func: Function, // must return truthy
-//   invalidate_func: Function // must return falsy; truthy becomes [err, false]
-// }
+Param descriptor shape:
+
+```javascript
+{
+  method: 'GET' | 'POST' | 'PATH' | 'HEADER' | 'FIXED',
+  name: String,              // key in source location
+  rename: String,            // output key name in returned args
+  value: *,                  // literal value (FIXED only)
+  required: Boolean,         // [null, false] if absent
+  default: *,                // used when absent and not required
+  is_number: Boolean,        // typecast to Number
+  is_boolean: Boolean,       // typecast via Boolean(Number(v))
+  is_json: Boolean,          // JSON.parse
+  trim: Boolean,             // trim whitespace, empty string → null
+  json_func: Function,       // transform applied after JSON.parse
+  sanatize_func: Function,   // sanitization function
+  validate_func: Function,   // must return truthy; failure → [null, false]
+  invalidate_func: Function  // must return falsy; truthy return → [err, false]
+}
 ```
 
 ### Response Functions
 
 ```javascript
-// Send HTTP response with status, headers, body
-Gateway.returnHttpResponse(instance, status, headers?, body?);
+// Send HTTP response — param order mirrors HTTP sequence: status → headers → cookies → body
+Gateway.returnHttpResponse(instance, status, headers?, cookies?, body?);
+// cookies: descriptor built by buildCookie() — serialized into Set-Cookie at gateway boundary
+// Default headers added: Cache-Control: max-age=0, Content-Type: application/json
 // Returns: Boolean (always true)
 
-// Send body-less status response
+// Send a body-less HTTP status response
 Gateway.returnHttpStatus(instance, status_name);
-// status_name: 'not_modified' | 'bad_request' | 'unauthorized' | 'not_found' | 'invalid_token'
+// status_name: 'not_modified'(304) | 'bad_request'(400) | 'unauthorized'(401)
+//            | 'not_found'(404) | 'invalid_token'(498)
 // Returns: Boolean (always true)
 
-// Send 301 redirect
+// Send a 301 permanent redirect
 Gateway.returnHttpRedirect(instance, location);
 // Returns: Boolean (always true)
 
-// Send 301 redirect to /404
+// Send a 301 redirect to /404
 Gateway.returnHttpRedirect404(instance);
 // Returns: Boolean (always true)
+```
+
+### Cookie Builder
+
+```javascript
+// Build (or accumulate) a cookie descriptor — pass as 4th param to returnHttpResponse
+Gateway.buildCookie(existing, name, value, ttl, options?);
+// existing : previous buildCookie result to append to, or null to start fresh
+// ttl      : seconds — 0 = expire/clear immediately, >0 = persistent
+// options  : attribute overrides (all optional, override gateway defaults)
+//   { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain: unset }
+// SameSite=None omitted automatically for incompatible browsers:
+//   iOS 12, macOS 10.14 Safari, UC Browser < 12.13.2, Chromium 51–66
+// Returns: Object (cookie descriptor — plain object keyed by cookie name)
+
+// Set one cookie
+const cookies = Gateway.buildCookie(null, 'session', token, 86400);
+Gateway.returnHttpResponse(instance, 200, null, cookies, body);
+
+// Accumulate two cookies
+let cookies = Gateway.buildCookie(null, 'session', token, 86400);
+cookies     = Gateway.buildCookie(cookies, 'pref', 'dark', 2592000);
+Gateway.returnHttpResponse(instance, 200, null, cookies, body);
+
+// Clear a cookie (ttl = 0, value = '')
+const cookies = Gateway.buildCookie(null, 'session', '', 0);
+Gateway.returnHttpResponse(instance, 200, null, cookies, null);
+
+// Override httpOnly to allow JS access
+const cookies = Gateway.buildCookie(null, 'csrf', token, 3600, { httpOnly: false });
 ```
 
 ### Request Accessors
 
 ```javascript
-// Get client IP from x-forwarded-for header (first in chain)
-Gateway.getRequestIPAddress(instance);
-// Returns: String (empty string if absent)
-
-// Get User-Agent header
-Gateway.getRequestUserAgent(instance);
-// Returns: String (empty string if absent)
-
-// Get Origin header
-Gateway.getRequestOrigin(instance);
-// Returns: String (empty string if absent)
-
-// Get country code from CDN if available
-Gateway.getRequestCountryCode(instance);
-// Returns: String | null
+Gateway.getRequestIPAddress(instance);  // String — first IP from x-forwarded-for, or ''
+Gateway.getRequestUserAgent(instance);  // String — User-Agent header, or ''
+Gateway.getRequestOrigin(instance);     // String — Origin header, or ''
+Gateway.getRequestCountryCode(instance); // String | null — from CDN header if available
 ```
 
 ### Utilities
 
 ```javascript
-// Set cookie with automatic SameSite=None handling for incompatible browsers
-Gateway.setCookie(instance, cookie_name, cookie_value, cookie_life_seconds);
-// Returns: void
-// SameSite=None omitted for: iOS 12, macOS 10.14 Safari, UC Browser < 12.13.2, Chromium 51-66
-
-// Format Unix timestamp as HTTP-date string
 Gateway.getHttpTime(timestamp_seconds?);
-// Returns: String (current time if no arg)
-// Format: "Wed, 21 Oct 2015 07:28:00 GMT"
+// Returns: String — HTTP-date format, e.g. "Wed, 21 Oct 2015 07:28:00 GMT"
+// Uses current time when no argument given
 
-// Parse URL into component parts
 Gateway.getUrlParts(url);
-// Returns: {
-//   sub_domain: String,
-//   domain: String,
-//   domain_without_tld: String,
-//   tld: String,
-//   hostname: String,
-//   is_ip: Boolean
-// }
+// Returns: { sub_domain, domain, domain_without_tld, tld, hostname, is_ip }
+```
+
+---
+
+## Instance Shape (after initHttpRequestData)
+
+```javascript
+instance.http_request = {
+  headers : { /* lowercase header keys */ },
+  get     : { /* query string params */ },
+  post    : { /* JSON or form-urlencoded body fields */ },
+  path    : { /* URL path params */ },
+  method  : 'GET' | 'POST' | ...,
+  cookies : { /* parsed Cookie header — read inbound cookies from here */ }
+};
+
+instance.http_response            = {};
+instance.gateway_response_callback = Function;
 ```
 
 ---
 
 ## Adapter Contract (for adapter implementers)
 
-Every adapter implements:
-
 ```javascript
-// Populate instance.http_request, http_response, gateway_response_callback
 adapter.loadHttpDataToInstance(instance, raw_request, raw_context, response_callback);
+// Populates instance.http_request, http_response, gateway_response_callback
 
-// Build runtime-specific response envelope
 adapter.buildHttpResponseObject(status, headers, body);
-// Returns: Object
+// Returns: runtime-specific response envelope
 
-// Return country code if available
 adapter.getHttpRequestCountryCode(instance);
 // Returns: String | null
 ```
@@ -166,13 +193,11 @@ adapter.getHttpRequestCountryCode(instance);
 
 ---
 
-## Important Constraints
+## Constraints
 
-**Multipart/form-data not supported:** POST bodies must be `application/json` or `application/x-www-form-urlencoded`. Multipart requests result in empty `instance.http_request.post`.
-
-**SameSite=None browser compatibility:** `setCookie` automatically detects incompatible browsers (iOS 12, macOS 10.14 Safari, UC Browser < 12.13.2, Chromium 51-66) and omits the SameSite attribute for them.
-
-**Default headers:** `returnHttpResponse` adds `Cache-Control: max-age=0` and `Content-Type: application/json` unless overridden by caller-supplied headers.
+- **Multipart not supported.** POST bodies must be `application/json` or `application/x-www-form-urlencoded`. Multipart results in empty `instance.http_request.post`.
+- **Cookies are return values, not side effects.** Never write `Set-Cookie` headers manually; always use `buildCookie` + `returnHttpResponse`.
+- **No module below the gateway serializes cookies.** Descriptors flow up the call chain; serialization happens only at the gateway boundary.
 
 ---
 
@@ -180,18 +205,19 @@ adapter.getHttpRequestCountryCode(instance);
 
 **Bundled:** `cookie@1.x`, `tldts@5.x`
 
-**Peer (in Lib):** js-helper-utils, js-helper-debug, js-server-helper-instance
+**Peer (in Lib):** `js-helper-utils`, `js-helper-debug`, `js-server-helper-instance`
 
-**Optional peer:** Runtime adapter (aws-apigateway or express)
+**Optional peer:** runtime adapter (`adapter-aws-apigateway` or `adapter-express`)
 
 ---
 
 ## Testing
 
-Tests use in-process stub adapter. No external services required.
-
 ```bash
 cd _test && npm install && npm test
 ```
 
-Coverage: loader validation, all public methods, SameSite=None browser detection, param extraction with all typecasts and validators.
+In-process stub adapter — no external services required. 116 tests covering: loader
+validation, all public methods, `buildCookie` (fresh/accumulate/override/clear/immutability),
+`returnHttpResponse` with cookies (defaults, overrides, SameSite=None UA guard),
+param extraction (all sources, typecasts, validators), parts internals.
