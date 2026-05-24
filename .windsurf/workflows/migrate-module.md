@@ -235,7 +235,7 @@ There is a single unified workflow: `.github/workflows/ci-helper-modules.yml`. I
 ## 7. Documentation Sync
 
 - [ ] `docs/testing/module-testing.md` updated with module entry
-- [ ] `AGENTS.md` updated if architecture changed (run `/propagate-changes`)
+- [ ] `AGENTS.md` updated if architecture changed (run `/compile-agents-md`)
 - [ ] Any new patterns or learnings documented
 
 ### Module Name Cross-Reference Verification (for renamed modules)
@@ -243,20 +243,23 @@ There is a single unified workflow: `.github/workflows/ci-helper-modules.yml`. I
 When renaming modules, old names often remain in documentation. Replace `<old-name>` with the previous module name:
 
 ```bash
-# Search all tracked files for the old module name (excludes gitignored __dev__/)
+# Search all tracked files in this repo for the old module name
 git grep "js-server-helper-<old-name>" -- \
-  'docs/**' 'AGENTS.md' '.windsurf/**' 'demo-project/**' \
+  'docs/**' 'AGENTS.md' '.windsurf/**' \
   'src/**/*.md' 'src/**/*.js' '*.yml'
 
-# Broader search across ALL file types (excludes .git and gitignored)
+# Broader search across ALL file types in this repo
 git grep -l "js-server-helper-<old-name>"
 
-# Common files that need updates:
+# Common files in THIS repo that need updates:
 # - docs/{foundations,modules,server,testing}/*.md (module examples, pattern references)
 # - docs/dev/*.md (developer guides)
 # - AGENTS.md (directory map)
-# - demo-project/src/server/common/loader.js (example loader)
 # - OTHER modules' README/ROBOTS (API comparison references - easy to miss!)
+#
+# Also check the sibling repos in the workspace:
+# - codebase-superloom: framework docs, AGENTS.md
+# - codebase-js-demo-project: src/server/common/loader.js (example loader)
 ```
 
 > **Note:** Use `git grep` instead of `grep -r` to automatically respect `.gitignore`. This avoids touching `__dev__/` personal workspace files.
@@ -291,7 +294,7 @@ When appending multi-line content via terminal to gitignored files, **do not use
 ```bash
 # Step 1: Create temp file with content (using write_to_file tool, not terminal heredoc)
 # Step 2: Append via simple cat
-cat /tmp/migration-entry.md >> /Users/sj/Projects/codebase-superloom/__dev__/migration-changelog.md
+cat /tmp/migration-entry.md >> /Users/sj/Projects/project-superloom/__dev__/migration-changelog.md
 rm /tmp/migration-entry.md
 ```
 
