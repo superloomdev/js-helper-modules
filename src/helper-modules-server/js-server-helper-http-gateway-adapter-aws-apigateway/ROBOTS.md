@@ -16,7 +16,7 @@ const Gateway = GatewayLoader(Lib, {
 });
 ```
 
-**Peer dependencies in Lib:** none (the adapter is self-contained)
+**Peer dependencies in Lib:** `Utils` (type checks via `Lib.Utils.isString`, `Lib.Utils.isObject`, `Lib.Utils.isFunction`, `Lib.Utils.isNullOrUndefined`)
 
 **Runtime peers:** none — no AWS SDK required, no Docker required, no external services
 
@@ -48,10 +48,11 @@ adapter.getHttpRequestCountryCode(instance);
 |---|---|
 | `method` | `event.requestContext.http.method` (uppercased); `null` if missing |
 | `headers` | `event.headers` with all keys lowercased |
-| `get` | `event.queryStringParameters` (multi-value keys are comma-combined per AWS spec) |
-| `post` | Parsed body (JSON or urlencoded); see below |
-| `path` | `event.pathParameters` (or `{}` if absent) |
+| `query` | `event.queryStringParameters` (multi-value keys are comma-combined per AWS spec) |
+| `body` | Parsed body (JSON or urlencoded); see below |
+| `params` | `event.pathParameters` (or `{}` if absent) |
 | `cookies` | Parsed from `event.cookies` array (or `{}` if absent / not array) |
+| `url` | `event.rawPath` + `?` + `event.rawQueryString` (or just `rawPath` if no query) |
 
 `gateway_response_callback` is wired to call the Lambda `callback(err, envelope)`.
 
@@ -83,9 +84,9 @@ The adapter does not throw on v1.0 events; it degrades gracefully so a downstrea
 
 ## Important Constraints
 
-**Multipart/form-data not supported.** API Gateway v2.0 does support multipart payloads, but the adapter does not parse them. `post` will be `{}` for multipart requests.
+**Multipart/form-data not supported.** API Gateway v2.0 does support multipart payloads, but the adapter does not parse them. `body` will be `{}` for multipart requests.
 
-**JSON root must be a plain object.** `post` is always a key/value map. JSON arrays and primitive root values (`["a","b"]`, `42`, `"hello"`) are rejected; `post` becomes `{}`. This is a root-level rule — array and primitive values **inside** a JSON object are preserved normally.
+**JSON root must be a plain object.** `body` is always a key/value map. JSON arrays and primitive root values (`["a","b"]`, `42`, `"hello"`) are rejected; `body` becomes `{}`. This is a root-level rule — array and primitive values **inside** a JSON object are preserved normally.
 
 **Authorizer context is not promoted.** JWT claims, IAM identity, and Lambda authorizer payloads remain on the raw event at `event.requestContext.authorizer`. The adapter does not surface them as standard `instance.http_request` fields. Read them from the raw event if needed.
 

@@ -16,7 +16,7 @@ const Gateway = GatewayLoader(Lib, {
 });
 ```
 
-**Peer dependencies in Lib:** none (the adapter is self-contained)
+**Peer dependencies in Lib:** `Utils` (type checks via `Lib.Utils.isString`, `Lib.Utils.isObject`, `Lib.Utils.isFunction`, `Lib.Utils.isNullOrUndefined`)
 
 **Runtime peers:** `express@>=5`, optional `cookie-parser@>=1`
 
@@ -48,10 +48,11 @@ adapter.getHttpRequestCountryCode(instance);
 |---|---|
 | `method` | `req.method.toUpperCase()` |
 | `headers` | `req.headers` (already lowercased by Node http) |
-| `get` | `req.query` (Express default parser, returns arrays for repeated keys) |
-| `post` | `req.body` (populated by `express.json()` / `express.urlencoded()`) |
-| `path` | `req.params` (Express route parameters) |
+| `query` | `req.query` (Express default parser, returns arrays for repeated keys) |
+| `body` | `req.body` (populated by `express.json()` / `express.urlencoded()`) |
+| `params` | `req.params` (Express route parameters) |
 | `cookies` | `req.cookies` if set by `cookie-parser`, else parsed from raw `Cookie` header |
+| `url` | `req.originalUrl` or `req.url` |
 
 `gateway_response_callback` is wired to `res.status(code).set(headers).send(body)`.
 
@@ -67,7 +68,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // optional - adapter falls back to raw Cookie header
 ```
 
-Without `express.json()`, `instance.http_request.post` remains `{}` for JSON bodies. Without `cookieParser()`, the adapter parses the raw `Cookie` header itself.
+Without `express.json()`, `instance.http_request.body` remains `{}` for JSON bodies. Without `cookieParser()`, the adapter parses the raw `Cookie` header itself.
 
 ---
 

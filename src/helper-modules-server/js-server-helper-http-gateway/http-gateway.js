@@ -379,7 +379,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
       const header = instance.http_request.headers['authorization'];
 
       // Check for Bearer prefix (case-insensitive per RFC 6750)
-      if (typeof header !== 'string' || header.length < 8) {
+      // Minimum 8 chars: "Bearer " (7) + at least 1 char token
+      if (!Lib.Utils.isString(header) || !Lib.Utils.validateString(header, 8)) {
         return null;
       }
 

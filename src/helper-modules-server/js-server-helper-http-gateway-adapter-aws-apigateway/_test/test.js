@@ -421,7 +421,7 @@ describe('Group D - body parsing', function () {
 
 describe('Group E - response building (Lambda envelope)', function () {
 
-  const adapter = AdapterFactory(null, null, null);
+  const adapter = AdapterFactory(Lib, null, null);
 
   it('wraps string body in Lambda envelope with isBase64Encoded=false', function () {
     const result = adapter.buildHttpResponseObject(200, { 'Content-Type': 'text/plain' }, 'hello');

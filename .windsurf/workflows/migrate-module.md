@@ -44,6 +44,14 @@ Run this checklist when adding a new helper module or migrating an existing one 
 - [ ] **Singleton pattern (Pattern 1) specifics** (only if applicable):
   - [ ] Config loading comment: `// Base configuration (overridden by loader-injected config)`
   - [ ] Config override guard and comment: `// Merge loader-injected config (overrides base values)` with `if (config && typeof config === 'object')`
+- [ ] **Adapter pattern (Class F) specifics** (only if module is a `-store-*` or `-adapter-*` package):
+  - [ ] Loader accepts `(Lib, CONFIG, ERRORS)` or `(shared_libs, _config, _errors)` - same uniform signature as parts
+  - [ ] `Lib` is injected and used for all type checks via `Lib.Utils` - no inline `typeof`
+  - [ ] **Public before private** - `Store`/`Adapter` declared before `_Store`/`_Adapter` (same rule as factory and singleton)
+  - [ ] Adapter contract methods listed in top-of-file comment block
+  - [ ] **Stores** (`-store-*`): use `createInterface` factory pattern (almost always — each instance needs own `STORE_CONFIG`), load `store.validators.js`, return `ERRORS` from parent catalog
+  - [ ] **Adapters** (`-adapter-*`): determine singleton vs factory based on whether per-instance config is needed. Singleton (stateless, all state on `instance`) is the common case. Factory if adapter needs per-instance config
+  - [ ] Reference skeletons: `docs/modules/module-structure-js.md` -> "Storage Adapter Skeleton" / "Adapter Skeleton"
 - [ ] JSDoc on every public function with `@param` and `@return`
 - [ ] **Function Naming Decision Tree**:
   ```

@@ -13,6 +13,10 @@
 'use strict';
 
 
+// Shared dependency container injected by loader
+let Lib;
+
+
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
@@ -20,168 +24,24 @@ Factory loader. Called by http-gateway.js as CONFIG.ADAPTER(Lib, CONFIG, ERRORS)
 Returns the 3-method adapter object. Each loader call returns the same
 stateless adapter singleton - all request state lives on instance.
 
-@param {Object} _lib    - Lib container (unused; accepted for contract conformance)
-@param {Object} _config - Merged CONFIG (unused; accepted for contract conformance)
-@param {Object} _errors - Error catalog (unused; accepted for contract conformance)
+@param {Object} shared_libs - Lib container (Utils, Debug)
+@param {Object} _config     - Merged CONFIG (accepted for contract conformance)
+@param {Object} _errors     - Error catalog (accepted for contract conformance)
 
 @return {Object} - { loadHttpDataToInstance, buildHttpResponseObject, getHttpRequestCountryCode }
 *********************************************************************/
-module.exports = function loader (_lib, _config, _errors) {
+module.exports = function loader (shared_libs, _config, _errors) {
 
-  return adapter;
+  Lib = shared_libs;
+
+  return Adapter;
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
 
-/*****************************************************************************
-INTERNAL HELPERS
-*****************************************************************************/
 
-/********************************************************************
-Parse a raw Cookie header string into a key/value map.
-Returns empty object on empty or missing input.
-
-@param {String} cookie_header - Raw value of the Cookie header
-
-@return {Object} - { name: value, ... }
-*********************************************************************/
-function parseCookieHeader (cookie_header) {
-
-  const result = {};
-
-  if (!cookie_header || typeof cookie_header !== 'string') {
-    return result;
-  }
-
-  const pairs = cookie_header.split(';');
-
-  for (let i = 0; i < pairs.length; i++) {
-
-    const pair = pairs[i].trim();
-    const eq_idx = pair.indexOf('=');
-
-    if (eq_idx < 1) {
-      continue;
-    }
-
-    const key = pair.slice(0, eq_idx).trim();
-    const val = pair.slice(eq_idx + 1).trim();
-
-    if (key) {
-      result[key] = decodeURIComponent(val);
-    }
-
-  }
-
-  return result;
-
-}
-
-
-/********************************************************************
-Parse a URL-encoded body string (application/x-www-form-urlencoded)
-into a key/value map. Returns empty object on empty or missing input.
-
-@param {String} body - URL-encoded body string
-
-@return {Object} - { key: value, ... }
-*********************************************************************/
-function parseUrlEncodedBody (body) {
-
-  const result = {};
-
-  if (!body || typeof body !== 'string') {
-    return result;
-  }
-
-  const params = new URLSearchParams(body);
-
-  params.forEach(function (value, key) {
-    result[key] = value;
-  });
-
-  return result;
-
-}
-
-
-/********************************************************************
-Normalize all header keys to lowercase. API Gateway may deliver
-headers with mixed casing depending on version and origin.
-
-@param {Object} raw_headers - Headers object from the event
-
-@return {Object} - New object with all keys lowercased
-*********************************************************************/
-function lowercaseHeaders (raw_headers) {
-
-  if (!raw_headers || typeof raw_headers !== 'object') {
-    return {};
-  }
-
-  const result = {};
-  const keys = Object.keys(raw_headers);
-
-  for (let i = 0; i < keys.length; i++) {
-    result[keys[i].toLowerCase()] = raw_headers[keys[i]];
-  }
-
-  return result;
-
-}
-
-
-/********************************************************************
-Parse the POST body from an API Gateway event. Detects content-type
-and parses accordingly. Returns empty object when body is absent.
-
-@param {Object} event   - Raw API Gateway event
-@param {Object} headers - Lowercase headers map (already normalized)
-
-@return {Object} - Parsed body as key/value map
-*********************************************************************/
-function parseBody (event, headers) {
-
-  const raw_body = event.body;
-
-  if (!raw_body) {
-    return {};
-  }
-
-  const decoded_body = event.isBase64Encoded
-    ? Buffer.from(raw_body, 'base64').toString('utf8')
-    : raw_body;
-
-  const content_type = (headers['content-type'] || '').toLowerCase();
-
-  if (content_type.includes('application/json')) {
-
-    try {
-      const parsed = JSON.parse(decoded_body);
-      return (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed))
-        ? parsed
-        : {};
-    }
-    catch {
-      return {};
-    }
-
-  }
-
-  if (content_type.includes('application/x-www-form-urlencoded')) {
-    return parseUrlEncodedBody(decoded_body);
-  }
-
-  return {};
-
-}
-
-
-/*****************************************************************************
-ADAPTER OBJECT
-*****************************************************************************/
-
-const adapter = {
+///////////////////////////Public Functions START//////////////////////////////
+const Adapter = {
 
   /********************************************************************
   Populate instance with normalized HTTP request data from a raw
@@ -207,11 +67,11 @@ const adapter = {
 
     const event = raw_request || {};
 
-    const headers = lowercaseHeaders(event.headers);
+    const headers = _Adapter.lowercaseHeaders(event.headers);
 
     // Cookies: v2 delivers them as event.cookies array
     const cookies = Array.isArray(event.cookies)
-      ? parseCookieHeader(event.cookies.join('; '))
+      ? _Adapter.parseCookieHeader(event.cookies.join('; '))
       : {};
 
     // Query string parameters
@@ -227,7 +87,7 @@ const adapter = {
       ? event.requestContext.http.method.toUpperCase()
       : null;
 
-    const post_params = parseBody(event, headers);
+    const post_params = _Adapter.parseBody(event, headers);
 
     // URL: rawPath + rawQueryString (v2 payload)
     const raw_path = event.rawPath || '';
@@ -250,7 +110,7 @@ const adapter = {
 
     instance.gateway_response_callback = function (err, response) {
 
-      if (typeof response_callback === 'function') {
+      if (Lib.Utils.isFunction(response_callback)) {
         response_callback(err, response);
       }
 
@@ -280,13 +140,13 @@ const adapter = {
     let normalized_body = '';
     let is_base64 = false;
 
-    if (body !== null && body !== undefined) {
+    if (!Lib.Utils.isNullOrUndefined(body)) {
 
       if (Buffer.isBuffer(body)) {
         normalized_body = body.toString('base64');
         is_base64 = true;
       }
-      else if (typeof body === 'object') {
+      else if (Lib.Utils.isObject(body)) {
         normalized_body = JSON.stringify(body);
       }
       else {
@@ -316,10 +176,12 @@ const adapter = {
   *********************************************************************/
   getHttpRequestCountryCode: function (instance) {
 
-    if (instance &&
-        instance.http_request &&
-        instance.http_request.headers &&
-        instance.http_request.headers['cloudfront-viewer-country']) {
+    if (
+      !Lib.Utils.isNullOrUndefined(instance) &&
+      !Lib.Utils.isNullOrUndefined(instance.http_request) &&
+      !Lib.Utils.isNullOrUndefined(instance.http_request.headers) &&
+      !Lib.Utils.isNullOrUndefined(instance.http_request.headers['cloudfront-viewer-country'])
+    ) {
       return instance.http_request.headers['cloudfront-viewer-country'];
     }
 
@@ -327,4 +189,150 @@ const adapter = {
 
   }
 
-};
+};////////////////////////////Public Functions END//////////////////////////////
+
+
+
+///////////////////////////Private Functions START/////////////////////////////
+const _Adapter = {
+
+  /********************************************************************
+  Parse a raw Cookie header string into a key/value map.
+  Returns empty object on empty or missing input.
+
+  @param {String} cookie_header - Raw value of the Cookie header
+
+  @return {Object} - { name: value, ... }
+  *********************************************************************/
+  parseCookieHeader: function (cookie_header) {
+
+    const result = {};
+
+    if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
+      return result;
+    }
+
+    const pairs = cookie_header.split(';');
+
+    for (let i = 0; i < pairs.length; i++) {
+
+      const pair = pairs[i].trim();
+      const eq_idx = pair.indexOf('=');
+
+      if (eq_idx < 1) {
+        continue;
+      }
+
+      const key = pair.slice(0, eq_idx).trim();
+      const val = pair.slice(eq_idx + 1).trim();
+
+      if (key) {
+        result[key] = decodeURIComponent(val);
+      }
+
+    }
+
+    return result;
+
+  },
+
+
+  /********************************************************************
+  Parse a URL-encoded body string (application/x-www-form-urlencoded)
+  into a key/value map. Returns empty object on empty or missing input.
+
+  @param {String} body - URL-encoded body string
+
+  @return {Object} - { key: value, ... }
+  *********************************************************************/
+  parseUrlEncodedBody: function (body) {
+
+    const result = {};
+
+    if (!body || !Lib.Utils.isString(body)) {
+      return result;
+    }
+
+    const params = new URLSearchParams(body);
+
+    params.forEach(function (value, key) {
+      result[key] = value;
+    });
+
+    return result;
+
+  },
+
+
+  /********************************************************************
+  Normalize all header keys to lowercase. API Gateway may deliver
+  headers with mixed casing depending on version and origin.
+
+  @param {Object} raw_headers - Headers object from the event
+
+  @return {Object} - New object with all keys lowercased
+  *********************************************************************/
+  lowercaseHeaders: function (raw_headers) {
+
+    if (!raw_headers || !Lib.Utils.isObject(raw_headers)) {
+      return {};
+    }
+
+    const result = {};
+    const keys = Object.keys(raw_headers);
+
+    for (let i = 0; i < keys.length; i++) {
+      result[keys[i].toLowerCase()] = raw_headers[keys[i]];
+    }
+
+    return result;
+
+  },
+
+
+  /********************************************************************
+  Parse the POST body from an API Gateway event. Detects content-type
+  and parses accordingly. Returns empty object when body is absent.
+
+  @param {Object} event   - Raw API Gateway event
+  @param {Object} headers - Lowercase headers map (already normalized)
+
+  @return {Object} - Parsed body as key/value map
+  *********************************************************************/
+  parseBody: function (event, headers) {
+
+    const raw_body = event.body;
+
+    if (!raw_body) {
+      return {};
+    }
+
+    const decoded_body = event.isBase64Encoded
+      ? Buffer.from(raw_body, 'base64').toString('utf8')
+      : raw_body;
+
+    const content_type = (headers['content-type'] || '').toLowerCase();
+
+    if (content_type.includes('application/json')) {
+
+      try {
+        const parsed = JSON.parse(decoded_body);
+        return (!Lib.Utils.isNullOrUndefined(parsed) && Lib.Utils.isObject(parsed) && !Array.isArray(parsed))
+          ? parsed
+          : {};
+      }
+      catch {
+        return {};
+      }
+
+    }
+
+    if (content_type.includes('application/x-www-form-urlencoded')) {
+      return _Adapter.parseUrlEncodedBody(decoded_body);
+    }
+
+    return {};
+
+  }
+
+};///////////////////////////Private Functions END//////////////////////////////

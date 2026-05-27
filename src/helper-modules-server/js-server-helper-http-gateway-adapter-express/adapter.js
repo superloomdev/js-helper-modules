@@ -12,6 +12,10 @@
 'use strict';
 
 
+// Shared dependency container injected by loader
+let Lib;
+
+
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
@@ -19,24 +23,24 @@ Factory loader. Called by http-gateway.js as CONFIG.ADAPTER(Lib, CONFIG, ERRORS)
 Returns the 3-method adapter object. Each loader call returns the same
 stateless adapter singleton - all request state lives on instance.
 
-@param {Object} _lib    - Lib container (unused; accepted for contract conformance)
-@param {Object} _config - Merged CONFIG (unused; accepted for contract conformance)
-@param {Object} _errors - Error catalog (unused; accepted for contract conformance)
+@param {Object} shared_libs - Lib container (Utils, Debug)
+@param {Object} _config     - Merged CONFIG (accepted for contract conformance)
+@param {Object} _errors     - Error catalog (accepted for contract conformance)
 
 @return {Object} - { loadHttpDataToInstance, buildHttpResponseObject, getHttpRequestCountryCode }
 *********************************************************************/
-module.exports = function loader (_lib, _config, _errors) {
+module.exports = function loader (shared_libs, _config, _errors) {
 
-  return adapter;
+  Lib = shared_libs;
+
+  return Adapter;
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
 
-/*****************************************************************************
-ADAPTER OBJECT
-*****************************************************************************/
 
-const adapter = {
+///////////////////////////Public Functions START//////////////////////////////
+const Adapter = {
 
   /********************************************************************
   Populate instance with normalized HTTP request data from an Express
@@ -69,26 +73,26 @@ const adapter = {
     const req = raw_request || {};
 
     // Express already lowercases header keys
-    const headers = (req.headers && typeof req.headers === 'object')
+    const headers = (req.headers && Lib.Utils.isObject(req.headers))
       ? req.headers
       : {};
 
     // Prefer pre-parsed req.cookies (cookie-parser); fall back to raw header
     let cookies;
 
-    if (req.cookies && typeof req.cookies === 'object') {
+    if (req.cookies && Lib.Utils.isObject(req.cookies)) {
       cookies = req.cookies;
     }
     else {
-      cookies = parseCookieHeader(headers['cookie'] || '');
+      cookies = _Adapter.parseCookieHeader(headers['cookie'] || '');
     }
 
     instance.http_request = {
       headers: headers,
       cookies: cookies,
-      query  : (req.query && typeof req.query === 'object') ? req.query : {},
-      body   : (req.body && typeof req.body === 'object') ? req.body : {},
-      params : (req.params && typeof req.params === 'object') ? req.params : {},
+      query  : (req.query && Lib.Utils.isObject(req.query)) ? req.query : {},
+      body   : (req.body && Lib.Utils.isObject(req.body)) ? req.body : {},
+      params : (req.params && Lib.Utils.isObject(req.params)) ? req.params : {},
       method : req.method ? req.method.toUpperCase() : null,
       url    : req.originalUrl || req.url || ''
     };
@@ -99,7 +103,7 @@ const adapter = {
 
     instance.gateway_response_callback = function (_err, response) {
 
-      if (!response_callback || typeof response_callback.status !== 'function') {
+      if (!response_callback || !Lib.Utils.isFunction(response_callback.status)) {
         return;
       }
 
@@ -145,12 +149,12 @@ const adapter = {
 
     let normalized_body = '';
 
-    if (body !== null && body !== undefined) {
+    if (!Lib.Utils.isNullOrUndefined(body)) {
 
       if (Buffer.isBuffer(body)) {
         normalized_body = body.toString('base64');
       }
-      else if (typeof body === 'object') {
+      else if (Lib.Utils.isObject(body)) {
         normalized_body = JSON.stringify(body);
       }
       else {
@@ -181,49 +185,51 @@ const adapter = {
     return null;
   }
 
-};
+};////////////////////////////Public Functions END//////////////////////////////
 
 
-/*****************************************************************************
-INTERNAL HELPERS
-*****************************************************************************/
 
-/********************************************************************
-Parse a raw Cookie header string into a key/value map.
-Used as fallback when cookie-parser middleware is not installed.
+///////////////////////////Private Functions START/////////////////////////////
+const _Adapter = {
 
-@param {String} cookie_header - Raw value of the Cookie header
+  /********************************************************************
+  Parse a raw Cookie header string into a key/value map.
+  Used as fallback when cookie-parser middleware is not installed.
 
-@return {Object} - { name: value, ... }
-*********************************************************************/
-function parseCookieHeader (cookie_header) {
+  @param {String} cookie_header - Raw value of the Cookie header
 
-  const result = {};
+  @return {Object} - { name: value, ... }
+  *********************************************************************/
+  parseCookieHeader: function (cookie_header) {
 
-  if (!cookie_header || typeof cookie_header !== 'string') {
+    const result = {};
+
+    if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
+      return result;
+    }
+
+    const pairs = cookie_header.split(';');
+
+    for (let i = 0; i < pairs.length; i++) {
+
+      const pair = pairs[i].trim();
+      const eq_idx = pair.indexOf('=');
+
+      if (eq_idx < 1) {
+        continue;
+      }
+
+      const key = pair.slice(0, eq_idx).trim();
+      const val = pair.slice(eq_idx + 1).trim();
+
+      if (key) {
+        result[key] = decodeURIComponent(val);
+      }
+
+    }
+
     return result;
-  }
-
-  const pairs = cookie_header.split(';');
-
-  for (let i = 0; i < pairs.length; i++) {
-
-    const pair = pairs[i].trim();
-    const eq_idx = pair.indexOf('=');
-
-    if (eq_idx < 1) {
-      continue;
-    }
-
-    const key = pair.slice(0, eq_idx).trim();
-    const val = pair.slice(eq_idx + 1).trim();
-
-    if (key) {
-      result[key] = decodeURIComponent(val);
-    }
 
   }
 
-  return result;
-
-}
+};///////////////////////////Private Functions END//////////////////////////////
