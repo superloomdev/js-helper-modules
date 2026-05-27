@@ -39,11 +39,12 @@ module.exports = function createStubAdapter () {
 
     raw_request shape (all keys optional; defaults to empty):
       headers  {Object} - Lowercase header key -> value map
-      get      {Object} - Query-string parameters
-      post     {Object} - Request body parameters
-      path     {Object} - Path parameters
+      query    {Object} - Query-string parameters
+      body     {Object} - Request body parameters
+      params   {Object} - Path parameters
       cookies  {Object} - Parsed cookies
       method   {String} - 'GET' | 'POST' | ...
+      url      {String} - Request URL path with query string
 
     @param {Object}   instance          - Per-request instance to populate
     @param {Object}   raw_request       - Pre-normalized request data
@@ -57,10 +58,11 @@ module.exports = function createStubAdapter () {
       instance.http_request = {
         headers: req.headers || {},
         cookies: req.cookies || {},
-        get    : req.get     || {},
-        post   : req.post    || {},
-        path   : req.path    || {},
-        method : req.method  || null
+        query  : req.query   || {},
+        body   : req.body    || {},
+        params : req.params  || {},
+        method : req.method  || null,
+        url    : req.url     || ''
       };
 
       instance.http_response = {

@@ -51,10 +51,11 @@ const adapter = {
   Populated fields:
     instance.http_request.headers  {Object} - Lowercase header key -> value map
     instance.http_request.cookies  {Object} - Parsed cookies map
-    instance.http_request.get      {Object} - Query-string parameters (req.query)
-    instance.http_request.post     {Object} - Request body (req.body)
-    instance.http_request.path     {Object} - Path parameters (req.params)
+    instance.http_request.query    {Object} - Query-string parameters (req.query)
+    instance.http_request.body     {Object} - Request body (req.body)
+    instance.http_request.params   {Object} - Path parameters (req.params)
     instance.http_request.method   {String} - HTTP method ('GET', 'POST', ...)
+    instance.http_request.url      {String} - Request URL path with query string
     instance.http_response         {Object} - { cookies: {} }
     instance.gateway_response_callback {Function} - Wraps Express res
 
@@ -85,10 +86,11 @@ const adapter = {
     instance.http_request = {
       headers: headers,
       cookies: cookies,
-      get    : (req.query && typeof req.query === 'object') ? req.query : {},
-      post   : (req.body && typeof req.body === 'object') ? req.body : {},
-      path   : (req.params && typeof req.params === 'object') ? req.params : {},
-      method : req.method ? req.method.toUpperCase() : null
+      query  : (req.query && typeof req.query === 'object') ? req.query : {},
+      body   : (req.body && typeof req.body === 'object') ? req.body : {},
+      params : (req.params && typeof req.params === 'object') ? req.params : {},
+      method : req.method ? req.method.toUpperCase() : null,
+      url    : req.originalUrl || req.url || ''
     };
 
     instance.http_response = {

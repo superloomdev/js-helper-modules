@@ -72,10 +72,11 @@ Build a typed, validated args object from the normalized HTTP request data in `i
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `method` | `String` | Source location: `'GET'` \| `'POST'` \| `'PATH'` \| `'HEADER'` \| `'FIXED'` |
+| `in` | `String` | Source location (preferred): `'query'` \| `'body'` \| `'header'` \| `'params'` \| `'fixed'` |
+| `method` | `String` | HTTP verb context. Used as source fallback when `in` is absent: `'GET'`→query, `'POST'`→body, `'PATH'`→params, `'HEADER'`→header, `'FIXED'`→fixed |
 | `name` | `String` | Key name in the source location |
 | `rename` | `String` | Output key name in returned args object |
-| `value` | `*` | Literal value (only for `method: 'FIXED'`) |
+| `value` | `*` | Literal value (only for `in: 'fixed'`) |
 | `required` | `Boolean` | `true` aborts and returns `[null, false]` if missing |
 | `default` | `*` | Value used when param is absent and not required |
 | `is_number` | `Boolean` | Typecast string to Number |
@@ -83,7 +84,7 @@ Build a typed, validated args object from the normalized HTTP request data in `i
 | `is_json` | `Boolean` | Parse value with `JSON.parse` |
 | `trim` | `Boolean` | Trim whitespace; converts empty string to null |
 | `json_func` | `Function` | Transform applied after `JSON.parse` |
-| `sanatize_func` | `Function` | Sanitization function applied to the value |
+| `sanitize_func` | `Function` | Sanitization function applied to the value |
 | `validate_func` | `Function` | Must return truthy; failure returns `[null, false]` |
 | `invalidate_func` | `Function` | Must return falsy; truthy return is forwarded as `[err, false]` |
 
@@ -95,9 +96,9 @@ Build a typed, validated args object from the normalized HTTP request data in `i
 **Example:**
 ```javascript
 const [err, args] = Gateway.setArgsFromRequest(instance, [
-  { method: 'GET', name: 'page', rename: 'page', required: false, default: 1, is_number: true },
-  { method: 'POST', name: 'email', rename: 'email', required: true, trim: true },
-  { method: 'HEADER', name: 'authorization', rename: 'token', required: true }
+  { method: 'GET', in: 'query',  name: 'page',  rename: 'page',  required: false, default: 1, is_number: true },
+  { method: 'POST', in: 'body',  name: 'email', rename: 'email', required: true, trim: true },
+  { method: 'GET', in: 'header', name: 'authorization', rename: 'token', required: true }
 ]);
 
 if (!args) {
@@ -247,6 +248,42 @@ Get the viewer country code from the request. Availability depends on the adapte
 | `instance` | `Object` | Yes | Per-request instance |
 
 **Returns:** `String` \| `null` - ISO 3166-1 alpha-2 country code or null
+
+---
+
+### getBearerToken(instance)
+
+Extract the Bearer token from the `Authorization` header. Returns `null` if the header is missing, does not use the Bearer scheme, or the token portion is empty.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `instance` | `Object` | Yes | Per-request instance |
+
+**Returns:** `String` \| `null` - The token string, or null
+
+**Example:**
+```javascript
+const token = Gateway.getBearerToken(instance);
+if (!token) {
+  return Gateway.returnHttpStatus(instance, 'unauthorized');
+}
+```
+
+---
+
+### isPreflightRequest(instance)
+
+Returns `true` if the request is a CORS preflight — HTTP method is `OPTIONS` and the `Origin` header is present.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `instance` | `Object` | Yes | Per-request instance |
+
+**Returns:** `Boolean`
 
 ---
 
@@ -403,6 +440,6 @@ This detection is based on the [Chromium SameSite incompatible clients list](htt
 
 ## Multipart Limitation
 
-This module does **not** support `multipart/form-data` request bodies. Sending a multipart request results in an empty `instance.http_request.post`. The body is not parsed and no error is raised.
+This module does **not** support `multipart/form-data` request bodies. Sending a multipart request results in an empty `instance.http_request.body`. The body is not parsed and no error is raised.
 
 Use `application/json` or `application/x-www-form-urlencoded` for all POST data. Multipart support will be added in a future version via a dedicated adapter-level option.

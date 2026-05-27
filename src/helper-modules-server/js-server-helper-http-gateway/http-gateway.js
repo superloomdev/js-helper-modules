@@ -104,6 +104,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
   ///////////////////////////Public Functions START//////////////////////////////
   const HttpGateway = {
 
+    // ~~~~~~~~~~~~~~~~~~~~ Request Lifecycle ~~~~~~~~~~~~~~~~~~~~
+    // Initialize and inspect the per-request HTTP state on instance.
+
     /********************************************************************
     Initialize HTTP request data in instance from raw runtime data.
     Delegates to the configured adapter which normalizes the wire-format
@@ -141,6 +144,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Parameter Extraction ~~~~~~~~~~~~~~~~~~~~
+    // Build typed, validated args from the normalized HTTP request data.
+
     /********************************************************************
     Build a typed, validated args object from the normalized HTTP request
     data in instance.http_request. See parts/params.js for the full param
@@ -159,6 +165,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Response Functions ~~~~~~~~~~~~~~~~~~~~
+    // Send responses back through the runtime adapter.
 
     /********************************************************************
     Send an HTTP response back through the runtime callback.
@@ -275,6 +284,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Request Accessors ~~~~~~~~~~~~~~~~~~~~
+    // Read transport-level metadata from the normalized request.
+
     /********************************************************************
     Get the client IP address from the request headers.
     Uses the x-forwarded-for header; returns the first IP in the chain
@@ -349,6 +361,63 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
 
     /********************************************************************
+    Extract the Bearer token from the Authorization header.
+    Returns the token string without the 'Bearer ' prefix, or null
+    if the header is absent or does not start with 'Bearer '.
+
+    @param {Object} instance - Per-request instance
+
+    @return {String|null} - Token string, or null
+    *********************************************************************/
+    getBearerToken: function (instance) {
+
+      // Read the Authorization header
+      if (!('authorization' in instance.http_request.headers)) {
+        return null;
+      }
+
+      const header = instance.http_request.headers['authorization'];
+
+      // Check for Bearer prefix (case-insensitive per RFC 6750)
+      if (typeof header !== 'string' || header.length < 8) {
+        return null;
+      }
+
+      if (header.slice(0, 7).toLowerCase() !== 'bearer ') {
+        return null;
+      }
+
+      // Return the token portion after 'Bearer '
+      const token = header.slice(7);
+
+      return token || null;
+
+    },
+
+
+    /********************************************************************
+    Return true if the request is a CORS preflight (OPTIONS + Origin).
+    A preflight request is an HTTP OPTIONS request with an Origin header,
+    sent by browsers before cross-origin requests.
+
+    @param {Object} instance - Per-request instance
+
+    @return {Boolean}
+    *********************************************************************/
+    isPreflightRequest: function (instance) {
+
+      return (
+        instance.http_request.method === 'OPTIONS' &&
+        'origin' in instance.http_request.headers
+      );
+
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Cookie Builder ~~~~~~~~~~~~~~~~~~~~
+    // Construct cookie descriptors for serialization at the gateway boundary.
+
+    /********************************************************************
     Build a cookie descriptor object (or add to an existing one).
     The descriptor is a plain object keyed by cookie name — pass it as
     the 4th argument (cookies) to returnHttpResponse for serialization.
@@ -387,6 +456,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Utilities ~~~~~~~~~~~~~~~~~~~~
+    // General-purpose HTTP helpers.
 
     /********************************************************************
     Format a Unix timestamp (seconds) as an HTTP-date string.

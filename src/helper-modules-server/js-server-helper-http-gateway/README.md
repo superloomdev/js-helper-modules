@@ -15,7 +15,9 @@ Your application code reads `instance.http_request` and calls `returnHttpRespons
 
 - **One codebase, two runtimes.** The same application handler runs unchanged on Docker (Express) and on AWS Lambda (API Gateway). Swap the adapter in configuration. No application rewrite.
 
-- **Typed parameter extraction.** `setArgsFromRequest` reads from GET, POST, HEADER, PATH, or FIXED sources. It typecasts (string to Number, Boolean, JSON), trims, validates, and sanitizes in one declarative pass. It returns `[null, args]` on success or `[null, false]` on validation failure. No conditional chains scattered across handler code.
+- **Typed parameter extraction.** `setArgsFromRequest` reads from query, body, header, params, or fixed sources (specified via the `in` key on each param descriptor). It typecasts (string to Number, Boolean, JSON), trims, validates, and sanitizes in one declarative pass. It returns `[null, args]` on success or `[null, false]` on validation failure. No conditional chains scattered across handler code.
+
+- **Request accessors.** `getBearerToken` extracts the token from an `Authorization: Bearer <token>` header. `isPreflightRequest` detects CORS preflight (OPTIONS + Origin). `getRequestIPAddress`, `getRequestUserAgent`, `getRequestOrigin`, and `getRequestCountryCode` read transport metadata.
 
 - **Cookie management with browser-compatibility handling.** `buildCookie` returns a plain descriptor object (no serialization). `returnHttpResponse` serializes it into `Set-Cookie` headers at the gateway boundary, automatically omitting the `SameSite=None` attribute for browsers that mishandle it (iOS 12, macOS 10.14 Safari, UC Browser, Chromium 51-66). Applications build cookie descriptors without managing browser quirks or header strings.
 

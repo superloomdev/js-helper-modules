@@ -59,10 +59,14 @@ const Params = {
     data in instance.http_request.
 
     Each entry in the params array describes one parameter:
-      method          {String}   - 'GET' | 'POST' | 'PATH' | 'HEADER' | 'FIXED'
+      in              {String}   - 'query' | 'body' | 'header' | 'params' | 'fixed'
+                                   Source location for value extraction (preferred)
+      method          {String}   - 'GET' | 'POST' | 'HEADER' | 'PATH' | 'FIXED'
+                                   HTTP verb context; used as source fallback when
+                                   `in` is not provided (backward compatibility)
       name            {String}   - Key name in the source location
       rename          {String}   - Output key name in the returned args object
-      value           {*}        - Literal value (only for method: 'FIXED')
+      value           {*}        - Literal value (only for in: 'fixed')
       required        {Boolean}  - true = abort and return [null, false] if missing
       default         {*}        - Value used when param is absent and not required
       is_number       {Boolean}  - Typecast string -> Number
@@ -70,7 +74,7 @@ const Params = {
       is_json         {Boolean}  - JSON.parse the string value
       trim            {Boolean}  - String trim; converts empty string to null
       json_func       {Function} - Transform applied after JSON.parse
-      sanatize_func   {Function} - Sanitization function applied to the value
+      sanitize_func   {Function} - Sanitization function applied to the value
       validate_func   {Function} - Must return true; failure returns [null, false]
       invalidate_func {Function} - Must return falsy; truthy return is forwarded
                                    as the error: [err, false]
@@ -97,20 +101,23 @@ const Params = {
 
       let param_value = null;
 
+      // Resolve source location: prefer `in` key, fall back to `method` for compat
+      const source = _Params.resolveSource(param);
+
       // Extract raw value from the correct source
-      if (param.method === 'GET' && param.name in instance.http_request.get) {
-        param_value = instance.http_request.get[param.name];
+      if (source === 'query' && param.name in instance.http_request.query) {
+        param_value = instance.http_request.query[param.name];
       }
-      else if (param.method === 'POST' && param.name in instance.http_request.post) {
-        param_value = instance.http_request.post[param.name];
+      else if (source === 'body' && param.name in instance.http_request.body) {
+        param_value = instance.http_request.body[param.name];
       }
-      else if (param.method === 'HEADER' && param.name in instance.http_request.headers) {
+      else if (source === 'header' && param.name in instance.http_request.headers) {
         param_value = instance.http_request.headers[param.name];
       }
-      else if (param.method === 'PATH' && param.name in instance.http_request.path) {
-        param_value = instance.http_request.path[param.name];
+      else if (source === 'params' && param.name in instance.http_request.params) {
+        param_value = instance.http_request.params[param.name];
       }
-      else if (param.method === 'FIXED') {
+      else if (source === 'fixed') {
         param_value = param.value;
       }
 
@@ -165,8 +172,8 @@ const Params = {
         }
 
         // Sanitization function
-        if ('sanatize_func' in param && !Lib.Utils.isNullOrUndefined(param_value)) {
-          param_value = param.sanatize_func(param_value);
+        if ('sanitize_func' in param && !Lib.Utils.isNullOrUndefined(param_value)) {
+          param_value = param.sanitize_func(param_value);
         }
 
         args[param.rename] = param_value;
@@ -223,3 +230,45 @@ const Params = {
 
 };
 ////////////////////////////Public Functions END//////////////////////////////
+
+
+
+///////////////////////////Private Functions START/////////////////////////////
+
+// Map legacy method values to their new `in` equivalents
+const METHOD_TO_SOURCE = Object.freeze({
+  'GET'   : 'query',
+  'POST'  : 'body',
+  'HEADER': 'header',
+  'PATH'  : 'params',
+  'FIXED' : 'fixed'
+});
+
+const _Params = {
+
+  /********************************************************************
+  Resolve the source location string for a param descriptor. Prefers
+  the `in` key (OpenAPI-aligned). Falls back to translating `method`
+  (legacy GET/POST/HEADER/PATH/FIXED) into the equivalent `in` value.
+
+  @param {Object} param - Single parameter descriptor
+
+  @return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
+  *********************************************************************/
+  resolveSource: function (param) {
+
+    // Prefer explicit `in` key
+    if ('in' in param && param.in) {
+      return param.in;
+    }
+
+    // Fall back to legacy `method` key
+    if ('method' in param && param.method) {
+      return METHOD_TO_SOURCE[param.method] || null;
+    }
+
+    return null;
+
+  }
+
+};///////////////////////////Private Functions END//////////////////////////////

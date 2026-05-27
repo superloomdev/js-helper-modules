@@ -116,9 +116,9 @@ describe('Group A - official AWS fixture compatibility', function () {
       assert.ok(instance.http_request, 'http_request was not populated');
       assert.ok(typeof instance.http_request.method === 'string', 'method missing');
       assert.ok(instance.http_request.headers, 'headers missing');
-      assert.ok(instance.http_request.get, 'get missing');
-      assert.ok(instance.http_request.post, 'post missing');
-      assert.ok(instance.http_request.path, 'path missing');
+      assert.ok(instance.http_request.query, 'query missing');
+      assert.ok(instance.http_request.body, 'body missing');
+      assert.ok(instance.http_request.params, 'params missing');
       assert.ok(instance.http_request.cookies, 'cookies missing');
       assert.ok(instance.http_response, 'http_response missing');
       assert.ok(typeof instance.gateway_response_callback === 'function');
@@ -201,37 +201,37 @@ describe('Group B - method, path, and query extraction', function () {
   it('populates path parameters from event.pathParameters', function () {
     const event = loadFixture('v2-path-params.json');
     const { instance } = pipe(event);
-    assert.equal(instance.http_request.path.user_id, '42');
-    assert.equal(instance.http_request.path.post_id, '99');
+    assert.equal(instance.http_request.params.user_id, '42');
+    assert.equal(instance.http_request.params.post_id, '99');
   });
 
   it('populates query string parameters from event.queryStringParameters', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance } = pipe(event);
-    assert.equal(instance.http_request.get.page, '3');
-    assert.equal(instance.http_request.get.sort, 'name');
+    assert.equal(instance.http_request.query.page, '3');
+    assert.equal(instance.http_request.query.sort, 'name');
   });
 
   it('combines multi-value query parameters with commas per v2 spec', function () {
     const event = loadFixture('v2-multi-value-query.json');
     const { instance } = pipe(event);
     // v2.0 spec combines repeated keys with commas - documented in the fixture
-    assert.equal(instance.http_request.get.tag, 'red,green,blue');
-    assert.equal(instance.http_request.get.active, 'true');
+    assert.equal(instance.http_request.query.tag, 'red,green,blue');
+    assert.equal(instance.http_request.query.active, 'true');
   });
 
-  it('returns empty path object when pathParameters is null', function () {
+  it('returns empty params object when pathParameters is null', function () {
     const event = loadFixture('v2-get-simple.json');
     event.pathParameters = null;
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.path, {});
+    assert.deepEqual(instance.http_request.params, {});
   });
 
-  it('returns empty get object when queryStringParameters is null', function () {
+  it('returns empty query object when queryStringParameters is null', function () {
     const event = loadFixture('v2-get-simple.json');
     event.queryStringParameters = null;
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.get, {});
+    assert.deepEqual(instance.http_request.query, {});
   });
 
 });
@@ -338,62 +338,62 @@ describe('Group D - body parsing', function () {
   it('parses JSON body when content-type is application/json', function () {
     const event = loadFixture('v2-post-json.json');
     const { instance } = pipe(event);
-    assert.equal(instance.http_request.post.email, 'alice@example.com');
-    assert.equal(instance.http_request.post.age, 30);
+    assert.equal(instance.http_request.body.email, 'alice@example.com');
+    assert.equal(instance.http_request.body.age, 30);
   });
 
   it('parses url-encoded body when content-type is application/x-www-form-urlencoded', function () {
     const event = loadFixture('v2-post-urlencoded.json');
     const { instance } = pipe(event);
-    assert.equal(instance.http_request.post.username, 'bob');
-    assert.equal(instance.http_request.post.password, 'secret');
-    assert.equal(instance.http_request.post.remember, '1');
+    assert.equal(instance.http_request.body.username, 'bob');
+    assert.equal(instance.http_request.body.password, 'secret');
+    assert.equal(instance.http_request.body.remember, '1');
   });
 
   it('decodes base64 body before JSON parsing', function () {
     const event = loadFixture('v2-post-base64.json');
     const { instance } = pipe(event);
-    assert.equal(instance.http_request.post.token, 'abc123');
-    assert.equal(instance.http_request.post.user, 'alice');
+    assert.equal(instance.http_request.body.token, 'abc123');
+    assert.equal(instance.http_request.body.user, 'alice');
   });
 
-  it('returns empty post object when body is missing', function () {
+  it('returns empty body object when body is missing', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
-  it('returns empty post object when body is empty string', function () {
+  it('returns empty body object when body is empty string', function () {
     const event = loadFixture('v2-empty-body.json');
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
-  it('returns empty post object on malformed JSON (no throw)', function () {
+  it('returns empty body object on malformed JSON (no throw)', function () {
     const event = loadFixture('v2-malformed-json-body.json');
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
-  it('returns empty post object on multipart/form-data (unsupported)', function () {
+  it('returns empty body object on multipart/form-data (unsupported)', function () {
     const event = loadFixture('v2-multipart-body.json');
     const { instance } = pipe(event);
     // Multipart is not supported by the adapter; body becomes empty post.
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
   it('handles unicode in JSON body', function () {
     const event = loadFixture('v2-unicode-body.json');
     const { instance } = pipe(event);
-    assert.equal(instance.http_request.post.greeting, 'hello 世界 🚀');
-    assert.equal(instance.http_request.post.name, '日本語');
+    assert.equal(instance.http_request.body.greeting, 'hello 世界 🚀');
+    assert.equal(instance.http_request.body.name, '日本語');
   });
 
-  it('returns empty post object when content-type is unknown', function () {
+  it('returns empty body object when content-type is unknown', function () {
     const event = loadFixture('v2-post-json.json');
     event.headers['content-type'] = 'application/xml';
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
   it('rejects JSON array body (only plain objects accepted)', function () {
@@ -402,14 +402,14 @@ describe('Group D - body parsing', function () {
     const event = loadFixture('v2-post-json.json');
     event.body = JSON.stringify([1, 2, 3]);
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
   it('rejects JSON primitive body (only plain objects accepted)', function () {
     const event = loadFixture('v2-post-json.json');
     event.body = '"plain-string-payload"';
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
 });
@@ -464,7 +464,7 @@ describe('Group E - response building (Lambda envelope)', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance, captured } = pipe(event);
 
-    gateway.returnHttpResponse(instance, 200, { 'X-Trace': 'abc' }, { ok: true });
+    gateway.returnHttpResponse(instance, 200, { 'X-Trace': 'abc' }, null, { ok: true });
 
     assert.equal(captured.called, true);
     assert.equal(captured.response.statusCode, 200);
@@ -490,10 +490,10 @@ describe('Group F - integration with gateway', function () {
     const { instance, captured } = pipe(event);
 
     const [err, args] = gateway.setArgsFromRequest(instance, [
-      { method: 'PATH',   name: 'user_id',       rename: 'user_id', required: true, is_number: true },
-      { method: 'PATH',   name: 'post_id',       rename: 'post_id', required: true, is_number: true },
-      { method: 'GET',    name: 'page',          rename: 'page',    required: true, is_number: true },
-      { method: 'HEADER', name: 'authorization', rename: 'auth',    required: true }
+      { method: 'GET',  in: 'params', name: 'user_id',       rename: 'user_id', required: true, is_number: true },
+      { method: 'GET',  in: 'params', name: 'post_id',       rename: 'post_id', required: true, is_number: true },
+      { method: 'GET',  in: 'query',  name: 'page',          rename: 'page',    required: true, is_number: true },
+      { method: 'GET',  in: 'header', name: 'authorization', rename: 'auth',    required: true }
     ]);
 
     assert.equal(err, null);
@@ -502,7 +502,7 @@ describe('Group F - integration with gateway', function () {
     assert.equal(args.page, 5);
     assert.equal(args.auth, 'Bearer xyz');
 
-    gateway.returnHttpResponse(instance, 200, null, args);
+    gateway.returnHttpResponse(instance, 200, null, null, args);
     assert.equal(captured.response.statusCode, 200);
     assert.deepEqual(JSON.parse(captured.response.body), {
       user_id: 42, post_id: 99, page: 5, auth: 'Bearer xyz'
@@ -514,13 +514,13 @@ describe('Group F - integration with gateway', function () {
     const { instance, captured } = pipe(event);
 
     const [err, args] = gateway.setArgsFromRequest(instance, [
-      { method: 'HEADER', name: 'authorization', rename: 'auth', required: true }
+      { method: 'GET', in: 'header', name: 'authorization', rename: 'auth', required: true }
     ]);
 
     assert.equal(err, null);
     assert.ok(args.auth.startsWith('Bearer '));
 
-    gateway.returnHttpResponse(instance, 200, null, { ok: true });
+    gateway.returnHttpResponse(instance, 200, null, null, { ok: true });
     assert.equal(captured.response.statusCode, 200);
   });
 
@@ -529,7 +529,7 @@ describe('Group F - integration with gateway', function () {
     const { instance, captured } = pipe(event);
 
     const [err, args] = gateway.setArgsFromRequest(instance, [
-      { method: 'HEADER', name: 'authorization', rename: 'auth', required: true }
+      { method: 'GET', in: 'header', name: 'authorization', rename: 'auth', required: true }
     ]);
 
     assert.equal(err, null);
@@ -549,12 +549,14 @@ describe('Group F - integration with gateway', function () {
     assert.equal(captured.response.headers['Location'], '/new-location');
   });
 
-  it('setCookie writes Set-Cookie into the response envelope headers', function () {
+  it('buildCookie writes Set-Cookie into the response envelope headers', function () {
     const event = loadFixture('v2-get-simple.json');
+    event.headers = event.headers || {};
+    event.headers['user-agent'] = 'Mozilla/5.0 Chrome/100.0';
     const { instance, captured } = pipe(event);
 
-    gateway.setCookie(instance, 'sid', 'session-xyz', 3600);
-    gateway.returnHttpResponse(instance, 200, null, { ok: true });
+    const cookies = gateway.buildCookie(null, 'sid', 'session-xyz', 3600);
+    gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
 
     assert.ok('Set-Cookie' in captured.response.headers);
     assert.ok(captured.response.headers['Set-Cookie'].includes('sid=session-xyz'));
@@ -637,9 +639,9 @@ describe('Group I - defensive edge cases', function () {
     const { instance } = pipe(event);
     assert.equal(instance.http_request.method, 'GET');
     assert.deepEqual(instance.http_request.headers, {});
-    assert.deepEqual(instance.http_request.get, {});
-    assert.deepEqual(instance.http_request.post, {});
-    assert.deepEqual(instance.http_request.path, {});
+    assert.deepEqual(instance.http_request.query, {});
+    assert.deepEqual(instance.http_request.body, {});
+    assert.deepEqual(instance.http_request.params, {});
     assert.deepEqual(instance.http_request.cookies, {});
   });
 
@@ -669,14 +671,14 @@ describe('Group I - defensive edge cases', function () {
     const event = loadFixture('v2-post-json.json');
     event.body = null;
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
   it('handles a base64 body that decodes to invalid JSON', function () {
     const event = loadFixture('v2-post-base64.json');
     event.body = Buffer.from('not-json-at-all').toString('base64');
     const { instance } = pipe(event);
-    assert.deepEqual(instance.http_request.post, {});
+    assert.deepEqual(instance.http_request.body, {});
   });
 
   it('isHttpInstance returns true after initialization', function () {

@@ -113,16 +113,16 @@ describe('initHttpRequestData', function () {
     const { gateway } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, {
       headers: { 'content-type': 'application/json' },
-      get: { page: '2' },
-      post: { name: 'Alice' },
-      path: { id: '42' },
+      query: { page: '2' },
+      body: { name: 'Alice' },
+      params: { id: '42' },
       method: 'POST'
     });
 
     assert.equal(instance.http_request.headers['content-type'], 'application/json');
-    assert.equal(instance.http_request.get.page, '2');
-    assert.equal(instance.http_request.post.name, 'Alice');
-    assert.equal(instance.http_request.path.id, '42');
+    assert.equal(instance.http_request.query.page, '2');
+    assert.equal(instance.http_request.body.name, 'Alice');
+    assert.equal(instance.http_request.params.id, '42');
     assert.equal(instance.http_request.method, 'POST');
   });
 
@@ -131,9 +131,9 @@ describe('initHttpRequestData', function () {
     const { instance } = initInstance(gateway, null);
 
     assert.deepEqual(instance.http_request.headers, {});
-    assert.deepEqual(instance.http_request.get, {});
-    assert.deepEqual(instance.http_request.post, {});
-    assert.deepEqual(instance.http_request.path, {});
+    assert.deepEqual(instance.http_request.query, {});
+    assert.deepEqual(instance.http_request.body, {});
+    assert.deepEqual(instance.http_request.params, {});
     assert.equal(instance.http_request.method, null);
   });
 
@@ -695,7 +695,7 @@ describe('parts/params - setArgsFromRequest', function () {
   function makeInstance (overrides) {
     return {
       http_request: Object.assign(
-        { headers: {}, get: {}, post: {}, path: {}, cookies: {}, method: 'GET' },
+        { headers: {}, query: {}, body: {}, params: {}, cookies: {}, method: 'GET' },
         overrides
       )
     };
@@ -707,8 +707,53 @@ describe('parts/params - setArgsFromRequest', function () {
     assert.deepEqual(args, {});
   });
 
-  it('extracts a GET param', function () {
-    const instance = makeInstance({ get: { page: '3' } });
+  it('extracts a query param using in key', function () {
+    const instance = makeInstance({ query: { page: '3' } });
+    const [err, args] = Params.setArgsFromRequest(instance, [
+      { method: 'GET', in: 'query', name: 'page', rename: 'page', required: true }
+    ]);
+    assert.equal(err, null);
+    assert.equal(args.page, '3');
+  });
+
+  it('extracts a body param using in key', function () {
+    const instance = makeInstance({ body: { email: 'a@b.com' } });
+    const [err, args] = Params.setArgsFromRequest(instance, [
+      { method: 'POST', in: 'body', name: 'email', rename: 'email', required: true }
+    ]);
+    assert.equal(err, null);
+    assert.equal(args.email, 'a@b.com');
+  });
+
+  it('extracts a header param using in key', function () {
+    const instance = makeInstance({ headers: { 'x-app-token': 'tok123' } });
+    const [err, args] = Params.setArgsFromRequest(instance, [
+      { method: 'GET', in: 'header', name: 'x-app-token', rename: 'app_token', required: true }
+    ]);
+    assert.equal(err, null);
+    assert.equal(args.app_token, 'tok123');
+  });
+
+  it('extracts a params (path) param using in key', function () {
+    const instance = makeInstance({ params: { id: '99' } });
+    const [err, args] = Params.setArgsFromRequest(instance, [
+      { method: 'GET', in: 'params', name: 'id', rename: 'record_id', required: true }
+    ]);
+    assert.equal(err, null);
+    assert.equal(args.record_id, '99');
+  });
+
+  it('extracts a fixed param using in key', function () {
+    const instance = makeInstance({});
+    const [err, args] = Params.setArgsFromRequest(instance, [
+      { method: 'POST', in: 'fixed', name: 'type', rename: 'type', value: 'user', required: true }
+    ]);
+    assert.equal(err, null);
+    assert.equal(args.type, 'user');
+  });
+
+  it('falls back to legacy method key when in is not provided', function () {
+    const instance = makeInstance({ query: { page: '3' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
       { method: 'GET', name: 'page', rename: 'page', required: true }
     ]);
@@ -716,46 +761,10 @@ describe('parts/params - setArgsFromRequest', function () {
     assert.equal(args.page, '3');
   });
 
-  it('extracts a POST param', function () {
-    const instance = makeInstance({ post: { email: 'a@b.com' } });
-    const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'POST', name: 'email', rename: 'email', required: true }
-    ]);
-    assert.equal(err, null);
-    assert.equal(args.email, 'a@b.com');
-  });
-
-  it('extracts a HEADER param', function () {
-    const instance = makeInstance({ headers: { 'x-app-token': 'tok123' } });
-    const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'HEADER', name: 'x-app-token', rename: 'app_token', required: true }
-    ]);
-    assert.equal(err, null);
-    assert.equal(args.app_token, 'tok123');
-  });
-
-  it('extracts a PATH param', function () {
-    const instance = makeInstance({ path: { id: '99' } });
-    const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'PATH', name: 'id', rename: 'record_id', required: true }
-    ]);
-    assert.equal(err, null);
-    assert.equal(args.record_id, '99');
-  });
-
-  it('extracts a FIXED param', function () {
-    const instance = makeInstance({});
-    const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'FIXED', name: 'type', rename: 'type', value: 'user', required: true }
-    ]);
-    assert.equal(err, null);
-    assert.equal(args.type, 'user');
-  });
-
   it('applies default value when optional param is absent', function () {
     const instance = makeInstance({});
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET', name: 'limit', rename: 'limit', required: false, default: 10 }
+      { method: 'GET', in: 'query', name: 'limit', rename: 'limit', required: false, default: 10 }
     ]);
     assert.equal(err, null);
     assert.equal(args.limit, 10);
@@ -764,16 +773,16 @@ describe('parts/params - setArgsFromRequest', function () {
   it('returns [null, false] when required param is missing', function () {
     const instance = makeInstance({});
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET', name: 'id', rename: 'id', required: true }
+      { method: 'GET', in: 'query', name: 'id', rename: 'id', required: true }
     ]);
     assert.equal(err, null);
     assert.equal(args, false);
   });
 
   it('typecasts string to number when is_number=true', function () {
-    const instance = makeInstance({ get: { count: '5' } });
+    const instance = makeInstance({ query: { count: '5' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET', name: 'count', rename: 'count', required: true, is_number: true }
+      { method: 'GET', in: 'query', name: 'count', rename: 'count', required: true, is_number: true }
     ]);
     assert.equal(err, null);
     assert.equal(typeof args.count, 'number');
@@ -781,46 +790,46 @@ describe('parts/params - setArgsFromRequest', function () {
   });
 
   it('typecasts to boolean when is_boolean=true', function () {
-    const instance = makeInstance({ get: { active: '1' } });
+    const instance = makeInstance({ query: { active: '1' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET', name: 'active', rename: 'active', required: true, is_boolean: true }
+      { method: 'GET', in: 'query', name: 'active', rename: 'active', required: true, is_boolean: true }
     ]);
     assert.equal(err, null);
     assert.equal(args.active, true);
   });
 
   it('parses JSON string when is_json=true', function () {
-    const instance = makeInstance({ post: { meta: '{"key":"val"}' } });
+    const instance = makeInstance({ body: { meta: '{"key":"val"}' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'POST', name: 'meta', rename: 'meta', required: true, is_json: true }
+      { method: 'POST', in: 'body', name: 'meta', rename: 'meta', required: true, is_json: true }
     ]);
     assert.equal(err, null);
     assert.deepEqual(args.meta, { key: 'val' });
   });
 
   it('returns [null, false] when is_json=true and value is invalid JSON and required', function () {
-    const instance = makeInstance({ post: { meta: 'not-json' } });
+    const instance = makeInstance({ body: { meta: 'not-json' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'POST', name: 'meta', rename: 'meta', required: true, is_json: true }
+      { method: 'POST', in: 'body', name: 'meta', rename: 'meta', required: true, is_json: true }
     ]);
     assert.equal(err, null);
     assert.equal(args, false);
   });
 
   it('trims whitespace and converts empty string to null', function () {
-    const instance = makeInstance({ get: { q: '   ' } });
+    const instance = makeInstance({ query: { q: '   ' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET', name: 'q', rename: 'q', required: false, trim: true, default: null }
+      { method: 'GET', in: 'query', name: 'q', rename: 'q', required: false, trim: true, default: null }
     ]);
     assert.equal(err, null);
     assert.equal(args.q, null);
   });
 
   it('returns [null, false] when validate_func fails', function () {
-    const instance = makeInstance({ get: { age: '-5' } });
+    const instance = makeInstance({ query: { age: '-5' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
       {
-        method: 'GET', name: 'age', rename: 'age', required: true, is_number: true,
+        method: 'GET', in: 'query', name: 'age', rename: 'age', required: true, is_number: true,
         validate_func: function (v) { return v > 0; }
       }
     ]);
@@ -830,10 +839,10 @@ describe('parts/params - setArgsFromRequest', function () {
 
   it('returns [err, false] when invalidate_func returns an error object', function () {
     const MY_ERR = { type: 'BAD_VALUE', message: 'too long' };
-    const instance = makeInstance({ get: { name: 'toolongname' } });
+    const instance = makeInstance({ query: { name: 'toolongname' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
       {
-        method: 'GET', name: 'name', rename: 'name', required: true,
+        method: 'GET', in: 'query', name: 'name', rename: 'name', required: true,
         invalidate_func: function (v) { return v.length > 8 ? MY_ERR : null; }
       }
     ]);
@@ -842,10 +851,10 @@ describe('parts/params - setArgsFromRequest', function () {
   });
 
   it('handles multiple params in sequence', function () {
-    const instance = makeInstance({ get: { a: '1', b: '2' } });
+    const instance = makeInstance({ query: { a: '1', b: '2' } });
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET', name: 'a', rename: 'a', required: true, is_number: true },
-      { method: 'GET', name: 'b', rename: 'b', required: true, is_number: true }
+      { method: 'GET', in: 'query', name: 'a', rename: 'a', required: true, is_number: true },
+      { method: 'GET', in: 'query', name: 'b', rename: 'b', required: true, is_number: true }
     ]);
     assert.equal(err, null);
     assert.equal(args.a, 1);
@@ -902,7 +911,7 @@ describe('parts/params - auth header extraction', function () {
   function makeInstance (overrides) {
     return {
       http_request: Object.assign(
-        { headers: {}, get: {}, post: {}, path: {}, cookies: {}, method: 'GET' },
+        { headers: {}, query: {}, body: {}, params: {}, cookies: {}, method: 'GET' },
         overrides
       )
     };
@@ -1030,9 +1039,9 @@ describe('parts/params - mixed source extraction', function () {
     return {
       http_request: {
         headers: { 'authorization': 'Bearer abc123', 'x-api-key': 'k1' },
-        get    : { page: '2', sort: 'name' },
-        post   : { email: 'a@b.com', age: '30' },
-        path   : { user_id: '42' },
+        query  : { page: '2', sort: 'name' },
+        body   : { email: 'a@b.com', age: '30' },
+        params : { user_id: '42' },
         cookies: { session: 'sess123' },
         method : 'POST'
       }
@@ -1042,14 +1051,14 @@ describe('parts/params - mixed source extraction', function () {
   it('extracts from GET + POST + HEADER + PATH + FIXED in a single call', function () {
     const instance = makeFullInstance();
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'PATH',   name: 'user_id',       rename: 'user_id', required: true, is_number: true },
-      { method: 'HEADER', name: 'authorization', rename: 'auth',    required: true },
-      { method: 'HEADER', name: 'x-api-key',     rename: 'api_key', required: true },
-      { method: 'GET',    name: 'page',          rename: 'page',    required: true, is_number: true },
-      { method: 'GET',    name: 'sort',          rename: 'sort',    required: false, default: 'created_at' },
-      { method: 'POST',   name: 'email',         rename: 'email',   required: true },
-      { method: 'POST',   name: 'age',           rename: 'age',     required: true, is_number: true },
-      { method: 'FIXED',  name: 'source',        rename: 'source',  required: true, value: 'api' }
+      { method: 'GET',  in: 'params', name: 'user_id',       rename: 'user_id', required: true, is_number: true },
+      { method: 'GET',  in: 'header', name: 'authorization', rename: 'auth',    required: true },
+      { method: 'GET',  in: 'header', name: 'x-api-key',     rename: 'api_key', required: true },
+      { method: 'GET',  in: 'query',  name: 'page',          rename: 'page',    required: true, is_number: true },
+      { method: 'GET',  in: 'query',  name: 'sort',          rename: 'sort',    required: false, default: 'created_at' },
+      { method: 'POST', in: 'body',   name: 'email',         rename: 'email',   required: true },
+      { method: 'POST', in: 'body',   name: 'age',           rename: 'age',     required: true, is_number: true },
+      { method: 'POST', in: 'fixed',  name: 'source',        rename: 'source',  required: true, value: 'api' }
     ]);
     assert.equal(err, null);
     assert.equal(args.user_id, 42);
@@ -1064,13 +1073,13 @@ describe('parts/params - mixed source extraction', function () {
 
   it('aborts at the first missing required param across mixed sources', function () {
     const instance = makeFullInstance();
-    delete instance.http_request.post.email;
+    delete instance.http_request.body.email;
 
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'PATH',   name: 'user_id',       rename: 'user_id', required: true, is_number: true },
-      { method: 'HEADER', name: 'authorization', rename: 'auth',    required: true },
-      { method: 'POST',   name: 'email',         rename: 'email',   required: true },
-      { method: 'GET',    name: 'page',          rename: 'page',    required: true, is_number: true }
+      { method: 'GET',  in: 'params', name: 'user_id',       rename: 'user_id', required: true, is_number: true },
+      { method: 'GET',  in: 'header', name: 'authorization', rename: 'auth',    required: true },
+      { method: 'POST', in: 'body',   name: 'email',         rename: 'email',   required: true },
+      { method: 'GET',  in: 'query',  name: 'page',          rename: 'page',    required: true, is_number: true }
     ]);
     assert.equal(err, null);
     assert.equal(args, false);
@@ -1083,17 +1092,17 @@ describe('parts/params - mixed source extraction', function () {
     const instance = {
       http_request: {
         headers: { 'id': 'header-id' },
-        get    : { id: 'get-id' },
-        post   : {},
-        path   : { id: 'path-id' },
+        query  : { id: 'get-id' },
+        body   : {},
+        params : { id: 'path-id' },
         cookies: {},
         method : 'GET'
       }
     };
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'GET',    name: 'id', rename: 'id_from_get',    required: true },
-      { method: 'HEADER', name: 'id', rename: 'id_from_header', required: true },
-      { method: 'PATH',   name: 'id', rename: 'id_from_path',   required: true }
+      { method: 'GET',  in: 'query',  name: 'id', rename: 'id_from_get',    required: true },
+      { method: 'GET',  in: 'header', name: 'id', rename: 'id_from_header', required: true },
+      { method: 'GET',  in: 'params', name: 'id', rename: 'id_from_path',   required: true }
     ]);
     assert.equal(err, null);
     assert.equal(args.id_from_get,    'get-id');
@@ -1104,15 +1113,15 @@ describe('parts/params - mixed source extraction', function () {
   it('mixed sources with validators and invalidators short-circuit correctly', function () {
     const MY_ERR = { type: 'AGE_TOO_LOW', message: 'must be 18+' };
     const instance = makeFullInstance();
-    instance.http_request.post.age = '15';
+    instance.http_request.body.age = '15';
 
     const [err, args] = Params.setArgsFromRequest(instance, [
-      { method: 'PATH', name: 'user_id', rename: 'user_id', required: true, is_number: true },
+      { method: 'GET', in: 'params', name: 'user_id', rename: 'user_id', required: true, is_number: true },
       {
-        method: 'POST', name: 'age', rename: 'age', required: true, is_number: true,
+        method: 'POST', in: 'body', name: 'age', rename: 'age', required: true, is_number: true,
         invalidate_func: function (v) { return v < 18 ? MY_ERR : null; }
       },
-      { method: 'GET', name: 'page', rename: 'page', required: true, is_number: true }
+      { method: 'GET', in: 'query', name: 'page', rename: 'page', required: true, is_number: true }
     ]);
     assert.deepEqual(err, MY_ERR);
     assert.equal(args, false);
@@ -1266,6 +1275,130 @@ describe('parts/cookies - parse edge cases', function () {
   it('returns empty object for non-string header', function () {
     const out = Cookies.parse(123);
     assert.equal(Object.keys(out).length, 0);
+  });
+
+});
+
+
+// ============================================================================
+// instance.http_request.url
+// ============================================================================
+
+describe('instance.http_request.url', function () {
+
+  it('populates url from raw_request', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      url: '/users/42?sort=name'
+    });
+    assert.equal(instance.http_request.url, '/users/42?sort=name');
+  });
+
+  it('defaults to empty string when url is absent', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {});
+    assert.equal(instance.http_request.url, '');
+  });
+
+});
+
+
+// ============================================================================
+// getBearerToken
+// ============================================================================
+
+describe('getBearerToken', function () {
+
+  it('extracts the token from a valid Bearer header', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      headers: { 'authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.payload.sig' }
+    });
+    assert.equal(gateway.getBearerToken(instance), 'eyJhbGciOiJIUzI1NiJ9.payload.sig');
+  });
+
+  it('returns null when Authorization header is absent', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, { headers: {} });
+    assert.equal(gateway.getBearerToken(instance), null);
+  });
+
+  it('returns null when Authorization header uses Basic scheme', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const cred = Buffer.from('user:pass').toString('base64');
+    const { instance } = initInstance(gateway, {
+      headers: { 'authorization': 'Basic ' + cred }
+    });
+    assert.equal(gateway.getBearerToken(instance), null);
+  });
+
+  it('handles case-insensitive Bearer prefix', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      headers: { 'authorization': 'BEARER mytoken123' }
+    });
+    assert.equal(gateway.getBearerToken(instance), 'mytoken123');
+  });
+
+  it('returns null when Bearer prefix is present but token is empty', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      headers: { 'authorization': 'Bearer ' }
+    });
+    assert.equal(gateway.getBearerToken(instance), null);
+  });
+
+  it('returns null when header value is too short to contain a token', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      headers: { 'authorization': 'Bear' }
+    });
+    assert.equal(gateway.getBearerToken(instance), null);
+  });
+
+});
+
+
+// ============================================================================
+// isPreflightRequest
+// ============================================================================
+
+describe('isPreflightRequest', function () {
+
+  it('returns true for OPTIONS + Origin', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      method: 'OPTIONS',
+      headers: { 'origin': 'https://app.example.com' }
+    });
+    assert.equal(gateway.isPreflightRequest(instance), true);
+  });
+
+  it('returns false for GET + Origin', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      method: 'GET',
+      headers: { 'origin': 'https://app.example.com' }
+    });
+    assert.equal(gateway.isPreflightRequest(instance), false);
+  });
+
+  it('returns false for OPTIONS without Origin', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      method: 'OPTIONS',
+      headers: {}
+    });
+    assert.equal(gateway.isPreflightRequest(instance), false);
+  });
+
+  it('returns false for POST without Origin', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {
+      method: 'POST',
+      headers: {}
+    });
+    assert.equal(gateway.isPreflightRequest(instance), false);
   });
 
 });

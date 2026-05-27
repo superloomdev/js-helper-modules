@@ -190,10 +190,11 @@ const adapter = {
   Populated fields:
     instance.http_request.headers  {Object} - Lowercase header key -> value map
     instance.http_request.cookies  {Object} - Parsed cookies map
-    instance.http_request.get      {Object} - Query-string parameters
-    instance.http_request.post     {Object} - Parsed body parameters
-    instance.http_request.path     {Object} - Path parameters
+    instance.http_request.query    {Object} - Query-string parameters
+    instance.http_request.body     {Object} - Parsed body parameters
+    instance.http_request.params   {Object} - Path parameters
     instance.http_request.method   {String} - HTTP method ('GET', 'POST', ...)
+    instance.http_request.url      {String} - Request URL path with query string
     instance.http_response         {Object} - { cookies: {} }
     instance.gateway_response_callback {Function} - Wraps the Lambda callback
 
@@ -228,13 +229,19 @@ const adapter = {
 
     const post_params = parseBody(event, headers);
 
+    // URL: rawPath + rawQueryString (v2 payload)
+    const raw_path = event.rawPath || '';
+    const raw_qs = event.rawQueryString || '';
+    const url = raw_qs ? raw_path + '?' + raw_qs : raw_path;
+
     instance.http_request = {
       headers: headers,
       cookies: cookies,
-      get    : get_params,
-      post   : post_params,
-      path   : path_params,
-      method : method
+      query  : get_params,
+      body   : post_params,
+      params : path_params,
+      method : method,
+      url    : url
     };
 
     instance.http_response = {

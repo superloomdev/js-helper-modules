@@ -66,12 +66,12 @@ describe('Group A - request normalization', function () {
       // so we register two explicit routes instead.
       const echo = function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, {
+        gateway.returnHttpResponse(instance, 200, null, null, {
           method : instance.http_request.method,
           headers: instance.http_request.headers,
-          get    : instance.http_request.get,
-          post   : instance.http_request.post,
-          path   : instance.http_request.path
+          get    : instance.http_request.query,
+          post   : instance.http_request.body,
+          path   : instance.http_request.params
         });
       };
 
@@ -164,7 +164,7 @@ describe('Group B - authentication patterns', function () {
       app.get('/protected', function (req, res) {
         const instance = buildInstance(req, res);
         const [err, args] = gateway.setArgsFromRequest(instance, [
-          { method: 'HEADER', name: 'authorization', rename: 'auth', required: true }
+          { method: 'GET', in: 'header', name: 'authorization', rename: 'auth', required: true }
         ]);
 
         if (err || args === false) {
@@ -172,14 +172,14 @@ describe('Group B - authentication patterns', function () {
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, { auth: args.auth });
+        gateway.returnHttpResponse(instance, 200, null, null, { auth: args.auth });
       });
 
       // API-key protected route
       app.get('/api', function (req, res) {
         const instance = buildInstance(req, res);
         const [err, args] = gateway.setArgsFromRequest(instance, [
-          { method: 'HEADER', name: 'x-api-key', rename: 'key', required: true }
+          { method: 'GET', in: 'header', name: 'x-api-key', rename: 'key', required: true }
         ]);
 
         if (err || args === false) {
@@ -187,7 +187,7 @@ describe('Group B - authentication patterns', function () {
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, { key: args.key });
+        gateway.returnHttpResponse(instance, 200, null, null, { key: args.key });
       });
 
     });
@@ -248,21 +248,21 @@ describe('Group C - cookies', function () {
       // Reads cookies sent by the client and echoes them back
       app.get('/cookies/read', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, { cookies: instance.http_request.cookies });
+        gateway.returnHttpResponse(instance, 200, null, null, { cookies: instance.http_request.cookies });
       });
 
-      // Sets a single cookie
+      // Sets a single cookie (SameSite=None so compatible/incompatible UA tests work)
       app.get('/cookies/set', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.setCookie(instance, 'sid', 'session-value-123', 3600);
-        gateway.returnHttpResponse(instance, 200, null, { ok: true });
+        const cookies = gateway.buildCookie(null, 'sid', 'session-value-123', 3600, { sameSite: 'none' });
+        gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
       });
 
       // Sets a cookie value that requires URL-encoding
       app.get('/cookies/set-encoded', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.setCookie(instance, 'tags', 'red,green;blue', 3600);
-        gateway.returnHttpResponse(instance, 200, null, { ok: true });
+        const cookies = gateway.buildCookie(null, 'tags', 'red,green;blue', 3600, { sameSite: 'none' });
+        gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
       });
 
     });
@@ -362,7 +362,7 @@ describe('Group C2 - cookies without cookie-parser middleware', function () {
 
       app.get('/cookies/read', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, { cookies: instance.http_request.cookies });
+        gateway.returnHttpResponse(instance, 200, null, null, { cookies: instance.http_request.cookies });
       });
 
     });
@@ -399,12 +399,12 @@ describe('Group D - response building', function () {
 
       app.get('/resp/string', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, { 'Content-Type': 'text/plain' }, 'plain-text-body');
+        gateway.returnHttpResponse(instance, 200, { 'Content-Type': 'text/plain' }, null, 'plain-text-body');
       });
 
       app.get('/resp/object', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, { ok: true, n: 7 });
+        gateway.returnHttpResponse(instance, 200, null, null, { ok: true, n: 7 });
       });
 
       app.get('/resp/buffer', function (req, res) {
@@ -413,6 +413,7 @@ describe('Group D - response building', function () {
           instance,
           200,
           { 'Content-Type': 'application/octet-stream' },
+          null,
           Buffer.from('binary-data')
         );
       });
@@ -439,7 +440,7 @@ describe('Group D - response building', function () {
 
       app.get('/resp/custom-headers', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, { 'X-Trace-Id': 'trace-abc' }, { ok: true });
+        gateway.returnHttpResponse(instance, 200, { 'X-Trace-Id': 'trace-abc' }, null, { ok: true });
       });
 
     });
@@ -511,12 +512,12 @@ describe('Group E - parameter extraction full pipeline', function () {
       app.post('/users/:user_id', function (req, res) {
         const instance = buildInstance(req, res);
         const [err, args] = gateway.setArgsFromRequest(instance, [
-          { method: 'PATH',   name: 'user_id',       rename: 'user_id', required: true, is_number: true },
-          { method: 'HEADER', name: 'authorization', rename: 'auth',    required: true },
-          { method: 'GET',    name: 'page',          rename: 'page',    required: true, is_number: true },
-          { method: 'GET',    name: 'sort',          rename: 'sort',    required: false, default: 'created' },
-          { method: 'POST',   name: 'email',         rename: 'email',   required: true },
-          { method: 'POST',   name: 'active',        rename: 'active',  required: false, is_boolean: true, default: false }
+          { method: 'GET',  in: 'params', name: 'user_id',       rename: 'user_id', required: true, is_number: true },
+          { method: 'GET',  in: 'header', name: 'authorization', rename: 'auth',    required: true },
+          { method: 'GET',  in: 'query',  name: 'page',          rename: 'page',    required: true, is_number: true },
+          { method: 'GET',  in: 'query',  name: 'sort',          rename: 'sort',    required: false, default: 'created' },
+          { method: 'POST', in: 'body',   name: 'email',         rename: 'email',   required: true },
+          { method: 'POST', in: 'body',   name: 'active',        rename: 'active',  required: false, is_boolean: true, default: false }
         ]);
 
         if (err || args === false) {
@@ -524,7 +525,7 @@ describe('Group E - parameter extraction full pipeline', function () {
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, args);
+        gateway.returnHttpResponse(instance, 200, null, null, args);
       });
 
       // Validator endpoint
@@ -532,7 +533,7 @@ describe('Group E - parameter extraction full pipeline', function () {
         const instance = buildInstance(req, res);
         const [err, args] = gateway.setArgsFromRequest(instance, [
           {
-            method: 'GET', name: 'age', rename: 'age', required: true, is_number: true,
+            method: 'GET', in: 'query', name: 'age', rename: 'age', required: true, is_number: true,
             validate_func: function (v) { return v >= 18 && v <= 120; }
           }
         ]);
@@ -542,14 +543,14 @@ describe('Group E - parameter extraction full pipeline', function () {
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, { age: args.age });
+        gateway.returnHttpResponse(instance, 200, null, null, { age: args.age });
       });
 
       // JSON typecast endpoint (reads JSON from query string)
       app.get('/json-cast', function (req, res) {
         const instance = buildInstance(req, res);
         const [err, args] = gateway.setArgsFromRequest(instance, [
-          { method: 'GET', name: 'meta', rename: 'meta', required: true, is_json: true }
+          { method: 'GET', in: 'query', name: 'meta', rename: 'meta', required: true, is_json: true }
         ]);
 
         if (err || args === false) {
@@ -557,7 +558,7 @@ describe('Group E - parameter extraction full pipeline', function () {
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, { meta: args.meta });
+        gateway.returnHttpResponse(instance, 200, null, null, { meta: args.meta });
       });
 
     });
@@ -660,9 +661,9 @@ describe('Group F - edge cases', function () {
 
       app.all('/echo', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, {
-          get : instance.http_request.get,
-          post: instance.http_request.post,
+        gateway.returnHttpResponse(instance, 200, null, null, {
+          get : instance.http_request.query,
+          post: instance.http_request.body,
           ip  : gateway.getRequestIPAddress(instance),
           ua  : gateway.getRequestUserAgent(instance),
           org : gateway.getRequestOrigin(instance),
@@ -672,11 +673,11 @@ describe('Group F - edge cases', function () {
 
       app.post('/large', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, {
-          length: JSON.stringify(instance.http_request.post).length,
-          first : instance.http_request.post.items ? instance.http_request.post.items[0] : null,
-          last  : instance.http_request.post.items
-            ? instance.http_request.post.items[instance.http_request.post.items.length - 1]
+        gateway.returnHttpResponse(instance, 200, null, null, {
+          length: JSON.stringify(instance.http_request.body).length,
+          first : instance.http_request.body.items ? instance.http_request.body.items[0] : null,
+          last  : instance.http_request.body.items
+            ? instance.http_request.body.items[instance.http_request.body.items.length - 1]
             : null
         });
       });
@@ -773,9 +774,9 @@ describe('Group G - graceful error handling', function () {
       // the test runner.
       app.post('/echo-post', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, {
-          post: instance.http_request.post,
-          type: typeof instance.http_request.post
+        gateway.returnHttpResponse(instance, 200, null, null, {
+          post: instance.http_request.body,
+          type: typeof instance.http_request.body
         });
       });
 

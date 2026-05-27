@@ -50,10 +50,13 @@ Param descriptor shape:
 
 ```javascript
 {
-  method: 'GET' | 'POST' | 'PATH' | 'HEADER' | 'FIXED',
+  in: 'query' | 'body' | 'header' | 'params' | 'fixed',
+                               // source location (preferred)
+  method: 'GET' | 'POST' | 'HEADER' | 'PATH' | 'FIXED',
+                               // HTTP verb context; source fallback when `in` absent
   name: String,              // key in source location
   rename: String,            // output key name in returned args
-  value: *,                  // literal value (FIXED only)
+  value: *,                  // literal value (fixed only)
   required: Boolean,         // [null, false] if absent
   default: *,                // used when absent and not required
   is_number: Boolean,        // typecast to Number
@@ -61,7 +64,7 @@ Param descriptor shape:
   is_json: Boolean,          // JSON.parse
   trim: Boolean,             // trim whitespace, empty string → null
   json_func: Function,       // transform applied after JSON.parse
-  sanatize_func: Function,   // sanitization function
+  sanitize_func: Function,   // sanitization function
   validate_func: Function,   // must return truthy; failure → [null, false]
   invalidate_func: Function  // must return falsy; truthy return → [err, false]
 }
@@ -124,10 +127,12 @@ const cookies = Gateway.buildCookie(null, 'csrf', token, 3600, { httpOnly: false
 ### Request Accessors
 
 ```javascript
-Gateway.getRequestIPAddress(instance);  // String — first IP from x-forwarded-for, or ''
-Gateway.getRequestUserAgent(instance);  // String — User-Agent header, or ''
-Gateway.getRequestOrigin(instance);     // String — Origin header, or ''
+Gateway.getRequestIPAddress(instance);   // String — first IP from x-forwarded-for, or ''
+Gateway.getRequestUserAgent(instance);   // String — User-Agent header, or ''
+Gateway.getRequestOrigin(instance);      // String — Origin header, or ''
 Gateway.getRequestCountryCode(instance); // String | null — from CDN header if available
+Gateway.getBearerToken(instance);        // String | null — token from Authorization: Bearer <token>
+Gateway.isPreflightRequest(instance);    // Boolean — true if OPTIONS + Origin header present
 ```
 
 ### Utilities
@@ -148,10 +153,11 @@ Gateway.getUrlParts(url);
 ```javascript
 instance.http_request = {
   headers : { /* lowercase header keys */ },
-  get     : { /* query string params */ },
-  post    : { /* JSON or form-urlencoded body fields */ },
-  path    : { /* URL path params */ },
+  query   : { /* query string params */ },
+  body    : { /* JSON or form-urlencoded body fields */ },
+  params  : { /* URL path params */ },
   method  : 'GET' | 'POST' | ...,
+  url     : '/path?query=string',
   cookies : { /* parsed Cookie header — read inbound cookies from here */ }
 };
 
@@ -195,7 +201,7 @@ adapter.getHttpRequestCountryCode(instance);
 
 ## Constraints
 
-- **Multipart not supported.** POST bodies must be `application/json` or `application/x-www-form-urlencoded`. Multipart results in empty `instance.http_request.post`.
+- **Multipart not supported.** POST bodies must be `application/json` or `application/x-www-form-urlencoded`. Multipart results in empty `instance.http_request.body`.
 - **Cookies are return values, not side effects.** Never write `Set-Cookie` headers manually; always use `buildCookie` + `returnHttpResponse`.
 - **No module below the gateway serializes cookies.** Descriptors flow up the call chain; serialization happens only at the gateway boundary.
 
@@ -217,7 +223,8 @@ adapter.getHttpRequestCountryCode(instance);
 cd _test && npm install && npm test
 ```
 
-In-process stub adapter — no external services required. 116 tests covering: loader
+In-process stub adapter — no external services required. 129 tests covering: loader
 validation, all public methods, `buildCookie` (fresh/accumulate/override/clear/immutability),
 `returnHttpResponse` with cookies (defaults, overrides, SameSite=None UA guard),
-param extraction (all sources, typecasts, validators), parts internals.
+param extraction (all sources via `in` key, legacy `method` fallback, typecasts, validators),
+`getBearerToken`, `isPreflightRequest`, `url` field, parts internals.
