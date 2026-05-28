@@ -161,8 +161,9 @@ instance.http_request = {
   cookies : { /* parsed Cookie header — read inbound cookies from here */ }
 };
 
-instance.http_response            = {};
-instance.gateway_response_callback = Function;
+instance._http_gateway = {
+  response_handler: Function
+};
 ```
 
 ---
@@ -170,13 +171,13 @@ instance.gateway_response_callback = Function;
 ## Adapter Contract (for adapter implementers)
 
 ```javascript
-adapter.loadHttpDataToInstance(instance, raw_request, raw_context, response_callback);
-// Populates instance.http_request, http_response, gateway_response_callback
+adapter.extractRequest(raw_request, raw_context, response_callback);
+// Returns: { headers, cookies, query, body, params, method, url, response_handler }
 
-adapter.buildHttpResponseObject(status, headers, body);
+adapter.buildResponseEnvelope(status, headers, body);
 // Returns: runtime-specific response envelope
 
-adapter.getHttpRequestCountryCode(instance);
+adapter.getCountryCode(headers);
 // Returns: String | null
 ```
 

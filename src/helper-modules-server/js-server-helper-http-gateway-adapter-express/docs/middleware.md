@@ -16,7 +16,7 @@ The Express adapter reads `req.body`, `req.cookies`, and `req.query` directly. I
 app.use(express.json());
 ```
 
-Without this, `instance.http_request.post` is `{}` for `application/json` requests. Note that `express.json()` rejects malformed JSON with a **400 response before the route handler runs** — your application code never sees the broken payload. To translate that into a Superloom-style response envelope, mount an error handler:
+Without this, `instance.http_request.body` is `{}` for `application/json` requests. Note that `express.json()` rejects malformed JSON with a **400 response before the route handler runs** — your application code never sees the broken payload. To translate that into a Superloom-style response envelope, mount an error handler:
 
 ```javascript
 app.use(function (err, req, res, next) {
@@ -34,7 +34,7 @@ app.use(function (err, req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 ```
 
-Without this, `application/x-www-form-urlencoded` requests produce empty `post`.
+Without this, `application/x-www-form-urlencoded` requests produce empty `body`.
 
 ---
 
@@ -57,7 +57,7 @@ Express does **not** parse `text/plain` by default. If your application accepts 
 app.use(express.text());
 ```
 
-The adapter will still expose `req.body` as a string in `instance.http_request.post` — note that `setArgsFromRequest` expects an object, so plain-text bodies do not fit the standard `POST` extraction pattern. Read the body directly from `req.body` in this case.
+The adapter will still expose `req.body` as a string in `instance.http_request.body` — note that `setArgsFromRequest` expects an object, so plain-text bodies do not fit the standard `POST` extraction pattern. Read the body directly from `req.body` in this case.
 
 ---
 
@@ -74,7 +74,7 @@ const upload = multer({ dest: 'uploads/' });
 app.post('/upload', upload.single('file'), function (req, res) {
   const instance = Lib.Instance.initialize();
   Gateway.initHttpRequestData(instance, req, null, res);
-  // req.file is available alongside instance.http_request.post
+  // req.file is available alongside instance.http_request.body
 });
 ```
 

@@ -162,14 +162,15 @@ After calling `initHttpRequestData`, the instance contains:
 ```javascript
 instance.http_request = {
   headers: { /* lowercase header names */ },
-  get: { /* query parameters */ },
-  post: { /* POST body fields (JSON or form-urlencoded) */ },
-  path: { /* URL path parameters */ },
+  query: { /* query parameters */ },
+  body: { /* POST body fields (JSON or form-urlencoded) */ },
+  params: { /* URL path parameters */ },
   method: 'GET' | 'POST' | ...,
+  url: '/path?query=string',
   cookies: { /* parsed Cookie header */ }
 };
 
-instance.http_response = {};
-
-instance.gateway_response_callback = Function;
+instance._http_gateway = {
+  response_handler: Function
+};
 ```

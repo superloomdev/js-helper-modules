@@ -21,7 +21,7 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 
-const { Lib, gateway } = require('./loader')();
+const { Lib, httpGateway } = require('./loader')();
 const { startTestServer, startBareTestServer, makeRequest } = require('./server-helper');
 
 
@@ -44,7 +44,7 @@ Used by route handlers inside each describe's app setup.
 function buildInstance (req, res) {
 
   const instance = Lib.Instance.initialize();
-  gateway.initHttpRequestData(instance, req, null, res);
+  httpGateway.initHttpRequestData(instance, req, null, res);
   return instance;
 
 }
@@ -66,7 +66,7 @@ describe('Group A - request normalization', function () {
       // so we register two explicit routes instead.
       const echo = function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, {
+        httpGateway.returnHttpResponse(instance, 200, null, null, {
           method : instance.http_request.method,
           headers: instance.http_request.headers,
           get    : instance.http_request.query,
@@ -163,31 +163,31 @@ describe('Group B - authentication patterns', function () {
       // Protected route - reads the Authorization header through the gateway
       app.get('/protected', function (req, res) {
         const instance = buildInstance(req, res);
-        const [err, args] = gateway.setArgsFromRequest(instance, [
+        const [err, args] = httpGateway.setArgsFromRequest(instance, [
           { method: 'GET', in: 'header', name: 'authorization', rename: 'auth', required: true }
         ]);
 
         if (err || args === false) {
-          gateway.returnHttpStatus(instance, 'unauthorized');
+          httpGateway.returnHttpStatus(instance, 'unauthorized');
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, null, { auth: args.auth });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { auth: args.auth });
       });
 
       // API-key protected route
       app.get('/api', function (req, res) {
         const instance = buildInstance(req, res);
-        const [err, args] = gateway.setArgsFromRequest(instance, [
+        const [err, args] = httpGateway.setArgsFromRequest(instance, [
           { method: 'GET', in: 'header', name: 'x-api-key', rename: 'key', required: true }
         ]);
 
         if (err || args === false) {
-          gateway.returnHttpStatus(instance, 'unauthorized');
+          httpGateway.returnHttpStatus(instance, 'unauthorized');
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, null, { key: args.key });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { key: args.key });
       });
 
     });
@@ -248,21 +248,21 @@ describe('Group C - cookies', function () {
       // Reads cookies sent by the client and echoes them back
       app.get('/cookies/read', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, { cookies: instance.http_request.cookies });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { cookies: instance.http_request.cookies });
       });
 
       // Sets a single cookie (SameSite=None so compatible/incompatible UA tests work)
       app.get('/cookies/set', function (req, res) {
         const instance = buildInstance(req, res);
-        const cookies = gateway.buildCookie(null, 'sid', 'session-value-123', 3600, { sameSite: 'none' });
-        gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
+        const cookies = httpGateway.buildCookie(null, 'sid', 'session-value-123', 3600, { sameSite: 'none' });
+        httpGateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
       });
 
       // Sets a cookie value that requires URL-encoding
       app.get('/cookies/set-encoded', function (req, res) {
         const instance = buildInstance(req, res);
-        const cookies = gateway.buildCookie(null, 'tags', 'red,green;blue', 3600, { sameSite: 'none' });
-        gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
+        const cookies = httpGateway.buildCookie(null, 'tags', 'red,green;blue', 3600, { sameSite: 'none' });
+        httpGateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
       });
 
     });
@@ -362,7 +362,7 @@ describe('Group C2 - cookies without cookie-parser middleware', function () {
 
       app.get('/cookies/read', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, { cookies: instance.http_request.cookies });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { cookies: instance.http_request.cookies });
       });
 
     });
@@ -399,17 +399,17 @@ describe('Group D - response building', function () {
 
       app.get('/resp/string', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, { 'Content-Type': 'text/plain' }, null, 'plain-text-body');
+        httpGateway.returnHttpResponse(instance, 200, { 'Content-Type': 'text/plain' }, null, 'plain-text-body');
       });
 
       app.get('/resp/object', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, { ok: true, n: 7 });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { ok: true, n: 7 });
       });
 
       app.get('/resp/buffer', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(
+        httpGateway.returnHttpResponse(
           instance,
           200,
           { 'Content-Type': 'application/octet-stream' },
@@ -420,27 +420,27 @@ describe('Group D - response building', function () {
 
       app.get('/resp/304', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpStatus(instance, 'not_modified');
+        httpGateway.returnHttpStatus(instance, 'not_modified');
       });
 
       app.get('/resp/400', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpStatus(instance, 'bad_request');
+        httpGateway.returnHttpStatus(instance, 'bad_request');
       });
 
       app.get('/resp/redirect', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpRedirect(instance, '/new-location');
+        httpGateway.returnHttpRedirect(instance, '/new-location');
       });
 
       app.get('/resp/redirect404', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpRedirect404(instance);
+        httpGateway.returnHttpRedirect404(instance);
       });
 
       app.get('/resp/custom-headers', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, { 'X-Trace-Id': 'trace-abc' }, null, { ok: true });
+        httpGateway.returnHttpResponse(instance, 200, { 'X-Trace-Id': 'trace-abc' }, null, { ok: true });
       });
 
     });
@@ -511,7 +511,7 @@ describe('Group E - parameter extraction full pipeline', function () {
       // Mixed-source endpoint: extracts PATH + GET + POST + HEADER together
       app.post('/users/:user_id', function (req, res) {
         const instance = buildInstance(req, res);
-        const [err, args] = gateway.setArgsFromRequest(instance, [
+        const [err, args] = httpGateway.setArgsFromRequest(instance, [
           { method: 'GET',  in: 'params', name: 'user_id',       rename: 'user_id', required: true, is_number: true },
           { method: 'GET',  in: 'header', name: 'authorization', rename: 'auth',    required: true },
           { method: 'GET',  in: 'query',  name: 'page',          rename: 'page',    required: true, is_number: true },
@@ -521,17 +521,17 @@ describe('Group E - parameter extraction full pipeline', function () {
         ]);
 
         if (err || args === false) {
-          gateway.returnHttpStatus(instance, 'bad_request');
+          httpGateway.returnHttpStatus(instance, 'bad_request');
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, null, args);
+        httpGateway.returnHttpResponse(instance, 200, null, null, args);
       });
 
       // Validator endpoint
       app.get('/age-check', function (req, res) {
         const instance = buildInstance(req, res);
-        const [err, args] = gateway.setArgsFromRequest(instance, [
+        const [err, args] = httpGateway.setArgsFromRequest(instance, [
           {
             method: 'GET', in: 'query', name: 'age', rename: 'age', required: true, is_number: true,
             validate_func: function (v) { return v >= 18 && v <= 120; }
@@ -539,26 +539,26 @@ describe('Group E - parameter extraction full pipeline', function () {
         ]);
 
         if (err || args === false) {
-          gateway.returnHttpStatus(instance, 'bad_request');
+          httpGateway.returnHttpStatus(instance, 'bad_request');
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, null, { age: args.age });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { age: args.age });
       });
 
       // JSON typecast endpoint (reads JSON from query string)
       app.get('/json-cast', function (req, res) {
         const instance = buildInstance(req, res);
-        const [err, args] = gateway.setArgsFromRequest(instance, [
+        const [err, args] = httpGateway.setArgsFromRequest(instance, [
           { method: 'GET', in: 'query', name: 'meta', rename: 'meta', required: true, is_json: true }
         ]);
 
         if (err || args === false) {
-          gateway.returnHttpStatus(instance, 'bad_request');
+          httpGateway.returnHttpStatus(instance, 'bad_request');
           return;
         }
 
-        gateway.returnHttpResponse(instance, 200, null, null, { meta: args.meta });
+        httpGateway.returnHttpResponse(instance, 200, null, null, { meta: args.meta });
       });
 
     });
@@ -661,19 +661,19 @@ describe('Group F - edge cases', function () {
 
       app.all('/echo', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, {
+        httpGateway.returnHttpResponse(instance, 200, null, null, {
           get : instance.http_request.query,
           post: instance.http_request.body,
-          ip  : gateway.getRequestIPAddress(instance),
-          ua  : gateway.getRequestUserAgent(instance),
-          org : gateway.getRequestOrigin(instance),
-          cc  : gateway.getRequestCountryCode(instance)
+          ip  : httpGateway.getRequestIPAddress(instance),
+          ua  : httpGateway.getRequestUserAgent(instance),
+          org : httpGateway.getRequestOrigin(instance),
+          cc  : httpGateway.getRequestCountryCode(instance)
         });
       });
 
       app.post('/large', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, {
+        httpGateway.returnHttpResponse(instance, 200, null, null, {
           length: JSON.stringify(instance.http_request.body).length,
           first : instance.http_request.body.items ? instance.http_request.body.items[0] : null,
           last  : instance.http_request.body.items
@@ -774,7 +774,7 @@ describe('Group G - graceful error handling', function () {
       // the test runner.
       app.post('/echo-post', function (req, res) {
         const instance = buildInstance(req, res);
-        gateway.returnHttpResponse(instance, 200, null, null, {
+        httpGateway.returnHttpResponse(instance, 200, null, null, {
           post: instance.http_request.body,
           type: typeof instance.http_request.body
         });
@@ -831,6 +831,317 @@ describe('Group G - graceful error handling', function () {
     });
     assert.equal(r.status, 200);
     assert.deepEqual(r.body.post, {});
+  });
+
+});
+
+
+// ============================================================================
+// GROUP H - ADAPTER DIRECT UNIT TESTS (NO HTTP SERVER)
+// ============================================================================
+
+describe('Group H - adapter direct unit tests', function () {
+
+  const HttpGatewayAdapterExpressHttp = require('../adapter.js')(Lib, null, null);
+
+  it('extractRequest returns normalized structure for minimal req', function () {
+    const minimalReq = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(minimalReq, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+
+    assert.equal(result.method, 'GET');
+    assert.equal(result.url, '/');
+    assert.deepEqual(result.headers, {});
+    assert.deepEqual(result.query, {});
+    assert.deepEqual(result.body, {});
+    assert.deepEqual(result.params, {});
+    assert.deepEqual(result.cookies, {});
+    assert.equal(typeof result.response_handler, 'function');
+  });
+
+  it('extractRequest handles req without originalUrl (falls back to url)', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      url: '/fallback-url'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.equal(result.url, '/fallback-url');
+  });
+
+  it('extractRequest handles req without originalUrl or url', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.equal(result.url, '');
+  });
+
+  it('extractRequest handles null raw_request gracefully', function () {
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(null, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.equal(result.method, null);
+    assert.equal(result.url, '');
+    assert.deepEqual(result.headers, {});
+  });
+
+  it('extractRequest normalizes method to uppercase', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'post',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.equal(result.method, 'POST');
+  });
+
+  it('extractRequest handles null method', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: null,
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.equal(result.method, null);
+  });
+
+  it('extractRequest parses cookies from raw header when req.cookies is absent', function () {
+    const req = {
+      headers: { 'cookie': 'test=value; other=data' },
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+      // Note: no req.cookies
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.equal(result.cookies.test, 'value');
+    assert.equal(result.cookies.other, 'data');
+  });
+
+  it('extractRequest handles malformed cookie header gracefully', function () {
+    const req = {
+      headers: { 'cookie': 'malformed-no-equals-sign' },
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('extractRequest handles empty cookie header', function () {
+    const req = {
+      headers: { 'cookie': '' },
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('extractRequest handles req.cookies that is not an object', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/',
+      cookies: 'not-an-object' // Invalid but should be handled gracefully
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    // Should fall back to parsing raw Cookie header (which is empty here)
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('extractRequest guards against invalid query objects', function () {
+    const req = {
+      headers: {},
+      query: 'not-an-object',
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.deepEqual(result.query, {});
+  });
+
+  it('extractRequest guards against invalid body objects', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: 'not-an-object',
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.deepEqual(result.body, {});
+  });
+
+  it('extractRequest guards against invalid params objects', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: 'not-an-object',
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, { status: function () { return { set: function () {}, send: function () {} }; } });
+    assert.deepEqual(result.params, {});
+  });
+
+  it('extractRequest guards against null response_callback', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, null);
+
+    // response_handler should still exist but do nothing when called
+    assert.equal(typeof result.response_handler, 'function');
+
+    // Should not throw when invoked
+    assert.doesNotThrow(function () {
+      result.response_handler(null, { statusCode: 200, headers: {}, body: 'test' });
+    });
+  });
+
+  it('extractRequest response_handler guards against missing status function', function () {
+    const req = {
+      headers: {},
+      query: {},
+      body: {},
+      params: {},
+      method: 'GET',
+      originalUrl: '/'
+    };
+
+    // response_callback that looks like Express res but missing status method
+    const fakeRes = {
+      set: function () {},
+      send: function () {}
+      // Note: no status function
+    };
+
+    const result = HttpGatewayAdapterExpressHttp.extractRequest(req, null, fakeRes);
+
+    // Should not throw when invoked
+    assert.doesNotThrow(function () {
+      result.response_handler(null, { statusCode: 200, headers: {}, body: 'test' });
+    });
+  });
+
+  it('buildResponseEnvelope handles Buffer body', function () {
+    const buf = Buffer.from('binary data');
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, {}, buf);
+    assert.equal(result.body, buf.toString('base64'));
+    assert.equal(result.statusCode, 200);
+  });
+
+  it('buildResponseEnvelope handles Object body', function () {
+    const obj = { test: 'value', nested: { key: 'data' } };
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, {}, obj);
+    assert.equal(result.body, JSON.stringify(obj));
+    assert.equal(result.statusCode, 200);
+  });
+
+  it('buildResponseEnvelope handles string body', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, {}, 'plain text');
+    assert.equal(result.body, 'plain text');
+  });
+
+  it('buildResponseEnvelope handles number body', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, {}, 42);
+    assert.equal(result.body, '42');
+  });
+
+  it('buildResponseEnvelope handles boolean body', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, {}, true);
+    assert.equal(result.body, 'true');
+  });
+
+  it('buildResponseEnvelope handles null body', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(204, {}, null);
+    assert.equal(result.body, '');
+  });
+
+  it('buildResponseEnvelope handles undefined body', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(204, {}, undefined);
+    assert.equal(result.body, '');
+  });
+
+  it('buildResponseEnvelope handles empty string body', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, {}, '');
+    assert.equal(result.body, '');
+  });
+
+  it('buildResponseEnvelope defaults headers to empty object', function () {
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, null, 'test');
+    assert.deepEqual(result.headers, {});
+  });
+
+  it('buildResponseEnvelope preserves custom headers', function () {
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Custom': 'value',
+      'Cache-Control': 'max-age=3600'
+    };
+    const result = HttpGatewayAdapterExpressHttp.buildResponseEnvelope(200, headers, {});
+    assert.equal(result.headers['Content-Type'], 'application/json');
+    assert.equal(result.headers['X-Custom'], 'value');
+    assert.equal(result.headers['Cache-Control'], 'max-age=3600');
+  });
+
+  it('getCountryCode always returns null', function () {
+    assert.equal(HttpGatewayAdapterExpressHttp.getCountryCode({}), null);
+    assert.equal(HttpGatewayAdapterExpressHttp.getCountryCode(null), null);
+    assert.equal(HttpGatewayAdapterExpressHttp.getCountryCode(undefined), null);
+    assert.equal(HttpGatewayAdapterExpressHttp.getCountryCode({ 'cloudfront-viewer-country': 'US' }), null);
   });
 
 });

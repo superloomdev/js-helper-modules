@@ -21,7 +21,7 @@
 //   - parts/cookies.serialize with all RFC 6265 attributes
 //
 // NOTE: Body parsing edge cases (malformed JSON, wrong content-type, etc.) are
-// the adapter's responsibility (parts/params reads pre-parsed instance.http_request.post).
+// the adapter's responsibility (parts/params reads pre-parsed instance.http_request.body).
 // Those tests live in each adapter's _test/test.js, not here.
 'use strict';
 
@@ -100,6 +100,39 @@ describe('loader validation', function () {
     });
   });
 
+  it('throws when adapter is missing extractRequest', function () {
+    const bad_adapter = {
+      buildResponseEnvelope: function () { return {}; },
+      getCountryCode: function () { return null; }
+    };
+
+    assert.throws(function () {
+      buildGateway(makeAdapterFactory(bad_adapter));
+    }, /Invalid adapter contract: missing method `extractRequest`/);
+  });
+
+  it('throws when adapter is missing buildResponseEnvelope', function () {
+    const bad_adapter = {
+      extractRequest: function () { return {}; },
+      getCountryCode: function () { return null; }
+    };
+
+    assert.throws(function () {
+      buildGateway(makeAdapterFactory(bad_adapter));
+    }, /Invalid adapter contract: missing method `buildResponseEnvelope`/);
+  });
+
+  it('throws when adapter is missing getCountryCode', function () {
+    const bad_adapter = {
+      extractRequest: function () { return {}; },
+      buildResponseEnvelope: function () { return {}; }
+    };
+
+    assert.throws(function () {
+      buildGateway(makeAdapterFactory(bad_adapter));
+    }, /Invalid adapter contract: missing method `getCountryCode`/);
+  });
+
 });
 
 
@@ -137,10 +170,16 @@ describe('initHttpRequestData', function () {
     assert.equal(instance.http_request.method, null);
   });
 
-  it('gateway_response_callback is a function', function () {
+  it('stores namespaced response_handler on instance', function () {
     const { gateway } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, {});
-    assert.equal(typeof instance.gateway_response_callback, 'function');
+    assert.equal(typeof instance._http_gateway.response_handler, 'function');
+  });
+
+  it('does not create legacy instance.http_response field', function () {
+    const { gateway } = buildGatewayWithMemory();
+    const { instance } = initInstance(gateway, {});
+    assert.equal(Object.prototype.hasOwnProperty.call(instance, 'http_response'), false);
   });
 
 });

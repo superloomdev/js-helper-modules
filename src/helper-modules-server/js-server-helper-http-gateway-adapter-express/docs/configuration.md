@@ -65,7 +65,7 @@ See [`middleware.md`](middleware.md) for the full setup pattern.
 
 ## Country Code Customization
 
-To enable country detection when fronting Express with a CDN (e.g. CloudFront), wrap the adapter and override `getHttpRequestCountryCode`:
+To enable country detection when fronting Express with a CDN (e.g. CloudFront), wrap the adapter and override `getCountryCode`:
 
 ```javascript
 const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
@@ -73,8 +73,7 @@ const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adap
 function CustomAdapter (Lib, config, errors) {
   const base = ExpressAdapter(Lib, config, errors);
   return Object.assign({}, base, {
-    getHttpRequestCountryCode: function (instance) {
-      const headers = instance.http_request && instance.http_request.headers;
+    getCountryCode: function (headers) {
       return (headers && headers['cloudfront-viewer-country']) || null;
     }
   });

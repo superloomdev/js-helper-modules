@@ -30,8 +30,8 @@ const assert = require('node:assert/strict');
 const { describe, it } = require('node:test');
 
 
-const { Lib, gateway } = require('./loader')();
-const AdapterFactory   = require('helper-http-gateway-adapter-aws-apigateway');
+const { Lib, httpGateway } = require('./loader')();
+const HttpGatewayAdapterAwsApiGateway = require('../adapter.js');
 
 
 // ============================================================================
@@ -73,7 +73,7 @@ function pipe (event) {
   const instance = Lib.Instance.initialize();
   const captured = { err: null, response: null, called: false };
 
-  gateway.initHttpRequestData(instance, event, null, function (err, response) {
+  httpGateway.initHttpRequestData(instance, event, null, function (err, response) {
     captured.err = err;
     captured.response = response;
     captured.called = true;
@@ -120,8 +120,8 @@ describe('Group A - official AWS fixture compatibility', function () {
       assert.ok(instance.http_request.body, 'body missing');
       assert.ok(instance.http_request.params, 'params missing');
       assert.ok(instance.http_request.cookies, 'cookies missing');
-      assert.ok(instance.http_response, 'http_response missing');
-      assert.ok(typeof instance.gateway_response_callback === 'function');
+      assert.ok(instance._http_gateway, 'internal gateway metadata missing');
+      assert.ok(typeof instance._http_gateway.response_handler === 'function');
     });
 
   });
@@ -421,10 +421,10 @@ describe('Group D - body parsing', function () {
 
 describe('Group E - response building (Lambda envelope)', function () {
 
-  const adapter = AdapterFactory(Lib, null, null);
+  const adapter = HttpGatewayAdapterAwsApiGateway(Lib, null, null);
 
   it('wraps string body in Lambda envelope with isBase64Encoded=false', function () {
-    const result = adapter.buildHttpResponseObject(200, { 'Content-Type': 'text/plain' }, 'hello');
+    const result = adapter.buildResponseEnvelope(200, { 'Content-Type': 'text/plain' }, 'hello');
     assert.equal(result.statusCode, 200);
     assert.equal(result.body, 'hello');
     assert.equal(result.isBase64Encoded, false);
@@ -432,39 +432,39 @@ describe('Group E - response building (Lambda envelope)', function () {
   });
 
   it('JSON-stringifies object body', function () {
-    const result = adapter.buildHttpResponseObject(200, {}, { ok: true, n: 7 });
+    const result = adapter.buildResponseEnvelope(200, {}, { ok: true, n: 7 });
     assert.equal(result.body, '{"ok":true,"n":7}');
     assert.equal(result.isBase64Encoded, false);
   });
 
   it('base64-encodes Buffer body and sets isBase64Encoded=true', function () {
     const buf = Buffer.from('binary-payload');
-    const result = adapter.buildHttpResponseObject(200, {}, buf);
+    const result = adapter.buildResponseEnvelope(200, {}, buf);
     assert.equal(result.body, buf.toString('base64'));
     assert.equal(result.isBase64Encoded, true);
   });
 
   it('returns empty string body when body is null', function () {
-    const result = adapter.buildHttpResponseObject(204, {}, null);
+    const result = adapter.buildResponseEnvelope(204, {}, null);
     assert.equal(result.body, '');
     assert.equal(result.isBase64Encoded, false);
   });
 
   it('returns empty string body when body is undefined', function () {
-    const result = adapter.buildHttpResponseObject(204, {});
+    const result = adapter.buildResponseEnvelope(204, {});
     assert.equal(result.body, '');
   });
 
   it('defaults headers to empty object when not provided', function () {
-    const result = adapter.buildHttpResponseObject(200, null, 'ok');
+    const result = adapter.buildResponseEnvelope(200, null, 'ok');
     assert.deepEqual(result.headers, {});
   });
 
-  it('gateway_response_callback delivers envelope to the Lambda callback', function () {
+  it('gateway response_handler delivers envelope to the Lambda callback', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance, captured } = pipe(event);
 
-    gateway.returnHttpResponse(instance, 200, { 'X-Trace': 'abc' }, null, { ok: true });
+    httpGateway.returnHttpResponse(instance, 200, { 'X-Trace': 'abc' }, null, { ok: true });
 
     assert.equal(captured.called, true);
     assert.equal(captured.response.statusCode, 200);
@@ -489,7 +489,7 @@ describe('Group F - integration with gateway', function () {
 
     const { instance, captured } = pipe(event);
 
-    const [err, args] = gateway.setArgsFromRequest(instance, [
+    const [err, args] = httpGateway.setArgsFromRequest(instance, [
       { method: 'GET',  in: 'params', name: 'user_id',       rename: 'user_id', required: true, is_number: true },
       { method: 'GET',  in: 'params', name: 'post_id',       rename: 'post_id', required: true, is_number: true },
       { method: 'GET',  in: 'query',  name: 'page',          rename: 'page',    required: true, is_number: true },
@@ -502,7 +502,7 @@ describe('Group F - integration with gateway', function () {
     assert.equal(args.page, 5);
     assert.equal(args.auth, 'Bearer xyz');
 
-    gateway.returnHttpResponse(instance, 200, null, null, args);
+    httpGateway.returnHttpResponse(instance, 200, null, null, args);
     assert.equal(captured.response.statusCode, 200);
     assert.deepEqual(JSON.parse(captured.response.body), {
       user_id: 42, post_id: 99, page: 5, auth: 'Bearer xyz'
@@ -513,14 +513,14 @@ describe('Group F - integration with gateway', function () {
     const event = loadFixture('v2-with-bearer-token.json');
     const { instance, captured } = pipe(event);
 
-    const [err, args] = gateway.setArgsFromRequest(instance, [
+    const [err, args] = httpGateway.setArgsFromRequest(instance, [
       { method: 'GET', in: 'header', name: 'authorization', rename: 'auth', required: true }
     ]);
 
     assert.equal(err, null);
     assert.ok(args.auth.startsWith('Bearer '));
 
-    gateway.returnHttpResponse(instance, 200, null, null, { ok: true });
+    httpGateway.returnHttpResponse(instance, 200, null, null, { ok: true });
     assert.equal(captured.response.statusCode, 200);
   });
 
@@ -528,14 +528,14 @@ describe('Group F - integration with gateway', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance, captured } = pipe(event);
 
-    const [err, args] = gateway.setArgsFromRequest(instance, [
+    const [err, args] = httpGateway.setArgsFromRequest(instance, [
       { method: 'GET', in: 'header', name: 'authorization', rename: 'auth', required: true }
     ]);
 
     assert.equal(err, null);
     assert.equal(args, false);
 
-    gateway.returnHttpStatus(instance, 'unauthorized');
+    httpGateway.returnHttpStatus(instance, 'unauthorized');
     assert.equal(captured.response.statusCode, 401);
   });
 
@@ -543,7 +543,7 @@ describe('Group F - integration with gateway', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance, captured } = pipe(event);
 
-    gateway.returnHttpRedirect(instance, '/new-location');
+    httpGateway.returnHttpRedirect(instance, '/new-location');
 
     assert.equal(captured.response.statusCode, 301);
     assert.equal(captured.response.headers['Location'], '/new-location');
@@ -555,8 +555,8 @@ describe('Group F - integration with gateway', function () {
     event.headers['user-agent'] = 'Mozilla/5.0 Chrome/100.0';
     const { instance, captured } = pipe(event);
 
-    const cookies = gateway.buildCookie(null, 'sid', 'session-xyz', 3600);
-    gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
+    const cookies = httpGateway.buildCookie(null, 'sid', 'session-xyz', 3600);
+    httpGateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
 
     assert.ok('Set-Cookie' in captured.response.headers);
     assert.ok(captured.response.headers['Set-Cookie'].includes('sid=session-xyz'));
@@ -574,20 +574,20 @@ describe('Group G - country code', function () {
   it('returns the country code from CloudFront-Viewer-Country header', function () {
     const event = loadFixture('v2-with-cloudfront-country.json');
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestCountryCode(instance), 'US');
+    assert.equal(httpGateway.getRequestCountryCode(instance), 'US');
   });
 
   it('returns null when CloudFront-Viewer-Country header is absent', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestCountryCode(instance), null);
+    assert.equal(httpGateway.getRequestCountryCode(instance), null);
   });
 
   it('reads the header case-insensitively (adapter lowercases keys)', function () {
     const event = loadFixture('v2-get-simple.json');
     event.headers = { 'CloudFront-Viewer-Country': 'DE' };
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestCountryCode(instance), 'DE');
+    assert.equal(httpGateway.getRequestCountryCode(instance), 'DE');
   });
 
 });
@@ -602,27 +602,27 @@ describe('Group H - IP / user-agent / origin extraction', function () {
   it('reads first IP from X-Forwarded-For via getRequestIPAddress', function () {
     const event = loadFixture('v2-x-forwarded-for.json');
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestIPAddress(instance), '203.0.113.42');
+    assert.equal(httpGateway.getRequestIPAddress(instance), '203.0.113.42');
   });
 
   it('returns empty string when X-Forwarded-For header is absent', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestIPAddress(instance), '');
+    assert.equal(httpGateway.getRequestIPAddress(instance), '');
   });
 
   it('reads user-agent header via getRequestUserAgent', function () {
     const event = loadFixture('v2-get-simple.json');
     event.headers['user-agent'] = 'CustomClient/2.0';
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestUserAgent(instance), 'CustomClient/2.0');
+    assert.equal(httpGateway.getRequestUserAgent(instance), 'CustomClient/2.0');
   });
 
   it('reads origin header via getRequestOrigin', function () {
     const event = loadFixture('v2-get-simple.json');
     event.headers['origin'] = 'https://app.example.com';
     const { instance } = pipe(event);
-    assert.equal(gateway.getRequestOrigin(instance), 'https://app.example.com');
+    assert.equal(httpGateway.getRequestOrigin(instance), 'https://app.example.com');
   });
 
 });
@@ -648,7 +648,7 @@ describe('Group I - defensive edge cases', function () {
   it('handles a null raw_request without throwing', function () {
     const instance = Lib.Instance.initialize();
     assert.doesNotThrow(function () {
-      gateway.initHttpRequestData(instance, null, null, function () {});
+      httpGateway.initHttpRequestData(instance, null, null, function () {});
     });
     assert.equal(instance.http_request.method, null);
   });
@@ -684,7 +684,378 @@ describe('Group I - defensive edge cases', function () {
   it('isHttpInstance returns true after initialization', function () {
     const event = loadFixture('v2-get-simple.json');
     const { instance } = pipe(event);
-    assert.equal(gateway.isHttpInstance(instance), true);
+    assert.equal(httpGateway.isHttpInstance(instance), true);
+  });
+
+});
+
+
+// ============================================================================
+// GROUP J - ADAPTER PRIVATE HELPERS (DIRECT UNIT TESTS)
+// ============================================================================
+
+describe('Group J - adapter private helpers direct tests', function () {
+
+  // Access the adapter directly for unit tests
+  const adapter = HttpGatewayAdapterAwsApiGateway(Lib, null, null);
+
+  it('parseCookieHeader handles empty string', function () {
+    const result = adapter.extractRequest({ headers: {}, cookies: [] }, null, function () {});
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('parseCookieHeader handles malformed cookies without equals sign', function () {
+    const event = {
+      headers: {},
+      cookies: ['malformed-cookie-no-value'],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('lowercaseHeaders normalizes mixed-case headers', function () {
+    const event = {
+      headers: { 'X-Custom-Header': 'value1', 'Authorization': 'Bearer token', 'CONTENT-TYPE': 'json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.equal(result.headers['x-custom-header'], 'value1');
+    assert.equal(result.headers['authorization'], 'Bearer token');
+    assert.equal(result.headers['content-type'], 'json');
+    assert.equal(result.headers['X-Custom-Header'], undefined);
+  });
+
+  it('lowercaseHeaders handles empty headers object', function () {
+    const event = {
+      headers: {},
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.headers, {});
+  });
+
+  it('parseBody handles URL-encoded form data', function () {
+    const event = {
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: 'name=John+Doe&age=30&city=New+York'
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.equal(result.body.name, 'John Doe');
+    assert.equal(result.body.age, '30');
+    assert.equal(result.body.city, 'New York');
+  });
+
+  it('parseBody handles malformed URL-encoded data gracefully', function () {
+    const event = {
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: 'invalid%%%encoded%%data'
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    // URLSearchParams is lenient, should still parse what it can
+    assert.ok(Lib.Utils.isObject(result.body));
+  });
+
+  it('parseBody handles JSON array by returning empty object', function () {
+    const event = {
+      headers: { 'content-type': 'application/json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: '[1, 2, 3, "array data"]'
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.body, {});
+  });
+
+  it('parseBody handles JSON primitive values by returning empty object', function () {
+    const event = {
+      headers: { 'content-type': 'application/json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: '"just a string"'
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.body, {});
+  });
+
+  it('parseBody handles JSON number primitive by returning empty object', function () {
+    const event = {
+      headers: { 'content-type': 'application/json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: '42'
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.body, {});
+  });
+
+  it('parseBody handles base64 encoded JSON', function () {
+    const jsonBody = JSON.stringify({ test: 'base64 data', number: 123 });
+    const event = {
+      headers: { 'content-type': 'application/json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      isBase64Encoded: true,
+      body: Buffer.from(jsonBody).toString('base64')
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.equal(result.body.test, 'base64 data');
+    assert.equal(result.body.number, 123);
+  });
+
+  it('parseBody handles base64 encoded form data', function () {
+    const formBody = 'name=Test&value=abc123';
+    const event = {
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      isBase64Encoded: true,
+      body: Buffer.from(formBody).toString('base64')
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.equal(result.body.name, 'Test');
+    assert.equal(result.body.value, 'abc123');
+  });
+
+  it('parseBody returns empty object for unknown content types', function () {
+    const event = {
+      headers: { 'content-type': 'text/plain' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: 'plain text content'
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.body, {});
+  });
+
+  it('parseBody handles content-type with charset suffix', function () {
+    const event = {
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: JSON.stringify({ charset: 'test' })
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.equal(result.body.charset, 'test');
+  });
+
+  it('buildResponseEnvelope handles Buffer with binary data', function () {
+    const buf = Buffer.from([0x00, 0x01, 0x02, 0x03, 0xff]);
+    const result = adapter.buildResponseEnvelope(200, {}, buf);
+    assert.equal(result.isBase64Encoded, true);
+    assert.equal(result.body, buf.toString('base64'));
+  });
+
+  it('buildResponseEnvelope handles empty string body', function () {
+    const result = adapter.buildResponseEnvelope(200, {}, '');
+    assert.equal(result.body, '');
+    assert.equal(result.isBase64Encoded, false);
+  });
+
+  it('buildResponseEnvelope handles number body by converting to string', function () {
+    const result = adapter.buildResponseEnvelope(200, {}, 42);
+    assert.equal(result.body, '42');
+    assert.equal(result.isBase64Encoded, false);
+  });
+
+  it('buildResponseEnvelope handles boolean body by converting to string', function () {
+    const result = adapter.buildResponseEnvelope(200, {}, true);
+    assert.equal(result.body, 'true');
+    assert.equal(result.isBase64Encoded, false);
+  });
+
+  it('buildResponseEnvelope preserves multiple response headers', function () {
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Request-ID': 'abc-123',
+      'Cache-Control': 'no-cache'
+    };
+    const result = adapter.buildResponseEnvelope(200, headers, { ok: true });
+    assert.equal(result.headers['Content-Type'], 'application/json');
+    assert.equal(result.headers['X-Request-ID'], 'abc-123');
+    assert.equal(result.headers['Cache-Control'], 'no-cache');
+  });
+
+  it('getCountryCode handles null headers gracefully', function () {
+    const result = adapter.getCountryCode(null);
+    assert.equal(result, null);
+  });
+
+  it('getCountryCode handles undefined headers gracefully', function () {
+    const result = adapter.getCountryCode(undefined);
+    assert.equal(result, null);
+  });
+
+  it('getCountryCode handles empty headers object', function () {
+    const result = adapter.getCountryCode({});
+    assert.equal(result, null);
+  });
+
+  it('extractRequest response_handler wraps callback correctly', function () {
+    let capturedErr = null;
+    let capturedResponse = null;
+    const callback = function (err, response) {
+      capturedErr = err;
+      capturedResponse = response;
+    };
+
+    const event = {
+      headers: {},
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+    };
+
+    const result = adapter.extractRequest(event, null, callback);
+
+    // Verify response_handler is a function
+    assert.equal(typeof result.response_handler, 'function');
+
+    // Test invoking the response handler
+    const testResponse = { statusCode: 200, body: 'test' };
+    result.response_handler(null, testResponse);
+
+    assert.equal(capturedErr, null);
+    assert.deepEqual(capturedResponse, testResponse);
+  });
+
+  it('extractRequest response_handler passes errors through', function () {
+    let capturedErr = null;
+    const callback = function (err) {
+      capturedErr = err;
+    };
+
+    const event = {
+      headers: {},
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+    };
+
+    const result = adapter.extractRequest(event, null, callback);
+
+    const testError = new Error('Test error');
+    result.response_handler(testError, null);
+
+    assert.equal(capturedErr.message, 'Test error');
+  });
+
+  it('handles event with no cookies property', function () {
+    const event = {
+      headers: {},
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+      // Note: no cookies property at all
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('handles event with null cookies property', function () {
+    const event = {
+      headers: {},
+      cookies: null,
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'GET' } }
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.cookies, {});
+  });
+
+  it('handles event with empty body string', function () {
+    const event = {
+      headers: { 'content-type': 'application/json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: ''
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.body, {});
+  });
+
+  it('handles event with whitespace-only body', function () {
+    const event = {
+      headers: { 'content-type': 'application/json' },
+      cookies: [],
+      queryStringParameters: {},
+      pathParameters: {},
+      rawPath: '/',
+      rawQueryString: '',
+      requestContext: { http: { method: 'POST' } },
+      body: '   '
+    };
+    const result = adapter.extractRequest(event, null, function () {});
+    assert.deepEqual(result.body, {});
   });
 
 });

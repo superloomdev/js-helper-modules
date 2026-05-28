@@ -3,9 +3,9 @@
 // into the standard instance.http_request shape consumed by the gateway.
 //
 // Adapter contract:
-//   loadHttpDataToInstance(instance, raw_request, raw_context, response_callback)
-//   buildHttpResponseObject(status, headers, body)
-//   getHttpRequestCountryCode(instance) -> String | null
+//   extractRequest(raw_request, raw_context, response_callback)
+//   buildResponseEnvelope(status, headers, body)
+//   getCountryCode(headers) -> String | null
 //
 // Reference: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
 //
@@ -22,13 +22,14 @@ let Lib;
 /********************************************************************
 Factory loader. Called by http-gateway.js as CONFIG.ADAPTER(Lib, CONFIG, ERRORS).
 Returns the 3-method adapter object. Each loader call returns the same
-stateless adapter singleton - all request state lives on instance.
+stateless adapter singleton. Request data is returned to the gateway,
+which owns instance writes.
 
 @param {Object} shared_libs - Lib container (Utils, Debug)
 @param {Object} _config     - Merged CONFIG (accepted for contract conformance)
 @param {Object} _errors     - Error catalog (accepted for contract conformance)
 
-@return {Object} - { loadHttpDataToInstance, buildHttpResponseObject, getHttpRequestCountryCode }
+@return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
 *********************************************************************/
 module.exports = function loader (shared_libs, _config, _errors) {
 
@@ -44,32 +45,32 @@ module.exports = function loader (shared_libs, _config, _errors) {
 const Adapter = {
 
   /********************************************************************
-  Populate instance with normalized HTTP request data from a raw
-  API Gateway payload format v2.0 event (HTTP API or Lambda Function URLs).
+  Extract normalized HTTP request data from a raw API Gateway payload
+  format v2.0 event (HTTP API or Lambda Function URLs).
 
-  Populated fields:
-    instance.http_request.headers  {Object} - Lowercase header key -> value map
-    instance.http_request.cookies  {Object} - Parsed cookies map
-    instance.http_request.query    {Object} - Query-string parameters
-    instance.http_request.body     {Object} - Parsed body parameters
-    instance.http_request.params   {Object} - Path parameters
-    instance.http_request.method   {String} - HTTP method ('GET', 'POST', ...)
-    instance.http_request.url      {String} - Request URL path with query string
-    instance.http_response         {Object} - { cookies: {} }
-    instance.gateway_response_callback {Function} - Wraps the Lambda callback
+  Returned fields:
+    headers          {Object}   - Lowercase header key -> value map
+    cookies          {Object}   - Parsed cookies map
+    query            {Object}   - Query-string parameters
+    body             {Object}   - Parsed body parameters
+    params           {Object}   - Path parameters
+    method           {String}   - HTTP method ('GET', 'POST', ...)
+    url              {String}   - Request URL path with query string
+    response_handler {Function} - Wraps the Lambda callback
 
-  @param {Object}   instance          - Per-request instance to populate
   @param {Object}   raw_request       - Raw API Gateway v2.0 event
   @param {Object}   raw_context       - Lambda execution context (unused)
   @param {Function} response_callback - Lambda callback function(err, response)
+
+  @return {Object} - Normalized request fields plus response_handler
   *********************************************************************/
-  loadHttpDataToInstance: function (instance, raw_request, _raw_context, response_callback) {
+  extractRequest: function (raw_request, _raw_context, response_callback) {
 
     const event = raw_request || {};
 
     const headers = _Adapter.lowercaseHeaders(event.headers);
 
-    // Cookies: v2 delivers them as event.cookies array
+    // Cookies: API Gateway payload format v2.0 delivers them as event.cookies array
     const cookies = Array.isArray(event.cookies)
       ? _Adapter.parseCookieHeader(event.cookies.join('; '))
       : {};
@@ -89,31 +90,27 @@ const Adapter = {
 
     const post_params = _Adapter.parseBody(event, headers);
 
-    // URL: rawPath + rawQueryString (v2 payload)
+    // URL: rawPath + rawQueryString (API Gateway v2.0 payload)
     const raw_path = event.rawPath || '';
     const raw_qs = event.rawQueryString || '';
     const url = raw_qs ? raw_path + '?' + raw_qs : raw_path;
 
-    instance.http_request = {
+    // Build the response handler that wraps the Lambda callback
+    const response_handler = function (err, response) {
+      if (Lib.Utils.isFunction(response_callback)) {
+        response_callback(err, response);
+      }
+    };
+
+    return {
       headers: headers,
       cookies: cookies,
       query  : get_params,
       body   : post_params,
       params : path_params,
       method : method,
-      url    : url
-    };
-
-    instance.http_response = {
-      cookies: {}
-    };
-
-    instance.gateway_response_callback = function (err, response) {
-
-      if (Lib.Utils.isFunction(response_callback)) {
-        response_callback(err, response);
-      }
-
+      url    : url,
+      response_handler: response_handler
     };
 
   },
@@ -135,26 +132,32 @@ const Adapter = {
 
   @return {Object} - { statusCode, headers, body, isBase64Encoded }
   *********************************************************************/
-  buildHttpResponseObject: function (status, headers, body) {
+  buildResponseEnvelope: function (status, headers, body) {
 
+    // Initialize response envelope fields
     let normalized_body = '';
     let is_base64 = false;
 
+    // Normalize body based on its type
     if (!Lib.Utils.isNullOrUndefined(body)) {
 
+      // Buffer -> base64 encode
       if (Buffer.isBuffer(body)) {
         normalized_body = body.toString('base64');
         is_base64 = true;
       }
+      // Object -> JSON stringify
       else if (Lib.Utils.isObject(body)) {
         normalized_body = JSON.stringify(body);
       }
+      // Everything else -> string
       else {
         normalized_body = String(body);
       }
 
     }
 
+    // Build the API Gateway response envelope
     return {
       statusCode     : status,
       headers        : headers || {},
@@ -170,19 +173,17 @@ const Adapter = {
   CloudFront-Viewer-Country header (forwarded through API Gateway).
   Returns null when not present.
 
-  @param {Object} instance - Per-request instance
+  @param {Object} headers - Lowercase request headers
 
   @return {String|null} - ISO 3166-1 alpha-2 country code, or null
   *********************************************************************/
-  getHttpRequestCountryCode: function (instance) {
+  getCountryCode: function (headers) {
 
     if (
-      !Lib.Utils.isNullOrUndefined(instance) &&
-      !Lib.Utils.isNullOrUndefined(instance.http_request) &&
-      !Lib.Utils.isNullOrUndefined(instance.http_request.headers) &&
-      !Lib.Utils.isNullOrUndefined(instance.http_request.headers['cloudfront-viewer-country'])
+      !Lib.Utils.isNullOrUndefined(headers) &&
+      !Lib.Utils.isNullOrUndefined(headers['cloudfront-viewer-country'])
     ) {
-      return instance.http_request.headers['cloudfront-viewer-country'];
+      return headers['cloudfront-viewer-country'];
     }
 
     return null;
@@ -206,26 +207,33 @@ const _Adapter = {
   *********************************************************************/
   parseCookieHeader: function (cookie_header) {
 
+    // Initialize empty result map
     const result = {};
 
+    // Guard: return empty object for invalid input
     if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
       return result;
     }
 
+    // Split header into name=value pairs
     const pairs = cookie_header.split(';');
 
+    // Parse each pair
     for (let i = 0; i < pairs.length; i++) {
 
       const pair = pairs[i].trim();
       const eq_idx = pair.indexOf('=');
 
+      // Skip malformed pairs without an equals sign
       if (eq_idx < 1) {
         continue;
       }
 
+      // Extract key and value
       const key = pair.slice(0, eq_idx).trim();
       const val = pair.slice(eq_idx + 1).trim();
 
+      // Store decoded cookie value
       if (key) {
         result[key] = decodeURIComponent(val);
       }
@@ -247,14 +255,18 @@ const _Adapter = {
   *********************************************************************/
   parseUrlEncodedBody: function (body) {
 
+    // Initialize empty result map
     const result = {};
 
+    // Guard: return empty object for invalid input
     if (!body || !Lib.Utils.isString(body)) {
       return result;
     }
 
+    // Parse URL-encoded string into key-value pairs
     const params = new URLSearchParams(body);
 
+    // Transfer parsed values to result object
     params.forEach(function (value, key) {
       result[key] = value;
     });
@@ -274,13 +286,18 @@ const _Adapter = {
   *********************************************************************/
   lowercaseHeaders: function (raw_headers) {
 
+    // Guard: return empty object for invalid input
     if (!raw_headers || !Lib.Utils.isObject(raw_headers)) {
       return {};
     }
 
+    // Initialize result object for lowercased headers
     const result = {};
+
+    // Get all header keys from raw headers
     const keys = Object.keys(raw_headers);
 
+    // Lowercase each header key and copy value
     for (let i = 0; i < keys.length; i++) {
       result[keys[i].toLowerCase()] = raw_headers[keys[i]];
     }
@@ -301,36 +318,45 @@ const _Adapter = {
   *********************************************************************/
   parseBody: function (event, headers) {
 
+    // Extract raw body from event
     const raw_body = event.body;
 
+    // Guard: return empty object when body is absent
     if (!raw_body) {
       return {};
     }
 
+    // Decode base64 body if necessary
     const decoded_body = event.isBase64Encoded
       ? Buffer.from(raw_body, 'base64').toString('utf8')
       : raw_body;
 
+    // Extract lowercase content-type header
     const content_type = (headers['content-type'] || '').toLowerCase();
 
+    // Parse JSON content type
     if (content_type.includes('application/json')) {
 
       try {
         const parsed = JSON.parse(decoded_body);
+        // Return parsed object only if it's a valid plain object (not array/null)
         return (!Lib.Utils.isNullOrUndefined(parsed) && Lib.Utils.isObject(parsed) && !Array.isArray(parsed))
           ? parsed
           : {};
       }
       catch {
+        // Return empty object on JSON parse failure
         return {};
       }
 
     }
 
+    // Parse URL-encoded content type
     if (content_type.includes('application/x-www-form-urlencoded')) {
       return _Adapter.parseUrlEncodedBody(decoded_body);
     }
 
+    // Default: return empty object for unsupported content types
     return {};
 
   }

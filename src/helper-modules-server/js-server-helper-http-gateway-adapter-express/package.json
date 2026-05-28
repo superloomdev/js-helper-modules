@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-http-gateway-adapter-express",
-  "description": "Express (Docker) adapter for js-server-helper-http-gateway. Implements the 3-method adapter contract. getHttpRequestCountryCode always returns null.",
+  "description": "Express (Docker) adapter for js-server-helper-http-gateway. Implements the 3-method adapter contract. getCountryCode always returns null.",
   "version": "1.0.0",
   "main": "adapter.js",
   "private": false,

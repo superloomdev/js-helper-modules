@@ -12,23 +12,21 @@ A stateless adapter that reads from the Express `req` object and stores `res` as
 ## Usage
 
 ```javascript
-const GatewayLoader    = require('@superloomdev/js-server-helper-http-gateway');
-const ExpressAdapter   = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
-const express          = require('express');
+const express = require('express');
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const Gateway = GatewayLoader(Lib, {
-  ADAPTER: ExpressAdapter
+const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-express')
 });
 
 app.post('/api/example', function (req, res) {
   const instance = Lib.Instance.initialize();
-  Gateway.initHttpRequestData(instance, req, null, res);
+  httpGateway.initHttpRequestData(instance, req, null, res);
   // ... application logic ...
-  Gateway.returnHttpResponse(instance, 200, null, { ok: true });
+  httpGateway.returnHttpResponse(instance, 200, null, { ok: true });
 });
 ```
 
@@ -38,9 +36,9 @@ This adapter implements the 3-method contract required by the gateway:
 
 | Method | Description |
 |--------|-------------|
-| `loadHttpDataToInstance(instance, req, context, res)` | Reads from Express `req` into `instance.http_request`; stores `res` as the response callback |
-| `buildHttpResponseObject(status, headers, body)` | Builds the `{ statusCode, headers, body }` response envelope |
-| `getHttpRequestCountryCode(instance)` | Always returns `null` |
+| `extractRequest(req, context, res)` | Returns normalized request fields and a `response_handler` closure |
+| `buildResponseEnvelope(status, headers, body)` | Builds the `{ statusCode, headers, body }` response envelope |
+| `getCountryCode(headers)` | Always returns `null` |
 
 ## Body Parsing
 
@@ -57,11 +55,11 @@ The adapter prefers `req.cookies` (populated by the `cookie-parser` middleware).
 
 ## Country Code
 
-Express has no CDN layer. `getHttpRequestCountryCode` always returns `null`. Projects fronting Express with CloudFront can implement a custom adapter that reads the forwarded `CloudFront-Viewer-Country` header.
+Express has no CDN layer. `getCountryCode` always returns `null`. Projects fronting Express with CloudFront can implement a custom adapter that reads the forwarded `CloudFront-Viewer-Country` header.
 
 ## Response Sending
 
-The gateway calls `gateway_response_callback(null, response)` when sending a response. This adapter wraps Express `res` to call `res.status(code).set(headers).send(body)`.
+The gateway calls `instance._http_gateway.response_handler(null, response)` when sending a response. This adapter's response handler wraps Express `res` to call `res.status(code).set(headers).send(body)`.
 
 ## Dependencies
 
@@ -82,7 +80,7 @@ The adapter relies on the application providing standard Express middleware (`ex
 |------|---------|--------|
 | Integration | Node.js built-in test runner against a real Express 5 server on a random free port | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Tests boot a real Express 5 server (`app.listen(0)`), install `express.json`, `express.urlencoded`, and `cookie-parser` middleware, then hit the server with native `fetch`. No mocked `req`/`res` objects. Coverage includes request normalization, auth patterns, cookie round-trip (with and without `cookie-parser`), response building, full parameter-extraction pipeline, unicode, large bodies, and graceful error handling for malformed JSON.
+Tests boot a real Express 5 server (`app.listen(0)`), install `express.json`, `express.urlencoded`, and `cookie-parser` middleware, then hit the server with native `fetch`. No mocked `req`/`res` objects. Coverage includes request normalization, auth patterns, cookie round-trip (with and without `cookie-parser`), response building, full parameter-extraction pipeline, unicode, large bodies, and graceful error handling for malformed JSON. Direct unit tests (Group H) cover adapter methods without HTTP server with 80 total tests.
 
 ## License
 

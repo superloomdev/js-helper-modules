@@ -27,16 +27,16 @@ const Gateway = GatewayLoader(Lib, {
 The adapter exposes the 3-method contract consumed by the gateway. Application code does **not** call the adapter directly — it calls `Gateway.*` methods which delegate.
 
 ```javascript
-// Populate instance.http_request, http_response, gateway_response_callback
-adapter.loadHttpDataToInstance(instance, event, context, lambda_callback);
-// Returns: void
+// Extract normalized request data for the gateway to write into instance
+adapter.extractRequest(event, context, lambda_callback);
+// Returns: { headers, cookies, query, body, params, method, url, response_handler }
 
 // Build the Lambda response envelope
-adapter.buildHttpResponseObject(status, headers, body);
+adapter.buildResponseEnvelope(status, headers, body);
 // Returns: Object - { statusCode, headers, body, isBase64Encoded }
 
 // Country code from CloudFront-Viewer-Country header (forwarded through API GW)
-adapter.getHttpRequestCountryCode(instance);
+adapter.getCountryCode(headers);
 // Returns: String | null
 ```
 
@@ -54,7 +54,7 @@ adapter.getHttpRequestCountryCode(instance);
 | `cookies` | Parsed from `event.cookies` array (or `{}` if absent / not array) |
 | `url` | `event.rawPath` + `?` + `event.rawQueryString` (or just `rawPath` if no query) |
 
-`gateway_response_callback` is wired to call the Lambda `callback(err, envelope)`.
+`response_handler` is wired to call the Lambda `callback(err, envelope)`.
 
 ---
 
@@ -90,7 +90,7 @@ The adapter does not throw on v1.0 events; it degrades gracefully so a downstrea
 
 **Authorizer context is not promoted.** JWT claims, IAM identity, and Lambda authorizer payloads remain on the raw event at `event.requestContext.authorizer`. The adapter does not surface them as standard `instance.http_request` fields. Read them from the raw event if needed.
 
-**Response is sent through the Lambda callback.** `buildHttpResponseObject` returns `{ statusCode, headers, body, isBase64Encoded }` which the gateway then delivers via `instance.gateway_response_callback(null, envelope)`.
+**Response is sent through the Lambda callback.** `buildResponseEnvelope` returns `{ statusCode, headers, body, isBase64Encoded }` which the gateway then delivers via `instance._http_gateway.response_handler(null, envelope)`.
 
 ---
 

@@ -6,8 +6,8 @@
 'use strict';
 
 
-const GatewayLoader = require('helper-http-gateway');
-const AdapterLoader = require('helper-http-gateway-adapter-aws-apigateway');
+const HttpGateway                  = require('../../js-server-helper-http-gateway/http-gateway.js');
+const HttpGatewayAdapterAwsApiGateway = require('../adapter.js');
 
 
 /********************************************************************
@@ -16,7 +16,7 @@ The gateway is wired with the AWS API Gateway adapter so test
 handlers can invoke gateway methods directly against real API
 Gateway v2.0 event fixtures.
 
-@return {Object} - { Lib, gateway }
+@return {Object} - { Lib, httpGateway }
 *********************************************************************/
 module.exports = function loader () {
 
@@ -41,9 +41,9 @@ module.exports = function loader () {
 
   // ==================== HTTP GATEWAY (WITH ADAPTER) ================ //
 
-  const gateway = GatewayLoader(Lib, { ADAPTER: AdapterLoader });
+  const httpGateway = HttpGateway(Lib, { ADAPTER: HttpGatewayAdapterAwsApiGateway });
 
 
-  return { Lib: Lib, gateway: gateway };
+  return { Lib: Lib, httpGateway: httpGateway };
 
 };

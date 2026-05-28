@@ -77,7 +77,7 @@ If you set cookies yourself using raw `Set-Cookie` headers rather than `buildCoo
 
 ### Multipart or form-data not supported
 
-This module does **not** support `multipart/form-data` request bodies. Sending a multipart request results in an empty `instance.http_request.post`. The body is not parsed and no error is raised.
+This module does **not** support `multipart/form-data` request bodies. Sending a multipart request results in an empty `instance.http_request.body`. The body is not parsed and no error is raised.
 
 Use `application/json` or `application/x-www-form-urlencoded` for all POST data. Multipart support will be added in a future version via a dedicated adapter-level option. The current contract is intentionally scoped to text payloads.
 
@@ -96,9 +96,7 @@ This module follows Superloom conventions. It uses the factory loader pattern, d
 Install as a peer dependency through your project's loader pattern. See [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md) for the loader pattern and [npmrc setup](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md) for GitHub Packages registry configuration.
 
 ```javascript
-const GatewayLoader = require('@superloomdev/js-server-helper-http-gateway');
-
-const Gateway = GatewayLoader(Lib, {
+const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')
 });
 ```
@@ -127,8 +125,8 @@ The gateway's own tests use the in-process stub adapter which satisfies the thre
 
 | Adapter | Test approach | Test count |
 |---|---|---|
-| [`adapter-express`](../js-server-helper-http-gateway-adapter-express) | Real Express 5 server on a random free port, hit with native `fetch`. Real `express.json`, `express.urlencoded`, `cookie-parser` middleware exercised | 54 |
-| [`adapter-aws-apigateway`](../js-server-helper-http-gateway-adapter-aws-apigateway) | 23 real API Gateway v2.0 event fixtures (6 copied verbatim from `aws/aws-lambda-go events/testdata`, 17 hand-written) piped through the full adapter→gateway pipeline | 66 |
+| [`adapter-express`](../js-server-helper-http-gateway-adapter-express) | Real Express 5 server on a random free port, hit with native `fetch`. Real `express.json`, `express.urlencoded`, `cookie-parser` middleware exercised | 80 |
+| [`adapter-aws-apigateway`](../js-server-helper-http-gateway-adapter-aws-apigateway) | 23 real API Gateway v2.0 event fixtures (6 copied verbatim from `aws/aws-lambda-go events/testdata`, 17 hand-written) piped through the full adapter→gateway pipeline | 93 |
 
 ## License
 

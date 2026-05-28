@@ -14,9 +14,9 @@
 //   js-server-helper-http-gateway-adapter-express
 //
 // Adapter contract (3 methods every adapter must implement):
-//   loadHttpDataToInstance(instance, raw_request, raw_context, response_callback)
-//   buildHttpResponseObject(status, headers, body)
-//   getHttpRequestCountryCode(instance)  -> String | null
+//   extractRequest(raw_request, raw_context, response_callback)
+//   buildResponseEnvelope(status, headers, body)
+//   getCountryCode(headers)  -> String | null
 //
 // Compatibility: Node.js 24+
 'use strict';
@@ -69,6 +69,7 @@ module.exports = function loader (shared_libs, config) {
   // Instantiate the adapter. CONFIG.ADAPTER is the factory function passed
   // in by the caller; it extracts its own slice from CONFIG.ADAPTER_CONFIG.
   const adapter = CONFIG.ADAPTER(Lib, CONFIG, ERRORS);
+  validateAdapterContract(Lib, adapter);
 
   // Construct internal parts. All parts use the uniform (Lib, CONFIG, ERRORS)
   // signature; unused args are accepted for future extensibility.
@@ -109,9 +110,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
     /********************************************************************
     Initialize HTTP request data in instance from raw runtime data.
-    Delegates to the configured adapter which normalizes the wire-format
-    into instance.http_request, instance.http_response, and
-    instance.gateway_response_callback.
+    Delegates to the configured adapter which normalizes the wire-format.
+    Gateway then writes the normalized request data onto instance.
 
     @param {Object}   instance          - Per-request instance to populate
     @param {Object}   raw_request       - Raw request from runtime (event / req)
@@ -122,7 +122,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     *********************************************************************/
     initHttpRequestData: function (instance, raw_request, raw_context, response_callback) {
 
-      adapter.loadHttpDataToInstance(instance, raw_request, raw_context, response_callback);
+      const normalized = adapter.extractRequest(raw_request, raw_context, response_callback);
+
+      instance.http_request = {
+        headers: normalized.headers,
+        cookies: normalized.cookies,
+        query  : normalized.query,
+        body   : normalized.body,
+        params : normalized.params,
+        method : normalized.method,
+        url    : normalized.url
+      };
+
+      instance._http_gateway = {
+        response_handler: normalized.response_handler
+      };
 
     },
 
@@ -226,9 +240,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
       }
 
-      const response = adapter.buildHttpResponseObject(status, final_headers, body);
+      const response = adapter.buildResponseEnvelope(status, final_headers, body);
 
-      instance.gateway_response_callback(null, response);
+      instance._http_gateway.response_handler(null, response);
 
       return true;
 
@@ -355,7 +369,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     *********************************************************************/
     getRequestCountryCode: function (instance) {
 
-      return adapter.getHttpRequestCountryCode(instance);
+      return adapter.getCountryCode(instance.http_request.headers);
 
     },
 
@@ -505,3 +519,34 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
 };
 /////////////////////////// createInterface END ////////////////////////////////
+
+
+/********************************************************************
+Validate that an instantiated adapter exposes the required method
+contract. Throws at startup when any method is missing so runtime
+requests never hit a partially-implemented adapter.
+
+@param {Object} Lib     - Dependency container (Utils)
+@param {Object} adapter - Instantiated adapter object
+
+@return {void}
+*********************************************************************/
+const validateAdapterContract = function (Lib, adapter) {
+
+  const required = [
+    'extractRequest',
+    'buildResponseEnvelope',
+    'getCountryCode'
+  ];
+
+  required.forEach(function (name) {
+
+    if (Lib.Utils.isNullOrUndefined(adapter[name]) || !Lib.Utils.isFunction(adapter[name])) {
+      throw new Error(
+        '[js-server-helper-http-gateway] Invalid adapter contract: missing method `' + name + '`'
+      );
+    }
+
+  });
+
+};

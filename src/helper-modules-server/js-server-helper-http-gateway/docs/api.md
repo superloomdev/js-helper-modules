@@ -20,7 +20,7 @@ Complete function reference for `@superloomdev/js-server-helper-http-gateway`. A
 
 ### initHttpRequestData(instance, raw_request, raw_context, response_callback)
 
-Initialize HTTP request data in the instance from raw runtime data. Delegates to the configured adapter which normalizes the wire-format into `instance.http_request`, `instance.http_response`, and `instance.gateway_response_callback`.
+Initialize HTTP request data in the instance from raw runtime data. Delegates to the configured adapter which returns normalized request fields. Gateway writes those fields into `instance.http_request` and stores an internal response handler under `instance._http_gateway.response_handler`.
 
 **Parameters:**
 
@@ -405,17 +405,17 @@ const parts = Gateway.getUrlParts('http://www.abc.example.co.uk:8080/path');
 
 Every runtime adapter implements three methods. The gateway calls these; application code does not.
 
-### loadHttpDataToInstance(instance, raw_request, raw_context, response_callback)
+### extractRequest(raw_request, raw_context, response_callback)
 
-Populate the instance with normalized request data from the raw runtime input. The adapter extracts headers, query params, path params, and body from the runtime-specific format and writes them into `instance.http_request`.
+Return normalized request data from the raw runtime input. The adapter extracts headers, query params, path params, and body from the runtime-specific format and returns them with a runtime response handler.
 
-### buildHttpResponseObject(status, headers, body)
+### buildResponseEnvelope(status, headers, body)
 
 Build the runtime-specific response envelope. Returns an object suitable for the runtime (for example, API Gateway response format or Express res object).
 
-### getHttpRequestCountryCode(instance)
+### getCountryCode(headers)
 
-Return the viewer country code if the runtime can supply it (for example, CloudFront). Returns `null` when unavailable.
+Return the viewer country code if the runtime can supply it (for example, CloudFront). Input is the normalized request headers map. Returns `null` when unavailable.
 
 ---
 

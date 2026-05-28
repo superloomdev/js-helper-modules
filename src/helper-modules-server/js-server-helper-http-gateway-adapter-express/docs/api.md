@@ -11,7 +11,7 @@ Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-expr
 
 ## Conventions
 
-**Stateless singleton.** The adapter is a single module-level object with no per-request state. All request data lives on the gateway's `instance` parameter.
+**Stateless singleton.** The adapter is a single module-level object with no per-request state. It returns normalized request data for the gateway to write into `instance`.
 
 **Loader contract.** The adapter is a factory function. Pass it as `CONFIG.ADAPTER` to the gateway. The gateway calls it once at construction time and reuses the returned adapter object for every request.
 
@@ -19,39 +19,37 @@ Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-expr
 
 ## Adapter Contract
 
-### loadHttpDataToInstance(instance, req, context, res)
+### extractRequest(req, context, res)
 
-Normalize an Express `req` object into `instance.http_request` and wire `res` as the gateway's response callback. Called by `Gateway.initHttpRequestData`.
+Normalize an Express `req` object into a plain request object and return a `response_handler` closure. Called by `Gateway.initHttpRequestData`.
 
 **Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `instance` | `Object` | Yes | Per-request instance to populate |
 | `req` | `Object` | Yes | Express request |
 | `context` | `*` | No | Unused (accepted for adapter contract) |
 | `res` | `Object` | Yes | Express response |
 
-**Populates on `instance`:**
+**Returns object fields:**
 
 | Field | Source | Type |
 |-------|--------|------|
-| `http_request.method` | `req.method` (uppercased) | `String` |
-| `http_request.headers` | `req.headers` (already lowercased by Node http) | `Object` |
-| `http_request.get` | `req.query` | `Object` |
-| `http_request.post` | `req.body` (or `{}` if absent) | `Object` |
-| `http_request.path` | `req.params` | `Object` |
-| `http_request.cookies` | `req.cookies` if present, else parsed from `Cookie` header | `Object` |
-| `http_response.cookies` | `{}` (filled later by `setCookie`) | `Object` |
-| `gateway_response_callback` | Wraps `res.status().set().send()` | `Function` |
+| `method` | `req.method` (uppercased) | `String` |
+| `headers` | `req.headers` (already lowercased by Node http) | `Object` |
+| `query` | `req.query` | `Object` |
+| `body` | `req.body` (or `{}` if absent) | `Object` |
+| `params` | `req.params` | `Object` |
+| `cookies` | `req.cookies` if present, else parsed from `Cookie` header | `Object` |
+| `response_handler` | Wraps `res.status().set().send()` | `Function` |
 
-**Returns:** `void`
+Gateway writes these returned fields into `instance.http_request` and stores the handler at `instance._http_gateway.response_handler`.
 
 ---
 
-### buildHttpResponseObject(status, headers, body)
+### buildResponseEnvelope(status, headers, body)
 
-Build the response envelope. The gateway uses this to assemble the final payload before invoking `gateway_response_callback`.
+Build the response envelope. The gateway uses this to assemble the final payload before invoking `instance._http_gateway.response_handler`.
 
 **Parameters:**
 
@@ -74,7 +72,7 @@ Build the response envelope. The gateway uses this to assemble the final payload
 
 ---
 
-### getHttpRequestCountryCode(instance)
+### getCountryCode(headers)
 
 Returns the viewer country code if a CDN forwards it.
 
@@ -89,8 +87,8 @@ Express has no native CDN layer, so this adapter **always returns `null`**. Proj
 When `Gateway.returnHttpResponse(instance, status, headers, body)` is called:
 
 1. Gateway merges caller-supplied headers over its defaults (`Cache-Control: max-age=0`, `Content-Type: application/json`)
-2. Gateway calls `adapter.buildHttpResponseObject(status, merged_headers, body)`
-3. Gateway calls `instance.gateway_response_callback(null, envelope)`
+2. Gateway calls `adapter.buildResponseEnvelope(status, merged_headers, body)`
+3. Gateway calls `instance._http_gateway.response_handler(null, envelope)`
 4. Adapter's callback invokes `res.status(envelope.statusCode).set(envelope.headers).send(envelope.body)`
 
 This is fully synchronous from the application's perspective.
@@ -101,7 +99,7 @@ This is fully synchronous from the application's perspective.
 
 Reading: prefers `req.cookies` (populated by `cookie-parser` middleware). Falls back to parsing the raw `Cookie` header when `cookie-parser` is not installed.
 
-Writing: `Gateway.setCookie(instance, name, value, life_seconds)` builds a `Set-Cookie` string with `Path=/`, `Secure`, optional `SameSite=None`, and `Max-Age`. The adapter then sets it as a response header. See [`../../js-server-helper-http-gateway/docs/api.md`](../../js-server-helper-http-gateway/docs/api.md) for the full cookie API.
+Writing: `Gateway.buildCookie(...)` returns a descriptor object. `Gateway.returnHttpResponse(...)` serializes it into `Set-Cookie` headers at the gateway boundary. See [`../../js-server-helper-http-gateway/docs/api.md`](../../js-server-helper-http-gateway/docs/api.md) for the full cookie API.
 
 ---
 
@@ -115,8 +113,7 @@ const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adap
 function CustomAdapter (Lib, config, errors) {
   const base = ExpressAdapter(Lib, config, errors);
   return Object.assign({}, base, {
-    getHttpRequestCountryCode: function (instance) {
-      const headers = instance.http_request && instance.http_request.headers;
+    getCountryCode: function (headers) {
       return (headers && headers['cloudfront-viewer-country']) || null;
     }
   });
@@ -125,4 +122,4 @@ function CustomAdapter (Lib, config, errors) {
 const Gateway = GatewayLoader(Lib, { ADAPTER: CustomAdapter });
 ```
 
-The other two contract methods (`loadHttpDataToInstance`, `buildHttpResponseObject`) inherit from the base adapter unchanged.
+The other two contract methods (`extractRequest`, `buildResponseEnvelope`) inherit from the base adapter unchanged.

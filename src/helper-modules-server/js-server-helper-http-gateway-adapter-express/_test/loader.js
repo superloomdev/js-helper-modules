@@ -6,8 +6,8 @@
 'use strict';
 
 
-const GatewayLoader = require('helper-http-gateway');
-const AdapterLoader = require('helper-http-gateway-adapter-express');
+const HttpGateway                   = require('../../js-server-helper-http-gateway/http-gateway.js');
+const HttpGatewayAdapterExpressHttp = require('../adapter.js');
 
 
 /********************************************************************
@@ -15,7 +15,7 @@ Build the dependency container and a configured gateway for tests.
 The gateway is wired with the Express adapter so registered Express
 route handlers can invoke gateway methods directly.
 
-@return {Object} - { Lib, gateway }
+@return {Object} - { Lib, httpGateway }
 *********************************************************************/
 module.exports = function loader () {
 
@@ -40,9 +40,9 @@ module.exports = function loader () {
 
   // ==================== HTTP GATEWAY (WITH ADAPTER) ================ //
 
-  const gateway = GatewayLoader(Lib, { ADAPTER: AdapterLoader });
+  const httpGateway = HttpGateway(Lib, { ADAPTER: HttpGatewayAdapterExpressHttp });
 
 
-  return { Lib: Lib, gateway: gateway };
+  return { Lib: Lib, httpGateway: httpGateway };
 
 };

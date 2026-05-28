@@ -6,9 +6,9 @@
 // Each function operates on the data it is given with no side effects.
 //
 // Adapter contract:
-//   loadHttpDataToInstance(instance, raw_request, raw_context, response_callback)
-//   buildHttpResponseObject(status, headers, body)
-//   getHttpRequestCountryCode(instance) -> String | null
+//   extractRequest(raw_request, raw_context, response_callback)
+//   buildResponseEnvelope(status, headers, body)
+//   getCountryCode(headers) -> String | null
 'use strict';
 
 
@@ -46,37 +46,33 @@ module.exports = function createStubAdapter () {
       method   {String} - 'GET' | 'POST' | ...
       url      {String} - Request URL path with query string
 
-    @param {Object}   instance          - Per-request instance to populate
     @param {Object}   raw_request       - Pre-normalized request data
     @param {Object}   raw_context       - Ignored by this adapter
-    @param {Function} response_callback - Stored on instance as gateway_response_callback
+    @param {Function} response_callback - Runtime callback wrapper target
+
+    @return {Object} - Normalized request payload + response_handler
     ******************************************************************/
-    loadHttpDataToInstance: function (instance, raw_request, _raw_context, response_callback) {
+    extractRequest: function (raw_request, _raw_context, response_callback) {
 
       const req = raw_request || {};
 
-      instance.http_request = {
+      return {
         headers: req.headers || {},
         cookies: req.cookies || {},
         query  : req.query   || {},
         body   : req.body    || {},
         params : req.params  || {},
         method : req.method  || null,
-        url    : req.url     || ''
-      };
+        url    : req.url     || '',
+        response_handler: function (err, response) {
 
-      instance.http_response = {
-        cookies: {}
-      };
+          if (typeof response_callback === 'function') {
+            response_callback(err, response);
+          }
 
-      instance.gateway_response_callback = function (err, response) {
+          sent.push(response);
 
-        if (typeof response_callback === 'function') {
-          response_callback(err, response);
         }
-
-        sent.push(response);
-
       };
 
     },
@@ -92,7 +88,7 @@ module.exports = function createStubAdapter () {
 
     @return {Object} - { status, headers, body }
     ******************************************************************/
-    buildHttpResponseObject: function (status, headers, body) {
+    buildResponseEnvelope: function (status, headers, body) {
 
       // Normalize body to string (same rule as AWS adapter)
       let normalized_body = '';
@@ -124,11 +120,11 @@ module.exports = function createStubAdapter () {
     Return the viewer country code if the adapter can supply it.
     The memory adapter never has this information - returns null.
 
-    @param {Object} _instance - Per-request instance (unused)
+    @param {Object} _headers - Request headers (unused)
 
     @return {null}
     ******************************************************************/
-    getHttpRequestCountryCode: function (_instance) {
+    getCountryCode: function (_headers) {
       return null;
     }
 

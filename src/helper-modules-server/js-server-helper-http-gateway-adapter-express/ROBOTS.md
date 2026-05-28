@@ -27,16 +27,16 @@ const Gateway = GatewayLoader(Lib, {
 The adapter exposes the 3-method contract consumed by the gateway. Application code does **not** call the adapter directly — it calls `Gateway.*` methods which delegate.
 
 ```javascript
-// Populate instance.http_request, http_response, gateway_response_callback
-adapter.loadHttpDataToInstance(instance, req, _context, res);
-// Returns: void
+// Extract normalized request data for the gateway to write into instance
+adapter.extractRequest(req, _context, res);
+// Returns: { headers, cookies, query, body, params, method, url, response_handler }
 
 // Build the response envelope sent through res.status().set().send()
-adapter.buildHttpResponseObject(status, headers, body);
+adapter.buildResponseEnvelope(status, headers, body);
 // Returns: Object - { statusCode, headers, body }
 
 // Country code from a CDN layer (Express has none)
-adapter.getHttpRequestCountryCode(instance);
+adapter.getCountryCode(headers);
 // Returns: null (always)
 ```
 
@@ -54,7 +54,7 @@ adapter.getHttpRequestCountryCode(instance);
 | `cookies` | `req.cookies` if set by `cookie-parser`, else parsed from raw `Cookie` header |
 | `url` | `req.originalUrl` or `req.url` |
 
-`gateway_response_callback` is wired to `res.status(code).set(headers).send(body)`.
+`response_handler` is wired to `res.status(code).set(headers).send(body)`.
 
 ---
 
@@ -94,7 +94,7 @@ Tested against Express 5.x (`express@^5.2.0`).
 
 **Country code always `null`.** Express has no CDN layer. Projects fronting Express with CloudFront should implement a custom adapter that reads the forwarded `CloudFront-Viewer-Country` header.
 
-**Response is sent synchronously.** `buildHttpResponseObject` returns the envelope; the gateway then calls `gateway_response_callback` which invokes `res.send`. There is no async write path.
+**Response is sent synchronously.** `buildResponseEnvelope` returns the envelope; the gateway then calls `instance._http_gateway.response_handler` which invokes `res.send`. There is no async write path.
 
 ---
 

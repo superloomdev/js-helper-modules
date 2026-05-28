@@ -86,4 +86,4 @@ See [`payload-format.md`](payload-format.md) for the supported v2.0 schema and t
 
 ## Country Code
 
-`getHttpRequestCountryCode` reads `instance.http_request.headers['cloudfront-viewer-country']`. To enable it, configure CloudFront in front of API Gateway and forward the `CloudFront-Viewer-Country` header. No adapter configuration is required.
+`getCountryCode` reads `headers['cloudfront-viewer-country']` from the normalized request headers map. To enable it, configure CloudFront in front of API Gateway and forward the `CloudFront-Viewer-Country` header. No adapter configuration is required.

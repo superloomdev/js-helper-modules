@@ -50,12 +50,12 @@ Key shape:
 
 | Adapter output | v2.0 source |
 |---|---|
-| `http_request.method` | `event.requestContext.http.method` (uppercased) |
-| `http_request.path` | `event.pathParameters` |
-| `http_request.get` | `event.queryStringParameters` |
-| `http_request.headers` | `event.headers` (keys lowercased) |
-| `http_request.cookies` | parsed from `event.cookies` array |
-| `http_request.post` | parsed from `event.body` (see [Body Parsing](#body-parsing)) |
+| `method` | `event.requestContext.http.method` (uppercased) |
+| `params` | `event.pathParameters` |
+| `query` | `event.queryStringParameters` |
+| `headers` | `event.headers` (keys lowercased) |
+| `cookies` | parsed from `event.cookies` array |
+| `body` | parsed from `event.body` (see [Body Parsing](#body-parsing)) |
 
 ---
 
@@ -87,7 +87,7 @@ instance.http_request.cookies === { session: 'abc-123', theme: 'dark' };
 
 When `event.cookies` is missing, empty, or not an array, `cookies` is `{}`.
 
-For setting cookies in the response, use `Gateway.setCookie(...)`. The adapter places the rendered `Set-Cookie` string in the response envelope's `headers['Set-Cookie']`.
+For setting cookies in the response, use `Gateway.buildCookie(...)` and pass the descriptor to `Gateway.returnHttpResponse(...)`. The adapter places the rendered `Set-Cookie` string in the response envelope's `headers['Set-Cookie']`.
 
 ---
 
@@ -106,7 +106,7 @@ If `event.isBase64Encoded === true`, the body is base64-decoded **before** conte
 
 The adapter rejects JSON arrays and primitive root values at the body level:
 
-| Root JSON | `instance.http_request.post` |
+| Root JSON | `instance.http_request.body` |
 |---|---|
 | `{"k":"v","n":7}` | `{ k: 'v', n: 7 }` |
 | `[1,2,3]` | `{}` (array rejected) |
@@ -118,7 +118,7 @@ This rule applies **only to the root**. Array and primitive values **inside** a 
 { "tags": ["a", "b"], "count": 7, "enabled": true }
 ```
 
-→ `post.tags === ['a','b']`, `post.count === 7`, `post.enabled === true`. The constraint exists so `instance.http_request.post` is always a flat key/value map that `setArgsFromRequest` can index by name. To submit an array as the entire request payload, wrap it in an object (`{"items":[...]}`).
+→ `body.tags === ['a','b']`, `body.count === 7`, `body.enabled === true`. The constraint exists so `instance.http_request.body` is always a key/value map that `setArgsFromRequest` can index by name. To submit an array as the entire request payload, wrap it in an object (`{"items":[...]}`).
 
 ### Multipart
 
@@ -153,7 +153,7 @@ API Gateway **REST API** uses payload format v1.0 with a completely different sh
 If a v1.0 event is passed to this adapter:
 
 - `instance.http_request.method` will be `null` (no `requestContext.http`)
-- `headers`, `get`, `path`, `body` may still populate from the v1.0 fields if shapes happen to match, but **the behavior is undefined and untested**
+- `headers`, `query`, `params`, `body` may still populate from the v1.0 fields if shapes happen to match, but **the behavior is undefined and untested**
 - The adapter does **not** throw
 
 The test suite includes an `apigw-v2-custom-authorizer-v1-request.json` fixture (actually a v1.0 REST API authorizer payload) specifically to verify that a v1.0 event degrades gracefully rather than crashing. Group A in `_test/test.js` documents this boundary.
