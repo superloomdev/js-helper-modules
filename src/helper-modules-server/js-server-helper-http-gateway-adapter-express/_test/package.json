@@ -15,9 +15,7 @@
     "helper-http-gateway": "npm:@superloomdev/js-server-helper-http-gateway@^1.0.0",
     "helper-http-gateway-adapter-express": "file:../",
     "express": "^5.2.0",
-    "cookie-parser": "^1.4.7",
-    "cookie": "1.x",
-    "tldts": "5.x"
+    "cookie-parser": "^1.4.7"
   },
   "scripts": {
     "test": "node --test test.js"

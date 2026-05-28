@@ -13,9 +13,7 @@
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
     "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0",
     "helper-http-gateway": "npm:@superloomdev/js-server-helper-http-gateway@^1.0.0",
-    "helper-http-gateway-adapter-aws-apigateway": "file:../",
-    "cookie": "1.x",
-    "tldts": "5.x"
+    "helper-http-gateway-adapter-aws-apigateway": "file:../"
   },
   "scripts": {
     "test": "node --test test.js"

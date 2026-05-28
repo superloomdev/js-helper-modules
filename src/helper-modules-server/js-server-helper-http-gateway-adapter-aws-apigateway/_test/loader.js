@@ -6,7 +6,7 @@
 'use strict';
 
 
-const HttpGateway                  = require('../../js-server-helper-http-gateway/http-gateway.js');
+const HttpGateway                  = require('helper-http-gateway');
 const HttpGatewayAdapterAwsApiGateway = require('../adapter.js');
 
 
