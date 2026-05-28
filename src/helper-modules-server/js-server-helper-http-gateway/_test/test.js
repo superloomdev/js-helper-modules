@@ -30,8 +30,8 @@ const { describe, it } = require('node:test');
 
 const { Lib } = require('./loader')();
 
-const GatewayLoader    = require('helper-http-gateway');
-const StubAdapter      = require('./stub-adapter.js');
+const HttpGateway              = require('helper-http-gateway');
+const HttpGatewayAdapterStub   = require('./stub-adapter.js');
 const CookiesFactory   = require('../parts/cookies.js');
 const ParamsFactory    = require('../parts/params.js');
 const UrlPartsFactory  = require('../parts/url-parts.js');
@@ -46,7 +46,7 @@ function buildInstance () {
 }
 
 function buildGateway (adapter_factory) {
-  return GatewayLoader(Lib, { ADAPTER: adapter_factory });
+  return HttpGateway(Lib, { ADAPTER: adapter_factory });
 }
 
 function makeAdapterFactory (adapter) {
@@ -54,7 +54,7 @@ function makeAdapterFactory (adapter) {
 }
 
 function buildGatewayWithMemory () {
-  const { adapter, sent } = StubAdapter();
+  const { adapter, sent } = HttpGatewayAdapterStub();
   const gateway = buildGateway(makeAdapterFactory(adapter));
   return { gateway, adapter, sent };
 }
@@ -77,24 +77,24 @@ describe('loader validation', function () {
 
   it('throws when ADAPTER is missing', function () {
     assert.throws(function () {
-      GatewayLoader(Lib, {});
+      HttpGateway(Lib, {});
     }, /CONFIG\.ADAPTER must be an adapter factory function/);
   });
 
   it('throws when ADAPTER is a string', function () {
     assert.throws(function () {
-      GatewayLoader(Lib, { ADAPTER: 'aws-apigateway' });
+      HttpGateway(Lib, { ADAPTER: 'aws-apigateway' });
     }, /CONFIG\.ADAPTER must be an adapter factory function/);
   });
 
   it('throws when ADAPTER is null', function () {
     assert.throws(function () {
-      GatewayLoader(Lib, { ADAPTER: null });
+      HttpGateway(Lib, { ADAPTER: null });
     }, /CONFIG\.ADAPTER must be an adapter factory function/);
   });
 
   it('succeeds with a valid adapter factory', function () {
-    const { adapter } = StubAdapter();
+    const { adapter } = HttpGatewayAdapterStub();
     assert.doesNotThrow(function () {
       buildGateway(makeAdapterFactory(adapter));
     });
