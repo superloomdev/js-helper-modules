@@ -7,7 +7,7 @@
 
 
 const HttpGateway                   = require('helper-http-gateway');
-const HttpGatewayAdapterExpressHttp = require('../adapter.js');
+const HttpGatewayAdapterExpressHttp = require('helper-http-gateway-adapter-express');
 
 
 /********************************************************************

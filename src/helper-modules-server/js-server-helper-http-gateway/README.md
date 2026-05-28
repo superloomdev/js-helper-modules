@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
-An incoming HTTP gateway for Node.js servers. Normalizes raw runtime request data into a per-request instance and writes responses back through runtime-specific adapters.  Part of [Superloom](https://superloom.dev).
+An incoming HTTP gateway for Node.js servers. Normalizes raw runtime request data into a per-request instance and writes responses back through runtime-specific adapters. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 

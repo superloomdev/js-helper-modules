@@ -7,7 +7,7 @@
 
 
 const HttpGateway                  = require('helper-http-gateway');
-const HttpGatewayAdapterAwsApiGateway = require('../adapter.js');
+const HttpGatewayAdapterAwsApiGateway = require('helper-http-gateway-adapter-aws-apigateway');
 
 
 /********************************************************************

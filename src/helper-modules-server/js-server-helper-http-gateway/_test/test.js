@@ -30,7 +30,7 @@ const { describe, it } = require('node:test');
 
 const { Lib } = require('./loader')();
 
-const GatewayLoader    = require('../http-gateway.js');
+const GatewayLoader    = require('helper-http-gateway');
 const StubAdapter      = require('./stub-adapter.js');
 const CookiesFactory   = require('../parts/cookies.js');
 const ParamsFactory    = require('../parts/params.js');
