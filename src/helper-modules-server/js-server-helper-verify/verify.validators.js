@@ -1,8 +1,9 @@
-// Info: Config and options validators for js-server-helper-verify.
-// Called once (validateConfig) at construction time from the loader, and
-// per-call (validateCreateOptions, validateVerifyOptions) from _Verify private
-// methods. Throws on the first violation so misconfiguration and programmer
-// errors surface immediately.
+// Info: Config, options, and store contract validators for js-server-helper-verify.
+// Called once at construction time from the loader: validateConfig (CONFIG shape)
+// and validateStoreContract (instantiated store method checks). Called per-call
+// from _Verify private methods: validateCreateOptions and validateVerifyOptions.
+// Throws on the first violation so misconfiguration and programmer errors
+// surface immediately.
 //
 // Singleton: Lib is injected once by the loader. Node.js require
 // cache guarantees the same reference on every subsequent require.
@@ -143,6 +144,42 @@ const Validators = {
     if (!Lib.Utils.isInteger(options.max_fail_count) || options.max_fail_count <= 0) {
       throw new TypeError('[js-server-helper-verify] options.max_fail_count must be a positive integer');
     }
+
+  },
+
+
+  // ~~~~~~~~~~~~~~~~~~~~ Store Contract Validators ~~~~~~~~~~~~~~~~~~~~
+  // Validate that an instantiated store exposes the required method
+  // contract. Called once at construction from the loader. A missing required
+  // store method is a setup error.
+
+  /********************************************************************
+  Validate that an instantiated store exposes the required method
+  contract. Throws at startup when any method is missing so runtime
+  requests never hit a partially-implemented store.
+
+    @param {Object} store - Instantiated store object
+
+    @return {void}
+  *********************************************************************/
+  validateStoreContract: function (store) {
+
+    const required = [
+      'getRecord',
+      'setRecord',
+      'incrementFailCount',
+      'deleteRecord'
+    ];
+
+    required.forEach(function (name) {
+
+      if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
+        throw new Error(
+          '[js-server-helper-verify] Invalid store contract: missing method `' + name + '`'
+        );
+      }
+
+    });
 
   }
 

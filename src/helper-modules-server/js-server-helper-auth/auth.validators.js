@@ -1,7 +1,9 @@
-// Info: All validators for js-server-helper-auth. Two concerns in one place:
-//   1. Config validators  - called once at construction time, take CONFIG as a
-//      parameter, throw Error on misconfiguration.
-//   2. Options validators - called per request, take caller options as a
+// Info: All validators for js-server-helper-auth. Three concerns in one place:
+//   1. Config validators         - called once at construction time, take CONFIG
+//      as a parameter, throw Error on misconfiguration.
+//   2. Store contract validators - called once at construction time after store
+//      instantiation, take store as a parameter, throw Error on missing methods.
+//   3. Options validators        - called per request, take caller options as a
 //      parameter, throw TypeError on programmer errors.
 //
 // Singleton: Lib is injected once by the loader. Public and private objects
@@ -172,6 +174,45 @@ const Validators = {
       }
 
     }
+
+  },
+
+
+  // ~~~~~~~~~~~~~~~~~~~~ Store Contract Validators ~~~~~~~~~~~~~~~~~~~~
+  // Called once at construction time from the auth.js loader, immediately
+  // after the store has been instantiated. Validates the returned store
+  // object exposes the required method contract. Throw Error - a missing
+  // store method is a setup error.
+
+  /********************************************************************
+  Validate that an instantiated store exposes the required method
+  contract. Throws at startup when any method is missing so runtime
+  requests never hit a partially-implemented store.
+
+    @param {Object} store - Instantiated store object
+
+    @return {void}
+  *********************************************************************/
+  validateStoreContract: function (store) {
+
+    const required = [
+      'getSession',
+      'setSession',
+      'listSessionsByActor',
+      'deleteSession',
+      'deleteSessions',
+      'updateSessionActivity'
+    ];
+
+    required.forEach(function (name) {
+
+      if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
+        throw new Error(
+          '[js-server-helper-auth] Invalid store contract: missing method `' + name + '`'
+        );
+      }
+
+    });
 
   },
 

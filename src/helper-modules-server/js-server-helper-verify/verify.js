@@ -62,6 +62,9 @@ module.exports = function loader (shared_libs, config) {
   // slice from CONFIG.STORE_CONFIG internally.
   const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
 
+  // Validate store contract immediately so missing methods fail at startup
+  Validators.validateStoreContract(store);
+
   // Build the public interface, closing over Lib, CONFIG, ERRORS, Validators, and store
   return createInterface(Lib, CONFIG, ERRORS, Validators, store);
 

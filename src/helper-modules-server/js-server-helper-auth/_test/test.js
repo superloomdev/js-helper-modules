@@ -103,6 +103,74 @@ describe('loader validation', function () {
 
   });
 
+  it('throws when store is missing a required method', function () {
+
+    // Create a store missing 'deleteSessions'
+    const partialStore = {
+      getSession: async function () {},
+      setSession: async function () {},
+      listSessionsByActor: async function () {},
+      deleteSession: async function () {},
+      updateSessionActivity: async function () {}
+      // missing deleteSessions
+    };
+
+    assert.throws(function () {
+      AuthFactory(Lib, {
+        STORE: function () { return partialStore; },
+        STORE_CONFIG: valid_store_config,
+        ACTOR_TYPE: 'user'
+      });
+    }, /Invalid store contract: missing method `deleteSessions`/);
+
+  });
+
+  it('throws when store method is not a function', function () {
+
+    // Create a store with non-function 'setSession'
+    const badStore = {
+      getSession: async function () {},
+      setSession: 'not-a-function',
+      listSessionsByActor: async function () {},
+      deleteSession: async function () {},
+      deleteSessions: async function () {},
+      updateSessionActivity: async function () {}
+    };
+
+    assert.throws(function () {
+      AuthFactory(Lib, {
+        STORE: function () { return badStore; },
+        STORE_CONFIG: valid_store_config,
+        ACTOR_TYPE: 'user'
+      });
+    }, /Invalid store contract: missing method `setSession`/);
+
+  });
+
+  it('accepts a store with all required methods', function () {
+
+    // Create a valid store with all 6 required methods
+    const validStore = {
+      getSession: async function () {},
+      setSession: async function () {},
+      listSessionsByActor: async function () {},
+      deleteSession: async function () {},
+      deleteSessions: async function () {},
+      updateSessionActivity: async function () {}
+    };
+
+    // Should not throw
+    const auth = AuthFactory(Lib, {
+      STORE: function () { return validStore; },
+      STORE_CONFIG: valid_store_config,
+      ACTOR_TYPE: 'user'
+    });
+
+    assert.ok(auth);
+    assert.equal(typeof auth.createSession, 'function');
+
+  });
+
 });
 
 

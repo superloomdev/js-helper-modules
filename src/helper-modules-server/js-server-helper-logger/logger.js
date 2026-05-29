@@ -68,6 +68,9 @@ module.exports = function loader (shared_libs, config) {
   // Instantiate the store with canonical signature (matching verify/auth pattern)
   const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
 
+  // Validate store contract immediately so missing methods fail at startup
+  Validators.validateStoreContract(store);
+
   return createInterface(Lib, CONFIG, ERRORS, Validators, store);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////

@@ -74,6 +74,9 @@ module.exports = function loader (shared_libs, config) {
   // by the caller; it extracts its own slice from CONFIG.STORE_CONFIG.
   const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
 
+  // Validate store contract immediately so missing methods fail at startup
+  Validators.validateStoreContract(store);
+
   // Construct internal parts. Every parts factory takes the uniform
   // (Lib, CONFIG, ERRORS) signature so a new part can be added without
   // touching this loader. Parts that need another part (today only

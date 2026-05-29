@@ -145,6 +145,100 @@ describe('Loader validation', function () {
     assert.equal(typeof logger.setupNewStore, 'function');
   });
 
+
+  it('throws when store is missing addLog method', function () {
+
+    // Store missing 'addLog'
+    const partialStore = {
+      getLogsByEntity: async function () {},
+      getLogsByActor: async function () {}
+    };
+
+    assert.throws(function () {
+      LoggerFactory(Lib, {
+        STORE: function () { return partialStore; },
+        STORE_CONFIG: {}
+      });
+    }, /Invalid store contract: missing method `addLog`/);
+
+  });
+
+
+  it('throws when store is missing getLogsByEntity method', function () {
+
+    // Store missing 'getLogsByEntity'
+    const partialStore = {
+      addLog: async function () {},
+      getLogsByActor: async function () {}
+    };
+
+    assert.throws(function () {
+      LoggerFactory(Lib, {
+        STORE: function () { return partialStore; },
+        STORE_CONFIG: {}
+      });
+    }, /Invalid store contract: missing method `getLogsByEntity`/);
+
+  });
+
+
+  it('throws when store is missing getLogsByActor method', function () {
+
+    // Store missing 'getLogsByActor'
+    const partialStore = {
+      addLog: async function () {},
+      getLogsByEntity: async function () {}
+    };
+
+    assert.throws(function () {
+      LoggerFactory(Lib, {
+        STORE: function () { return partialStore; },
+        STORE_CONFIG: {}
+      });
+    }, /Invalid store contract: missing method `getLogsByActor`/);
+
+  });
+
+
+  it('throws when a store method is not a function', function () {
+
+    // Store with non-function 'addLog'
+    const badStore = {
+      addLog: 'not-a-function',
+      getLogsByEntity: async function () {},
+      getLogsByActor: async function () {}
+    };
+
+    assert.throws(function () {
+      LoggerFactory(Lib, {
+        STORE: function () { return badStore; },
+        STORE_CONFIG: {}
+      });
+    }, /Invalid store contract: missing method `addLog`/);
+
+  });
+
+
+  it('accepts a store with all required methods', function () {
+
+    // Minimal valid store - only the required contract methods
+    const validStore = {
+      addLog: async function () {},
+      getLogsByEntity: async function () {},
+      getLogsByActor: async function () {}
+    };
+
+    // Should not throw
+    const logger = LoggerFactory(Lib, {
+      STORE: function () { return validStore; },
+      STORE_CONFIG: {}
+    });
+
+    assert.ok(logger);
+    assert.equal(typeof logger.log, 'function');
+
+  });
+
 });
 
 

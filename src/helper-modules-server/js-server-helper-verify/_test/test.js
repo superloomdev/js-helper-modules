@@ -150,7 +150,77 @@ describe('Loader validation', function () {
 
 
 // ============================================================================
-// 2. CHARSETS - createPin / createCode / createToken
+// 2. STORE CONTRACT VALIDATION
+// ============================================================================
+
+describe('Store contract validation', function () {
+
+  it('throws when store is missing getRecord method', function () {
+    const store = createMemoryStore();
+    delete store.getRecord;
+
+    assert.throws(function () {
+      buildVerify(store);
+    }, /Invalid store contract: missing method `getRecord`/);
+  });
+
+
+  it('throws when store is missing setRecord method', function () {
+    const store = createMemoryStore();
+    delete store.setRecord;
+
+    assert.throws(function () {
+      buildVerify(store);
+    }, /Invalid store contract: missing method `setRecord`/);
+  });
+
+
+  it('throws when store is missing incrementFailCount method', function () {
+    const store = createMemoryStore();
+    delete store.incrementFailCount;
+
+    assert.throws(function () {
+      buildVerify(store);
+    }, /Invalid store contract: missing method `incrementFailCount`/);
+  });
+
+
+  it('throws when store is missing deleteRecord method', function () {
+    const store = createMemoryStore();
+    delete store.deleteRecord;
+
+    assert.throws(function () {
+      buildVerify(store);
+    }, /Invalid store contract: missing method `deleteRecord`/);
+  });
+
+
+  it('throws when store method is not a function', function () {
+    const store = createMemoryStore();
+    store.getRecord = 'not a function';
+
+    assert.throws(function () {
+      buildVerify(store);
+    }, /Invalid store contract: missing method `getRecord`/);
+  });
+
+
+  it('accepts a valid store with all required methods', function () {
+    const store = createMemoryStore();
+
+    // Should not throw
+    const verify = buildVerify(store);
+
+    assert.strictEqual(typeof verify.createPin, 'function');
+    assert.strictEqual(typeof verify.verify, 'function');
+  });
+
+});
+
+
+
+// ============================================================================
+// 4. CHARSETS - createPin / createCode / createToken
 // ============================================================================
 
 describe('createPin', function () {
@@ -288,7 +358,7 @@ describe('Cooldown enforcement', function () {
 
 
 // ============================================================================
-// 4. VERIFY - HAPPY PATH
+// 6. VERIFY - HAPPY PATH
 // ============================================================================
 
 describe('verify - happy path', function () {
@@ -341,7 +411,7 @@ describe('verify - happy path', function () {
 
 
 // ============================================================================
-// 5. VERIFY - REJECTION PATHS
+// 7. VERIFY - REJECTION PATHS
 // ============================================================================
 
 describe('verify - rejection paths', function () {
@@ -496,7 +566,7 @@ describe('Adapter error propagation', function () {
 
 
 // ============================================================================
-// 7. INPUT VALIDATION
+// 9. INPUT VALIDATION
 // ============================================================================
 
 describe('Input validation (programmer errors throw, never returned as envelope)', function () {
@@ -569,7 +639,7 @@ describe('Input validation (programmer errors throw, never returned as envelope)
 
 
 // ============================================================================
-// 8. CLEANUP EXPIRED RECORDS
+// 9. CLEANUP EXPIRED RECORDS
 // ============================================================================
 
 describe('cleanupExpiredRecords', function () {
@@ -663,7 +733,7 @@ describe('cleanupExpiredRecords', function () {
 
 
 // ============================================================================
-// 9. FACTORY PATTERN
+// 11. FACTORY PATTERN
 // ============================================================================
 
 describe('Factory pattern', function () {
