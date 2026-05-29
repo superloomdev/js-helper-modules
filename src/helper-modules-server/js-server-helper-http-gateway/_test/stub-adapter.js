@@ -1,4 +1,4 @@
-// Info: Stub adapter for js-server-helper-http-gateway tests.
+// Info: Stub adapter factory for js-server-helper-http-gateway tests.
 // Satisfies the 3-method adapter contract with minimal fixed-output behavior
 // so http-gateway.js can be tested without any real runtime (Lambda or Express).
 // This is not a simulation of API Gateway or Express internals - it only
@@ -13,124 +13,127 @@
 
 
 /********************************************************************
-Create a new stub adapter. Returns an object matching the 3-method
-adapter contract consumed by http-gateway.js. Not a simulation of
-any real runtime - exists only to satisfy the contract interface
-and capture outbound responses for test assertions.
+Create a new stub adapter factory. Returns a factory function that
+mimics the real adapter loader signature (Lib, CONFIG, ERRORS) => Adapter,
+plus a `sent` array for capturing outbound responses.
 
-Each call produces an independent stub with its own `sent` array
+Each call produces an independent factory with its own `sent` array
 so tests can run in isolation.
 
-@return {Object} - { adapter, sent }
-  adapter {Object} - The 3-method adapter stub
-  sent    {Array}  - Array of { status, headers, body } for each response sent
+@return {Object} - { factory, sent }
+  factory {Function} - (Lib, CONFIG, ERRORS) => Adapter
+  sent    {Array}    - Array of { status, headers, body } for each response sent
 *********************************************************************/
-module.exports = function createStubAdapter () {
+module.exports = function makeStubAdapter () {
 
   const sent = [];
 
-  const adapter = {
+  const factory = function (_Lib, _CONFIG, _ERRORS) {
 
-    /******************************************************************
-    Populate instance with normalized HTTP request data from a plain
-    raw_request object. The raw_request shape mirrors what real adapters
-    produce after normalization - tests pass it pre-normalized so they
-    can focus on gateway logic, not wire-format parsing.
+    return {
 
-    raw_request shape (all keys optional; defaults to empty):
-      headers  {Object} - Lowercase header key -> value map
-      query    {Object} - Query-string parameters
-      body     {Object} - Request body parameters
-      params   {Object} - Path parameters
-      cookies  {Object} - Parsed cookies
-      method   {String} - 'GET' | 'POST' | ...
-      url      {String} - Request URL path with query string
+      /****************************************************************
+      Populate instance with normalized HTTP request data from a plain
+      raw_request object. The raw_request shape mirrors what real adapters
+      produce after normalization - tests pass it pre-normalized so they
+      can focus on gateway logic, not wire-format parsing.
 
-    @param {Object}   raw_request       - Pre-normalized request data
-    @param {Object}   raw_context       - Ignored by this adapter
-    @param {Function} response_callback - Runtime callback wrapper target
+      raw_request shape (all keys optional; defaults to empty):
+        headers  {Object} - Lowercase header key -> value map
+        query    {Object} - Query-string parameters
+        body     {Object} - Request body parameters
+        params   {Object} - Path parameters
+        cookies  {Object} - Parsed cookies
+        method   {String} - 'GET' | 'POST' | ...
+        url      {String} - Request URL path with query string
 
-    @return {Object} - Normalized request payload + response_handler
-    ******************************************************************/
-    extractRequest: function (raw_request, _raw_context, response_callback) {
+      @param {Object}   raw_request       - Pre-normalized request data
+      @param {Object}   raw_context       - Ignored by this adapter
+      @param {Function} response_callback - Runtime callback wrapper target
 
-      const req = raw_request || {};
+      @return {Object} - Normalized request payload + response_handler
+      ****************************************************************/
+      extractRequest: function (raw_request, _raw_context, response_callback) {
 
-      return {
-        headers: req.headers || {},
-        cookies: req.cookies || {},
-        query  : req.query   || {},
-        body   : req.body    || {},
-        params : req.params  || {},
-        method : req.method  || null,
-        url    : req.url     || '',
-        response_handler: function (err, response) {
+        const req = raw_request || {};
 
-          if (typeof response_callback === 'function') {
-            response_callback(err, response);
+        return {
+          headers: req.headers || {},
+          cookies: req.cookies || {},
+          query  : req.query   || {},
+          body   : req.body    || {},
+          params : req.params  || {},
+          method : req.method  || null,
+          url    : req.url     || '',
+          response_handler: function (err, response) {
+
+            if (typeof response_callback === 'function') {
+              response_callback(err, response);
+            }
+
+            sent.push(response);
+
+          }
+        };
+
+      },
+
+
+      /****************************************************************
+      Build a response envelope. Returns a plain object that mirrors the
+      shape real adapters produce, suitable for test assertions.
+
+      @param {Integer} status  - HTTP status code
+      @param {Object}  headers - Response headers map
+      @param {*}       body    - Response body (string, object, or Buffer)
+
+      @return {Object} - { status, headers, body }
+      ****************************************************************/
+      buildResponseEnvelope: function (status, headers, body) {
+
+        // Normalize body to string (same rule as AWS adapter)
+        let normalized_body = '';
+
+        if (body !== null && body !== undefined) {
+
+          if (Buffer.isBuffer(body)) {
+            normalized_body = body.toString('base64');
+          }
+          else if (typeof body === 'object') {
+            normalized_body = JSON.stringify(body);
+          }
+          else {
+            normalized_body = String(body);
           }
 
-          sent.push(response);
-
-        }
-      };
-
-    },
-
-
-    /******************************************************************
-    Build a response envelope. Returns a plain object that mirrors the
-    shape real adapters produce, suitable for test assertions.
-
-    @param {Integer} status  - HTTP status code
-    @param {Object}  headers - Response headers map
-    @param {*}       body    - Response body (string, object, or Buffer)
-
-    @return {Object} - { status, headers, body }
-    ******************************************************************/
-    buildResponseEnvelope: function (status, headers, body) {
-
-      // Normalize body to string (same rule as AWS adapter)
-      let normalized_body = '';
-
-      if (body !== null && body !== undefined) {
-
-        if (Buffer.isBuffer(body)) {
-          normalized_body = body.toString('base64');
-        }
-        else if (typeof body === 'object') {
-          normalized_body = JSON.stringify(body);
-        }
-        else {
-          normalized_body = String(body);
         }
 
+        return {
+          status : status,
+          headers: headers || {},
+          body   : normalized_body
+        };
+
+      },
+
+
+      /****************************************************************
+      Return the viewer country code if the adapter can supply it.
+      The memory adapter never has this information - returns null.
+
+      @param {Object} _headers - Request headers (unused)
+
+      @return {null}
+      ****************************************************************/
+      getCountryCode: function (_headers) {
+        return null;
       }
 
-      return {
-        status : status,
-        headers: headers || {},
-        body   : normalized_body
-      };
-
-    },
-
-
-    /******************************************************************
-    Return the viewer country code if the adapter can supply it.
-    The memory adapter never has this information - returns null.
-
-    @param {Object} _headers - Request headers (unused)
-
-    @return {null}
-    ******************************************************************/
-    getCountryCode: function (_headers) {
-      return null;
-    }
+    };
 
   };
 
 
-  return { adapter: adapter, sent: sent };
+  return { factory: factory, sent: sent };
 
 };

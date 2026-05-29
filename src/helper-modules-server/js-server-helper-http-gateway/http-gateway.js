@@ -2,10 +2,8 @@
 // data into a per-request instance object and writes responses back through
 // the runtime-specific adapter (API Gateway, Express, ...).
 //
-// Singleton: Lib and CONFIG are injected once by the loader. Public and
-// private objects are declared at module scope - Node.js require cache
-// guarantees the same reference is returned on every subsequent require.
-// No factory needed.
+// Factory pattern: each loader call returns an independent HttpGateway
+// interface bound to one adapter. Stateless - no per-instance resources.
 //
 // Multipart/form-data is NOT supported. Use application/json or
 // application/x-www-form-urlencoded for POST bodies.
@@ -24,24 +22,6 @@
 'use strict';
 
 
-// Shared dependency injected by loader
-let Lib;
-
-// Domain config injected by loader
-let CONFIG;
-
-// Internal error catalog (frozen, loaded at require time)
-const ERRORS = require('./http-gateway.errors');
-
-// Validators module (singleton, set by loader after Lib is available)
-let Validators;
-
-// Instantiated adapter (set by loader; implements 3-method contract)
-let adapter;
-
-// Instantiated internal parts (set by loader)
-let Parts;
-
 // Known HTTP status codes for returnHttpStatus
 const STATUS_CODES = Object.freeze({
   not_modified : 304,
@@ -52,47 +32,13 @@ const STATUS_CODES = Object.freeze({
 });
 
 
-///////////////////////////Private Functions START/////////////////////////////
-
-/********************************************************************
-Validate that an instantiated adapter exposes the required method
-contract. Throws at startup when any method is missing so runtime
-requests never hit a partially-implemented adapter.
-
-@param {Object} Lib     - Dependency container (Utils)
-@param {Object} adapter - Instantiated adapter object
-
-@return {void}
-*********************************************************************/
-const validateAdapterContract = function (Lib, adapter) {
-
-  const required = [
-    'extractRequest',
-    'buildResponseEnvelope',
-    'getCountryCode'
-  ];
-
-  required.forEach(function (name) {
-
-    if (Lib.Utils.isNullOrUndefined(adapter[name]) || !Lib.Utils.isFunction(adapter[name])) {
-      throw new Error(
-        '[js-server-helper-http-gateway] Invalid adapter contract: missing method `' + name + '`'
-      );
-    }
-
-  });
-
-};//////////////////////////Private Functions END///////////////////////////////
-
-
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and CONFIG, initializes Validators,
-adapter, and Parts, then returns the module-scope HttpGateway object
-directly. Node.js require cache guarantees a single instance across
-the process.
+Factory loader. One call = one independent HttpGateway instance
+bound to one adapter. Validates CONFIG at construction time so
+misconfiguration fails at startup, not on first request.
 
 @param {Object} shared_libs - Lib container with Utils, Debug, Instance
 @param {Object} config      - Overrides merged over module config defaults
@@ -101,103 +47,114 @@ the process.
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
-  // Inject shared dependencies
-  Lib = {
+  const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
     Instance: shared_libs.Instance
   };
 
-  // Merge overrides over defaults
-  CONFIG = Object.assign(
+  const CONFIG = Object.assign(
     {},
     require('./http-gateway.config'),
     config || {}
   );
 
-  // Validate CONFIG early - throws on misconfiguration
-  Validators = require('./http-gateway.validators')(Lib);
+  const ERRORS = require('./http-gateway.errors');
+
+  const Validators = require('./http-gateway.validators')(Lib);
   Validators.validateConfig(CONFIG);
 
-  // Instantiate the adapter. CONFIG.ADAPTER is the factory function passed
-  // in by the caller; it extracts its own slice from CONFIG.ADAPTER_CONFIG.
-  adapter = CONFIG.ADAPTER(Lib, CONFIG, ERRORS);
-  validateAdapterContract(Lib, adapter);
+  const adapter = CONFIG.ADAPTER(Lib, CONFIG, ERRORS);
+  Validators.validateAdapterContract(adapter);
 
-  // Construct internal parts. All parts use the uniform (Lib, CONFIG, ERRORS)
-  // signature; unused args are accepted for future extensibility.
-  Parts = {
+  const Parts = {
     Cookies: require('./parts/cookies')(Lib, CONFIG, ERRORS),
     UrlParts: require('./parts/url-parts')(Lib, CONFIG, ERRORS),
     Params: require('./parts/params')(Lib, CONFIG, ERRORS)
   };
 
-  return HttpGateway;
+  return createInterface(Lib, CONFIG, ERRORS, Parts, adapter);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
 
 
-///////////////////////////Public Functions START//////////////////////////////
-const HttpGateway = {
+/////////////////////////// createInterface START //////////////////////////////
 
-  // ~~~~~~~~~~~~~~~~~~~~ Request Lifecycle ~~~~~~~~~~~~~~~~~~~~
-  // Initialize and inspect the per-request HTTP state on instance.
+/********************************************************************
+Build the public HttpGateway interface closed over Lib, CONFIG,
+ERRORS, Parts, and adapter.
 
-  /********************************************************************
-  Initialize HTTP request data in instance from raw runtime data.
-  Delegates to the configured adapter which normalizes the wire-format.
-  Gateway then writes the normalized request data onto instance.
+@param {Object} Lib     - Dependency container
+@param {Object} CONFIG  - Merged configuration
+@param {Object} ERRORS  - Error catalog
+@param {Object} Parts   - Instantiated parts (Cookies, UrlParts, Params)
+@param {Object} adapter - Instantiated adapter (3-method contract)
 
-  @param {Object}   instance          - Per-request instance to populate
-  @param {Object}   raw_request       - Raw request from runtime (event / req)
-  @param {Object}   raw_context       - Runtime execution context (ctx / null)
-  @param {Function} response_callback - Runtime response callback (cb / res)
+@return {Object} - Public HttpGateway interface
+*********************************************************************/
+const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
 
-  @return {void}
-  *********************************************************************/
-  initHttpRequestData: function (instance, raw_request, raw_context, response_callback) {
+  ///////////////////////////Public Functions START//////////////////////////////
+  const HttpGateway = {
 
-    const normalized = adapter.extractRequest(raw_request, raw_context, response_callback);
+    // ~~~~~~~~~~~~~~~~~~~~ Request Lifecycle ~~~~~~~~~~~~~~~~~~~~
+    // Initialize and inspect the per-request HTTP state on instance.
 
-    instance.http_request = {
-      headers: normalized.headers,
-      cookies: normalized.cookies,
-      query  : normalized.query,
-      body   : normalized.body,
-      params : normalized.params,
-      method : normalized.method,
-      url    : normalized.url
-    };
+    /********************************************************************
+    Initialize HTTP request data in instance from raw runtime data.
+    Delegates to the configured adapter which normalizes the wire-format.
+    Gateway then writes the normalized request data onto instance.
 
-    instance._http_gateway = {
-      response_handler: normalized.response_handler
-    };
+    @param {Object}   instance          - Per-request instance to populate
+    @param {Object}   raw_request       - Raw request from runtime (event / req)
+    @param {Object}   raw_context       - Runtime execution context (ctx / null)
+    @param {Function} response_callback - Runtime response callback (cb / res)
 
-  },
+    @return {void}
+    *********************************************************************/
+    initHttpRequestData: function (instance, raw_request, raw_context, response_callback) {
+
+      const normalized = adapter.extractRequest(raw_request, raw_context, response_callback);
+
+      instance.http_request = {
+        headers: normalized.headers,
+        cookies: normalized.cookies,
+        query  : normalized.query,
+        body   : normalized.body,
+        params : normalized.params,
+        method : normalized.method,
+        url    : normalized.url
+      };
+
+      instance._http_gateway = {
+        response_handler: normalized.response_handler
+      };
+
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Return true if the instance was initialized with HTTP request data.
 
   @param {Object} instance - Per-request instance
 
   @return {Boolean}
   *********************************************************************/
-  isHttpInstance: function (instance) {
+    isHttpInstance: function (instance) {
 
-    return (
-      !Lib.Utils.isNullOrUndefined(instance.http_request) &&
+      return (
+        !Lib.Utils.isNullOrUndefined(instance.http_request) &&
       instance.http_request !== false
-    );
+      );
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Parameter Extraction ~~~~~~~~~~~~~~~~~~~~
-  // Build typed, validated args from the normalized HTTP request data.
+    // ~~~~~~~~~~~~~~~~~~~~ Parameter Extraction ~~~~~~~~~~~~~~~~~~~~
+    // Build typed, validated args from the normalized HTTP request data.
 
-  /********************************************************************
+    /********************************************************************
   Build a typed, validated args object from the normalized HTTP request
   data in instance.http_request. See parts/params.js for the full param
   descriptor shape.
@@ -209,17 +166,17 @@ const HttpGateway = {
   @return {Array} [null, false]     - On required-param or validation failure
   @return {Array} [{Object}, false] - On invalidate_func failure
   *********************************************************************/
-  setArgsFromRequest: function (instance, params) {
+    setArgsFromRequest: function (instance, params) {
 
-    return Parts.Params.setArgsFromRequest(instance, params);
+      return Parts.Params.setArgsFromRequest(instance, params);
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Response Functions ~~~~~~~~~~~~~~~~~~~~
-  // Send responses back through the runtime adapter.
+    // ~~~~~~~~~~~~~~~~~~~~ Response Functions ~~~~~~~~~~~~~~~~~~~~
+    // Send responses back through the runtime adapter.
 
-  /********************************************************************
+    /********************************************************************
   Send an HTTP response back through the runtime callback.
   Merges default headers (Cache-Control, Content-Type) with caller-
   supplied headers, serializes any cookie descriptors into Set-Cookie
@@ -237,55 +194,55 @@ const HttpGateway = {
 
   @return {Boolean} - Always true
   *********************************************************************/
-  returnHttpResponse: function (instance, status, headers, cookies, body) {
+    returnHttpResponse: function (instance, status, headers, cookies, body) {
 
-    // Default headers
-    const final_headers = {
-      'Cache-Control': 'max-age=0',
-      'Content-Type': 'application/json'
-    };
+      // Default headers
+      const final_headers = {
+        'Cache-Control': 'max-age=0',
+        'Content-Type': 'application/json'
+      };
 
-    // Merge caller-supplied headers (they win over defaults)
-    if (!Lib.Utils.isNullOrUndefined(headers)) {
-      Object.assign(final_headers, headers);
-    }
+      // Merge caller-supplied headers (they win over defaults)
+      if (!Lib.Utils.isNullOrUndefined(headers)) {
+        Object.assign(final_headers, headers);
+      }
 
-    // Serialize cookie descriptors into Set-Cookie header strings
-    if (!Lib.Utils.isNullOrUndefined(cookies)) {
+      // Serialize cookie descriptors into Set-Cookie header strings
+      if (!Lib.Utils.isNullOrUndefined(cookies)) {
 
-      const ua = HttpGateway.getRequestUserAgent(instance);
+        const ua = HttpGateway.getRequestUserAgent(instance);
 
-      Object.keys(cookies).forEach(function (name) {
+        Object.keys(cookies).forEach(function (name) {
 
-        const c = cookies[name];
+          const c = cookies[name];
 
-        const opts = Object.assign(
-          { httpOnly: true, secure: true, sameSite: 'lax', path: '/' },
-          c.options,
-          { maxAge: c.ttl }
-        );
+          const opts = Object.assign(
+            { httpOnly: true, secure: true, sameSite: 'lax', path: '/' },
+            c.options,
+            { maxAge: c.ttl }
+          );
 
-        // Omit SameSite=None for browsers known to mishandle it
-        if (opts.sameSite === 'none' && Parts.Cookies.isSameSiteNoneIncompatible(ua)) {
-          delete opts.sameSite;
-        }
+          // Omit SameSite=None for browsers known to mishandle it
+          if (opts.sameSite === 'none' && Parts.Cookies.isSameSiteNoneIncompatible(ua)) {
+            delete opts.sameSite;
+          }
 
-        final_headers['Set-Cookie'] = Parts.Cookies.serialize(name, c.value, opts);
+          final_headers['Set-Cookie'] = Parts.Cookies.serialize(name, c.value, opts);
 
-      });
+        });
 
-    }
+      }
 
-    const response = adapter.buildResponseEnvelope(status, final_headers, body);
+      const response = adapter.buildResponseEnvelope(status, final_headers, body);
 
-    instance._http_gateway.response_handler(null, response);
+      instance._http_gateway.response_handler(null, response);
 
-    return true;
+      return true;
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Send a body-less HTTP status response back through the runtime callback.
 
   @param {Object} instance     - Per-request instance
@@ -294,14 +251,14 @@ const HttpGateway = {
 
   @return {Boolean} - Always true
   *********************************************************************/
-  returnHttpStatus: function (instance, status_name) {
+    returnHttpStatus: function (instance, status_name) {
 
-    return HttpGateway.returnHttpResponse(instance, STATUS_CODES[status_name]);
+      return HttpGateway.returnHttpResponse(instance, STATUS_CODES[status_name]);
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Send a 301 permanent redirect response back through the runtime callback.
 
   @param {Object} instance  - Per-request instance
@@ -309,35 +266,35 @@ const HttpGateway = {
 
   @return {Boolean} - Always true
   *********************************************************************/
-  returnHttpRedirect: function (instance, location) {
+    returnHttpRedirect: function (instance, location) {
 
-    return HttpGateway.returnHttpResponse(
-      instance,
-      301,
-      { 'Location': location }
-    );
+      return HttpGateway.returnHttpResponse(
+        instance,
+        301,
+        { 'Location': location }
+      );
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Send a 301 redirect to '/404' back through the runtime callback.
 
   @param {Object} instance - Per-request instance
 
   @return {Boolean} - Always true
   *********************************************************************/
-  returnHttpRedirect404: function (instance) {
+    returnHttpRedirect404: function (instance) {
 
-    return HttpGateway.returnHttpRedirect(instance, '/404');
+      return HttpGateway.returnHttpRedirect(instance, '/404');
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Request Accessors ~~~~~~~~~~~~~~~~~~~~
-  // Read transport-level metadata from the normalized request.
+    // ~~~~~~~~~~~~~~~~~~~~ Request Accessors ~~~~~~~~~~~~~~~~~~~~
+    // Read transport-level metadata from the normalized request.
 
-  /********************************************************************
+    /********************************************************************
   Get the client IP address from the request headers.
   Uses the x-forwarded-for header; returns the first IP in the chain
   (the originating client address).
@@ -346,36 +303,36 @@ const HttpGateway = {
 
   @return {String} - IP address string, or '' if not available
   *********************************************************************/
-  getRequestIPAddress: function (instance) {
+    getRequestIPAddress: function (instance) {
 
-    if ('x-forwarded-for' in instance.http_request.headers) {
-      return instance.http_request.headers['x-forwarded-for'].split(',', 1)[0].trim();
-    }
+      if ('x-forwarded-for' in instance.http_request.headers) {
+        return instance.http_request.headers['x-forwarded-for'].split(',', 1)[0].trim();
+      }
 
-    return '';
+      return '';
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Get the User-Agent string from the request headers.
 
   @param {Object} instance - Per-request instance
 
   @return {String} - User-Agent string, or '' if not present
   *********************************************************************/
-  getRequestUserAgent: function (instance) {
+    getRequestUserAgent: function (instance) {
 
-    if ('user-agent' in instance.http_request.headers) {
-      return instance.http_request.headers['user-agent'];
-    }
+      if ('user-agent' in instance.http_request.headers) {
+        return instance.http_request.headers['user-agent'];
+      }
 
-    return '';
+      return '';
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Get the Origin header from the request.
   Returns the scheme + host (e.g. 'https://api.example.com').
 
@@ -383,18 +340,18 @@ const HttpGateway = {
 
   @return {String} - Origin string, or '' if not present
   *********************************************************************/
-  getRequestOrigin: function (instance) {
+    getRequestOrigin: function (instance) {
 
-    if ('origin' in instance.http_request.headers) {
-      return instance.http_request.headers['origin'];
-    }
+      if ('origin' in instance.http_request.headers) {
+        return instance.http_request.headers['origin'];
+      }
 
-    return '';
+      return '';
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Get the viewer country code from the request.
   Availability depends on the adapter - adapters that cannot supply
   this (e.g. Express without a CDN) return null.
@@ -403,14 +360,14 @@ const HttpGateway = {
 
   @return {String|null} - ISO 3166-1 alpha-2 country code, or null
   *********************************************************************/
-  getRequestCountryCode: function (instance) {
+    getRequestCountryCode: function (instance) {
 
-    return adapter.getCountryCode(instance.http_request.headers);
+      return adapter.getCountryCode(instance.http_request.headers);
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Extract the Bearer token from the Authorization header.
   Returns the token string without the 'Bearer ' prefix, or null
   if the header is absent or does not start with 'Bearer '.
@@ -419,34 +376,34 @@ const HttpGateway = {
 
   @return {String|null} - Token string, or null
   *********************************************************************/
-  getBearerToken: function (instance) {
+    getBearerToken: function (instance) {
 
-    // Read the Authorization header
-    if (!('authorization' in instance.http_request.headers)) {
-      return null;
-    }
+      // Read the Authorization header
+      if (!('authorization' in instance.http_request.headers)) {
+        return null;
+      }
 
-    const header = instance.http_request.headers['authorization'];
+      const header = instance.http_request.headers['authorization'];
 
-    // Check for Bearer prefix (case-insensitive per RFC 6750)
-    // Minimum 8 chars: "Bearer " (7) + at least 1 char token
-    if (!Lib.Utils.isString(header) || !Lib.Utils.validateString(header, 8)) {
-      return null;
-    }
+      // Check for Bearer prefix (case-insensitive per RFC 6750)
+      // Minimum 8 chars: "Bearer " (7) + at least 1 char token
+      if (!Lib.Utils.isString(header) || !Lib.Utils.validateString(header, 8)) {
+        return null;
+      }
 
-    if (header.slice(0, 7).toLowerCase() !== 'bearer ') {
-      return null;
-    }
+      if (header.slice(0, 7).toLowerCase() !== 'bearer ') {
+        return null;
+      }
 
-    // Return the token portion after 'Bearer '
-    const token = header.slice(7);
+      // Return the token portion after 'Bearer '
+      const token = header.slice(7);
 
-    return token || null;
+      return token || null;
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Return true if the request is a CORS preflight (OPTIONS + Origin).
   A preflight request is an HTTP OPTIONS request with an Origin header,
   sent by browsers before cross-origin requests.
@@ -455,20 +412,20 @@ const HttpGateway = {
 
   @return {Boolean}
   *********************************************************************/
-  isPreflightRequest: function (instance) {
+    isPreflightRequest: function (instance) {
 
-    return (
-      instance.http_request.method === 'OPTIONS' &&
+      return (
+        instance.http_request.method === 'OPTIONS' &&
       'origin' in instance.http_request.headers
-    );
+      );
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Cookie Builder ~~~~~~~~~~~~~~~~~~~~
-  // Construct cookie descriptors for serialization at the gateway boundary.
+    // ~~~~~~~~~~~~~~~~~~~~ Cookie Builder ~~~~~~~~~~~~~~~~~~~~
+    // Construct cookie descriptors for serialization at the gateway boundary.
 
-  /********************************************************************
+    /********************************************************************
   Build a cookie descriptor object (or add to an existing one).
   The descriptor is a plain object keyed by cookie name — pass it as
   the 4th argument (cookies) to returnHttpResponse for serialization.
@@ -493,25 +450,25 @@ const HttpGateway = {
 
   @return {Object} - Cookie descriptor object
   *********************************************************************/
-  buildCookie: function (existing, name, value, ttl, options) {
+    buildCookie: function (existing, name, value, ttl, options) {
 
-    const descriptor = Lib.Utils.isNullOrUndefined(existing) ? {} : Object.assign({}, existing);
+      const descriptor = Lib.Utils.isNullOrUndefined(existing) ? {} : Object.assign({}, existing);
 
-    descriptor[name] = {
-      value  : value,
-      ttl    : ttl,
-      options: options || {}
-    };
+      descriptor[name] = {
+        value  : value,
+        ttl    : ttl,
+        options: options || {}
+      };
 
-    return descriptor;
+      return descriptor;
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Utilities ~~~~~~~~~~~~~~~~~~~~
-  // General-purpose HTTP helpers.
+    // ~~~~~~~~~~~~~~~~~~~~ Utilities ~~~~~~~~~~~~~~~~~~~~
+    // General-purpose HTTP helpers.
 
-  /********************************************************************
+    /********************************************************************
   Format a Unix timestamp (seconds) as an HTTP-date string.
   If no date is provided the current time is used.
 
@@ -522,18 +479,18 @@ const HttpGateway = {
 
   @return {String} - HTTP-date formatted string
   *********************************************************************/
-  getHttpTime: function (timestamp_seconds) {
+    getHttpTime: function (timestamp_seconds) {
 
-    if (!Lib.Utils.isNullOrUndefined(timestamp_seconds)) {
-      return new Date(timestamp_seconds * 1000).toUTCString();
-    }
+      if (!Lib.Utils.isNullOrUndefined(timestamp_seconds)) {
+        return new Date(timestamp_seconds * 1000).toUTCString();
+      }
 
-    return new Date().toUTCString();
+      return new Date().toUTCString();
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Extract the component parts of a URL.
 
   @param {String} url - Full URL string to parse
@@ -541,10 +498,14 @@ const HttpGateway = {
   @return {Object} - { sub_domain, domain, domain_without_tld, tld,
                        hostname, is_ip }
   *********************************************************************/
-  getUrlParts: function (url) {
+    getUrlParts: function (url) {
 
-    return Parts.UrlParts.getUrlParts(url);
+      return Parts.UrlParts.getUrlParts(url);
 
-  }
+    }
 
-};///////////////////////////Public Functions END//////////////////////////////
+  };///////////////////////////Public Functions END//////////////////////////////
+
+  return HttpGateway;
+
+};///////////////////////////// createInterface END /////////////////////////////

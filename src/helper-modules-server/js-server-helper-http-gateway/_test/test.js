@@ -49,14 +49,10 @@ function buildGateway (adapter_factory) {
   return HttpGateway(Lib, { ADAPTER: adapter_factory });
 }
 
-function makeAdapterFactory (adapter) {
-  return function () { return adapter; };
-}
-
 function buildGatewayWithMemory () {
-  const { adapter, sent } = HttpGatewayAdapterStub();
-  const gateway = buildGateway(makeAdapterFactory(adapter));
-  return { gateway, adapter, sent };
+  const { factory, sent } = HttpGatewayAdapterStub();
+  const gateway = buildGateway(factory);
+  return { gateway, factory, sent };
 }
 
 function initInstance (gateway, raw_request) {
@@ -94,9 +90,9 @@ describe('loader validation', function () {
   });
 
   it('succeeds with a valid adapter factory', function () {
-    const { adapter } = HttpGatewayAdapterStub();
+    const { factory } = HttpGatewayAdapterStub();
     assert.doesNotThrow(function () {
-      buildGateway(makeAdapterFactory(adapter));
+      buildGateway(factory);
     });
   });
 
@@ -107,7 +103,7 @@ describe('loader validation', function () {
     };
 
     assert.throws(function () {
-      buildGateway(makeAdapterFactory(bad_adapter));
+      buildGateway(function () { return bad_adapter; });
     }, /Invalid adapter contract: missing method `extractRequest`/);
   });
 
@@ -118,7 +114,7 @@ describe('loader validation', function () {
     };
 
     assert.throws(function () {
-      buildGateway(makeAdapterFactory(bad_adapter));
+      buildGateway(function () { return bad_adapter; });
     }, /Invalid adapter contract: missing method `buildResponseEnvelope`/);
   });
 
@@ -129,8 +125,36 @@ describe('loader validation', function () {
     };
 
     assert.throws(function () {
-      buildGateway(makeAdapterFactory(bad_adapter));
+      buildGateway(function () { return bad_adapter; });
     }, /Invalid adapter contract: missing method `getCountryCode`/);
+  });
+
+  it('factory contract: two gateways with different adapters are independent', function () {
+    // Build two independent stub factories with different getCountryCode behavior
+    const { factory: factoryA, sent: sentA } = HttpGatewayAdapterStub();
+    const { factory: factoryB, sent: sentB } = HttpGatewayAdapterStub();
+
+    // Build two gateways, each with its own factory
+    const gatewayA = buildGateway(factoryA);
+    const gatewayB = buildGateway(factoryB);
+
+    // Prove they are independent objects
+    assert.notStrictEqual(gatewayA, gatewayB);
+
+    // Prove each adapter captures to its own sent array
+    const { instance: instanceA } = initInstance(gatewayA, {});
+    gatewayA.returnHttpResponse(instanceA, 200, {}, {}, { message: 'A' });
+
+    const { instance: instanceB } = initInstance(gatewayB, {});
+    gatewayB.returnHttpResponse(instanceB, 200, {}, {}, { message: 'B' });
+
+    // Each sent array received exactly one response
+    assert.strictEqual(sentA.length, 1);
+    assert.strictEqual(sentB.length, 1);
+
+    // And they contain the correct distinct responses
+    assert.strictEqual(sentA[0].body, '{"message":"A"}');
+    assert.strictEqual(sentB[0].body, '{"message":"B"}');
   });
 
 });
