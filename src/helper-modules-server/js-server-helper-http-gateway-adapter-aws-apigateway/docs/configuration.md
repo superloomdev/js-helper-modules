@@ -11,18 +11,17 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 
 ## Loader Pattern
 
-The adapter is a factory function. Pass it as `CONFIG.ADAPTER` to the gateway:
+Pass the adapter's `require()` result as `CONFIG.ADAPTER` to the gateway singleton loader:
 
 ```javascript
-const GatewayLoader = require('@superloomdev/js-server-helper-http-gateway');
-const AwsAdapter    = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
 
-const Gateway = GatewayLoader(Lib, {
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: AwsAdapter
 });
 ```
 
-Pass the factory function itself (the result of `require()`), not the result of calling it. The gateway invokes it once at construction time with `(Lib, ADAPTER_CONFIG, errors)` and reuses the returned adapter object for every request.
+Pass the adapter itself (the result of `require()`), not the result of calling it. The gateway singleton loader invokes it once at construction time with `(Lib, ADAPTER_CONFIG, errors)` and reuses the returned adapter object for every request.
 
 ---
 
@@ -36,7 +35,7 @@ The AWS adapter accepts **no configuration**. All three loader parameters are un
 | `ADAPTER_CONFIG` (the `CONFIG.ADAPTER_CONFIG` you pass to the gateway) | No |
 | `errors` (the gateway's error catalog) | No |
 
-The parameters are accepted only to satisfy the adapter factory contract.
+The parameters are accepted only to satisfy the adapter contract.
 
 ---
 
@@ -51,11 +50,10 @@ This keeps the deployment artifact small. A typical Lambda function bundle that 
 ## Lambda Handler Pattern
 
 ```javascript
-const GatewayLoader = require('@superloomdev/js-server-helper-http-gateway');
-const AwsAdapter    = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
 
 // Build the gateway once at module scope so it survives across warm invocations:
-const Gateway = GatewayLoader(Lib, { ADAPTER: AwsAdapter });
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: AwsAdapter });
 
 exports.handler = function (event, context, callback) {
   const instance = Lib.Instance.initialize();

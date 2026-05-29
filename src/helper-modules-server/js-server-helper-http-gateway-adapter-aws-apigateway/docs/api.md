@@ -13,7 +13,7 @@ Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-aws-
 
 **Stateless singleton.** The adapter is a single module-level object with no per-request state. It returns normalized request data for the gateway to write into `instance`.
 
-**Loader contract.** The adapter is a factory function. Pass it as `CONFIG.ADAPTER` to the gateway. The gateway calls it once at construction time and reuses the returned adapter object for every request.
+**Loader contract.** Pass the adapter as `CONFIG.ADAPTER` to the gateway singleton loader. The gateway calls it once at construction time and reuses the returned adapter object for every request.
 
 ---
 
