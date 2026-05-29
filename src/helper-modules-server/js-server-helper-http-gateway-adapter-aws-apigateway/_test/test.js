@@ -31,7 +31,7 @@ const { describe, it } = require('node:test');
 
 
 const { Lib, httpGateway } = require('./loader')();
-const HttpGatewayAdapterAwsApiGateway = require('../adapter.js');
+const HttpGatewayAdapterAwsApiGateway = require('helper-http-gateway-adapter-aws-apigateway');
 
 
 // ============================================================================

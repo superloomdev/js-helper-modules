@@ -10,7 +10,7 @@ const { describe, it } = require('node:test');
 const { Lib } = require('./loader')();
 
 // Verify module under test - constructed per-case with its own adapter
-const VerifyLoader = require('../verify.js');
+const VerifyLoader = require('helper-verify');
 
 // In-process Map-backed store fixture (Tier-2 enabler)
 const createMemoryStore = require('./memory-store');

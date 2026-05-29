@@ -47,7 +47,7 @@ module.exports = function loader () {
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.MongoDB = require('../mongodb.js')(Lib, config_mongodb);
+  Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
 
 
   // Return runtime objects

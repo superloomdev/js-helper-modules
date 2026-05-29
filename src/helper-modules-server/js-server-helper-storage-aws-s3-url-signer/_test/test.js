@@ -5,7 +5,7 @@ const { describe, it } = require('node:test');
 const { strictEqual } = require('node:assert/strict');
 
 const { Lib, Config } = require('./loader.js');
-const S3UrlSigner = require('../s3-url-signer.js')(Lib, Config);
+const S3UrlSigner = require('helper-storage-aws-s3-url-signer')(Lib, Config);
 
 describe('S3UrlSigner', { concurrency: false }, function () {
 

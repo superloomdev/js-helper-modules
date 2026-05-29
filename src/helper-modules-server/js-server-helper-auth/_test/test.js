@@ -9,7 +9,7 @@ const { describe, it } = require('node:test');
 
 const { Lib } = require('./loader')();
 
-const AuthLoader         = require('../auth.js');
+const AuthLoader         = require('helper-auth');
 const MemoryStoreFactory = require('./memory-store');
 const ERRORS             = require('../auth.errors');
 const CONFIG_STUB        = {};

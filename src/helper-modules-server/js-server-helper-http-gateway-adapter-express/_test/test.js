@@ -842,7 +842,7 @@ describe('Group G - graceful error handling', function () {
 
 describe('Group H - adapter direct unit tests', function () {
 
-  const HttpGatewayAdapterExpressHttp = require('../adapter.js')(Lib, null, null);
+  const HttpGatewayAdapterExpressHttp = require('helper-http-gateway-adapter-express')(Lib, null, null);
 
   it('extractRequest returns normalized structure for minimal req', function () {
     const minimalReq = {

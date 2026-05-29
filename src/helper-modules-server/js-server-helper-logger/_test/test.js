@@ -13,7 +13,7 @@ const { describe, it } = require('node:test');
 
 
 const { Lib } = require('./loader')();
-const LoggerLoader = require('../logger.js');
+const LoggerLoader = require('helper-logger');
 const createMemoryStore = require('./memory-store');
 
 

@@ -8,7 +8,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
 const { Lib } = require('./loader')();
-const AuthLoader  = require('../auth.js');
+const AuthLoader  = require('helper-auth');
 const MemoryStore = require('./memory-store');
 
 
