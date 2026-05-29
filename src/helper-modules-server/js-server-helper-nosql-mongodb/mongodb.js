@@ -76,6 +76,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
   ///////////////////////////Public Functions START//////////////////////////////
   const MongoDB = {
 
+    // ~~~~~~~~~~~~~~~~~~~~ Convenience Functions ~~~~~~~~~~~~~~~~~~~~
+    // Single-record CRUD operations. getRecord, writeRecord, deleteRecord,
+    // and updateRecord provide the basic building blocks for document-level
+    // operations. All are upsert-friendly where applicable.
+
     /********************************************************************
     Get a single record from a collection by filter (typically _id).
 
@@ -286,6 +291,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Query and Scan ~~~~~~~~~~~~~~~~~~~~
+    // Multi-record reads with safety controls. query() and count() reject
+    // empty filters to prevent accidental full-collection operations.
+    // scan() permits empty filters for intentional full reads.
+
     /********************************************************************
     Query multiple records from a collection. Requires a non-empty filter
     to prevent accidental full-collection scans. Use scan() for intentional
@@ -468,6 +478,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Delete by Filter ~~~~~~~~~~~~~~~~~~~~
+    // MongoDB-unique filter-based bulk delete. No DynamoDB equivalent.
+    // Requires non-empty filter to prevent accidental full-collection deletion.
+
     /********************************************************************
     Delete multiple records from a single collection matching a filter.
     MongoDB-unique convenience function - no DynamoDB equivalent exists.
@@ -523,6 +537,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Batch Operations ~~~~~~~~~~~~~~~~~~~~
+    // Multi-collection operations that internally loop since MongoDB lacks
+    // native cross-collection batch commands. Consistent with DynamoDB interface.
 
     /********************************************************************
     Batch get multiple records by _id from one or more collections.
@@ -808,6 +826,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Transactions ~~~~~~~~~~~~~~~~~~~~
+    // Atomic multi-operation execution using MongoDB transactions.
+    // Requires replica set (Atlas has this by default; local Docker needs --replSet).
+
     /********************************************************************
     Execute multiple write operations atomically within a transaction.
     All operations succeed or all are rolled back.
@@ -874,6 +896,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Indexes ~~~~~~~~~~~~~~~~~~~~
+    // Collection-level index management. Idempotent createIndex is safe
+    // to call repeatedly at startup without worrying about duplicates.
+
     /********************************************************************
     Create (or verify) an index on a collection. Idempotent - MongoDB's
     createIndex is a no-op when an equivalent index already exists with
@@ -929,6 +955,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Connection ~~~~~~~~~~~~~~~~~~~~
+    // Lifecycle management. Graceful connection teardown for cleanup
+    // on shutdown or when switching database contexts.
 
     /********************************************************************
     Close the MongoDB connection for this instance.

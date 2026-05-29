@@ -66,6 +66,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   ///////////////////////////Public Functions START//////////////////////////////
   const Crypto = {
 
+    // ~~~~~~~~~~~~~~~~~~~~ Random and UUIDs ~~~~~~~~~~~~~~~~~~~~
+    // Cryptographically secure random generation and UUID helpers.
+
     /********************************************************************
     Generate cryptographically secure random string from a character set
 
@@ -154,6 +157,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Hashing ~~~~~~~~~~~~~~~~~~~~
+    // MD5 for checksums, SHA256-HMAC for secure keyed hashing.
+
     /********************************************************************
     Generate MD5 hash of a string (32 characters, hexadecimal)
 
@@ -186,6 +192,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ AES Encryption ~~~~~~~~~~~~~~~~~~~~
+    // Symmetric encryption using AES-128-CBC.
 
     /********************************************************************
     Encrypt a string using AES-128-CBC
@@ -233,6 +242,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Base Conversion ~~~~~~~~~~~~~~~~~~~~
+    // Integer <-> base36 conversion utilities.
+
     /********************************************************************
     Convert integer to base36 string
 
@@ -260,6 +272,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Base64 ~~~~~~~~~~~~~~~~~~~~
+    // Standard and URL-safe base64 encoding/decoding.
 
     /********************************************************************
     Convert string to base64

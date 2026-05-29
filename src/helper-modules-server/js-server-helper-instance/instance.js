@@ -62,6 +62,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   ///////////////////////////Public Functions START//////////////////////////////
   const Instance = {
 
+    // ~~~~~~~~~~~~~~~~~~~~ Lifecycle ~~~~~~~~~~~~~~~~~~~~
+    // Instance creation and state initialization.
+
     /********************************************************************
     Initialize a new request instance object.
     The instance is a lightweight reference passed to all functions during a request.
@@ -86,6 +89,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
+    // Cleanup queue management and execution.
 
     /********************************************************************
     Add a cleanup function to instance's cleanup queue.

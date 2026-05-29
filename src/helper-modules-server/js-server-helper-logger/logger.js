@@ -93,6 +93,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
   const Logger = {
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Write ~~~~~~~~~~~~~~~~~~~~
+    // Recording actions to the audit log. Fire-and-forget by default;
+    // compliance callers can opt into synchronous await.
+
     /********************************************************************
     Record one action log entry.
 
@@ -187,6 +191,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Read ~~~~~~~~~~~~~~~~~~~~
+    // Querying the audit log by entity (what happened to X) or by actor
+    // (what did Y do). Cursor pagination for large result sets.
+
     /********************************************************************
     List actions recorded for one entity, most-recent first.
 
@@ -261,6 +269,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Maintenance ~~~~~~~~~~~~~~~~~~~~
+    // Background cleanup and schema setup. cleanupExpiredLogs is a sweep
+    // for SQL stores; NoSQL backends handle TTL natively. setupNewStore
+    // idempotently creates tables and indexes where needed.
 
     /********************************************************************
     Delete records whose `expires_at` is in the past. Intended to run

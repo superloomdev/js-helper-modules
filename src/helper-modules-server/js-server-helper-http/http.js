@@ -60,6 +60,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
   ///////////////////////////Public Functions START//////////////////////////////
   const Http = {
 
+    // ~~~~~~~~~~~~~~~~~~~~ Core ~~~~~~~~~~~~~~~~~~~~
+    // Primary HTTP function that all convenience methods wrap.
+    // Handles auth, timeouts, content-type encoding, and response normalization.
+
     /********************************************************************
     Send HTTP request and return normalized JSON response.
     Supports GET, POST, PUT, DELETE, PATCH with various content types.
@@ -98,6 +102,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ Convenience Methods ~~~~~~~~~~~~~~~~~~~~
+    // HTTP verb wrappers that delegate to fetchJSON with appropriate defaults.
 
     /********************************************************************
     Send HTTP GET request and return normalized JSON response.

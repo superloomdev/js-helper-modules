@@ -55,6 +55,10 @@ const createInterface = function (Lib, CONFIG) {
   ///////////////////////////Public Functions START//////////////////////////////
   const Crypto = {
 
+    // ~~~~~~~~~~~~~~~~~~~~ Random and UUIDs ~~~~~~~~~~~~~~~~~~~~
+    // Cryptographically secure random generation and UUID helpers.
+    // Uses Web Crypto API when available, falls back to Math.random.
+
     /********************************************************************
   Generate random string from a character set.
   Uses Web Crypto when available, falls back to Math.random.
@@ -116,6 +120,9 @@ const createInterface = function (Lib, CONFIG) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Base64 Encoding ~~~~~~~~~~~~~~~~~~~~
+    // Standard base64 encode/decode for string data.
+
     /********************************************************************
   Convert UTF-8 string to base64
 
@@ -143,6 +150,10 @@ const createInterface = function (Lib, CONFIG) {
 
     },
 
+
+    // ~~~~~~~~~~~~~~~~~~~~ URL-Safe Base64 ~~~~~~~~~~~~~~~~~~~~
+    // Convert between standard base64 and URL-safe variant.
+    // URL-safe replaces + with -, / with _, and removes padding.
 
     /********************************************************************
   Convert standard base64 to URL-safe base64
