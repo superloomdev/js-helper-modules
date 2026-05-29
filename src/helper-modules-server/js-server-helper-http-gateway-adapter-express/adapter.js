@@ -52,60 +52,6 @@ Build the public Adapter interface closed over Lib.
 *********************************************************************/
 const createInterface = function (Lib) {
 
-  ////////////////////////////// Private Functions START ///////////////////////
-  const _Adapter = {
-
-    /********************************************************************
-    Parse a raw Cookie header string into a key/value map.
-    Used as fallback when cookie-parser middleware is not installed.
-
-    @param {String} cookie_header - Raw value of the Cookie header
-
-    @return {Object} - { name: value, ... }
-    *********************************************************************/
-    parseCookieHeader: function (cookie_header) {
-
-      // Initialize empty result map
-      const result = {};
-
-      // Guard: return empty object for invalid input
-      if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
-        return result;
-      }
-
-      // Split header into name=value pairs
-      const pairs = cookie_header.split(';');
-
-      // Parse each pair
-      for (let i = 0; i < pairs.length; i++) {
-
-        const pair = pairs[i].trim();
-        const eq_idx = pair.indexOf('=');
-
-        // Skip malformed pairs without an equals sign
-        if (eq_idx < 1) {
-          continue;
-        }
-
-        // Extract key and value
-        const key = pair.slice(0, eq_idx).trim();
-        const val = pair.slice(eq_idx + 1).trim();
-
-        // Store decoded cookie value
-        if (key) {
-          result[key] = decodeURIComponent(val);
-        }
-
-      }
-
-      return result;
-
-    }
-
-  };///////////////////////////// Private Functions END ////////////////////////
-
-
-
   ////////////////////////////// Public Functions START ////////////////////////
   const Adapter = {
 
@@ -262,6 +208,60 @@ const createInterface = function (Lib) {
     }
 
   };////////////////////////////// Public Functions END ////////////////////////
+
+
+
+  ////////////////////////////// Private Functions START ///////////////////////
+  const _Adapter = {
+
+    /********************************************************************
+    Parse a raw Cookie header string into a key/value map.
+    Used as fallback when cookie-parser middleware is not installed.
+
+    @param {String} cookie_header - Raw value of the Cookie header
+
+    @return {Object} - { name: value, ... }
+    *********************************************************************/
+    parseCookieHeader: function (cookie_header) {
+
+      // Initialize empty result map
+      const result = {};
+
+      // Guard: return empty object for invalid input
+      if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
+        return result;
+      }
+
+      // Split header into name=value pairs
+      const pairs = cookie_header.split(';');
+
+      // Parse each pair
+      for (let i = 0; i < pairs.length; i++) {
+
+        const pair = pairs[i].trim();
+        const eq_idx = pair.indexOf('=');
+
+        // Skip malformed pairs without an equals sign
+        if (eq_idx < 1) {
+          continue;
+        }
+
+        // Extract key and value
+        const key = pair.slice(0, eq_idx).trim();
+        const val = pair.slice(eq_idx + 1).trim();
+
+        // Store decoded cookie value
+        if (key) {
+          result[key] = decodeURIComponent(val);
+        }
+
+      }
+
+      return result;
+
+    }
+
+  };///////////////////////////// Private Functions END ////////////////////////
 
   return Adapter;
 

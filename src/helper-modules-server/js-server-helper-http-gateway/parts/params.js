@@ -51,7 +51,7 @@ module.exports = function loader (shared_libs, config, errors) {
 
 
 
-///////////////////////////Public Functions START//////////////////////////////
+/////////////////////////// Public Functions START ////////////////////////////
 const Params = {
 
   /********************************************************************
@@ -79,12 +79,12 @@ const Params = {
       invalidate_func {Function} - Must return falsy; truthy return is forwarded
                                    as the error: [err, false]
 
-    @param {Object}   instance - Per-request instance with http_request populated
-    @param {Object[]} params   - Array of parameter descriptor objects
+      @param {Object}   instance - Per-request instance with http_request populated
+      @param {Object[]} params   - Array of parameter descriptor objects
 
-    @return {Array} [null, {Object}]    - On success: [null, args]
-    @return {Array} [null, false]       - On required-param failure or validation failure
-    @return {Array} [{Object}, false]   - On invalidate_func failure: [err, false]
+      @return {Array} [null, {Object}]    - On success: [null, args]
+      @return {Array} [null, false]       - On required-param failure or validation failure
+      @return {Array} [{Object}, false]   - On invalidate_func failure: [err, false]
     *********************************************************************/
   setArgsFromRequest: function (instance, params) {
 
@@ -229,11 +229,11 @@ const Params = {
   }
 
 };
-////////////////////////////Public Functions END//////////////////////////////
+//////////////////////////// Public Functions END ////////////////////////////
 
 
 
-///////////////////////////Private Functions START/////////////////////////////
+/////////////////////////// Private Functions START ///////////////////////////
 
 // Map legacy method values to their new `in` equivalents
 const METHOD_TO_SOURCE = Object.freeze({
@@ -251,9 +251,9 @@ const _Params = {
   the `in` key (OpenAPI-aligned). Falls back to translating `method`
   (legacy GET/POST/HEADER/PATH/FIXED) into the equivalent `in` value.
 
-  @param {Object} param - Single parameter descriptor
+    @param {Object} param - Single parameter descriptor
 
-  @return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
+    @return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
   *********************************************************************/
   resolveSource: function (param) {
 
@@ -271,4 +271,4 @@ const _Params = {
 
   }
 
-};///////////////////////////Private Functions END//////////////////////////////
+};/////////////////////////// Private Functions END ///////////////////////////

@@ -106,12 +106,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Delegates to the configured adapter which normalizes the wire-format.
     Gateway then writes the normalized request data onto instance.
 
-    @param {Object}   instance          - Per-request instance to populate
-    @param {Object}   raw_request       - Raw request from runtime (event / req)
-    @param {Object}   raw_context       - Runtime execution context (ctx / null)
-    @param {Function} response_callback - Runtime response callback (cb / res)
+        @param {Object}   instance          - Per-request instance to populate
+        @param {Object}   raw_request       - Raw request from runtime (event / req)
+        @param {Object}   raw_context       - Runtime execution context (ctx / null)
+        @param {Function} response_callback - Runtime response callback (cb / res)
 
-    @return {void}
+        @return {void}
     *********************************************************************/
     initHttpRequestData: function (instance, raw_request, raw_context, response_callback) {
 
@@ -137,9 +137,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     /********************************************************************
     Return true if the instance was initialized with HTTP request data.
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {Boolean}
+        @return {Boolean}
     *********************************************************************/
     isHttpInstance: function (instance) {
 
@@ -159,12 +159,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     data in instance.http_request. See parts/params.js for the full param
     descriptor shape.
 
-    @param {Object}   instance - Per-request instance with http_request populated
-    @param {Object[]} params   - Array of parameter descriptor objects
+        @param {Object}   instance - Per-request instance with http_request populated
+        @param {Object[]} params   - Array of parameter descriptor objects
 
-    @return {Array} [null, {Object}]  - On success
-    @return {Array} [null, false]     - On required-param or validation failure
-    @return {Array} [{Object}, false] - On invalidate_func failure
+        @return {Array} [null, {Object}]  - On success
+        @return {Array} [null, false]     - On required-param or validation failure
+        @return {Array} [{Object}, false] - On invalidate_func failure
     *********************************************************************/
     setArgsFromRequest: function (instance, params) {
 
@@ -185,14 +185,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Param order mirrors the HTTP response sequence:
       status → headers → cookies → body
 
-    @param {Object}  instance         - Per-request instance
-    @param {Integer} status           - HTTP status code
-    @param {Object}  [headers]        - Optional additional response headers
-    @param {Object}  [cookies]        - Optional cookie descriptor object
+        @param {Object}  instance         - Per-request instance
+        @param {Integer} status           - HTTP status code
+        @param {Object}  [headers]        - Optional additional response headers
+        @param {Object}  [cookies]        - Optional cookie descriptor object
                                         built by buildCookie()
-    @param {Object}  [body]           - Optional response body
+        @param {Object}  [body]           - Optional response body
 
-    @return {Boolean} - Always true
+        @return {Boolean} - Always true
     *********************************************************************/
     returnHttpResponse: function (instance, status, headers, cookies, body) {
 
@@ -245,11 +245,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     /********************************************************************
     Send a body-less HTTP status response back through the runtime callback.
 
-    @param {Object} instance     - Per-request instance
-    @param {String} status_name  - One of: 'not_modified' | 'bad_request' |
+        @param {Object} instance     - Per-request instance
+        @param {String} status_name  - One of: 'not_modified' | 'bad_request' |
                                    'unauthorized' | 'not_found' | 'invalid_token'
 
-    @return {Boolean} - Always true
+        @return {Boolean} - Always true
     *********************************************************************/
     returnHttpStatus: function (instance, status_name) {
 
@@ -261,10 +261,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     /********************************************************************
     Send a 301 permanent redirect response back through the runtime callback.
 
-    @param {Object} instance  - Per-request instance
-    @param {String} location  - Redirect target URI
+        @param {Object} instance  - Per-request instance
+        @param {String} location  - Redirect target URI
 
-    @return {Boolean} - Always true
+        @return {Boolean} - Always true
     *********************************************************************/
     returnHttpRedirect: function (instance, location) {
 
@@ -280,9 +280,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     /********************************************************************
     Send a 301 redirect to '/404' back through the runtime callback.
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {Boolean} - Always true
+        @return {Boolean} - Always true
     *********************************************************************/
     returnHttpRedirect404: function (instance) {
 
@@ -299,9 +299,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Uses the x-forwarded-for header; returns the first IP in the chain
     (the originating client address).
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {String} - IP address string, or '' if not available
+        @return {String} - IP address string, or '' if not available
     *********************************************************************/
     getRequestIPAddress: function (instance) {
 
@@ -317,9 +317,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     /********************************************************************
     Get the User-Agent string from the request headers.
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {String} - User-Agent string, or '' if not present
+        @return {String} - User-Agent string, or '' if not present
     *********************************************************************/
     getRequestUserAgent: function (instance) {
 
@@ -336,9 +336,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Get the Origin header from the request.
     Returns the scheme + host (e.g. 'https://api.example.com').
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {String} - Origin string, or '' if not present
+        @return {String} - Origin string, or '' if not present
     *********************************************************************/
     getRequestOrigin: function (instance) {
 
@@ -356,9 +356,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Availability depends on the adapter - adapters that cannot supply
     this (e.g. Express without a CDN) return null.
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {String|null} - ISO 3166-1 alpha-2 country code, or null
+        @return {String|null} - ISO 3166-1 alpha-2 country code, or null
     *********************************************************************/
     getRequestCountryCode: function (instance) {
 
@@ -372,9 +372,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Returns the token string without the 'Bearer ' prefix, or null
     if the header is absent or does not start with 'Bearer '.
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {String|null} - Token string, or null
+        @return {String|null} - Token string, or null
     *********************************************************************/
     getBearerToken: function (instance) {
 
@@ -408,9 +408,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     A preflight request is an HTTP OPTIONS request with an Origin header,
     sent by browsers before cross-origin requests.
 
-    @param {Object} instance - Per-request instance
+        @param {Object} instance - Per-request instance
 
-    @return {Boolean}
+        @return {Boolean}
     *********************************************************************/
     isPreflightRequest: function (instance) {
 
@@ -436,19 +436,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     ttl = 0  means expire/clear the cookie immediately (Max-Age=0).
     ttl > 0  sets a persistent cookie that expires after that many seconds.
 
-    @param {Object|null} existing    - Previous buildCookie result to append
+        @param {Object|null} existing    - Previous buildCookie result to append
                                        to, or null to start a fresh object
-    @param {String}      name        - Cookie name
-    @param {String}      value       - Cookie value ('' to clear)
-    @param {Number}      ttl         - Lifetime in seconds (0 = expire now)
-    @param {Object}      [options]   - Optional attribute overrides
-    @param {Boolean}     [options.httpOnly]  - Default: true
-    @param {Boolean}     [options.secure]    - Default: true
-    @param {String}      [options.sameSite]  - Default: 'lax'
-    @param {String}      [options.path]      - Default: '/'
-    @param {String}      [options.domain]    - Default: unset
+        @param {String}      name        - Cookie name
+        @param {String}      value       - Cookie value ('' to clear)
+        @param {Number}      ttl         - Lifetime in seconds (0 = expire now)
+        @param {Object}      [options]   - Optional attribute overrides
+        @param {Boolean}     [options.httpOnly]  - Default: true
+        @param {Boolean}     [options.secure]    - Default: true
+        @param {String}      [options.sameSite]  - Default: 'lax'
+        @param {String}      [options.path]      - Default: '/'
+        @param {String}      [options.domain]    - Default: unset
 
-    @return {Object} - Cookie descriptor object
+        @return {Object} - Cookie descriptor object
     *********************************************************************/
     buildCookie: function (existing, name, value, ttl, options) {
 
@@ -475,9 +475,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     Format: "Day, DD Mon YYYY HH:MM:SS GMT"
     Example: "Wed, 21 Oct 2015 07:28:00 GMT"
 
-    @param {Number} [timestamp_seconds] - Unix timestamp (seconds). Optional.
+        @param {Number} [timestamp_seconds] - Unix timestamp (seconds). Optional.
 
-    @return {String} - HTTP-date formatted string
+        @return {String} - HTTP-date formatted string
     *********************************************************************/
     getHttpTime: function (timestamp_seconds) {
 
@@ -493,9 +493,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     /********************************************************************
     Extract the component parts of a URL.
 
-    @param {String} url - Full URL string to parse
+        @param {String} url - Full URL string to parse
 
-    @return {Object} - { sub_domain, domain, domain_without_tld, tld,
+        @return {Object} - { sub_domain, domain, domain_without_tld, tld,
                          hostname, is_ip }
     *********************************************************************/
     getUrlParts: function (url) {

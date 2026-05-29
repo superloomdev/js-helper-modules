@@ -46,9 +46,9 @@ const Validators = {
   Validate the merged CONFIG. Throws on any missing-required violation
   so the loader fails before serving a single request.
 
-  @param {Object} CONFIG - Merged module configuration
+    @param {Object} CONFIG - Merged module configuration
 
-  @return {void}
+    @return {void}
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
@@ -76,9 +76,9 @@ const Validators = {
   contract. Throws at startup when any method is missing so runtime
   requests never hit a partially-implemented adapter.
 
-  @param {Object} adapter - Instantiated adapter object
+    @param {Object} adapter - Instantiated adapter object
 
-  @return {void}
+    @return {void}
   *********************************************************************/
   validateAdapterContract: function (adapter) {
 

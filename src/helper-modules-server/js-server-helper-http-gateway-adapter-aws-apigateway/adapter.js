@@ -53,6 +53,159 @@ Build the public Adapter interface closed over Lib.
 *********************************************************************/
 const createInterface = function (Lib) {
 
+  ////////////////////////////// Public Functions START ////////////////////////
+  const Adapter = {
+
+    /********************************************************************
+    Extract normalized HTTP request data from a raw API Gateway payload
+    format v2.0 event (HTTP API or Lambda Function URLs).
+
+    Returned fields:
+    headers          {Object}   - Lowercase header key -> value map
+    cookies          {Object}   - Parsed cookies map
+    query            {Object}   - Query-string parameters
+    body             {Object}   - Parsed body parameters
+    params           {Object}   - Path parameters
+    method           {String}   - HTTP method ('GET', 'POST', ...)
+    url              {String}   - Request URL path with query string
+    response_handler {Function} - Wraps the Lambda callback
+
+    @param {Object}   raw_request       - Raw API Gateway v2.0 event
+    @param {Object}   raw_context       - Lambda execution context (unused)
+    @param {Function} response_callback - Lambda callback function(err, response)
+
+    @return {Object} - Normalized request fields plus response_handler
+    *********************************************************************/
+    extractRequest: function (raw_request, _raw_context, response_callback) {
+
+      const event = raw_request || {};
+
+      const headers = _Adapter.lowercaseHeaders(event.headers);
+
+      // Cookies: API Gateway payload format v2.0 delivers them as event.cookies array
+      const cookies = Array.isArray(event.cookies)
+        ? _Adapter.parseCookieHeader(event.cookies.join('; '))
+        : {};
+
+      // Query string parameters
+      const get_params = event.queryStringParameters || {};
+
+      // Path parameters
+      const path_params = event.pathParameters || {};
+
+      // HTTP method: v2 nests it under requestContext.http.method
+      const method = (event.requestContext &&
+                    event.requestContext.http &&
+                    event.requestContext.http.method)
+        ? event.requestContext.http.method.toUpperCase()
+        : null;
+
+      const post_params = _Adapter.parseBody(event, headers);
+
+      // URL: rawPath + rawQueryString (API Gateway v2.0 payload)
+      const raw_path = event.rawPath || '';
+      const raw_qs = event.rawQueryString || '';
+      const url = raw_qs ? raw_path + '?' + raw_qs : raw_path;
+
+      // Build the response handler that wraps the Lambda callback
+      const response_handler = function (err, response) {
+        if (Lib.Utils.isFunction(response_callback)) {
+          response_callback(err, response);
+        }
+      };
+
+      return {
+        headers: headers,
+        cookies: cookies,
+        query  : get_params,
+        body   : post_params,
+        params : path_params,
+        method : method,
+        url    : url,
+        response_handler: response_handler
+      };
+
+    },
+
+
+    /********************************************************************
+    Build the API Gateway response envelope. API Gateway expects
+    { statusCode, headers, body, isBase64Encoded }.
+
+    Body normalization rules:
+    null / undefined  -> ''
+    Buffer            -> base64 string (isBase64Encoded = true)
+    Object            -> JSON.stringify
+    Anything else     -> String(value)
+
+    @param {Integer} status  - HTTP status code
+    @param {Object}  headers - Response headers map
+    @param {*}       body    - Response body (string, object, Buffer, or null)
+
+    @return {Object} - { statusCode, headers, body, isBase64Encoded }
+    *********************************************************************/
+    buildResponseEnvelope: function (status, headers, body) {
+
+      // Initialize response envelope fields
+      let normalized_body = '';
+      let is_base64 = false;
+
+      // Normalize body based on its type
+      if (!Lib.Utils.isNullOrUndefined(body)) {
+
+        // Buffer -> base64 encode
+        if (Buffer.isBuffer(body)) {
+          normalized_body = body.toString('base64');
+          is_base64 = true;
+        }
+        // Object -> JSON stringify
+        else if (Lib.Utils.isObject(body)) {
+          normalized_body = JSON.stringify(body);
+        }
+        // Everything else -> string
+        else {
+          normalized_body = String(body);
+        }
+
+      }
+
+      // Build the API Gateway response envelope
+      return {
+        statusCode     : status,
+        headers        : headers || {},
+        body           : normalized_body,
+        isBase64Encoded: is_base64
+      };
+
+    },
+
+
+    /********************************************************************
+    Return the viewer country code if supplied by CloudFront via the
+    CloudFront-Viewer-Country header (forwarded through API Gateway).
+    Returns null when not present.
+
+    @param {Object} headers - Lowercase request headers
+
+    @return {String|null} - ISO 3166-1 alpha-2 country code, or null
+    *********************************************************************/
+    getCountryCode: function (headers) {
+
+      if (
+        !Lib.Utils.isNullOrUndefined(headers) &&
+        !Lib.Utils.isNullOrUndefined(headers['cloudfront-viewer-country'])
+      ) {
+        return headers['cloudfront-viewer-country'];
+      }
+
+      return null;
+
+    }
+
+  };////////////////////////////// Public Functions END ////////////////////////
+
+
+
   ////////////////////////////// Private Functions START ///////////////////////
   const _Adapter = {
 
@@ -204,7 +357,7 @@ const createInterface = function (Lib) {
             : {};
         }
         catch {
-        // Return empty object on JSON parse failure
+          // Return empty object on JSON parse failure
           return {};
         }
 
@@ -221,159 +374,6 @@ const createInterface = function (Lib) {
     }
 
   };///////////////////////////// Private Functions END ////////////////////////
-
-
-
-  ////////////////////////////// Public Functions START ////////////////////////
-  const Adapter = {
-
-    /********************************************************************
-    Extract normalized HTTP request data from a raw API Gateway payload
-    format v2.0 event (HTTP API or Lambda Function URLs).
-
-    Returned fields:
-    headers          {Object}   - Lowercase header key -> value map
-    cookies          {Object}   - Parsed cookies map
-    query            {Object}   - Query-string parameters
-    body             {Object}   - Parsed body parameters
-    params           {Object}   - Path parameters
-    method           {String}   - HTTP method ('GET', 'POST', ...)
-    url              {String}   - Request URL path with query string
-    response_handler {Function} - Wraps the Lambda callback
-
-  @param {Object}   raw_request       - Raw API Gateway v2.0 event
-  @param {Object}   raw_context       - Lambda execution context (unused)
-  @param {Function} response_callback - Lambda callback function(err, response)
-
-  @return {Object} - Normalized request fields plus response_handler
-  *********************************************************************/
-    extractRequest: function (raw_request, _raw_context, response_callback) {
-
-      const event = raw_request || {};
-
-      const headers = _Adapter.lowercaseHeaders(event.headers);
-
-      // Cookies: API Gateway payload format v2.0 delivers them as event.cookies array
-      const cookies = Array.isArray(event.cookies)
-        ? _Adapter.parseCookieHeader(event.cookies.join('; '))
-        : {};
-
-      // Query string parameters
-      const get_params = event.queryStringParameters || {};
-
-      // Path parameters
-      const path_params = event.pathParameters || {};
-
-      // HTTP method: v2 nests it under requestContext.http.method
-      const method = (event.requestContext &&
-                    event.requestContext.http &&
-                    event.requestContext.http.method)
-        ? event.requestContext.http.method.toUpperCase()
-        : null;
-
-      const post_params = _Adapter.parseBody(event, headers);
-
-      // URL: rawPath + rawQueryString (API Gateway v2.0 payload)
-      const raw_path = event.rawPath || '';
-      const raw_qs = event.rawQueryString || '';
-      const url = raw_qs ? raw_path + '?' + raw_qs : raw_path;
-
-      // Build the response handler that wraps the Lambda callback
-      const response_handler = function (err, response) {
-        if (Lib.Utils.isFunction(response_callback)) {
-          response_callback(err, response);
-        }
-      };
-
-      return {
-        headers: headers,
-        cookies: cookies,
-        query  : get_params,
-        body   : post_params,
-        params : path_params,
-        method : method,
-        url    : url,
-        response_handler: response_handler
-      };
-
-    },
-
-
-    /********************************************************************
-    Build the API Gateway response envelope. API Gateway expects
-    { statusCode, headers, body, isBase64Encoded }.
-
-    Body normalization rules:
-    null / undefined  -> ''
-    Buffer            -> base64 string (isBase64Encoded = true)
-    Object            -> JSON.stringify
-    Anything else     -> String(value)
-
-  @param {Integer} status  - HTTP status code
-  @param {Object}  headers - Response headers map
-  @param {*}       body    - Response body (string, object, Buffer, or null)
-
-  @return {Object} - { statusCode, headers, body, isBase64Encoded }
-  *********************************************************************/
-    buildResponseEnvelope: function (status, headers, body) {
-
-      // Initialize response envelope fields
-      let normalized_body = '';
-      let is_base64 = false;
-
-      // Normalize body based on its type
-      if (!Lib.Utils.isNullOrUndefined(body)) {
-
-        // Buffer -> base64 encode
-        if (Buffer.isBuffer(body)) {
-          normalized_body = body.toString('base64');
-          is_base64 = true;
-        }
-        // Object -> JSON stringify
-        else if (Lib.Utils.isObject(body)) {
-          normalized_body = JSON.stringify(body);
-        }
-        // Everything else -> string
-        else {
-          normalized_body = String(body);
-        }
-
-      }
-
-      // Build the API Gateway response envelope
-      return {
-        statusCode     : status,
-        headers        : headers || {},
-        body           : normalized_body,
-        isBase64Encoded: is_base64
-      };
-
-    },
-
-
-    /********************************************************************
-    Return the viewer country code if supplied by CloudFront via the
-    CloudFront-Viewer-Country header (forwarded through API Gateway).
-    Returns null when not present.
-
-    @param {Object} headers - Lowercase request headers
-
-    @return {String|null} - ISO 3166-1 alpha-2 country code, or null
-    *********************************************************************/
-    getCountryCode: function (headers) {
-
-      if (
-        !Lib.Utils.isNullOrUndefined(headers) &&
-        !Lib.Utils.isNullOrUndefined(headers['cloudfront-viewer-country'])
-      ) {
-        return headers['cloudfront-viewer-country'];
-      }
-
-      return null;
-
-    }
-
-  };////////////////////////////// Public Functions END ////////////////////////
 
   return Adapter;
 
