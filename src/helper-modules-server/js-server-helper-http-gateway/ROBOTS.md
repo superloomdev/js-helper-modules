@@ -7,16 +7,16 @@ through runtime-specific adapters.
 
 ---
 
-## Factory Loader
+## Singleton Loader
 
 ```javascript
-const GatewayLoader = require('@superloomdev/js-server-helper-http-gateway');
-
-const Gateway = GatewayLoader(Lib, {
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway'),
   ADAPTER_CONFIG: {} // optional, adapter-specific
 });
 ```
+
+Node.js `require` cache guarantees the same `Gateway` object is returned on every subsequent call. One loader call per process.
 
 **Config validation:** Throws at construction time if `ADAPTER` is missing or not a function.
 
@@ -224,7 +224,7 @@ adapter.getCountryCode(headers);
 cd _test && npm install && npm test
 ```
 
-In-process stub adapter — no external services required. 129 tests covering: loader
+In-process stub adapter — no external services required. 133 tests covering: loader
 validation, all public methods, `buildCookie` (fresh/accumulate/override/clear/immutability),
 `returnHttpResponse` with cookies (defaults, overrides, SameSite=None UA guard),
 param extraction (all sources via `in` key, legacy `method` fallback, typecasts, validators),

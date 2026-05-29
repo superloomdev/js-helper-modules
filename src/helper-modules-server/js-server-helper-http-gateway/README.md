@@ -7,7 +7,7 @@ An incoming HTTP gateway for Node.js servers. Normalizes raw runtime request dat
 
 ## What This Is
 
-A runtime-abstraction layer that sits between your application logic and the HTTP transport. One loader call returns one independent HttpGateway interface bound to one runtime adapter. The calling shape is identical regardless of whether the request arrived from AWS API Gateway or Express.
+A runtime-abstraction layer that sits between your application logic and the HTTP transport. One loader call initializes the singleton HttpGateway bound to one runtime adapter and returns the same shared object on every subsequent `require`. The calling shape is identical regardless of whether the request arrived from AWS API Gateway or Express.
 
 Your application code reads `instance.http_request` and calls `returnHttpResponse`. The adapter wires it to the real runtime underneath.
 
@@ -27,11 +27,11 @@ Your application code reads `instance.http_request` and calls `returnHttpRespons
 
 ## Behavior
 
-HttpGateway is a **factory module**. Each `require()(Lib, config)` call returns a fully independent interface bound to one adapter and one configuration.
+HttpGateway is a **singleton module**. One `require()(Lib, config)` call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js `require` cache guarantees the same object is returned on every subsequent call.
 
 ```
-HttpGateway instance
- ├─ CONFIG.ADAPTER        (adapter factory function)
+HttpGateway (singleton)
+ ├─ CONFIG.ADAPTER        (adapter factory function - set once by loader)
  ├─ CONFIG.ADAPTER_CONFIG (optional adapter-specific options)
  ├─ parts/cookies.js      (serialize, parse, SameSite compatibility)
  ├─ parts/url-parts.js    (tldts wrapper for URL parsing)
@@ -83,7 +83,7 @@ Use `application/json` or `application/x-www-form-urlencoded` for all POST data.
 
 ## Aligned with Superloom Philosophy
 
-This module follows Superloom conventions. It uses the factory loader pattern, depends on `Lib` container injection, and returns errors via the standard `[err, result]` envelope. If your project is built on Superloom conventions, this module slots in without you needing to learn anything new.
+This module follows Superloom conventions. It uses the singleton loader pattern, depends on `Lib` container injection, and returns errors via the standard `[err, result]` envelope. If your project is built on Superloom conventions, this module slots in without you needing to learn anything new.
 
 ## Extended Documentation
 

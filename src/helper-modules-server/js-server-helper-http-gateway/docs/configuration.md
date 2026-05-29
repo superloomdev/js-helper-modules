@@ -10,12 +10,10 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway`.
 
 ## Loader Pattern
 
-The gateway is a factory module. Each `require()(Lib, config)` call returns an independent HttpGateway interface bound to one adapter and one configuration.
+The gateway is a singleton module. One `require()(Lib, config)` call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js `require` cache guarantees the same object is returned on every subsequent call — one loader call per process.
 
 ```javascript
-const GatewayLoader = require('@superloomdev/js-server-helper-http-gateway');
-
-const Gateway = GatewayLoader(Lib, {
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')
 });
 ```
@@ -44,7 +42,7 @@ The adapter factory function. Pass the result of `require()` for your chosen run
 
 **Example:**
 ```javascript
-const Gateway = GatewayLoader(Lib, {
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-express')
 });
 ```
@@ -55,7 +53,7 @@ Optional configuration passed through to the adapter factory. The shape varies b
 
 **Example:**
 ```javascript
-const Gateway = GatewayLoader(Lib, {
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway'),
   ADAPTER_CONFIG: {
     // Adapter-specific options
