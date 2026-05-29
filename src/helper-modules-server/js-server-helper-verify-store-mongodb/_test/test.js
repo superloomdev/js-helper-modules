@@ -14,8 +14,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-verify-store-mongodb');
-const VerifyLoader = require('helper-verify');
+const VerifyStoreMongoDBFactory = require('helper-verify-store-mongodb');
+const VerifyFactory             = require('helper-verify');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -44,14 +44,14 @@ const buildStore = function (collection) {
       lib_mongodb: Lib.MongoDB
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return VerifyStoreMongoDBFactory(Lib, config, ERRORS);
 
 };
 
 const buildVerify = function () {
 
-  return VerifyLoader(Lib, {
-    STORE: StoreLoader,
+  return VerifyFactory(Lib, {
+    STORE: VerifyStoreMongoDBFactory,
     STORE_CONFIG: {
       collection_name: TEST_COLLECTION,
       lib_mongodb: Lib.MongoDB
@@ -70,7 +70,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { VerifyStoreMongoDBFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -79,7 +79,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
+      function () { VerifyStoreMongoDBFactory(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
       /collection_name is required/
     );
 
@@ -88,7 +88,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_mongodb is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
+      function () { VerifyStoreMongoDBFactory(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
       /lib_mongodb is required/
     );
 

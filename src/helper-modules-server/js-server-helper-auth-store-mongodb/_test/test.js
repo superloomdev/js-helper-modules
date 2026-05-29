@@ -21,8 +21,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-auth-store-mongodb');
-const AuthLoader = require('helper-auth');
+const AuthStoreMongoDBFactory = require('helper-auth-store-mongodb');
+const AuthFactory             = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -51,7 +51,7 @@ const buildStore = function (collection) {
       lib_mongodb: Lib.MongoDB
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return AuthStoreMongoDBFactory(Lib, config, ERRORS);
 
 };
 
@@ -97,7 +97,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { AuthStoreMongoDBFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -106,7 +106,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
+      function () { AuthStoreMongoDBFactory(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
       /collection_name is required/
     );
 
@@ -115,7 +115,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_mongodb is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
+      function () { AuthStoreMongoDBFactory(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
       /lib_mongodb is required/
     );
 
@@ -437,7 +437,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: AuthStoreMongoDBFactory,
     STORE_CONFIG: { collection_name: TEST_COLLECTION, lib_mongodb: Lib.MongoDB },
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
@@ -452,7 +452,7 @@ const buildAuth = function (overrides) {
     COOKIE_PREFIX: 'sl_user_'
   }, overrides || {});
 
-  return AuthLoader(Lib, config);
+  return AuthFactory(Lib, config);
 
 };
 

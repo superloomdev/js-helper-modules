@@ -18,8 +18,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, beforeEach } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-logger-store-sqlite');
-const LoggerLoader = require('helper-logger');
+const LoggerStoreSQLiteFactory = require('helper-logger-store-sqlite');
+const LoggerFactory            = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -54,7 +54,7 @@ const buildStore = function (table) {
       lib_sql: Lib.SQLite
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return LoggerStoreSQLiteFactory(Lib, config, ERRORS);
 
 };
 
@@ -86,7 +86,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { LoggerStoreSQLiteFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -95,7 +95,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
+      function () { LoggerStoreSQLiteFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
       /table_name is required/
     );
 
@@ -104,7 +104,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreSQLiteFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
 
@@ -122,7 +122,7 @@ describe('Tier 1: Q() identifier quoting', function () {
     assert.throws(
       function () {
         // Build a store with a bad table name to trigger Q() on it
-        StoreLoader(Lib, { STORE_CONFIG: { table_name: 'bad"name', lib_sql: Lib.SQLite } }, ERRORS);
+        LoggerStoreSQLiteFactory(Lib, { STORE_CONFIG: { table_name: 'bad"name', lib_sql: Lib.SQLite } }, ERRORS);
       },
       // Q() is called in buildCreateTableSQL during buildInsertSQL at createInterface time
       // Actually Q is called lazily during setupNewStore/addLog, so just verify validator passes
@@ -370,11 +370,11 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 const buildLogger = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: LoggerStoreSQLiteFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.SQLite }
   }, overrides || {});
 
-  return LoggerLoader(Lib, config);
+  return LoggerFactory(Lib, config);
 
 };
 

@@ -12,8 +12,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-verify-store-sqlite');
-const VerifyLoader = require('helper-verify');
+const VerifyStoreSQLiteFactory = require('helper-verify-store-sqlite');
+const VerifyFactory            = require('helper-verify');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -42,14 +42,14 @@ const buildStore = function (table) {
       lib_sql: Lib.SQLite
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return VerifyStoreSQLiteFactory(Lib, config, ERRORS);
 
 };
 
 const buildVerify = function () {
 
-  return VerifyLoader(Lib, {
-    STORE: StoreLoader,
+  return VerifyFactory(Lib, {
+    STORE: VerifyStoreSQLiteFactory,
     STORE_CONFIG: {
       table_name: TEST_TABLE,
       lib_sql: Lib.SQLite
@@ -68,7 +68,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { VerifyStoreSQLiteFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -77,7 +77,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
+      function () { VerifyStoreSQLiteFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
       /table_name is required/
     );
 
@@ -86,7 +86,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { VerifyStoreSQLiteFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
 

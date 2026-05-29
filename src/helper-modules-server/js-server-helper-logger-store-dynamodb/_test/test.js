@@ -20,8 +20,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after, beforeEach } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-logger-store-dynamodb');
-const LoggerLoader = require('helper-logger');
+const LoggerStoreDynamoDBFactory = require('helper-logger-store-dynamodb');
+const LoggerFactory              = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -50,7 +50,7 @@ const buildStore = function (table) {
       lib_dynamodb: Lib.DynamoDB
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return LoggerStoreDynamoDBFactory(Lib, config, ERRORS);
 
 };
 
@@ -118,7 +118,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { LoggerStoreDynamoDBFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -127,7 +127,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
+      function () { LoggerStoreDynamoDBFactory(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
       /table_name is required/
     );
 
@@ -136,7 +136,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_dynamodb is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreDynamoDBFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_dynamodb is required/
     );
 
@@ -411,11 +411,11 @@ describe('Tier 1: cleanupExpiredLogs', function () {
 const buildLogger = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: LoggerStoreDynamoDBFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_dynamodb: Lib.DynamoDB }
   }, overrides || {});
 
-  return LoggerLoader(Lib, config);
+  return LoggerFactory(Lib, config);
 
 };
 

@@ -14,8 +14,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-verify-store-postgres');
-const VerifyLoader = require('helper-verify');
+const VerifyStorePostgresFactory = require('helper-verify-store-postgres');
+const VerifyFactory              = require('helper-verify');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -44,14 +44,14 @@ const buildStore = function (table) {
       lib_sql: Lib.Postgres
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return VerifyStorePostgresFactory(Lib, config, ERRORS);
 
 };
 
 const buildVerify = function () {
 
-  return VerifyLoader(Lib, {
-    STORE: StoreLoader,
+  return VerifyFactory(Lib, {
+    STORE: VerifyStorePostgresFactory,
     STORE_CONFIG: {
       table_name: TEST_TABLE,
       lib_sql: Lib.Postgres
@@ -70,7 +70,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { VerifyStorePostgresFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -79,7 +79,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
+      function () { VerifyStorePostgresFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
       /table_name is required/
     );
 
@@ -88,7 +88,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { VerifyStorePostgresFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
 

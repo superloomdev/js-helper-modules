@@ -5,8 +5,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after, beforeEach } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-logger-store-mysql');
-const LoggerLoader = require('helper-logger');
+const LoggerStoreMySQLFactory = require('helper-logger-store-mysql');
+const LoggerFactory           = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -33,7 +33,7 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return StoreLoader(Lib, {
+  return LoggerStoreMySQLFactory(Lib, {
     STORE_CONFIG: { table_name: table || TEST_TABLE, lib_sql: Lib.MySQL }
   }, ERRORS);
 
@@ -73,21 +73,21 @@ describe('Tier 1: store loader validation', function () {
 
   it('throws when STORE_CONFIG is missing', function () {
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { LoggerStoreMySQLFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
   });
 
   it('throws when table_name is missing', function () {
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.MySQL } }, ERRORS); },
+      function () { LoggerStoreMySQLFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.MySQL } }, ERRORS); },
       /table_name is required/
     );
   });
 
   it('throws when lib_sql is missing', function () {
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreMySQLFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
   });
@@ -308,8 +308,8 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  return LoggerLoader(Lib, Object.assign({
-    STORE: StoreLoader,
+  return LoggerFactory(Lib, Object.assign({
+    STORE: LoggerStoreMySQLFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.MySQL }
   }, overrides || {}));
 

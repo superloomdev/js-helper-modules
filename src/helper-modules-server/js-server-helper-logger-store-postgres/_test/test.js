@@ -18,8 +18,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, beforeEach } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-logger-store-postgres');
-const LoggerLoader = require('helper-logger');
+const LoggerStorePostgresFactory = require('helper-logger-store-postgres');
+const LoggerFactory              = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -54,7 +54,7 @@ const buildStore = function (table) {
       lib_sql: Lib.Postgres
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return LoggerStorePostgresFactory(Lib, config, ERRORS);
 
 };
 
@@ -88,7 +88,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { LoggerStorePostgresFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -97,7 +97,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
+      function () { LoggerStorePostgresFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
       /table_name is required/
     );
 
@@ -106,7 +106,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStorePostgresFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
 
@@ -335,11 +335,11 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 const buildLogger = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: LoggerStorePostgresFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.Postgres }
   }, overrides || {});
 
-  return LoggerLoader(Lib, config);
+  return LoggerFactory(Lib, config);
 
 };
 

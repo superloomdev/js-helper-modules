@@ -21,8 +21,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-auth-store-dynamodb');
-const AuthLoader = require('helper-auth');
+const AuthStoreDynamoDBFactory = require('helper-auth-store-dynamodb');
+const AuthFactory              = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -51,7 +51,7 @@ const buildStore = function (table) {
       lib_dynamodb: Lib.DynamoDB
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return AuthStoreDynamoDBFactory(Lib, config, ERRORS);
 
 };
 
@@ -107,7 +107,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { AuthStoreDynamoDBFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -116,7 +116,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
+      function () { AuthStoreDynamoDBFactory(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
       /table_name is required/
     );
 
@@ -125,7 +125,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_dynamodb is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { AuthStoreDynamoDBFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_dynamodb is required/
     );
 
@@ -431,7 +431,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: AuthStoreDynamoDBFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_dynamodb: Lib.DynamoDB },
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
@@ -446,7 +446,7 @@ const buildAuth = function (overrides) {
     COOKIE_PREFIX: 'sl_user_'
   }, overrides || {});
 
-  return AuthLoader(Lib, config);
+  return AuthFactory(Lib, config);
 
 };
 

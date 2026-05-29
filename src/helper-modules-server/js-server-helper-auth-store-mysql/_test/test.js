@@ -24,8 +24,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-auth-store-mysql');
-const AuthLoader = require('helper-auth');
+const AuthStoreMySQLFactory = require('helper-auth-store-mysql');
+const AuthFactory           = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -54,7 +54,7 @@ const buildStore = function (table) {
       lib_sql: Lib.MySQL
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return AuthStoreMySQLFactory(Lib, config, ERRORS);
 
 };
 
@@ -68,7 +68,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { AuthStoreMySQLFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -77,7 +77,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.MySQL } }, ERRORS); },
+      function () { AuthStoreMySQLFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.MySQL } }, ERRORS); },
       /table_name is required/
     );
 
@@ -86,7 +86,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { AuthStoreMySQLFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
 
@@ -108,7 +108,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        StoreLoader(Lib, {
+        AuthStoreMySQLFactory(Lib, {
           STORE_CONFIG: { table_name: 'bad`table', lib_sql: Lib.MySQL }
         }, ERRORS);
       },
@@ -121,7 +121,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        StoreLoader(Lib, {
+        AuthStoreMySQLFactory(Lib, {
           STORE_CONFIG: { table_name: 'bad"table', lib_sql: Lib.MySQL }
         }, ERRORS);
       },
@@ -624,7 +624,7 @@ describe('Tier 1: large multi-actor list isolation', { concurrency: false }, fun
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: AuthStoreMySQLFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.MySQL },
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
@@ -639,7 +639,7 @@ const buildAuth = function (overrides) {
     COOKIE_PREFIX: 'sl_user_'
   }, overrides || {});
 
-  return AuthLoader(Lib, config);
+  return AuthFactory(Lib, config);
 
 };
 

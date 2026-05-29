@@ -18,8 +18,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-auth-store-sqlite');
-const AuthLoader = require('helper-auth');
+const AuthStoreSQLiteFactory = require('helper-auth-store-sqlite');
+const AuthFactory            = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -48,7 +48,7 @@ const buildStore = function (table) {
       lib_sql: Lib.SQLite
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return AuthStoreSQLiteFactory(Lib, config, ERRORS);
 
 };
 
@@ -62,7 +62,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { AuthStoreSQLiteFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -71,7 +71,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
+      function () { AuthStoreSQLiteFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
       /table_name is required/
     );
 
@@ -80,7 +80,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { AuthStoreSQLiteFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
       /lib_sql is required/
     );
 
@@ -106,7 +106,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        StoreLoader(Lib, {
+        AuthStoreSQLiteFactory(Lib, {
           STORE_CONFIG: { table_name: 'bad"table', lib_sql: Lib.SQLite }
         }, ERRORS);
       },
@@ -614,7 +614,7 @@ describe('Tier 1: large multi-actor list isolation', function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: AuthStoreSQLiteFactory,
     STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.SQLite },
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
@@ -629,7 +629,7 @@ const buildAuth = function (overrides) {
     COOKIE_PREFIX: 'sl_user_'
   }, overrides || {});
 
-  return AuthLoader(Lib, config);
+  return AuthFactory(Lib, config);
 
 };
 

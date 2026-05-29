@@ -19,8 +19,8 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after, afterEach, beforeEach } = require('node:test');
 
 const { Lib, ERRORS } = require('./loader')();
-const StoreLoader = require('helper-logger-store-mongodb');
-const LoggerLoader = require('helper-logger');
+const LoggerStoreMongoDBFactory = require('helper-logger-store-mongodb');
+const LoggerFactory             = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
 
 
@@ -49,7 +49,7 @@ const buildStore = function (collection) {
       lib_mongodb: Lib.MongoDB
     }
   };
-  return StoreLoader(Lib, config, ERRORS);
+  return LoggerStoreMongoDBFactory(Lib, config, ERRORS);
 
 };
 
@@ -95,7 +95,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, {}, ERRORS); },
+      function () { LoggerStoreMongoDBFactory(Lib, {}, ERRORS); },
       /STORE_CONFIG must be an object/
     );
 
@@ -104,7 +104,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
+      function () { LoggerStoreMongoDBFactory(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
       /collection_name is required/
     );
 
@@ -113,7 +113,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_mongodb is missing', function () {
 
     assert.throws(
-      function () { StoreLoader(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreMongoDBFactory(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
       /lib_mongodb is required/
     );
 
@@ -364,11 +364,11 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 const buildLogger = function (overrides) {
 
   const config = Object.assign({
-    STORE: StoreLoader,
+    STORE: LoggerStoreMongoDBFactory,
     STORE_CONFIG: { collection_name: TEST_COLLECTION, lib_mongodb: Lib.MongoDB }
   }, overrides || {});
 
-  return LoggerLoader(Lib, config);
+  return LoggerFactory(Lib, config);
 
 };
 
