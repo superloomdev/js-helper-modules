@@ -3,6 +3,9 @@
 // getCountryCode always returns null - Express has no CDN layer.
 // Projects fronting Express with CloudFront can override via a custom adapter.
 //
+// Factory loader. Each call returns an independent adapter closed over its
+// own Lib. Stateless - no per-instance resources.
+//
 // Adapter contract:
 //   extractRequest(raw_request, raw_context, response_callback)
 //   buildResponseEnvelope(status, headers, body)
@@ -12,19 +15,12 @@
 'use strict';
 
 
-// Shared dependency container injected by loader
-let Lib;
-
-
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton adapter loader. Called once by the http-gateway singleton
-loader as CONFIG.ADAPTER(Lib, CONFIG, ERRORS) at process startup.
-Injects Lib and returns the module-scope Adapter object. Node.js
-require cache guarantees the same Adapter is returned on every
-subsequent require call. Request data is returned to the gateway,
-which owns instance writes.
+Factory adapter loader. One call = one independent adapter instance
+closed over its own Lib. Called by the gateway factory as
+CONFIG.ADAPTER(Lib, CONFIG, ERRORS) at construction time.
 
 @param {Object} shared_libs - Lib container (Utils, Debug)
 @param {Object} _config     - Merged CONFIG (accepted for contract conformance)
@@ -34,28 +30,96 @@ which owns instance writes.
 *********************************************************************/
 module.exports = function loader (shared_libs, _config, _errors) {
 
-  Lib = shared_libs;
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug
+  };
 
-  return Adapter;
+  return createInterface(Lib);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
 
 
-///////////////////////////Public Functions START//////////////////////////////
-const Adapter = {
+/////////////////////////// createInterface START //////////////////////////////
 
-  /********************************************************************
-  Extract normalized HTTP request data from an Express req object.
-  Reads headers, query, body, params, cookies, and method directly
-  from the Express request object.
+/********************************************************************
+Build the public Adapter interface closed over Lib.
 
-  Express is expected to be configured with:
+@param {Object} Lib - Dependency container (Utils, Debug)
+
+@return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
+*********************************************************************/
+const createInterface = function (Lib) {
+
+  ////////////////////////////// Private Functions START ///////////////////////
+  const _Adapter = {
+
+    /********************************************************************
+    Parse a raw Cookie header string into a key/value map.
+    Used as fallback when cookie-parser middleware is not installed.
+
+    @param {String} cookie_header - Raw value of the Cookie header
+
+    @return {Object} - { name: value, ... }
+    *********************************************************************/
+    parseCookieHeader: function (cookie_header) {
+
+      // Initialize empty result map
+      const result = {};
+
+      // Guard: return empty object for invalid input
+      if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
+        return result;
+      }
+
+      // Split header into name=value pairs
+      const pairs = cookie_header.split(';');
+
+      // Parse each pair
+      for (let i = 0; i < pairs.length; i++) {
+
+        const pair = pairs[i].trim();
+        const eq_idx = pair.indexOf('=');
+
+        // Skip malformed pairs without an equals sign
+        if (eq_idx < 1) {
+          continue;
+        }
+
+        // Extract key and value
+        const key = pair.slice(0, eq_idx).trim();
+        const val = pair.slice(eq_idx + 1).trim();
+
+        // Store decoded cookie value
+        if (key) {
+          result[key] = decodeURIComponent(val);
+        }
+
+      }
+
+      return result;
+
+    }
+
+  };///////////////////////////// Private Functions END ////////////////////////
+
+
+
+  ////////////////////////////// Public Functions START ////////////////////////
+  const Adapter = {
+
+    /********************************************************************
+    Extract normalized HTTP request data from an Express req object.
+    Reads headers, query, body, params, cookies, and method directly
+    from the Express request object.
+
+    Express is expected to be configured with:
     - express.json() or express.urlencoded() middleware for body parsing
     - cookie-parser middleware for req.cookies (optional; falls back to
       parsing the raw Cookie header if req.cookies is absent)
 
-  Returned fields:
+    Returned fields:
     headers          {Object} - Lowercase header key -> value map
     cookies          {Object} - Parsed cookies map
     query            {Object} - Query-string parameters (req.query)
@@ -65,190 +129,140 @@ const Adapter = {
     url              {String} - Request URL path with query string
     response_handler {Function} - Wraps Express res
 
-  @param {Object}   raw_request       - Express req object
-  @param {Object}   raw_context       - Unused (no execution context in Express)
-  @param {Object}   response_callback - Express res object
+    @param {Object}   raw_request       - Express req object
+    @param {Object}   raw_context       - Unused (no execution context in Express)
+    @param {Object}   response_callback - Express res object
 
-  @return {Object} - Normalized request fields plus response_handler
-  *********************************************************************/
-  extractRequest: function (raw_request, _raw_context, response_callback) {
+    @return {Object} - Normalized request fields plus response_handler
+    *********************************************************************/
+    extractRequest: function (raw_request, _raw_context, response_callback) {
 
-    const req = raw_request || {};
+      const req = raw_request || {};
 
-    // Express already lowercases header keys
-    const headers = (req.headers && Lib.Utils.isObject(req.headers))
-      ? req.headers
-      : {};
+      // Express already lowercases header keys
+      const headers = (req.headers && Lib.Utils.isObject(req.headers))
+        ? req.headers
+        : {};
 
-    // Prefer pre-parsed req.cookies (cookie-parser); fall back to raw header
-    let cookies;
+      // Prefer pre-parsed req.cookies (cookie-parser); fall back to raw header
+      let cookies;
 
-    if (req.cookies && Lib.Utils.isObject(req.cookies)) {
-      cookies = req.cookies;
-    }
-    else {
-      cookies = _Adapter.parseCookieHeader(headers['cookie'] || '');
-    }
-
-    // Build the response handler that wraps Express res
-    const response_handler = function (_err, response) {
-
-      // Guard: response_callback must be a valid Express res object
-      if (!response_callback || !Lib.Utils.isFunction(response_callback.status)) {
-        return;
+      if (req.cookies && Lib.Utils.isObject(req.cookies)) {
+        cookies = req.cookies;
+      }
+      else {
+        cookies = _Adapter.parseCookieHeader(headers['cookie'] || '');
       }
 
-      const res = response_callback;
-      const status_code = response.statusCode || 200;
-      const headers_map = response.headers || {};
-      const body = response.body;
+      // Build the response handler that wraps Express res
+      const response_handler = function (_err, response) {
 
-      // Set HTTP status code
-      res.status(status_code);
+        // Guard: response_callback must be a valid Express res object
+        if (!response_callback || !Lib.Utils.isFunction(response_callback.status)) {
+          return;
+        }
 
-      // Apply response headers
-      const header_keys = Object.keys(headers_map);
+        const res = response_callback;
+        const status_code = response.statusCode || 200;
+        const headers_map = response.headers || {};
+        const body = response.body;
 
-      for (let i = 0; i < header_keys.length; i++) {
-        res.set(header_keys[i], headers_map[header_keys[i]]);
-      }
+        // Set HTTP status code
+        res.status(status_code);
 
-      // Send response body
-      res.send(body);
+        // Apply response headers
+        const header_keys = Object.keys(headers_map);
 
-    };
+        for (let i = 0; i < header_keys.length; i++) {
+          res.set(header_keys[i], headers_map[header_keys[i]]);
+        }
 
-    // Build and return the normalized request object
-    return {
-      headers: headers,
-      cookies: cookies,
-      query  : (req.query && Lib.Utils.isObject(req.query)) ? req.query : {},
-      body   : (req.body && Lib.Utils.isObject(req.body)) ? req.body : {},
-      params : (req.params && Lib.Utils.isObject(req.params)) ? req.params : {},
-      method : req.method ? req.method.toUpperCase() : null,
-      url    : req.originalUrl || req.url || '',
-      response_handler: response_handler
-    };
+        // Send response body
+        res.send(body);
 
-  },
+      };
+
+      // Build and return the normalized request object
+      return {
+        headers: headers,
+        cookies: cookies,
+        query  : (req.query && Lib.Utils.isObject(req.query)) ? req.query : {},
+        body   : (req.body && Lib.Utils.isObject(req.body)) ? req.body : {},
+        params : (req.params && Lib.Utils.isObject(req.params)) ? req.params : {},
+        method : req.method ? req.method.toUpperCase() : null,
+        url    : req.originalUrl || req.url || '',
+        response_handler: response_handler
+      };
+
+    },
 
 
-  /********************************************************************
-  Build the Express-compatible response envelope. Produces a plain
-  object with statusCode, headers, and body - the same shape used by
-  the gateway's returnHttpResponse logic. The actual send is performed
-  by the response_handler returned from extractRequest.
+    /********************************************************************
+    Build the Express-compatible response envelope. Produces a plain
+    object with statusCode, headers, and body - the same shape used by
+    the gateway's returnHttpResponse logic. The actual send is performed
+    by the response_handler returned from extractRequest.
 
-  Body normalization rules:
+    Body normalization rules:
     null / undefined  -> ''
     Buffer            -> base64 string
     Object            -> JSON.stringify
     Anything else     -> String(value)
 
-  @param {Integer} status  - HTTP status code
-  @param {Object}  headers - Response headers map
-  @param {*}       body    - Response body (string, object, Buffer, or null)
+    @param {Integer} status  - HTTP status code
+    @param {Object}  headers - Response headers map
+    @param {*}       body    - Response body (string, object, Buffer, or null)
 
-  @return {Object} - { statusCode, headers, body }
-  *********************************************************************/
-  buildResponseEnvelope: function (status, headers, body) {
+    @return {Object} - { statusCode, headers, body }
+    *********************************************************************/
+    buildResponseEnvelope: function (status, headers, body) {
 
-    // Initialize response body
-    let normalized_body = '';
+      // Initialize response body
+      let normalized_body = '';
 
-    // Normalize body based on its type
-    if (!Lib.Utils.isNullOrUndefined(body)) {
+      // Normalize body based on its type
+      if (!Lib.Utils.isNullOrUndefined(body)) {
 
-      // Buffer -> base64 encode
-      if (Buffer.isBuffer(body)) {
-        normalized_body = body.toString('base64');
+        // Buffer -> base64 encode
+        if (Buffer.isBuffer(body)) {
+          normalized_body = body.toString('base64');
+        }
+        // Object -> JSON stringify
+        else if (Lib.Utils.isObject(body)) {
+          normalized_body = JSON.stringify(body);
+        }
+        // Everything else -> string
+        else {
+          normalized_body = String(body);
+        }
+
       }
-      // Object -> JSON stringify
-      else if (Lib.Utils.isObject(body)) {
-        normalized_body = JSON.stringify(body);
-      }
-      // Everything else -> string
-      else {
-        normalized_body = String(body);
-      }
 
+      // Build the Express response envelope
+      return {
+        statusCode: status,
+        headers   : headers || {},
+        body      : normalized_body
+      };
+
+    },
+
+
+    /********************************************************************
+    Express has no CDN layer - always returns null.
+    Projects fronting Express with CloudFront can implement a custom
+    adapter that reads the CloudFront-Viewer-Country forwarded header.
+
+    @param {Object} _headers - Request headers (unused)
+
+    @return {null}
+    *********************************************************************/
+    getCountryCode: function (_headers) {
+      return null;
     }
 
-    // Build the Express response envelope
-    return {
-      statusCode: status,
-      headers   : headers || {},
-      body      : normalized_body
-    };
+  };////////////////////////////// Public Functions END ////////////////////////
 
-  },
+  return Adapter;
 
-
-  /********************************************************************
-  Express has no CDN layer - always returns null.
-  Projects fronting Express with CloudFront can implement a custom
-  adapter that reads the CloudFront-Viewer-Country forwarded header.
-
-  @param {Object} _headers - Request headers (unused)
-
-  @return {null}
-  *********************************************************************/
-  getCountryCode: function (_headers) {
-    return null;
-  }
-
-};////////////////////////////Public Functions END//////////////////////////////
-
-
-
-///////////////////////////Private Functions START/////////////////////////////
-const _Adapter = {
-
-  /********************************************************************
-  Parse a raw Cookie header string into a key/value map.
-  Used as fallback when cookie-parser middleware is not installed.
-
-  @param {String} cookie_header - Raw value of the Cookie header
-
-  @return {Object} - { name: value, ... }
-  *********************************************************************/
-  parseCookieHeader: function (cookie_header) {
-
-    // Initialize empty result map
-    const result = {};
-
-    // Guard: return empty object for invalid input
-    if (!cookie_header || !Lib.Utils.isString(cookie_header)) {
-      return result;
-    }
-
-    // Split header into name=value pairs
-    const pairs = cookie_header.split(';');
-
-    // Parse each pair
-    for (let i = 0; i < pairs.length; i++) {
-
-      const pair = pairs[i].trim();
-      const eq_idx = pair.indexOf('=');
-
-      // Skip malformed pairs without an equals sign
-      if (eq_idx < 1) {
-        continue;
-      }
-
-      // Extract key and value
-      const key = pair.slice(0, eq_idx).trim();
-      const val = pair.slice(eq_idx + 1).trim();
-
-      // Store decoded cookie value
-      if (key) {
-        result[key] = decodeURIComponent(val);
-      }
-
-    }
-
-    return result;
-
-  }
-
-};///////////////////////////Private Functions END//////////////////////////////
+};///////////////////////////// createInterface END /////////////////////////////
