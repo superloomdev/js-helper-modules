@@ -8,7 +8,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 
 const { Lib } = require('./loader')();
-const AuthLoader  = require('helper-auth');
+const AuthFactory = require('helper-auth');
 const MemoryStore = require('./memory-store');
 
 
@@ -47,7 +47,7 @@ const buildAuth = function (overrides) {
     COOKIE_PREFIX: 'sl_user_'
   }, overrides || {});
 
-  return AuthLoader(Lib, config);
+  return AuthFactory(Lib, config);
 
 };
 

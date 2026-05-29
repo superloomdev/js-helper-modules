@@ -9,7 +9,7 @@ const { describe, it } = require('node:test');
 
 const { Lib } = require('./loader')();
 
-const AuthLoader         = require('helper-auth');
+const AuthFactory        = require('helper-auth');
 const MemoryStoreFactory = require('./memory-store');
 const ERRORS             = require('../auth.errors');
 const CONFIG_STUB        = {};
@@ -44,7 +44,7 @@ describe('loader validation', function () {
   it('throws when STORE is missing', function () {
 
     assert.throws(function () {
-      AuthLoader(Lib, { ACTOR_TYPE: 'user', STORE_CONFIG: valid_store_config });
+      AuthFactory(Lib, { ACTOR_TYPE: 'user', STORE_CONFIG: valid_store_config });
     }, /CONFIG\.STORE must be a store factory function/);
 
   });
@@ -52,7 +52,7 @@ describe('loader validation', function () {
   it('throws when STORE is not a function', function () {
 
     assert.throws(function () {
-      AuthLoader(Lib, { STORE: 'sqlite', ACTOR_TYPE: 'user', STORE_CONFIG: valid_store_config });
+      AuthFactory(Lib, { STORE: 'sqlite', ACTOR_TYPE: 'user', STORE_CONFIG: valid_store_config });
     }, /CONFIG\.STORE must be a store factory function/);
 
   });
@@ -60,7 +60,7 @@ describe('loader validation', function () {
   it('throws when STORE_CONFIG is missing', function () {
 
     assert.throws(function () {
-      AuthLoader(Lib, { STORE: MemoryStoreFactory, ACTOR_TYPE: 'user' });
+      AuthFactory(Lib, { STORE: MemoryStoreFactory, ACTOR_TYPE: 'user' });
     }, /CONFIG\.STORE_CONFIG is required/);
 
   });
@@ -68,7 +68,7 @@ describe('loader validation', function () {
   it('throws when ACTOR_TYPE is missing', function () {
 
     assert.throws(function () {
-      AuthLoader(Lib, { STORE: MemoryStoreFactory, STORE_CONFIG: valid_store_config });
+      AuthFactory(Lib, { STORE: MemoryStoreFactory, STORE_CONFIG: valid_store_config });
     }, /CONFIG\.ACTOR_TYPE is required/);
 
   });
@@ -77,7 +77,7 @@ describe('loader validation', function () {
 
     // Missing JWT block entirely
     assert.throws(function () {
-      AuthLoader(Lib, {
+      AuthFactory(Lib, {
         STORE: MemoryStoreFactory,
         STORE_CONFIG: valid_store_config,
         ACTOR_TYPE: 'user',
@@ -90,7 +90,7 @@ describe('loader validation', function () {
 
     // Signing key too short
     assert.throws(function () {
-      AuthLoader(Lib, {
+      AuthFactory(Lib, {
         STORE: MemoryStoreFactory,
         STORE_CONFIG: valid_store_config,
         ACTOR_TYPE: 'user',
@@ -319,9 +319,9 @@ describe('createSession / removeSession cookie descriptor', function () {
 
   it('createSession returns cookies: null when COOKIE_PREFIX is not set', async function () {
 
-    const Auth = AuthLoader(Lib, valid_base_config);
+    const auth = AuthFactory(Lib, valid_base_config);
     const instance = buildInstance(1000);
-    const result = await Auth.createSession(instance, {
+    const result = await auth.createSession(instance, {
       tenant_id: 'T', actor_id: 'A1',
       install_platform: 'web', install_form_factor: 'desktop'
     });
@@ -333,9 +333,9 @@ describe('createSession / removeSession cookie descriptor', function () {
 
   it('createSession returns a cookie descriptor when COOKIE_PREFIX is set', async function () {
 
-    const Auth = AuthLoader(Lib, Object.assign({}, valid_base_config, { COOKIE_PREFIX: 'sl_user_' }));
+    const auth = AuthFactory(Lib, Object.assign({}, valid_base_config, { COOKIE_PREFIX: 'sl_user_' }));
     const instance = buildInstance(1000);
-    const result = await Auth.createSession(instance, {
+    const result = await auth.createSession(instance, {
       tenant_id: 'T', actor_id: 'A1',
       install_platform: 'web', install_form_factor: 'desktop'
     });
@@ -350,18 +350,18 @@ describe('createSession / removeSession cookie descriptor', function () {
 
   it('removeSession returns a clear-cookie descriptor (ttl=0) when COOKIE_PREFIX is set', async function () {
 
-    const Auth = AuthLoader(Lib, Object.assign({}, valid_base_config, { COOKIE_PREFIX: 'sl_user_' }));
+    const auth = AuthFactory(Lib, Object.assign({}, valid_base_config, { COOKIE_PREFIX: 'sl_user_' }));
     const instance = buildInstance(1000);
 
     // Create a session first so we have a token_key to remove
-    const create_result = await Auth.createSession(instance, {
+    const create_result = await auth.createSession(instance, {
       tenant_id: 'T', actor_id: 'A1',
       install_platform: 'web', install_form_factor: 'desktop'
     });
     assert.equal(create_result.success, true);
 
     const { actor_id, token_key } = require('../parts/auth-id')(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
-    const remove_result = await Auth.removeSession(instance, {
+    const remove_result = await auth.removeSession(instance, {
       tenant_id: 'T', actor_id: actor_id, token_key: token_key
     });
 
@@ -375,15 +375,15 @@ describe('createSession / removeSession cookie descriptor', function () {
 
   it('removeSession returns cookies: null when COOKIE_PREFIX is not set', async function () {
 
-    const Auth = AuthLoader(Lib, valid_base_config);
+    const auth = AuthFactory(Lib, valid_base_config);
     const instance = buildInstance(1000);
 
-    const create_result = await Auth.createSession(instance, {
+    const create_result = await auth.createSession(instance, {
       tenant_id: 'T', actor_id: 'A1',
       install_platform: 'web', install_form_factor: 'desktop'
     });
     const { actor_id, token_key } = require('../parts/auth-id')(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
-    const remove_result = await Auth.removeSession(instance, {
+    const remove_result = await auth.removeSession(instance, {
       tenant_id: 'T', actor_id: actor_id, token_key: token_key
     });
 

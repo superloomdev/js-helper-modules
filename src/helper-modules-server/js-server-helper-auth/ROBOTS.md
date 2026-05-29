@@ -33,8 +33,9 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 One Auth instance per `actor_type`:
 
 ```javascript
-Lib.AuthUser  = AuthLoader(Lib, { ACTOR_TYPE: 'user',  STORE: require('...auth-store-postgres'), STORE_CONFIG: { table_name: 'sessions_user',  lib_sql: Lib.Postgres } });
-Lib.AuthAdmin = AuthLoader(Lib, { ACTOR_TYPE: 'admin', STORE: require('...auth-store-postgres'), STORE_CONFIG: { table_name: 'sessions_admin', lib_sql: Lib.Postgres } });
+const AuthFactory = require('@superloomdev/js-server-helper-auth');
+Lib.AuthUser  = AuthFactory(Lib, { ACTOR_TYPE: 'user',  STORE: require('...auth-store-postgres'), STORE_CONFIG: { table_name: 'sessions_user',  lib_sql: Lib.Postgres } });
+Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', STORE: require('...auth-store-postgres'), STORE_CONFIG: { table_name: 'sessions_admin', lib_sql: Lib.Postgres } });
 ```
 
 **STORE must be the factory function returned by `require(...)`, never a string.** Passing a string is rejected at loader time.

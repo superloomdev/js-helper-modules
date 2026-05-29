@@ -13,7 +13,7 @@ const { describe, it } = require('node:test');
 
 
 const { Lib } = require('./loader')();
-const LoggerLoader = require('helper-logger');
+const LoggerFactory = require('helper-logger');
 const createMemoryStore = require('./memory-store');
 
 
@@ -48,7 +48,7 @@ const waitForBackgroundQueue = async function (instance) {
 
 // Build a logger backed by the in-memory store.
 const buildLogger = function (overrides) {
-  return LoggerLoader(Lib, Object.assign({
+  return LoggerFactory(Lib, Object.assign({
     STORE: createMemoryStore,
     STORE_CONFIG: {}
   }, overrides || {}));
@@ -57,7 +57,7 @@ const buildLogger = function (overrides) {
 
 // Build a logger backed by an arbitrary store factory (test fixtures).
 const buildLoggerWithStore = function (store_factory, overrides) {
-  return LoggerLoader(Lib, Object.assign({
+  return LoggerFactory(Lib, Object.assign({
     STORE: store_factory,
     STORE_CONFIG: {}
   }, overrides || {}));
@@ -96,14 +96,14 @@ describe('Loader validation', function () {
 
   it('throws when CONFIG.STORE is missing', function () {
     assert.throws(function () {
-      LoggerLoader(Lib, {});
+      LoggerFactory(Lib, {});
     }, /CONFIG\.STORE must be a store factory function/);
   });
 
 
   it('throws when CONFIG.STORE is not a function', function () {
     assert.throws(function () {
-      LoggerLoader(Lib, { STORE: 'sqlite' });
+      LoggerFactory(Lib, { STORE: 'sqlite' });
     }, /CONFIG\.STORE must be a store factory function/);
   });
 
@@ -112,14 +112,14 @@ describe('Loader validation', function () {
 
   it('throws when CONFIG.STORE_CONFIG is missing', function () {
     assert.throws(function () {
-      LoggerLoader(Lib, { STORE: createMemoryStore });
+      LoggerFactory(Lib, { STORE: createMemoryStore });
     }, /CONFIG\.STORE_CONFIG is required/);
   });
 
 
   it('throws when CONFIG.STORE_CONFIG is not an object', function () {
     assert.throws(function () {
-      LoggerLoader(Lib, { STORE: createMemoryStore, STORE_CONFIG: 'not-an-object' });
+      LoggerFactory(Lib, { STORE: createMemoryStore, STORE_CONFIG: 'not-an-object' });
     }, /CONFIG\.STORE_CONFIG must be a plain object/);
   });
 
@@ -128,7 +128,7 @@ describe('Loader validation', function () {
 
   it('throws when IP_ENCRYPT_KEY is the empty string', function () {
     assert.throws(function () {
-      LoggerLoader(Lib, {
+      LoggerFactory(Lib, {
         STORE: createMemoryStore, STORE_CONFIG: {},
         IP_ENCRYPT_KEY: ''
       });
@@ -137,12 +137,12 @@ describe('Loader validation', function () {
 
 
   it('constructs successfully with the in-memory store', function () {
-    const Logger = LoggerLoader(Lib, { STORE: createMemoryStore, STORE_CONFIG: {} });
-    assert.equal(typeof Logger.log, 'function');
-    assert.equal(typeof Logger.listByEntity, 'function');
-    assert.equal(typeof Logger.listByActor, 'function');
-    assert.equal(typeof Logger.cleanupExpiredLogs, 'function');
-    assert.equal(typeof Logger.setupNewStore, 'function');
+    const logger = LoggerFactory(Lib, { STORE: createMemoryStore, STORE_CONFIG: {} });
+    assert.equal(typeof logger.log, 'function');
+    assert.equal(typeof logger.listByEntity, 'function');
+    assert.equal(typeof logger.listByActor, 'function');
+    assert.equal(typeof logger.cleanupExpiredLogs, 'function');
+    assert.equal(typeof logger.setupNewStore, 'function');
   });
 
 });
@@ -155,48 +155,48 @@ describe('Loader validation', function () {
 describe('log option validation', function () {
 
   it('throws TypeError when options is not an object', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
-      async function () { await Logger.log(Lib.Instance.initialize(), null); },
+      async function () { await logger.log(Lib.Instance.initialize(), null); },
       TypeError
     );
   });
 
 
   it('throws TypeError when entity_type is missing', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     const opts = defaultLogOptions();
     delete opts.entity_type;
     await assert.rejects(
-      async function () { await Logger.log(Lib.Instance.initialize(), opts); },
+      async function () { await logger.log(Lib.Instance.initialize(), opts); },
       /entity_type is required/
     );
   });
 
 
   it('throws TypeError when action is the empty string', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
-      async function () { await Logger.log(Lib.Instance.initialize(), defaultLogOptions({ action: '' })); },
+      async function () { await logger.log(Lib.Instance.initialize(), defaultLogOptions({ action: '' })); },
       /action is required/
     );
   });
 
 
   it('missing retention defaults to persistent (no throw)', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     const opts = defaultLogOptions();
     delete opts.retention;
-    const result = await Logger.log(Lib.Instance.initialize(), opts);
+    const result = await logger.log(Lib.Instance.initialize(), opts);
     assert.equal(result.success, true);
   });
 
 
   it('throws TypeError when retention.ttl_seconds is zero or negative', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
       async function () {
-        await Logger.log(Lib.Instance.initialize(), defaultLogOptions({ retention: { ttl_seconds: 0 } }));
+        await logger.log(Lib.Instance.initialize(), defaultLogOptions({ retention: { ttl_seconds: 0 } }));
       },
       /retention must be "persistent" or .* ttl_seconds/
     );
@@ -204,10 +204,10 @@ describe('log option validation', function () {
 
 
   it('throws TypeError when data is not a plain object', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
       async function () {
-        await Logger.log(Lib.Instance.initialize(), defaultLogOptions({ data: 'not-an-object' }));
+        await logger.log(Lib.Instance.initialize(), defaultLogOptions({ data: 'not-an-object' }));
       },
       /options.data must be an object/
     );
@@ -224,16 +224,16 @@ describe('log() write behaviour', function () {
 
   it('await:true returns success and the record is immediately readable', async function () {
 
-    const Logger = buildLogger();
+    const logger = buildLogger();
     const instance = Lib.Instance.initialize();
     instance.time = 1000;
     instance.time_ms = 1000 * 1000;
 
-    const result = await Logger.log(instance, defaultLogOptions());
+    const result = await logger.log(instance, defaultLogOptions());
     assert.equal(result.success, true);
     assert.equal(result.error, null);
 
-    const list = await Logger.listByEntity(Lib.Instance.initialize(), {
+    const list = await logger.listByEntity(Lib.Instance.initialize(), {
       scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records.length, 1);
@@ -243,17 +243,17 @@ describe('log() write behaviour', function () {
 
   it('await defaults to false (background mode); the record lands after the queue drains', async function () {
 
-    const Logger = buildLogger();
+    const logger = buildLogger();
     const instance = Lib.Instance.initialize();
     instance.time = 2000;
     instance.time_ms = 2000 * 1000;
 
-    const result = await Logger.log(instance, defaultLogOptions({ await: false }));
+    const result = await logger.log(instance, defaultLogOptions({ await: false }));
     assert.equal(result.success, true);
 
     await waitForBackgroundQueue(instance);
 
-    const list = await Logger.listByEntity(Lib.Instance.initialize(), {
+    const list = await logger.listByEntity(Lib.Instance.initialize(), {
       scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records.length, 1);
@@ -263,8 +263,8 @@ describe('log() write behaviour', function () {
 
   it('await:true surfaces store write failure as SERVICE_UNAVAILABLE', async function () {
 
-    const Logger = buildLoggerWithStore(createFailingStore);
-    const result = await Logger.log(Lib.Instance.initialize(), defaultLogOptions());
+    const logger = buildLoggerWithStore(createFailingStore);
+    const result = await logger.log(Lib.Instance.initialize(), defaultLogOptions());
 
     assert.equal(result.success, false);
     assert.equal(result.error.type, 'LOGGER_SERVICE_UNAVAILABLE');
@@ -274,10 +274,10 @@ describe('log() write behaviour', function () {
 
   it('await:false swallows store write failure (caller never sees it)', async function () {
 
-    const Logger = buildLoggerWithStore(createFailingStore);
+    const logger = buildLoggerWithStore(createFailingStore);
     const instance = Lib.Instance.initialize();
 
-    const result = await Logger.log(instance, defaultLogOptions({ await: false }));
+    const result = await logger.log(instance, defaultLogOptions({ await: false }));
     assert.equal(result.success, true);
     assert.equal(result.error, null);
 
@@ -297,13 +297,13 @@ describe('retention modes', function () {
 
   it('persistent records have expires_at: null', async function () {
 
-    const Logger = buildLogger();
+    const logger = buildLogger();
     const instance = Lib.Instance.initialize();
     instance.time = 1000; instance.time_ms = 1000 * 1000;
 
-    await Logger.log(instance, defaultLogOptions({ retention: 'persistent' }));
+    await logger.log(instance, defaultLogOptions({ retention: 'persistent' }));
 
-    const list = await Logger.listByEntity(Lib.Instance.initialize(), {
+    const list = await logger.listByEntity(Lib.Instance.initialize(), {
       scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records[0].expires_at, null);
@@ -313,13 +313,13 @@ describe('retention modes', function () {
 
   it('ttl_seconds:N records have expires_at = created_at + N', async function () {
 
-    const Logger = buildLogger();
+    const logger = buildLogger();
     const instance = Lib.Instance.initialize();
     instance.time = 5000; instance.time_ms = 5000 * 1000;
 
-    await Logger.log(instance, defaultLogOptions({ retention: { ttl_seconds: 600 } }));
+    await logger.log(instance, defaultLogOptions({ retention: { ttl_seconds: 600 } }));
 
-    const list = await Logger.listByEntity(Lib.Instance.initialize(), {
+    const list = await logger.listByEntity(Lib.Instance.initialize(), {
       scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records[0].expires_at, 5000 + 600);
@@ -345,16 +345,16 @@ describe('IP encryption', function () {
   it('round-trips an IP address through encrypt+decrypt invisibly', async function () {
 
     const key = newKey();
-    const Logger = buildLogger({ IP_ENCRYPT_KEY: key });
+    const logger = buildLogger({ IP_ENCRYPT_KEY: key });
     const instance = Lib.Instance.initialize();
 
-    await Logger.log(instance, defaultLogOptions({
+    await logger.log(instance, defaultLogOptions({
       action: 'auth.login',
       ip: '203.0.113.42',
       await: true
     }));
 
-    const list = await Logger.listByEntity(Lib.Instance.initialize(), {
+    const list = await logger.listByEntity(Lib.Instance.initialize(), {
       scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
 
@@ -380,9 +380,9 @@ describe('IP encryption', function () {
     };
 
     const key = newKey();
-    const Logger = buildLoggerWithStore(function () { return captureStore; }, { IP_ENCRYPT_KEY: key });
+    const logger = buildLoggerWithStore(function () { return captureStore; }, { IP_ENCRYPT_KEY: key });
 
-    await Logger.log(Lib.Instance.initialize(), defaultLogOptions({
+    await logger.log(Lib.Instance.initialize(), defaultLogOptions({
       ip: '198.51.100.7', await: true
     }));
 
@@ -462,7 +462,7 @@ describe('HttpHandler auto-capture', function () {
       getHttpRequestUserAgent: function () { return 'Test-UA/1.0'; }
     };
 
-    const Logger = LoggerLoader(
+    const logger = LoggerFactory(
       Object.assign({}, Lib, { HttpHandler: FakeHttpHandler }),
       { STORE: function () { return captureStore; }, STORE_CONFIG: {} }
     );
@@ -474,7 +474,7 @@ describe('HttpHandler auto-capture', function () {
     delete opts.ip;
     delete opts.user_agent;
 
-    await Logger.log(instance, opts);
+    await logger.log(instance, opts);
 
     assert.equal(captured.length, 1);
     assert.equal(captured[0].ip, '198.51.100.99');
@@ -502,7 +502,7 @@ describe('HttpHandler auto-capture', function () {
       getHttpRequestUserAgent: function () { return 'Test-UA/1.0'; }
     };
 
-    const Logger = LoggerLoader(
+    const logger = LoggerFactory(
       Object.assign({}, Lib, { HttpHandler: FakeHttpHandler }),
       { STORE: function () { return captureStore; }, STORE_CONFIG: {} }
     );
@@ -510,7 +510,7 @@ describe('HttpHandler auto-capture', function () {
     const instance = Lib.Instance.initialize();
     instance.http_request = { headers: {}, connection: {} };
 
-    await Logger.log(instance, defaultLogOptions({
+    await logger.log(instance, defaultLogOptions({
       ip: '203.0.113.55', user_agent: 'Explicit/1.0'
     }));
 
@@ -529,10 +529,10 @@ describe('HttpHandler auto-capture', function () {
 describe('list option validation', function () {
 
   it('listByEntity throws when entity_type is missing', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
       async function () {
-        await Logger.listByEntity(Lib.Instance.initialize(), {
+        await logger.listByEntity(Lib.Instance.initialize(), {
           scope: 'tenant-A', entity_id: 'u-1'
         });
       },
@@ -542,10 +542,10 @@ describe('list option validation', function () {
 
 
   it('listByActor throws when actor_id is missing', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
       async function () {
-        await Logger.listByActor(Lib.Instance.initialize(), {
+        await logger.listByActor(Lib.Instance.initialize(), {
           scope: 'tenant-A', actor_type: 'user'
         });
       },
@@ -555,10 +555,10 @@ describe('list option validation', function () {
 
 
   it('listByEntity rejects a non-string action filter', async function () {
-    const Logger = buildLogger();
+    const logger = buildLogger();
     await assert.rejects(
       async function () {
-        await Logger.listByEntity(Lib.Instance.initialize(), {
+        await logger.listByEntity(Lib.Instance.initialize(), {
           scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1',
           actions: ['', 'auth.*']
         });
@@ -578,8 +578,8 @@ describe('Store error envelopes', function () {
 
   it('listByEntity surfaces a store read failure as SERVICE_UNAVAILABLE', async function () {
 
-    const Logger = buildLoggerWithStore(createFailingStore);
-    const result = await Logger.listByEntity(Lib.Instance.initialize(), {
+    const logger = buildLoggerWithStore(createFailingStore);
+    const result = await logger.listByEntity(Lib.Instance.initialize(), {
       entity_type: 'test',
       entity_id: '1'
     });
@@ -592,8 +592,8 @@ describe('Store error envelopes', function () {
 
   it('listByActor surfaces a store read failure as SERVICE_UNAVAILABLE', async function () {
 
-    const Logger = buildLoggerWithStore(createFailingStore);
-    const result = await Logger.listByActor(Lib.Instance.initialize(), {
+    const logger = buildLoggerWithStore(createFailingStore);
+    const result = await logger.listByActor(Lib.Instance.initialize(), {
       actor_type: 'user',
       actor_id: '1'
     });
@@ -606,8 +606,8 @@ describe('Store error envelopes', function () {
 
   it('cleanupExpiredLogs surfaces failure as SERVICE_UNAVAILABLE', async function () {
 
-    const Logger = buildLoggerWithStore(createFailingStore);
-    const result = await Logger.cleanupExpiredLogs(Lib.Instance.initialize());
+    const logger = buildLoggerWithStore(createFailingStore);
+    const result = await logger.cleanupExpiredLogs(Lib.Instance.initialize());
 
     assert.equal(result.success, false);
     assert.equal(result.error.type, 'LOGGER_SERVICE_UNAVAILABLE');
@@ -624,8 +624,8 @@ describe('Store error envelopes', function () {
 describe('setupNewStore', function () {
 
   it('memory store: setupNewStore is a no-op that returns success', async function () {
-    const Logger = buildLogger();
-    const result = await Logger.setupNewStore(Lib.Instance.initialize());
+    const logger = buildLogger();
+    const result = await logger.setupNewStore(Lib.Instance.initialize());
     assert.equal(result.success, true);
     assert.equal(result.error, null);
   });
@@ -638,8 +638,8 @@ describe('setupNewStore', function () {
       getLogsByActor: async function () { return { success: true, records: [], next_cursor: null, error: null }; }
     };
 
-    const Logger = buildLoggerWithStore(function () { return minimalStore; });
-    const result = await Logger.setupNewStore(Lib.Instance.initialize());
+    const logger = buildLoggerWithStore(function () { return minimalStore; });
+    const result = await logger.setupNewStore(Lib.Instance.initialize());
     assert.equal(result.success, true);
   });
 
@@ -651,8 +651,8 @@ describe('setupNewStore', function () {
       getLogsByActor: async function () { return { success: true, records: [], next_cursor: null, error: null }; }
     };
 
-    const Logger = buildLoggerWithStore(function () { return minimalStore; });
-    const result = await Logger.cleanupExpiredLogs(Lib.Instance.initialize());
+    const logger = buildLoggerWithStore(function () { return minimalStore; });
+    const result = await logger.cleanupExpiredLogs(Lib.Instance.initialize());
     assert.equal(result.success, true);
     assert.equal(result.deleted_count, 0);
   });

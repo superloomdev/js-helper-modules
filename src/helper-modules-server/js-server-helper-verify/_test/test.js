@@ -10,7 +10,7 @@ const { describe, it } = require('node:test');
 const { Lib } = require('./loader')();
 
 // Verify module under test - constructed per-case with its own adapter
-const VerifyLoader = require('helper-verify');
+const VerifyFactory = require('helper-verify');
 
 // In-process Map-backed store fixture (Tier-2 enabler)
 const createMemoryStore = require('./memory-store');
@@ -20,7 +20,7 @@ const createMemoryStore = require('./memory-store');
 // store fixture. The inline factory receives (Lib, CONFIG, ERRORS) and
 // returns the pre-built store object directly.
 const buildVerify = function (store) {
-  return VerifyLoader(Lib, {
+  return VerifyFactory(Lib, {
     STORE: function injectFactory () { return store; },
     STORE_CONFIG: {}
   });
@@ -106,28 +106,28 @@ describe('Loader validation', function () {
 
   it('throws when CONFIG.STORE is missing', function () {
     assert.throws(function () {
-      VerifyLoader(Lib, {});
+      VerifyFactory(Lib, {});
     }, /CONFIG\.STORE is required/);
   });
 
 
   it('throws when CONFIG.STORE is null', function () {
     assert.throws(function () {
-      VerifyLoader(Lib, { STORE: null });
+      VerifyFactory(Lib, { STORE: null });
     }, /CONFIG\.STORE is required/);
   });
 
 
   it('throws when CONFIG.STORE is not a function', function () {
     assert.throws(function () {
-      VerifyLoader(Lib, { STORE: 'sqlite', STORE_CONFIG: {} });
+      VerifyFactory(Lib, { STORE: 'sqlite', STORE_CONFIG: {} });
     }, /CONFIG\.STORE is required and must be a store factory function/);
   });
 
 
   it('throws when store factory throws on bad STORE_CONFIG (e.g. missing table_name)', function () {
     assert.throws(function () {
-      VerifyLoader(Lib, {
+      VerifyFactory(Lib, {
         STORE: function () { throw new Error('[verify] STORE_CONFIG.table_name is required for sqlite'); },
         STORE_CONFIG: {}
       });
@@ -136,13 +136,13 @@ describe('Loader validation', function () {
 
 
   it('constructs successfully with a valid inline factory', function () {
-    const Verify = buildVerify(createMemoryStore());
-    assert.strictEqual(typeof Verify.createPin, 'function');
-    assert.strictEqual(typeof Verify.createCode, 'function');
-    assert.strictEqual(typeof Verify.createToken, 'function');
-    assert.strictEqual(typeof Verify.verify, 'function');
-    assert.strictEqual(typeof Verify.cleanupExpiredRecords, 'function');
-    assert.strictEqual(typeof Verify.setupNewStore, 'function');
+    const verify = buildVerify(createMemoryStore());
+    assert.strictEqual(typeof verify.createPin, 'function');
+    assert.strictEqual(typeof verify.createCode, 'function');
+    assert.strictEqual(typeof verify.createToken, 'function');
+    assert.strictEqual(typeof verify.verify, 'function');
+    assert.strictEqual(typeof verify.cleanupExpiredRecords, 'function');
+    assert.strictEqual(typeof verify.setupNewStore, 'function');
   });
 
 });
