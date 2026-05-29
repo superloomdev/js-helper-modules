@@ -5,13 +5,13 @@
 
 ---
 
-## Factory Loader
+## Singleton Loader
 
 ```javascript
 const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
 
-// Pass the factory function (not the result of calling it) as CONFIG.ADAPTER:
-const Gateway = GatewayLoader(Lib, {
+// Pass the adapter (not the result of calling it) as CONFIG.ADAPTER:
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: ExpressAdapter
 });
 ```

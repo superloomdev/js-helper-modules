@@ -11,18 +11,17 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 
 ## Loader Pattern
 
-The adapter is a factory function. Pass it as `CONFIG.ADAPTER` to the gateway:
+Pass the adapter's `require()` result as `CONFIG.ADAPTER` to the gateway singleton loader:
 
 ```javascript
-const GatewayLoader  = require('@superloomdev/js-server-helper-http-gateway');
 const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
 
-const Gateway = GatewayLoader(Lib, {
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   ADAPTER: ExpressAdapter
 });
 ```
 
-Pass the factory function itself (the result of `require()`), not the result of calling it. The gateway invokes it once at construction time with `(Lib, ADAPTER_CONFIG, errors)` and reuses the returned adapter object for every request.
+Pass the adapter itself (the result of `require()`), not the result of calling it. The gateway singleton loader invokes it once at construction time with `(Lib, ADAPTER_CONFIG, errors)` and reuses the returned adapter object for every request.
 
 ---
 
@@ -36,12 +35,12 @@ The Express adapter accepts **no configuration**. All three loader parameters ar
 | `ADAPTER_CONFIG` (the `CONFIG.ADAPTER_CONFIG` you pass to the gateway) | No |
 | `errors` (the gateway's error catalog) | No |
 
-If the gateway is configured with `ADAPTER_CONFIG`, this adapter ignores it. The parameters are accepted only to satisfy the adapter factory contract.
+If the gateway is configured with `ADAPTER_CONFIG`, this adapter ignores it. The parameters are accepted only to satisfy the adapter contract.
 
 ```javascript
 // Both of these are equivalent for this adapter:
-GatewayLoader(Lib, { ADAPTER: ExpressAdapter });
-GatewayLoader(Lib, { ADAPTER: ExpressAdapter, ADAPTER_CONFIG: { anything: 'ignored' } });
+require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: ExpressAdapter });
+require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: ExpressAdapter, ADAPTER_CONFIG: { anything: 'ignored' } });
 ```
 
 ---
@@ -79,7 +78,7 @@ function CustomAdapter (Lib, config, errors) {
   });
 }
 
-const Gateway = GatewayLoader(Lib, { ADAPTER: CustomAdapter });
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: CustomAdapter });
 ```
 
 The other two contract methods inherit from the base adapter unchanged.

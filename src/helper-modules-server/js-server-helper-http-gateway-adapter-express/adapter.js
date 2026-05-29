@@ -19,9 +19,11 @@ let Lib;
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Factory loader. Called by http-gateway.js as CONFIG.ADAPTER(Lib, CONFIG, ERRORS).
-Returns the 3-method adapter object. Each loader call returns the same
-stateless adapter singleton. Request data is returned to the gateway,
+Singleton adapter loader. Called once by the http-gateway singleton
+loader as CONFIG.ADAPTER(Lib, CONFIG, ERRORS) at process startup.
+Injects Lib and returns the module-scope Adapter object. Node.js
+require cache guarantees the same Adapter is returned on every
+subsequent require call. Request data is returned to the gateway,
 which owns instance writes.
 
 @param {Object} shared_libs - Lib container (Utils, Debug)
