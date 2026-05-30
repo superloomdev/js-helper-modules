@@ -56,7 +56,7 @@ Validates options, runs the limit policy (list-then-filter), batch-deletes evict
 
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `tenant_id` | `string` | Yes | Tenant scoping key. All store queries are scoped to this value |
+| `tenant_id` | `string` | Yes | Tenant scoping key. All store queries are scoped to this value. `#` is forbidden and throws `TypeError` |
 | `actor_id` | `string` | Yes | The authenticating actor. Reserved characters `-` and `#` are forbidden and throw `TypeError` |
 | `install_id` | `string` | No | Device or browser install identifier. When supplied and matching an existing session, that session is replaced atomically regardless of caps |
 | `install_platform` | `string` | Yes | One of `'web'`, `'ios'`, `'android'`, `'macos'`, `'windows'`, `'linux'`, `'other'`. Used by `LIMITS.by_platform_max` |

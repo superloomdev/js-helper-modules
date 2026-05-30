@@ -238,6 +238,13 @@ const Validators = {
     _Validators.assertNonEmptyString(options.tenant_id, 'tenant_id', 'createSession');
     _Validators.assertNonEmptyString(options.actor_id, 'actor_id', 'createSession');
 
+    // Separator-character constraints (plan 0042): createSession is the only
+    // function that mints wire auth_id and composite store keys from a
+    // project-supplied actor_id. Catching reserved chars here — before any
+    // store I/O — prevents orphaned session writes.
+    _Validators.assertNoWireSeparators(options.actor_id, 'actor_id', 'createSession');
+    _Validators.assertNoHashSeparator(options.tenant_id, 'tenant_id', 'createSession');
+
     // install_platform and install_form_factor are required and enumerated
     _Validators.assertEnum(options.install_platform, PLATFORM_VALUES, 'install_platform', 'createSession');
     _Validators.assertEnum(options.install_form_factor, FORM_FACTOR_VALUES, 'install_form_factor', 'createSession');
@@ -575,6 +582,62 @@ const _Validators = {
       throw new TypeError(
         '[js-server-helper-auth] ' + fn_name + ' options.' + field +
         ' must be one of: ' + allowed.join(', ')
+      );
+    }
+
+  },
+
+
+  /********************************************************************
+  Throw TypeError if value contains either reserved separator character
+  ('-' or '#'). Used for actor_id which enters both the wire auth_id
+  and the composite store key.
+
+  @param {String} value   - Value to check (already validated as non-empty string)
+  @param {String} field   - Field name
+  @param {String} fn_name - Public function name
+
+  @return {void}
+  *********************************************************************/
+  assertNoWireSeparators: function (value, field, fn_name) {
+
+    // Reject '-' (wire auth_id separator)
+    if (value.indexOf('-') !== -1) {
+      throw new TypeError(
+        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        ' must not contain "-" or "#" (reserved auth_id / composite-key separators)'
+      );
+    }
+
+    // Reject '#' (composite store key separator)
+    if (value.indexOf('#') !== -1) {
+      throw new TypeError(
+        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        ' must not contain "-" or "#" (reserved auth_id / composite-key separators)'
+      );
+    }
+
+  },
+
+
+  /********************************************************************
+  Throw TypeError if value contains the '#' composite-key separator.
+  Used for tenant_id which enters the composite store key but NOT the
+  wire auth_id (so '-' is allowed).
+
+  @param {String} value   - Value to check (already validated as non-empty string)
+  @param {String} field   - Field name
+  @param {String} fn_name - Public function name
+
+  @return {void}
+  *********************************************************************/
+  assertNoHashSeparator: function (value, field, fn_name) {
+
+    // Reject '#' (composite store key separator)
+    if (value.indexOf('#') !== -1) {
+      throw new TypeError(
+        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        ' must not contain "#" (reserved composite-key separator)'
       );
     }
 

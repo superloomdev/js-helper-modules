@@ -94,7 +94,7 @@ Inbound cookies are read from `instance.http_request.cookies` (already parsed by
 
 createSession(instance, options) → { success, auth_id, session, cookies, [access_token, refresh_token], error } | async:yes
   Validates options, runs limit policy (list-then-filter), batch-deletes evictions, inserts new session. Returns cookie descriptor in `cookies` when COOKIE_PREFIX is set. In JWT mode also mints access_token + refresh_token.
-  - options.tenant_id (required), options.actor_id (required; no `-` or `#`)
+  - options.tenant_id (required; no `#`), options.actor_id (required; no `-` or `#`)
   - options.install_id (optional; matches existing session for atomic same-device replacement)
   - options.install_platform (required: web|ios|android|macos|windows|linux|other)
   - options.install_form_factor (required: mobile|tablet|desktop|tv|watch|other)
