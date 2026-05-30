@@ -3,43 +3,19 @@
 //
 // Compatibility: Node.js 24+.
 //
-// Factory pattern: each loader call returns an independent Utils interface.
-// Functions are pure - no shared module-level state between instances.
+// Singleton pattern: pure utility module with zero dependencies.
+// One shared instance for all callers. No loader needed.
 'use strict';
 
 
 
-/////////////////////////// Module-Loader START ////////////////////////////////
-
-/********************************************************************
-Factory loader. One call = one independent instance.
-shared_libs accepted for interface uniformity but unused.
-
-@param {Object} shared_libs - Lib container (unused)
-@param {Object} config - Reserved for future config overrides
-
-@return {Object} - Public interface for this module
-*********************************************************************/
-module.exports = function loader (shared_libs, config) { // eslint-disable-line no-unused-vars
-
-  // Create and return the public interface
-  return createInterface();
-
-};///////////////////////////// Module-Loader END ///////////////////////////////
 
 
 
-/////////////////////////// createInterface START //////////////////////////////
+///////////////////////////Public Functions START//////////////////////////////
 
-/********************************************************************
-Builds the public interface for one instance.
-
-@return {Object} - Public interface for this module
-*********************************************************************/
-const createInterface = function () {
-
-  ///////////////////////////Public Functions START//////////////////////////////
-  const Utils = { // Public functions accessible by other modules
+// Singleton Utils interface - pure utility module with zero dependencies
+const Utils = {
 
     /********************************************************************
     Copy of Util Functions from Node JS util lib
@@ -1643,7 +1619,5 @@ const createInterface = function () {
 
 
 
-  // Return public interface
-  return Utils;
-
-};/////////////////////////// createInterface END ///////////////////////////////
+  // Export singleton Utils interface
+module.exports = Utils;
