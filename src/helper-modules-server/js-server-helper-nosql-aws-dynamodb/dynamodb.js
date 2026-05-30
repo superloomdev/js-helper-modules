@@ -236,8 +236,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB writeRecord failed', {
           type: ERRORS.DATABASE_WRITE_FAILED.type,
@@ -284,8 +283,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB deleteRecord failed', {
           type: ERRORS.DATABASE_DELETE_FAILED.type,
@@ -334,8 +332,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB updateRecord failed', {
           type: ERRORS.DATABASE_UPDATE_FAILED.type,
@@ -389,8 +386,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB getRecord failed', {
           type: ERRORS.DATABASE_READ_FAILED.type,
@@ -570,8 +566,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB query failed', {
           type: ERRORS.DATABASE_QUERY_FAILED.type,
@@ -658,8 +653,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB scan failed', {
           type: ERRORS.DATABASE_SCAN_FAILED.type,
@@ -715,8 +709,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB batchGetRecords failed', {
           type: ERRORS.DATABASE_BATCH_FAILED.type,
@@ -767,8 +760,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB batchWriteAndDeleteRecords failed', {
           type: ERRORS.DATABASE_BATCH_FAILED.type,
@@ -825,8 +817,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
             return { PutRequest: { Item: item } };
           });
           available -= items.length;
-        }
-        else {
+        } else {
         // Split: first part fits, rest goes to remaining
           chunk[table] = items.slice(0, available).map(function (item) {
             return { PutRequest: { Item: item } };
@@ -856,8 +847,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB batchWriteRecords failed', {
           type: ERRORS.DATABASE_BATCH_FAILED.type,
@@ -913,8 +903,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
             return { DeleteRequest: { Key: key } };
           });
           available -= keys.length;
-        }
-        else {
+        } else {
         // Split: first part fits, rest goes to remaining
           chunk[table] = keys.slice(0, available).map(function (key) {
             return { DeleteRequest: { Key: key } };
@@ -944,8 +933,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB batchDeleteRecords failed', {
           type: ERRORS.DATABASE_BATCH_FAILED.type,
@@ -1159,8 +1147,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('DynamoDB transactWriteRecords failed', {
           type: ERRORS.DATABASE_TRANSACTION_FAILED.type,

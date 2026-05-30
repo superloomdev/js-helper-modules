@@ -478,8 +478,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       if (result === 'timeout') {
         Lib.Debug.warning('Postgres: Pool close timed out, force destroying');
         _Postgres.destroyPool();
-      }
-      else {
+      } else {
         Lib.Debug.debug('Postgres: Pool closed gracefully');
       }
 
@@ -535,8 +534,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('Postgres getClient failed', {
           type: ERRORS.DATABASE_CONNECTION_FAILED.type,
@@ -635,8 +633,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // SSL for managed databases. Pass `true` for defaults or an object for custom options.
       if (CONFIG.SSL === true) {
         options.ssl = { rejectUnauthorized: true };
-      }
-      else if (CONFIG.SSL && typeof CONFIG.SSL === 'object') {
+      } else if (CONFIG.SSL && typeof CONFIG.SSL === 'object') {
         options.ssl = CONFIG.SSL;
       }
 
@@ -686,8 +683,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
             }
           });
         }
-      }
-      catch {
+      } catch {
         // Ignore errors during force destroy
       }
 
@@ -890,8 +886,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           const val = values[value_idx++];
           if (Array.isArray(val)) {
             out += val.map(_Postgres.escapeIdentifier).join(', ');
-          }
-          else {
+          } else {
             out += _Postgres.escapeIdentifier(String(val));
           }
           i += 2;
@@ -1088,8 +1083,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('Postgres query failed', {
           type: ERRORS.DATABASE_QUERY_FAILED.type,
@@ -1200,12 +1194,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         // Roll back and release. Guard against rollback itself throwing.
         if (client) {
-          try { await client.query('ROLLBACK'); } catch { /* already failing - ignore */ }
+          try {
+            await client.query('ROLLBACK');
+          } catch { /* already failing - ignore */ }
           client.release();
         }
 

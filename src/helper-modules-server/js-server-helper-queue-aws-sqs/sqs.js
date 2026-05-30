@@ -134,8 +134,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('SQS send failed', {
           type: ERRORS.QUEUE_SEND_FAILED.type,
@@ -220,8 +219,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('SQS receive failed', {
           type: ERRORS.QUEUE_RECEIVE_FAILED.type,
@@ -284,8 +282,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('SQS delete failed', {
           type: ERRORS.QUEUE_DELETE_FAILED.type,

@@ -370,7 +370,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       // Report success
       return {
         success: true,
-        records: page.map(function (doc) { return _Store.documentToRecord(doc); }),
+        records: page.map(function (doc) {
+          return _Store.documentToRecord(doc);
+        }),
         next_cursor: next_cursor,
         error: null
       };

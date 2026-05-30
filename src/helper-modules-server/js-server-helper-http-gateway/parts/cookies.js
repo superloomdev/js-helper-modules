@@ -21,7 +21,7 @@
 const CookieLib = require('cookie');
 
 // Shared dependencies injected by loader (uniform parts signature)
-let Lib; // eslint-disable-line no-unused-vars
+let Lib;
 let CONFIG; // eslint-disable-line no-unused-vars
 let ERRORS; // eslint-disable-line no-unused-vars
 

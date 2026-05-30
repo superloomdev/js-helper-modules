@@ -467,8 +467,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       try {
         state.db.close();
         Lib.Debug.debug('SQLite: Database closed');
-      }
-      catch (error) {
+      } catch (error) {
         Lib.Debug.debug('SQLite close failed', { file: CONFIG.FILE, error: error.message });
       }
 
@@ -527,8 +526,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('SQLite getClient failed', {
           type: ERRORS.DATABASE_CONNECTION_FAILED.type,
@@ -861,8 +859,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           const val = values[value_idx++];
           if (Array.isArray(val)) {
             out += val.map(_SQLite.escapeIdentifier).join(', ');
-          }
-          else {
+          } else {
             out += _SQLite.escapeIdentifier(String(val));
           }
           i += 2;
@@ -1190,8 +1187,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('SQLite query failed', {
           type: ERRORS.DATABASE_QUERY_FAILED.type,
@@ -1304,8 +1300,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
               insert_id: insert_id,
               rows: rows
             });
-          }
-          else {
+          } else {
             const res = prepared.run(...bind);
             const is_insert = shape.first_word === 'INSERT' || shape.first_word === 'REPLACE';
             const last_id = _SQLite.narrowInteger(res.lastInsertRowid || 0);
@@ -1329,12 +1324,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         // Roll back if still open. Guard against rollback itself throwing.
         if (begun) {
-          try { state.db.exec('ROLLBACK'); } catch { /* already failing - ignore */ }
+          try {
+            state.db.exec('ROLLBACK');
+          } catch { /* already failing - ignore */ }
         }
 
         Lib.Debug.debug('SQLite transaction failed', {

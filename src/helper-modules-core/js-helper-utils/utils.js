@@ -230,8 +230,7 @@ const Utils = {
     if ( !Utils.isNull(str) ) { // Only if not null
       try {
         str = JSON.parse(str); // Convert string -> JSON
-      }
-      catch {
+      } catch {
         str = null; // Set as null if invalid json
       }
     }
@@ -268,8 +267,7 @@ const Utils = {
 
     if ( Array.isArray(list) ) {
       return list.join(separator); // Join and Return
-    }
-    else {
+    } else {
       return list; // Return orignal value as-it-is
     }
 
@@ -288,8 +286,7 @@ const Utils = {
 
     if ( Array.isArray(arr) ) {
       return [...new Set(arr)];
-    }
-    else {
+    } else {
       return arr; // Return orignal value as-it-is
     }
 
@@ -433,8 +430,7 @@ const Utils = {
     // Check if NaN in case of Alphabates String passed as number
     if ( isNaN(i) ) {
       return null; // Return Null in case it's not a number
-    }
-    else {
+    } else {
       return i; // Return clean Integer
     }
 
@@ -486,8 +482,7 @@ const Utils = {
     // Check if custom date is sent
     if ( !Utils.isNullOrUndefined(date) ) {
       return ( new Date(date) ); // Return Unix Timestamp equivalant of specific date in Milliseconds
-    }
-    else {
+    } else {
       return ( new Date().getTime() ); // Return Unix Timestamp equivalant of current time in Milliseconds
     }
 
@@ -562,8 +557,7 @@ const Utils = {
 
     if ( Utils.isEmpty(str) ) { // If Empty String, return Null instead of 0
       return null;
-    }
-    else {
+    } else {
       return Number(str); // Convert to Number
     }
 
@@ -587,15 +581,16 @@ const Utils = {
     }
 
     let arr = str.split(delimiter);        // Split into Array
-    arr = arr.map( function (item) { return item.trim().toLowerCase(); } );    // Convert to lowercase and Trim white spaces including \n \t \r
+    arr = arr.map( function (item) {
+      return item.trim().toLowerCase();
+    } );    // Convert to lowercase and Trim white spaces including \n \t \r
     arr = arr.filter( Boolean);            // Remove Empty element from array in case string is null/''/0/false/undefined. (If you split an empty string, you get back a one-element array with 0 as the key and an empty string for the value.)
 
 
     // Check if resultant array is empty, then return false
     if ( arr.length > 0 ) {
       return arr;
-    }
-    else {
+    } else {
       return false; // Empty array
     }
 
@@ -616,9 +611,10 @@ const Utils = {
 
     if ( !Array.isArray(keys) ) { // If single item string
       obj[keys] = values;
-    }
-    else {
-      keys.map( function (key, index) { obj[key] = values[index]; } ); // Create a Set from feilds-array with corrosponding values-array
+    } else {
+      keys.map( function (key, index) {
+        obj[key] = values[index];
+      } ); // Create a Set from feilds-array with corrosponding values-array
     }
 
     return obj;
@@ -858,8 +854,7 @@ const Utils = {
       try {
         // Use native structuredClone() for optimal performance
         return structuredClone(obj);
-      }
-      catch {
+      } catch {
         // Fallback to polyfill if structuredClone fails (e.g., unsupported object types)
         return _Utils.deepCopyObjectPolyfill(obj);
       }
@@ -1261,8 +1256,7 @@ const Utils = {
       let obj_errs;
       if ( objs_list[key]['command'] == 'new' ) {
         obj_errs = new_obj_check_func( objs_list[key] );
-      }
-      else { // Edit/No-Change
+      } else { // Edit/No-Change
         obj_errs = edit_obj_check_func( objs_list[key] );
       }
 
@@ -1296,8 +1290,7 @@ const Utils = {
     try {
       require.resolve(module_name);
       return true; // Module found
-    }
-    catch {
+    } catch {
       // Reach here means module not found
       return false;
     }
@@ -1345,8 +1338,7 @@ const Utils = {
         hash: url_data['hash'] // '#section1'
       };
 
-    }
-    catch {
+    } catch {
       return false; // Return false if Invalid/Malformed URL
     }
 

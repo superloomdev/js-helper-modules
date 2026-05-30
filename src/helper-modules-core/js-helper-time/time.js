@@ -399,14 +399,11 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
 
       if (hours === 24 || hours === 0) {
         return `12:${minutes} AM`;
-      }
-      else if (hours === 12) {
+      } else if (hours === 12) {
         return `12:${minutes} PM`;
-      }
-      else if (hours < 12) {
+      } else if (hours < 12) {
         return `${hours}:${minutes} AM`;
-      }
-      else {
+      } else {
         return `${hours - 12}:${minutes} PM`;
       }
 

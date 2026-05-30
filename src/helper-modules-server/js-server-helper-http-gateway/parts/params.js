@@ -107,17 +107,13 @@ const Params = {
       // Extract raw value from the correct source
       if (source === 'query' && param.name in instance.http_request.query) {
         param_value = instance.http_request.query[param.name];
-      }
-      else if (source === 'body' && param.name in instance.http_request.body) {
+      } else if (source === 'body' && param.name in instance.http_request.body) {
         param_value = instance.http_request.body[param.name];
-      }
-      else if (source === 'header' && param.name in instance.http_request.headers) {
+      } else if (source === 'header' && param.name in instance.http_request.headers) {
         param_value = instance.http_request.headers[param.name];
-      }
-      else if (source === 'params' && param.name in instance.http_request.params) {
+      } else if (source === 'params' && param.name in instance.http_request.params) {
         param_value = instance.http_request.params[param.name];
-      }
-      else if (source === 'fixed') {
+      } else if (source === 'fixed') {
         param_value = param.value;
       }
 
@@ -155,8 +151,7 @@ const Params = {
         if (param.is_json && Lib.Utils.isString(param_value)) {
           try {
             param_value = JSON.parse(param_value);
-          }
-          catch {
+          } catch {
             param_value = null;
 
             if (param.required) {
@@ -178,8 +173,7 @@ const Params = {
 
         args[param.rename] = param_value;
 
-      }
-      else {
+      } else {
         // Use default when absent and not required
         args[param.rename] = param.default;
       }

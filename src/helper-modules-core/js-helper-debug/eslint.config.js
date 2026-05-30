@@ -70,6 +70,7 @@ module.exports = [
       'array-bracket-spacing': ['error', 'never'],    // No spaces inside array brackets
       'comma-spacing': ['error', { 'before': false, 'after': true }], // Space after comma, none before
       'curly': ['error', 'all'],                                        // All if/else/for/while must use braces
+      'brace-style': ['error', '1tbs', { allowSingleLine: false }],    // Block body must be on its own line (no single-line blocks)
       'no-unused-vars': ['error', { 'args': 'after-used', 'argsIgnorePattern': '^_' }], // Flag unused vars; args only checked after last used arg
 
       // Modern JS preferences (let/const over var)

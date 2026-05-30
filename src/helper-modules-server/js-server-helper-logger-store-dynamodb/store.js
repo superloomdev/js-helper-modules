@@ -322,15 +322,21 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
         for (let i = 0; i < query.actions.length; i++) {
           actionSet[query.actions[i]] = true;
         }
-        items = items.filter(function (item) { return actionSet[item.action]; });
+        items = items.filter(function (item) {
+          return actionSet[item.action];
+        });
       }
 
       if (query.start_time_ms !== null && query.start_time_ms !== undefined) {
-        items = items.filter(function (item) { return item.created_at_ms >= query.start_time_ms; });
+        items = items.filter(function (item) {
+          return item.created_at_ms >= query.start_time_ms;
+        });
       }
 
       if (query.end_time_ms !== null && query.end_time_ms !== undefined) {
-        items = items.filter(function (item) { return item.created_at_ms <= query.end_time_ms; });
+        items = items.filter(function (item) {
+          return item.created_at_ms <= query.end_time_ms;
+        });
       }
 
       // Detect next page and slice to requested page size

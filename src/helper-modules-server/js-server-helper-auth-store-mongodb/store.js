@@ -182,7 +182,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       }
 
       // Strip MongoDB-specific fields from every document and return the list
-      const records = result.documents.map(function (doc) { return _Store.docToRecord(doc); });
+      const records = result.documents.map(function (doc) {
+        return _Store.docToRecord(doc);
+      });
       return {
         success: true,
         records: records,
