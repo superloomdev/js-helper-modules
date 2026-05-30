@@ -1,5 +1,5 @@
 // Info: Test Cases for js-server-helper-http
-// Uses httpbin.org for real HTTP verification — requires network access.
+// Uses postman-echo.com for real HTTP verification — requires network access.
 'use strict';
 
 const { describe, it } = require('node:test');
@@ -35,7 +35,7 @@ describe('GET requests', function () {
 
   it('should return success=true for successful GET', async function () {
 
-    const result = await Http.get('https://httpbin.org/get');
+    const result = await Http.get('https://postman-echo.com/get');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.status, 200);
@@ -45,7 +45,7 @@ describe('GET requests', function () {
 
   it('should send query parameters', async function () {
 
-    const result = await Http.get('https://httpbin.org/get', { foo: 'bar', num: 123 });
+    const result = await Http.get('https://postman-echo.com/get', { foo: 'bar', num: 123 });
 
     assert.strictEqual(result.success, true);
     assert.ok(result.data);
@@ -57,7 +57,7 @@ describe('GET requests', function () {
 
   it('should handle 404 error gracefully', async function () {
 
-    const result = await Http.get('https://httpbin.org/status/404');
+    const result = await Http.get('https://postman-echo.com/status/404');
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.status, 404);
@@ -73,7 +73,7 @@ describe('POST requests', function () {
   it('should POST JSON data', async function () {
 
     const payload = { name: 'test', value: 42 };
-    const result = await Http.post('https://httpbin.org/post', payload);
+    const result = await Http.post('https://postman-echo.com/post', payload);
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.status, 200);
@@ -87,7 +87,7 @@ describe('POST requests', function () {
   it('should POST form data', async function () {
 
     const payload = { name: 'test', value: 'hello' };
-    const result = await Http.postForm('https://httpbin.org/post', payload);
+    const result = await Http.postForm('https://postman-echo.com/post', payload);
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.status, 200);
@@ -105,7 +105,7 @@ describe('PUT requests', function () {
   it('should PUT JSON data', async function () {
 
     const payload = { updated: true };
-    const result = await Http.put('https://httpbin.org/put', payload);
+    const result = await Http.put('https://postman-echo.com/put', payload);
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.status, 200);
@@ -122,7 +122,7 @@ describe('DELETE requests', function () {
 
   it('should send DELETE request', async function () {
 
-    const result = await Http.delete('https://httpbin.org/delete');
+    const result = await Http.delete('https://postman-echo.com/delete');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.status, 200);
@@ -138,7 +138,7 @@ describe('PATCH requests', function () {
   it('should PATCH JSON data', async function () {
 
     const payload = { patched: true };
-    const result = await Http.patch('https://httpbin.org/patch', payload);
+    const result = await Http.patch('https://postman-echo.com/patch', payload);
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.status, 200);
@@ -156,14 +156,15 @@ describe('Authentication', function () {
   it('should send Bearer token', async function () {
 
     const result = await Http.get(
-      'https://httpbin.org/bearer',
+      'https://postman-echo.com/headers',
       null,
       { auth: { bearer_token: 'test-token-123' } }
     );
 
     assert.strictEqual(result.success, true);
     assert.ok(result.data);
-    assert.strictEqual(result.data.token, 'test-token-123');
+    assert.ok(result.data.headers.authorization);
+    assert.strictEqual(result.data.headers.authorization, 'Bearer test-token-123');
 
   });
 
@@ -171,9 +172,9 @@ describe('Authentication', function () {
   it('should send Basic auth', async function () {
 
     const result = await Http.get(
-      'https://httpbin.org/basic-auth/user/pass',
+      'https://postman-echo.com/basic-auth',
       null,
-      { auth: { basic: { username: 'user', password: 'pass' } } }
+      { auth: { basic: { username: 'postman', password: 'password' } } }
     );
 
     assert.strictEqual(result.success, true);
@@ -190,7 +191,7 @@ describe('Custom headers', function () {
   it('should send custom headers', async function () {
 
     const result = await Http.get(
-      'https://httpbin.org/headers',
+      'https://postman-echo.com/headers',
       null,
       { headers: { 'X-Custom-Header': 'custom-value' } }
     );
@@ -198,7 +199,7 @@ describe('Custom headers', function () {
     assert.strictEqual(result.success, true);
     assert.ok(result.data);
     assert.ok(result.data.headers);
-    assert.strictEqual(result.data.headers['X-Custom-Header'], 'custom-value');
+    assert.strictEqual(result.data.headers['x-custom-header'], 'custom-value');
 
   });
 
@@ -210,7 +211,7 @@ describe('Response structure', function () {
 
   it('should return normalized headers with lowercase keys', async function () {
 
-    const result = await Http.get('https://httpbin.org/get');
+    const result = await Http.get('https://postman-echo.com/get');
 
     assert.ok(result.headers);
     assert.ok(result.headers['content-type']);
@@ -220,7 +221,7 @@ describe('Response structure', function () {
 
   it('should include error details on failure', async function () {
 
-    const result = await Http.get('https://httpbin.org/status/500');
+    const result = await Http.get('https://postman-echo.com/status/500');
 
     assert.strictEqual(result.success, false);
     assert.ok(result.error);
@@ -231,9 +232,9 @@ describe('Response structure', function () {
 
   it('should return NETWORK_TIMEOUT on timeout', async function () {
 
-    // httpbin /delay/5 waits 5 seconds, we timeout after 1
+    // postman-echo /delay/5 waits 5 seconds, we timeout after 1
     const result = await Http.get(
-      'https://httpbin.org/delay/5',
+      'https://postman-echo.com/delay/5',
       null,
       { timeout: 1 }
     );
@@ -255,5 +256,5 @@ describe('Response structure', function () {
 // config absorption contract: exempt (Strategy 4 — integration tier) —
 // CONFIG.TIMEOUT and CONFIG.USER_AGENT are consumed by _Http.fetch when
 // making real outgoing HTTP requests. Their override effects are only
-// observable through live network calls (httpbin.org), not at the unit tier.
+// observable through live network calls (postman-echo.com), not at the unit tier.
 // Verification belongs in integration tests that have network access.
