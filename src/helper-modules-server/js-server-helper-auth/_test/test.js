@@ -32,6 +32,17 @@ const buildInstance = function (time_seconds) {
 };
 
 
+const validBaseConfig = function () {
+  return {
+    STORE:        MemoryStoreFactory,
+    STORE_CONFIG: {},
+    ACTOR_TYPE:   'user',
+    TTL_SECONDS:  3600,
+    LIMITS:       { total_max: 5, evict_oldest_on_limit: true }
+  };
+};
+
+
 // ============================================================================
 // LOADER VALIDATION (uses in-process memory store - no DB driver needed)
 // ============================================================================
@@ -169,6 +180,57 @@ describe('loader validation', function () {
     assert.ok(auth);
     assert.equal(typeof auth.createSession, 'function');
 
+  });
+
+});
+
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+
+describe('config absorption contract', function () {
+
+  // Sanity anchor: valid baseline must construct cleanly.
+  it('constructs with a valid baseline config', function () {
+    assert.doesNotThrow(function () { AuthFactory(Lib, validBaseConfig()); });
+  });
+
+  // OVERRIDE WINS: a negative TTL overrides the default 2592000 and fails
+  // validation — proves the override reached the effective CONFIG.
+  it('absorbs an override that changes the validation outcome', function () {
+    assert.throws(function () {
+      AuthFactory(Lib, Object.assign(validBaseConfig(), { TTL_SECONDS: -1 }));
+    }, /TTL_SECONDS/);
+  });
+
+  // NULL HONORED (0032 canary): JWT default is a plain object; explicit null
+  // must be seen as null. With Object.assign this throws; with the buggy
+  // overrideObject it silently keeps the default and does NOT throw here.
+  it('honors an explicit null override of JWT (a key with a non-null default)', function () {
+    assert.throws(function () {
+      AuthFactory(Lib, Object.assign(validBaseConfig(), { ENABLE_JWT: true, JWT: null }));
+    }, /CONFIG\.JWT must be a plain object/);
+  });
+
+  // SHALLOW MERGE (intentional): a partial JWT object replaces the whole
+  // default JWT object, so access_token_ttl_seconds is missing → throws.
+  it('replaces nested objects wholesale (shallow merge is intentional)', function () {
+    assert.throws(function () {
+      AuthFactory(Lib, Object.assign(validBaseConfig(), {
+        ENABLE_JWT: true,
+        JWT: { signing_key: 'x'.repeat(32), issuer: 'i', audience: 'a' }
+      }));
+    }, /access_token_ttl_seconds/);
+  });
+
+  // OMISSION KEEPS DEFAULT: LAST_ACTIVE_UPDATE_INTERVAL_SECONDS defaults to
+  // 600; omitting it from the override must not throw.
+  it('retains the default when an optional key is omitted from the override', function () {
+    const cfg = validBaseConfig();
+    delete cfg.LAST_ACTIVE_UPDATE_INTERVAL_SECONDS;
+    assert.doesNotThrow(function () { AuthFactory(Lib, cfg); });
   });
 
 });

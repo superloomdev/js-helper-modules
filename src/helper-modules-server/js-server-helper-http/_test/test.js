@@ -246,3 +246,14 @@ describe('Response structure', function () {
   });
 
 });
+
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+// config absorption contract: exempt (Strategy 4 — integration tier) —
+// CONFIG.TIMEOUT and CONFIG.USER_AGENT are consumed by _Http.fetch when
+// making real outgoing HTTP requests. Their override effects are only
+// observable through live network calls (httpbin.org), not at the unit tier.
+// Verification belongs in integration tests that have network access.

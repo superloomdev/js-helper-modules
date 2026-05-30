@@ -49,6 +49,11 @@ function buildGateway (adapter_factory) {
   return HttpGateway(Lib, { ADAPTER: adapter_factory });
 }
 
+function validBaseConfig () {
+  const { factory } = HttpGatewayAdapterStub();
+  return { ADAPTER: factory };
+}
+
 function buildGatewayWithMemory () {
   const { factory, sent } = HttpGatewayAdapterStub();
   const gateway = buildGateway(factory);
@@ -1420,6 +1425,42 @@ describe('getBearerToken', function () {
   });
 
 });
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+
+describe('config absorption contract', function () {
+
+  // Sanity anchor: valid baseline must construct cleanly.
+  it('constructs with a valid baseline config', function () {
+    assert.doesNotThrow(function () { HttpGateway(Lib, validBaseConfig()); });
+  });
+
+  // OVERRIDE WINS (Strategy 1): override ADAPTER with null — the null replaces
+  // the valid factory and validation must throw, proving the override reached
+  // CONFIG (if the default were kept, it would not throw here).
+  it('absorbs an ADAPTER override — null override triggers the required-ADAPTER validation', function () {
+    assert.throws(function () {
+      HttpGateway(Lib, Object.assign(validBaseConfig(), { ADAPTER: null }));
+    }, /CONFIG\.ADAPTER must be an adapter factory function/);
+  });
+
+  // OMISSION KEEPS DEFAULT: ADAPTER_CONFIG defaults to null; omitting it from
+  // the override must not affect construction.
+  it('retains null ADAPTER_CONFIG default when the key is omitted from the override', function () {
+    const cfg = validBaseConfig();
+    delete cfg.ADAPTER_CONFIG;
+    assert.doesNotThrow(function () { HttpGateway(Lib, cfg); });
+  });
+
+  // NULL HONORED: not applicable at unit tier — both CONFIG defaults (ADAPTER,
+  // ADAPTER_CONFIG) are null. There is no key with a non-null default whose
+  // null-override would produce a distinct observable outcome at this tier.
+
+});
+
 
 
 // ============================================================================
