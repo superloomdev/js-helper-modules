@@ -46,7 +46,7 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')();
+  Lib.Utils = require('helper-utils')(Lib, {});
   Lib.Debug = require('helper-debug')(Lib, config_debug);
   Lib.Instance = require('helper-instance')(Lib, {});
 
