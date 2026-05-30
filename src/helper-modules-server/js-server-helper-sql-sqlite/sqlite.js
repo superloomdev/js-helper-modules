@@ -250,7 +250,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         };
       }
 
-      if (result.row === null) {
+      if (Lib.Utils.isNull(result.row)) {
         return {
           success: true,
           value: null,
@@ -607,7 +607,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before handle creation
       _SQLite.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'SQLite Handle', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'SQLite Handle', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Constructor options resolved from the merged CONFIG
       const options = {
@@ -628,7 +628,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         state.db.exec('PRAGMA synchronous = ' + _SQLite.escapePragmaValue(CONFIG.SYNCHRONOUS));
       }
 
-      Lib.Debug.performanceAuditLog('Init-End', 'SQLite Handle', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'SQLite Handle', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.info('SQLite Handle Initialized', {
         file: CONFIG.FILE,
         readonly: options.readOnly,
@@ -657,7 +657,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
 
       const upper = String(val).toUpperCase();
 
-      if (allowed.indexOf(upper) === -1) {
+      if (!Lib.Utils.inArray(allowed, upper)) {
         throw new Error('SQLite: invalid PRAGMA value: ' + val);
       }
 
@@ -703,7 +703,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     *********************************************************************/
     escapeValue: function (val) {
 
-      if (val === null || val === undefined) {
+      if (Lib.Utils.isNullOrUndefined(val)) {
         return 'NULL';
       }
 
@@ -1006,7 +1006,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     normalizeParams: function (params) {
 
       return params.map(function (p) {
-        if (p === undefined || p === null) {
+        if (Lib.Utils.isNullOrUndefined(p)) {
           return null;
         }
         if (typeof p === 'boolean') {

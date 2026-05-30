@@ -447,8 +447,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       if (
         Lib.Utils.isNullOrUndefined(CONFIG.IP_ENCRYPT_KEY) ||
-        Lib.Utils.isNullOrUndefined(record.ip) ||
-        record.ip === ''
+        Lib.Utils.isEmpty(record.ip)
       ) {
         return record;
       }

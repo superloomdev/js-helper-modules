@@ -148,7 +148,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['symbol']['native'];
 
@@ -172,7 +174,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     // Normalize the country code for comparison
     const country = Lib.Utils.isString(country_code)
@@ -201,7 +205,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['iso_alpha'];
 
@@ -220,7 +226,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['iso_numeric'];
 
@@ -239,7 +247,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['name_en'];
 
@@ -259,7 +269,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['symbol_minor']['native'];
 
@@ -285,13 +297,17 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     // Check if the currency has a native minor symbol at all
     const native_minor = CURRENCIES[code]['symbol_minor']['native'];
 
     // If no native minor symbol exists, return null regardless of locale
-    if (native_minor === null) { return null; }
+    if (Lib.Utils.isNull(native_minor)) {
+      return null;
+    }
 
     // Normalize the country code for comparison
     const country = Lib.Utils.isString(country_code)
@@ -320,7 +336,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['decimals'];
 
@@ -341,7 +359,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     return CURRENCIES[code]['min_transactional_unit'];
 
@@ -361,7 +381,9 @@ const Money = {
     // Normalize and verify the currency code is known
     const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (code === null) { return null; }
+    if (Lib.Utils.isNull(code)) {
+      return null;
+    }
 
     // Check if this currency defines denominations
     const currency = CURRENCIES[code];

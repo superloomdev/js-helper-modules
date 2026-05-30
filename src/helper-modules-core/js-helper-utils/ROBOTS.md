@@ -47,7 +47,7 @@ splitWithTrim(str, delimiter) → String[] | async:no
 stringToNumber(str) → Number | async:no
 stringToArray(delimiter, str) → String[] | async:no
 keyValueToObject(keys, values) → Object | async:no
-overrideObject(base_obj, ...new_objs) → Object | async:no - shallow merge
+overrideObject(base_obj, ...new_objs) → Object | async:no - shallow merge; SKIPS strictly-null values (null override keeps base), does NOT skip undefined, never deep-merges. NOT a drop-in for Object.assign - see Gotchas
 setNonEmptyKey(obj, key, new_val) → Object | async:no - only set if new_val is non-empty
 fallback(new_val, fallback_val) → any | async:no - return new_val if non-empty, else fallback
 deepCopyObject(obj) → Object | async:no
@@ -101,3 +101,6 @@ generateRandomString(length) → String | async:no
 - **Exception to DRY rule:** Foundation modules cannot use `Lib.Utils` (they ARE it). Raw type checks are allowed INSIDE this module only. All other modules MUST use this module's functions instead of inline checks
 - **Pure functions:** No side effects, no I/O, no async
 - **Self-contained:** Implements all type checks and data helpers needed across the framework
+
+## Gotchas
+- **`overrideObject` ≠ `Object.assign`.** It is a shallow merge that SKIPS strictly-`null` values (a `null` override keeps the base value), does NOT skip `undefined` (undefined overwrites), and never deep-merges nested objects (nested objects are replaced wholesale). Use it only for "layer non-null overrides onto defaults". When a caller must set a key to `null` to clear a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead — `overrideObject` would silently retain the default and change behaviour. Do NOT blanket-replace `Object.assign` with `overrideObject` during audits.

@@ -247,7 +247,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       }
 
       // No row -> null value (not an error)
-      if (result.row === null) {
+      if (Lib.Utils.isNull(result.row)) {
         return {
           success: true,
           value: null,
@@ -623,7 +623,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before pool creation
       _MySQL.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'MySQL Pool', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'MySQL Pool', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Driver options resolved from the merged CONFIG
       const options = {
@@ -656,7 +656,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Pool is lazy - TCP connections open on the first real query
       state.pool = MySQLDriverPromise.createPool(options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'MySQL Pool', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'MySQL Pool', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.debug('MySQL Pool Initialized', {
         host: CONFIG.HOST,
         database: CONFIG.DATABASE,

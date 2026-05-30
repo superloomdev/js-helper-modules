@@ -805,7 +805,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before client creation
       _S3.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'S3 Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'S3 Client', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Base client options - region and retry config
       const client_options = {
@@ -834,7 +834,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Build S3 client
       state.client = new S3Lib.S3Client(client_options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'S3 Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'S3 Client', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.debug('S3 Client Initialized', {
         region: CONFIG.REGION,
         endpoint: CONFIG.ENDPOINT || null,

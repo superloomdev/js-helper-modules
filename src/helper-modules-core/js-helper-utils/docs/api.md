@@ -83,7 +83,21 @@ const safe_user = Utils.sanitizeObject(user, null, ['password', 'pin']);
 
 ### `overrideObject(base_obj, ...new_objs)`
 
-Shallow merge. Later objects' non-null values overwrite earlier ones. `null` and `undefined` values are skipped (so `overrideObject({a:1}, {a:null})` keeps `{a:1}`). Use this for "merge config defaults with user overrides" patterns.
+Shallow merge with **null-skipping** semantics: a later object's value overwrites an earlier key **only when that value is not strictly `null`**. A strictly-`null` value (`=== null`) on an existing key is skipped and the base value is retained — so `overrideObject({a:1}, {a:null})` returns `{a:1}`, not `{a:null}`.
+
+Important behaviours that decide whether this function fits your use case:
+
+- **`null` is skipped; `undefined` is NOT.** The skip check is strict `=== null`. An `undefined` value still overwrites (the key is set to `undefined`). Do not rely on this function to ignore `undefined`.
+- **Shallow only.** Nested objects are replaced wholesale, never deep-merged. `overrideObject({jwt:{a:1,b:2}}, {jwt:{a:9}})` returns `{jwt:{a:9}}` — `b` is lost.
+- **Keys absent from the base are still added** (the skip rule applies only to keys already present in the base).
+
+**Use it for:** layering partial, non-null overrides onto a defaults object where "absent or null means keep the default" is the desired rule.
+
+**Do NOT use it (use `Object.assign` instead) when:**
+- A caller must be able to set a key to `null` explicitly to override a non-null default (e.g. config merging where `{ JWT: null }` should clear the default `JWT` object). `overrideObject` would silently keep the default and change behaviour.
+- You are patch-merging and want the plain, predictable "last write wins, including null/undefined" semantics of `Object.assign`.
+
+`overrideObject` is **not** a drop-in replacement for `Object.assign`; they differ on null handling.
 
 ### `setNonEmptyKey(obj, key, new_val)`
 

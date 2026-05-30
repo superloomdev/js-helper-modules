@@ -201,4 +201,8 @@ The integration tier connects to real AWS DynamoDB using credentials from `__dev
 
 Full setup guide: [AWS DynamoDB Integration Setup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-nosql-aws-dynamodb/_test/ops/01-integration-testing/aws-dynamodb-integration-setup.md).
 
+### Test Infrastructure Dependencies
+
+The `_test/package.json` includes `test-infra-aws-sdk` as a devDependency to provide direct access to `CreateTableCommand` and `DeleteTableCommand` for test table lifecycle management. The main module lazy-loads AWS SDK internally and doesn't export these infrastructure classes. This devDependency must stay version-matched with the main module's AWS SDK dependencies.
+
 For the framework-wide testing architecture see [Module Testing](https://github.com/superloomdev/superloom/blob/main/docs/testing/module-testing.md).

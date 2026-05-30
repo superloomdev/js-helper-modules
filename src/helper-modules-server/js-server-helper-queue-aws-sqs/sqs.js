@@ -94,7 +94,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       _SQS.initIfNot();
 
       // Record operation start time
-      const start_ms = Date.now();
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -175,7 +175,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       _SQS.initIfNot();
 
       // Record operation start time
-      const start_ms = Date.now();
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -258,7 +258,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       _SQS.initIfNot();
 
       // Record operation start time
-      const start_ms = Date.now();
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -364,7 +364,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before client creation
       _SQS.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'SQS Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'SQS Client', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Base client options - region and retry config
       const client_options = {
@@ -388,7 +388,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Build SQS client
       state.client = new SQSAdapter.SQSClient(client_options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'SQS Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'SQS Client', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.debug('SQS Client Initialized', {
         region: CONFIG.REGION,
         endpoint: CONFIG.ENDPOINT || null
@@ -442,12 +442,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     *********************************************************************/
     parseBody: function (body) {
 
-      try {
-        return JSON.parse(body);
+      const parsed = Lib.Utils.stringToJSON(body);
+      if (parsed !== null) {
+        return parsed;
       }
-      catch (e) { // eslint-disable-line no-unused-vars
-        return body;
-      }
+      return body;
 
     }
 

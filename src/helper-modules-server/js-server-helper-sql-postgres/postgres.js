@@ -242,7 +242,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         };
       }
 
-      if (result.row === null) {
+      if (Lib.Utils.isNull(result.row)) {
         return {
           success: true,
           value: null,
@@ -613,7 +613,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before pool creation
       _Postgres.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'Postgres Pool', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'Postgres Pool', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Driver options resolved from the merged CONFIG
       const options = {
@@ -648,7 +648,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         Lib.Debug.debug('Postgres idle client error', { error: err.message });
       });
 
-      Lib.Debug.performanceAuditLog('Init-End', 'Postgres Pool', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'Postgres Pool', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.info('Postgres Pool Initialized', {
         host: CONFIG.HOST,
         database: CONFIG.DATABASE,
@@ -731,11 +731,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
     *********************************************************************/
     escapeValue: function (val) {
 
-      if (val === null || val === undefined) {
+      if (Lib.Utils.isNullOrUndefined(val)) {
         return 'NULL';
       }
 
-      if (typeof val === 'boolean') {
+      if (Lib.Utils.isBoolean(val)) {
         return val ? 'TRUE' : 'FALSE';
       }
 

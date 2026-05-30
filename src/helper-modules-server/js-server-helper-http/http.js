@@ -224,7 +224,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     fetch: async function (url, method, params, content_type, timeout, headers, auth) {
 
       // Start performance timer
-      const start_ms = Date.now();
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Build headers with framework defaults (caller overrides below)
       const request_headers = {
@@ -452,12 +452,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       }
 
       // Try JSON parse; fall back to raw text on parse failure
-      try {
-        return JSON.parse(text);
+      const parsed = Lib.Utils.stringToJSON(text);
+      if (parsed !== null) {
+        return parsed;
       }
-      catch {
-        return text;
-      }
+      return text;
 
     },
 

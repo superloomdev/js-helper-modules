@@ -8,6 +8,10 @@
     "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0",
     "helper-nosql-aws-dynamodb": "file:../"
   },
+  "devDependencies": {
+    "test-infra-aws-sdk": "npm:@aws-sdk/client-dynamodb@^3.1032.0",
+    "test-infra-aws-sdk-lib": "npm:@aws-sdk/lib-dynamodb@^3.1032.0"
+  },
   "scripts": {
     "pretest": "docker compose down -v --remove-orphans 2>/dev/null; docker compose up -d --wait",
     "test": "AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local AWS_REGION=us-east-1 DYNAMODB_ENDPOINT=http://127.0.0.1:8000 node --test --test-timeout 120000 test.js",
