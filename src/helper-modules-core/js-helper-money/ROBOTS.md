@@ -29,14 +29,14 @@ Each loader call returns an independent `Money` interface with its own merged co
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `DEFAULT_CURRENCY_CODE` | `String` | `'usd'` | Default currency code (reserved for future use) |
-| `CURRENCY_CODE_MIN_LENGTH` | `Number` | `3` | Reserved. Minimum valid length of a currency code |
-| `CURRENCY_CODE_MAX_LENGTH` | `Number` | `3` | Reserved. Maximum valid length of a currency code |
-| `CURRENCY_CODE_SANITIZE_REGEX` | `RegExp` | `/[^a-zA-Z]/g` | Reserved. Characters stripped from sanitized input |
+| `DEFAULT_CURRENCY_CODE` | `String` | `'usd'` | Default currency code. Validated at loader time |
+| `CURRENCY_CODE_MIN_LENGTH` | `Number` | `3` | Minimum valid length of a currency code |
+| `CURRENCY_CODE_MAX_LENGTH` | `Number` | `3` | Maximum valid length of a currency code |
+| `CURRENCY_CODE_SANITIZE_REGEX` | `RegExp` | `/[^a-zA-Z]/g` | Characters stripped from sanitized input |
 
-Config values are currently reserved - not referenced by any current public function. They are merged in the loader so callers can set them today and have them honoured by future validation helpers.
+Config values are actively used by validators (`isCurrencyCode`, `assertCurrencyCode`, `validateCurrencyCode`, `sanitizeCurrencyCode`). They are merged in the loader so callers can override them at construction time.
 
-## Exported Functions (13 total)
+## Exported Functions (20 total)
 
 All functions are synchronous. Currency codes are case-insensitive on input.
 
@@ -45,8 +45,13 @@ All functions are synchronous. Currency codes are case-insensitive on input.
 | Function | Signature | Returns |
 |---|---|---|
 | `isCurrencyCode` | `isCurrencyCode(code)` | `Boolean` - true if code is known |
+| `sanitizeCurrencyCode` | `sanitizeCurrencyCode(code)` | `String\|null` - sanitized lowercase code or null |
+| `validateCurrencyCode` | `validateCurrencyCode(code)` | `false\|Array` - false if valid, Error[] if invalid |
 | `getCurrencySymbol` | `getCurrencySymbol(currency_code)` | `String\|null` - native symbol (e.g., '₹', '$') |
 | `getCurrencySymbolForLocale` | `getCurrencySymbolForLocale(currency_code, country_code, language_code)` | `String\|null` - locale-aware symbol selection |
+| `getCurrencyIsoAlpha` | `getCurrencyIsoAlpha(currency_code)` | `String\|null` - ISO alpha code (e.g., 'USD') |
+| `getCurrencyIsoNumeric` | `getCurrencyIsoNumeric(currency_code)` | `String\|null` - ISO numeric code (e.g., '840') |
+| `getCurrencyName` | `getCurrencyName(currency_code)` | `String\|null` - English name (e.g., 'United States Dollar') |
 | `getCurrencySymbolMinor` | `getCurrencySymbolMinor(currency_code)` | `String\|null` - native minor symbol (e.g., '¢') |
 | `getCurrencySymbolMinorForLocale` | `getCurrencySymbolMinorForLocale(currency_code, country_code, language_code)` | `String\|null` - locale-aware minor symbol |
 | `getCurrencyDecimals` | `getCurrencyDecimals(currency_code)` | `Integer\|null` - decimal places (typically 2) |

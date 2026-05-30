@@ -9,12 +9,6 @@
 'use strict';
 
 
-// Shared dependency injected by loader
-let Lib;
-
-// Domain config injected by loader
-let CONFIG;
-
 // Static reference data (loaded once at require time)
 const CURRENCIES = require('./data/currencies.json');
 
@@ -61,7 +55,19 @@ module.exports = function loader (shared_libs, config) {
 
 
 ///////////////////////////createInterface START/////////////////////////////
-function createInterface (Lib, CONFIG, ERRORS, Validators) {
+
+/********************************************************************
+Builds the public interface for one factory instance. Public functions
+close over the provided Lib, CONFIG, ERRORS, and Validators.
+
+@param {Object} Lib - Dependency container (Utils, Debug)
+@param {Object} CONFIG - Merged configuration for this instance
+@param {Object} ERRORS - Error catalog (frozen)
+@param {Object} Validators - Validators module instance
+
+@return {Object} - Public Money interface
+*********************************************************************/
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
   // Public interface
   const Money = {
@@ -239,7 +245,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     @param {String} currency_code - Currency code
 
     @return {String|null} - English name, or null if unknown
-  *********************************************************************/
+    *********************************************************************/
     getCurrencyName: function (currency_code) {
 
       // Normalize and verify the currency code is known
@@ -259,8 +265,8 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
 
     @param {String} currency_code - Currency code
 
-  @return {String|null} - Native minor symbol, or null if currency
-                            has none or is unknown
+    @return {String|null} - Native minor symbol, or null if currency
+                              has none or is unknown
     *********************************************************************/
     getCurrencySymbolMinor: function (currency_code) {
 
@@ -317,7 +323,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
         return native_minor;
       }
 
-    return CURRENCIES[code]['symbol_minor']['standard'];
+      return CURRENCIES[code]['symbol_minor']['standard'];
 
     },
 
@@ -327,7 +333,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
 
     @param {String} currency_code - Currency code
 
-  @return {Integer|null} - Decimal places (e.g., 2), or null if unknown
+    @return {Integer|null} - Decimal places (e.g., 2), or null if unknown
     *********************************************************************/
     getCurrencyDecimals: function (currency_code) {
 
@@ -346,7 +352,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     /********************************************************************
     Get the minimum transactional unit for a currency.
     This is the smallest amount that can be transacted (e.g., 0.01 for USD,
-  1 for INR).
+    1 for INR).
 
     @param {String} currency_code - Currency code
 
@@ -357,7 +363,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       // Normalize and verify the currency code is known
       const code = Validators.normalizeCurrencyCode(currency_code);
 
-    if (Lib.Utils.isNull(code)) {
+      if (Lib.Utils.isNull(code)) {
         return null;
       }
 
@@ -366,15 +372,15 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     },
 
 
-  /********************************************************************
+    /********************************************************************
     Get the available denominations for a currency.
 
     @param {String} currency_code - Currency code
 
     @return {Object|null} - { minor: [...], major: [...] } or null if
-                            currency has no denominations or is unknown
+                              currency has no denominations or is unknown
     *********************************************************************/
-  getCurrencyDenominations: function (currency_code) {
+    getCurrencyDenominations: function (currency_code) {
 
       // Normalize and verify the currency code is known
       const code = Validators.normalizeCurrencyCode(currency_code);
@@ -403,7 +409,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     Uses Lib.Utils.round internally.
 
     @param {Number} amount - Amount to round
-  @param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
     @param {Number} [decimals] - Optional override for decimal places
 
     @return {Number} - Rounded amount
@@ -414,7 +420,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       const code = Validators.assertCurrencyCode(currency_code, 'roundAmount');
       Validators.assertNumber(amount, 'amount', 'roundAmount');
 
-    // Resolve decimal places (caller override or currency default)
+      // Resolve decimal places (caller override or currency default)
       const currency_decimals = CURRENCIES[code]['decimals'];
       const resolved = Lib.Utils.fallback(decimals, currency_decimals);
 
@@ -432,7 +438,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
 
     @param {Number} amount - Amount to format
     @param {String} currency_code - Currency code
-  @param {Number} [decimals] - Optional override for decimal places
+    @param {Number} [decimals] - Optional override for decimal places
     @param {Boolean} [no_pad] - If true, don't add trailing zeros for whole numbers
 
     @return {String} - Formatted amount string
@@ -443,7 +449,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       const code = Validators.assertCurrencyCode(currency_code, 'formatAmount');
       Validators.assertNumber(amount, 'amount', 'formatAmount');
 
-    // Round first, then resolve decimal places for formatting
+      // Round first, then resolve decimal places for formatting
       const rounded = Money.roundAmount(amount, currency_code, decimals);
       const currency_decimals = CURRENCIES[code]['decimals'];
       const resolved = Lib.Utils.fallback(decimals, currency_decimals);
@@ -463,7 +469,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     // ~~~~~~~~~~~~~~~~~~~~ Transactional Amounts ~~~~~~~~~~~~~~~~~~~~
     // Conversions to/from fractional units and transactional rounding.
 
-  /********************************************************************
+    /********************************************************************
     Round an amount to the nearest minimum transactional unit.
     When apply_min_unit is false, just applies standard rounding.
 
@@ -480,7 +486,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       const code = Validators.assertCurrencyCode(currency_code, 'getTransactionalAmount');
       Validators.assertNumber(amount, 'amount', 'getTransactionalAmount');
 
-    // Resolve decimal places (caller override or currency default)
+      // Resolve decimal places (caller override or currency default)
       const currency_decimals = CURRENCIES[code]['decimals'];
       const resolved_decimals = Lib.Utils.fallback(decimals, currency_decimals);
 
@@ -489,7 +495,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       // Convert to integer representation for float-safe arithmetic
       const integer_amount = _Money.toIntegerAmount(amount, code, resolved_decimals);
 
-    // Return standard rounding when min-unit rounding is not requested
+      // Return standard rounding when min-unit rounding is not requested
       if (!apply_min_unit) {
         return _Money.fromIntegerAmount(integer_amount, code, resolved_decimals);
       }
@@ -498,7 +504,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       const min_unit = CURRENCIES[code]['min_transactional_unit'];
       const integer_min_unit = _Money.toIntegerAmount(min_unit, code, resolved_decimals);
 
-    const rounded = Math.round(integer_amount / integer_min_unit) * integer_min_unit;
+      const rounded = Math.round(integer_amount / integer_min_unit) * integer_min_unit;
 
       return _Money.fromIntegerAmount(rounded, code, resolved_decimals);
 
@@ -517,7 +523,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     *********************************************************************/
     toFractionalUnits: function (amount, currency_code, decimals) {
 
-    // Validate currency code and amount
+      // Validate currency code and amount
       const code = Validators.assertCurrencyCode(currency_code, 'toFractionalUnits');
       Validators.assertNumber(amount, 'amount', 'toFractionalUnits');
 
@@ -527,7 +533,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
 
       Validators.assertOptionalInteger(resolved, 'decimals', 'toFractionalUnits');
 
-    // Round to min transactional unit first, then convert to integer
+      // Round to min transactional unit first, then convert to integer
       const rounded = Money.getTransactionalAmount(amount, currency_code, resolved, true);
 
       return _Money.toIntegerAmount(rounded, code, resolved);
@@ -546,7 +552,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     *********************************************************************/
     fromFractionalUnits: function (amount, currency_code, decimals) {
 
-    // Validate currency code and amount
+      // Validate currency code and amount
       const code = Validators.assertCurrencyCode(currency_code, 'fromFractionalUnits');
       Validators.assertNumber(amount, 'amount', 'fromFractionalUnits');
 
@@ -556,7 +562,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
 
       Validators.assertOptionalInteger(resolved, 'decimals', 'fromFractionalUnits');
 
-    // Convert integer units back to large currency
+      // Convert integer units back to large currency
       return _Money.fromIntegerAmount(amount, code, resolved);
 
     },
@@ -565,7 +571,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     // ~~~~~~~~~~~~~~~~~~~~ Aggregation (float-safe) ~~~~~~~~~~~~~~~~~~~~
     // Summing multiple amounts safely using integer arithmetic internally.
 
-  /********************************************************************
+    /********************************************************************
     Sum an array of amounts safely, avoiding floating-point errors.
     (e.g., 0.1 + 0.2 = 0.3 exactly, not 0.30000000000000004)
 
@@ -577,7 +583,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     *********************************************************************/
     sum: function (amounts, currency_code, decimals) {
 
-    // Validate currency code and optional decimals override
+      // Validate currency code and optional decimals override
       const code = Validators.assertCurrencyCode(currency_code, 'sum');
 
       Validators.assertOptionalInteger(decimals, 'decimals', 'sum');
@@ -586,7 +592,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       const currency_decimals = CURRENCIES[code]['decimals'];
       const resolved = Lib.Utils.fallback(decimals, currency_decimals);
 
-    // Sum in integer space to avoid floating-point errors
+      // Sum in integer space to avoid floating-point errors
       const total = amounts.reduce(function (sum, current) {
         Validators.assertNumber(current, 'amount item', 'sum');
         return sum + _Money.toIntegerAmount(current, code, resolved);
@@ -604,7 +610,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
     @param {Array} [majors] - Array of { value, count } for major denominations
     @param {Array} [minors] - Array of { value, count } for minor denominations (in fractional units)
     @param {String} currency_code - Currency code
-  @param {Number} [decimals] - Optional override for decimal places
+    @param {Number} [decimals] - Optional override for decimal places
     @param {Boolean} [apply_min_unit] - If true, apply min transactional unit rounding
 
     @return {Number} - Calculated total amount
@@ -614,7 +620,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       // Validate currency code and optional decimals override
       const code = Validators.assertCurrencyCode(currency_code, 'calculateTotalFromDenominations');
 
-    Validators.assertOptionalInteger(decimals, 'decimals', 'calculateTotalFromDenominations');
+      Validators.assertOptionalInteger(decimals, 'decimals', 'calculateTotalFromDenominations');
 
       // Resolve decimal places (caller override or currency default)
       const currency_decimals = CURRENCIES[code]['decimals'];
@@ -623,7 +629,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
       let total = 0;
 
       // Calculate majors (in large currency units)
-    if (!Lib.Utils.isNullOrUndefined(majors)) {
+      if (!Lib.Utils.isNullOrUndefined(majors)) {
         majors.forEach(function (major) {
           Validators.assertNumber(major['value'], 'major.value', 'calculateTotalFromDenominations');
           Validators.assertNumber(major['count'], 'major.count', 'calculateTotalFromDenominations');
@@ -634,7 +640,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
         });
       }
 
-    // Calculate minors (values are in fractional units, e.g., paise/cents)
+      // Calculate minors (values are in fractional units, e.g., paise/cents)
       if (!Lib.Utils.isNullOrUndefined(minors)) {
         minors.forEach(function (minor) {
           Validators.assertNumber(minor['value'], 'minor.value', 'calculateTotalFromDenominations');
@@ -653,7 +659,7 @@ function createInterface (Lib, CONFIG, ERRORS, Validators) {
         return Money.getTransactionalAmount(total, currency_code, resolved, true);
       }
 
-    return total;
+      return total;
 
     }
 

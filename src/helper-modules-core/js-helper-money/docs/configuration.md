@@ -35,16 +35,16 @@ Loader call semantics:
 
 ## Configuration Keys
 
-Four keys, all reserved. The keys are merged into the instance's `CONFIG` object so callers can set them today and have them honoured by future validation helpers, but no current public function reads any of them.
+Four keys. All are merged into the instance's `CONFIG` object and actively used by validators (`isCurrencyCode`, `assertCurrencyCode`, `validateCurrencyCode`, `sanitizeCurrencyCode`).
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `DEFAULT_CURRENCY_CODE` | `String` | `'usd'` | Reserved. Default currency code for operations |
-| `CURRENCY_CODE_MIN_LENGTH` | `Number` | `3` | Reserved. Minimum valid length of a currency code |
-| `CURRENCY_CODE_MAX_LENGTH` | `Number` | `3` | Reserved. Maximum valid length of a currency code |
-| `CURRENCY_CODE_SANITIZE_REGEX` | `RegExp` | `/[^a-zA-Z]/g` | Reserved. Characters stripped from sanitized input |
+| `DEFAULT_CURRENCY_CODE` | `String` | `'usd'` | Default currency code. Validated at loader time (must be a known currency) |
+| `CURRENCY_CODE_MIN_LENGTH` | `Number` | `3` | Minimum valid length of a currency code |
+| `CURRENCY_CODE_MAX_LENGTH` | `Number` | `3` | Maximum valid length of a currency code |
+| `CURRENCY_CODE_SANITIZE_REGEX` | `RegExp` | `/[^a-zA-Z]/g` | Characters stripped from sanitized input |
 
-> **Why ship reserved keys.** They define the module's external surface for upcoming validation helpers. Setting them now means application configuration does not change when validation lands.
+> **Why expose config keys.** They define the module's validation constraints. Overriding them at loader time (e.g., changing `CURRENCY_CODE_MIN_LENGTH`) immediately affects all validation and sanitization without code changes.
 
 ---
 
