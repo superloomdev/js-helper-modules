@@ -5,7 +5,7 @@
 //
 // Factory pattern: each loader call returns an independent Time interface
 // with its own config. All functions are pure - no shared module-level
-// state between instances.
+// state between instances. Utils is imported directly as singleton.
 'use strict';
 
 
@@ -24,7 +24,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
-    Utils: shared_libs.Utils
+    Utils: require('helper-utils')
   };
 
   // Merge overrides over defaults

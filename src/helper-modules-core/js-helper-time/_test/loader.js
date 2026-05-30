@@ -33,7 +33,7 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')();
+  Lib.Utils = require('helper-utils');
   Lib.Debug = require('helper-debug')(Lib, config_debug);
 
 
