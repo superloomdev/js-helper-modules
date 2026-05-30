@@ -3,24 +3,47 @@
 //
 // Compatibility: Node.js 24+.
 //
-// Singleton pattern: pure utility module with zero dependencies.
-// One shared instance for all callers. No loader needed.
+// Singleton: Validators initialized once by the loader. Public and private
+// objects are declared at module scope - Node.js require cache guarantees
+// the same Utils object is returned on every subsequent require.
+// No factory needed.
 'use strict';
 
 
+// Validators module (singleton, set by loader)
+let Validators; // eslint-disable-line no-unused-vars
 
+
+/////////////////////////// Module-Loader START ////////////////////////////////
+
+/********************************************************************
+Singleton loader. Initializes Validators and returns the module-scope
+Utils object directly. Node.js require cache guarantees a single
+instance across the process.
+
+@param {Object} shared_libs - Lib container (unused — Utils is the foundation)
+@param {Object} config - Reserved for future config overrides
+
+@return {Object} - Public Utils interface
+*********************************************************************/
+module.exports = function loader (shared_libs, config) { // eslint-disable-line no-unused-vars
+
+  // Initialize validators
+  Validators = require('./utils.validators')(shared_libs);
+
+  return Utils;
+
+};///////////////////////////// Module-Loader END ///////////////////////////////
 
 
 
 ///////////////////////////Public Functions START//////////////////////////////
-
-// Singleton Utils interface - pure utility module with zero dependencies
 const Utils = {
 
   /********************************************************************
-    Copy of Util Functions from Node JS util lib
-    Link: https://github.com/isaacs/core-util-is/blob/master/lib/util.js
-    *********************************************************************/
+  Copy of Util Functions from Node JS util lib
+  Link: https://github.com/isaacs/core-util-is/blob/master/lib/util.js
+  *********************************************************************/
   isNull: function (arg) {
     return arg === null;
   },
@@ -53,13 +76,13 @@ const Utils = {
   // Core type checks and empty-value helpers.
 
   /********************************************************************
-    Check if number is Integer (Whole Number)
+  Check if number is Integer (Whole Number)
 
-    @param {Mixed} num - Number to be checked
+  @param {Mixed} num - Number to be checked
 
-    @return {Boolean} - true if Integer (10.0 | 10)
-    @return {Boolean} - false if Decimal number (10.7 | 0.7)
-    *********************************************************************/
+  @return {Boolean} - true if Integer (10.0 | 10)
+  @return {Boolean} - false if Decimal number (10.7 | 0.7)
+  *********************************************************************/
   isInteger: function (num) {
 
     // Return
@@ -69,74 +92,74 @@ const Utils = {
 
 
   /********************************************************************
-    Check if variable is any non-null object type (includes arrays, Date,
-    RegExp, etc.). Ported from core-util-is. Use Array.isArray() when you
-    need to distinguish arrays from plain objects.
+  Check if variable is any non-null object type (includes arrays, Date,
+  RegExp, etc.). Ported from core-util-is. Use Array.isArray() when you
+  need to distinguish arrays from plain objects.
 
-    @param {Mixed} arg - Item to be checked
+  @param {Mixed} arg - Item to be checked
 
-    @return {Boolean} - 'true' if Object otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if Object otherwise 'false'
+  *********************************************************************/
   isObject: function (arg) {
     return typeof arg === 'object' && !Utils.isNull(arg); // (null is also an object)
   },
 
 
   /********************************************************************
-    Check if variable is Function
+  Check if variable is Function
 
-    @param {Mixed} arg - Item to be checked
+  @param {Mixed} arg - Item to be checked
 
-    @return {Boolean} - 'true' if type id Function otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if type id Function otherwise 'false'
+  *********************************************************************/
   isFunction: function (arg) {
     return typeof arg === 'function';
   },
 
 
   /********************************************************************
-    Check if variable is Error Type
+  Check if variable is Error Type
 
-    @param {Mixed} arg - Item to be checked
+  @param {Mixed} arg - Item to be checked
 
-    @return {Boolean} - 'true' if type of object Error otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if type of object Error otherwise 'false'
+  *********************************************************************/
   isError: function (arg) {
     return typeof arg === 'object' && (arg instanceof Error); // This won't work if the error was thrown in a different window/frame/iframe than where the check is happening
   },
 
 
   /********************************************************************
-    Check if string is empty ''
+  Check if string is empty ''
 
-    @param {String} str - String to be checked
+  @param {String} str - String to be checked
 
-    @return {Boolean} - 'true' if empty otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if empty otherwise 'false'
+  *********************************************************************/
   isEmptyString: function (str) {
     return str.length === 0;
   },
 
 
   /********************************************************************
-    Check if an Object is empty with no keys {}
+  Check if an Object is empty with no keys {}
 
-    @param {Set} obj - Object to be checked
+  @param {Set} obj - Object to be checked
 
-    @return {Boolean} - 'true' if empty otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if empty otherwise 'false'
+  *********************************************************************/
   isEmptyObject: function (obj) {
     return Object.keys(obj).length === 0;
   },
 
 
   /********************************************************************
-    Whether value is null or undefined or '' or {} or []
+  Whether value is null or undefined or '' or {} or []
 
-    @param {String | Integer | Object} arg - Item to be checked
+  @param {String | Integer | Object} arg - Item to be checked
 
-    @return {Boolean} - 'true' if empty otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if empty otherwise 'false'
+  *********************************************************************/
   isEmpty: function (arg) {
     return (
       Utils.isNullOrUndefined(arg) || // Check for Null or Undefined
@@ -147,13 +170,13 @@ const Utils = {
 
 
   /********************************************************************
-    Whether an array contains a string (return 'true' if does otherwise 'false')
+  Whether an array contains a string (return 'true' if does otherwise 'false')
 
-    @param {String | Integer | Object} arr - Error object
-    @param {String} element - Item to be searched
+  @param {String | Integer | Object} arr - Error object
+  @param {String} element - Item to be searched
 
-    @return {Boolean} - 'true' if does otherwise 'false'
-    *********************************************************************/
+  @return {Boolean} - 'true' if does otherwise 'false'
+  *********************************************************************/
   inArray: function (arr, element) {
     return arr.indexOf(element) > -1;
   },
@@ -163,13 +186,13 @@ const Utils = {
   // Error construction and no-op utilities.
 
   /********************************************************************
-    Custom Error
+  Custom Error
 
-    @param {String | Integer | Object} err_obj - Error object with 'code' and 'message' keys
-    @param {String} [context] - ID for Handshaking
+  @param {String | Integer | Object} err_obj - Error object with 'code' and 'message' keys
+  @param {String} [context] - ID for Handshaking
 
-    @return - JSON Object
-    *********************************************************************/
+  @return - JSON Object
+  *********************************************************************/
   error: function (err_obj, context) {
 
     const err = Error(err_obj['message']);
@@ -184,10 +207,10 @@ const Utils = {
 
 
   /********************************************************************
-    Null function - For optional callback functions
+  Null function - For optional callback functions
 
-    @return None
-    *********************************************************************/
+  @return None
+  *********************************************************************/
   nullFunc: function () {},
 
 
@@ -195,12 +218,12 @@ const Utils = {
   // String conversion, parsing, and manipulation helpers.
 
   /********************************************************************
-    Return JSON object from flattened string
+  Return JSON object from flattened string
 
-    @param {string} str - String to be converted into JSON
+  @param {string} str - String to be converted into JSON
 
-    @return - JSON Object
-    *********************************************************************/
+  @return - JSON Object
+  *********************************************************************/
   stringToJSON: function (str) {
 
     // Convert flattened-json string into JSON
@@ -219,13 +242,13 @@ const Utils = {
 
 
   /********************************************************************
-    Return reversed String
-    Note: Only works for ASCII strings and some Unicodes
+  Return reversed String
+  Note: Only works for ASCII strings and some Unicodes
 
-    @param {string} str - String to be reversed
+  @param {string} str - String to be reversed
 
-    @return - Reversed string
-    *********************************************************************/
+  @return - Reversed string
+  *********************************************************************/
   stringReverse: function (str) {
 
     return Array.from(str).reverse().join('');
@@ -234,13 +257,13 @@ const Utils = {
 
 
   /********************************************************************
-    Join an array of strings. If non-array, then returned as-it-is
+  Join an array of strings. If non-array, then returned as-it-is
 
-    @param {string[]|Boolean|Null} list - List of Strings to be joined. If non-array, then returned as-it-is
-    @param {string} separator - Delimiter for Split
+  @param {string[]|Boolean|Null} list - List of Strings to be joined. If non-array, then returned as-it-is
+  @param {string} separator - Delimiter for Split
 
-    @return - String
-    *********************************************************************/
+  @return - String
+  *********************************************************************/
   safeJoin: function (list, separator) {
 
     if ( Array.isArray(list) ) {
@@ -254,13 +277,13 @@ const Utils = {
 
 
   /********************************************************************
-    Filter an array to only contain Distint values
-    [1, 2, 2, 3, 3, 3, 'a', 'a'] -> [1, 2, 3, 'a']
+  Filter an array to only contain Distint values
+  [1, 2, 2, 3, 3, 3, 'a', 'a'] -> [1, 2, 3, 'a']
 
-    @param {string|Number[]} arr - Array to be filtered
+  @param {string|Number[]} arr - Array to be filtered
 
-    @return - Array
-    *********************************************************************/
+  @return - Array
+  *********************************************************************/
   arrayDistint: function (arr) {
 
     if ( Array.isArray(arr) ) {
@@ -274,13 +297,13 @@ const Utils = {
 
 
   /********************************************************************
-    Split a String and remove Whitespaces
+  Split a String and remove Whitespaces
 
-    @param {string} str - String to be Splited
-    @param {string} delimiter - Delimiter for Split
+  @param {string} str - String to be Splited
+  @param {string} delimiter - Delimiter for Split
 
-    @return - Array of String
-    *********************************************************************/
+  @return - Array of String
+  *********************************************************************/
   splitWithTrim: function (str, delimiter) {
 
     return str.split(delimiter).map(function (item) {
@@ -294,14 +317,14 @@ const Utils = {
   // Remove or normalize unwanted values from objects, arrays, and strings.
 
   /********************************************************************
-    Remove unwanted feilds of Object (By Ref)
+  Remove unwanted feilds of Object (By Ref)
 
-    @param {Set} obj - JSON Object to be cleaned
-    @param {string[]} whitelist - All the key other then these will be removed from JSON
-    @param {string[]} blacklist - These keys will be removed from JSON
+  @param {Set} obj - JSON Object to be cleaned
+  @param {string[]} whitelist - All the key other then these will be removed from JSON
+  @param {string[]} blacklist - These keys will be removed from JSON
 
-    @return - Sanatized Object
-    *********************************************************************/
+  @return - Sanatized Object
+  *********************************************************************/
   sanitizeObject: function (obj, whitelist, blacklist) {
 
     // Return as null if obj is null or undefined or not-an-array
@@ -346,13 +369,13 @@ const Utils = {
 
 
   /********************************************************************
-    Sanatize each item of Array (By Ref)
+  Sanatize each item of Array (By Ref)
 
-    @param {Mixed[]} list - Array to be Cleaned
-    @param {Function} sanatize_func - Array item sanatizer
+  @param {Mixed[]} list - Array to be Cleaned
+  @param {Function} sanatize_func - Array item sanatizer
 
-    @return - Sanatized Object
-    *********************************************************************/
+  @return - Sanatized Object
+  *********************************************************************/
   sanitizeArray: function (list, sanatize_func) {
 
     // Return as null if list is null or undefined or not-an-array
@@ -373,14 +396,14 @@ const Utils = {
 
 
   /********************************************************************
-    Return cleaned string with only characters from specific regular expresion
-    Remove all the dangerous characters excluding those who satisfy RegExp
+  Return cleaned string with only characters from specific regular expresion
+  Remove all the dangerous characters excluding those who satisfy RegExp
 
-    @param {string} str - String to be sanatized/cleaned
-    @param {string} regx - The regular expression
+  @param {string} str - String to be sanatized/cleaned
+  @param {string} regx - The regular expression
 
-    @return - Sanatized string
-    *********************************************************************/
+  @return - Sanatized string
+  *********************************************************************/
   sanitizeUsingRegx: function (str, regx) {
 
     // If null or undefined or zero-length, return value as-it-is
@@ -396,12 +419,12 @@ const Utils = {
 
 
   /********************************************************************
-    Return cleaned Integer. Convert String/Decimals to a whole-number.
+  Return cleaned Integer. Convert String/Decimals to a whole-number.
 
-    @param {Unknown} num - Number to be cleaned
+  @param {Unknown} num - Number to be cleaned
 
-    @return {Number} - Sanitized number. Rounded to 'Floor' in case of decimal.
-    *********************************************************************/
+  @return {Number} - Sanitized number. Rounded to 'Floor' in case of decimal.
+  *********************************************************************/
   sanitizeInteger: function (num) {
 
     // Convert to Integer
@@ -419,12 +442,12 @@ const Utils = {
 
 
   /********************************************************************
-    Return cleaned Boolean. Convert String/Number to true/false
+  Return cleaned Boolean. Convert String/Number to true/false
 
-    @param {Unknown} bool - Boolean to be cleaned
+  @param {Unknown} bool - Boolean to be cleaned
 
-    @return {Boolean} - Sanitized boolean value
-    *********************************************************************/
+  @return {Boolean} - Sanitized boolean value
+  *********************************************************************/
   sanitizeBoolean: function (bool) {
 
     // Return
@@ -437,12 +460,12 @@ const Utils = {
   // Timestamp, rounding, and numeric conversion helpers.
 
   /********************************************************************
-    Return specific/current unix timestamp in seconds
+  Return specific/current unix timestamp in seconds
 
-    @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
+  @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
-    @return {String} - Unix timestamp (Seconds)
-    *********************************************************************/
+  @return {String} - Unix timestamp (Seconds)
+  *********************************************************************/
   getUnixTime: function (date) {
 
     // Return Unix Timestamp equivalant of specific date in seconds
@@ -452,12 +475,12 @@ const Utils = {
 
 
   /********************************************************************
-    Return specific/current unix timestamp in Milli-Seconds
+  Return specific/current unix timestamp in Milli-Seconds
 
-    @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
+  @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
-    @return {String} - Unix timestamp (Milli-Seconds)
-    *********************************************************************/
+  @return {String} - Unix timestamp (Milli-Seconds)
+  *********************************************************************/
   getUnixTimeInMilliSeconds: function (date) {
 
     // Check if custom date is sent
@@ -472,17 +495,17 @@ const Utils = {
 
 
   /********************************************************************
-    Round a Decimal number to specified number of digits after decimal. Standard rounding rules
-    Ref: https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
-    Note: math.round() is more precise then Number.toFixed()
-    (11.5249, 2) => 11.52
-    (11.525, 2) => 11.53
+  Round a Decimal number to specified number of digits after decimal. Standard rounding rules
+  Ref: https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
+  Note: math.round() is more precise then Number.toFixed()
+  (11.5249, 2) => 11.52
+  (11.525, 2) => 11.53
 
-    @param {Number} num - Number to be rounded off
-    @param {Number} digits_after_decimal - Number of digits after decimal
+  @param {Number} num - Number to be rounded off
+  @param {Number} digits_after_decimal - Number of digits after decimal
 
-    @return {Number} - Rounded off number
-    *********************************************************************/
+  @return {Number} - Rounded off number
+  *********************************************************************/
   round: function (num, digits_after_decimal) {
 
     // If null or undefined, return value as-it-is
@@ -500,15 +523,15 @@ const Utils = {
 
 
   /********************************************************************
-    Round a Decimal number to specified number of digits after decimal. Cascading base rounding rules
-    (11.5249, 2) => 11.53
+  Round a Decimal number to specified number of digits after decimal. Cascading base rounding rules
+  (11.5249, 2) => 11.53
 
-    @param {Number} num - Number to be rounded off
-    @param {Number} digits_after_decimal - Number of digits after decimal
-    @param {Integer} safety - Number of decimals to start rounding from (default 10)
+  @param {Number} num - Number to be rounded off
+  @param {Number} digits_after_decimal - Number of digits after decimal
+  @param {Integer} safety - Number of decimals to start rounding from (default 10)
 
-    @return {Number} - Rounded off number
-    *********************************************************************/
+  @return {Number} - Rounded off number
+  *********************************************************************/
   roundWithCascading: function (num, digits_after_decimal, safety = 10) {
 
     // If null or undefined, return value as-it-is
@@ -528,13 +551,13 @@ const Utils = {
 
 
   /********************************************************************
-    Convert String to Integer (Return NaN if invalid value)
+  Convert String to Integer (Return NaN if invalid value)
 
-    @param {String} str - String to be converted to Number
+  @param {String} str - String to be converted to Number
 
-    @return {Number} - Number equivalant of the string. Null if String is Empty.
-    @return {Number} - NaN if invalid string or Array or Object
-    *********************************************************************/
+  @return {Number} - Number equivalant of the string. Null if String is Empty.
+  @return {Number} - NaN if invalid string or Array or Object
+  *********************************************************************/
   stringToNumber: function (str) {
 
     if ( Utils.isEmpty(str) ) { // If Empty String, return Null instead of 0
@@ -548,15 +571,15 @@ const Utils = {
 
 
   /********************************************************************
-    Break string into array with a delimiter
-    (Inbuilt skips all empty elements and trim whitespaces and convert to lowercase)
+  Break string into array with a delimiter
+  (Inbuilt skips all empty elements and trim whitespaces and convert to lowercase)
 
-    @param {String} delimiter - The boundary string
-    @param {String} str - The input string. Can be NULL or Empty
+  @param {String} delimiter - The boundary string
+  @param {String} str - The input string. Can be NULL or Empty
 
-    @return {Boolean} - false if input sring is null or ''
-    @return {String[]} - Newly converted array of strings
-    *********************************************************************/
+  @return {Boolean} - false if input sring is null or ''
+  @return {String[]} - Newly converted array of strings
+  *********************************************************************/
   stringToArray: function (delimiter, str) {
 
     if (str.length === 0) {
@@ -580,13 +603,13 @@ const Utils = {
 
 
   /********************************************************************
-    Join 2 Arrays (or String) of 'key' and 'value' into one Object
+  Join 2 Arrays (or String) of 'key' and 'value' into one Object
 
-    @param {String|Array} keys - Array with list of keys or single item string
-    @param {String|Array} values - Array with list of values or single item string
+  @param {String|Array} keys - Array with list of keys or single item string
+  @param {String|Array} values - Array with list of values or single item string
 
-    @return {Set} - Object with mearged key vale pairs
-    *********************************************************************/
+  @return {Set} - Object with mearged key vale pairs
+  *********************************************************************/
   keyValueToObject: function (keys, values) {
 
     const obj = {};
@@ -604,14 +627,14 @@ const Utils = {
 
 
   /********************************************************************
-    Creates a new object by overriding keys of base-object with non-null keys of new-object
-    Both Objects should be identical. Keys not present in base object won't be added to it
+  Creates a new object by overriding keys of base-object with non-null keys of new-object
+  Both Objects should be identical. Keys not present in base object won't be added to it
 
-    @param {Set} base_obj - Base object
-    @param {Set} new_objs - (... List) New object whose non-null keys will override base-object keys
+  @param {Set} base_obj - Base object
+  @param {Set} new_objs - (... List) New object whose non-null keys will override base-object keys
 
-    @return {Set} - Object with mearged data
-    *********************************************************************/
+  @return {Set} - Object with mearged data
+  *********************************************************************/
   overrideObject: function (base_obj, ...new_objs) {
 
     // Create copy of base-object
@@ -643,15 +666,15 @@ const Utils = {
 
 
   /********************************************************************
-    Set a value for specific key of object (Only if value is not null or undefined)
-    By Reference: Changes are made directly in orignal object
+  Set a value for specific key of object (Only if value is not null or undefined)
+  By Reference: Changes are made directly in orignal object
 
-    @param {Set} obj - Object in which value is to be inserted
-    @param {Set} key - Key to which this value is to be assigned
-    @param {Mixed} new_val - New value
+  @param {Set} obj - Object in which value is to be inserted
+  @param {Set} key - Key to which this value is to be assigned
+  @param {Mixed} new_val - New value
 
-    @return {Set} obj - Updated Object
-    *********************************************************************/
+  @return {Set} obj - Updated Object
+  *********************************************************************/
   setNonEmptyKey: function (obj, key, new_val) {
 
     // Set value if it's not null/undefined
@@ -666,13 +689,13 @@ const Utils = {
 
 
   /********************************************************************
-    Set a value with fallback value if it's null/undefined
+  Set a value with fallback value if it's null/undefined
 
-    @param {Mixed} new_val - New value
-    @param {Mixed} [fallback_val] - (Optional) Falback value. Auto null if not sent in param
+  @param {Mixed} new_val - New value
+  @param {Mixed} [fallback_val] - (Optional) Falback value. Auto null if not sent in param
 
-    @return {Set} - Object with mearged data
-    *********************************************************************/
+  @return {Set} - Object with mearged data
+  *********************************************************************/
   fallback: function (new_val, fallback_val) {
 
     // If fallback-value is not sent, set it as null
@@ -687,19 +710,19 @@ const Utils = {
 
 
   /********************************************************************
-    Check if All chracters in string are of valid charset and string has
-    minimum and maximum length
+  Check if All chracters in string are of valid charset and string has
+  minimum and maximum length
 
-    @param {String} str - The variable to be checked
-    @param {Number} [min_length] - (Optional) Minimum required length this string must have
-    @param {Number} [max_length] - (Optional) Maximum length this string can have
+  @param {String} str - The variable to be checked
+  @param {Number} [min_length] - (Optional) Minimum required length this string must have
+  @param {Number} [max_length] - (Optional) Maximum length this string can have
 
-    @return {Boolean} - true on success
-    @return {Boolean} - false if validation fails
+  @return {Boolean} - true on success
+  @return {Boolean} - false if validation fails
 
-    Note: Always check this function output against identic (===) FALSE to
-    avoid mismatches with text 'false' or '0' or empty strings
-    *********************************************************************/
+  Note: Always check this function output against identic (===) FALSE to
+  avoid mismatches with text 'false' or '0' or empty strings
+  *********************************************************************/
   validateString: function (str, min_length, max_length) {
 
     // Null/Empty-String Allowed (Only if minimum length is specified)
@@ -738,17 +761,17 @@ const Utils = {
 
 
   /********************************************************************
-    Check if All chracters in string statisfy particular regular expression
-    and string has minimum and maximum length
+  Check if All chracters in string statisfy particular regular expression
+  and string has minimum and maximum length
 
-    @param {String} str - The variable to be checked
-    @param {String} regx - The regular expression (EX: '[a-z0-9]{6}')
-    @param {Number} [min_length] - (Optional) Minimum required length this string must have
-    @param {Number} [max_length] - (Optional) Maximum length this string can have
+  @param {String} str - The variable to be checked
+  @param {String} regx - The regular expression (EX: '[a-z0-9]{6}')
+  @param {Number} [min_length] - (Optional) Minimum required length this string must have
+  @param {Number} [max_length] - (Optional) Maximum length this string can have
 
-    @return {Boolean} - true on success
-    @return {Boolean} - false if validation fails
-    *********************************************************************/
+  @return {Boolean} - true on success
+  @return {Boolean} - false if validation fails
+  *********************************************************************/
   validateStringRegx: function (str, regx, min_length, max_length) {
 
     // Null/Empty-String Allowed (Only if minimum length is specified)
@@ -787,15 +810,15 @@ const Utils = {
 
 
   /********************************************************************
-    Check if Integer is within Minimum and maximum range (including min and max)
+  Check if Integer is within Minimum and maximum range (including min and max)
 
-    @param {String} num - The variable to be checked
-    @param {Number} [min_value] - (Optional) Minimum required value
-    @param {Number} [max_value] - (Optional) Maximum allowed value (including)
+  @param {String} num - The variable to be checked
+  @param {Number} [min_value] - (Optional) Minimum required value
+  @param {Number} [max_value] - (Optional) Maximum allowed value (including)
 
-    @return {Boolean} - true on success
-    @return {Boolean} - false if validation fails
-    *********************************************************************/
+  @return {Boolean} - true on success
+  @return {Boolean} - false if validation fails
+  *********************************************************************/
   validateNumber: function (num, min_value, max_value) {
 
     // Validate type
@@ -820,14 +843,14 @@ const Utils = {
 
 
   /********************************************************************
-    Return Deep Copy of an Object
-    Uses native structuredClone() for better performance when available, falls back to custom polyfill for older environments.
+  Return Deep Copy of an Object
+  Uses native structuredClone() for better performance when available, falls back to custom polyfill for older environments.
 
-    @param {Object} obj - Object to be deep cloned
+  @param {Object} obj - Object to be deep cloned
 
-    @return {Object} response - Deep copy of object
-    @return {Error} response - Error if unsupported object
-    *********************************************************************/
+  @return {Object} response - Deep copy of object
+  @return {Error} response - Error if unsupported object
+  *********************************************************************/
   deepCopyObject: function (obj) {
 
     // Check if modern structuredClone() is available in this environment
@@ -849,14 +872,14 @@ const Utils = {
 
 
   /********************************************************************
-    Performs a deep comparison between two values to determine if they are equivalent in terms of content and structure
-    Similar implementation as of nodeJS assert.deepStrictEqual
+  Performs a deep comparison between two values to determine if they are equivalent in terms of content and structure
+  Similar implementation as of nodeJS assert.deepStrictEqual
 
-    @param {Object|*} a - Object to be compared
-    @param {Object|*} b - Object to be compared
+  @param {Object|*} a - Object to be compared
+  @param {Object|*} b - Object to be compared
 
-    @return {Boolean} response - Returns true if the values are deeply equal, otherwise false
-    *********************************************************************/
+  @return {Boolean} response - Returns true if the values are deeply equal, otherwise false
+  *********************************************************************/
   compareObjects: function (a, b) {
 
     // Primitive Type Comparisions. Directly compare primitive values or references
@@ -963,22 +986,22 @@ const Utils = {
   // Validate required keys, invalid keys, and nested object lists.
 
   /********************************************************************
-    Return Error-Object if required keys of object are missing or null
+  Return Error-Object if required keys of object are missing or null
 
-    @param {Object} obj - Object to be checked
-    @param {String} [context] - (Optional) Request context
-    @param {Object} required_config - Map of key names to their validation rules
-    @param {Set} required_config[key].error - Custom-Error Object to push when key is missing
-    @param {Boolean} [required_config[key].not_null] - (Optional) If true, null values are also rejected
-    @param {String|Object[]} required_keys - Keys to check. Strings are always required; Objects are conditionally required
-    @param {Object} [dependent_keys] - Keys that become required when another key has a specific value
-    @param {Object[]} [dependent_keys[parentKey]] - Rules array for a given parent key
-    @param {String[]} dependent_keys[parentKey][].keys - Dependent key names to add as required
-    @param {Boolean|Integer|String[]} [dependent_keys[parentKey][].values] - (Optional) Parent key values that trigger the dependency. Null means any value
+  @param {Object} obj - Object to be checked
+  @param {String} [context] - (Optional) Request context
+  @param {Object} required_config - Map of key names to their validation rules
+  @param {Set} required_config[key].error - Custom-Error Object to push when key is missing
+  @param {Boolean} [required_config[key].not_null] - (Optional) If true, null values are also rejected
+  @param {String|Object[]} required_keys - Keys to check. Strings are always required; Objects are conditionally required
+  @param {Object} [dependent_keys] - Keys that become required when another key has a specific value
+  @param {Object[]} [dependent_keys[parentKey]] - Rules array for a given parent key
+  @param {String[]} dependent_keys[parentKey][].keys - Dependent key names to add as required
+  @param {Boolean|Integer|String[]} [dependent_keys[parentKey][].values] - (Optional) Parent key values that trigger the dependency. Null means any value
 
-    @return {Error[]} response - Array of Error-Objects if required fields not sent
-    @return {Boolean} response - false if valid data
-    *********************************************************************/
+  @return {Error[]} response - Array of Error-Objects if required fields not sent
+  @return {Boolean} response - false if valid data
+  *********************************************************************/
   absenteeKeysCheckObject: function (
     obj, context, required_config,
     required_keys, dependent_keys = {}
@@ -1040,21 +1063,21 @@ const Utils = {
 
 
   /********************************************************************
-    Return Error-Object if validations for an object failed
+  Return Error-Object if validations for an object failed
 
-    @param {Object} obj - Object to be checked
-    @param {String} [context] - (Optional) Request context
-    @param {Object[]} [validation_config] - Validation rules; each must pass or an error is added
-    @param {Function} [validation_config[].func] - Function returning true if valid
-    @param {String[]} validation_config[].params - Object keys passed as arguments to func
-    @param {Set} validation_config[].error - Error to push when func returns false
-    @param {Object[]} [invalidation_config] - Invalidation rules; each may return errors directly
-    @param {Function} [invalidation_config[].func] - Function returning Error[] or false
-    @param {String[]} invalidation_config[].params - Object keys passed as arguments to func
+  @param {Object} obj - Object to be checked
+  @param {String} [context] - (Optional) Request context
+  @param {Object[]} [validation_config] - Validation rules; each must pass or an error is added
+  @param {Function} [validation_config[].func] - Function returning true if valid
+  @param {String[]} validation_config[].params - Object keys passed as arguments to func
+  @param {Set} validation_config[].error - Error to push when func returns false
+  @param {Object[]} [invalidation_config] - Invalidation rules; each may return errors directly
+  @param {Function} [invalidation_config[].func] - Function returning Error[] or false
+  @param {String[]} invalidation_config[].params - Object keys passed as arguments to func
 
-    @return {Error[]} response - Array of Error-Objects if required fields not sent
-    @return {Boolean} response - false if valid data
-    *********************************************************************/
+  @return {Error[]} response - Array of Error-Objects if required fields not sent
+  @return {Boolean} response - false if valid data
+  *********************************************************************/
   invalidKeysCheckObject: function (
     obj, context,
     validation_config, invalidation_config
@@ -1128,18 +1151,18 @@ const Utils = {
 
 
   /********************************************************************
-    Does both required-keys-check and invalid-keys-check for an Object
-    Only checks for invalid-keys if there are no keys absent
+  Does both required-keys-check and invalid-keys-check for an Object
+  Only checks for invalid-keys if there are no keys absent
 
-    @param {Object} obj - Object to be checked
-    @param {String[]} required_keys - List of required keys
-    @param {Set} dependent_keys - List of keys which are required only if another key is present
-    @param {Function} require_check_func - Function to check required-keys
-    @param {Function} invalidate_check_func - Function to check invalid-keys
+  @param {Object} obj - Object to be checked
+  @param {String[]} required_keys - List of required keys
+  @param {Set} dependent_keys - List of keys which are required only if another key is present
+  @param {Function} require_check_func - Function to check required-keys
+  @param {Function} invalidate_check_func - Function to check invalid-keys
 
-    @return {Error[]} response - Array of Error-Objects if invalid data
-    @return {Boolean} response - false if valid data
-    *********************************************************************/
+  @return {Error[]} response - Array of Error-Objects if invalid data
+  @return {Boolean} response - false if valid data
+  *********************************************************************/
   checkObjectData: function (
     obj, required_keys, dependent_keys,
     require_check_func, invalidate_check_func
@@ -1155,18 +1178,18 @@ const Utils = {
 
 
   /********************************************************************
-    Check and return Errors in each Object in a array
+  Check and return Errors in each Object in a array
 
-    @param {Set[]} objs_list - List of Partiton Items
-    @param {Function} new_obj_check_func - Function to check required-keys of Deep-Object
-    @param {Integer} [min_length] - (Optional) Minimum Length of Objects list (Including)
-    @param {Error} [min_length_error] - (Optional) Error for Minimum Length
-    @param {Integer} [max_length] - (Optional) Maximum Length of Objects list (Including)
-    @param {Error} [max_length_error] - (Optional) Error for Maximum Length
+  @param {Set[]} objs_list - List of Partiton Items
+  @param {Function} new_obj_check_func - Function to check required-keys of Deep-Object
+  @param {Integer} [min_length] - (Optional) Minimum Length of Objects list (Including)
+  @param {Error} [min_length_error] - (Optional) Error for Minimum Length
+  @param {Integer} [max_length] - (Optional) Maximum Length of Objects list (Including)
+  @param {Error} [max_length_error] - (Optional) Error for Maximum Length
 
-    @return {Error} response - Error-Object if invalid data
-    @return {Boolean} response - false if valid data
-    *********************************************************************/
+  @return {Error} response - Error-Object if invalid data
+  @return {Boolean} response - false if valid data
+  *********************************************************************/
   checkNewObjectsList: function (
     objs_list,
     new_obj_check_func,
@@ -1214,16 +1237,16 @@ const Utils = {
 
 
   /********************************************************************
-    Check and return Errors in each Object in a array
-    Automatically Check if New or Edit or No-Change in object based on 'cmd'
+  Check and return Errors in each Object in a array
+  Automatically Check if New or Edit or No-Change in object based on 'cmd'
 
-    @param {Set[]} objs_list - List of Partiton Items
-    @param {Function} new_obj_check_func - Function to check New Object
-    @param {Function} edit_obj_check_func - Function to check Edit Object
+  @param {Set[]} objs_list - List of Partiton Items
+  @param {Function} new_obj_check_func - Function to check New Object
+  @param {Function} edit_obj_check_func - Function to check Edit Object
 
-    @return {Error} response - Error-Object if invalid data
-    @return {Boolean} response - false if valid data
-    *********************************************************************/
+  @return {Error} response - Error-Object if invalid data
+  @return {Boolean} response - false if valid data
+  *********************************************************************/
   checkEditObjectsList: function (
     objs_list,
     new_obj_check_func, edit_obj_check_func
@@ -1261,12 +1284,12 @@ const Utils = {
   // URL parsing, CSV conversion, module checks, and random generation.
 
   /********************************************************************
-    Check if a node module is available
+  Check if a node module is available
 
-    @param {string} module_name - Request Instance object reference
+  @param {string} module_name - Request Instance object reference
 
-    @return {Boolean} - True if module is available. False if not available
-    *********************************************************************/
+  @return {Boolean} - True if module is available. False if not available
+  *********************************************************************/
   moduleAvailable: function (module_name) {
 
     // Check if module is available
@@ -1283,24 +1306,24 @@ const Utils = {
 
 
   /********************************************************************
-    Extract Protocol, Domain, Port, Path from a valid domain
-    Example: https://user:pass@subdomain.example.com:8080/abc/pqr/query?param1=apple#section1
+  Extract Protocol, Domain, Port, Path from a valid domain
+  Example: https://user:pass@subdomain.example.com:8080/abc/pqr/query?param1=apple#section1
 
-    @param {String} url - Full url
+  @param {String} url - Full url
 
-    @return {Boolean} - false if invalid URL
-    @return {Object} - URL data object if valid
-    @return {String} .origin - Scheme+Domain+Port ('https://subdomain.example.com:8080')
-    @return {String} .protocol - Protocol including ':' ('https:')
-    @return {String} .username - Username before domain ('user')
-    @return {String} .password - Password before domain ('pass')
-    @return {String} .hostname - Domain including subdomains ('subdomain.example.com')
-    @return {String} .host - Hostname+Port ('subdomain.example.com:8080')
-    @return {String} .port - Port number ('8080')
-    @return {String} .pathname - Path not including query or fragment ('/abc/pqr/query')
-    @return {String} .search - Query string including '?' ('?param1=apple')
-    @return {String} .hash - Fragment including '#' ('#section1')
-    *********************************************************************/
+  @return {Boolean} - false if invalid URL
+  @return {Object} - URL data object if valid
+  @return {String} .origin - Scheme+Domain+Port ('https://subdomain.example.com:8080')
+  @return {String} .protocol - Protocol including ':' ('https:')
+  @return {String} .username - Username before domain ('user')
+  @return {String} .password - Password before domain ('pass')
+  @return {String} .hostname - Domain including subdomains ('subdomain.example.com')
+  @return {String} .host - Hostname+Port ('subdomain.example.com:8080')
+  @return {String} .port - Port number ('8080')
+  @return {String} .pathname - Path not including query or fragment ('/abc/pqr/query')
+  @return {String} .search - Query string including '?' ('?param1=apple')
+  @return {String} .hash - Fragment including '#' ('#section1')
+  *********************************************************************/
   disjoinUrl: function (url) {
 
     try {
@@ -1331,15 +1354,15 @@ const Utils = {
 
 
   /********************************************************************
-    Extract Routing Data from Path Data
-    Example: /abc/pqr/query?param1=apple#section1
+  Extract Routing Data from Path Data
+  Example: /abc/pqr/query?param1=apple#section1
 
-    @param {String} pathname - Path portion of URL, not including query string or fragment ('/abc/pqr/query')
+  @param {String} pathname - Path portion of URL, not including query string or fragment ('/abc/pqr/query')
 
-    @return {Object} - Route data object
-    @return {String} .route - First path segment ('abc')
-    @return {String[]} .values - Remaining path segments (['pqr', 'query'])
-    *********************************************************************/
+  @return {Object} - Route data object
+  @return {String} .route - First path segment ('abc')
+  @return {String[]} .values - Remaining path segments (['pqr', 'query'])
+  *********************************************************************/
   disjoinPathname: function (pathname) {
 
     // Remove Querystring or Hash from Pathname
@@ -1369,12 +1392,12 @@ const Utils = {
 
 
   /********************************************************************
-    Convert CSV String to Data (CSV File Should have Header)
+  Convert CSV String to Data (CSV File Should have Header)
 
-    @param {String} csv_data - CSV Data
+  @param {String} csv_data - CSV Data
 
-    @return {Set[]} data - List of Objects
-    *********************************************************************/
+  @return {Set[]} data - List of Objects
+  *********************************************************************/
   convertCsvToData: function (csv_data) {
 
     // Create lines from CSV. Internally normalize line breaks (\rn). Internally removes empty lines.
@@ -1411,13 +1434,13 @@ const Utils = {
 
 
   /********************************************************************
-    Convert Data to CSV String
-    NOTE: Headers are Automatically extracted from data
+  Convert Data to CSV String
+  NOTE: Headers are Automatically extracted from data
 
-    @param {Set[]} records - List of Records as Objects
+  @param {Set[]} records - List of Records as Objects
 
-    @return {String} csv_data - CSV Data
-    *********************************************************************/
+  @return {String} csv_data - CSV Data
+  *********************************************************************/
   convertDataToCsv: function (records) {
 
     // Initialization
@@ -1461,14 +1484,14 @@ const Utils = {
 
 
   /********************************************************************
-    Convert Data to CSV String
-    NOTE: Headers are explicitly specified along with data
+  Convert Data to CSV String
+  NOTE: Headers are explicitly specified along with data
 
-    @param {Set[]} fields - Array of Column Names
-    @param {Set[]} records - List of Objects
+  @param {Set[]} fields - Array of Column Names
+  @param {Set[]} records - List of Objects
 
-    @return {String} csv_data - CSV Data
-    *********************************************************************/
+  @return {String} csv_data - CSV Data
+  *********************************************************************/
   convertDataToCsv2: function (fields, records) {
 
     // Initialization
@@ -1509,14 +1532,14 @@ const Utils = {
 
 
   /********************************************************************
-    Generate Unique string.
-    Use this method for generating non-secure random-ids only.
-    For secure random string, prefer crypto library.
+  Generate Unique string.
+  Use this method for generating non-secure random-ids only.
+  For secure random string, prefer crypto library.
 
-    @param {Number} length - length of Unique string
+  @param {Number} length - length of Unique string
 
-    @return {String} - Unique string
-    *********************************************************************/
+  @return {String} - Unique string
+  *********************************************************************/
   generateRandomString: function (length) {
 
     // Standard character set
@@ -1553,25 +1576,23 @@ const Utils = {
 
   }
 
-}; // Close Public Functions
-
-////////////////////////////Public Functions END///////////////////////////////
+};////////////////////////////Public Functions END///////////////////////////////
 
 
 
 //////////////////////////Private Functions START//////////////////////////////
-const _Utils = { // Private functions accessible within this modules only
+const _Utils = {
 
   /********************************************************************
-    Return Deep Copy of an Object (For older version of nodeJS or browsers that do not support structuredClone)
-    It uses recursion to handle nested objects and arrays.
-    Only works for plain JavaScript objects and arrays.
+  Return Deep Copy of an Object (For older version of nodeJS or browsers that do not support structuredClone)
+  It uses recursion to handle nested objects and arrays.
+  Only works for plain JavaScript objects and arrays.
 
-    @param {Object} obj - Object to be deep cloned
+  @param {Object} obj - Object to be deep cloned
 
-    @return {Object} response - Deep copy of object
-    @return {Error} response - Error if unsupported object
-    *********************************************************************/
+  @return {Object} response - Deep copy of object
+  @return {Error} response - Error if unsupported object
+  *********************************************************************/
   deepCopyObjectPolyfill: function (obj) {
 
     // Initialize object's Copy
@@ -1615,9 +1636,3 @@ const _Utils = { // Private functions accessible within this modules only
   }
 
 };///////////////////////////Private Functions END/////////////////////////////
-
-
-
-
-// Export singleton Utils interface
-module.exports = Utils;

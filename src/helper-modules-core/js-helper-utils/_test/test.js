@@ -5,7 +5,11 @@
 
 const assert = require('node:assert/strict');
 const { describe, it } = require('node:test');
-const Utils = require('helper-utils');
+
+// Load dependencies via loader (DI pattern)
+const loader = require('./loader');
+const { Lib } = loader();
+const Utils = Lib.Utils;
 
 
 
@@ -477,6 +481,29 @@ describe('splitWithTrim', function () {
       Utils.splitWithTrim('a,b,c,,e', ','),
       ['a', 'b', 'c', '', 'e']
     );
+  });
+
+});
+
+
+describe('stringToArray', function () {
+
+  it('should split string into lowercase trimmed array', function () {
+    const result = Utils.stringToArray(',', 'Apple, Banana, Cherry');
+    assert.deepStrictEqual(result, ['apple', 'banana', 'cherry']);
+  });
+
+  it('should return false when given empty string', function () {
+    assert.strictEqual(Utils.stringToArray(',', ''), false);
+  });
+
+  it('should return false when all elements are empty after filter', function () {
+    assert.strictEqual(Utils.stringToArray(',', ',,,'), false);
+  });
+
+  it('should handle single element string', function () {
+    const result = Utils.stringToArray(',', 'hello');
+    assert.deepStrictEqual(result, ['hello']);
   });
 
 });
@@ -1133,6 +1160,120 @@ describe('invalidKeysCheckObject', function () {
 });
 
 
+describe('checkObjectData', function () {
+
+  it('should return absentee errors when required keys are missing', function () {
+    const err = { code: 1, message: 'missing' };
+    const config = { name: { error: err } };
+    const require_func = function (obj, keys) {
+      return Utils.absenteeKeysCheckObject(obj, null, config, keys);
+    };
+    const invalidate_func = function () { return false; };
+    const result = Utils.checkObjectData({ age: 10 }, ['name'], {}, require_func, invalidate_func);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+  it('should return false when all checks pass', function () {
+    const require_func = function () { return false; };
+    const invalidate_func = function () { return false; };
+    const result = Utils.checkObjectData({ name: 'John' }, ['name'], {}, require_func, invalidate_func);
+    assert.strictEqual(result, false);
+  });
+
+  it('should fall through to invalidate when require passes', function () {
+    const err = { code: 2, message: 'invalid' };
+    const require_func = function () { return false; };
+    const invalidate_func = function (obj) {
+      return Utils.invalidKeysCheckObject(obj, null, [
+        { func: function (name) { return name.length > 5; }, params: ['name'], error: err }
+      ]);
+    };
+    const result = Utils.checkObjectData({ name: 'Jo' }, ['name'], {}, require_func, invalidate_func);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+});
+
+
+describe('checkNewObjectsList', function () {
+
+  it('should return false when all objects pass validation', function () {
+    const check_func = function () { return false; };
+    const result = Utils.checkNewObjectsList([{ a: 1 }, { a: 2 }], check_func);
+    assert.strictEqual(result, false);
+  });
+
+  it('should return errors when object fails validation', function () {
+    const err = { code: 1, message: 'fail' };
+    const config = { a: { error: err } };
+    const check_func = function (obj) {
+      return Utils.absenteeKeysCheckObject(obj, null, config, ['a']);
+    };
+    const result = Utils.checkNewObjectsList([{ a: 1 }, { b: 2 }], check_func);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+  it('should return error when list is shorter than min_length', function () {
+    const min_err = { code: 10, message: 'too few' };
+    const check_func = function () { return false; };
+    const result = Utils.checkNewObjectsList([{ a: 1 }], check_func, 2, min_err);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+  it('should return error when list is longer than max_length', function () {
+    const max_err = { code: 11, message: 'too many' };
+    const check_func = function () { return false; };
+    const result = Utils.checkNewObjectsList([{ a: 1 }, { a: 2 }, { a: 3 }], check_func, null, null, 2, max_err);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+});
+
+
+describe('checkEditObjectsList', function () {
+
+  it('should return false when all objects pass validation', function () {
+    const new_func = function () { return false; };
+    const edit_func = function () { return false; };
+    const list = [{ command: 'new', a: 1 }, { command: 'edit', a: 2 }];
+    const result = Utils.checkEditObjectsList(list, new_func, edit_func);
+    assert.strictEqual(result, false);
+  });
+
+  it('should route new objects to new_obj_check_func', function () {
+    const err = { code: 1, message: 'new fail' };
+    const config = { b: { error: err } };
+    const new_func = function (obj) {
+      return Utils.absenteeKeysCheckObject(obj, null, config, ['b']);
+    };
+    const edit_func = function () { return false; };
+    const list = [{ command: 'new', a: 1 }];
+    const result = Utils.checkEditObjectsList(list, new_func, edit_func);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+  it('should route edit objects to edit_obj_check_func', function () {
+    const err = { code: 2, message: 'edit fail' };
+    const config = { b: { error: err } };
+    const new_func = function () { return false; };
+    const edit_func = function (obj) {
+      return Utils.absenteeKeysCheckObject(obj, null, config, ['b']);
+    };
+    const list = [{ command: 'edit', a: 1 }];
+    const result = Utils.checkEditObjectsList(list, new_func, edit_func);
+    assert.strictEqual(Array.isArray(result), true);
+    assert.strictEqual(result.length, 1);
+  });
+
+});
+
+
 
 // ============================================================================
 // 10. URL OPERATIONS
@@ -1316,10 +1457,52 @@ describe('getUnixTime', function () {
 });
 
 
+describe('getUnixTimeInMilliSeconds', function () {
+
+  it('should return current time in milliseconds', function () {
+    const result = Utils.getUnixTimeInMilliSeconds();
+    assert.strictEqual(Utils.isNumber(result), true);
+    assert.strictEqual(result > 1000000000000, true); // Milliseconds are > 10^12
+  });
+
+  it('should return millisecond timestamp for specific date', function () {
+    const result = Utils.getUnixTimeInMilliSeconds('2030-01-01T00:00:00.000Z');
+    assert.strictEqual(Number(result), 1893456000000);
+  });
+
+});
+
+
+
+// ============================================================================
+// 13. LOADER / SINGLETON CONTRACT
+// ============================================================================
+
+describe('loader', function () {
+
+  it('should return Utils object when called with (Lib, {})', function () {
+    const result = require('helper-utils')({}, {});
+    assert.strictEqual(typeof result, 'object');
+    assert.strictEqual(typeof result.isNull, 'function');
+  });
+
+  it('should return the same singleton reference on repeated calls', function () {
+    const first = require('helper-utils')({}, {});
+    const second = require('helper-utils')({}, {});
+    assert.strictEqual(first, second);
+  });
+
+  it('should return the same reference as Lib.Utils from loader', function () {
+    const direct = require('helper-utils')({}, {});
+    assert.strictEqual(direct, Utils);
+  });
+
+});
+
 
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// config absorption contract: exempt — the loader signature accepts (shared_libs, config)
-// for interface uniformity but config is unused: createInterface() takes no arguments
-// and no public function reads CONFIG. Nothing to assert.
+// Config absorption contract: exempt — the loader signature accepts (shared_libs, config)
+// for interface uniformity but config is unused. No public function reads CONFIG.
+// Nothing to assert.

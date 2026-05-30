@@ -17,7 +17,7 @@ This page is intentionally short. Foundation utility modules accept no config ke
 
 ## Loader Pattern
 
-The module is a factory. Each loader call returns an independent public interface. Every function on the interface is captured in a closure at loader time; the interface itself is otherwise stateless.
+The module is a singleton. The loader initializes Validators and returns the module-scope Utils object. Node.js require cache guarantees the same reference is returned on every subsequent require.
 
 ```javascript
 Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, {});
@@ -27,9 +27,9 @@ Loader call semantics:
 
 - **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Foundation utility does not read it. Pass whatever your project uses (commonly `Lib`, `null`, or `{}`).
 - **Second argument: config.** Accepted for interface uniformity. There are no configuration keys. Pass `{}`.
-- **Multiple loader calls return independent interfaces.** Functions are pure, so two interfaces are functionally identical. Loading the module multiple times is harmless but wasteful.
+- **Multiple loader calls return the same singleton reference.** Node.js require cache guarantees identity. The loader is idempotent.
 
-> **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. Class C and D modules use both arguments; Class A modules accept them and discard them. The uniformity is the point.
+> **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. Higher-tier modules use both arguments; foundation modules accept them and discard them. The uniformity is the point.
 
 ---
 

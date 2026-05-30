@@ -9,13 +9,14 @@ None (foundation).
 ## Direct Dependencies
 None.
 
-## Loader Pattern (Factory)
+## Loader Pattern (Singleton)
 
 ```javascript
-Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, { /* config overrides */ });
+Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, {});
 ```
 
-`shared_libs` accepted for interface uniformity but unused - Utils has no external lib dependencies.
+`shared_libs` accepted for interface uniformity but unused — Utils has no external lib dependencies.
+`config` reserved for future overrides.
 
 ## Config Keys
 None.
@@ -51,7 +52,6 @@ overrideObject(base_obj, ...new_objs) → Object | async:no - shallow merge; SKI
 setNonEmptyKey(obj, key, new_val) → Object | async:no - only set if new_val is non-empty
 fallback(new_val, fallback_val) → any | async:no - return new_val if non-empty, else fallback
 deepCopyObject(obj) → Object | async:no
-deepCopyObjectPolyfill(obj) → Object | async:no
 compareObjects(a, b) → Boolean | async:no - deep equality
 
 ### Sanitization
@@ -90,14 +90,15 @@ disjoinPathname(pathname) → Object | async:no
 
 ### CSV
 convertCsvToData(csv_data) → Array | async:no
-convertDataToCsv(records) → String | async:no
+convertDataToCsv(records) → String | async:no - headers extracted from first record
+convertDataToCsv2(fields, records) → String | async:no - headers explicitly specified
 
 ### Random
 generateRandomString(length) → String | async:no
 
 ## Patterns
 - **Foundation:** This module has zero dependencies. All other modules may import it freely
-- **Factory per loader:** every loader call returns its own `Utils` interface with functions captured in closure
+- **Singleton with loader:** One shared object for all callers. Loader initializes Validators and returns the module-scope Utils object. `shared_libs` and `config` accepted for interface uniformity
 - **Exception to DRY rule:** Foundation modules cannot use `Lib.Utils` (they ARE it). Raw type checks are allowed INSIDE this module only. All other modules MUST use this module's functions instead of inline checks
 - **Pure functions:** No side effects, no I/O, no async
 - **Self-contained:** Implements all type checks and data helpers needed across the framework
