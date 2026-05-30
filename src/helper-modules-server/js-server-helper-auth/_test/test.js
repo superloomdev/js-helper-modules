@@ -722,3 +722,117 @@ describe('parts/policy', function () {
   });
 
 });
+
+
+
+// ============================================================================
+// WIRE-FORMAT VALIDATION — actor_id / tenant_id separator constraints (plan 0042)
+// ============================================================================
+
+describe('createSession wire-format validation (plan 0042)', function () {
+
+  const valid_base_config = {
+    STORE: MemoryStoreFactory,
+    STORE_CONFIG: {},
+    ACTOR_TYPE: 'user',
+    TTL_SECONDS: 3600,
+    LIMITS: { total_max: 5, evict_oldest_on_limit: true }
+  };
+
+  it('rejects actor_id containing "-" with TypeError before store I/O', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    await assert.rejects(
+      auth.createSession(instance, {
+        tenant_id: 'T', actor_id: 'bad-id',
+        install_platform: 'web', install_form_factor: 'desktop'
+      }),
+      function (err) {
+        return err instanceof TypeError &&
+          /options\.actor_id/.test(err.message) &&
+          /must not contain "-" or "#"/.test(err.message);
+      }
+    );
+
+  });
+
+  it('rejects actor_id containing "#" with TypeError before store I/O', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    await assert.rejects(
+      auth.createSession(instance, {
+        tenant_id: 'T', actor_id: 'bad#id',
+        install_platform: 'web', install_form_factor: 'desktop'
+      }),
+      function (err) {
+        return err instanceof TypeError &&
+          /options\.actor_id/.test(err.message) &&
+          /must not contain "-" or "#"/.test(err.message);
+      }
+    );
+
+  });
+
+  it('rejects tenant_id containing "#" with TypeError before store I/O', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    await assert.rejects(
+      auth.createSession(instance, {
+        tenant_id: 'bad#tenant', actor_id: 'A1',
+        install_platform: 'web', install_form_factor: 'desktop'
+      }),
+      function (err) {
+        return err instanceof TypeError &&
+          /options\.tenant_id/.test(err.message) &&
+          /must not contain "#"/.test(err.message);
+      }
+    );
+
+  });
+
+  it('allows tenant_id containing "-" (not a composite-key separator)', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    const result = await auth.createSession(instance, {
+      tenant_id: 'my-tenant', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+
+    assert.equal(result.success, true);
+    assert.ok(result.auth_id);
+
+  });
+
+  it('no orphaned session row after actor_id rejection (regression)', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    // Attempt createSession with a bad actor_id — must throw
+    await assert.rejects(
+      auth.createSession(instance, {
+        tenant_id: 'T', actor_id: 'orphan-test',
+        install_platform: 'web', install_form_factor: 'desktop'
+      }),
+      TypeError
+    );
+
+    // Verify no session was persisted for this actor
+    const list_result = await auth.listSessions(instance, {
+      tenant_id: 'T', actor_id: 'orphan-test'
+    });
+
+    assert.equal(list_result.success, true);
+    assert.equal(list_result.sessions.length, 0);
+
+  });
+
+});

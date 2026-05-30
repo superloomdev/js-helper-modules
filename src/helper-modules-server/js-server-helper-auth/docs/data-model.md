@@ -36,7 +36,7 @@ actor_type: 'service'         actor_id: 'billing-api'   // machine-to-machine
 auth_id = "{actor_id}-{token_key}-{token_secret}"
 ```
 
-Reserved characters are `-` (segment separator) and `#` (composite-key separator inside MongoDB `_id` and DynamoDB sort key). Both are forbidden in any user-supplied `actor_id`. Validation runs at `createSession` and `createAuthId`.
+Reserved characters are `-` (segment separator) and `#` (composite-key separator inside MongoDB `_id` and DynamoDB sort key). Both are forbidden in any user-supplied `actor_id`; `#` alone is forbidden in `tenant_id` (it never enters the wire `auth_id`, only the composite key). Validation runs at `createSession` and `createAuthId`.
 
 **install_id.** An optional client-supplied device or browser identifier. When provided and it matches an existing session's `install_id`, the prior session is **replaced atomically** regardless of session limits. This implements "log in again on the same device overrides the previous session" without requiring the client to remember the old `token_key`.
 
@@ -51,7 +51,7 @@ install_id: null                  // omit when the platform has no stable device
 
 | Field | Type | Set by | Description |
 |-------|------|--------|-------------|
-| `tenant_id` | String | caller | Top-level isolation boundary. All store queries are scoped to this value. Immutable after creation. |
+| `tenant_id` | String | caller | Top-level isolation boundary. All store queries are scoped to this value. Forbidden character: `#`. Immutable after creation. |
 | `actor_id` | String | caller | The authenticated principal. Forbidden characters: `-` and `#`. Immutable after creation. |
 | `actor_type` | String | auth module | Copied from `CONFIG.ACTOR_TYPE`. Validated on every `verifySession`. Immutable. |
 | `token_key` | String | auth module | Random 16-char hex. Part of the composite primary key. Returned inside `auth_id`. |
