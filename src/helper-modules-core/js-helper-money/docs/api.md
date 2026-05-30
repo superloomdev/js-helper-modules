@@ -21,7 +21,7 @@ Every function in this module is **synchronous, side-effect-free, and platform-a
 |---|---|
 | **Currency codes are case-insensitive.** | `'USD'`, `'usd'`, and `'Usd'` are all valid and equivalent |
 | **Unknown currency codes return null for metadata.** | `getCurrencySymbol('xyz')` returns `null`; `getCurrencyDecimals('xyz')` returns `null` |
-| **Arithmetic functions assume valid input.** | `roundAmount`, `sum`, `formatAmount` do not validate the currency code; callers should validate first via `isCurrencyCode` |
+| **Arithmetic functions validate input.** | `roundAmount`, `sum`, `formatAmount`, `getTransactionalAmount`, `toFractionalUnits`, `fromFractionalUnits`, and `calculateTotalFromDenominations` throw `TypeError` for missing, non-string, or unknown currency codes and non-finite amounts |
 | **Min transactional unit vs decimals.** | `decimals` is for display precision (typically 2); `min_transactional_unit` is for rounding rules. INR has `decimals: 2` (display as 15.00) but `min_transactional_unit: 1` (round to whole rupees for transactions) |
 | **Integer arithmetic internally.** | Functions like `sum` convert to integer (cents/paise), sum, then convert back. This prevents floating-point errors like `0.1 + 0.2 = 0.30000000000000004` |
 | **Denominations are strings.** | The `denominations.minor` and `denominations.major` arrays contain string values (e.g., `"50"`, `"100"`) as defined in the currency data |
@@ -41,6 +41,48 @@ Returns `true` if the provided code is a known currency, `false` otherwise. Case
 | Returns | Description |
 |---|---|
 | `Boolean` | True if known (e.g., `'usd'`, `'INR'`), false otherwise |
+
+---
+
+### `sanitizeCurrencyCode(code)`
+
+Sanitize a currency code: lowercase, strip non-letter characters. Returns null if the result has wrong length or is not a string.
+
+| Param | Type | Description |
+|---|---|---|
+| `code` | `*` | Currency code to sanitize |
+
+| Returns | Description |
+|---|---|
+| `String\|null` | Sanitized lowercase code, or null |
+
+```javascript
+Lib.Money.sanitizeCurrencyCode('USD');       // 'usd'
+Lib.Money.sanitizeCurrencyCode(' Usd ');     // 'usd'
+Lib.Money.sanitizeCurrencyCode('U$S$D');     // 'usd'
+Lib.Money.sanitizeCurrencyCode('us');        // null (too short)
+Lib.Money.sanitizeCurrencyCode(null);        // null
+```
+
+---
+
+### `validateCurrencyCode(code)`
+
+Validate a currency code without throwing. Returns `false` if valid, or an array of error objects from the error catalog on failure.
+
+| Param | Type | Description |
+|---|---|---|
+| `code` | `*` | Currency code to validate |
+
+| Returns | Description |
+|---|---|
+| `false\|Array` | `false` if valid, `Error[]` if invalid |
+
+```javascript
+Lib.Money.validateCurrencyCode('usd');   // false (valid)
+Lib.Money.validateCurrencyCode(null);    // [{ type: 'MONEY_CURRENCY_CODE_REQUIRED', ... }]
+Lib.Money.validateCurrencyCode('xyz');   // [{ type: 'MONEY_CURRENCY_CODE_UNKNOWN', ... }]
+```
 
 ---
 
@@ -82,6 +124,66 @@ Returns the currency symbol considering locale preferences. If the country/langu
 Lib.Money.getCurrencySymbolForLocale('inr', 'in', 'hi_in');  // '₹'
 Lib.Money.getCurrencySymbolForLocale('inr', 'us', 'en_us');  // 'INR'
 Lib.Money.getCurrencySymbolForLocale('usd', 'us', 'en_us');  // '$'
+```
+
+---
+
+### `getCurrencyIsoAlpha(currency_code)`
+
+Returns the ISO 4217 alpha code (uppercase).
+
+| Param | Type | Description |
+|---|---|---|
+| `currency_code` | `String` | Currency code |
+
+| Returns | Description |
+|---|---|
+| `String\|null` | ISO alpha code (e.g., `'USD'`, `'INR'`), or null if unknown |
+
+```javascript
+Lib.Money.getCurrencyIsoAlpha('usd');  // 'USD'
+Lib.Money.getCurrencyIsoAlpha('inr');  // 'INR'
+Lib.Money.getCurrencyIsoAlpha('xyz');  // null
+```
+
+---
+
+### `getCurrencyIsoNumeric(currency_code)`
+
+Returns the ISO 4217 numeric code as a zero-padded string.
+
+| Param | Type | Description |
+|---|---|---|
+| `currency_code` | `String` | Currency code |
+
+| Returns | Description |
+|---|---|
+| `String\|null` | ISO numeric code (e.g., `'840'`, `'036'`), or null if unknown |
+
+```javascript
+Lib.Money.getCurrencyIsoNumeric('usd');  // '840'
+Lib.Money.getCurrencyIsoNumeric('aud');  // '036'
+Lib.Money.getCurrencyIsoNumeric('xyz');  // null
+```
+
+---
+
+### `getCurrencyName(currency_code)`
+
+Returns the English name for a currency (ISO 4217 official name).
+
+| Param | Type | Description |
+|---|---|---|
+| `currency_code` | `String` | Currency code |
+
+| Returns | Description |
+|---|---|
+| `String\|null` | English name, or null if unknown |
+
+```javascript
+Lib.Money.getCurrencyName('usd');  // 'United States Dollar'
+Lib.Money.getCurrencyName('inr');  // 'Indian Rupee'
+Lib.Money.getCurrencyName('xyz');  // null
 ```
 
 ---
