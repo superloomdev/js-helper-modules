@@ -424,7 +424,7 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     secondsToTimeString: function (seconds) {
 
-      if (Lib.Utils.isNullOrUndefined(seconds) || seconds === '') {
+      if (Lib.Utils.isEmpty(seconds)) {
         return '';
       }
 

@@ -1043,7 +1043,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before client creation
       _MongoDB.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'MongoDB Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'MongoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Build MongoClient with connection pooling options
       state.client = new MongoClient(CONFIG.CONNECTION_STRING, {
@@ -1057,7 +1057,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Cache the database reference
       state.db = state.client.db(CONFIG.DATABASE_NAME);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'MongoDB Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'MongoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.debug('MongoDB Client Initialized', {
         database: CONFIG.DATABASE_NAME
       });

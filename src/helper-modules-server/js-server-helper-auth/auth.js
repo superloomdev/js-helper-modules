@@ -356,7 +356,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       // Parse the wire format
       const parts = AuthId.parseAuthId(auth_id);
       // Reject if the wire format is malformed
-      if (parts === null) {
+      if (Lib.Utils.isNull(parts)) {
         return {
           success: false,
           session: null,
@@ -397,7 +397,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       }
 
       // Token not found - treat as invalid rather than exposing absence
-      if (get_result.record === null) {
+      if (Lib.Utils.isNull(get_result.record)) {
         return {
           success: false,
           session: null,
@@ -1144,7 +1144,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       const parts = AuthId.parseAuthId(options.refresh_token);
 
       // Reject if the wire format is malformed
-      if (parts === null) {
+      if (Lib.Utils.isNull(parts)) {
         return {
           success: false,
           access_token: null,

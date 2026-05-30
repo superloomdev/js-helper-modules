@@ -19,6 +19,12 @@ A flat collection of small, pure JavaScript functions covering type checks, vali
 
 - **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom in order, use the section breaks as checkpoints to mark how far they have got, and finish without ever getting lost in dense logic. This matters most when an AI assistant is generating the change and a human still has to sign off on it. Open `utils.js` to see the structure.
 
+## Gotchas Worth Knowing
+
+A few functions have deliberate semantics that are easy to misuse if you assume they behave like their standard-library lookalikes. Read the [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/api.md) before reaching for these.
+
+- **`overrideObject` is not `Object.assign`.** It is a shallow merge that **skips strictly-`null` values** (a `null` override keeps the base value) but does **not** skip `undefined`, and it never deep-merges nested objects. Use it only for "layer non-null overrides onto defaults" patterns. When a caller must be able to set a key to `null` to override a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead — `overrideObject` would silently retain the default and change behaviour.
+
 ## Aligned with Superloom Philosophy
 
 If your project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without you needing to learn anything new. It is the foundation that every other Superloom helper module rests on, so adopting it does not introduce inconsistency into your codebase.

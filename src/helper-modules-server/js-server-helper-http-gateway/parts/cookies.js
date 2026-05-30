@@ -235,7 +235,7 @@ const _Cookies = {
   isUcBrowserVersionAtLeast: function (major, minor, build, user_agent) {
     const match = user_agent.match(/UCBrowser\/(\d+)\.(\d+)\.(\d+)/);
 
-    if (match === null) {
+    if (Lib.Utils.isNull(match)) {
       return false;
     }
 

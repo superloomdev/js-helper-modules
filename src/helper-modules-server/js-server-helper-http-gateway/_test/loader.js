@@ -27,6 +27,7 @@ module.exports = function loader () {
 
   Lib.Utils = require('helper-utils')(Lib, {});
   Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Time = require('helper-time')(Lib, {});
 
 
   // ==================== SERVER HELPER MODULES ====================== //

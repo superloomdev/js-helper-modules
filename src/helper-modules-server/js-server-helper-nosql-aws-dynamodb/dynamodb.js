@@ -1270,7 +1270,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before client creation
       _DynamoDB.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'DynamoDB Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-Start', 'DynamoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
 
       // Base client options - region and retry config
       const client_options = {
@@ -1304,7 +1304,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Wrap base client in Document Client for simplified data access
       state.client = DynamoDBLib.DynamoDBDocumentClient.from(base_client, document_options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'DynamoDB Client', Date.now());
+      Lib.Debug.performanceAuditLog('Init-End', 'DynamoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
       Lib.Debug.debug('DynamoDB Client Initialized', {
         region: CONFIG.REGION,
         endpoint: CONFIG.ENDPOINT || null

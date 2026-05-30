@@ -50,6 +50,7 @@ module.exports = function loader (shared_libs, config) {
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
+    Time: shared_libs.Time,
     Instance: shared_libs.Instance
   };
 
@@ -482,10 +483,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
     getHttpTime: function (timestamp_seconds) {
 
       if (!Lib.Utils.isNullOrUndefined(timestamp_seconds)) {
-        return new Date(timestamp_seconds * 1000).toUTCString();
+        return Lib.Time.unixtimeToUtcString(timestamp_seconds);
       }
 
-      return new Date().toUTCString();
+      return Lib.Time.unixtimeToUtcString(Lib.Utils.getUnixTime());
 
     },
 

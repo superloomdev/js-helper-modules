@@ -5,7 +5,11 @@
 
 const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
-const { DynamoDBClient, CreateTableCommand, DeleteTableCommand } = require('@aws-sdk/client-dynamodb');
+// NOTE: Direct AWS SDK require needed for test infrastructure setup
+// (CreateTableCommand, DeleteTableCommand). The main module lazy-loads 
+// AWS SDK internally and does not export it. This devDependency must 
+// stay version-matched with ../package.json dependencies.
+const { DynamoDBClient, CreateTableCommand, DeleteTableCommand } = require('test-infra-aws-sdk');
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files — only in loader.js

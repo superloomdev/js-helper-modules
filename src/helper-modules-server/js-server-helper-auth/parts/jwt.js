@@ -160,8 +160,13 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
       let claims;
       try {
 
-        header = JSON.parse(Jwt.base64UrlDecode(parts[0]));
-        claims = JSON.parse(Jwt.base64UrlDecode(parts[1]));
+        const header_decoded = Jwt.base64UrlDecode(parts[0]);
+        const claims_decoded = Jwt.base64UrlDecode(parts[1]);
+        header = Lib.Utils.stringToJSON(header_decoded);
+        claims = Lib.Utils.stringToJSON(claims_decoded);
+        if (Lib.Utils.isNull(header) || Lib.Utils.isNull(claims)) {
+          throw new Error('JWT decode failed');
+        }
 
       } catch (err) {
 
