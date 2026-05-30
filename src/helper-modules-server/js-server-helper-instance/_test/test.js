@@ -335,3 +335,12 @@ describe('getAge', function () {
   });
 
 });
+
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+// config absorption contract: exempt — instance.config.js is intentionally
+// empty (no keys defined). CONFIG is accepted by the loader for future use
+// but is currently unused in createInterface. Nothing to assert.

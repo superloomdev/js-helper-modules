@@ -27,6 +27,14 @@ const buildVerify = function (store) {
 };
 
 
+const validBaseConfig = function () {
+  return {
+    STORE:        function () { return createMemoryStore(); },
+    STORE_CONFIG: {}
+  };
+};
+
+
 // Build an adapter that returns failure for every method - used to test
 // error propagation paths through the verify module.
 const createFailingStore = function () {
@@ -752,6 +760,54 @@ describe('Factory pattern', function () {
     assert.strictEqual(store_a._records.size, 1);
     assert.strictEqual(store_b._records.size, 1);
     assert.notStrictEqual(Verify_A, Verify_B);
+  });
+
+});
+
+
+
+// ============================================================================
+// 12. CONFIG ABSORPTION CONTRACT
+// ============================================================================
+
+describe('config absorption contract', function () {
+
+  // Sanity anchor: valid baseline must construct cleanly.
+  it('constructs with a valid baseline config', function () {
+    assert.doesNotThrow(function () { VerifyFactory(Lib, validBaseConfig()); });
+  });
+
+  // OVERRIDE WINS: override PIN_CHARSET to a single character 'X' — every
+  // generated digit must be 'X', proving the override reached CONFIG.
+  it('absorbs a PIN_CHARSET override that changes generated output', async function () {
+    const verify = VerifyFactory(Lib, Object.assign(validBaseConfig(), { PIN_CHARSET: 'X' }));
+    const instance = Lib.Instance.initialize();
+    const result = await verify.createPin(instance, defaultCreateOptions({ length: 6 }));
+    assert.strictEqual(result.success, true);
+    assert.match(result.code, /^X{6}$/);
+  });
+
+  // NULL HONORED (0032 canary): PIN_CHARSET default is '0123456789' (non-null);
+  // explicit null must be seen as null. With Object.assign, Crypto.generateRandomString
+  // receives null and returns '' (empty string). With the buggy overrideObject, the
+  // default charset is kept and a 6-digit code is returned.
+  it('honors an explicit null override of PIN_CHARSET (a key with a non-null default)', async function () {
+    const verify = VerifyFactory(Lib, Object.assign(validBaseConfig(), { PIN_CHARSET: null }));
+    const instance = Lib.Instance.initialize();
+    const result = await verify.createPin(instance, defaultCreateOptions({ length: 6 }));
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.code, '');
+  });
+
+  // OMISSION KEEPS DEFAULT: omitting PIN_CHARSET falls back to '0123456789'.
+  it('retains the default PIN_CHARSET when the key is omitted from the override', async function () {
+    const cfg = validBaseConfig();
+    delete cfg.PIN_CHARSET;
+    const verify = VerifyFactory(Lib, cfg);
+    const instance = Lib.Instance.initialize();
+    const result = await verify.createPin(instance, defaultCreateOptions({ length: 6 }));
+    assert.strictEqual(result.success, true);
+    assert.match(result.code, /^[0-9]{6}$/);
   });
 
 });

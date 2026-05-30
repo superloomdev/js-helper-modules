@@ -454,3 +454,41 @@ describe('performanceAuditLog', function () {
   });
 
 });
+
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+
+describe('config absorption contract', function () {
+
+  // Sanity anchor: valid baseline must construct cleanly.
+  it('constructs with a valid baseline config', function () {
+    assert.doesNotThrow(function () { createDebug({ LOG_LEVEL: 'error', LOG_FORMAT: 'text' }); });
+  });
+
+  // OVERRIDE WINS: LOG_LEVEL default is 'debug' (all messages pass through);
+  // override to 'none' suppresses all output — proves the override reached CONFIG.
+  it('absorbs a LOG_LEVEL override that suppresses all output', function () {
+    const Debug = createDebug({ LOG_LEVEL: 'none', LOG_FORMAT: 'text' });
+    const output = captureOutput(function () { Debug.debug('should be silent'); });
+    assert.strictEqual(output.length, 0);
+  });
+
+  // NULL HONORED: not applicable for LOG_LEVEL — shouldLog uses
+  // `_Debug.LOG_LEVELS[CONFIG.LOG_LEVEL] || 0`, so null falls back to 0
+  // (same numeric threshold as 'debug'). null and 'debug' produce identical
+  // output behaviour; there is no observable distinction at this tier.
+  // APP_NAME and LOG_FORMAT also have no binary-observable null vs non-null
+  // distinction at unit level. Null-honored is documented as deferred.
+
+  // OMISSION KEEPS DEFAULT: omitting LOG_LEVEL leaves it as 'debug' — debug()
+  // messages are emitted.
+  it('retains the default LOG_LEVEL when the key is omitted from the override', function () {
+    const Debug = createDebug({ LOG_FORMAT: 'text' });
+    const output = captureOutput(function () { Debug.debug('visible'); });
+    assert.ok(output.length > 0);
+  });
+
+});

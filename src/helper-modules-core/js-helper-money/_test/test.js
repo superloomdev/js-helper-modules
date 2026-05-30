@@ -10,6 +10,19 @@ const loader = require('./loader');
 const { Lib } = loader();
 const Money = Lib.Money;
 
+// Factory required directly for contract tests — money is a singleton so
+// each loader call updates the module-level CONFIG (require-cache instance).
+const MoneyFactory = require('helper-money');
+
+const validBaseConfig = function () {
+  return {
+    DEFAULT_CURRENCY_CODE:    'usd',
+    CURRENCY_CODE_MIN_LENGTH: 3,
+    CURRENCY_CODE_MAX_LENGTH: 3,
+    CURRENCY_CODE_SANITIZE_REGEX: /[^a-zA-Z]/g
+  };
+};
+
 
 
 // ============================================================================
@@ -734,6 +747,52 @@ describe('Validation and new functions', function () {
       Money.roundAmount(Infinity, 'usd');
     }, /amount must be a finite number/);
 
+  });
+
+});
+
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+// Note: js-helper-money is a singleton — each MoneyFactory(Lib, config) call
+// updates the shared module-level CONFIG. Tests below exercise the loader
+// directly (not Lib.Money) so that each call uses a fresh config snapshot.
+// The factory is called only for its load-time validation side-effect; the
+// returned singleton reference is not used.
+
+describe('config absorption contract', function () {
+
+  // Sanity anchor: valid baseline must construct cleanly.
+  it('constructs with a valid baseline config', function () {
+    assert.doesNotThrow(function () { MoneyFactory(Lib, validBaseConfig()); });
+  });
+
+  // OVERRIDE WINS (Strategy 1): override DEFAULT_CURRENCY_CODE with an unknown
+  // code — validateConfig throws, proving the override reached CONFIG.
+  it('absorbs a DEFAULT_CURRENCY_CODE override that fails validation', function () {
+    assert.throws(function () {
+      MoneyFactory(Lib, Object.assign(validBaseConfig(), { DEFAULT_CURRENCY_CODE: 'INVALID' }));
+    }, /not a known currency/);
+  });
+
+  // NULL HONORED (0032 canary): CURRENCY_CODE_SANITIZE_REGEX default is a RegExp
+  // (non-null). Explicit null must be seen as null. With Object.assign, null
+  // replaces the RegExp → validateConfig throws. With buggy overrideObject, the
+  // default RegExp is kept → no throw.
+  it('honors an explicit null override of CURRENCY_CODE_SANITIZE_REGEX (a key with a non-null default)', function () {
+    assert.throws(function () {
+      MoneyFactory(Lib, Object.assign(validBaseConfig(), { CURRENCY_CODE_SANITIZE_REGEX: null }));
+    }, /must be a RegExp/);
+  });
+
+  // OMISSION KEEPS DEFAULT: omitting DEFAULT_CURRENCY_CODE falls back to 'usd'
+  // (a known currency) — loader must not throw.
+  it('retains the default DEFAULT_CURRENCY_CODE when the key is omitted from the override', function () {
+    const cfg = validBaseConfig();
+    delete cfg.DEFAULT_CURRENCY_CODE;
+    assert.doesNotThrow(function () { MoneyFactory(Lib, cfg); });
   });
 
 });

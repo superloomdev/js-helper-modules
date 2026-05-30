@@ -46,6 +46,14 @@ const waitForBackgroundQueue = async function (instance) {
 };
 
 
+const validBaseConfig = function () {
+  return {
+    STORE:        createMemoryStore,
+    STORE_CONFIG: {}
+  };
+};
+
+
 // Build a logger backed by the in-memory store.
 const buildLogger = function (overrides) {
   return LoggerFactory(Lib, Object.assign({
@@ -750,5 +758,67 @@ describe('setupNewStore', function () {
     assert.equal(result.success, true);
     assert.equal(result.deleted_count, 0);
   });
+
+});
+
+
+
+// ============================================================================
+// 10. CONFIG ABSORPTION CONTRACT
+// ============================================================================
+
+describe('config absorption contract', function () {
+
+  // Sanity anchor: valid baseline must construct cleanly.
+  it('constructs with a valid baseline config', function () {
+    assert.doesNotThrow(function () { LoggerFactory(Lib, validBaseConfig()); });
+  });
+
+  // OVERRIDE WINS: IP_ENCRYPT_KEY defaults to null (no encryption); setting a
+  // non-null key overrides that — the IP stored in the record must be ciphertext,
+  // not the original value, proving the override reached CONFIG.
+  it('absorbs an IP_ENCRYPT_KEY override that changes stored IP to ciphertext', async function () {
+    const captured = [];
+    const captureStore = {
+      addLog: async function (_instance, record) { captured.push(record); return { success: true, error: null }; },
+      getLogsByEntity: async function () { return { success: true, records: [], next_cursor: null, error: null }; },
+      getLogsByActor: async function () { return { success: true, records: [], next_cursor: null, error: null }; }
+    };
+
+    const key = Lib.Crypto.generateRandomString('0123456789abcdef', 64);
+    const logger = LoggerFactory(Lib, Object.assign(validBaseConfig(), {
+      STORE:        function () { return captureStore; },
+      IP_ENCRYPT_KEY: key
+    }));
+
+    await logger.log(Lib.Instance.initialize(), defaultLogOptions({ ip: '198.51.100.1', await: true }));
+
+    assert.equal(captured.length, 1);
+    assert.notEqual(captured[0].ip, '198.51.100.1');
+  });
+
+  // OMISSION KEEPS DEFAULT (null): omitting IP_ENCRYPT_KEY leaves it null —
+  // IP is stored as plaintext.
+  it('retains null IP_ENCRYPT_KEY default when the key is omitted (ip stored as plaintext)', async function () {
+    const captured = [];
+    const captureStore = {
+      addLog: async function (_instance, record) { captured.push(record); return { success: true, error: null }; },
+      getLogsByEntity: async function () { return { success: true, records: [], next_cursor: null, error: null }; },
+      getLogsByActor: async function () { return { success: true, records: [], next_cursor: null, error: null }; }
+    };
+
+    const cfg = validBaseConfig();
+    delete cfg.IP_ENCRYPT_KEY;
+    const logger = LoggerFactory(Lib, Object.assign(cfg, { STORE: function () { return captureStore; } }));
+
+    await logger.log(Lib.Instance.initialize(), defaultLogOptions({ ip: '198.51.100.2', await: true }));
+
+    assert.equal(captured.length, 1);
+    assert.equal(captured[0].ip, '198.51.100.2');
+  });
+
+  // NULL HONORED: not applicable at unit tier — all three CONFIG defaults are null
+  // (STORE, STORE_CONFIG, IP_ENCRYPT_KEY). There is no key with a non-null default
+  // whose null-override would produce a distinct observable outcome at this tier.
 
 });

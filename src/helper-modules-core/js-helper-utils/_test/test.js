@@ -1314,3 +1314,12 @@ describe('getUnixTime', function () {
   });
 
 });
+
+
+
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+// config absorption contract: exempt — the loader signature accepts (shared_libs, config)
+// for interface uniformity but config is unused: createInterface() takes no arguments
+// and no public function reads CONFIG. Nothing to assert.

@@ -446,3 +446,15 @@ describe('urlDecodeBase64', function () {
 
 
 
+// ============================================================================
+// CONFIG ABSORPTION CONTRACT
+// ============================================================================
+// config absorption contract: exempt — the loader accepts a config argument
+// and merges it via Object.assign, but CONFIG is unused in createInterface
+// (eslint-disable-line no-unused-vars). The charset keys (BASE36_CHARSET,
+// HEX_CHARSET, INT_CHARSET) are defined as reference data but no public
+// function reads CONFIG — callers supply charsets as direct arguments.
+// Nothing to assert.
+
+
+
