@@ -1,18 +1,38 @@
-// Test loader for js-helper-utils
-// Builds a Lib container for use in test files
+// Info: Test loader for js-helper-utils
+// Mirrors the main project loader pattern: loads dependencies from environment
+// process.env is ONLY read here — nowhere else in test code
 'use strict';
 
 
+/********************************************************************
+Load all test dependencies and build the Lib container from environment.
 
+process.env is ONLY read here — never in test.js.
+
+@return {Object} result - Runtime objects for testing
+@return {Object} result.Lib - Dependency container (Utils)
+@return {Object} result.Config - Test-wide environment values (none for this module)
+*********************************************************************/
 module.exports = function loader () {
 
-  // Build Lib container
+  // ========================= CONFIGURATION ========================= //
+
+  // Test-wide environment config — this module has no env-dependent values
+  const Config = {};
+
+
+  // ==================== DEPENDENCY CONTAINER ======================= //
+
   const Lib = {};
 
-  // Load Utils instance (scoped name for module under test)
-  Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, {});
+
+  // ==================== HELPER MODULES ============================= //
+
+  // Utils — singleton loader, no dependencies
+  Lib.Utils = require('helper-utils')(Lib, {});
+
 
   // Return runtime objects
-  return { Lib };
+  return { Lib, Config };
 
 };

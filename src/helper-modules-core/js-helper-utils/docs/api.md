@@ -58,15 +58,11 @@ Fourteen single-purpose checks. Every one returns `Boolean` and never throws.
 
 ## Object and Array Helpers
 
-Eleven helpers for non-mutating object and array work.
+Ten helpers for non-mutating object and array work.
 
 ### `deepCopyObject(obj)`
 
 Returns a deep copy. Internally uses `structuredClone` when available, falls back to `deepCopyObjectPolyfill` otherwise. Handles plain objects, arrays, `Date`, `RegExp`, primitives, and circular references (via `structuredClone`). Does **not** copy functions or class instances.
-
-### `deepCopyObjectPolyfill(obj)`
-
-Pure-JavaScript deep clone. Used internally as the fallback for `deepCopyObject` when `structuredClone` is unavailable. Exposed publicly so callers who specifically need the polyfill behaviour (no circular-reference handling) can opt in.
 
 ### `compareObjects(a, b)`
 
@@ -101,7 +97,7 @@ Important behaviours that decide whether this function fits your use case:
 
 ### `setNonEmptyKey(obj, key, new_val)`
 
-Sets `obj[key] = new_val` only if `new_val` is non-empty (per `isEmpty`). Returns `obj`. Useful when building DTOs where empty fields must be omitted entirely rather than serialized as `null`.
+Sets `obj[key] = new_val` only if `new_val` is not null or undefined (per `isNullOrUndefined`). Returns `obj`. Useful when building DTOs where empty fields must be omitted entirely rather than serialized as `null`.
 
 ### `fallback(new_val, fallback_val)`
 
@@ -109,7 +105,7 @@ Returns `new_val` if non-empty, otherwise `fallback_val`. Equivalent to "use thi
 
 ### `sanitizeArray(list, sanitize_func)`
 
-Returns a new array where each item has been passed through `sanitize_func`. Items where the function returns `null` or `undefined` are dropped.
+Returns a new array where each item has been passed through `sanitize_func`. Returns `null` if `list` is null, undefined, or not an array.
 
 ### `arrayDistint(arr)`
 
@@ -175,23 +171,23 @@ A small framework for validating the shape of incoming data (typically request b
 
 #### `absenteeKeysCheckObject(obj, context, required_config, required_keys, dependent_keys)`
 
-Returns `true` if all required keys are present and all dependent-key constraints are satisfied. The `context` argument is forwarded to user-supplied checks.
+Returns `false` if all required keys are present and valid. Returns `Error[]` if any required keys are missing or null. The `context` argument is forwarded to error construction.
 
 #### `invalidKeysCheckObject(obj, context, validation_config, invalidation_config)`
 
-Returns `true` if every key in `obj` passes its corresponding validation rule and no key matches an invalidation rule.
+Returns `false` if all validations pass. Returns `Error[]` if any validation or invalidation rule fails.
 
 #### `checkObjectData(obj, required_keys, dependent_keys, require_check_func, invalidate_check_func)`
 
-The combined check. Runs `absenteeKeysCheckObject` then `invalidKeysCheckObject` and returns the AND.
+The combined check. Runs the require check first; if it returns errors, those are returned immediately. Otherwise runs the invalidate check and returns its result.
 
 #### `checkNewObjectsList(objs_list, new_obj_check_func, min_length, min_length_error, max_length, max_length_error)`
 
-Validates an array of objects. Each item is passed through `new_obj_check_func`. The list itself is range-checked. Returns `true` if every item passes and the list length is within bounds.
+Validates an array of objects. Each item is passed through `new_obj_check_func`. The list itself is range-checked. Returns `false` if every item passes and the list length is within bounds. Returns `Error[]` on any failure.
 
 #### `checkEditObjectsList(objs_list, new_obj_check_func, edit_obj_check_func)`
 
-Validates an array of objects where each item carries an implicit "new" or "edit" command. New items are validated by `new_obj_check_func`, edits by `edit_obj_check_func`.
+Validates an array of objects where each item carries a `command` key (`'new'` or `'edit'`). New items are validated by `new_obj_check_func`, edits by `edit_obj_check_func`. Returns `false` on success, `Error[]` on failure.
 
 > **Worked example.** The validation framework is most useful in DTO-style request handlers where the body is an array of "create or update" entries. The pattern: define one check function per object shape, pass it into `checkEditObjectsList`, branch on the boolean return. The framework does not throw; failure surfaces as `false`.
 
@@ -204,7 +200,7 @@ Validates an array of objects where each item carries an implicit "new" or "edit
 | `disjoinUrl` | `disjoinUrl(url)` | `{ protocol, domain, port, path, query, hash }`. Each field is a string or `null` |
 | `disjoinPathname` | `disjoinPathname(pathname)` | Routing data extracted from the path (segments, query string, etc.) |
 
-Useful in routing layers and link-rendering helpers. Both functions are pure string manipulation. They do not call `URL`, do not require a network, and work consistently in browser and Node.
+Useful in routing layers and link-rendering helpers. `disjoinUrl` uses the built-in `URL` constructor internally. `disjoinPathname` is pure string manipulation. Both work consistently in browser and Node.
 
 ---
 
@@ -253,6 +249,6 @@ Returns a pseudo-random alphanumeric string of the requested length. **Not crypt
 
 ## Lifecycle
 
-There is nothing to clean up. The module exposes only pure synchronous functions. Loader-time initialization captures the function bindings in a closure (the [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md) defines this pattern); after that, no module-level state changes for the lifetime of the process.
+There is nothing to clean up. The module exposes only pure synchronous functions. The loader initializes Validators and returns the module-scope Utils singleton; after that, no module-level state changes for the lifetime of the process.
 
 For module-level setup details (loader signature, why `Lib` and config arguments are accepted but not read) see [Configuration → Loader Pattern](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/configuration.md#loader-pattern).
