@@ -24,7 +24,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
-    Utils: require('helper-utils')
+    Utils: require('../js-helper-utils')
   };
 
   // Merge overrides over defaults

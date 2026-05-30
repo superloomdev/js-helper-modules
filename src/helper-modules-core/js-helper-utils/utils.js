@@ -17,42 +17,42 @@
 // Singleton Utils interface - pure utility module with zero dependencies
 const Utils = {
 
-    /********************************************************************
+  /********************************************************************
     Copy of Util Functions from Node JS util lib
     Link: https://github.com/isaacs/core-util-is/blob/master/lib/util.js
     *********************************************************************/
-    isNull: function (arg) {
-      return arg === null;
-    },
+  isNull: function (arg) {
+    return arg === null;
+  },
 
-    isNullOrUndefined: function (arg) {
-      return arg == null;
-    },
+  isNullOrUndefined: function (arg) {
+    return arg == null;
+  },
 
-    isUndefined: function (arg) {
-      return arg === void 0;
-    },
+  isUndefined: function (arg) {
+    return arg === void 0;
+  },
 
-    isBoolean: function (arg) {
-      return typeof arg === 'boolean';
-    },
+  isBoolean: function (arg) {
+    return typeof arg === 'boolean';
+  },
 
-    isNumber: function (arg) {
-      return (
-        (typeof arg === 'number') && // Is Number Type
+  isNumber: function (arg) {
+    return (
+      (typeof arg === 'number') && // Is Number Type
         !isNaN(arg) // Should not be NaN. NaN is considered as Number Type
-      );
-    },
+    );
+  },
 
-    isString: function (arg) {
-      return typeof arg === 'string';
-    },
+  isString: function (arg) {
+    return typeof arg === 'string';
+  },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Basic Utilities ~~~~~~~~~~~~~~~~~~~~
-    // Core type checks and empty-value helpers.
+  // ~~~~~~~~~~~~~~~~~~~~ Basic Utilities ~~~~~~~~~~~~~~~~~~~~
+  // Core type checks and empty-value helpers.
 
-    /********************************************************************
+  /********************************************************************
     Check if number is Integer (Whole Number)
 
     @param {Mixed} num - Number to be checked
@@ -60,15 +60,15 @@ const Utils = {
     @return {Boolean} - true if Integer (10.0 | 10)
     @return {Boolean} - false if Decimal number (10.7 | 0.7)
     *********************************************************************/
-    isInteger: function (num) {
+  isInteger: function (num) {
 
-      // Return
-      return num % 1 == 0;
+    // Return
+    return num % 1 == 0;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check if variable is any non-null object type (includes arrays, Date,
     RegExp, etc.). Ported from core-util-is. Use Array.isArray() when you
     need to distinguish arrays from plain objects.
@@ -77,76 +77,76 @@ const Utils = {
 
     @return {Boolean} - 'true' if Object otherwise 'false'
     *********************************************************************/
-    isObject: function (arg) {
-      return typeof arg === 'object' && !Utils.isNull(arg); // (null is also an object)
-    },
+  isObject: function (arg) {
+    return typeof arg === 'object' && !Utils.isNull(arg); // (null is also an object)
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check if variable is Function
 
     @param {Mixed} arg - Item to be checked
 
     @return {Boolean} - 'true' if type id Function otherwise 'false'
     *********************************************************************/
-    isFunction: function (arg) {
-      return typeof arg === 'function';
-    },
+  isFunction: function (arg) {
+    return typeof arg === 'function';
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check if variable is Error Type
 
     @param {Mixed} arg - Item to be checked
 
     @return {Boolean} - 'true' if type of object Error otherwise 'false'
     *********************************************************************/
-    isError: function (arg) {
-      return typeof arg === 'object' && (arg instanceof Error); // This won't work if the error was thrown in a different window/frame/iframe than where the check is happening
-    },
+  isError: function (arg) {
+    return typeof arg === 'object' && (arg instanceof Error); // This won't work if the error was thrown in a different window/frame/iframe than where the check is happening
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check if string is empty ''
 
     @param {String} str - String to be checked
 
     @return {Boolean} - 'true' if empty otherwise 'false'
     *********************************************************************/
-    isEmptyString: function (str) {
-      return str.length === 0;
-    },
+  isEmptyString: function (str) {
+    return str.length === 0;
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check if an Object is empty with no keys {}
 
     @param {Set} obj - Object to be checked
 
     @return {Boolean} - 'true' if empty otherwise 'false'
     *********************************************************************/
-    isEmptyObject: function (obj) {
-      return Object.keys(obj).length === 0;
-    },
+  isEmptyObject: function (obj) {
+    return Object.keys(obj).length === 0;
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Whether value is null or undefined or '' or {} or []
 
     @param {String | Integer | Object} arg - Item to be checked
 
     @return {Boolean} - 'true' if empty otherwise 'false'
     *********************************************************************/
-    isEmpty: function (arg) {
-      return (
-        Utils.isNullOrUndefined(arg) || // Check for Null or Undefined
+  isEmpty: function (arg) {
+    return (
+      Utils.isNullOrUndefined(arg) || // Check for Null or Undefined
         Utils.isEmptyString(arg) || // Check for empty String (Bonus check for empty Array)
         (Utils.isObject(arg) && Utils.isEmptyObject(arg)) // Check for empty Object or Array
-      );
-    },
+    );
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Whether an array contains a string (return 'true' if does otherwise 'false')
 
     @param {String | Integer | Object} arr - Error object
@@ -154,15 +154,15 @@ const Utils = {
 
     @return {Boolean} - 'true' if does otherwise 'false'
     *********************************************************************/
-    inArray: function (arr, element) {
-      return arr.indexOf(element) > -1;
-    },
+  inArray: function (arr, element) {
+    return arr.indexOf(element) > -1;
+  },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Errors & Misc ~~~~~~~~~~~~~~~~~~~~
-    // Error construction and no-op utilities.
+  // ~~~~~~~~~~~~~~~~~~~~ Errors & Misc ~~~~~~~~~~~~~~~~~~~~
+  // Error construction and no-op utilities.
 
-    /********************************************************************
+  /********************************************************************
     Custom Error
 
     @param {String | Integer | Object} err_obj - Error object with 'code' and 'message' keys
@@ -170,55 +170,55 @@ const Utils = {
 
     @return - JSON Object
     *********************************************************************/
-    error: function (err_obj, context) {
+  error: function (err_obj, context) {
 
-      const err = Error(err_obj['message']);
-      err.code = err_obj['code'];
-      err.name = err_obj['code'].toString(); // Instead of showing 'Error' as title in stack trace, show 'Error Code'.
-      err.context = context || null;
+    const err = Error(err_obj['message']);
+    err.code = err_obj['code'];
+    err.name = err_obj['code'].toString(); // Instead of showing 'Error' as title in stack trace, show 'Error Code'.
+    err.context = context || null;
 
-      // Return Newly built Error
-      return err;
+    // Return Newly built Error
+    return err;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Null function - For optional callback functions
 
     @return None
     *********************************************************************/
-    nullFunc: function () {},
+  nullFunc: function () {},
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ String Utilities ~~~~~~~~~~~~~~~~~~~~
-    // String conversion, parsing, and manipulation helpers.
+  // ~~~~~~~~~~~~~~~~~~~~ String Utilities ~~~~~~~~~~~~~~~~~~~~
+  // String conversion, parsing, and manipulation helpers.
 
-    /********************************************************************
+  /********************************************************************
     Return JSON object from flattened string
 
     @param {string} str - String to be converted into JSON
 
     @return - JSON Object
     *********************************************************************/
-    stringToJSON: function (str) {
+  stringToJSON: function (str) {
 
-      // Convert flattened-json string into JSON
-      if ( !Utils.isNull(str) ) { // Only if not null
-        try {
-          str = JSON.parse(str); // Convert string -> JSON
-        }
-        catch {
-          str = null; // Set as null if invalid json
-        }
+    // Convert flattened-json string into JSON
+    if ( !Utils.isNull(str) ) { // Only if not null
+      try {
+        str = JSON.parse(str); // Convert string -> JSON
       }
+      catch {
+        str = null; // Set as null if invalid json
+      }
+    }
 
-      return str;
+    return str;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Return reversed String
     Note: Only works for ASCII strings and some Unicodes
 
@@ -226,14 +226,14 @@ const Utils = {
 
     @return - Reversed string
     *********************************************************************/
-    stringReverse: function (str) {
+  stringReverse: function (str) {
 
-      return Array.from(str).reverse().join('');
+    return Array.from(str).reverse().join('');
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Join an array of strings. If non-array, then returned as-it-is
 
     @param {string[]|Boolean|Null} list - List of Strings to be joined. If non-array, then returned as-it-is
@@ -241,19 +241,19 @@ const Utils = {
 
     @return - String
     *********************************************************************/
-    safeJoin: function (list, separator) {
+  safeJoin: function (list, separator) {
 
-      if ( Array.isArray(list) ) {
-        return list.join(separator); // Join and Return
-      }
-      else {
-        return list; // Return orignal value as-it-is
-      }
+    if ( Array.isArray(list) ) {
+      return list.join(separator); // Join and Return
+    }
+    else {
+      return list; // Return orignal value as-it-is
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Filter an array to only contain Distint values
     [1, 2, 2, 3, 3, 3, 'a', 'a'] -> [1, 2, 3, 'a']
 
@@ -261,19 +261,19 @@ const Utils = {
 
     @return - Array
     *********************************************************************/
-    arrayDistint: function (arr) {
+  arrayDistint: function (arr) {
 
-      if ( Array.isArray(arr) ) {
-        return [...new Set(arr)];
-      }
-      else {
-        return arr; // Return orignal value as-it-is
-      }
+    if ( Array.isArray(arr) ) {
+      return [...new Set(arr)];
+    }
+    else {
+      return arr; // Return orignal value as-it-is
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Split a String and remove Whitespaces
 
     @param {string} str - String to be Splited
@@ -281,19 +281,19 @@ const Utils = {
 
     @return - Array of String
     *********************************************************************/
-    splitWithTrim: function (str, delimiter) {
+  splitWithTrim: function (str, delimiter) {
 
-      return str.split(delimiter).map(function (item) {
-        return item.trim();
-      });
+    return str.split(delimiter).map(function (item) {
+      return item.trim();
+    });
 
-    },
+  },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Sanitization ~~~~~~~~~~~~~~~~~~~~
-    // Remove or normalize unwanted values from objects, arrays, and strings.
+  // ~~~~~~~~~~~~~~~~~~~~ Sanitization ~~~~~~~~~~~~~~~~~~~~
+  // Remove or normalize unwanted values from objects, arrays, and strings.
 
-    /********************************************************************
+  /********************************************************************
     Remove unwanted feilds of Object (By Ref)
 
     @param {Set} obj - JSON Object to be cleaned
@@ -302,50 +302,50 @@ const Utils = {
 
     @return - Sanatized Object
     *********************************************************************/
-    sanitizeObject: function (obj, whitelist, blacklist) {
+  sanitizeObject: function (obj, whitelist, blacklist) {
 
-      // Return as null if obj is null or undefined or not-an-array
-      if (
-        Utils.isNullOrUndefined(obj) ||
+    // Return as null if obj is null or undefined or not-an-array
+    if (
+      Utils.isNullOrUndefined(obj) ||
         !Utils.isObject(obj)
-      ) {
-        return null;
-      }
+    ) {
+      return null;
+    }
 
 
-      // Create Shallow Copy of Object
-      const new_obj = { ...obj };
+    // Create Shallow Copy of Object
+    const new_obj = { ...obj };
 
 
-      // Remove Blacklist keys from Object
-      // Ref: https://stackoverflow.com/a/32535117
-      if (blacklist) {
+    // Remove Blacklist keys from Object
+    // Ref: https://stackoverflow.com/a/32535117
+    if (blacklist) {
 
-        blacklist.forEach( function (key) {
-          delete new_obj[key]; // By Reference
-        });
+      blacklist.forEach( function (key) {
+        delete new_obj[key]; // By Reference
+      });
 
-      }
-
-
-      // Remove Non-Whitelist keys from Object
-      // Ref: https://stackoverflow.com/a/38750895
-      if (whitelist) {
-
-        Object.keys(new_obj)
-          .filter(key => !whitelist.includes(key))
-          .forEach(key => delete new_obj[key]); // By Reference
-
-      }
+    }
 
 
-      // Return Clean JSON
-      return new_obj;
+    // Remove Non-Whitelist keys from Object
+    // Ref: https://stackoverflow.com/a/38750895
+    if (whitelist) {
 
-    },
+      Object.keys(new_obj)
+        .filter(key => !whitelist.includes(key))
+        .forEach(key => delete new_obj[key]); // By Reference
+
+    }
 
 
-    /********************************************************************
+    // Return Clean JSON
+    return new_obj;
+
+  },
+
+
+  /********************************************************************
     Sanatize each item of Array (By Ref)
 
     @param {Mixed[]} list - Array to be Cleaned
@@ -353,26 +353,26 @@ const Utils = {
 
     @return - Sanatized Object
     *********************************************************************/
-    sanitizeArray: function (list, sanatize_func) {
+  sanitizeArray: function (list, sanatize_func) {
 
-      // Return as null if list is null or undefined or not-an-array
-      if (
-        Utils.isNullOrUndefined(list) ||
+    // Return as null if list is null or undefined or not-an-array
+    if (
+      Utils.isNullOrUndefined(list) ||
         !Array.isArray(list)
-      ) {
-        return null;
-      }
+    ) {
+      return null;
+    }
 
 
-      // Sanatize each item of array
-      return list.map(function (item) {
-        return sanatize_func(item);
-      });
+    // Sanatize each item of array
+    return list.map(function (item) {
+      return sanatize_func(item);
+    });
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Return cleaned string with only characters from specific regular expresion
     Remove all the dangerous characters excluding those who satisfy RegExp
 
@@ -381,97 +381,97 @@ const Utils = {
 
     @return - Sanatized string
     *********************************************************************/
-    sanitizeUsingRegx: function (str, regx) {
+  sanitizeUsingRegx: function (str, regx) {
 
-      // If null or undefined or zero-length, return value as-it-is
-      if (Utils.isNullOrUndefined(str) || str.length == 0) {
-        return str;
-      }
-
-
-      // Return Clean String
-      return str.replace(regx, ''); // Clean and return
-
-    },
+    // If null or undefined or zero-length, return value as-it-is
+    if (Utils.isNullOrUndefined(str) || str.length == 0) {
+      return str;
+    }
 
 
-    /********************************************************************
+    // Return Clean String
+    return str.replace(regx, ''); // Clean and return
+
+  },
+
+
+  /********************************************************************
     Return cleaned Integer. Convert String/Decimals to a whole-number.
 
     @param {Unknown} num - Number to be cleaned
 
     @return {Number} - Sanitized number. Rounded to 'Floor' in case of decimal.
     *********************************************************************/
-    sanitizeInteger: function (num) {
+  sanitizeInteger: function (num) {
 
-      // Convert to Integer
-      const i = parseInt( Number(num) ); // Convert String/Decimal or any type to equivalent Integer
+    // Convert to Integer
+    const i = parseInt( Number(num) ); // Convert String/Decimal or any type to equivalent Integer
 
-      // Check if NaN in case of Alphabates String passed as number
-      if ( isNaN(i) ) {
-        return null; // Return Null in case it's not a number
-      }
-      else {
-        return i; // Return clean Integer
-      }
+    // Check if NaN in case of Alphabates String passed as number
+    if ( isNaN(i) ) {
+      return null; // Return Null in case it's not a number
+    }
+    else {
+      return i; // Return clean Integer
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Return cleaned Boolean. Convert String/Number to true/false
 
     @param {Unknown} bool - Boolean to be cleaned
 
     @return {Boolean} - Sanitized boolean value
     *********************************************************************/
-    sanitizeBoolean: function (bool) {
+  sanitizeBoolean: function (bool) {
 
-      // Return
-      return Boolean( Number(bool) ); // Return string -> number -> boolean
+    // Return
+    return Boolean( Number(bool) ); // Return string -> number -> boolean
 
-    },
+  },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Number Utilities ~~~~~~~~~~~~~~~~~~~~
-    // Timestamp, rounding, and numeric conversion helpers.
+  // ~~~~~~~~~~~~~~~~~~~~ Number Utilities ~~~~~~~~~~~~~~~~~~~~
+  // Timestamp, rounding, and numeric conversion helpers.
 
-    /********************************************************************
+  /********************************************************************
     Return specific/current unix timestamp in seconds
 
     @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
     @return {String} - Unix timestamp (Seconds)
     *********************************************************************/
-    getUnixTime: function (date) {
+  getUnixTime: function (date) {
 
-      // Return Unix Timestamp equivalant of specific date in seconds
-      return Math.floor( Utils.getUnixTimeInMilliSeconds(date) / 1000 ); // Convert Milli-Seconds to Seconds
+    // Return Unix Timestamp equivalant of specific date in seconds
+    return Math.floor( Utils.getUnixTimeInMilliSeconds(date) / 1000 ); // Convert Milli-Seconds to Seconds
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Return specific/current unix timestamp in Milli-Seconds
 
     @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
     @return {String} - Unix timestamp (Milli-Seconds)
     *********************************************************************/
-    getUnixTimeInMilliSeconds: function (date) {
+  getUnixTimeInMilliSeconds: function (date) {
 
-      // Check if custom date is sent
-      if ( !Utils.isNullOrUndefined(date) ) {
-        return ( new Date(date) ); // Return Unix Timestamp equivalant of specific date in Milliseconds
-      }
-      else {
-        return ( new Date().getTime() ); // Return Unix Timestamp equivalant of current time in Milliseconds
-      }
+    // Check if custom date is sent
+    if ( !Utils.isNullOrUndefined(date) ) {
+      return ( new Date(date) ); // Return Unix Timestamp equivalant of specific date in Milliseconds
+    }
+    else {
+      return ( new Date().getTime() ); // Return Unix Timestamp equivalant of current time in Milliseconds
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Round a Decimal number to specified number of digits after decimal. Standard rounding rules
     Ref: https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
     Note: math.round() is more precise then Number.toFixed()
@@ -483,23 +483,23 @@ const Utils = {
 
     @return {Number} - Rounded off number
     *********************************************************************/
-    round: function (num, digits_after_decimal) {
+  round: function (num, digits_after_decimal) {
 
-      // If null or undefined, return value as-it-is
-      if (Utils.isNullOrUndefined(num)) {
-        return num;
-      }
+    // If null or undefined, return value as-it-is
+    if (Utils.isNullOrUndefined(num)) {
+      return num;
+    }
 
-      // Calculate multiplier
-      const multiplier = Number(`1e${digits_after_decimal}`); // 1e0 === 1, 1e1 === 10, 1e2 === 100
+    // Calculate multiplier
+    const multiplier = Number(`1e${digits_after_decimal}`); // 1e0 === 1, 1e1 === 10, 1e2 === 100
 
-      // Return
-      return Math.round(num * multiplier) / multiplier; // 123.456 = 123.45, 123.4 = 123.4
+    // Return
+    return Math.round(num * multiplier) / multiplier; // 123.456 = 123.45, 123.4 = 123.4
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Round a Decimal number to specified number of digits after decimal. Cascading base rounding rules
     (11.5249, 2) => 11.53
 
@@ -509,25 +509,25 @@ const Utils = {
 
     @return {Number} - Rounded off number
     *********************************************************************/
-    roundWithCascading: function (num, digits_after_decimal, safety = 10) {
+  roundWithCascading: function (num, digits_after_decimal, safety = 10) {
 
-      // If null or undefined, return value as-it-is
-      if (Utils.isNullOrUndefined(num)) {
-        return num;
-      }
-
-      // Round off by stepping down one decimal at a time, starting from 'safety' decimal places
-      for (let i = safety; i >= digits_after_decimal; i--) {
-        num = Utils.round(num, i);
-      }
-
-      // Return rounded number
+    // If null or undefined, return value as-it-is
+    if (Utils.isNullOrUndefined(num)) {
       return num;
+    }
 
-    },
+    // Round off by stepping down one decimal at a time, starting from 'safety' decimal places
+    for (let i = safety; i >= digits_after_decimal; i--) {
+      num = Utils.round(num, i);
+    }
+
+    // Return rounded number
+    return num;
+
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Convert String to Integer (Return NaN if invalid value)
 
     @param {String} str - String to be converted to Number
@@ -535,19 +535,19 @@ const Utils = {
     @return {Number} - Number equivalant of the string. Null if String is Empty.
     @return {Number} - NaN if invalid string or Array or Object
     *********************************************************************/
-    stringToNumber: function (str) {
+  stringToNumber: function (str) {
 
-      if ( Utils.isEmpty(str) ) { // If Empty String, return Null instead of 0
-        return null;
-      }
-      else {
-        return Number(str); // Convert to Number
-      }
+    if ( Utils.isEmpty(str) ) { // If Empty String, return Null instead of 0
+      return null;
+    }
+    else {
+      return Number(str); // Convert to Number
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Break string into array with a delimiter
     (Inbuilt skips all empty elements and trim whitespaces and convert to lowercase)
 
@@ -557,29 +557,29 @@ const Utils = {
     @return {Boolean} - false if input sring is null or ''
     @return {String[]} - Newly converted array of strings
     *********************************************************************/
-    stringToArray: function (delimiter, str) {
+  stringToArray: function (delimiter, str) {
 
-      if (str.length === 0) {
-        return false; //Empty string
-      }
+    if (str.length === 0) {
+      return false; //Empty string
+    }
 
-      let arr = str.split(delimiter);        // Split into Array
-      arr = arr.map( function (item) { return item.trim().toLowerCase(); } );    // Convert to lowercase and Trim white spaces including \n \t \r
-      arr = arr.filter( Boolean);            // Remove Empty element from array in case string is null/''/0/false/undefined. (If you split an empty string, you get back a one-element array with 0 as the key and an empty string for the value.)
-
-
-      // Check if resultant array is empty, then return false
-      if ( arr.length > 0 ) {
-        return arr;
-      }
-      else {
-        return false; // Empty array
-      }
-
-    },
+    let arr = str.split(delimiter);        // Split into Array
+    arr = arr.map( function (item) { return item.trim().toLowerCase(); } );    // Convert to lowercase and Trim white spaces including \n \t \r
+    arr = arr.filter( Boolean);            // Remove Empty element from array in case string is null/''/0/false/undefined. (If you split an empty string, you get back a one-element array with 0 as the key and an empty string for the value.)
 
 
-    /********************************************************************
+    // Check if resultant array is empty, then return false
+    if ( arr.length > 0 ) {
+      return arr;
+    }
+    else {
+      return false; // Empty array
+    }
+
+  },
+
+
+  /********************************************************************
     Join 2 Arrays (or String) of 'key' and 'value' into one Object
 
     @param {String|Array} keys - Array with list of keys or single item string
@@ -587,23 +587,23 @@ const Utils = {
 
     @return {Set} - Object with mearged key vale pairs
     *********************************************************************/
-    keyValueToObject: function (keys, values) {
+  keyValueToObject: function (keys, values) {
 
-      const obj = {};
+    const obj = {};
 
-      if ( !Array.isArray(keys) ) { // If single item string
-        obj[keys] = values;
-      }
-      else {
-        keys.map( function (key, index) { obj[key] = values[index]; } ); // Create a Set from feilds-array with corrosponding values-array
-      }
+    if ( !Array.isArray(keys) ) { // If single item string
+      obj[keys] = values;
+    }
+    else {
+      keys.map( function (key, index) { obj[key] = values[index]; } ); // Create a Set from feilds-array with corrosponding values-array
+    }
 
-      return obj;
+    return obj;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Creates a new object by overriding keys of base-object with non-null keys of new-object
     Both Objects should be identical. Keys not present in base object won't be added to it
 
@@ -612,37 +612,37 @@ const Utils = {
 
     @return {Set} - Object with mearged data
     *********************************************************************/
-    overrideObject: function (base_obj, ...new_objs) {
+  overrideObject: function (base_obj, ...new_objs) {
 
-      // Create copy of base-object
-      const { ...obj } = { ...base_obj };
+    // Create copy of base-object
+    const { ...obj } = { ...base_obj };
 
 
-      // Iterate each new-object
-      new_objs.forEach(function (new_obj) {
+    // Iterate each new-object
+    new_objs.forEach(function (new_obj) {
 
-        // Copy exclusive/Non-Null keys in New-Object
-        for ( const key in new_obj ) {
+      // Copy exclusive/Non-Null keys in New-Object
+      for ( const key in new_obj ) {
 
-          if (
-            !(key in obj) || // Exclusive keys in New-Object (Keys which were not present in output-object)
+        if (
+          !(key in obj) || // Exclusive keys in New-Object (Keys which were not present in output-object)
             !Utils.isNull(new_obj[key]) // Non-Null key of New-Object
-          ) {
-            obj[key] = new_obj[key];
-          }
-
+        ) {
+          obj[key] = new_obj[key];
         }
 
-      });
+      }
+
+    });
 
 
-      // Return new object
-      return obj;
+    // Return new object
+    return obj;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Set a value for specific key of object (Only if value is not null or undefined)
     By Reference: Changes are made directly in orignal object
 
@@ -652,20 +652,20 @@ const Utils = {
 
     @return {Set} obj - Updated Object
     *********************************************************************/
-    setNonEmptyKey: function (obj, key, new_val) {
+  setNonEmptyKey: function (obj, key, new_val) {
 
-      // Set value if it's not null/undefined
-      if ( !Utils.isNullOrUndefined(new_val) ) {
-        obj[key] = new_val;
-      }
+    // Set value if it's not null/undefined
+    if ( !Utils.isNullOrUndefined(new_val) ) {
+      obj[key] = new_val;
+    }
 
-      // Return Object
-      return obj;
+    // Return Object
+    return obj;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Set a value with fallback value if it's null/undefined
 
     @param {Mixed} new_val - New value
@@ -673,20 +673,20 @@ const Utils = {
 
     @return {Set} - Object with mearged data
     *********************************************************************/
-    fallback: function (new_val, fallback_val) {
+  fallback: function (new_val, fallback_val) {
 
-      // If fallback-value is not sent, set it as null
-      if ( Utils.isUndefined(fallback_val) ) {
-        fallback_val = null;
-      }
+    // If fallback-value is not sent, set it as null
+    if ( Utils.isUndefined(fallback_val) ) {
+      fallback_val = null;
+    }
 
-      // Return new object
-      return ( !Utils.isNullOrUndefined(new_val) ? new_val : fallback_val );
+    // Return new object
+    return ( !Utils.isNullOrUndefined(new_val) ? new_val : fallback_val );
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check if All chracters in string are of valid charset and string has
     minimum and maximum length
 
@@ -700,44 +700,44 @@ const Utils = {
     Note: Always check this function output against identic (===) FALSE to
     avoid mismatches with text 'false' or '0' or empty strings
     *********************************************************************/
-    validateString: function (str, min_length, max_length) {
+  validateString: function (str, min_length, max_length) {
 
-      // Null/Empty-String Allowed (Only if minimum length is specified)
-      if ( !Utils.isNullOrUndefined(min_length) && // sent in param
+    // Null/Empty-String Allowed (Only if minimum length is specified)
+    if ( !Utils.isNullOrUndefined(min_length) && // sent in param
         min_length === 0 &&
         ( str === null || str === '')
-      ) {
-        return true;
-      }
+    ) {
+      return true;
+    }
 
 
-      // Check if string type
-      if ( typeof str !== 'string' ) {
-        return false;
-      }
+    // Check if string type
+    if ( typeof str !== 'string' ) {
+      return false;
+    }
 
 
-      // Check Min and Max length limit
-      const len = str.length; //Store var length
+    // Check Min and Max length limit
+    const len = str.length; //Store var length
 
-      // Check Min Length (Only if specified)
-      if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
-        return false; // Less then minimum required length
-      }
+    // Check Min Length (Only if specified)
+    if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
+      return false; // Less then minimum required length
+    }
 
-      // Check Max Length (Only if specified)
-      if ( !Utils.isNullOrUndefined(max_length) && len > max_length ) {
-        return false; // More then maximum allowed length
-      }
-
-
-      // Reach here means all validations passed
-      return true; // Validation successful
-
-    },
+    // Check Max Length (Only if specified)
+    if ( !Utils.isNullOrUndefined(max_length) && len > max_length ) {
+      return false; // More then maximum allowed length
+    }
 
 
-    /********************************************************************
+    // Reach here means all validations passed
+    return true; // Validation successful
+
+  },
+
+
+  /********************************************************************
     Check if All chracters in string statisfy particular regular expression
     and string has minimum and maximum length
 
@@ -749,44 +749,44 @@ const Utils = {
     @return {Boolean} - true on success
     @return {Boolean} - false if validation fails
     *********************************************************************/
-    validateStringRegx: function (str, regx, min_length, max_length) {
+  validateStringRegx: function (str, regx, min_length, max_length) {
 
-      // Null/Empty-String Allowed (Only if minimum length is specified)
-      if ( !Utils.isNullOrUndefined(min_length) && // Sent in params
+    // Null/Empty-String Allowed (Only if minimum length is specified)
+    if ( !Utils.isNullOrUndefined(min_length) && // Sent in params
         min_length === 0 &&
         ( str === null || str === '')
-      ) {
-        return true;
-      }
+    ) {
+      return true;
+    }
 
 
-      // Check string against regular expression
-      if ( !regx.test(str) ) {
-        return false;
-      }
+    // Check string against regular expression
+    if ( !regx.test(str) ) {
+      return false;
+    }
 
 
-      // Check Min and Max length limit
-      const len = str.length; //Store var length
+    // Check Min and Max length limit
+    const len = str.length; //Store var length
 
-      // Check Min Length (Only if specified)
-      if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
-        return false; // Less then minimum required length
-      }
+    // Check Min Length (Only if specified)
+    if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
+      return false; // Less then minimum required length
+    }
 
-      // Check Max Length (Only if specified)
-      if ( !Utils.isNullOrUndefined(max_length) && len > max_length ) {
-        return false; // More then maximum allowed length
-      }
-
-
-      // Reach here means all validations passed
-      return true; // Validation successful
-
-    },
+    // Check Max Length (Only if specified)
+    if ( !Utils.isNullOrUndefined(max_length) && len > max_length ) {
+      return false; // More then maximum allowed length
+    }
 
 
-    /********************************************************************
+    // Reach here means all validations passed
+    return true; // Validation successful
+
+  },
+
+
+  /********************************************************************
     Check if Integer is within Minimum and maximum range (including min and max)
 
     @param {String} num - The variable to be checked
@@ -796,30 +796,30 @@ const Utils = {
     @return {Boolean} - true on success
     @return {Boolean} - false if validation fails
     *********************************************************************/
-    validateNumber: function (num, min_value, max_value) {
+  validateNumber: function (num, min_value, max_value) {
 
-      // Validate type
-      if ( typeof num !== 'number' || isNaN(num) ) {
-        return false;
-      }
+    // Validate type
+    if ( typeof num !== 'number' || isNaN(num) ) {
+      return false;
+    }
 
-      // Check Minimum Value
-      if ( !Utils.isNullOrUndefined(min_value) && num < min_value ) { // If Minimum value set in parameter
-        return false;
-      }
+    // Check Minimum Value
+    if ( !Utils.isNullOrUndefined(min_value) && num < min_value ) { // If Minimum value set in parameter
+      return false;
+    }
 
-      // Check Maximum Value
-      if ( !Utils.isNullOrUndefined(max_value) && num > max_value ) { // If Maximum value set in parameter
-        return false;
-      }
+    // Check Maximum Value
+    if ( !Utils.isNullOrUndefined(max_value) && num > max_value ) { // If Maximum value set in parameter
+      return false;
+    }
 
-      // Reach here means all validations passed
-      return true; // Validation successful
+    // Reach here means all validations passed
+    return true; // Validation successful
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Return Deep Copy of an Object
     Uses native structuredClone() for better performance when available, falls back to custom polyfill for older environments.
 
@@ -828,27 +828,27 @@ const Utils = {
     @return {Object} response - Deep copy of object
     @return {Error} response - Error if unsupported object
     *********************************************************************/
-    deepCopyObject: function (obj) {
+  deepCopyObject: function (obj) {
 
-      // Check if modern structuredClone() is available in this environment
-      if (typeof structuredClone === 'function') {
-        try {
-          // Use native structuredClone() for optimal performance
-          return structuredClone(obj);
-        }
-        catch {
-          // Fallback to polyfill if structuredClone fails (e.g., unsupported object types)
-          return _Utils.deepCopyObjectPolyfill(obj);
-        }
+    // Check if modern structuredClone() is available in this environment
+    if (typeof structuredClone === 'function') {
+      try {
+        // Use native structuredClone() for optimal performance
+        return structuredClone(obj);
       }
+      catch {
+        // Fallback to polyfill if structuredClone fails (e.g., unsupported object types)
+        return _Utils.deepCopyObjectPolyfill(obj);
+      }
+    }
 
-      // Fallback to polyfill for older environments that don't support structuredClone()
-      return _Utils.deepCopyObjectPolyfill(obj);
+    // Fallback to polyfill for older environments that don't support structuredClone()
+    return _Utils.deepCopyObjectPolyfill(obj);
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Performs a deep comparison between two values to determine if they are equivalent in terms of content and structure
     Similar implementation as of nodeJS assert.deepStrictEqual
 
@@ -857,112 +857,112 @@ const Utils = {
 
     @return {Boolean} response - Returns true if the values are deeply equal, otherwise false
     *********************************************************************/
-    compareObjects: function (a, b) {
+  compareObjects: function (a, b) {
 
-      // Primitive Type Comparisions. Directly compare primitive values or references
-      if (a === b) {
-        return true;
-      }
+    // Primitive Type Comparisions. Directly compare primitive values or references
+    if (a === b) {
+      return true;
+    }
 
 
-      // If both are Functions, check if they have the same implementation
-      if ( Utils.isFunction(a) && Utils.isFunction(b) ) {
-        return a.toString() === b.toString();
+    // If both are Functions, check if they have the same implementation
+    if ( Utils.isFunction(a) && Utils.isFunction(b) ) {
+      return a.toString() === b.toString();
       // Note: It only checks if the toString representation of the two functions is the same,
       // which means two different functions with the same body will be seen as equal
-      }
+    }
 
-      // If only one is a Function, they are not equal
-      if ( Utils.isFunction(a) || Utils.isFunction(b) ) {
+    // If only one is a Function, they are not equal
+    if ( Utils.isFunction(a) || Utils.isFunction(b) ) {
+      return false;
+    }
+
+
+    // If either is null or not an object, they cannot be deeply equal
+    if ( !Utils.isObject(a) || !Utils.isObject(b) ) {
+      return false;
+    }
+
+
+    // If both are Date objects, check if they represent the same time
+    if ( a instanceof Date && b instanceof Date ) {
+      return a.getTime() === b.getTime();
+    }
+
+    // If only one is a Date object, they are not equal
+    if ( a instanceof Date || b instanceof Date ) {
+      return false;
+    }
+
+
+    // If both are RegExp objects, check if they have the same pattern and flags
+    if ( a instanceof RegExp && b instanceof RegExp ) {
+      return a.toString() === b.toString();
+    }
+
+    // If only one is a RegExp object, they are not equal
+    if ( a instanceof RegExp || b instanceof RegExp ) {
+      return false;
+    }
+
+
+    // Check if both values are arrays.
+    if ( Array.isArray(a) && Array.isArray(b) ) {
+
+      // If arrays have different lengths, they are not equal
+      if (a.length !== b.length) {
         return false;
       }
 
-
-      // If either is null or not an object, they cannot be deeply equal
-      if ( !Utils.isObject(a) || !Utils.isObject(b) ) {
-        return false;
-      }
-
-
-      // If both are Date objects, check if they represent the same time
-      if ( a instanceof Date && b instanceof Date ) {
-        return a.getTime() === b.getTime();
-      }
-
-      // If only one is a Date object, they are not equal
-      if ( a instanceof Date || b instanceof Date ) {
-        return false;
-      }
-
-
-      // If both are RegExp objects, check if they have the same pattern and flags
-      if ( a instanceof RegExp && b instanceof RegExp ) {
-        return a.toString() === b.toString();
-      }
-
-      // If only one is a RegExp object, they are not equal
-      if ( a instanceof RegExp || b instanceof RegExp ) {
-        return false;
-      }
-
-
-      // Check if both values are arrays.
-      if ( Array.isArray(a) && Array.isArray(b) ) {
-
-        // If arrays have different lengths, they are not equal
-        if (a.length !== b.length) {
-          return false;
-        }
-
-        // Recursively compare each item in the arrays
-        for (let i = 0; i < a.length; i++) {
-          if ( !Utils.compareObjects(a[i], b[i]) ) {
-            return false;
-          }
-        }
-
-        // Reach here means equal
-        return true;
-
-      }
-
-      // If only one is an array, they cannot be deeply equal
-      if ( Array.isArray(a) || Array.isArray(b) ) {
-        return false;
-      }
-
-
-      // At this point, both values should be regular objects
-      // Start by comparing their sets of keys.
-      const keys_a = Object.keys(a);
-      const keys_b = Object.keys(b);
-
-      // If they have different numbers of keys, they are not equal
-      if ( keys_a.length !== keys_b.length ) {
-        return false;
-      }
-
-      // Check that all keys in the first object exist in the second, and that their associated values are deeply equal
-      for (const key of keys_a) {
-        if ( !Object.prototype.hasOwnProperty.call(b, key) ) {
-          return false;
-        }
-        if ( !Utils.compareObjects(a[key], b[key]) ) {
+      // Recursively compare each item in the arrays
+      for (let i = 0; i < a.length; i++) {
+        if ( !Utils.compareObjects(a[i], b[i]) ) {
           return false;
         }
       }
 
-
-      // If all checks passed, the objects are deeply equal
+      // Reach here means equal
       return true;
 
-    },
+    }
+
+    // If only one is an array, they cannot be deeply equal
+    if ( Array.isArray(a) || Array.isArray(b) ) {
+      return false;
+    }
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Object Validation Framework ~~~~~~~~~~~~~~~~~~~~
-    // Validate required keys, invalid keys, and nested object lists.
+    // At this point, both values should be regular objects
+    // Start by comparing their sets of keys.
+    const keys_a = Object.keys(a);
+    const keys_b = Object.keys(b);
 
-    /********************************************************************
+    // If they have different numbers of keys, they are not equal
+    if ( keys_a.length !== keys_b.length ) {
+      return false;
+    }
+
+    // Check that all keys in the first object exist in the second, and that their associated values are deeply equal
+    for (const key of keys_a) {
+      if ( !Object.prototype.hasOwnProperty.call(b, key) ) {
+        return false;
+      }
+      if ( !Utils.compareObjects(a[key], b[key]) ) {
+        return false;
+      }
+    }
+
+
+    // If all checks passed, the objects are deeply equal
+    return true;
+
+  },
+
+
+  // ~~~~~~~~~~~~~~~~~~~~ Object Validation Framework ~~~~~~~~~~~~~~~~~~~~
+  // Validate required keys, invalid keys, and nested object lists.
+
+  /********************************************************************
     Return Error-Object if required keys of object are missing or null
 
     @param {Object} obj - Object to be checked
@@ -979,67 +979,67 @@ const Utils = {
     @return {Error[]} response - Array of Error-Objects if required fields not sent
     @return {Boolean} response - false if valid data
     *********************************************************************/
-    absenteeKeysCheckObject: function (
-      obj, context, required_config,
-      required_keys, dependent_keys = {}
-    ) {
+  absenteeKeysCheckObject: function (
+    obj, context, required_config,
+    required_keys, dependent_keys = {}
+  ) {
 
-      // Initialize empty list of errors
-      const errs = [];
+    // Initialize empty list of errors
+    const errs = [];
 
 
-      // Iterate through all dependent keys
-      for ( const key in dependent_keys ) {
+    // Iterate through all dependent keys
+    for ( const key in dependent_keys ) {
 
-        // Only if this key is present in obj
-        if ( !Utils.isNullOrUndefined( obj[key] ) ) {
+      // Only if this key is present in obj
+      if ( !Utils.isNullOrUndefined( obj[key] ) ) {
 
-          // Iterate all rules on this Key
-          dependent_keys[key].forEach(function (rule) {
+        // Iterate all rules on this Key
+        dependent_keys[key].forEach(function (rule) {
 
-            // Test this Key's value against possible values
-            if (
-              Utils.isNullOrUndefined( rule['values'] ) || // Null means any value
+          // Test this Key's value against possible values
+          if (
+            Utils.isNullOrUndefined( rule['values'] ) || // Null means any value
               rule['values'].includes( obj[key] ) // Matches a possible allowed value
-            ) {
-              required_keys = [...required_keys, ...rule['keys']]; // Add dependeny-Keys to list of required-Keys
-            }
+          ) {
+            required_keys = [...required_keys, ...rule['keys']]; // Add dependeny-Keys to list of required-Keys
+          }
 
-          });
-
-        }
+        });
 
       }
 
+    }
 
-      // Iterate through all required keys
-      required_keys.forEach(function ( key ) {
 
-        // Check if value is null or undefined
-        if (
-          Utils.isUndefined( obj[key] ) || // Check for undefined
+    // Iterate through all required keys
+    required_keys.forEach(function ( key ) {
+
+      // Check if value is null or undefined
+      if (
+        Utils.isUndefined( obj[key] ) || // Check for undefined
           (
             required_config[key]['not_null'] && // Only if null value is not allowed
             Utils.isNull( obj[key] ) // Check for null
           )
-        ) {
-          errs.push( // Error found. Add Error Object to List of Errors
-            Utils.error( // Cerate Error Object
-              required_config[key]['error'],
-              context
-            )
-          );
-        }
+      ) {
+        errs.push( // Error found. Add Error Object to List of Errors
+          Utils.error( // Cerate Error Object
+            required_config[key]['error'],
+            context
+          )
+        );
+      }
 
-      });
+    });
 
-      // Return Error if any
-      return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+    // Return Error if any
+    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Return Error-Object if validations for an object failed
 
     @param {Object} obj - Object to be checked
@@ -1055,79 +1055,79 @@ const Utils = {
     @return {Error[]} response - Array of Error-Objects if required fields not sent
     @return {Boolean} response - false if valid data
     *********************************************************************/
-    invalidKeysCheckObject: function (
-      obj, context,
-      validation_config, invalidation_config
-    ) {
+  invalidKeysCheckObject: function (
+    obj, context,
+    validation_config, invalidation_config
+  ) {
 
-      // Initialize empty list of errors
-      let errs = [];
+    // Initialize empty list of errors
+    let errs = [];
 
 
-      // Iterate through all validation rules
-      if (validation_config) { // If any validation rules are sent in param
-        validation_config.forEach(function ( validation_rule ) {
+    // Iterate through all validation rules
+    if (validation_config) { // If any validation rules are sent in param
+      validation_config.forEach(function ( validation_rule ) {
 
-          // Only validate if param(s) are not null
-          if (
-            validation_rule['params'].every(function (param) { // Only validate if every param is not-null
-              return !Utils.isNullOrUndefined(obj[param]);
-            }) &&
+        // Only validate if param(s) are not null
+        if (
+          validation_rule['params'].every(function (param) { // Only validate if every param is not-null
+            return !Utils.isNullOrUndefined(obj[param]);
+          }) &&
             !Utils.isNullOrUndefined( validation_rule['func'] ) && // Only if function is not-null
             !validation_rule['func']( // Execute validation function with params
               ...validation_rule['params'].map(function (key) { // Iterate params - substitute 'key' with its value
                 return obj[key];
               })
             )
-          ) {
-            errs.push( // Error found. Add Error Object to List of Errors
-              Utils.error( // Cerate Error Object
-                validation_rule['error'],
-                context
-              )
-            );
-          }
+        ) {
+          errs.push( // Error found. Add Error Object to List of Errors
+            Utils.error( // Cerate Error Object
+              validation_rule['error'],
+              context
+            )
+          );
+        }
 
-        });
-      }
+      });
+    }
 
 
-      // Iterate through all Invalidation rules
-      if (invalidation_config) { // If any invalidation rules are sent in param
-        invalidation_config.forEach(function ( invalidation_rule ) {
+    // Iterate through all Invalidation rules
+    if (invalidation_config) { // If any invalidation rules are sent in param
+      invalidation_config.forEach(function ( invalidation_rule ) {
 
-          // Only validate if param(s) are not null
-          if (
-            invalidation_rule['params'].every(function (param) { // Only validate if every param is not-null
-              return !Utils.isNullOrUndefined(obj[param]);
-            }) &&
+        // Only validate if param(s) are not null
+        if (
+          invalidation_rule['params'].every(function (param) { // Only validate if every param is not-null
+            return !Utils.isNullOrUndefined(obj[param]);
+          }) &&
             !Utils.isNullOrUndefined( invalidation_rule['func'] ) // Only if function is not-null
-          ) {
+        ) {
 
-            const obj_errs = invalidation_rule['func']( // Execute invalidation function with params
-              ...invalidation_rule['params'].map(function (key) { // Iterate params - substitute 'key' with its value
-                return obj[key];
-              })
-            );
+          const obj_errs = invalidation_rule['func']( // Execute invalidation function with params
+            ...invalidation_rule['params'].map(function (key) { // Iterate params - substitute 'key' with its value
+              return obj[key];
+            })
+          );
 
 
-            // If Errors found, then merge it to full list of errors
-            if (obj_errs) {
-              errs = [...errs, ...obj_errs];
-            }
-
+          // If Errors found, then merge it to full list of errors
+          if (obj_errs) {
+            errs = [...errs, ...obj_errs];
           }
 
-        });
-      }
+        }
 
-      // Return Error if any
-      return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+      });
+    }
 
-    },
+    // Return Error if any
+    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Does both required-keys-check and invalid-keys-check for an Object
     Only checks for invalid-keys if there are no keys absent
 
@@ -1140,21 +1140,21 @@ const Utils = {
     @return {Error[]} response - Array of Error-Objects if invalid data
     @return {Boolean} response - false if valid data
     *********************************************************************/
-    checkObjectData: function (
-      obj, required_keys, dependent_keys,
-      require_check_func, invalidate_check_func
-    ) {
+  checkObjectData: function (
+    obj, required_keys, dependent_keys,
+    require_check_func, invalidate_check_func
+  ) {
 
-      // Return after checking required params and validations
-      return (
-        require_check_func( obj, required_keys, dependent_keys ) || // Return absentee-Keys-check errors if any
+    // Return after checking required params and validations
+    return (
+      require_check_func( obj, required_keys, dependent_keys ) || // Return absentee-Keys-check errors if any
         invalidate_check_func( obj ) // Return invalid-keys-check errors if no absentee-Keys-check errors
-      );
+    );
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check and return Errors in each Object in a array
 
     @param {Set[]} objs_list - List of Partiton Items
@@ -1167,53 +1167,53 @@ const Utils = {
     @return {Error} response - Error-Object if invalid data
     @return {Boolean} response - false if valid data
     *********************************************************************/
-    checkNewObjectsList: function (
-      objs_list,
-      new_obj_check_func,
-      min_length, min_length_error,
-      max_length, max_length_error
-    ) {
+  checkNewObjectsList: function (
+    objs_list,
+    new_obj_check_func,
+    min_length, min_length_error,
+    max_length, max_length_error
+  ) {
 
-      let errs = [];
+    let errs = [];
 
 
-      // Check for Min length of Objects List (if found then push respective error)
-      if (
-        !Utils.isNullOrUndefined(min_length) &&
+    // Check for Min length of Objects List (if found then push respective error)
+    if (
+      !Utils.isNullOrUndefined(min_length) &&
         objs_list.length < min_length
-      ) {
-        errs.push(min_length_error);
-      }
+    ) {
+      errs.push(min_length_error);
+    }
 
-      // Check for Max length of Objects List (if found then push respective error)
-      if (
-        !Utils.isNullOrUndefined(max_length) &&
+    // Check for Max length of Objects List (if found then push respective error)
+    if (
+      !Utils.isNullOrUndefined(max_length) &&
         objs_list.length > max_length
-      ) {
-        errs.push(max_length_error);
+    ) {
+      errs.push(max_length_error);
+    }
+
+
+    // Iterate each obj in objs_list
+    for ( const key in objs_list ) {
+
+      // Check error
+      const obj_errs = new_obj_check_func( objs_list[key] );
+
+      // If Errors found, then merge it to full list of errors
+      if (obj_errs) {
+        errs = [...errs, ...obj_errs];
       }
 
+    }
 
-      // Iterate each obj in objs_list
-      for ( const key in objs_list ) {
+    // Return Errors if any
+    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
 
-        // Check error
-        const obj_errs = new_obj_check_func( objs_list[key] );
-
-        // If Errors found, then merge it to full list of errors
-        if (obj_errs) {
-          errs = [...errs, ...obj_errs];
-        }
-
-      }
-
-      // Return Errors if any
-      return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
-
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Check and return Errors in each Object in a array
     Automatically Check if New or Edit or No-Change in object based on 'cmd'
 
@@ -1224,65 +1224,65 @@ const Utils = {
     @return {Error} response - Error-Object if invalid data
     @return {Boolean} response - false if valid data
     *********************************************************************/
-    checkEditObjectsList: function (
-      objs_list,
-      new_obj_check_func, edit_obj_check_func
-    ) {
+  checkEditObjectsList: function (
+    objs_list,
+    new_obj_check_func, edit_obj_check_func
+  ) {
 
-      let errs = [];
+    let errs = [];
 
-      // Iterate each obj in objs_list
-      for ( const key in objs_list ) {
+    // Iterate each obj in objs_list
+    for ( const key in objs_list ) {
 
-        // Check error
-        let obj_errs;
-        if ( objs_list[key]['command'] == 'new' ) {
-          obj_errs = new_obj_check_func( objs_list[key] );
-        }
-        else { // Edit/No-Change
-          obj_errs = edit_obj_check_func( objs_list[key] );
-        }
-
-
-        // If Errors found, then merge it to full list of errors
-        if (obj_errs) {
-          errs = [...errs, ...obj_errs];
-        }
-
+      // Check error
+      let obj_errs;
+      if ( objs_list[key]['command'] == 'new' ) {
+        obj_errs = new_obj_check_func( objs_list[key] );
+      }
+      else { // Edit/No-Change
+        obj_errs = edit_obj_check_func( objs_list[key] );
       }
 
-      // Return Errors if any
-      return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
 
-    },
+      // If Errors found, then merge it to full list of errors
+      if (obj_errs) {
+        errs = [...errs, ...obj_errs];
+      }
+
+    }
+
+    // Return Errors if any
+    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+
+  },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ URL, CSV & Misc ~~~~~~~~~~~~~~~~~~~~
-    // URL parsing, CSV conversion, module checks, and random generation.
+  // ~~~~~~~~~~~~~~~~~~~~ URL, CSV & Misc ~~~~~~~~~~~~~~~~~~~~
+  // URL parsing, CSV conversion, module checks, and random generation.
 
-    /********************************************************************
+  /********************************************************************
     Check if a node module is available
 
     @param {string} module_name - Request Instance object reference
 
     @return {Boolean} - True if module is available. False if not available
     *********************************************************************/
-    moduleAvailable: function (module_name) {
+  moduleAvailable: function (module_name) {
 
-      // Check if module is available
-      try {
-        require.resolve(module_name);
-        return true; // Module found
-      }
-      catch {
-        // Reach here means module not found
-        return false;
-      }
+    // Check if module is available
+    try {
+      require.resolve(module_name);
+      return true; // Module found
+    }
+    catch {
+      // Reach here means module not found
+      return false;
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Extract Protocol, Domain, Port, Path from a valid domain
     Example: https://user:pass@subdomain.example.com:8080/abc/pqr/query?param1=apple#section1
 
@@ -1301,36 +1301,36 @@ const Utils = {
     @return {String} .search - Query string including '?' ('?param1=apple')
     @return {String} .hash - Fragment including '#' ('#section1')
     *********************************************************************/
-    disjoinUrl: function (url) {
+  disjoinUrl: function (url) {
 
-      try {
+    try {
 
-        // Extract URL data
-        const url_data = new URL(url);
+      // Extract URL data
+      const url_data = new URL(url);
 
-        // Return URL Data
-        return {
-          origin: url_data['origin'], // 'https://subdomain.example.com:8080'
-          protocol: url_data['protocol'], // 'https:'
-          username: url_data['username'], // 'user'
-          password: url_data['password'], // 'pass'
-          hostname: url_data['hostname'], // 'subdomain.example.com'
-          host: url_data['host'], // 'subdomain.example.com:8080'
-          port: url_data['port'], // '8080'
-          pathname: url_data['pathname'], // '/abc/pqr/query'
-          search: url_data['search'], // '?param1=apple'
-          hash: url_data['hash'] // '#section1'
-        };
+      // Return URL Data
+      return {
+        origin: url_data['origin'], // 'https://subdomain.example.com:8080'
+        protocol: url_data['protocol'], // 'https:'
+        username: url_data['username'], // 'user'
+        password: url_data['password'], // 'pass'
+        hostname: url_data['hostname'], // 'subdomain.example.com'
+        host: url_data['host'], // 'subdomain.example.com:8080'
+        port: url_data['port'], // '8080'
+        pathname: url_data['pathname'], // '/abc/pqr/query'
+        search: url_data['search'], // '?param1=apple'
+        hash: url_data['hash'] // '#section1'
+      };
 
-      }
-      catch {
-        return false; // Return false if Invalid/Malformed URL
-      }
+    }
+    catch {
+      return false; // Return false if Invalid/Malformed URL
+    }
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Extract Routing Data from Path Data
     Example: /abc/pqr/query?param1=apple#section1
 
@@ -1340,77 +1340,77 @@ const Utils = {
     @return {String} .route - First path segment ('abc')
     @return {String[]} .values - Remaining path segments (['pqr', 'query'])
     *********************************************************************/
-    disjoinPathname: function (pathname) {
+  disjoinPathname: function (pathname) {
 
-      // Remove Querystring or Hash from Pathname
-      pathname = pathname.split(/[?#]/)[0];
+    // Remove Querystring or Hash from Pathname
+    pathname = pathname.split(/[?#]/)[0];
 
-      // Extract path values
-      let path_data = pathname.split('/');
+    // Extract path values
+    let path_data = pathname.split('/');
 
-      // Clean Path Values by removing empty strings
-      path_data = path_data.filter(function (value) {
-        return !Utils.isEmptyString(value);
-      });
+    // Clean Path Values by removing empty strings
+    path_data = path_data.filter(function (value) {
+      return !Utils.isEmptyString(value);
+    });
 
-      // Get Route from Pathname
-      const route = Utils.fallback(
-        path_data.shift(), // Remove and return first value from array
-        null // fallback
-      );
+    // Get Route from Pathname
+    const route = Utils.fallback(
+      path_data.shift(), // Remove and return first value from array
+      null // fallback
+    );
 
-      // Return
-      return {
-        route: route,
-        values: path_data
-      };
+    // Return
+    return {
+      route: route,
+      values: path_data
+    };
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Convert CSV String to Data (CSV File Should have Header)
 
     @param {String} csv_data - CSV Data
 
     @return {Set[]} data - List of Objects
     *********************************************************************/
-    convertCsvToData: function (csv_data) {
+  convertCsvToData: function (csv_data) {
 
-      // Create lines from CSV. Internally normalize line breaks (\rn). Internally removes empty lines.
-      const lines = csv_data.replace(/\r\n/g, '\n').split('\n').filter(line => line.trim());
+    // Create lines from CSV. Internally normalize line breaks (\rn). Internally removes empty lines.
+    const lines = csv_data.replace(/\r\n/g, '\n').split('\n').filter(line => line.trim());
 
-      // If no data lines, return empty array
-      if ( lines.length <= 1 ) { // Either no line, or only header is present in file
-        return []; // Return Empty Array (No data present)
-      }
+    // If no data lines, return empty array
+    if ( lines.length <= 1 ) { // Either no line, or only header is present in file
+      return []; // Return Empty Array (No data present)
+    }
 
-      // Get header keys from the first line of CSV
-      const header = Utils.splitWithTrim(
-        lines.shift(), // Get 1st item (0th Index) of Lines and remove it simultaneously
-        ','
-      );
+    // Get header keys from the first line of CSV
+    const header = Utils.splitWithTrim(
+      lines.shift(), // Get 1st item (0th Index) of Lines and remove it simultaneously
+      ','
+    );
 
 
-      // iterate all lines and Return
-      return lines.map(function (line) {
+    // iterate all lines and Return
+    return lines.map(function (line) {
 
-        // Convert line-string to array
-        let data = Utils.splitWithTrim(line, ',');
+      // Convert line-string to array
+      let data = Utils.splitWithTrim(line, ',');
 
-        // Convert empty strings to undefined
-        data = data.map(function (item) {
-          return ( Utils.isEmptyString(item) ? void 0 : item );
-        });
-
-        return Utils.keyValueToObject(header, data);
-
+      // Convert empty strings to undefined
+      data = data.map(function (item) {
+        return ( Utils.isEmptyString(item) ? void 0 : item );
       });
 
-    },
+      return Utils.keyValueToObject(header, data);
+
+    });
+
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Convert Data to CSV String
     NOTE: Headers are Automatically extracted from data
 
@@ -1418,49 +1418,49 @@ const Utils = {
 
     @return {String} csv_data - CSV Data
     *********************************************************************/
-    convertDataToCsv: function (records) {
+  convertDataToCsv: function (records) {
 
-      // Initialization
-      let csv_data;
-      let fields = [];
-      const values = [];
+    // Initialization
+    let csv_data;
+    let fields = [];
+    const values = [];
 
-      // If empty array (no data)
-      if (records.length == 0) {
-        return '';
-      }
+    // If empty array (no data)
+    if (records.length == 0) {
+      return '';
+    }
 
-      // Extract keys from first record
-      fields = Object.keys(records[0]);
+    // Extract keys from first record
+    fields = Object.keys(records[0]);
 
-      // Iterate over records
-      records.forEach(function (record) {
+    // Iterate over records
+    records.forEach(function (record) {
 
-        // Get array contain values of record
-        const row = fields.map(function (field) {
-          return Utils.fallback(record[field], ''); // if not found, replace with empty string
-        });
-
-        values.push( // Push string of row (array contain record values) values seperated by comma
-          row.join(',') // join row (array contain record values) seperated by comma
-        );
-
+      // Get array contain values of record
+      const row = fields.map(function (field) {
+        return Utils.fallback(record[field], ''); // if not found, replace with empty string
       });
 
-      // Join fields array elements seperated by comma
-      csv_data = fields.join(',') + '\n';
+      values.push( // Push string of row (array contain record values) values seperated by comma
+        row.join(',') // join row (array contain record values) seperated by comma
+      );
 
-      // Join values array elements seperated by new line (\n)
-      csv_data += values.join('\n');
+    });
+
+    // Join fields array elements seperated by comma
+    csv_data = fields.join(',') + '\n';
+
+    // Join values array elements seperated by new line (\n)
+    csv_data += values.join('\n');
 
 
-      // Return CSV Data
-      return csv_data;
+    // Return CSV Data
+    return csv_data;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Convert Data to CSV String
     NOTE: Headers are explicitly specified along with data
 
@@ -1469,46 +1469,46 @@ const Utils = {
 
     @return {String} csv_data - CSV Data
     *********************************************************************/
-    convertDataToCsv2: function (fields, records) {
+  convertDataToCsv2: function (fields, records) {
 
-      // Initialization
-      let csv_data;
-      const values = [];
+    // Initialization
+    let csv_data;
+    const values = [];
 
-      // If empty array (no data)
-      if (records.length == 0) {
-        return '';
-      }
+    // If empty array (no data)
+    if (records.length == 0) {
+      return '';
+    }
 
 
-      // Iterate over records
-      records.forEach(function (record) {
+    // Iterate over records
+    records.forEach(function (record) {
 
-        // Get array contain values of record
-        const row = fields.map(function (field) {
-          return Utils.fallback(record[field], ''); // if not found, replace with empty string
-        });
-
-        values.push( // Push string of row (array contain record values) values seperated by comma
-          row.join(',') // join row (array contain record values) seperated by comma
-        );
-
+      // Get array contain values of record
+      const row = fields.map(function (field) {
+        return Utils.fallback(record[field], ''); // if not found, replace with empty string
       });
 
-      // Join fields array elements seperated by comma
-      csv_data = fields.join(',') + '\n';
+      values.push( // Push string of row (array contain record values) values seperated by comma
+        row.join(',') // join row (array contain record values) seperated by comma
+      );
 
-      // Join values array elements seperated by new line (\n)
-      csv_data += values.join('\n');
+    });
+
+    // Join fields array elements seperated by comma
+    csv_data = fields.join(',') + '\n';
+
+    // Join values array elements seperated by new line (\n)
+    csv_data += values.join('\n');
 
 
-      // Return CSV Data
-      return csv_data;
+    // Return CSV Data
+    return csv_data;
 
-    },
+  },
 
 
-    /********************************************************************
+  /********************************************************************
     Generate Unique string.
     Use this method for generating non-secure random-ids only.
     For secure random string, prefer crypto library.
@@ -1517,52 +1517,52 @@ const Utils = {
 
     @return {String} - Unique string
     *********************************************************************/
-    generateRandomString: function (length) {
+  generateRandomString: function (length) {
 
-      // Standard character set
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let result = '';
+    // Standard character set
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
 
-      // LCG parameters
-      // 'm', 'a', and 'c' are constants used in the LCG algorithm
-      const m = Math.pow(2, 32);
-      const a = 1664525;
-      const c = 1013904223;
+    // LCG parameters
+    // 'm', 'a', and 'c' are constants used in the LCG algorithm
+    const m = Math.pow(2, 32);
+    const a = 1664525;
+    const c = 1013904223;
 
-      // Using the current timestamp as an initial seed value for the LCG
-      let seed = Date.now();
+    // Using the current timestamp as an initial seed value for the LCG
+    let seed = Date.now();
 
-      // LCG function to generate pseudo-random numbers
-      function lcg () {
-        // Updating the seed value using the LCG formula
-        seed = (a * seed + c) % m;
-        // Normalizing the result to produce a number between 0 and 1
-        return seed / m;
-      }
-
-      // Generating the random string
-      for (let i = 0; i < length; i++) {
-        // For each iteration, generate a pseudo-random number using the LCG,
-        // multiply it by the length of the character set to get a random index,
-        // and use this index to select a character from the character set.
-        result += characters.charAt(Math.floor(lcg() * characters.length));
-      }
-
-      // Returning the final generated random string
-      return result;
-
+    // LCG function to generate pseudo-random numbers
+    function lcg () {
+      // Updating the seed value using the LCG formula
+      seed = (a * seed + c) % m;
+      // Normalizing the result to produce a number between 0 and 1
+      return seed / m;
     }
 
-  }; // Close Public Functions
+    // Generating the random string
+    for (let i = 0; i < length; i++) {
+      // For each iteration, generate a pseudo-random number using the LCG,
+      // multiply it by the length of the character set to get a random index,
+      // and use this index to select a character from the character set.
+      result += characters.charAt(Math.floor(lcg() * characters.length));
+    }
 
-  ////////////////////////////Public Functions END///////////////////////////////
+    // Returning the final generated random string
+    return result;
+
+  }
+
+}; // Close Public Functions
+
+////////////////////////////Public Functions END///////////////////////////////
 
 
 
-  //////////////////////////Private Functions START//////////////////////////////
-  const _Utils = { // Private functions accessible within this modules only
+//////////////////////////Private Functions START//////////////////////////////
+const _Utils = { // Private functions accessible within this modules only
 
-    /********************************************************************
+  /********************************************************************
     Return Deep Copy of an Object (For older version of nodeJS or browsers that do not support structuredClone)
     It uses recursion to handle nested objects and arrays.
     Only works for plain JavaScript objects and arrays.
@@ -1572,52 +1572,52 @@ const Utils = {
     @return {Object} response - Deep copy of object
     @return {Error} response - Error if unsupported object
     *********************************************************************/
-    deepCopyObjectPolyfill: function (obj) {
+  deepCopyObjectPolyfill: function (obj) {
 
-      // Initialize object's Copy
-      let copy;
+    // Initialize object's Copy
+    let copy;
 
-      // Handle the 3 simple types, and null or undefined
-      if ( null == obj || 'object' != typeof obj ) {
-        return obj;
-      }
-
-      // Handle Date
-      if (obj instanceof Date) {
-        copy = new Date();
-        copy.setTime(obj.getTime());
-        return copy;
-      }
-
-      // Handle Array
-      if (obj instanceof Array) {
-        copy = [];
-        for (let i = 0, len = obj.length; i < len; i++) {
-          copy[i] = Utils.deepCopyObject(obj[i]);
-        }
-        return copy;
-      }
-
-      // Handle Object
-      if (obj instanceof Object) {
-        copy = {};
-        for (const attr in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, attr)) {
-            copy[attr] = Utils.deepCopyObject(obj[attr]);
-          }
-        }
-        return copy;
-      }
-
-      // Reach here means unsupported object type
-      throw new Error('Unable to copy obj. Its type is not supported.');
-
+    // Handle the 3 simple types, and null or undefined
+    if ( null == obj || 'object' != typeof obj ) {
+      return obj;
     }
 
-  };///////////////////////////Private Functions END/////////////////////////////
+    // Handle Date
+    if (obj instanceof Date) {
+      copy = new Date();
+      copy.setTime(obj.getTime());
+      return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+      copy = [];
+      for (let i = 0, len = obj.length; i < len; i++) {
+        copy[i] = Utils.deepCopyObject(obj[i]);
+      }
+      return copy;
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+      copy = {};
+      for (const attr in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, attr)) {
+          copy[attr] = Utils.deepCopyObject(obj[attr]);
+        }
+      }
+      return copy;
+    }
+
+    // Reach here means unsupported object type
+    throw new Error('Unable to copy obj. Its type is not supported.');
+
+  }
+
+};///////////////////////////Private Functions END/////////////////////////////
 
 
 
 
-  // Export singleton Utils interface
+// Export singleton Utils interface
 module.exports = Utils;
