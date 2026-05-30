@@ -10,8 +10,8 @@ const loader = require('./loader');
 const { Lib } = loader();
 const Money = Lib.Money;
 
-// Factory required directly for contract tests — money is a singleton so
-// each loader call updates the module-level CONFIG (require-cache instance).
+// Factory required directly for contract tests — money is now a factory pattern
+// so each loader call returns an independent instance with its own CONFIG.
 const MoneyFactory = require('helper-money');
 
 const validBaseConfig = function () {
@@ -756,11 +756,9 @@ describe('Validation and new functions', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// Note: js-helper-money is a singleton — each MoneyFactory(Lib, config) call
-// updates the shared module-level CONFIG. Tests below exercise the loader
-// directly (not Lib.Money) so that each call uses a fresh config snapshot.
-// The factory is called only for its load-time validation side-effect; the
-// returned singleton reference is not used.
+// Note: js-helper-money is now a factory pattern — each MoneyFactory(Lib, config) call
+// returns an independent instance with its own CONFIG. Tests below exercise the loader
+// directly to verify config validation works correctly for each independent instance.
 
 describe('config absorption contract', function () {
 
