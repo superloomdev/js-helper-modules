@@ -482,8 +482,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       if (result === 'timeout') {
         Lib.Debug.warning('MySQL: Pool close timed out, force destroying');
         _MySQL.destroyPool();
-      }
-      else {
+      } else {
         Lib.Debug.debug('MySQL: Pool closed gracefully');
       }
 
@@ -539,8 +538,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('MySQL getClient failed', {
           type: ERRORS.DATABASE_CONNECTION_FAILED.type,
@@ -648,8 +646,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // SSL for managed databases. Pass `true` for defaults or an object for custom options.
       if (CONFIG.SSL === true) {
         options.ssl = { rejectUnauthorized: true };
-      }
-      else if (CONFIG.SSL && typeof CONFIG.SSL === 'object') {
+      } else if (CONFIG.SSL && typeof CONFIG.SSL === 'object') {
         options.ssl = CONFIG.SSL;
       }
 
@@ -694,8 +691,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
             }
           });
         }
-      }
-      catch {
+      } catch {
         // Ignore errors during force destroy
       }
 
@@ -746,8 +742,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('MySQL query failed', {
           type: ERRORS.DATABASE_QUERY_FAILED.type,
@@ -854,12 +849,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         // Roll back and release. Guard against rollback itself throwing.
         if (conn) {
-          try { await conn.rollback(); } catch { /* already failing - ignore */ }
+          try {
+            await conn.rollback();
+          } catch { /* already failing - ignore */ }
           conn.release();
         }
 

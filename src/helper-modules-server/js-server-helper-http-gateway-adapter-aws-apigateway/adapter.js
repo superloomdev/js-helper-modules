@@ -157,13 +157,11 @@ const createInterface = function (Lib) {
         if (Buffer.isBuffer(body)) {
           normalized_body = body.toString('base64');
           is_base64 = true;
-        }
-        // Object -> JSON stringify
-        else if (Lib.Utils.isObject(body)) {
+        } else if (Lib.Utils.isObject(body)) {
+          // Object -> JSON stringify
           normalized_body = JSON.stringify(body);
-        }
-        // Everything else -> string
-        else {
+        } else {
+          // Everything else -> string
           normalized_body = String(body);
         }
 
@@ -355,8 +353,7 @@ const createInterface = function (Lib) {
           return (!Lib.Utils.isNullOrUndefined(parsed) && Lib.Utils.isObject(parsed) && !Array.isArray(parsed))
             ? parsed
             : {};
-        }
-        catch {
+        } catch {
           // Return empty object on JSON parse failure
           return {};
         }

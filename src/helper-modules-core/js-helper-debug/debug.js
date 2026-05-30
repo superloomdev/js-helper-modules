@@ -241,8 +241,7 @@ const createInterface = function (CONFIG) {
       // Choose format
       if (CONFIG.LOG_FORMAT === 'json') {
         _Debug.writeJsonLog(level, message, data);
-      }
-      else {
+      } else {
         _Debug.writeTextLog(level, message, data);
       }
 
@@ -276,8 +275,7 @@ const createInterface = function (CONFIG) {
       // Use stderr for error level, stdout for everything else
       if (level === 'error') {
         console.error(JSON.stringify(entry));
-      }
-      else {
+      } else {
         console.log(JSON.stringify(entry));
       }
 
@@ -337,8 +335,7 @@ const createInterface = function (CONFIG) {
       // Use stderr for error level, stdout for everything else
       if (level === 'error') {
         console.error(output);
-      }
-      else {
+      } else {
         console.log(output);
       }
 

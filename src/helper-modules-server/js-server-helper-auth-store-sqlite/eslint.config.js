@@ -74,6 +74,7 @@ module.exports = [
       'array-bracket-spacing': ['error', 'never'],
       'comma-spacing': ['error', { 'before': false, 'after': true }],
       'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs', { allowSingleLine: false }],    // Block body must be on its own line (no single-line blocks)
       'no-unused-vars': ['error', { 'args': 'after-used', 'argsIgnorePattern': '^_' }],
 
       // Modern JS preferences (let/const over var)

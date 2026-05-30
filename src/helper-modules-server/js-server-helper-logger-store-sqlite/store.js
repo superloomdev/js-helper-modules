@@ -240,7 +240,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       return {
         success: true,
-        records: page.map(function (row) { return _Store.rowToRecord(row); }),
+        records: page.map(function (row) {
+          return _Store.rowToRecord(row);
+        }),
         next_cursor: next_cursor,
         error: null
       };
@@ -286,7 +288,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       return {
         success: true,
-        records: page.map(function (row) { return _Store.rowToRecord(row); }),
+        records: page.map(function (row) {
+          return _Store.rowToRecord(row);
+        }),
         next_cursor: next_cursor,
         error: null
       };
@@ -503,7 +507,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const Q = _Store.Q;
       const t = Q(STORE_CONFIG.table_name);
       const cols = _Store.COLUMNS.map(Q).join(', ');
-      const placeholders = _Store.COLUMNS.map(function () { return '?'; }).join(', ');
+      const placeholders = _Store.COLUMNS.map(function () {
+        return '?';
+      }).join(', ');
 
       return 'INSERT INTO ' + t + ' (' + cols + ') VALUES (' + placeholders + ')';
 
@@ -546,7 +552,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Optional action filter (IN list)
       if (query.actions && query.actions.length > 0) {
-        const placeholders = query.actions.map(function () { return '?'; }).join(', ');
+        const placeholders = query.actions.map(function () {
+          return '?';
+        }).join(', ');
         parts.push(Q('action') + ' IN (' + placeholders + ')');
         for (let i = 0; i < query.actions.length; i++) {
           params.push(query.actions[i]);

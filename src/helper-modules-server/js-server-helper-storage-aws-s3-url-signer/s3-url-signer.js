@@ -109,8 +109,7 @@ const S3UrlSigner = {
         error: null
       };
 
-    }
-    catch (error) {
+    } catch (error) {
 
       Lib.Debug.debug('S3 PUT upload URL failed', {
         type: ERRORS.STORAGE_URL_GENERATION_FAILED.type,
@@ -187,8 +186,7 @@ const S3UrlSigner = {
         error: null
       };
 
-    }
-    catch (error) {
+    } catch (error) {
 
       Lib.Debug.debug('S3 download URL failed', {
         type: ERRORS.STORAGE_URL_GENERATION_FAILED.type,
@@ -264,8 +262,7 @@ const S3UrlSigner = {
         error: null
       };
 
-    }
-    catch (error) {
+    } catch (error) {
 
       Lib.Debug.debug('S3 POST upload URL failed', {
         type: ERRORS.STORAGE_URL_GENERATION_FAILED.type,
@@ -305,7 +302,9 @@ const _S3FileUpload = {
   *********************************************************************/
   initSDK: function () {
 
-    if (_S3FileUpload.client !== null) return;
+    if (_S3FileUpload.client !== null) {
+return;
+}
 
     const { S3Client: S3ClientClass, PutObjectCommand: PutCmd, GetObjectCommand: GetCmd } = require('@aws-sdk/client-s3');
     const { getSignedUrl: getSigned } = require('@aws-sdk/s3-request-presigner');

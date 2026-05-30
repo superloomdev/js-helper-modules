@@ -95,8 +95,7 @@ const createInterface = function (Lib) {
 
       if (req.cookies && Lib.Utils.isObject(req.cookies)) {
         cookies = req.cookies;
-      }
-      else {
+      } else {
         cookies = _Adapter.parseCookieHeader(headers['cookie'] || '');
       }
 
@@ -172,13 +171,11 @@ const createInterface = function (Lib) {
         // Buffer -> base64 encode
         if (Buffer.isBuffer(body)) {
           normalized_body = body.toString('base64');
-        }
-        // Object -> JSON stringify
-        else if (Lib.Utils.isObject(body)) {
+        } else if (Lib.Utils.isObject(body)) {
+          // Object -> JSON stringify
           normalized_body = JSON.stringify(body);
-        }
-        // Everything else -> string
-        else {
+        } else {
+          // Everything else -> string
           normalized_body = String(body);
         }
 

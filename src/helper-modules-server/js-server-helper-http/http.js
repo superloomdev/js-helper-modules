@@ -238,8 +238,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Apply authentication headers
       if (auth && !Lib.Utils.isEmpty(auth.bearer_token)) {
         request_headers['Authorization'] = 'Bearer ' + auth.bearer_token;
-      }
-      else if (auth && auth.basic && !Lib.Utils.isEmpty(auth.basic.username)) {
+      } else if (auth && auth.basic && !Lib.Utils.isEmpty(auth.basic.username)) {
         const credentials = auth.basic.username + ':' + (auth.basic.password || '');
         request_headers['Authorization'] = 'Basic ' + Buffer.from(credentials).toString('base64');
       }
@@ -258,8 +257,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           request_headers['Content-Type'] = encoded.content_type_header;
         }
 
-      }
-      else {
+      } else {
 
         // Query-string methods: append params to URL
         final_url = _Http.appendQueryParams(url, params);
@@ -318,8 +316,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           error: ERRORS.NETWORK_REQUEST_FAILED
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         // Log performance of failed request
         Lib.Debug.performanceAuditLog('HTTP ' + method + ' (failed)', final_url, start_ms);

@@ -24,7 +24,9 @@ module.exports = [
       'no-unused-vars': 'error',
       'no-console': 'off',
       'prefer-const': 'error',
-      'no-var': 'error'
+      'no-var': 'error',
+      'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs', { allowSingleLine: false }]
     }
   }
 ];

@@ -647,8 +647,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
 
             if (operations[j].put) {
               bulk_ops.push({ insertOne: { document: operations[j].put } });
-            }
-            else if (operations[j].delete) {
+            } else if (operations[j].delete) {
               bulk_ops.push({ deleteOne: { filter: operations[j].delete } });
             }
 

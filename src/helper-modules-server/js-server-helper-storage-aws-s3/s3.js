@@ -112,8 +112,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Attach optional canned ACL only when explicitly provided
       if (is_public === true) {
         service_params.ACL = 'public-read';
-      }
-      else if (is_public === false) {
+      } else if (is_public === false) {
         service_params.ACL = 'private';
       }
 
@@ -181,8 +180,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Attach optional canned ACL only when explicitly provided
       if (is_public === true) {
         service_params.ACL = 'public-read';
-      }
-      else if (is_public === false) {
+      } else if (is_public === false) {
         service_params.ACL = 'private';
       }
 
@@ -222,8 +220,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('S3 PutObject failed', {
           type: ERRORS.STORAGE_UPLOAD_FAILED.type,
@@ -270,8 +267,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         let body;
         if (output_as_string === true) {
           body = await response.Body.transformToString();
-        }
-        else {
+        } else {
           const bytes = await response.Body.transformToByteArray();
           body = Buffer.from(bytes);
         }
@@ -287,8 +283,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         // Suppress log noise for expected "object not found" errors
         if (error.name !== 'NoSuchKey' && error.name !== 'NotFound') {
@@ -342,8 +337,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('S3 DeleteObject failed', {
           type: ERRORS.STORAGE_DELETE_FAILED.type,
@@ -391,8 +385,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         // Suppress log noise for expected "object not found" errors
         if (error.name !== 'NoSuchKey' && error.name !== 'NotFound') {
@@ -449,7 +442,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         // Extract key list from response contents
         const keys = Lib.Utils.isEmpty(response.Contents)
           ? []
-          : response.Contents.map(function (item) { return item.Key; });
+          : response.Contents.map(function (item) {
+            return item.Key;
+          });
 
         // Log operation performance
         Lib.Debug.performanceAuditLog('End', 'S3 ListObjectsV2 - ' + bucket, instance['time_ms']);
@@ -460,8 +455,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('S3 ListObjectsV2 failed', {
           type: ERRORS.STORAGE_LIST_FAILED.type,
@@ -543,7 +537,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         }));
 
         // Aggregate success - true only when every upload succeeded
-        const all_ok = results.every(function (r) { return r.success === true; });
+        const all_ok = results.every(function (r) {
+          return r.success === true;
+        });
 
         // Log operation performance
         Lib.Debug.performanceAuditLog('End', 'S3 BatchUpload (' + files.length + ')', instance['time_ms']);
@@ -554,8 +550,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: all_ok ? null : ERRORS.STORAGE_BATCH_UPLOAD_FAILED
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('S3 BatchUpload failed', {
           type: ERRORS.STORAGE_BATCH_UPLOAD_FAILED.type,
@@ -652,7 +647,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         const service_params = {
           Bucket: bucket,
           Delete: {
-            Objects: chunk_keys.map(function (k) { return { Key: k }; }),
+            Objects: chunk_keys.map(function (k) {
+              return { Key: k };
+            }),
             Quiet: false
           }
         };
@@ -664,7 +661,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         // Extract deleted key list from response
         const deleted_chunk = Lib.Utils.isEmpty(response.Deleted)
           ? []
-          : response.Deleted.map(function (item) { return item.Key; });
+          : response.Deleted.map(function (item) {
+            return item.Key;
+          });
 
         // Log operation performance
         Lib.Debug.performanceAuditLog('End', 'S3 DeleteObjects (' + chunk_keys.length + ')', instance['time_ms']);
@@ -685,8 +684,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
           error: null
         };
 
-      }
-      catch (error) {
+      } catch (error) {
 
         Lib.Debug.debug('S3 DeleteObjects failed', {
           type: ERRORS.STORAGE_BATCH_DELETE_FAILED.type,

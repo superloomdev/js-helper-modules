@@ -400,7 +400,9 @@ function createInterface (Lib, STORE_CONFIG, ERRORS) {
       const COLUMNS = _Store.COLUMNS;
       const t = Q(STORE_CONFIG.table_name);
       const cols = COLUMNS.map(Q).join(', ');
-      const placeholders = COLUMNS.map(function () { return '?'; }).join(', ');
+      const placeholders = COLUMNS.map(function () {
+        return '?';
+      }).join(', ');
 
       return (
         'INSERT INTO ' + t + ' (' + cols + ')' +
@@ -431,9 +433,13 @@ function createInterface (Lib, STORE_CONFIG, ERRORS) {
       sql += ' AND ' + Q('entity_id') + ' = ?'; values.push(query.entity_id);
 
       if (query.actions && query.actions.length > 0) {
-        const placeholders = query.actions.map(function () { return '?'; }).join(', ');
+        const placeholders = query.actions.map(function () {
+          return '?';
+        }).join(', ');
         sql += ' AND ' + Q('action') + ' IN (' + placeholders + ')';
-        query.actions.forEach(function (a) { values.push(a); });
+        query.actions.forEach(function (a) {
+          values.push(a);
+        });
       }
 
       if (query.cursor) {

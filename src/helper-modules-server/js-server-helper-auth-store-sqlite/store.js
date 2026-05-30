@@ -245,7 +245,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       }
 
       // Decode every raw row to canonical record shape and return the list
-      const records = result.rows.map(function (row) { return _Store.rowToRecord(row); });
+      const records = result.rows.map(function (row) {
+        return _Store.rowToRecord(row);
+      });
       return {
         success: true,
         records: records,
@@ -666,7 +668,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const UPSERT_IMMUTABLE_COLUMNS = _Store.UPSERT_IMMUTABLE_COLUMNS;
       const tq = Q(STORE_CONFIG.table_name);
       const cols_quoted = COLUMNS.map(Q).join(', ');
-      const placeholders = COLUMNS.map(function () { return '?'; }).join(', ');
+      const placeholders = COLUMNS.map(function () {
+        return '?';
+      }).join(', ');
 
       // Build the DO UPDATE SET pairs for every mutable column
       const update_cols = COLUMNS.filter(function (c) {

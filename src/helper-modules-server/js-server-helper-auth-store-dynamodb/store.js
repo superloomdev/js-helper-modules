@@ -209,7 +209,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       }
 
       // Strip DynamoDB-only keys from every item and return the list
-      const records = result.items.map(function (item) { return _Store.itemToRecord(item); });
+      const records = result.items.map(function (item) {
+        return _Store.itemToRecord(item);
+      });
       return {
         success: true,
         records: records,
