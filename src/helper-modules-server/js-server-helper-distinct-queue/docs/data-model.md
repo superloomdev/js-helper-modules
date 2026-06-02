@@ -82,26 +82,31 @@ independently.
 The sort key combines three parts:
 
 ```
-resource_id + '#' + data_version_ms + '#' + random_suffix(4)
+resource_id + '#' + data_version_ms + '#' + random_suffix(8)
 ```
 
 - `resource_id` enables `begins_with(resource_id + '#')` prefix queries
   without a Global Secondary Index.
 - `data_version_ms` is a 13-digit millisecond timestamp that is
   lexicographically monotonic until year 2286 — no zero-padding needed.
-- `random_suffix` (4 alphanumeric chars) breaks ties within the same
-  millisecond and ensures sort key uniqueness across concurrent writes.
+- `random_suffix` (8 alphanumeric chars, cryptographically random) breaks
+  ties within the same millisecond and ensures sort key uniqueness across
+  concurrent writes.
 
-## How the Index Works
-
-- **DynamoDB:** `tenant_id` → partition key (`p`), sort key (`id`) = full
-  composite sort key. `begins_with(resource_id + '#')` returns all records
-  for that resource in chronological order. Last item = latest.
-- **MongoDB:** compound index `{ tenant_id: 1, resource_id: 1, data_version: 1 }`.
-  Query by `{ tenant_id, resource_id }` sorted by `data_version` desc.
-- **SQL (future):** `(tenant_id, resource_id)` columns with an indexed
-  `data_version` column. Range query:
-  `WHERE tenant_id = $1 AND resource_id = $2 ORDER BY data_version ASC`.
+## Indexing Requirements
 
 The storage adapter owns all index and schema decisions. The core module only
 knows `tenant_id`, `resource_id`, and `data_version` as logical concepts.
+
+Every adapter must support these query patterns efficiently:
+
+1. **Query by exact resource:** all records for `(tenant_id, resource_id)`,
+   ordered by `data_version` ascending.
+2. **Query by prefix:** all records for `(tenant_id)` whose `resource_id`
+   begins with a given prefix.
+3. **Delete by threshold:** remove all records for `(tenant_id, resource_id)`
+   with `data_version <= N`.
+
+How each adapter implements these (partition keys, composite sort keys,
+compound indexes, SQL WHERE clauses) is documented in the adapter's own
+`docs/schema.md`.
