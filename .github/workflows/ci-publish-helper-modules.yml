@@ -42,9 +42,10 @@
 #   33. test-auth-store-mysql → publish-auth-store-mysql
 #   34. test-auth-store-mongodb → publish-auth-store-mongodb
 #   35. test-auth-store-dynamodb → publish-auth-store-dynamodb
-#   36. test-http-gateway → publish-http-gateway
-#   37. test-http-gateway-adapter-aws-apigateway → publish-http-gateway-adapter-aws-apigateway
-#   38. test-http-gateway-adapter-express → publish-http-gateway-adapter-express
+#   36. test-distinct-queue → publish-distinct-queue
+#   37. test-http-gateway → publish-http-gateway
+#   38. test-http-gateway-adapter-aws-apigateway → publish-http-gateway-adapter-aws-apigateway
+#   39. test-http-gateway-adapter-express → publish-http-gateway-adapter-express
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -2403,12 +2404,77 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 36: js-server-helper-http-gateway
+  #   MODULE 34: js-server-helper-distinct-queue
+  #   (needs utils, debug, crypto, instance; no Docker — tests use in-memory store)
+  # ###########################################################################
+
+  test-distinct-queue:
+    needs: [detect, publish-auth-store-dynamodb]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-distinct-queue')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-distinct-queue
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-distinct-queue:
+    needs: [detect, test-distinct-queue]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-distinct-queue'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-distinct-queue')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-distinct-queue
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 35: js-server-helper-http-gateway
   #   (needs utils, debug, instance; no Docker required)
   # ###########################################################################
 
   test-http-gateway:
-    needs: [detect, publish-auth-store-dynamodb]
+    needs: [detect, publish-distinct-queue]
     if: |
       always() &&
       !cancelled() &&
@@ -2468,7 +2534,7 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 37: js-server-helper-http-gateway-adapter-aws-apigateway
+  #   MODULE 36: js-server-helper-http-gateway-adapter-aws-apigateway
   #   (no runtime deps; no Docker required)
   # ###########################################################################
 
@@ -2533,7 +2599,7 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 38: js-server-helper-http-gateway-adapter-express
+  #   MODULE 37: js-server-helper-http-gateway-adapter-express
   #   (no runtime deps; no Docker required)
   # ###########################################################################
 
