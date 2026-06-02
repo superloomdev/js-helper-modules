@@ -33,6 +33,13 @@ Identify which category the module belongs to before starting. Each category has
 
 Reference examples are for pattern recognition, not copy-paste. Read them to understand the shape, then apply first principles.
 
+**Adapter-backed module lifecycle:** When a module uses pluggable store adapters, development follows a strict sequence:
+
+1. **Core module first.** Build and test the core module using an in-memory mock store (`_test/memory-store.js`). This mock implements the full store contract in plain arrays/objects — no external dependencies. The core module is published before any adapter work begins.
+2. **Adapters second.** Each adapter is a separate module created after the core is published. Adapters depend on the core module's error catalog (passed via `ERRORS` at loader time) and implement the contract validated by the core's `Validators.validateStoreContract`.
+3. **One adapter at a time.** Build, test, and publish adapters individually. Each has its own `docker-compose.yml` with the relevant database emulator.
+4. **Contract test suite.** Each adapter's `_test/store-contract-suite.js` contains shared tests that validate the 4-method contract against a real (emulated) backend. The core module's `_test/memory-store.js` serves as the behavioural reference.
+
 ### Module Types
 
 | Type | Directory | Constraints |
