@@ -361,35 +361,53 @@ For every runtime and dev dependency:
 - [ ] `_test/package.json` exists
 - [ ] Verify with `npm pack --dry-run`: only source, `README.md`, `ROBOTS.md`, `docs/`, `package.json` ship
 
-### CI/CD Registration
+### CI/CD Registration (first publish only)
 
-Single unified workflow: `.github/workflows/ci-helper-modules.yml`
+**This is a one-time task.** Once a module's `test-*` and `publish-*` jobs exist in the CI workflow, subsequent version bumps are handled automatically by the detect job. You only add CI jobs when a module is first created.
 
-- [ ] Module added to `test-offline` matrix (offline modules) OR dedicated `test-*` job (service-dependent modules)
-- [ ] Service-dependent modules also need a dedicated `publish-*` job with the same service container
-- [ ] Regex pattern uses `src/helper-modules-[\w-]+/js-[\w-]+`
+Single unified workflow: `.github/workflows/ci-publish-helper-modules.yml`
 
-**For service-dependent modules:**
+The pipeline is **strictly sequential** — every module runs after the previous module's publish job. This ensures all dependencies are on the registry before any dependent module installs them.
+
+**Placement rules:**
+
+1. **Read the execution order** in the header comment at the top of the CI file. Each module is numbered and the chain is explicit.
+2. **Find the correct position** by identifying the module's dependencies. The new module must be placed **after** the last dependency's publish job and **before** any module that depends on it.
+3. **For adapter-backed modules:** the core module must appear before its store adapters. Store adapters chain after the core module's publish job.
+4. **Chain the next module** by updating the `needs:` of the module that previously chained off your insertion point to now chain off the new module's `publish-*` job.
+
+**Adding a test + publish job pair:**
+
+- [ ] Add a `test-[suffix]:` job that `needs: [detect, publish-[previous-module]]`
+- [ ] Add a `publish-[suffix]:` job that `needs: [detect, test-[suffix]]`
+- [ ] Use `contains(fromJSON(...))` with the module's full `src/` path for both `if:` conditions
+- [ ] The test job's `if:` must include `always() && !cancelled()` to bypass transitive `success()` — see `docs/dev/pitfalls.md`
+- [ ] The publish job's `if:` must include `!cancelled()` and the explicit `needs['test-...'].result == 'success'` pattern
+- [ ] Update the execution order header comment with the new module number
+- [ ] Update the `needs:` of the **next** module's test job to chain off `publish-[new-module]`
+
+**Reference an existing job pair** in the same file as a template. Copy the structure of a module with similar characteristics (offline vs service-dependent, adapter vs standalone).
+
+**For service-dependent modules (uses Docker in tests):**
 - [ ] `_test/docker-compose.yml` exists with emulator service
 - [ ] `_test/ops/00-local-testing/` has setup guide
-- [ ] Service container in CI has health check
-- [ ] Environment variables match test loader expectations
-- [ ] Docker compose starts, tests pass, compose stops cleanly
+- [ ] Environment variables in the CI `env:` block match test loader expectations
+- [ ] `pretest`/`posttest` in `_test/package.json` manage container lifecycle
 
 ### CI/CD Verification Commands
 
 ```bash
-# Check module detection
-grep "MODULE: js-server-helper-<module-suffix>" .github/workflows/ci-helper-modules.yml
+# Check test job exists
+grep "^  test-[suffix]:" .github/workflows/ci-publish-helper-modules.yml
 
-# Check test job
-grep "^  test-<module-suffix>:" .github/workflows/ci-helper-modules.yml
-
-# Check publish job
-grep "^  publish-<module-suffix>:" .github/workflows/ci-helper-modules.yml
+# Check publish job exists
+grep "^  publish-[suffix]:" .github/workflows/ci-publish-helper-modules.yml
 
 # Check working-directory paths
-grep "working-directory.*js-server-helper-<module-suffix>" .github/workflows/ci-helper-modules.yml
+grep "working-directory.*js-server-helper-[module-name]" .github/workflows/ci-publish-helper-modules.yml
+
+# Verify chain: next module should need publish-[suffix]
+grep "publish-[suffix]" .github/workflows/ci-publish-helper-modules.yml
 ```
 
 ### Testing Verification
