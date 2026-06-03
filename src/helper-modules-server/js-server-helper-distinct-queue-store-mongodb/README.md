@@ -37,6 +37,10 @@ Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib
     lib_mongodb: Lib.MongoDB
   }
 });
+
+// Initialize store (one-time provisioning — run only on first setup, not on every boot)
+const instance = Lib.Instance.initialize();
+await Lib.DistinctQueue.setupNewStore(instance);
 ```
 
 ## Configuration
@@ -51,12 +55,10 @@ See [`docs/schema.md`](docs/schema.md) for detailed schema documentation and ind
 ## Testing
 
 ```bash
-cd _test
-docker-compose up -d
-npm install
-npm test
-docker-compose down
+cd _test && npm install && npm test
 ```
+
+Docker lifecycle (up before, down after) is managed automatically by `pretest`/`posttest` hooks.
 
 ## License
 

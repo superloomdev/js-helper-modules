@@ -80,7 +80,7 @@ describe('adapter specific', function () {
       tenant_id: 'special_tenant',
       resource_id: special_resource_id,
       data_version: Date.now(),
-      sort_key: special_resource_id + '#' + Date.now() + '#' + Lib.Crypto.generateCompactUUID(),
+      random_suffix: Lib.Crypto.generateCompactUUID(),
       payload: { data: 'special' },
       action: 'special_action',
       toc: Date.now()
@@ -110,7 +110,7 @@ describe('adapter specific', function () {
       tenant_id: 'large_tenant',
       resource_id: 'large_resource',
       data_version: Date.now(),
-      sort_key: 'large_resource#' + Date.now() + '#' + Lib.Crypto.generateCompactUUID(),
+      random_suffix: Lib.Crypto.generateCompactUUID(),
       payload: large_payload,
       action: 'large_action',
       toc: Date.now()
@@ -131,14 +131,14 @@ describe('adapter specific', function () {
     const tenant_id = 'concurrent_tenant';
     const resource_id = 'concurrent_resource';
 
-    // Fire multiple concurrent writes with unique sort keys
+    // Fire multiple concurrent writes with unique random suffixes
     const writes = [];
     for (let i = 0; i < 5; i++) {
       writes.push(store.writeRecord(instance, {
         tenant_id: tenant_id,
         resource_id: resource_id,
         data_version: Date.now() + i,
-        sort_key: resource_id + '#' + (Date.now() + i) + '#' + Lib.Crypto.generateCompactUUID(),
+        random_suffix: Lib.Crypto.generateCompactUUID(),
         payload: { index: i },
         action: 'concurrent_action',
         toc: Date.now()
@@ -165,7 +165,7 @@ describe('adapter specific', function () {
       tenant_id: tenant_id,
       resource_id: 'test.resource.v1',
       data_version: 1000,
-      sort_key: 'test.resource.v1#1000#aaaa0000',
+      random_suffix: 'aaaa0000',
       payload: {},
       action: 'test',
       toc: 1000
@@ -175,7 +175,7 @@ describe('adapter specific', function () {
       tenant_id: tenant_id,
       resource_id: 'test+resource+v2',
       data_version: 2000,
-      sort_key: 'test+resource+v2#2000#bbbb1111',
+      random_suffix: 'bbbb1111',
       payload: {},
       action: 'test',
       toc: 2000
