@@ -1,0 +1,63 @@
+# js-server-helper-distinct-queue-store-mongodb
+
+[![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg)](https://github.com/superloomdev/js-helper-modules/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node.js >=24](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org/)
+
+MongoDB store adapter for [`js-server-helper-distinct-queue`](https://github.com/superloomdev/js-helper-modules).
+
+Uses a **smart subdocument `_id` design** to enable efficient queue operations without secondary indexes. Records are retrieved using only `tenant_id` and `resource_id` via MongoDB's implicit `_id` index — no need to know `data_version` or the random suffix. Supports prefix queries, chronological sorting, and batch cleanup in single roundtrips.
+
+## Installation
+
+```bash
+npm install @superloomdev/js-server-helper-distinct-queue-store-mongodb
+```
+
+## Usage
+
+```javascript
+// Load base helpers
+Lib.Utils = require('@superloomdev/js-helper-utils');
+Lib.Debug = require('@superloomdev/js-helper-debug')(Lib);
+Lib.Instance = require('@superloomdev/js-server-helper-instance')(Lib);
+
+// Load MongoDB driver helper
+Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+  CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
+  DATABASE: process.env.MONGODB_DATABASE
+});
+
+// Load distinct-queue with MongoDB adapter
+const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb');
+Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
+  STORE: StoreAdapter,
+  STORE_CONFIG: {
+    collection_name: 'queue_jobs',
+    lib_mongodb: Lib.MongoDB
+  }
+});
+```
+
+## Configuration
+
+Requires a `STORE_CONFIG` object:
+
+- **`collection_name`** — MongoDB collection name for queue records
+- **`lib_mongodb`** — Reference to the `js-server-helper-nosql-mongodb` instance
+
+See [`docs/schema.md`](docs/schema.md) for detailed schema documentation and index design.
+
+## Testing
+
+```bash
+cd _test
+docker-compose up -d
+npm install
+npm test
+docker-compose down
+```
+
+## License
+
+MIT

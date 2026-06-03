@@ -1,0 +1,20 @@
+# MongoDB for distinct-queue-store-mongodb module testing
+# Lifecycle managed by npm scripts: npm test starts -> tests -> stops and removes
+# Ephemeral - data lost on container stop
+# Port 27020 to avoid conflict with auth-store-mongodb (27018) and verify-store-mongodb (27019)
+
+name: superloom-test-distinct-queue-store-mongodb
+
+services:
+
+  mongodb:
+    image: mongo:8
+    container_name: superloom-test-distinct-queue-store-mongodb
+    ports:
+      - "127.0.0.1:27020:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
