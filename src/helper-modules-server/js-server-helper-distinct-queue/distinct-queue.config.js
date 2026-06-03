@@ -1,6 +1,7 @@
 // Info: Configuration defaults for js-server-helper-distinct-queue.
-// Only two keys are required: STORE (the adapter factory) and STORE_CONFIG
-// (per-adapter configuration). The module has no other tunables in v1.
+// Only STORE and STORE_CONFIG are required. The core module has no other
+// tunables. Adapters own all storage-specific configuration (key format,
+// delimiter, table/collection name) internally via STORE_CONFIG.
 'use strict';
 
 

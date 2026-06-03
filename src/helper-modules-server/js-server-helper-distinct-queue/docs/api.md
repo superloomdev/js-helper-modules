@@ -52,8 +52,8 @@ Append a new job record for a `(tenant_id, resource_id)` pair.
 
 1. Validate options (throws `TypeError` on programmer error).
 2. Generate `data_version` = current time in milliseconds.
-3. Generate unique sort key = `resource_id + '#' + data_version + '#' + random(4)`.
-4. Build canonical record shape.
+3. Generate `random_suffix` = compact UUID (cryptographically random).
+4. Build canonical record shape: `{ tenant_id, resource_id, data_version, random_suffix, payload, action, toc }`.
 5. Call `store.writeRecord(instance, record)`.
 6. On store failure, return `{ success: false, error: DISTINCT_QUEUE_SERVICE_UNAVAILABLE }`.
 7. On success, return `{ success: true, error: null }`.
@@ -88,7 +88,7 @@ Query all records for a resource. Pick the latest. Delete all stale records. Ret
 1. Validate options (throws `TypeError` on programmer error).
 2. Call `store.queryByResourceId(instance, tenant_id, resource_id)`.
 3. If no records, return `{ payload: null, action: null }`.
-4. Pick the record with the highest `data_version` (ties broken by lexicographic sort key comparison).
+4. Pick the record with the highest `data_version` (ties broken by lexicographic `random_suffix` comparison).
 5. Call `store.deleteByDataVersionLte(instance, tenant_id, resource_id, winner.data_version)`.
 6. Deletion failure is logged but non-fatal — the claim still returns the winner.
 7. Return `{ payload, action }`.
@@ -112,7 +112,7 @@ Operational query. Returns all records whose `resource_id` begins with a prefix.
 ```js
 {
   success: true,
-  records: [ { tenant_id, resource_id, sort_key, data_version, payload, action, toc }, ... ],
+  records: [ { tenant_id, resource_id, data_version, random_suffix, payload, action, toc }, ... ],
   error: null
 }
 ```

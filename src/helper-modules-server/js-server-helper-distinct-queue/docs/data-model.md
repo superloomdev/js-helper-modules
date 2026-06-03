@@ -25,8 +25,8 @@ Unix timestamp in milliseconds. The caller never supplies it. When multiple jobs
 latest and is the only one that should execute.
 
 **Same-millisecond tie rule:** if two records arrive within the same
-millisecond, they have identical `data_version`. The random suffix in the sort
-key breaks ties — the record with the lexicographically larger sort key wins.
+millisecond, they have identical `data_version`. The `random_suffix` breaks
+ties — the record with the lexicographically larger `random_suffix` wins.
 Both records are deleted when either is claimed.
 
 ### Coalescing
@@ -38,14 +38,16 @@ absorbed without dropping the final state.
 
 ## Record Shape
 
-Every stored job record has these fields regardless of adapter:
+The core module passes these raw fields to the store adapter on every write.
+Adapters may combine or transform these fields into backend-specific storage
+keys, but must reconstruct all of them on read.
 
 | Field | Type | Set by | Description |
 |---|---|---|---|
 | `tenant_id` | String | caller | Partition boundary. |
-| `sort_key` | String | module | `resource_id + '#' + data_version_ms + '#' + random`. The full sort key. |
 | `resource_id` | String | caller | Opaque resource identifier within the tenant. |
 | `data_version` | Number | module | Current time in ms at enqueue time. Ordering signal. |
+| `random_suffix` | String | module | Compact UUID. Ensures uniqueness and breaks same-millisecond ties. |
 | `payload` | Object | caller | Arbitrary data. Stored as-is. Returned by `claim`. |
 | `action` | String | caller | Opaque label for the worker. Returned by `claim`. |
 | `toc` | Number | module | Same as `data_version` for v1 (both = enqueue time). |
@@ -77,21 +79,33 @@ catalog under that account would supersede any other. A resource ID of
 `account_id + '.' + catalog_id + '.' + product_id` scopes each product
 independently.
 
-## Sort Key Design
+## Sort Key Design (Adapter Responsibility)
 
-The sort key combines three parts:
+The core module does **not** construct a storage key. Each adapter builds its
+own key from the raw fields using a format appropriate for its backend.
+
+For string-based backends (e.g. DynamoDB), the adapter concatenates the three
+parts using a delimiter:
 
 ```
-resource_id + '#' + data_version_ms + '#' + random_suffix
+resource_id + DELIMITER + data_version_ms + DELIMITER + random_suffix
 ```
 
-- `resource_id` enables `begins_with(resource_id + '#')` prefix queries
-  without a Global Secondary Index.
-- `data_version_ms` is a 13-digit millisecond timestamp that is
-  lexicographically monotonic until year 2286 — no zero-padding needed.
-- `random_suffix` (full compact UUID, cryptographically random) breaks
-  ties within the same millisecond and ensures sort key uniqueness across
-  concurrent writes.
+- `resource_id` enables `begins_with(resource_id + DELIMITER)` prefix queries.
+- `data_version_ms` is a 13-digit millisecond timestamp, lexicographically
+  monotonic until year 2286 — no zero-padding needed.
+- `random_suffix` (full compact UUID) breaks ties and ensures uniqueness.
+
+The delimiter is `\u001F` (ASCII Unit Separator). It is hardcoded inside
+each string-based adapter — it is not a configurable option in the core
+module. This character is a non-printable control character that cannot
+appear in normal caller-supplied strings.
+
+> **Warning:** `resource_id` values MUST NOT contain `\u001F`. Passing one
+> that does will corrupt sort key parsing in string-based adapters.
+
+For document-based backends (e.g. MongoDB), the adapter stores the fields as
+a subdocument `_id: { t, r, d, s }` — no delimiter is needed.
 
 ## Indexing Requirements
 

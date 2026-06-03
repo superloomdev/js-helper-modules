@@ -71,8 +71,9 @@ The module operates in a two-phase flow:
 **Enqueue side** (runs inside an inbound request handler):
 
 1. Call `enqueue(instance, { tenant_id, resource_id, payload, action })`.
-2. The module generates an internal ordering timestamp and a unique sort key.
-   The record is appended to the store. No reads.
+2. The module generates a millisecond `data_version` timestamp and a
+   cryptographically random `random_suffix`. The record is appended to the
+   store. No reads.
 
 ```js
 // Example: webhook handler enqueues a sync job
