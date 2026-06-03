@@ -82,14 +82,14 @@ independently.
 The sort key combines three parts:
 
 ```
-resource_id + '#' + data_version_ms + '#' + random_suffix(8)
+resource_id + '#' + data_version_ms + '#' + random_suffix
 ```
 
 - `resource_id` enables `begins_with(resource_id + '#')` prefix queries
   without a Global Secondary Index.
 - `data_version_ms` is a 13-digit millisecond timestamp that is
   lexicographically monotonic until year 2286 — no zero-padding needed.
-- `random_suffix` (8 alphanumeric chars, cryptographically random) breaks
+- `random_suffix` (full compact UUID, cryptographically random) breaks
   ties within the same millisecond and ensures sort key uniqueness across
   concurrent writes.
 
