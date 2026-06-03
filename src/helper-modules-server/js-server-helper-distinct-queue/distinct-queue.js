@@ -356,8 +356,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Build the sort key from resource_id, data_version, and a random
-    suffix. The random suffix (8 chars) breaks ties within the same
-    millisecond and ensures sort key uniqueness.
+    suffix. The random suffix breaks ties within the same millisecond
+    and ensures sort key uniqueness.
 
     Format: resource_id + '#' + data_version_ms + '#' + random_suffix
 
@@ -439,16 +439,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Cryptographically secure suffix generation.
 
     /********************************************************************
-    Generate a short random string for sort key uniqueness.
-    Uses Lib.Crypto.generateCompactUUID (cryptographically secure) and
-    takes the first 8 characters as the suffix.
+    Generate a random string for sort key uniqueness.
+    Uses the full compact UUID (cryptographically secure) as the suffix.
 
-    @return {String} - 8-character random string
+    @return {String} - Full compact UUID string
     *********************************************************************/
     randomSuffix: function () {
 
-      // Slice 8 chars from a compact UUID for sort key tiebreaking
-      return Lib.Crypto.generateCompactUUID().slice(0, 8);
+      // Use full compact UUID for sort key tiebreaking
+      return Lib.Crypto.generateCompactUUID();
 
     }
 

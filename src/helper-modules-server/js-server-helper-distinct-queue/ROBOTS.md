@@ -85,7 +85,7 @@ Every adapter must implement these methods:
 | Field | Type | Set by |
 |---|---|---|
 | `tenant_id` | String | caller |
-| `sort_key` | String | module — `resource_id + '#' + data_version_ms + '#' + random(4)` |
+| `sort_key` | String | module — `resource_id + '#' + data_version_ms + '#' + compact_uuid` |
 | `resource_id` | String | caller |
 | `data_version` | Number | module — current time in ms at enqueue |
 | `payload` | Object | caller |
