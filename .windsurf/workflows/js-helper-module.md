@@ -40,6 +40,27 @@ Reference examples are for pattern recognition, not copy-paste. Read them to und
 3. **One adapter at a time.** Build, test, and publish adapters individually. Each has its own `docker-compose.yml` with the relevant database emulator.
 4. **Contract test suite.** Each adapter's `_test/store-contract-suite.js` contains shared tests that validate the 4-method contract against a real (emulated) backend. The core module's `_test/memory-store.js` serves as the behavioural reference.
 
+### Store Adapter Implementation Rules
+
+When implementing a store adapter, you call the wrapper module's API (e.g., `js-server-helper-nosql-mongodb`), not native database driver methods directly.
+
+**Before writing any adapter code:**
+1. **Read the wrapper's exported methods** — grep for `^    \w+: (async )?function` in the wrapper module to see available methods
+2. **Map required operations to wrapper methods** — document in THOUGHTS.md which wrapper method implements each store contract requirement
+3. **Never use native driver method names in code** — if you find yourself typing `deleteMany`, `findOne`, `insertOne`, you are using native names. Use the wrapper's exported names (e.g., `deleteRecordsByFilter`, `getRecord`, `writeRecord`, `query`)
+
+**Two contexts, two vocabularies:**
+
+| Context | Reference | Example |
+|---------|-----------|---------|
+| **Schema docs** (`docs/schema.md`) | Database concepts for reader understanding | "Uses `deleteMany` to remove multiple records" |
+| **Implementation** (`store.js`) | Wrapper API for actual calls | `lib_mongodb.deleteRecordsByFilter(...)` |
+
+**Common wrapper method mapping (verify in actual wrapper module):**
+- SQL wrappers: `getRecord`, `writeRecord`, `deleteRecord`, `query`
+- MongoDB wrapper: `getRecord`, `writeRecord`, `deleteRecord`, `deleteRecordsByFilter`, `query`, `createIndex`
+- DynamoDB wrapper: `getRecord`, `writeRecord`, `deleteRecord`, `batchWriteAndDeleteRecords`, `query`, `scan`
+
 ### Module Types
 
 | Type | Directory | Constraints |
@@ -177,17 +198,17 @@ Build a module from scratch. You already know what problem it solves and have de
    - `_test/test.js`: Uses `node:test` and `node:assert/strict`. One `describe` per function. Test names: `should [behavior] when [condition]`
    - For adapter-backed modules: `_test/memory-store.js` implementing the store contract in-memory
 
-10. **Create documentation.** Follow the Documentation File Responsibilities table. README sections in order:
+10. **Create documentation.** Follow the Documentation File Responsibilities table.
+
+    **For Class F store adapters**, the README is **short and focused**:
     - Badges (3: Test + License + Node.js)
-    - Description (1-2 sentences)
-    - What It Does / Why
-    - API table
+    - Short description + key innovation sentence (what makes this backend implementation clever)
     - Usage snippet
-    - Configuration
-    - Peer Dependencies
-    - Testing status
-    - Extended Documentation (links to docs/)
-    - License (MIT)
+    - Configuration (prose explanation of `STORE_CONFIG` keys)
+    - Extended Documentation links
+    - Testing + License (MIT)
+
+    **Details go in `docs/` not README:** schema, index design, query patterns, backend concepts.
 
 11. **Register environment variables** (if module needs them). Add to all four files:
     - `docs/dev/.env.dev.example`
