@@ -54,7 +54,7 @@ const Validators = {
       Lib.Utils.isNullOrUndefined(store_config) ||
       !Lib.Utils.isObject(store_config)
     ) {
-      throw new Error('[js-server-helper-distinct-queue-store-mongodb] STORE_CONFIG must be an object');
+      throw new Error('[helper-distinct-queue-store-mongodb] STORE_CONFIG must be an object');
     }
 
     // collection_name is required and must be a non-empty string
@@ -63,12 +63,12 @@ const Validators = {
       !Lib.Utils.isString(store_config.collection_name) ||
       Lib.Utils.isEmptyString(store_config.collection_name)
     ) {
-      throw new Error('[js-server-helper-distinct-queue-store-mongodb] STORE_CONFIG.collection_name is required');
+      throw new Error('[helper-distinct-queue-store-mongodb] STORE_CONFIG.collection_name is required');
     }
 
     // lib_mongodb is required - the caller must inject the MongoDB helper
     if (Lib.Utils.isNullOrUndefined(store_config.lib_mongodb)) {
-      throw new Error('[js-server-helper-distinct-queue-store-mongodb] STORE_CONFIG.lib_mongodb is required (pass Lib.MongoDB)');
+      throw new Error('[helper-distinct-queue-store-mongodb] STORE_CONFIG.lib_mongodb is required (pass Lib.MongoDB)');
     }
 
   }

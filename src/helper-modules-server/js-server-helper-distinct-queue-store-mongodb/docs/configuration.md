@@ -59,21 +59,13 @@ Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib
   }
 });
 
-// 3. Initialize collection (one-time setup)
+// 3. Initialize collection (one-time provisioning — run only on first setup)
 const instance = Lib.Instance.initialize();
-const setup_result = await Lib.DistinctQueue.setupNewStore(instance);
-if (!setup_result.success) {
-  console.error('Failed to setup MongoDB store:', setup_result.error);
-}
+await Lib.DistinctQueue.setupNewStore(instance);
 ```
 
 ## Index Creation
 
-The `setupNewStore()` method is a no-op for this adapter. MongoDB's implicit `_id` index covers all queries. Run once at application startup:
+`setupNewStore()` is a **one-time provisioning step** — run it once when setting up the store for the first time, not on every application boot.
 
-```javascript
-// Application bootstrap
-await Lib.DistinctQueue.setupNewStore(instance);
-```
-
-The index creation is idempotent — safe to call on every startup.
+For this MongoDB adapter it is a no-op (MongoDB creates the collection and implicit `_id` index automatically on first write). For SQL adapters, `setupNewStore` creates the table and indexes — calling it on an existing store could overwrite data.

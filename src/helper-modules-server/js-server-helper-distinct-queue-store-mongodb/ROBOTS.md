@@ -56,7 +56,7 @@ All methods return `{ success, error }` shape. On driver failure:
 Uses `store-contract-suite.js` — shared tests validate the 4-method contract against real MongoDB via Docker.
 
 ```bash
-cd _test && docker-compose up -d && npm install && npm test
+cd _test && npm install && npm test
 ```
 
 ## Index Design
@@ -64,6 +64,6 @@ cd _test && docker-compose up -d && npm install && npm test
 MongoDB's implicit `_id` index on subdocument `{ t, r, d, s }` supports all query patterns via dot notation:
 - Exact resource: `find({ "_id.t": t, "_id.r": r }).sort({ "_id.d": 1 })`
 - Prefix: `find({ "_id.t": t, "_id.r": { $regex: '^prefix' } }).sort({ "_id.d": 1 })`
-- Delete: `deleteMany({ "_id.t": t, "_id.r": r, "_id.d": { $lte: N } })
+- Delete: `deleteMany({ "_id.t": t, "_id.r": r, "_id.d": { $lte: N } })`
 
 No secondary indexes required.

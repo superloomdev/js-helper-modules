@@ -74,8 +74,7 @@ const document = {
 insertOne(document);
 ```
 
-**Effort:** Single write operation.  
-The `random_suffix` is extracted from `sort_key` (segment after the final `#`, opaque to adapter).
+**Effort:** Single write operation.
 
 ### queryByResourceId
 

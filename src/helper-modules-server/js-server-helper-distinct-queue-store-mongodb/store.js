@@ -19,6 +19,7 @@
 // STORE_CONFIG.lib_mongodb (typically Lib.MongoDB).
 //
 // Store contract (identical shape across all adapters):
+//   - setupNewStore(instance)                                           -> { success, error }
 //   - writeRecord(instance, record)                                    -> { success, error }
 //   - queryByResourceId(instance, tenant_id, resource_id)                -> { success, records, error }
 //   - queryByResourceIdPrefix(instance, tenant_id, resource_id_prefix)   -> { success, records, error }
@@ -42,8 +43,8 @@ can return the same error shapes as the core module.
 @param {Object} CONFIG - Merged module configuration
 @param {Object} ERRORS - Error catalog forwarded from distinct-queue.js
 
-@return {Object} - Store interface (4 methods: writeRecord, queryByResourceId,
-                    queryByResourceIdPrefix, deleteByDataVersionLte)
+@return {Object} - Store interface (5 methods: setupNewStore, writeRecord,
+                    queryByResourceId, queryByResourceIdPrefix, deleteByDataVersionLte)
 *********************************************************************/
 module.exports = function loader (Lib, CONFIG, ERRORS) {
 
@@ -69,7 +70,7 @@ close over the same Lib, STORE_CONFIG, and ERRORS.
 @param {Object} STORE_CONFIG - { collection_name, lib_mongodb }
 @param {Object} ERRORS       - Error catalog forwarded from distinct-queue.js
 
-@return {Object} - Store interface (4 methods)
+@return {Object} - Store interface (5 methods)
 *********************************************************************/
 const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
@@ -77,18 +78,20 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
   const Store = {
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ First-Time Provisioning ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Idempotent setup. MongoDB's implicit _id index on the compound
-    subdocument { t, r, d, s } handles all query patterns.
-    No secondary indexes required.
+    One-time store provisioning. Run once when setting up the store for
+    the first time — not on every application boot.
+
+    No-op for this adapter: MongoDB creates the collection and implicit
+    _id index automatically on first write. No explicit setup needed.
 
     @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    setupNewStore: async function (instance) {
+    setupNewStore: async function (instance) { // eslint-disable-line no-unused-vars
 
       // The subdocument _id is automatically indexed by MongoDB.
       // No explicit index creation needed.
@@ -107,24 +110,20 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     // ~~~~~~~~~~~~~~~~~~~~ Write Operation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Append a record to the collection. Uses insertOne for atomic append.
-    The _id is a compound subdocument { t, r, d, s }.
+    Append a record to the collection. Calls lib_mongodb.writeRecord
+    with the compound _id subdocument { t, r, d, s }.
 
     @param {Object} instance - Request instance
-    @param {Object} record   - The record to write (tenant_id, sort_key,
-                               resource_id, data_version, payload, action, toc)
+    @param {Object} record   - The record to write (tenant_id, resource_id,
+                               data_version, random_suffix, payload, action, toc)
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (instance, record) {
 
-      // Extract random_suffix from sort_key (last segment after final #)
-      const sort_key_parts = record.sort_key.split('#');
-      const random_suffix = sort_key_parts[sort_key_parts.length - 1];
-
       // Build the document with compound _id
       const document = {
-        _id: _Store.composeId(record.tenant_id, record.resource_id, record.data_version, random_suffix),
+        _id: _Store.composeId(record.tenant_id, record.resource_id, record.data_version, record.random_suffix),
         payload: record.payload,
         action: record.action,
         toc: record.toc
@@ -179,8 +178,8 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const result = await STORE_CONFIG.lib_mongodb.query(
         instance,
         STORE_CONFIG.collection_name,
-        { "_id.t": tenant_id, "_id.r": resource_id },
-        { sort: { "_id.d": 1 } }
+        { '_id.t': tenant_id, '_id.r': resource_id },
+        { sort: { '_id.d': 1 } }
       );
 
       // Return service error on failure
@@ -227,15 +226,15 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       // Escape regex special characters in the prefix to prevent injection
       const escaped_prefix = resource_id_prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-       // Query with regex prefix match on _id.r
+      // Query with regex prefix match on _id.r
       const result = await STORE_CONFIG.lib_mongodb.query(
         instance,
         STORE_CONFIG.collection_name,
         {
-          "_id.t": tenant_id,
-          "_id.r": { $regex: '^' + escaped_prefix }
+          '_id.t': tenant_id,
+          '_id.r': { $regex: '^' + escaped_prefix }
         },
-        { sort: { "_id.d": 1 } }
+        { sort: { '_id.d': 1 } }
       );
 
       // Return service error on failure
@@ -288,9 +287,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
         instance,
         STORE_CONFIG.collection_name,
         {
-          "_id.t": tenant_id,
-          "_id.r": resource_id,
-          "_id.d": { $lte: data_version_boundary }
+          '_id.t': tenant_id,
+          '_id.r': resource_id,
+          '_id.d': { $lte: data_version_boundary }
         }
       );
 
@@ -352,7 +351,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
         tenant_id: doc._id.t,
         resource_id: doc._id.r,
         data_version: doc._id.d,
-        sort_key: doc._id.r + '#' + doc._id.d + '#' + doc._id.s,
+        random_suffix: doc._id.s,
         payload: doc.payload,
         action: doc.action,
         toc: doc.toc
