@@ -238,6 +238,8 @@ describe('core integration (enqueue/claim/listByPrefix)', function () {
     const resource_id = 'account_1.product_2';
 
     await queue.enqueue(instance, { tenant_id: tenant_id, resource_id: resource_id, payload: { v: 1 }, action: 'a' });
+    // Wait 2ms to guarantee a distinct data_version on the second enqueue
+    await new Promise(function (resolve) { setTimeout(resolve, 2); });
     await queue.enqueue(instance, { tenant_id: tenant_id, resource_id: resource_id, payload: { v: 2 }, action: 'b' });
 
     const claim_result = await queue.claim(instance, { tenant_id: tenant_id, resource_id: resource_id });
