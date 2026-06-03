@@ -85,9 +85,9 @@ Every adapter must implement these methods:
 | Field | Type | Set by |
 |---|---|---|
 | `tenant_id` | String | caller |
-| `sort_key` | String | module — `resource_id + '#' + data_version_ms + '#' + compact_uuid` |
 | `resource_id` | String | caller |
 | `data_version` | Number | module — current time in ms at enqueue |
+| `random_suffix` | String | module — compact UUID for uniqueness and tiebreaking |
 | `payload` | Object | caller |
 | `action` | String | caller |
 | `toc` | Number | module — same as `data_version` in v1 |

@@ -59,17 +59,17 @@ const Validators = {
       Lib.Utils.isNullOrUndefined(config.STORE) ||
       !Lib.Utils.isFunction(config.STORE)
     ) {
-      throw new Error('[js-server-helper-distinct-queue] CONFIG.STORE is required and must be a store factory function');
+      throw new Error('[helper-distinct-queue] CONFIG.STORE is required and must be a store factory function');
     }
 
     // STORE_CONFIG is required - each store validates its own required keys
     if (Lib.Utils.isNullOrUndefined(config.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-distinct-queue] CONFIG.STORE_CONFIG is required (object)');
+      throw new Error('[helper-distinct-queue] CONFIG.STORE_CONFIG is required (object)');
     }
 
     // STORE_CONFIG must be a plain object
     if (!Lib.Utils.isObject(config.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-distinct-queue] CONFIG.STORE_CONFIG must be a plain object');
+      throw new Error('[helper-distinct-queue] CONFIG.STORE_CONFIG must be a plain object');
     }
 
   },
@@ -91,27 +91,27 @@ const Validators = {
 
     // Programmer error: options object itself must be present
     if (Lib.Utils.isNullOrUndefined(options)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options object is required');
+      throw new TypeError('[helper-distinct-queue] options object is required');
     }
 
     // tenant_id is required, non-empty string
     if (Lib.Utils.isEmpty(options.tenant_id)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.tenant_id is required');
+      throw new TypeError('[helper-distinct-queue] options.tenant_id is required');
     }
 
     // resource_id is required, non-empty string
     if (Lib.Utils.isEmpty(options.resource_id)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.resource_id is required');
+      throw new TypeError('[helper-distinct-queue] options.resource_id is required');
     }
 
     // payload is required and must be an object
     if (Lib.Utils.isNullOrUndefined(options.payload) || !Lib.Utils.isObject(options.payload)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.payload is required (plain object)');
+      throw new TypeError('[helper-distinct-queue] options.payload is required (plain object)');
     }
 
     // action is required, non-empty string
     if (Lib.Utils.isEmpty(options.action)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.action is required');
+      throw new TypeError('[helper-distinct-queue] options.action is required');
     }
 
   },
@@ -129,17 +129,17 @@ const Validators = {
 
     // Programmer error: options object itself must be present
     if (Lib.Utils.isNullOrUndefined(options)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options object is required');
+      throw new TypeError('[helper-distinct-queue] options object is required');
     }
 
     // tenant_id is required, non-empty string
     if (Lib.Utils.isEmpty(options.tenant_id)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.tenant_id is required');
+      throw new TypeError('[helper-distinct-queue] options.tenant_id is required');
     }
 
     // resource_id is required, non-empty string
     if (Lib.Utils.isEmpty(options.resource_id)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.resource_id is required');
+      throw new TypeError('[helper-distinct-queue] options.resource_id is required');
     }
 
   },
@@ -157,17 +157,17 @@ const Validators = {
 
     // Programmer error: options object itself must be present
     if (Lib.Utils.isNullOrUndefined(options)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options object is required');
+      throw new TypeError('[helper-distinct-queue] options object is required');
     }
 
     // tenant_id is required, non-empty string
     if (Lib.Utils.isEmpty(options.tenant_id)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.tenant_id is required');
+      throw new TypeError('[helper-distinct-queue] options.tenant_id is required');
     }
 
     // resource_id_prefix is required, non-empty string
     if (Lib.Utils.isEmpty(options.resource_id_prefix)) {
-      throw new TypeError('[js-server-helper-distinct-queue] options.resource_id_prefix is required');
+      throw new TypeError('[helper-distinct-queue] options.resource_id_prefix is required');
     }
 
   },
@@ -199,7 +199,7 @@ const Validators = {
 
       if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
         throw new Error(
-          '[js-server-helper-distinct-queue] Invalid store contract: missing method `' + name + '`'
+          '[helper-distinct-queue] Invalid store contract: missing method `' + name + '`'
         );
       }
 

@@ -100,7 +100,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Append a new job record for a (tenant_id, resource_id) pair. Generates
-    data_version (Date.now() ms) and a unique sort key internally. Write-
+    data_version (Date.now() ms) and a unique random_suffix internally. Write-
     only - no reads. Safe to call from many concurrent Lambda handlers.
 
     @param {Object} instance - Request instance for time and lifecycle
@@ -117,9 +117,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // Programmer errors (bad args) throw synchronously
       Validators.validateEnqueueOptions(options);
 
-      // Generate the ordering signal and unique sort key
+      // Generate the ordering signal and unique random suffix
       const data_version = _DistinctQueue.generateDataVersion();
-      const sort_key = _DistinctQueue.generateSortKey(options.resource_id, data_version);
+      const random_suffix = _DistinctQueue.generateRandomSuffix();
 
       // Build the canonical record shape
       const record = _DistinctQueue.buildRecord(
@@ -128,7 +128,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         options.payload,
         options.action,
         data_version,
-        sort_key
+        random_suffix
       );
 
       // Write to the store
@@ -341,7 +341,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
   const _DistinctQueue = {
 
     // ~~~~~~~~~~~~~~~~~~~~ Key Generation ~~~~~~~~~~~~~~~~~~~~
-    // Data version, sort key, and random suffix.
+    // Data version timestamp and random suffix for tiebreaking.
 
     /********************************************************************
     Generate the ordering signal: current time in milliseconds.
@@ -354,49 +354,30 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     },
 
 
-    /********************************************************************
-    Build the sort key from resource_id, data_version, and a random
-    suffix. The random suffix breaks ties within the same millisecond
-    and ensures sort key uniqueness.
-
-    Format: resource_id + '#' + data_version_ms + '#' + random_suffix
-
-    @param {String} resource_id - Opaque resource identifier
-    @param {Number} data_version_ms - Millisecond timestamp
-
-    @return {String} - Composite sort key
-    *********************************************************************/
-    generateSortKey: function (resource_id, data_version_ms) {
-
-      // Generate random suffix and assemble composite key
-      const suffix = _DistinctQueue.randomSuffix();
-      return resource_id + '#' + data_version_ms + '#' + suffix;
-
-    },
-
-
     // ~~~~~~~~~~~~~~~~~~~~ Record Construction ~~~~~~~~~~~~~~~~~~~~
     // Shape assembly and winner selection.
 
     /********************************************************************
-    Assemble the canonical record shape for storage.
+    Assemble the canonical record shape for storage. The core module does
+    not construct a storage key — each adapter builds its own key from the
+    raw fields using its own delimiter and format.
 
-    @param {String} tenant_id - Partition boundary
-    @param {String} resource_id - Opaque resource identifier
-    @param {Object} payload - Caller-supplied data
-    @param {String} action - Opaque label for the worker
+    @param {String} tenant_id    - Partition boundary
+    @param {String} resource_id  - Opaque resource identifier
+    @param {Object} payload      - Caller-supplied data
+    @param {String} action       - Opaque label for the worker
     @param {Number} data_version - Millisecond timestamp
-    @param {String} sort_key - Full composite sort key
+    @param {String} random_suffix - UUID suffix for uniqueness and tiebreaking
 
     @return {Object} - Canonical record
     *********************************************************************/
-    buildRecord: function (tenant_id, resource_id, payload, action, data_version, sort_key) {
+    buildRecord: function (tenant_id, resource_id, payload, action, data_version, random_suffix) {
 
       return {
         tenant_id: tenant_id,
-        sort_key: sort_key,
         resource_id: resource_id,
         data_version: data_version,
+        random_suffix: random_suffix,
         payload: payload,
         action: action,
         toc: data_version
@@ -408,7 +389,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     /********************************************************************
     Pick the record with the highest data_version from an array.
     If two records have identical data_version, the one with the
-    lexicographically larger sort_key wins (random suffix tiebreak).
+    lexicographically larger random_suffix wins (UUID tiebreak).
 
     @param {Array} records - Array of record objects
 
@@ -424,7 +405,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         const candidate = records[i];
         if (
           candidate.data_version > winner.data_version ||
-          (candidate.data_version === winner.data_version && candidate.sort_key > winner.sort_key)
+          (candidate.data_version === winner.data_version && candidate.random_suffix > winner.random_suffix)
         ) {
           winner = candidate;
         }
@@ -439,14 +420,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Cryptographically secure suffix generation.
 
     /********************************************************************
-    Generate a random string for sort key uniqueness.
-    Uses the full compact UUID (cryptographically secure) as the suffix.
+    Generate a random suffix for sort key uniqueness and same-millisecond
+    tiebreaking. Uses the full compact UUID (cryptographically secure).
 
     @return {String} - Full compact UUID string
     *********************************************************************/
-    randomSuffix: function () {
+    generateRandomSuffix: function () {
 
-      // Use full compact UUID for sort key tiebreaking
+      // Use full compact UUID for tiebreaking
       return Lib.Crypto.generateCompactUUID();
 
     }
