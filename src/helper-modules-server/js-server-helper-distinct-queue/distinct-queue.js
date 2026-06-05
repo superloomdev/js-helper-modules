@@ -29,7 +29,7 @@ Factory loader. One call = one independent instance with its own
 Lib, CONFIG, and store. Validates CONFIG at construction so
 misconfiguration fails fast at startup, not on first request.
 
-@param {Object} shared_libs - Lib container with Utils, Debug, Instance
+@param {Object} shared_libs - Lib container with Utils, Debug, Crypto, Instance
 @param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public interface for this module
@@ -82,7 +82,7 @@ Builds the public interface for one instance. Public and private
 functions close over the provided Lib, CONFIG, ERRORS, Validators,
 and store.
 
-@param {Object} Lib        - Dependency container (Utils, Debug, Instance)
+@param {Object} Lib        - Dependency container (Utils, Debug, Crypto, Instance)
 @param {Object} CONFIG     - Merged configuration for this instance
 @param {Object} ERRORS     - Frozen error catalog for this module
 @param {Object} Validators - Validator singleton
@@ -100,8 +100,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Append a new job record for a (tenant_id, resource_id) pair. Generates
-    data_version (Date.now() ms) and a unique random_suffix internally. Write-
+    data_version (Date.now() ms) and a unique request_id internally. Write-
     only - no reads. Safe to call from many concurrent Lambda handlers.
+
+    On success, returns the generated request_id so the caller can log or
+    return it to the external service that submitted the job.
 
     @param {Object} instance - Request instance for time and lifecycle
     @param {Object} options - Per-call parameters
@@ -110,16 +113,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     @param {Object} options.payload - Arbitrary data stored as-is, returned by claim
     @param {String} options.action - Opaque label for the worker, returned by claim
 
-    @return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, request_id, error }
     *********************************************************************/
     enqueue: async function (instance, options) {
 
       // Programmer errors (bad args) throw synchronously
       Validators.validateEnqueueOptions(options);
 
-      // Generate the ordering signal and unique random suffix
+      // Generate the ordering signal and unique request ID
       const data_version = _DistinctQueue.generateDataVersion();
-      const random_suffix = _DistinctQueue.generateRandomSuffix();
+      const request_id = _DistinctQueue.generateRequestId();
 
       // Build the canonical record shape
       const record = _DistinctQueue.buildRecord(
@@ -128,7 +131,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         options.payload,
         options.action,
         data_version,
-        random_suffix
+        request_id
       );
 
       // Write to the store
@@ -148,6 +151,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
         return {
           success: true,
+          request_id: request_id,
           error: null
         };
 
@@ -173,6 +177,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Query all records for a (tenant_id, resource_id). Pick the record with
     the highest data_version. Delete all records with data_version <= that
     value. Return the winning record's payload and action.
+
+    Ordering granularity is one millisecond (see pickLatest). Writes that are
+    at least 1ms apart are strictly ordered; writes that land in the same
+    millisecond are treated as interchangeable - claim returns one of them and
+    coalesces (deletes) the rest, leaving nothing behind.
 
     Called only by the single scheduled poller. When no records exist,
     payload is null (nothing to process). The poller loops claim until
@@ -341,7 +350,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
   const _DistinctQueue = {
 
     // ~~~~~~~~~~~~~~~~~~~~ Key Generation ~~~~~~~~~~~~~~~~~~~~
-    // Data version timestamp and random suffix for tiebreaking.
+    // Data version timestamp for ordering.
 
     /********************************************************************
     Generate the ordering signal: current time in milliseconds.
@@ -367,17 +376,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     @param {Object} payload      - Caller-supplied data
     @param {String} action       - Opaque label for the worker
     @param {Number} data_version - Millisecond timestamp
-    @param {String} random_suffix - UUID suffix for uniqueness and tiebreaking
+    @param {String} request_id   - Compact UUID for uniqueness and tiebreaking
 
     @return {Object} - Canonical record
     *********************************************************************/
-    buildRecord: function (tenant_id, resource_id, payload, action, data_version, random_suffix) {
+    buildRecord: function (tenant_id, resource_id, payload, action, data_version, request_id) {
 
       return {
         tenant_id: tenant_id,
         resource_id: resource_id,
         data_version: data_version,
-        random_suffix: random_suffix,
+        request_id: request_id,
         payload: payload,
         action: action,
         toc: data_version
@@ -388,8 +397,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Pick the record with the highest data_version from an array.
-    If two records have identical data_version, the one with the
-    lexicographically larger random_suffix wins (UUID tiebreak).
+
+    data_version has millisecond granularity, so records that differ by
+    at least 1ms are strictly ordered (later wins). When two records share
+    the same millisecond they have identical data_version; the tie is then
+    broken on the lexicographically larger request_id. Since request_id
+    is a random UUID, that winner is stable for a given set of records but
+    arbitrary with respect to actual write order - same-millisecond writes
+    are treated as interchangeable, not "latest wins". Either way the caller
+    deletes all records <= the winner, so same-ms records are fully coalesced.
 
     @param {Array} records - Array of record objects
 
@@ -405,7 +421,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         const candidate = records[i];
         if (
           candidate.data_version > winner.data_version ||
-          (candidate.data_version === winner.data_version && candidate.random_suffix > winner.random_suffix)
+          (candidate.data_version === winner.data_version && candidate.request_id > winner.request_id)
         ) {
           winner = candidate;
         }
@@ -416,18 +432,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ Randomness ~~~~~~~~~~~~~~~~~~~~
-    // Cryptographically secure suffix generation.
+    // ~~~~~~~~~~~~~~~~~~~~ Request ID Generation ~~~~~~~~~~~~~~~~~~~~
+    // Cryptographically secure request identifier.
 
     /********************************************************************
-    Generate a random suffix for sort key uniqueness and same-millisecond
-    tiebreaking. Uses the full compact UUID (cryptographically secure).
+    Generate a request_id for uniqueness, same-millisecond tiebreaking,
+    and caller correlation. Uses the full compact UUID (cryptographically
+    secure). Returned to the caller on successful enqueue.
 
     @return {String} - Full compact UUID string
     *********************************************************************/
-    generateRandomSuffix: function () {
+    generateRequestId: function () {
 
-      // Use full compact UUID for tiebreaking
+      // Use full compact UUID as request identifier
       return Lib.Crypto.generateCompactUUID();
 
     }

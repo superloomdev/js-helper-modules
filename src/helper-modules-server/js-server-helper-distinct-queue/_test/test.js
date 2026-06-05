@@ -199,6 +199,9 @@ describe('enqueue', function () {
 
     assert.equal(result.success, true);
     assert.equal(result.error, null);
+    assert.equal(typeof result.request_id, 'string');
+    assert.ok(result.request_id.length > 0);
+    assert.equal(result.request_id, store._records[0].request_id);
     assert.equal(store._records.length, 1);
   });
 
@@ -222,11 +225,11 @@ describe('enqueue', function () {
     assert.equal(typeof record.data_version, 'number');
     assert.ok(record.data_version > 0);
     assert.equal(record.toc, record.data_version);
-    assert.equal(typeof record.random_suffix, 'string');
-    assert.ok(record.random_suffix.length > 0);
+    assert.equal(typeof record.request_id, 'string');
+    assert.ok(record.request_id.length > 0);
   });
 
-  it('generates unique random_suffix values for multiple enqueues', async function () {
+  it('generates unique request_id values for multiple enqueues', async function () {
     const store = createMemoryStore();
     const queue = buildQueue(store);
     const instance = makeInstance();
@@ -235,9 +238,9 @@ describe('enqueue', function () {
     await queue.enqueue(instance, defaultEnqueueOptions());
     await queue.enqueue(instance, defaultEnqueueOptions());
 
-    const suffixes = store._records.map(function (r) { return r.random_suffix; });
+    const suffixes = store._records.map(function (r) { return r.request_id; });
     const unique_suffixes = new Set(suffixes);
-    assert.equal(unique_suffixes.size, 3, 'Each enqueue must produce a unique random_suffix');
+    assert.equal(unique_suffixes.size, 3, 'Each enqueue must produce a unique request_id');
   });
 
   it('returns SERVICE_UNAVAILABLE when store write fails', async function () {
@@ -369,7 +372,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { val: 'old' },
       action: 'sync',
@@ -378,7 +381,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'cccc',
+      request_id: 'cccc',
       data_version: 1000000000003,
       payload: { val: 'newest' },
       action: 'sync',
@@ -387,7 +390,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'bbbb',
+      request_id: 'bbbb',
       data_version: 1000000000002,
       payload: { val: 'middle' },
       action: 'sync',
@@ -405,6 +408,54 @@ describe('claim', function () {
     assert.equal(store._records.length, 0);
   });
 
+  it('coalesces same-millisecond records: picks one stably and leaves nothing', async function () {
+    const store = createMemoryStore();
+    const queue = buildQueue(store);
+    const instance = makeInstance();
+
+    // Two records for the same resource sharing an identical data_version
+    // (same millisecond). Ordering between them is indeterminate; the tie is
+    // broken on the lexicographically larger request_id, so 'bbbb' wins.
+    store._records.push({
+      tenant_id: 'tenant-A',
+      resource_id: 'res.1',
+      request_id: 'aaaa',
+      data_version: 1000000000005,
+      payload: { val: 'tie-a' },
+      action: 'sync',
+      toc: 1000000000005
+    });
+    store._records.push({
+      tenant_id: 'tenant-A',
+      resource_id: 'res.1',
+      request_id: 'bbbb',
+      data_version: 1000000000005,
+      payload: { val: 'tie-b' },
+      action: 'sync',
+      toc: 1000000000005
+    });
+
+    const result = await queue.claim(instance, {
+      tenant_id: 'tenant-A',
+      resource_id: 'res.1'
+    });
+
+    // Winner is the larger-suffix record (stable tiebreak), not an ordering
+    // guarantee. The contract that matters: claim succeeds and absorbs both.
+    assert.equal(result.success, true);
+    assert.deepEqual(result.payload, { val: 'tie-b' });
+    // Coalescing: both same-millisecond records are deleted, nothing left.
+    assert.equal(store._records.length, 0);
+
+    // A second claim has nothing to process.
+    const second = await queue.claim(instance, {
+      tenant_id: 'tenant-A',
+      resource_id: 'res.1'
+    });
+    assert.equal(second.success, true);
+    assert.equal(second.payload, null);
+  });
+
   it('does not delete records from other tenants or resources', async function () {
     const store = createMemoryStore();
     const queue = buildQueue(store);
@@ -414,7 +465,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.other',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { val: 'other-resource' },
       action: 'sync',
@@ -425,7 +476,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-B',
       resource_id: 'res.1',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { val: 'other-tenant' },
       action: 'sync',
@@ -436,7 +487,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'bbbb',
+      request_id: 'bbbb',
       data_version: 1000000000002,
       payload: { val: 'target' },
       action: 'sync',
@@ -496,7 +547,7 @@ describe('claim', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { val: 'data' },
       action: 'sync',
@@ -560,7 +611,7 @@ describe('listByPrefix', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'account.1.catalog.2.product.1',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { val: 'product-1' },
       action: 'sync',
@@ -569,7 +620,7 @@ describe('listByPrefix', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'account.1.catalog.2.product.2',
-      random_suffix: 'bbbb',
+      request_id: 'bbbb',
       data_version: 1000000000002,
       payload: { val: 'product-2' },
       action: 'sync',
@@ -578,7 +629,7 @@ describe('listByPrefix', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'account.1.catalog.3.product.1',
-      random_suffix: 'cccc',
+      request_id: 'cccc',
       data_version: 1000000000003,
       payload: { val: 'different-catalog' },
       action: 'sync',
@@ -618,7 +669,7 @@ describe('listByPrefix', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { val: 'tenant-A' },
       action: 'sync',
@@ -627,7 +678,7 @@ describe('listByPrefix', function () {
     store._records.push({
       tenant_id: 'tenant-B',
       resource_id: 'res.1',
-      random_suffix: 'bbbb',
+      request_id: 'bbbb',
       data_version: 1000000000002,
       payload: { val: 'tenant-B' },
       action: 'sync',
@@ -743,7 +794,7 @@ describe('end-to-end flow', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'account.1.catalog.2.product.3',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: 1000000000001,
       payload: { v: 1 },
       action: 'sync-catalog',
@@ -752,7 +803,7 @@ describe('end-to-end flow', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'account.1.catalog.2.product.3',
-      random_suffix: 'bbbb',
+      request_id: 'bbbb',
       data_version: 1000000000002,
       payload: { v: 2 },
       action: 'sync-catalog',
@@ -770,7 +821,7 @@ describe('end-to-end flow', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'account.1.catalog.2.product.3',
-      random_suffix: 'cccc',
+      request_id: 'cccc',
       data_version: 1000000000003,
       payload: { v: 3 },
       action: 'sync-catalog',
@@ -827,7 +878,7 @@ describe('end-to-end flow', function () {
       store._records.push({
         tenant_id: 'tenant-A',
         resource_id: 'res.burst',
-        random_suffix: String(i).padStart(4, '0'),
+        request_id: String(i).padStart(4, '0'),
         data_version: 1000000000000 + i,
         payload: { burst_index: i },
         action: 'sync',
@@ -856,7 +907,7 @@ describe('end-to-end flow', function () {
 
 describe('same-millisecond tie breaking', function () {
 
-  it('picks the record with the lexicographically larger random_suffix on tie', async function () {
+  it('picks the record with the lexicographically larger request_id on tie', async function () {
     const store = createMemoryStore();
     const queue = buildQueue(store);
     const instance = makeInstance();
@@ -866,7 +917,7 @@ describe('same-millisecond tie breaking', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'aaaa',
+      request_id: 'aaaa',
       data_version: same_dv,
       payload: { val: 'first' },
       action: 'sync',
@@ -875,7 +926,7 @@ describe('same-millisecond tie breaking', function () {
     store._records.push({
       tenant_id: 'tenant-A',
       resource_id: 'res.1',
-      random_suffix: 'zzzz',
+      request_id: 'zzzz',
       data_version: same_dv,
       payload: { val: 'second-wins' },
       action: 'sync',
