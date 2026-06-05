@@ -24,10 +24,25 @@ Unix timestamp in milliseconds. The caller never supplies it. When multiple jobs
 `(tenant_id, resource_id)`, the one with the highest `data_version` is the
 latest and is the only one that should execute.
 
-**Same-millisecond tie rule:** if two records arrive within the same
-millisecond, they have identical `data_version`. The `random_suffix` breaks
-ties — the record with the lexicographically larger `random_suffix` wins.
-Both records are deleted when either is claimed.
+**Ordering granularity is one millisecond.** `data_version` resolves to whole
+milliseconds, so two enqueues for the same resource that differ by at least
+one millisecond are strictly ordered — the later write always wins. This is
+the resolution the queue guarantees; callers must not depend on any finer
+ordering.
+
+**Same-millisecond writes are indeterminate.** If two records for the same
+resource arrive within the same millisecond, they carry identical
+`data_version`, and the queue cannot tell which was written last. To still
+pick a single, stable winner, `claim` breaks the tie on `request_id`
+(lexicographically larger wins). Because `request_id` is a random compact
+UUID, this choice is **deterministic for a given set of records but arbitrary
+with respect to actual write order** — it is not a "latest wins" guarantee
+within the same millisecond. This is an accepted trade-off: jobs that land in
+the same millisecond for one resource are treated as interchangeable.
+
+In all cases coalescing still holds: `claim` deletes every record with
+`data_version <= ` the winner's, so same-millisecond records are fully
+absorbed and nothing is left behind.
 
 ### Coalescing
 
@@ -47,7 +62,7 @@ keys, but must reconstruct all of them on read.
 | `tenant_id` | String | caller | Partition boundary. |
 | `resource_id` | String | caller | Opaque resource identifier within the tenant. |
 | `data_version` | Number | module | Current time in ms at enqueue time. Ordering signal. |
-| `random_suffix` | String | module | Compact UUID. Ensures uniqueness and breaks same-millisecond ties. |
+| `request_id` | String | module | Compact UUID. Ensures uniqueness, breaks same-millisecond ties, and is returned to the caller on successful enqueue. |
 | `payload` | Object | caller | Arbitrary data. Stored as-is. Returned by `claim`. |
 | `action` | String | caller | Opaque label for the worker. Returned by `claim`. |
 | `toc` | Number | module | Same as `data_version` for v1 (both = enqueue time). |
@@ -88,13 +103,13 @@ For string-based backends (e.g. DynamoDB), the adapter concatenates the three
 parts using a delimiter:
 
 ```
-resource_id + DELIMITER + data_version_ms + DELIMITER + random_suffix
+resource_id + DELIMITER + data_version_ms + DELIMITER + request_id
 ```
 
 - `resource_id` enables `begins_with(resource_id + DELIMITER)` prefix queries.
 - `data_version_ms` is a 13-digit millisecond timestamp, lexicographically
   monotonic until year 2286 — no zero-padding needed.
-- `random_suffix` (full compact UUID) breaks ties and ensures uniqueness.
+- `request_id` (full compact UUID) breaks ties and ensures uniqueness.
 
 The delimiter is `\u001F` (ASCII Unit Separator). It is hardcoded inside
 each string-based adapter — it is not a configurable option in the core

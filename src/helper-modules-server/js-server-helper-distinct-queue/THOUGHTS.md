@@ -33,9 +33,26 @@ payload format. Arrival time at our server is the best available ordering signal
 module at enqueue time. The caller never supplies it.
 
 **Same-millisecond limitation:** if two records arrive within the same
-millisecond, they are treated as equivalent — both are deleted when either is
-claimed and cleaned. The random suffix in the sort key provides uniqueness for
+millisecond, they are treated as equivalent - both are deleted when either is
+claimed and cleaned. The `request_id` in the sort key provides uniqueness for
 storage but does not represent a meaningful ordering beyond tiebreaking.
+
+**Why millisecond granularity is acceptable:** this queue is fed by external
+webhooks. The external source does not supply a source timestamp we can trust,
+so arrival time is the only ordering signal. Within the same millisecond, the
+module has no way to determine which webhook reflects "the truth" - both carry
+an identical arrival timestamp, and the external system does not guarantee
+delivery order either. Accepting millisecond resolution as the ordering
+boundary is not a compromise - it is an honest reflection of what the module
+can actually know.
+
+No realistic use case requires sub-millisecond precision in a coalescing
+queue. The queue's purpose is to collapse N rapid-fire updates into one
+execution of the latest payload. If two updates for the same resource arrive
+within the same millisecond, either one is an equally valid representation of
+"current state" - and both will be fully absorbed by `claim` regardless of
+which is picked as the winner. The coalescing guarantee (`deleteByDataVersionLte`
+removes everything `<=` the winner's timestamp) means nothing is left behind.
 
 **Why not caller-supplied:** requiring callers to supply a source timestamp
 would push complexity outward and fail silently when webhooks omit it. The
@@ -48,7 +65,7 @@ module's job is to handle the common case correctly, and `Date.now()` does that.
 We need to query all records for a `(tenant_id, resource_id)` without a Global
 Secondary Index. The sort key must support `begins_with` prefix queries.
 
-**Decision:** sort key = `resource_id + '#' + data_version_ms + '#' + random_suffix(4)`
+**Decision:** sort key = `resource_id + '#' + data_version_ms + '#' + request_id`
 
 - `tenant_id` → partition key (DynamoDB) / first segment of `_id` (MongoDB)
 - The full sort key enables `begins_with(resource_id + '#')` to return all
@@ -58,9 +75,9 @@ Secondary Index. The sort key must support `begins_with` prefix queries.
 from 2001 through 2286. They are lexicographically monotonic without
 zero-padding. No special encoding needed.
 
-**Why 4-char random suffix:** breaks ties within the same millisecond and
-ensures sort key uniqueness. 36^4 = 1,679,616 possible values — more than
-enough for sub-millisecond burst scenarios.
+**Why compact UUID `request_id`:** breaks ties within the same millisecond and
+ensures sort key uniqueness. Full compact UUID provides collision resistance
+and is returned to the caller for correlation.
 
 ---
 
@@ -95,19 +112,21 @@ feature tracked in a new plan.
 
 ---
 
-## Problem 5 — `claim` return value and `request_id` exposure
+## Problem 5 - `claim` return value and `request_id` exposure
 
-Early designs returned a `request_id` to the caller so they could target
-`clean` precisely. This leaked an internal key detail to application code.
+Early designs returned a `request_id` from `claim` so the caller could target
+`clean` precisely. This was rejected because `claim` now handles deletion
+internally.
 
-**Decision:** `claim` returns `payload`, `action`, and `data_version`. The
-`data_version` (ms timestamp) is the deletion boundary for `clean`. The random
-suffix is never exposed.
+**Decision (v1.1):** `enqueue` returns `request_id` to the caller on success.
+This allows callers to log it, return it to the submitting service for
+correlation, or trace webhook deliveries. `claim` does NOT return `request_id`
+- it returns only `payload` and `action`, which are the caller's concerns.
 
-**Why not expose `request_id`:** it is an internal detail of the sort key
-format. Exposing it couples application code to the storage implementation.
-The ms timestamp is a stable, meaningful value that serves as the cleanup
-boundary without leaking internals.
+**Why expose from enqueue but not claim:** the enqueue caller is the one
+receiving the external webhook. Returning `request_id` lets them correlate the
+accepted job with a response to the external system. The claim caller (the
+poller) does not need it - it acts on `payload` and `action`.
 
 ---
 
@@ -149,7 +168,8 @@ separate `clean(data_version)` step anymore, so the caller has no use for it.
   single-poller pattern.
 - **Atomic conditional delete.** Not needed in v1. Single poller = no
   contention.
-- **`request_id` exposed to caller.** No. Internal implementation detail.
+- **`request_id` exposed from `claim`.** No. `claim` returns only `payload`
+  and `action`. `request_id` IS returned from `enqueue` for caller correlation.
 - **`clean` method.** Removed. `claim` handles deletion + chaining check
   internally. Two-method interface (enqueue + claim) is sufficient.
 - **`claimed` return key.** Removed. `payload !== null` communicates the same

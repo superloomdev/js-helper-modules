@@ -72,8 +72,8 @@ The module operates in a two-phase flow:
 
 1. Call `enqueue(instance, { tenant_id, resource_id, payload, action })`.
 2. The module generates a millisecond `data_version` timestamp and a
-   cryptographically random `random_suffix`. The record is appended to the
-   store. No reads.
+   cryptographically random `request_id` (compact UUID). The record is appended
+   to the store. No reads. The `request_id` is returned to the caller on success.
 
 ```js
 // Example: webhook handler enqueues a sync job

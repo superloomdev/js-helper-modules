@@ -46,7 +46,7 @@ module.exports = function createMemoryStore () {
 
     /******************************************************************
     Return all records matching (tenant_id, resource_id), sorted by
-    data_version ascending (chronological order), random_suffix as
+    data_version ascending (chronological order), request_id as
     tiebreak.
     ******************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) { // eslint-disable-line no-unused-vars
@@ -57,8 +57,8 @@ module.exports = function createMemoryStore () {
         })
         .sort(function (a, b) {
           if (a.data_version !== b.data_version) { return a.data_version - b.data_version; }
-          if (a.random_suffix < b.random_suffix) { return -1; }
-          if (a.random_suffix > b.random_suffix) { return 1; }
+          if (a.request_id < b.request_id) { return -1; }
+          if (a.request_id > b.request_id) { return 1; }
           return 0;
         });
 
@@ -109,8 +109,8 @@ module.exports = function createMemoryStore () {
         })
         .sort(function (a, b) {
           if (a.data_version !== b.data_version) { return a.data_version - b.data_version; }
-          if (a.random_suffix < b.random_suffix) { return -1; }
-          if (a.random_suffix > b.random_suffix) { return 1; }
+          if (a.request_id < b.request_id) { return -1; }
+          if (a.request_id > b.request_id) { return 1; }
           return 0;
         });
 

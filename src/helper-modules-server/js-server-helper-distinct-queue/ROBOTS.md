@@ -36,7 +36,7 @@ Append a new job record. Write-only — no reads. Safe to call from many concurr
 - **options.resource_id**: String, required. Opaque resource identifier within the tenant.
 - **options.payload**: Object, required. Arbitrary data stored as-is, returned by `claim`.
 - **options.action**: String, required. Opaque label for the worker, returned by `claim`.
-- **Returns**: `{ success, error }`.
+- **Returns**: `{ success, request_id, error }`. `request_id` is the compact UUID generated for this enqueue.
 
 ### `claim(instance, options)` *(async)*
 
@@ -87,7 +87,7 @@ Every adapter must implement these methods:
 | `tenant_id` | String | caller |
 | `resource_id` | String | caller |
 | `data_version` | Number | module — current time in ms at enqueue |
-| `random_suffix` | String | module — compact UUID for uniqueness and tiebreaking |
+| `request_id` | String | module — compact UUID for uniqueness, tiebreaking, and caller correlation |
 | `payload` | Object | caller |
 | `action` | String | caller |
 | `toc` | Number | module — same as `data_version` in v1 |
