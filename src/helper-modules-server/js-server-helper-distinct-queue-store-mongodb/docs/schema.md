@@ -12,7 +12,7 @@ The adapter stores records in a single MongoDB collection (configurable via `STO
     t: String,              // tenant_id - partition boundary
     r: String,              // resource_id - supports prefix queries
     d: Number,              // data_version - millisecond timestamp
-    s: String               // random_suffix - tie-breaker (opaque to adapter)
+    s: String               // request_id - tie-breaker (opaque to adapter)
   },
   payload: Object,          // Arbitrary caller data (stored as-is)
   action: String,         // Opaque action label
@@ -32,7 +32,7 @@ MongoDB automatically creates a unique index on `_id`. Because `_id` is a subdoc
 { "_id.t": 1, "_id.r": 1, "_id.d": 1, "_id.s": 1 }
 ```
 
-This is a **smart index** — you can retrieve records without knowing the full `{ t, r, d, s }` key. The index prefix on `{ t, r }` enables "begins with" queries that return all records for a resource even when `data_version` and `random_suffix` are unknown.
+This is a **smart index** — you can retrieve records without knowing the full `{ t, r, d, s }` key. The index prefix on `{ t, r }` enables "begins with" queries that return all records for a resource even when `data_version` and `request_id` are unknown.
 
 **Key Retrieval Goals:**
 
@@ -44,9 +44,9 @@ This is a **smart index** — you can retrieve records without knowing the full 
 
 **Why This Works:**
 
-We store `data_version` and `random_suffix` inside `_id` (as `d` and `s`) not for query specificity, but for:
+We store `data_version` and `request_id` inside `_id` (as `d` and `s`) not for query specificity, but for:
 1. **Sorting** — `_id.d` provides chronological ordering
-2. **Tie-breaking** — `_id.s` ensures uniqueness when multiple records have same millisecond timestamp
+2. **Tie-breaking** — `_id.s` ensures uniqueness when multiple records have same millisecond timestamp (stores `request_id`)
 3. **Uniqueness** — the full `{ t, r, d, s }` combination is unique per document
 
 But for retrieval, we only need `tenant_id` and `resource_id`. The index "begins with" pattern (`$regex: '^resource_id'`) efficiently scans all records for that resource, then MongoDB sorts by `d` and `s` within the result set.
@@ -66,7 +66,7 @@ Uses `insertOne` with compound `_id` built from record fields:
 
 ```javascript
 const document = {
-  _id: { t: tenant_id, r: resource_id, d: data_version, s: random_suffix },
+  _id: { t: tenant_id, r: resource_id, d: data_version, s: request_id },
   payload: payload,
   action: action,
   toc: toc

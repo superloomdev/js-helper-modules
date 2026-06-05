@@ -80,7 +80,7 @@ describe('adapter specific', function () {
       tenant_id: 'special_tenant',
       resource_id: special_resource_id,
       data_version: Date.now(),
-      random_suffix: Lib.Crypto.generateCompactUUID(),
+      request_id: Lib.Crypto.generateCompactUUID(),
       payload: { data: 'special' },
       action: 'special_action',
       toc: Date.now()
@@ -110,7 +110,7 @@ describe('adapter specific', function () {
       tenant_id: 'large_tenant',
       resource_id: 'large_resource',
       data_version: Date.now(),
-      random_suffix: Lib.Crypto.generateCompactUUID(),
+      request_id: Lib.Crypto.generateCompactUUID(),
       payload: large_payload,
       action: 'large_action',
       toc: Date.now()
@@ -131,14 +131,14 @@ describe('adapter specific', function () {
     const tenant_id = 'concurrent_tenant';
     const resource_id = 'concurrent_resource';
 
-    // Fire multiple concurrent writes with unique random suffixes
+    // Fire multiple concurrent writes with unique request IDs
     const writes = [];
     for (let i = 0; i < 5; i++) {
       writes.push(store.writeRecord(instance, {
         tenant_id: tenant_id,
         resource_id: resource_id,
         data_version: Date.now() + i,
-        random_suffix: Lib.Crypto.generateCompactUUID(),
+        request_id: Lib.Crypto.generateCompactUUID(),
         payload: { index: i },
         action: 'concurrent_action',
         toc: Date.now()
@@ -165,7 +165,7 @@ describe('adapter specific', function () {
       tenant_id: tenant_id,
       resource_id: 'test.resource.v1',
       data_version: 1000,
-      random_suffix: 'aaaa0000',
+      request_id: 'aaaa0000',
       payload: {},
       action: 'test',
       toc: 1000
@@ -175,7 +175,7 @@ describe('adapter specific', function () {
       tenant_id: tenant_id,
       resource_id: 'test+resource+v2',
       data_version: 2000,
-      random_suffix: 'bbbb1111',
+      request_id: 'bbbb1111',
       payload: {},
       action: 'test',
       toc: 2000
@@ -232,19 +232,29 @@ describe('core integration (enqueue/claim/listByPrefix)', function () {
   });
 
 
-  it('claim returns the latest enqueued version for a resource', async function () {
+  it('claim returns the later write when enqueues are in distinct milliseconds, then coalesces', async function () {
     const instance = buildInstance();
     const tenant_id = 'integ_tenant';
     const resource_id = 'account_1.product_2';
 
+    // data_version has millisecond granularity, so "latest wins" is only
+    // well-defined across distinct milliseconds. A >=1ms gap guarantees the
+    // second enqueue gets a strictly higher data_version. Without the gap the
+    // two writes could share a millisecond, in which case the winner is
+    // indeterminate by design (see core data-model.md).
     await queue.enqueue(instance, { tenant_id: tenant_id, resource_id: resource_id, payload: { v: 1 }, action: 'a' });
-    // Wait 2ms to guarantee a distinct data_version on the second enqueue
     await new Promise(function (resolve) { setTimeout(resolve, 2); });
     await queue.enqueue(instance, { tenant_id: tenant_id, resource_id: resource_id, payload: { v: 2 }, action: 'b' });
 
     const claim_result = await queue.claim(instance, { tenant_id: tenant_id, resource_id: resource_id });
     assert.strictEqual(claim_result.success, true);
     assert.strictEqual(claim_result.payload.v, 2);
+
+    // Coalescing: both records are absorbed by the single claim, so a second
+    // claim has nothing left to process.
+    const second = await queue.claim(instance, { tenant_id: tenant_id, resource_id: resource_id });
+    assert.strictEqual(second.success, true);
+    assert.strictEqual(second.payload, null);
   });
 
 
