@@ -6,7 +6,7 @@
 
 MongoDB store adapter for [`js-server-helper-distinct-queue`](https://github.com/superloomdev/js-helper-modules).
 
-Uses a **smart subdocument `_id` design** to enable efficient queue operations without secondary indexes. Records are retrieved using only `tenant_id` and `resource_id` via MongoDB's implicit `_id` index — no need to know `data_version` or the random suffix. Supports prefix queries, chronological sorting, and batch cleanup in single roundtrips.
+Uses a **smart subdocument `_id` design** to enable efficient queue operations without secondary indexes. Records are retrieved using only `tenant_id` and `resource_id` via MongoDB's implicit `_id` index — no need to know `data_version` or `request_id`. Supports prefix queries, chronological sorting, and batch cleanup in single roundtrips.
 
 ## Installation
 

@@ -5,7 +5,7 @@
 //   - t: tenant_id (string) - partition boundary
 //   - r: resource_id (string) - supports prefix queries via $regex
 //   - d: data_version (number) - millisecond timestamp for sorting
-//   - s: random_suffix (string) - compact UUID for tie-breaking
+//   - s: request_id (string) - compact UUID for tie-breaking
 //
 // Query patterns:
 //   - Exact resource: find({ "_id.t": t, "_id.r": r }).sort({ "_id.d": 1 })
@@ -115,7 +115,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
     @param {Object} instance - Request instance
     @param {Object} record   - The record to write (tenant_id, resource_id,
-                               data_version, random_suffix, payload, action, toc)
+                               data_version, request_id, payload, action, toc)
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
@@ -123,7 +123,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Build the document with compound _id
       const document = {
-        _id: _Store.composeId(record.tenant_id, record.resource_id, record.data_version, record.random_suffix),
+        _id: _Store.composeId(record.tenant_id, record.resource_id, record.data_version, record.request_id),
         payload: record.payload,
         action: record.action,
         toc: record.toc
@@ -328,12 +328,12 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     @param {String} tenant_id - Partition boundary
     @param {String} resource_id - Resource identifier
     @param {Number} data_version - Millisecond timestamp
-    @param {String} random_suffix - Compact UUID tie-breaker
+    @param {String} request_id - Compact UUID tie-breaker
 
     @return {Object} - { t, r, d, s }
     *********************************************************************/
-    composeId: function (tenant_id, resource_id, data_version, random_suffix) {
-      return { t: tenant_id, r: resource_id, d: data_version, s: random_suffix };
+    composeId: function (tenant_id, resource_id, data_version, request_id) {
+      return { t: tenant_id, r: resource_id, d: data_version, s: request_id };
     },
 
 
@@ -351,7 +351,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
         tenant_id: doc._id.t,
         resource_id: doc._id.r,
         data_version: doc._id.d,
-        random_suffix: doc._id.s,
+        request_id: doc._id.s,
         payload: doc.payload,
         action: doc.action,
         toc: doc.toc

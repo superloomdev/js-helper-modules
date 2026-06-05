@@ -53,7 +53,7 @@ module.exports = function buildContractSuite (deps) {
         tenant_id: 'tenant_1',
         resource_id: 'resource_1',
         data_version: Date.now(),
-        random_suffix: Lib.Crypto.generateCompactUUID(),
+        request_id: Lib.Crypto.generateCompactUUID(),
         payload: { data: 'test' },
         action: 'test_action',
         toc: Date.now()
@@ -78,8 +78,8 @@ module.exports = function buildContractSuite (deps) {
         const instance = buildInstance();
         const resource_id = 'multi_write_test';
 
-        const record1 = createRecord({ resource_id, data_version: 1000, random_suffix: 'aaaa0000' });
-        const record2 = createRecord({ resource_id, data_version: 2000, random_suffix: 'bbbb1111' });
+        const record1 = createRecord({ resource_id, data_version: 1000, request_id: 'aaaa0000' });
+        const record2 = createRecord({ resource_id, data_version: 2000, request_id: 'bbbb1111' });
 
         const result1 = await store.writeRecord(instance, record1);
         const result2 = await store.writeRecord(instance, record2);
@@ -128,9 +128,9 @@ module.exports = function buildContractSuite (deps) {
         const resource_id = 'query_test_resource';
 
         // Write records out of order
-        const record3 = createRecord({ tenant_id, resource_id, data_version: 3000, random_suffix: 'cccc2222' });
-        const record1 = createRecord({ tenant_id, resource_id, data_version: 1000, random_suffix: 'aaaa0000' });
-        const record2 = createRecord({ tenant_id, resource_id, data_version: 2000, random_suffix: 'bbbb1111' });
+        const record3 = createRecord({ tenant_id, resource_id, data_version: 3000, request_id: 'cccc2222' });
+        const record1 = createRecord({ tenant_id, resource_id, data_version: 1000, request_id: 'aaaa0000' });
+        const record2 = createRecord({ tenant_id, resource_id, data_version: 2000, request_id: 'bbbb1111' });
 
         await store.writeRecord(instance, record3);
         await store.writeRecord(instance, record1);
@@ -226,9 +226,9 @@ module.exports = function buildContractSuite (deps) {
         const resource_id = 'delete_test_resource';
 
         // Write records at versions 1000, 2000, 3000
-        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 1000, random_suffix: 'aaaa0000' }));
-        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 2000, random_suffix: 'bbbb1111' }));
-        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 3000, random_suffix: 'cccc2222' }));
+        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 1000, request_id: 'aaaa0000' }));
+        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 2000, request_id: 'bbbb1111' }));
+        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 3000, request_id: 'cccc2222' }));
 
         // Delete records with data_version <= 2000
         const delete_result = await store.deleteByDataVersionLte(instance, tenant_id, resource_id, 2000);
@@ -246,7 +246,7 @@ module.exports = function buildContractSuite (deps) {
         const tenant_id = 'preserve_test_tenant';
         const resource_id = 'preserve_test_resource';
 
-        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 5000, random_suffix: 'aaaa0000' }));
+        await store.writeRecord(instance, createRecord({ tenant_id, resource_id, data_version: 5000, request_id: 'aaaa0000' }));
 
         // Delete with boundary 1000 (below our record)
         const delete_result = await store.deleteByDataVersionLte(instance, tenant_id, resource_id, 1000);
@@ -263,9 +263,9 @@ module.exports = function buildContractSuite (deps) {
         const instance = buildInstance();
 
         // Write records for different combinations
-        await store.writeRecord(instance, createRecord({ tenant_id: 'tenant_a', resource_id: 'res_1', data_version: 1000, random_suffix: 'aaaa0000' }));
-        await store.writeRecord(instance, createRecord({ tenant_id: 'tenant_a', resource_id: 'res_2', data_version: 1000, random_suffix: 'bbbb1111' }));
-        await store.writeRecord(instance, createRecord({ tenant_id: 'tenant_b', resource_id: 'res_1', data_version: 1000, random_suffix: 'cccc2222' }));
+        await store.writeRecord(instance, createRecord({ tenant_id: 'tenant_a', resource_id: 'res_1', data_version: 1000, request_id: 'aaaa0000' }));
+        await store.writeRecord(instance, createRecord({ tenant_id: 'tenant_a', resource_id: 'res_2', data_version: 1000, request_id: 'bbbb1111' }));
+        await store.writeRecord(instance, createRecord({ tenant_id: 'tenant_b', resource_id: 'res_1', data_version: 1000, request_id: 'cccc2222' }));
 
         // Delete only tenant_a, res_1
         const delete_result = await store.deleteByDataVersionLte(instance, 'tenant_a', 'res_1', 1000);

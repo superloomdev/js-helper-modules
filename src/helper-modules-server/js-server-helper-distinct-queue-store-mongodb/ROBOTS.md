@@ -3,8 +3,8 @@
 ## Quick Reference
 
 **Pattern:** Store adapter for adapter-backed module (Pattern 2 + Store)  
-**Contract:** 4 methods (`writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`)  
-**Storage:** MongoDB with subdocument `_id` index on `{ t, r, d, s }` (tenant_id, resource_id, data_version, random_suffix)
+**Contract:** 5 methods (`setupNewStore`, `writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`)  
+**Storage:** MongoDB with subdocument `_id` index on `{ t, r, d, s }` (tenant_id, resource_id, data_version, request_id)
 
 ## Usage
 
@@ -53,7 +53,7 @@ All methods return `{ success, error }` shape. On driver failure:
 
 ## Testing
 
-Uses `store-contract-suite.js` — shared tests validate the 4-method contract against real MongoDB via Docker.
+Uses `store-contract-suite.js` — shared tests validate the 5-method contract against real MongoDB via Docker.
 
 ```bash
 cd _test && npm install && npm test
