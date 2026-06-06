@@ -4,7 +4,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after, beforeEach } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const LoggerStoreMySQLFactory = require('helper-logger-store-mysql');
 const LoggerFactory           = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -33,9 +33,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return LoggerStoreMySQLFactory(Lib, {
-    STORE_CONFIG: { table_name: table || TEST_TABLE, lib_sql: Lib.MySQL }
-  }, ERRORS);
+  return LoggerStoreMySQLFactory({
+    table_name: table || TEST_TABLE,
+    lib_sql: Lib.MySQL
+  });
 
 };
 
@@ -71,23 +72,23 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
     assert.throws(
-      function () { LoggerStoreMySQLFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { LoggerStoreMySQLFactory(); },
+      /config must be an object/
     );
   });
 
   it('throws when table_name is missing', function () {
     assert.throws(
-      function () { LoggerStoreMySQLFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.MySQL } }, ERRORS); },
+      function () { LoggerStoreMySQLFactory({ lib_sql: Lib.MySQL }); },
       /table_name is required/
     );
   });
 
   it('throws when lib_sql is missing', function () {
     assert.throws(
-      function () { LoggerStoreMySQLFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreMySQLFactory({ table_name: 'x' }); },
       /lib_sql is required/
     );
   });
@@ -308,10 +309,12 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  return LoggerFactory(Lib, Object.assign({
-    STORE: LoggerStoreMySQLFactory,
-    STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.MySQL }
-  }, overrides || {}));
+  const Store = LoggerStoreMySQLFactory({
+    table_name: TEST_TABLE,
+    lib_sql: Lib.MySQL
+  });
+
+  return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));
 
 };
 

@@ -1,32 +1,35 @@
 # Configuration — js-server-helper-logger-store-mysql
 
-## Loader Pattern
+## Construction Pattern
+
+This adapter is fully independent — it owns its own Lib and ERRORS. Construct it before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
+const Store = require('@superloomdev/js-server-helper-logger-store-mysql')({
+  table_name: 'action_log',
+  lib_sql:    Lib.MySQL
+});
+
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-logger-store-mysql'),
-  STORE_CONFIG: {
-    table_name: 'action_log',
-    lib_sql:    Lib.MySQL
-  },
+  Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY  // optional
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Config Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the log table. Must not contain a backtick. |
 | `lib_sql` | `Object` | Yes | An initialized `Lib.MySQL` instance (`@superloomdev/js-server-helper-sql-mysql`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-mysql` | MySQL driver wrapper (`Lib.MySQL`) |
+| Package | Scope | Purpose |
+|---------|-------|---------||
+| `@superloomdev/js-helper-utils` | Owned | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Owned | Structured debug logging |
+| `@superloomdev/js-server-helper-sql-mysql` | Peer (via `config.lib_sql`) | MySQL driver wrapper |
 
 ## Environment Variables
 
