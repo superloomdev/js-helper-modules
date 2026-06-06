@@ -47,6 +47,10 @@ const ERRORS = Object.freeze({
   SERVICE_UNAVAILABLE: {
     type: 'AUTH_STORE_MONGODB_SERVICE_UNAVAILABLE',
     message: 'MongoDB backend unavailable'
+  },
+  NOT_IMPLEMENTED: {
+    type: 'NOT_IMPLEMENTED',
+    message: 'This operation is not yet implemented for this backend'
   }
 });
 

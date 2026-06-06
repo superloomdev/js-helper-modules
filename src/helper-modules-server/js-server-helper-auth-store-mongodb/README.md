@@ -41,7 +41,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mongodb/docs/api.md). The store contract this adapter implements and the adapter factory protocol
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mongodb/docs/configuration.md). `STORE_CONFIG` keys, peer dependencies, environment variables, testing tier
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mongodb/docs/configuration.md). Config keys, peer dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mongodb/docs/schema.md). Document shape, `_id` composition, the `prefix` field, operator-provisioned indexes, BSON type mapping
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mongodb/docs/cleanup.md). MongoDB does not run native TTL on integer timestamps; scheduled cleanup is the default path. A Date-field + TTL-index alternative is also documented
 - [Auth parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth). The data model, error catalog, and Auth-side configuration this adapter plugs into
