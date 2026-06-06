@@ -4,14 +4,14 @@ Compact, AI-targeted reference for the public interface. Humans should read `REA
 
 ## Module Overview
 
-Persistent, storage-agnostic last-write-wins coalescing queue keyed by `(tenant_id, resource_id)`. N rapid-fire writes for the same resource collapse into at most one execution of the latest payload. Write path is append-only (no reads on enqueue). The "distinct" property is enforced at consumption time (`claim`), not at write time. Storage backends are standalone adapter packages (`@superloomdev/js-server-helper-distinct-queue-store-*`); the caller passes the adapter factory directly as `CONFIG.STORE`.
+Persistent, storage-agnostic last-write-wins coalescing queue keyed by `(tenant_id, resource_id)`. N rapid-fire writes for the same resource collapse into at most one execution of the latest payload. Write path is append-only (no reads on enqueue). The "distinct" property is enforced at consumption time (`claim`), not at write time. Storage backends are standalone adapter packages (`@superloomdev/js-server-helper-distinct-queue-store-*`); the caller passes a ready-to-use store object as `CONFIG.Store`.
 
 ## Factory Pattern
 
 ```js
 module.exports = function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
-  // Validates CONFIG at construction (STORE must be a function).
+  // Validates CONFIG at construction (Store must be a ready-to-use object).
   // Throws synchronously on misconfiguration.
   return { enqueue, claim, listByPrefix };
 };
@@ -21,9 +21,8 @@ module.exports = function loader (shared_libs, config) {
 
 ```js
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-    table_name: 'distinct_queue',
-    lib_dynamodb: Lib.DynamoDB
+  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+    table_name: 'distinct_queue'
   })
 });
 ```

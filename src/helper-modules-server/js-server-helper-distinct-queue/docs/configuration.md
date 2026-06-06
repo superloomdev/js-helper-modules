@@ -11,9 +11,8 @@ at runtime.
 const DistinctQueueFactory = require('@superloomdev/js-server-helper-distinct-queue');
 
 Lib.DistinctQueue = DistinctQueueFactory(Lib, {
-  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-    table_name: 'distinct_queue',
-    lib_dynamodb: Lib.DynamoDB
+  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+    table_name: 'distinct_queue'
   })
 });
 ```
@@ -31,14 +30,13 @@ Passing a non-object throws `CONFIG.Store is required and must be a store object
 
 ## Per-Adapter Configuration
 
-Each adapter owns its config. Pass the config object directly to the adapter's `configure()` call, not to this module.
+Each adapter owns its config. Pass `Lib` and the config object directly to the adapter loader, not to this module.
 
 ### DynamoDB
 
 ```js
-Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-  table_name: 'distinct_queue',
-  lib_dynamodb: Lib.DynamoDB
+Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+  table_name: 'distinct_queue'
 })
 ```
 
