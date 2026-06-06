@@ -1,11 +1,11 @@
 # Configuration
 
-The DynamoDB store adapter is configured through the Auth parent's `STORE` and `STORE_CONFIG` keys. The adapter itself is a factory function; the parent calls it once at load time and retains the returned Store interface.
+The DynamoDB store adapter is a fully independent module. Call it with its config to get a ready-to-use store object, then pass that object as `Store` to the Auth parent.
 
 ## On This Page
 
 - [Loader Pattern](#loader-pattern)
-- [`STORE_CONFIG` Keys](#store_config-keys)
+- [Config Keys](#config-keys)
 - [IAM Permissions](#iam-permissions)
 - [Peer Dependencies](#peer-dependencies)
 - [Environment Variables](#environment-variables)
@@ -19,19 +19,23 @@ Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib,
   REGION:   process.env.AWS_REGION        // required: AWS region
 });
 
+const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')({
+  table_name:   'sessions_user',
+  lib_dynamodb: Lib.DynamoDB
+});
+
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-auth-store-dynamodb'),
-  STORE_CONFIG: { table_name: 'sessions_user', lib_dynamodb: Lib.DynamoDB },
-  ACTOR_TYPE:   'user',
-  TTL_SECONDS:  2592000
+  Store:      Store,
+  ACTOR_TYPE: 'user',
+  TTL_SECONDS: 2592000
 });
 ```
 
-The adapter is passed to the parent as a **factory function reference**, not as the result of a call. The parent invokes the factory internally with the right arguments (`Lib`, the full `CONFIG`, and the frozen `ERRORS` catalog). Treat `STORE` as a function value; do not call it yourself.
+The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
 The AWS SDK client is **not** created at loader time. `Lib.DynamoDB` lazy-initializes on the first operation. The adapter does not open any connection during construction either.
 
-## `STORE_CONFIG` Keys
+## Config Keys
 
 | Key | Type | Required | Description |
 |---|---|---|---|
@@ -86,13 +90,13 @@ The adapter does not interact with IAM credential acquisition. The driver helper
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-aws-dynamodb` driver helper is passed in via `config.lib_dynamodb` by the application.
 
-| Package | Reads via `Lib` |
+| Package | How it is used |
 |---|---|
-| `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
-| `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
-| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | `Lib.DynamoDB` via `STORE_CONFIG.lib_dynamodb` |
+| `@superloomdev/js-helper-utils` | Required by adapter; used for type checks in `store.validators.js` |
+| `@superloomdev/js-helper-debug` | Required by adapter; used for driver-error logging |
+| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | Passed in via `config.lib_dynamodb`; the adapter delegates all AWS SDK calls to this helper |
 
 The driver helper carries its own dependency on the AWS SDK for JavaScript v3. The adapter never `require`s the AWS SDK directly; applications that never use this store never load the DynamoDB client.
 

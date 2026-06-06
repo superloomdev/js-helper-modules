@@ -56,6 +56,10 @@ const ERRORS = Object.freeze({
   SERVICE_UNAVAILABLE: {
     type: 'AUTH_STORE_DYNAMODB_SERVICE_UNAVAILABLE',
     message: 'DynamoDB backend unavailable'
+  },
+  NOT_IMPLEMENTED: {
+    type: 'NOT_IMPLEMENTED',
+    message: 'This operation is not yet implemented for this backend'
   }
 });
 
