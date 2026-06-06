@@ -39,23 +39,22 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_dynamodb: Lib.DynamoDB
-    }
+    table_name: table || TEST_TABLE,
+    lib_dynamodb: Lib.DynamoDB
   };
-  return VerifyStoreDynamoDBFactory(Lib, config, ERRORS);
+  return VerifyStoreDynamoDBFactory(config);
 
 };
 
 const buildVerify = function () {
 
+  const Store = VerifyStoreDynamoDBFactory({
+    table_name: TEST_TABLE,
+    lib_dynamodb: Lib.DynamoDB
+  });
+
   return VerifyFactory(Lib, {
-    STORE: VerifyStoreDynamoDBFactory,
-    STORE_CONFIG: {
-      table_name: TEST_TABLE,
-      lib_dynamodb: Lib.DynamoDB
-    }
+    Store: Store
   });
 
 };
@@ -67,11 +66,11 @@ const buildVerify = function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreDynamoDBFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { VerifyStoreDynamoDBFactory({}); },
+      /config.lib_dynamodb is required/
     );
 
   });
@@ -79,8 +78,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreDynamoDBFactory(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
-      /table_name is required/
+      function () { VerifyStoreDynamoDBFactory({ lib_dynamodb: Lib.DynamoDB, table_name: null }); },
+      /config.table_name is required/
     );
 
   });
@@ -88,8 +87,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_dynamodb is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreDynamoDBFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
-      /lib_dynamodb is required/
+      function () { VerifyStoreDynamoDBFactory({ table_name: 'x' }); },
+      /config.lib_dynamodb is required/
     );
 
   });
