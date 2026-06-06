@@ -34,16 +34,15 @@ Auth is a **factory module**. Each `require()(Lib, config)` call returns a fully
 
 ```
 Auth instance
- ├─ CONFIG.STORE         (store adapter factory, e.g. require('...auth-store-postgres'))
- ├─ CONFIG.STORE_CONFIG  (table_name / collection_name + lib_sql / lib_mongodb / lib_dynamodb)
- ├─ CONFIG.ACTOR_TYPE    ('user', 'admin', 'merchant', ...)
- ├─ parts/               (stateless helpers: policy, auth-id, jwt, token-source, record-shape)
- └─ Store                (instantiated from CONFIG.STORE; reads/writes sessions)
+ ├─ CONFIG.Store       (ready-to-use store object from the chosen adapter)
+ ├─ CONFIG.ACTOR_TYPE  ('user', 'admin', 'merchant', ...)
+ ├─ parts/             (stateless helpers: policy, auth-id, jwt, token-source, record-shape)
+ └─ store              (CONFIG.Store used directly; reads/writes sessions)
 ```
 
-`CONFIG.STORE` is the adapter factory function itself. You pass the result of `require(...)` directly, the same way you pass `Lib.Postgres` or `Lib.MongoDB` to other helpers. Every adapter (and every internal `parts/` helper) uses the same `factory(Lib, CONFIG, ERRORS)` signature, so adding a new backend never changes the call-site code.
+Store adapters are **fully independent modules**. Each adapter builds its own `Lib`, defines its own `ERRORS`, validates its own config, and returns a ready-to-use store object. Auth receives that object via `CONFIG.Store` and uses it directly — no factory invocation, no shared dependencies.
 
-For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and `STORE_CONFIG` details, see each adapter package's own README (linked below).
+For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and store config details, see each adapter package's own README (linked below).
 
 ## Storage Adapters
 
@@ -87,7 +86,7 @@ npm install @superloomdev/js-server-helper-auth \
             @superloomdev/js-server-helper-auth-store-postgres
 ```
 
-Substitute `auth-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the `STORE_CONFIG` shape for each adapter is in the adapter package's own README.
+Substitute `auth-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the store config shape for each adapter is in the adapter package's own README.
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
@@ -103,7 +102,7 @@ It expects five peer modules in the `Lib` container (Utils, Debug, Crypto, Insta
 |---|---|---|
 | Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Auth's own tests use the in-process memory fixture (`createInMemoryAuthStore()` in `_test/`) which implements the full eight-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`js-server-helper-auth-store-*`) and run the shared store contract suite against real backends.
+Auth's own tests use the in-process memory fixture (`MemoryStore` in `_test/`) which implements the full eight-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`js-server-helper-auth-store-*`) and run the shared store contract suite against real backends.
 
 Test runtime details live in [Configuration → Testing Tiers](docs/configuration.md#testing-tiers).
 

@@ -21,8 +21,7 @@ None. JWT signing uses Node's built-in `crypto` (via `Lib.Crypto`).
 
 ```javascript
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-auth-store-postgres'),   // FACTORY FUNCTION, not a string
-  STORE_CONFIG: { table_name: 'sessions_user', lib_sql: Lib.Postgres },
+  Store:        require('@superloomdev/js-server-helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
   LIMITS:       { total_max: 20, evict_oldest_on_limit: true },
@@ -34,18 +33,17 @@ One Auth instance per `actor_type`:
 
 ```javascript
 const AuthFactory = require('@superloomdev/js-server-helper-auth');
-Lib.AuthUser  = AuthFactory(Lib, { ACTOR_TYPE: 'user',  STORE: require('...auth-store-postgres'), STORE_CONFIG: { table_name: 'sessions_user',  lib_sql: Lib.Postgres } });
-Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', STORE: require('...auth-store-postgres'), STORE_CONFIG: { table_name: 'sessions_admin', lib_sql: Lib.Postgres } });
+Lib.AuthUser  = AuthFactory(Lib, { ACTOR_TYPE: 'user',  Store: require('...auth-store-postgres')({ table_name: 'sessions_user',  lib_sql: Lib.Postgres }) });
+Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-store-postgres')({ table_name: 'sessions_admin', lib_sql: Lib.Postgres }) });
 ```
 
-**STORE must be the factory function returned by `require(...)`, never a string.** Passing a string is rejected at loader time.
+**Store must be a ready-to-use store object returned by calling the adapter with its config.** Passing a function or string is rejected at loader time.
 
 ## Config Keys
 
 | Key | Type | Default | Notes |
 |---|---|---|---|
-| `STORE` | Function | `null` | **Required.** Pass `require('@superloomdev/js-server-helper-auth-store-*')` directly. Must be a function, not a string |
-| `STORE_CONFIG` | Object | `null` | **Required.** Shape varies by adapter. See per-adapter README |
+| `Store` | Object | `null` | **Required.** Pass a ready-to-use store object: `require('@superloomdev/js-server-helper-auth-store-*')({...})` |
 | `ACTOR_TYPE` | String | `null` | **Required.** This instance owns one actor_type |
 | `TTL_SECONDS` | Number | `2592000` (30 days) | Session lifetime |
 | `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | Number | `600` | Throttle for last_active refresh |
@@ -62,7 +60,9 @@ Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', STORE: require('...auth-
 | `JWT.rotate_refresh_token` | Boolean | `true` | RFC 6819 single-use rotation |
 | `COOKIE_PREFIX` | String | `null` | Full cookie name = `${COOKIE_PREFIX}${tenant_id}`. Cookie attributes (httpOnly, secure, sameSite, path) are applied by `Lib.HttpGateway.buildCookie` defaults |
 
-## STORE_CONFIG by Backend
+## Store Config by Backend
+
+The adapter owns its own config. Pass config directly when calling the adapter:
 
 | Adapter | Required keys |
 |---|---|
@@ -238,15 +238,15 @@ Access patterns:
 - **One Auth instance per actor_type.** Sessions never cross types - `verifySession` rejects mismatches with `AUTH_ACTOR_TYPE_MISMATCH`
 - **Tenant scoping is mandatory.** Every store function requires tenant_id
 - **Cookie handling delegated to gateway.** Auth builds `cookies` descriptor via `Lib.HttpGateway.buildCookie()`; caller passes it to `Lib.HttpGateway.returnHttpResponse`. Inbound cookies read from `instance.http_request.cookies` (pre-parsed by adapter)
-- **STORE_CONFIG is extracted internally.** The adapter pulls its slice from `CONFIG.STORE_CONFIG`; caller passes the full config object
+- **Store is pre-configured.** The adapter is called with its own config before being passed to auth. Auth receives a ready-to-use object
 - **Token secret never stored.** Only SHA-256 hash (`token_secret_hash`). Wrong-secret lookups return null, not an error - no timing oracle
 - **Throttled last_active_at.** `verifySession` writes back at most once per `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` (default 600s) via `Lib.Instance.backgroundRoutine`
 
 ## Documentation
 
 - `docs/api.md` - full API reference (every function, every option, every error type)
-- `docs/configuration.md` - loader pattern, every config key, STORE_CONFIG by backend, testing tiers
+- `docs/configuration.md` - loader pattern, every config key, store config by backend, testing tiers
 - `docs/data-model.md` - canonical record shape, core concepts, design decisions
 - `docs/runtime.md` - the differences between persistent-server and serverless-function runtime shapes only (how `instance` is constructed; how scheduled cleanup is wired). Not a framework cookbook
-- Storage adapters: see the README's "Storage Adapters" section for the list + selection rule. Per-backend schema, indexes, TTL, IaC notes, and `STORE_CONFIG` shape live in each adapter package's own README (`@superloomdev/js-server-helper-auth-store-*`)
+- Storage adapters: see the README's "Storage Adapters" section for the list + selection rule. Per-backend schema, indexes, TTL, IaC notes, and store config shape live in each adapter package's own README (`@superloomdev/js-server-helper-auth-store-*`)
 - `docs/push-notifications.md` - push-token contract for a future `js-server-helper-push`

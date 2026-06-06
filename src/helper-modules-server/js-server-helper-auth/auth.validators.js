@@ -62,22 +62,12 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
-    // STORE must be the store factory function (e.g. require('@superloomdev/js-server-helper-auth-store-sqlite'))
+    // Store must be a ready-to-use store object with required methods
     if (
-      Lib.Utils.isNullOrUndefined(CONFIG.STORE) ||
-      typeof CONFIG.STORE !== 'function'
+      Lib.Utils.isNullOrUndefined(CONFIG.Store) ||
+      !Lib.Utils.isObject(CONFIG.Store)
     ) {
-      throw new Error('[js-server-helper-auth] CONFIG.STORE must be a store factory function (e.g. require("js-server-helper-auth-store-sqlite"))');
-    }
-
-    // STORE_CONFIG is required - each store validates its own required keys
-    // (table_name, lib_sql, etc.) inside its factory.
-    if (Lib.Utils.isNullOrUndefined(CONFIG.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-auth] CONFIG.STORE_CONFIG is required (object)');
-    }
-
-    if (!Lib.Utils.isObject(CONFIG.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-auth] CONFIG.STORE_CONFIG must be a plain object');
+      throw new Error('[js-server-helper-auth] CONFIG.Store must be a ready-to-use store object from an adapter (e.g. require("js-server-helper-auth-store-sqlite")({...}))');
     }
 
     // ACTOR_TYPE is required and must be a non-empty string

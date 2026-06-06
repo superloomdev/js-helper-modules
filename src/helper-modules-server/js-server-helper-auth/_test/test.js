@@ -9,10 +9,10 @@ const { describe, it } = require('node:test');
 
 const { Lib } = require('./loader')();
 
-const AuthFactory        = require('helper-auth');
-const MemoryStoreFactory = require('./memory-store');
-const ERRORS             = require('../auth.errors');
-const CONFIG_STUB        = {};
+const AuthFactory   = require('helper-auth');
+const MemoryStore   = require('./memory-store');
+const ERRORS        = require('../auth.errors');
+const CONFIG_STUB   = {};
 
 const PolicyFactory      = require('../parts/policy.js');
 const RecordShapeFactory = require('../parts/record-shape.js');
@@ -34,8 +34,7 @@ const buildInstance = function (time_seconds) {
 
 const validBaseConfig = function () {
   return {
-    STORE:        MemoryStoreFactory,
-    STORE_CONFIG: {},
+    Store:        MemoryStore,
     ACTOR_TYPE:   'user',
     TTL_SECONDS:  3600,
     LIMITS:       { total_max: 5, evict_oldest_on_limit: true }
@@ -49,37 +48,26 @@ const validBaseConfig = function () {
 
 describe('loader validation', function () {
 
-  // Memory store needs no config - STORE_CONFIG: {} satisfies the validator.
-  const valid_store_config = {};
-
-  it('throws when STORE is missing', function () {
+  it('throws when Store is missing', function () {
 
     assert.throws(function () {
-      AuthFactory(Lib, { ACTOR_TYPE: 'user', STORE_CONFIG: valid_store_config });
-    }, /CONFIG\.STORE must be a store factory function/);
+      AuthFactory(Lib, { ACTOR_TYPE: 'user' });
+    }, /CONFIG\.Store must be a ready-to-use store object/);
 
   });
 
-  it('throws when STORE is not a function', function () {
+  it('throws when Store is not an object', function () {
 
     assert.throws(function () {
-      AuthFactory(Lib, { STORE: 'sqlite', ACTOR_TYPE: 'user', STORE_CONFIG: valid_store_config });
-    }, /CONFIG\.STORE must be a store factory function/);
-
-  });
-
-  it('throws when STORE_CONFIG is missing', function () {
-
-    assert.throws(function () {
-      AuthFactory(Lib, { STORE: MemoryStoreFactory, ACTOR_TYPE: 'user' });
-    }, /CONFIG\.STORE_CONFIG is required/);
+      AuthFactory(Lib, { Store: 'sqlite', ACTOR_TYPE: 'user' });
+    }, /CONFIG\.Store must be a ready-to-use store object/);
 
   });
 
   it('throws when ACTOR_TYPE is missing', function () {
 
     assert.throws(function () {
-      AuthFactory(Lib, { STORE: MemoryStoreFactory, STORE_CONFIG: valid_store_config });
+      AuthFactory(Lib, { Store: MemoryStore });
     }, /CONFIG\.ACTOR_TYPE is required/);
 
   });
@@ -89,8 +77,7 @@ describe('loader validation', function () {
     // Missing JWT block entirely
     assert.throws(function () {
       AuthFactory(Lib, {
-        STORE: MemoryStoreFactory,
-        STORE_CONFIG: valid_store_config,
+        Store: MemoryStore,
         ACTOR_TYPE: 'user',
         ENABLE_JWT: true,
         JWT: null,
@@ -102,8 +89,7 @@ describe('loader validation', function () {
     // Signing key too short
     assert.throws(function () {
       AuthFactory(Lib, {
-        STORE: MemoryStoreFactory,
-        STORE_CONFIG: valid_store_config,
+        Store: MemoryStore,
         ACTOR_TYPE: 'user',
         ENABLE_JWT: true,
         JWT: { signing_key: 'short', issuer: 'test', audience: 'test' },
@@ -128,8 +114,7 @@ describe('loader validation', function () {
 
     assert.throws(function () {
       AuthFactory(Lib, {
-        STORE: function () { return partialStore; },
-        STORE_CONFIG: valid_store_config,
+        Store: partialStore,
         ACTOR_TYPE: 'user'
       });
     }, /Invalid store contract: missing method `deleteSessions`/);
@@ -150,8 +135,7 @@ describe('loader validation', function () {
 
     assert.throws(function () {
       AuthFactory(Lib, {
-        STORE: function () { return badStore; },
-        STORE_CONFIG: valid_store_config,
+        Store: badStore,
         ACTOR_TYPE: 'user'
       });
     }, /Invalid store contract: missing method `setSession`/);
@@ -172,8 +156,7 @@ describe('loader validation', function () {
 
     // Should not throw
     const auth = AuthFactory(Lib, {
-      STORE: function () { return validStore; },
-      STORE_CONFIG: valid_store_config,
+      Store: validStore,
       ACTOR_TYPE: 'user'
     });
 
@@ -440,8 +423,7 @@ describe('parts/token-source', function () {
 describe('createSession / removeSession cookie descriptor', function () {
 
   const valid_base_config = {
-    STORE: MemoryStoreFactory,
-    STORE_CONFIG: {},
+    Store: MemoryStore._createNew(),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LIMITS: { total_max: 5, evict_oldest_on_limit: true }
@@ -732,8 +714,7 @@ describe('parts/policy', function () {
 describe('createSession wire-format validation (plan 0042)', function () {
 
   const valid_base_config = {
-    STORE: MemoryStoreFactory,
-    STORE_CONFIG: {},
+    Store: MemoryStore._createNew(),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LIMITS: { total_max: 5, evict_oldest_on_limit: true }

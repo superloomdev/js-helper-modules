@@ -34,12 +34,12 @@ function makeKey (tenant_id, actor_id, token_key) {
 
 /********************************************************************
 Create a new in-process memory store. Returns an object matching the
-8-method store contract consumed by auth.js. Each call to this
-factory produces an independent Map, so tests can run in isolation.
+8-method store contract consumed by auth.js. Each call produces an
+independent Map, so tests can run in isolation.
 
 @return {Object} - Store interface
 *********************************************************************/
-module.exports = function createMemoryStore () {
+function createMemoryStore () {
 
   const _map = new Map();
 
@@ -234,4 +234,18 @@ module.exports = function createMemoryStore () {
 
   return Store;
 
-};
+}
+
+
+/********************************************************************
+Export a ready-to-use singleton store for the default test loader.
+Tests that need isolation can call MemoryStore._createNew() for a
+fresh instance with its own Map.
+*********************************************************************/
+
+const MemoryStore = createMemoryStore();
+
+// Test helper: create a fresh isolated store instance
+MemoryStore._createNew = createMemoryStore;
+
+module.exports = MemoryStore;
