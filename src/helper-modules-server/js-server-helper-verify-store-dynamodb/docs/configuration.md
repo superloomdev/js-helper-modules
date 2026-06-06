@@ -3,29 +3,30 @@
 ## Loader Pattern
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')({
+  table_name:   'verification_codes',
+  lib_dynamodb: Lib.DynamoDB
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-verify-store-dynamodb'),
-  STORE_CONFIG: {
-    table_name:   'verification_codes',
-    lib_dynamodb: Lib.DynamoDB
-  }
+  Store: Store
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Configuration Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the DynamoDB table. |
 | `lib_dynamodb` | `Object` | Yes | An initialized `Lib.DynamoDB` instance (`@superloomdev/js-server-helper-nosql-aws-dynamodb`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | DynamoDB wrapper (`Lib.DynamoDB`) |
+| Package | Type | Purpose |
+|---------|------|---------|
+| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
+| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | Peer | DynamoDB wrapper (`Lib.DynamoDB`) |
 
 ## Environment Variables
 

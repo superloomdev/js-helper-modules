@@ -1,25 +1,26 @@
 # js-server-helper-verify-store-dynamodb. AI Reference
 
-Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-verify`. Cannot stand alone. Always loaded by the Verify parent via the factory protocol; not called directly by application code.
+Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a DynamoDB table provisioned out-of-band (IaC, AWS Console, or CloudFormation). The adapter provisions the table itself via `setupNewStore` using `PAY_PER_REQUEST` billing mode. Uses `js-server-helper-nosql-aws-dynamodb` injected via `STORE_CONFIG.lib_dynamodb`.
+Requires a DynamoDB table provisioned out-of-band (IaC, AWS Console, or CloudFormation). The adapter provisions the table itself via `setupNewStore` using `PAY_PER_REQUEST` billing mode. Uses `js-server-helper-nosql-aws-dynamodb` injected via `config.lib_dynamodb`.
 
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-verify-store-dynamodb');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')({
+  table_name:   'verification_codes',
+  lib_dynamodb: Lib.DynamoDB
+});
 ```
 
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Verify config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Verify error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
+| Argument | Type | Required | Description |
+|---|---|---|---|
+| `table_name` | String | Yes | Name of the DynamoDB table |
+| `lib_dynamodb` | Object | Yes | Initialized `js-server-helper-nosql-aws-dynamodb` instance |
 
-Returns a Store interface. The Verify parent retains the reference and calls the contract methods.
+Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods.
 
-## `STORE_CONFIG`
+## Configuration
 
 ```js
 {
@@ -53,7 +54,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Verify module.
+1. **Never call the adapter directly from application code.** Always go through the parent Verify module. The adapter is configured independently and passed as a ready-to-use store object to the Verify parent.
 
 2. **`getRecord` returns `record: null` on a miss.** Not an error.
 
