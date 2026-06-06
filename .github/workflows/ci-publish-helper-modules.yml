@@ -44,9 +44,10 @@
 #   35. test-auth-store-dynamodb → publish-auth-store-dynamodb
 #   36. test-distinct-queue → publish-distinct-queue
 #   37. test-distinct-queue-store-mongodb → publish-distinct-queue-store-mongodb
-#   38. test-http-gateway → publish-http-gateway
-#   39. test-http-gateway-adapter-aws-apigateway → publish-http-gateway-adapter-aws-apigateway
-#   40. test-http-gateway-adapter-express → publish-http-gateway-adapter-express
+#   38. test-distinct-queue-store-dynamodb → publish-distinct-queue-store-dynamodb
+#   39. test-http-gateway → publish-http-gateway
+#   40. test-http-gateway-adapter-aws-apigateway → publish-http-gateway-adapter-aws-apigateway
+#   41. test-http-gateway-adapter-express → publish-http-gateway-adapter-express
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -2535,12 +2536,77 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 36: js-server-helper-http-gateway
+  #   MODULE 36: js-server-helper-distinct-queue-store-dynamodb
+  #   (needs utils, debug, crypto, instance, nosql-aws-dynamodb, distinct-queue; Docker)
+  # ###########################################################################
+
+  test-distinct-queue-store-dynamodb:
+    needs: [detect, publish-distinct-queue]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-distinct-queue-store-dynamodb:
+    needs: [detect, test-distinct-queue-store-dynamodb]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-distinct-queue-store-dynamodb'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 37: js-server-helper-http-gateway
   #   (needs utils, debug, instance; no Docker required)
   # ###########################################################################
 
   test-http-gateway:
-    needs: [detect, publish-distinct-queue-store-mongodb]
+    needs: [detect, publish-distinct-queue-store-dynamodb]
     if: |
       always() &&
       !cancelled() &&
