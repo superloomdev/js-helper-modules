@@ -13,7 +13,7 @@ const MemoryStore = require('./memory-store');
 
 
 // Shared store instance so cleanupBetweenTests can call _clear().
-const sharedStore = MemoryStore();
+const sharedStore = MemoryStore._createNew();
 
 
 // 64-char signing key gives HS256 the full security margin.
@@ -23,8 +23,7 @@ const SIGNING_KEY = 'k'.repeat(64);
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: function () { return sharedStore; },
-    STORE_CONFIG: {},
+    Store:      sharedStore,
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

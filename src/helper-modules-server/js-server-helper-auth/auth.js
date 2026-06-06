@@ -45,8 +45,8 @@ misconfiguration fails fast at startup, not on first request.
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
-  // Dependencies for this instance. Each store may pull additional libs
-  // (Lib.Postgres etc.) from CONFIG.STORE_CONFIG - not from here.
+  // Dependencies for this instance. Store adapters build their own Lib
+  // internally — auth does not inject driver helpers into them.
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,

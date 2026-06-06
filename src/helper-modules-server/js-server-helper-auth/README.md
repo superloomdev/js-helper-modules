@@ -60,7 +60,7 @@ Five storage adapters are available, each a separate package. Install only the o
 
 A legitimate deviation is using a NoSQL adapter for auth in a SQL-backed application when sessions need different scaling characteristics from the rest of the app (burstiness, serverless cold-start, compliance segregation). Mixing SQL families (Postgres app with MySQL or SQLite auth) is not a useful pattern.
 
-Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and `STORE_CONFIG` shape. The auth module itself owns no per-backend documentation: every Class F adapter is the authoritative source for its own backend.
+Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and its own config shape. The auth module itself owns no per-backend documentation: every adapter is the authoritative source for its own backend.
 
 ## Aligned with Superloom Philosophy
 
@@ -71,7 +71,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, options, and error types. DB-mode and JWT-mode functions side by side
-- [Configuration](docs/configuration.md). Loader pattern, every configuration key, per-backend `STORE_CONFIG` shape, peer dependencies, testing tiers
+- [Configuration](docs/configuration.md). Loader pattern, every configuration key, per-backend adapter config shape, peer dependencies, testing tiers
 - [Data model](docs/data-model.md). Every session-record field, the design decisions behind the composite primary key, the throttled `last_active_at` refresh, and the `custom_data` extension point
 - [Runtime](docs/runtime.md). The two or three concrete differences between running the auth module in a persistent-server runtime and a serverless-function runtime
 - [Push notifications](docs/push-notifications.md). The push-token contract the auth module exposes for a future `js-server-helper-push` to consume
