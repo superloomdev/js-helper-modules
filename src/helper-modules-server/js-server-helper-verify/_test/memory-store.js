@@ -32,7 +32,7 @@ function compositeKey (scope, key) {
 /********************************************************************
 Create a new in-process memory store. Returns an object matching the
 6-method store contract consumed by verify.js. Each call to this
-factory produces an independent Map, so tests can run in isolation.
+function produces an independent Map, so tests can run in isolation.
 
 @return {Object} - Store interface (plus _records for white-box assertions)
 *********************************************************************/

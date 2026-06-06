@@ -4,25 +4,29 @@ Compact, AI-targeted reference for the public interface. Humans should read `REA
 
 ## Module Overview
 
-One-time verification code lifecycle: generate, store, validate, consume. Three create interfaces (`createPin`, `createCode`, `createToken`) over one shared flow, plus one `verify` function that consumes any of them. Three independent defenses against abuse: cooldown on creation, expiry (TTL), per-record fail counter. Successful verify deletes the record in the background. Storage backends are standalone Class F adapter packages (`@superloomdev/js-server-helper-verify-store-*`); the caller passes the adapter factory directly as `CONFIG.STORE`.
+One-time verification code lifecycle: generate, store, validate, consume. Three create interfaces (`createPin`, `createCode`, `createToken`) over one shared flow, plus one `verify` function that consumes any of them. Three independent defenses against abuse: cooldown on creation, expiry (TTL), per-record fail counter. Successful verify deletes the record in the background. Storage backends are standalone Class F adapter packages (`@superloomdev/js-server-helper-verify-store-*`); the caller passes the ready-to-use store object directly as `CONFIG.Store`.
 
 ## Factory Pattern
 
 ```js
 module.exports = function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
-  // Validates CONFIG at construction (STORE must be a function; STORE_CONFIG must be an object).
+  // Validates CONFIG at construction (Store must be a ready-to-use object).
   // Throws synchronously on misconfiguration.
   return { createPin, createCode, createToken, verify, setupNewStore, cleanupExpiredRecords };
 };
 ```
 
-`CONFIG.STORE` is a **factory function**, not a string. The loader calls it as `CONFIG.STORE(Lib, CONFIG, ERRORS)` and binds the returned store object to the instance. Passing a string throws `CONFIG.STORE is required and must be a store factory function`.
+`CONFIG.Store` is a **ready-to-use store object**, not a factory function. The loader uses it directly. The adapter is a fully independent module that owns its own Lib/Config/ERRORS. Passing a factory function throws `CONFIG.Store is required and must be a ready-to-use store object`.
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
+  table_name: 'verification_codes',
+  lib_postgresql: Lib.PostgreSQL
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-verify-store-postgres'),
-  STORE_CONFIG: { table_name: 'verification_codes', lib_sql: Lib.Postgres }
+  Store: Store
 });
 ```
 
@@ -76,8 +80,7 @@ Bulk-deletes records whose `expires_at` is in the past. SQL backends require thi
 
 | Key | Type | Required | Notes |
 |---|---|---|---|
-| `STORE` | function | Yes | Store factory function. `require('@superloomdev/js-server-helper-verify-store-<backend>')` |
-| `STORE_CONFIG` | object | Yes | Per-adapter config. Shape lives in each adapter's README |
+| `Store` | object | Yes | Ready-to-use store object. Configure adapter independently, then pass result |
 | `PIN_CHARSET` | string | No | Default `'0123456789'` |
 | `CODE_CHARSET` | string | No | Default Crockford Base32 (`'0123456789ABCDEFGHJKMNPQRSTVWXYZ'`) |
 | `TOKEN_CHARSET` | string | No | Default `a-zA-Z0-9` (62 chars) |
@@ -108,7 +111,7 @@ Error shape is frozen at module load: `{ type: 'VERIFY_NOT_FOUND', message: 'Ver
 ## Critical Behaviour for Code-Generating Tools
 
 - **`instance` is always the first argument.** Every function reads `instance.time` for timestamps.
-- **`STORE` is a factory function, not a string.** The loader throws on string, object, or missing.
+- **`Store` is a ready-to-use object, not a factory function.** The loader throws on factory function, string, or missing.
 - **Programmer errors throw, operational errors return.** Missing required options throw `TypeError`; store failures return `{ success: false, error }`.
 - **One `(scope, key)` pair holds at most one active record.** A new `create*` call replaces the previous record. There is no accumulation.
 - **One-time guarantee via background delete.** On successful verify, the record is removed in the background. In serverless runtimes, the container freeze may defer the delete; see `docs/runtime.md` for the caveat and mitigations.
@@ -123,7 +126,7 @@ Error shape is frozen at module load: `{ type: 'VERIFY_NOT_FOUND', message: 'Ver
 | `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | `generateRandomString(charset, length)` |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | `backgroundRoutine` for post-verify record deletion |
 
-The store adapter (`CONFIG.STORE`) consumes its own driver helper (`Lib.SQLite`, `Lib.Postgres`, `Lib.MySQL`, `Lib.MongoDB`, or `Lib.DynamoDB`) through `CONFIG.STORE_CONFIG`. The verify module never imports a database driver helper directly.
+The store adapter (`CONFIG.Store`) is a fully independent module that owns its own driver helper (`Lib.SQLite`, `Lib.Postgres`, `Lib.MySQL`, `Lib.MongoDB`, or `Lib.DynamoDB`). The verify module never imports a database driver helper directly.
 
 ## Out of Scope
 
@@ -137,4 +140,4 @@ The store adapter (`CONFIG.STORE`) consumes its own driver helper (`Lib.SQLite`,
 - `docs/configuration.md`. Loader pattern, every config key, charset overrides, peer dependencies, testing tier
 - `docs/data-model.md`. Canonical record shape, core concepts, design decisions
 - `docs/runtime.md`. The runtime-shape differences for the verify module (post-verify background delete caveat in serverless, scheduled cleanup mechanism). Not a framework cookbook
-- Storage adapters: see the README's "Storage Adapters" section for the list plus selection rule. Per-backend schema, indexes, TTL, IaC notes, and `STORE_CONFIG` shape live in each adapter package's own README (`@superloomdev/js-server-helper-verify-store-*`)
+- Storage adapters: see the README's "Storage Adapters" section for the list plus selection rule. Per-backend schema, indexes, TTL, IaC notes, and configuration shape live in each adapter package's own README (`@superloomdev/js-server-helper-verify-store-*`)
