@@ -5,18 +5,17 @@
 
 ---
 
-## Singleton Loader
+## Standalone Loader
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
 
-// Pass the adapter (not the result of calling it) as CONFIG.ADAPTER:
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: AwsAdapter
+  Adapter: AwsAdapter
 });
 ```
 
-**Peer dependencies in Lib:** `Utils` (type checks via `Lib.Utils.isString`, `Lib.Utils.isObject`, `Lib.Utils.isFunction`, `Lib.Utils.isNullOrUndefined`)
+The adapter is standalone — it builds its own `Lib` internally. No peer dependencies required from the caller.
 
 **Runtime peers:** none — no AWS SDK required, no Docker required, no external services
 

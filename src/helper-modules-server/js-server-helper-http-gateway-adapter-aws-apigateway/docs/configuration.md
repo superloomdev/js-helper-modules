@@ -5,37 +5,37 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 **Related docs:**
 - [`api.md`](api.md) for the 3-method adapter contract
 - [`payload-format.md`](payload-format.md) for the v2.0 event schema and v1.0 boundary
-- [`../../js-server-helper-http-gateway/docs/configuration.md`](../../js-server-helper-http-gateway/docs/configuration.md) for the gateway loader and `CONFIG.ADAPTER` slot
+- [`../../js-server-helper-http-gateway/docs/configuration.md`](../../js-server-helper-http-gateway/docs/configuration.md) for the gateway loader and `CONFIG.Adapter` slot
 
 ---
 
 ## Loader Pattern
 
-Pass the adapter's `require()` result as `CONFIG.ADAPTER` to the gateway singleton loader:
+Instantiate the adapter by calling it, then pass the ready-to-use object as `CONFIG.Adapter` to the gateway loader:
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
 
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: AwsAdapter
+  Adapter: AwsAdapter
 });
 ```
 
-Pass the adapter itself (the result of `require()`), not the result of calling it. The gateway singleton loader invokes it once at construction time with `(Lib, ADAPTER_CONFIG, errors)` and reuses the returned adapter object for every request.
+Call the adapter loader first (it builds its own Lib and ERRORS internally). Pass the resulting ready-to-use adapter object — not the `require()` result directly — to the gateway.
 
 ---
 
 ## Configuration Keys
 
-The AWS adapter accepts **no configuration**. All three loader parameters are unused:
+The AWS adapter accepts **no configuration**. Pass an empty object `{}` or `null`/`undefined`:
 
-| Loader parameter | Used by adapter? |
-|---|---|
-| `Lib` (the gateway's dependency container) | No |
-| `ADAPTER_CONFIG` (the `CONFIG.ADAPTER_CONFIG` you pass to the gateway) | No |
-| `errors` (the gateway's error catalog) | No |
+```javascript
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+```
 
-The parameters are accepted only to satisfy the adapter contract.
+| Config key | Required | Description |
+|---|---|---|
+| *(none)* | — | This adapter requires no configuration |
 
 ---
 
@@ -50,10 +50,10 @@ This keeps the deployment artifact small. A typical Lambda function bundle that 
 ## Lambda Handler Pattern
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway');
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
 
 // Build the gateway once at module scope so it survives across warm invocations:
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: AwsAdapter });
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: AwsAdapter });
 
 exports.handler = function (event, context, callback) {
   const instance = Lib.Instance.initialize();

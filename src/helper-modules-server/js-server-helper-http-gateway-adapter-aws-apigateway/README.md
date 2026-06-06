@@ -7,15 +7,17 @@ AWS Lambda + API Gateway runtime adapter for [`@superloomdev/js-server-helper-ht
 
 ## What This Is
 
-A stateless adapter that normalizes AWS API Gateway payload format v2.0 event objects (HTTP API, Lambda Function URLs) into the standard `instance.http_request` shape consumed by the gateway. Pass it as `CONFIG.ADAPTER` when constructing the gateway.
+A stateless adapter that normalizes AWS API Gateway payload format v2.0 event objects (HTTP API, Lambda Function URLs) into the standard `instance.http_request` shape consumed by the gateway. Call it to get a ready-to-use object, then pass it as `CONFIG.Adapter` when constructing the gateway.
 
 **For REST API (payload format v1.0) support,** use `js-server-helper-http-gateway-adapter-aws-apigateway-v1` (if available) or implement a custom adapter.
 
 ## Usage
 
 ```javascript
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+
 const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')
+  Adapter: AwsAdapter
 });
 
 // In your Lambda handler:
