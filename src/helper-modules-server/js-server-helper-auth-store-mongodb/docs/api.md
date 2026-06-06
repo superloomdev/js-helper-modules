@@ -20,19 +20,19 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-mongodb');
-const store   = factory(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-auth-store-mongodb')({
+  collection_name: 'sessions_user',
+  lib_mongodb:     Lib.MongoDB
+});
 ```
 
 | Argument | Type | Purpose |
 |---|---|---|
-| `Lib` | Object | Dependency container. Reads `Lib.Utils` and `Lib.Debug` |
-| `CONFIG` | Object | Merged Auth `CONFIG`. The factory reads `CONFIG.STORE_CONFIG` only. See [configuration.md](configuration.md) |
-| `ERRORS` | Object | Auth's frozen error catalog. The adapter uses `ERRORS.SERVICE_UNAVAILABLE` and `ERRORS.NOT_IMPLEMENTED` |
+| `config` | Object | `{ collection_name, lib_mongodb }`. See [configuration.md](configuration.md) |
 
-The factory validates `CONFIG.STORE_CONFIG` and returns a Store interface. Each factory call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different collections) coexist in the same process.
+The adapter validates the config, builds its own `Lib` (Utils + Debug) and `ERRORS` catalog internally, and returns a ready-to-use Store interface. Each call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different collections) coexist in the same process.
 
-The factory throws an `Error` if `STORE_CONFIG`, `STORE_CONFIG.collection_name`, or `STORE_CONFIG.lib_mongodb` is missing.
+The adapter throws an `Error` if `config.collection_name` or `config.lib_mongodb` is missing.
 
 ## Store Contract
 

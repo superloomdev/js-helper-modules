@@ -1,23 +1,29 @@
 # js-server-helper-auth-store-mongodb. AI Reference
 
-Class F storage adapter. MongoDB backend for `@superloomdev/js-server-helper-auth`. Cannot stand alone. Always loaded by the Auth parent via the factory protocol; not called directly by application code.
+Class F storage adapter. MongoDB backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
-## Adapter Factory
+## Loader Pattern
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-mongodb');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')({
+  collection_name: 'sessions_user',
+  lib_mongodb:     Lib.MongoDB
+});
+
+Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+  Store:      Store,
+  ACTOR_TYPE: 'user'
+});
 ```
 
-| Argument | Type | Source |
+| Config key | Type | Notes |
 |---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Auth config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Auth error catalog; the adapter uses `SERVICE_UNAVAILABLE` and `NOT_IMPLEMENTED` |
+| `collection_name` | String | Required. One collection per actor_type |
+| `lib_mongodb` | Object | Required. Initialized `js-server-helper-nosql-mongodb` instance |
 
-Returns a Store interface. The Auth parent retains the reference and calls the contract methods to satisfy its persistence needs.
+The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
 
-## `STORE_CONFIG`
+## Config
 
 ```js
 {
@@ -62,7 +68,7 @@ Each session is a single document. The shape is the canonical record plus two ad
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Auth module. The adapter expects `Lib`, the full Auth `CONFIG`, and the frozen Auth `ERRORS` catalog. Application code does not have those.
+1. **Call the adapter directly with its config to get a Store object, then pass that to the Auth parent.** Do not pass the factory function reference to Auth; pass the result of calling it.
 
 2. **`setupNewStore` is not implemented.** Always returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`. Indexes and the collection are provisioned out-of-band. Generated code that calls `setupNewStore` on this backend must handle the `NOT_IMPLEMENTED` error envelope; do not assume it succeeds.
 
@@ -92,16 +98,16 @@ Each session is a single document. The shape is the canonical record plus two ad
 @superloomdev/js-server-helper-nosql-mongodb   (MongoDB driver wrapper)
 ```
 
-These are loaded into `Lib` by the application before the Auth parent is loaded. The adapter does not require any of them directly; it accesses them through `Lib`.
+Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-mongodb` driver helper is passed in via `config.lib_mongodb` by the application.
 
-## Error Catalog Used
+## Error Catalog
 
-Two types from the Auth `ERRORS` catalog:
+The adapter defines its own internal ERRORS catalog. Auth forwards error envelopes transparently.
 
 | Error | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
-| `ERRORS.NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
+| `SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
+| `NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
