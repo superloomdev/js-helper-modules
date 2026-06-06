@@ -41,7 +41,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-postgres/docs/api.md). The store contract this adapter implements and the adapter factory protocol
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-postgres/docs/configuration.md). `STORE_CONFIG` keys, peer dependencies, environment variables, testing tier
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-postgres/docs/configuration.md). Config keys, peer dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-postgres/docs/schema.md). What `setupNewStore` creates, PostgreSQL-specific syntax notes (identifier quoting, BIGINT coercion, JSON encoding, UPSERT semantics, index strategy)
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-postgres/docs/cleanup.md). PostgreSQL has no native TTL; scheduled cleanup is required
 - [Auth parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth). The data model, error catalog, and Auth-side configuration this adapter plugs into

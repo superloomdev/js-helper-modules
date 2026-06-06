@@ -1,23 +1,29 @@
 # js-server-helper-auth-store-postgres. AI Reference
 
-Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-auth`. Cannot stand alone. Always loaded by the Auth parent via the factory protocol; not called directly by application code.
+Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
-## Adapter Factory
+## Loader Pattern
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-postgres');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-auth-store-postgres')({
+  table_name: 'sessions_user',
+  lib_sql:    Lib.Postgres
+});
+
+Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+  Store:      Store,
+  ACTOR_TYPE: 'user'
+});
 ```
 
-| Argument | Type | Source |
+| Config key | Type | Notes |
 |---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Auth config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Auth error catalog; used verbatim in error envelopes |
+| `table_name` | String | Required. One table per actor_type |
+| `lib_sql` | Object | Required. Initialized `js-server-helper-sql-postgres` instance |
 
-Returns a Store interface with eight async methods. The Auth parent retains the reference and calls these methods to satisfy its persistence needs.
+The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
 
-## `STORE_CONFIG`
+## Config
 
 ```js
 {
@@ -45,7 +51,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Auth module. The adapter expects `Lib`, the full Auth `CONFIG`, and the frozen Auth `ERRORS` catalog. Application code does not have those.
+1. **Call the adapter directly with its config to get a Store object, then pass that to the Auth parent.** Do not pass the factory function reference to Auth; pass the result of calling it.
 
 2. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration.
 
@@ -73,15 +79,15 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 @superloomdev/js-server-helper-sql-postgres   (Postgres driver wrapper)
 ```
 
-These are loaded into `Lib` by the application before the Auth parent is loaded. The adapter does not require any of them directly; it accesses them through `Lib`.
+Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `sql-postgres` driver helper is passed in via `config.lib_sql` by the application.
 
 ## Error Catalog Used
 
-Only one type from the Auth `ERRORS` catalog:
+The adapter defines its own internal ERRORS catalog. Auth forwards error envelopes transparently; the adapter's `SERVICE_UNAVAILABLE` type is `AUTH_STORE_POSTGRES_SERVICE_UNAVAILABLE`.
 
 | Error | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
+| `SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
