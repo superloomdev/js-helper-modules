@@ -2,7 +2,7 @@
 
 ## Table Structure
 
-The adapter stores records in a single DynamoDB table (configurable via `STORE_CONFIG.table_name`).
+The adapter stores records in a single DynamoDB table (configurable via `table_name`).
 
 ### Item Shape
 
@@ -59,7 +59,7 @@ PutItem(item);
 ```
 
 **Effort:** Single write operation.  
-The `request_id` is extracted from `sort_key` (segment after the final `\u001F`, opaque to adapter).
+The sort key is composed from `resource_id`, `data_version`, and `request_id` joined by `\u001F`.
 
 ### queryByResourceId
 
@@ -125,7 +125,7 @@ Used during `claim()` to remove stale records after the latest is selected.
 The `setupNewStore()` method provisions the table idempotently:
 
 ```javascript
-await lib_dynamodb.createTable(instance, table_name, {
+await Lib.DynamoDB.createTable(instance, table_name, {
   attribute_definitions: [
     { name: 'p',  type: 'S' },
     { name: 'id', type: 'S' }

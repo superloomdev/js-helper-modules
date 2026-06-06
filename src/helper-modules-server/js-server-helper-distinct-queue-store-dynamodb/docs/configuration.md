@@ -1,25 +1,25 @@
 # Configuration — js-server-helper-distinct-queue-store-dynamodb
 
-## Adapter-Local Configuration
+## Loader Pattern
 
-This adapter owns its configuration internally, like any standalone module.
-You pass configuration when requiring the adapter; the resulting factory
-function is what you provide to the parent module's `CONFIG.STORE` key.
+The adapter is a store implementation for `js-server-helper-distinct-queue`.
+The project loader injects `Lib` (including `Lib.DynamoDB`), and the adapter
+owns its own configuration. It returns a ready-to-use store object that
+you provide to the parent module's `CONFIG.Store` key.
 
 ```javascript
-// Configure the adapter with its required settings
-const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-  table_name: 'distinct_queue_jobs',
-  lib_dynamodb: Lib.DynamoDB
+// Load the adapter with Lib injected and its own config
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+  table_name: 'distinct_queue_jobs'
 });
 
-// Pass the pre-configured adapter to the parent module
+// Pass the ready-to-use store to the parent module
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: StoreAdapter
+  Store: Store
 });
 ```
 
-## Required Configuration Keys
+## Configuration Keys
 
 ### `table_name`
 
@@ -32,12 +32,29 @@ The DynamoDB table name for queue records. The table will be created automatical
 table_name: 'myapp_queue_jobs'
 ```
 
-### `lib_dynamodb`
+### `KEY_DELIMITER`
 
-**Type:** `object`  
-**Required:** Yes
+**Type:** `string`  
+**Required:** No (default: `\u001F`)
 
-Reference to the `js-server-helper-nosql-aws-dynamodb` instance. This is typically `Lib.DynamoDB` after loading the helper.
+The sort key field separator. The default `\u001F` is the ASCII Unit Separator,
+a non-printable control character that never appears in caller-supplied
+resource_ids. Changing this after records exist would make stored sort keys
+unreadable — override only with full understanding of the migration implications.
+
+```javascript
+KEY_DELIMITER: '\u001F'
+```
+
+## Injected Dependencies
+
+The adapter reads these from the injected `Lib` container:
+
+| `Lib.*` | Source | Used for |
+|---|---|---|
+| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks |
+| `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on driver failures |
+| `Lib.DynamoDB` | `@superloomdev/js-server-helper-nosql-aws-dynamodb` | The DynamoDB driver used for all storage operations |
 
 ```javascript
 Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, {
@@ -46,8 +63,6 @@ Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
 });
 ```
-
-The adapter merges your configuration over its internal defaults and validates at stage 2 (when the parent module calls `CONFIG.STORE(Lib, ERRORS)`).
 
 ## Full Configuration Example
 
@@ -64,13 +79,12 @@ Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-// 3. Configure and load distinct-queue with DynamoDB adapter
-// The adapter owns its config; just pass the configured factory to STORE
+// 3. Load the store adapter (Lib injected), then the parent module
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+  table_name: 'queue_jobs'
+});
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-    table_name: 'queue_jobs',
-    lib_dynamodb: Lib.DynamoDB
-  })
+  Store: Store
 });
 
 // 4. Idempotent table setup (run once at app startup)
@@ -94,14 +108,14 @@ See the `_test/` directory for a complete Docker Compose setup with DynamoDB Loc
 
 ## Validation
 
-The adapter validates its merged configuration in stage 2 (when the parent module calls `CONFIG.STORE(Lib, ERRORS)`) and throws if:
+The adapter validates configuration at load time and throws if:
 
-- `Config` is not an object
 - `table_name` is missing or empty
-- `lib_dynamodb` is not provided
+- `KEY_DELIMITER` is missing or empty
+- `Lib.DynamoDB` is not injected
 
 ```
-[js-server-helper-distinct-queue-store-dynamodb] Config must be an object
-[js-server-helper-distinct-queue-store-dynamodb] Config.table_name is required
-[js-server-helper-distinct-queue-store-dynamodb] Config.lib_dynamodb is required (pass Lib.DynamoDB)
+[distinct-queue-store-dynamodb] CONFIG.table_name is required and must be a non-empty string
+[distinct-queue-store-dynamodb] CONFIG.KEY_DELIMITER is required and must be a non-empty string
+[distinct-queue-store-dynamodb] Lib.DynamoDB is required
 ```
