@@ -19,8 +19,8 @@
 // CREATE INDEX. NoSQL backends (mongodb, dynamodb) return NOT_IMPLEMENTED;
 // provision those out-of-band until the underlying helpers gain schema APIs.
 // Storage backends are provided by standalone adapter packages. The caller
-// passes the chosen store factory directly as CONFIG.STORE - no string
-// dispatch inside this module. Require only the adapter you need:
+// passes a ready-to-use store object via CONFIG.Store - the adapter is
+// pre-configured with its own Lib and config. Require only the adapter you need:
 //   js-server-helper-auth-store-sqlite
 //   js-server-helper-auth-store-postgres
 //   js-server-helper-auth-store-mysql
@@ -70,9 +70,9 @@ module.exports = function loader (shared_libs, config) {
   const Validators = require('./auth.validators')(Lib);
   Validators.validateConfig(CONFIG);
 
-  // Instantiate the store. CONFIG.STORE is the factory function passed in
-  // by the caller; it extracts its own slice from CONFIG.STORE_CONFIG.
-  const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
+  // Use the ready-to-use store object passed in via config.Store.
+  // The adapter was pre-configured by the caller with its own Lib and config.
+  const store = CONFIG.Store;
 
   // Validate store contract immediately so missing methods fail at startup
   Validators.validateStoreContract(store);
@@ -899,8 +899,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       // a generic envelope error.
       if (!Lib.Utils.isFunction(store.setupNewStore)) {
         throw new TypeError(
-          '[js-server-helper-auth] setupNewStore is not supported by store "' +
-          CONFIG.STORE + '" - provision the schema out-of-band'
+          '[js-server-helper-auth] setupNewStore is not supported by this store - provision the schema out-of-band'
         );
       }
 
@@ -926,8 +925,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       // leaking a synthetic envelope error to the caller.
       if (!Lib.Utils.isFunction(store.cleanupExpiredSessions)) {
         throw new Error(
-          '[js-server-helper-auth] store "' + CONFIG.STORE +
-          '" does not implement cleanupExpiredSessions'
+          '[js-server-helper-auth] store does not implement cleanupExpiredSessions'
         );
       }
 

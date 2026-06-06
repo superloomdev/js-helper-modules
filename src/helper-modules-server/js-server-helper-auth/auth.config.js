@@ -7,23 +7,15 @@
 
 module.exports = {
 
-  // Store factory function. Pass the result of require() for the chosen
-  // adapter package - the same way you pass Lib.Postgres / Lib.MongoDB.
-  //   STORE: require('@superloomdev/js-server-helper-auth-store-sqlite')
-  //   STORE: require('@superloomdev/js-server-helper-auth-store-postgres')
-  //   STORE: require('@superloomdev/js-server-helper-auth-store-mysql')
-  //   STORE: require('@superloomdev/js-server-helper-auth-store-mongodb')
-  //   STORE: require('@superloomdev/js-server-helper-auth-store-dynamodb')
+  // Ready-to-use store object from the chosen adapter package.
+  // The adapter is pre-configured with its own Lib and config.
+  //   Store: require('@superloomdev/js-server-helper-auth-store-sqlite')({ table_name: 'sessions_user', lib_sql: Lib.SQLite })
+  //   Store: require('@superloomdev/js-server-helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres })
+  //   Store: require('@superloomdev/js-server-helper-auth-store-mysql')({ table_name: 'sessions_user', lib_sql: Lib.MySQL })
+  //   Store: require('@superloomdev/js-server-helper-auth-store-mongodb')({ collection_name: 'sessions_user', lib_mongodb: Lib.MongoDB })
+  //   Store: require('@superloomdev/js-server-helper-auth-store-dynamodb')({ table_name: 'sessions_user', lib_dynamodb: Lib.DynamoDB })
   // Required.
-  STORE: null,
-
-  // Per-store configuration. Shape varies by STORE - the chosen store's
-  // factory validates its own required keys.
-  //   sqlite/postgres/mysql: { table_name: 'sessions_user', lib_sql: Lib.SQLite }
-  //   dynamodb:              { table_name: 'sessions_user', lib_dynamodb: Lib.DynamoDB }
-  //   mongodb:               { collection_name: 'sessions_user', lib_mongodb: Lib.MongoDB }
-  // Required.
-  STORE_CONFIG: null,
+  Store: null,
 
   // The actor_type this instance owns. Stamped onto every record (defense
   // in depth) and verified on every read. One instance = one actor_type.

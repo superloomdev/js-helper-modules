@@ -1,12 +1,12 @@
 # Configuration. `js-server-helper-auth`
 
-Loader pattern, every configuration key, the per-backend `STORE_CONFIG` shape, peer dependencies, and the testing tier. For the function reference see [API Reference](api.md). For backend selection criteria see the [Storage Adapters](../README.md#storage-adapters) section in the module README.
+Loader pattern, every configuration key, the per-backend store config shape, peer dependencies, and the testing tier. For the function reference see [API Reference](api.md). For backend selection criteria see the [Storage Adapters](../README.md#storage-adapters) section in the module README.
 
 ## On This Page
 
 - [Loader Pattern](#loader-pattern)
 - [Configuration Keys](#configuration-keys)
-- [`STORE_CONFIG` by Backend](#store_config-by-backend)
+- [Store Config by Backend](#store-config-by-backend)
 - [JWT Mode](#jwt-mode)
 - [Limit Policy](#limit-policy)
 - [Environment Variables](#environment-variables)
@@ -22,8 +22,7 @@ The module is a factory. Each `require(...)(Lib, config)` call returns an indepe
 
 ```javascript
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-auth-store-postgres'),
-  STORE_CONFIG: { table_name: 'sessions_user', lib_sql: Lib.Postgres },
+  Store:        require('@superloomdev/js-server-helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
   LIMITS:       { total_max: 20, evict_oldest_on_limit: true },
@@ -33,14 +32,14 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 Loader call semantics:
 
-- **First argument: `Lib`.** A container exposing peer modules. Auth reads `Lib.Utils` (type checks, validation), `Lib.Debug` (logging, performance audit), `Lib.Crypto` (token generation, SHA-256 hashing), `Lib.Instance` (request lifecycle, `instance.time`), and `Lib.HttpGateway` (cookie descriptor building). The chosen store adapter brings its own peer requirement on the corresponding driver module (`Lib.Postgres`, `Lib.MongoDB`, etc.).
-- **Second argument: config overrides.** Merged on top of `auth.config.js` defaults. Required keys (`STORE`, `STORE_CONFIG`, `ACTOR_TYPE`) throw `TypeError` at loader time when absent. JWT-required keys (`JWT.signing_key`, `JWT.issuer`, `JWT.audience`) throw at loader time when `ENABLE_JWT: true` and they are still `null`.
-- **One instance per `actor_type`.** Calling the loader twice with the same `ACTOR_TYPE` and a different `TTL_SECONDS` is allowed but rarely useful. The common pattern is one loader call per actor type, with each instance scoped to a different `table_name` or `collection_name`.
+- **First argument: `Lib`.** A container exposing peer modules. Auth reads `Lib.Utils` (type checks, validation), `Lib.Debug` (logging, performance audit), `Lib.Crypto` (token generation, SHA-256 hashing), `Lib.Instance` (request lifecycle, `instance.time`), and `Lib.HttpGateway` (cookie descriptor building). The chosen store adapter is a fully independent module that builds its own `Lib` internally — auth does not inject dependencies into it.
+- **Second argument: config overrides.** Merged on top of `auth.config.js` defaults. Required keys (`Store`, `ACTOR_TYPE`) throw `TypeError` at loader time when absent. JWT-required keys (`JWT.signing_key`, `JWT.issuer`, `JWT.audience`) throw at loader time when `ENABLE_JWT: true` and they are still `null`.
+- **One instance per `actor_type`.** Calling the loader twice with the same `ACTOR_TYPE` and a different `TTL_SECONDS` is allowed but rarely useful. The common pattern is one loader call per actor type, each bound to a different store instance.
 
 ```javascript
 // Two actor types, two policies, one process.
-Lib.AuthUser  = require('...auth')(Lib, { ACTOR_TYPE: 'user',  STORE_CONFIG: { table_name: 'sessions_user',  ... }, TTL_SECONDS: 2592000, ... });
-Lib.AuthAdmin = require('...auth')(Lib, { ACTOR_TYPE: 'admin', STORE_CONFIG: { table_name: 'sessions_admin', ... }, TTL_SECONDS: 3600,    ... });
+Lib.AuthUser  = require('...auth')(Lib, { ACTOR_TYPE: 'user',  Store: require('...auth-store-postgres')({ table_name: 'sessions_user',  lib_sql: Lib.Postgres }), TTL_SECONDS: 2592000 });
+Lib.AuthAdmin = require('...auth')(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-store-postgres')({ table_name: 'sessions_admin', lib_sql: Lib.Postgres }), TTL_SECONDS: 3600 });
 ```
 
 Sessions never cross actor types. The stored `actor_type` is verified on every `verifySession` call (defense-in-depth against misconfigured table pointers).
@@ -53,8 +52,7 @@ All keys are merged over `auth.config.js` defaults. Keys with a `null` default a
 
 | Key | Type | Default | Required | Description |
 |---|---|---|---|---|
-| `STORE` | `Function` | `null` | Yes | The store adapter factory function. Pass the result of `require('@superloomdev/js-server-helper-auth-store-*')` directly. **The value must be a function, not a string.** Strings will be rejected at loader time |
-| `STORE_CONFIG` | `object` | `null` | Yes | Adapter-specific config. Shape varies by backend. See [`STORE_CONFIG` by Backend](#store_config-by-backend) |
+| `Store` | `object` | `null` | Yes | A ready-to-use store object from the chosen adapter. Call the adapter with its config: `require('@superloomdev/js-server-helper-auth-store-*')({...})`. The value must be a plain object with the required store methods |
 | `ACTOR_TYPE` | `string` | `null` | Yes | Non-empty string naming the kind of actor (`'user'`, `'admin'`, `'merchant'`, ...). Stamped on every record and verified on every read |
 | `TTL_SECONDS` | `number` | `2592000` (30 days) | No | Session lifetime in seconds. `expires_at` rolls forward by `TTL_SECONDS` on each throttled activity refresh |
 | `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | `number` | `600` (10 min) | No | Minimum gap between `last_active_at` write-backs. Prevents one DB write per request on busy actors |
@@ -65,9 +63,9 @@ All keys are merged over `auth.config.js` defaults. Keys with a `null` default a
 
 ---
 
-## `STORE_CONFIG` by Backend
+## Store Config by Backend
 
-Each adapter validates its own `STORE_CONFIG` keys. The shape is documented here for cross-reference; the canonical source is each adapter package's README.
+Each adapter is a fully independent module that validates its own config internally. Pass config directly when calling the adapter. The canonical source is each adapter package's README.
 
 | Adapter | Required keys | Notes |
 |---|---|---|
@@ -80,19 +78,19 @@ Each adapter validates its own `STORE_CONFIG` keys. The shape is documented here
 Example: Postgres
 
 ```javascript
-STORE_CONFIG: {
+Store: require('@superloomdev/js-server-helper-auth-store-postgres')({
   table_name: 'sessions_user',
   lib_sql:    Lib.Postgres
-}
+})
 ```
 
 Example: MongoDB
 
 ```javascript
-STORE_CONFIG: {
+Store: require('@superloomdev/js-server-helper-auth-store-mongodb')({
   collection_name: 'sessions_user',
   lib_mongodb:     Lib.MongoDB
-}
+})
 ```
 
 ---
@@ -170,7 +168,7 @@ None. The module's `package.json` declares no `dependencies`. JWT signing and ve
 
 ## Testing Tiers
 
-The auth module's own tests are **fully offline**. They use an in-process memory store fixture (`createInMemoryAuthStore()` in `_test/`) that implements the full eight-method store contract without any real backend. There is no Docker dependency in this package and no database driver is required to run them.
+The auth module's own tests are **fully offline**. They use an in-process memory store fixture (`MemoryStore` in `_test/`) that implements the full eight-method store contract without any real backend. There is no Docker dependency in this package and no database driver is required to run them.
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
@@ -182,7 +180,7 @@ cd _test && npm install && npm test
 
 Coverage:
 
-- Loader validation. Every required config key. `STORE` must be a function. JWT-mode required keys
+- Loader validation. Every required config key. `Store` must be a ready-to-use object. JWT-mode required keys
 - Pure helpers. `auth-id`, `record-shape`, `token-source` (reads `instance.http_request.cookies`)
 - Pure policy. Every cap tier. LRU eviction. `evict_oldest_on_limit: false` path. Same-installation replacement priority
 - Session lifecycle cookie descriptor. `createSession` returns `cookies` descriptor when `COOKIE_PREFIX` is set. `removeSession` + `removeAllSessions` return clear-cookie descriptor (`ttl: 0`)
