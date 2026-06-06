@@ -28,27 +28,25 @@ Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// Load distinct-queue with MongoDB adapter
-const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb');
-Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: StoreAdapter,
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+// Load the store adapter (owns its own Lib, Config, and ERRORS)
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
 });
 
-// Initialize store (one-time provisioning — run only on first setup, not on every boot)
+// Pass the ready-to-use store to the parent module
+Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
+  Store: Store
+});
+
+// Initialize collection (one-time provisioning — run only on first setup, not on every boot)
 const instance = Lib.Instance.initialize();
-await Lib.DistinctQueue.setupNewStore(instance);
+await Store.setupNewStore(instance);
 ```
 
 ## Configuration
 
-Requires a `STORE_CONFIG` object:
-
-- **`collection_name`** — MongoDB collection name for queue records
-- **`lib_mongodb`** — Reference to the `js-server-helper-nosql-mongodb` instance
+- **`collection_name`** — MongoDB collection name for queue records (required)
+- `Lib.MongoDB` is read from the injected `Lib` container — no separate `lib_mongodb` config key
 
 See [`docs/schema.md`](docs/schema.md) for detailed schema documentation and index design.
 

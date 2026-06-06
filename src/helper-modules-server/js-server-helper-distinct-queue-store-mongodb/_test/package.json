@@ -14,7 +14,7 @@
     "helper-crypto": "npm:@superloomdev/js-server-helper-crypto@^1.0.0",
     "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0",
     "helper-nosql-mongodb": "npm:@superloomdev/js-server-helper-nosql-mongodb@^1.0.0",
-    "helper-distinct-queue": "npm:@superloomdev/js-server-helper-distinct-queue@^1.0.0",
+    "helper-distinct-queue": "npm:@superloomdev/js-server-helper-distinct-queue@^1.0.1",
     "helper-distinct-queue-store-mongodb": "file:../"
   },
   "scripts": {

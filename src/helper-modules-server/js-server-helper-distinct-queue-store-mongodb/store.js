@@ -1,29 +1,22 @@
-// Info: MongoDB store adapter for js-server-helper-distinct-queue. Implements
-// the 4-method store contract using a subdocument _id.
+// Info: MongoDB store adapter for js-server-helper-distinct-queue.
+// Implements the 4-method store contract using a subdocument _id.
 //
-// The _id field is a compound object: { t, r, d, s }
-//   - t: tenant_id (string) - partition boundary
-//   - r: resource_id (string) - supports prefix queries via $regex
-//   - d: data_version (number) - millisecond timestamp for sorting
-//   - s: request_id (string) - compact UUID for tie-breaking
+// The application injects a ready-to-use MongoDB helper via Lib.MongoDB.
 //
-// Query patterns:
-//   - Exact resource: find({ "_id.t": t, "_id.r": r }).sort({ "_id.d": 1 })
-//   - Prefix match:   find({ "_id.t": t, "_id.r": { $regex: '^prefix' } }).sort({ "_id.d": 1 })
-//   - Delete stale:   deleteMany({ "_id.t": t, "_id.r": r, "_id.d": { $lte: N } })
+// Schema:
+//   - _id: { t, r, d, s } — (tenant_id, resource_id, data_version, request_id)
+//   - Attributes: payload (Object), action (String), toc (Number)
 //
-// The implicit _id index on { t, r, d, s } covers all access patterns.
-// No secondary indexes required.
+// The implicit _id index covers all access patterns. No secondary indexes needed.
 //
-// The application injects a ready-to-use MongoDB helper via
-// STORE_CONFIG.lib_mongodb (typically Lib.MongoDB).
-//
-// Store contract (identical shape across all adapters):
-//   - setupNewStore(instance)                                           -> { success, error }
+// Store contract (identical shape across all adapters, validated by the parent):
 //   - writeRecord(instance, record)                                    -> { success, error }
-//   - queryByResourceId(instance, tenant_id, resource_id)                -> { success, records, error }
-//   - queryByResourceIdPrefix(instance, tenant_id, resource_id_prefix)   -> { success, records, error }
-//   - deleteByDataVersionLte(instance, tenant_id, resource_id, dv)     -> { success, error }
+//   - queryByResourceId(instance, tenant_id, resource_id)             -> { success, records, error }
+//   - queryByResourceIdPrefix(instance, tenant_id, resource_id_prefix) -> { success, records, error }
+//   - deleteByDataVersionLte(instance, tenant_id, resource_id, dv)    -> { success, error }
+//
+// Plus an idempotent provisioning method (not part of the validated contract):
+//   - setupNewStore(instance)                                          -> { success, error }
 
 'use strict';
 
@@ -32,29 +25,41 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own collection_name and lib_mongodb reference.
+Factory loader. One call = one independent store instance with its
+own Lib, CONFIG, and ERRORS. Validates CONFIG at construction so
+misconfiguration fails fast at startup, not on first request.
 
-The ERRORS catalog is forwarded from distinct-queue.js so the adapter
-can return the same error shapes as the core module.
+@param {Object} shared_libs - Lib container with Utils, Debug, MongoDB
+@param {Object} config      - Overrides merged over adapter config defaults
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from distinct-queue.js
-
-@return {Object} - Store interface (5 methods: setupNewStore, writeRecord,
-                    queryByResourceId, queryByResourceIdPrefix, deleteByDataVersionLte)
+@return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    MongoDB: shared_libs.MongoDB
+  };
+
+  // Merge overrides over defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
+
+  // Load internal error catalog
+  const ERRORS = require('./store.errors');
 
   // Load the validators singleton and inject Lib
   const Validators = require('./store.validators')(Lib);
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
+  // Validate CONFIG - throws on misconfiguration
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  return createInterface(Lib, CONFIG, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -63,16 +68,16 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Builds the public Store interface for one instance. All functions
-close over the same Lib, STORE_CONFIG, and ERRORS.
+Builds the public Store interface. All functions close over
+Lib, CONFIG, and ERRORS.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { collection_name, lib_mongodb }
-@param {Object} ERRORS       - Error catalog forwarded from distinct-queue.js
+@param {Object} Lib    - Dependency container (Utils, Debug, MongoDB)
+@param {Object} CONFIG - Merged adapter configuration { collection_name }
+@param {Object} ERRORS - Frozen error catalog
 
-@return {Object} - Store interface (5 methods)
+@return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -130,9 +135,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       };
 
       // Insert the record using upsert — compound _id guarantees uniqueness
-      const result = await STORE_CONFIG.lib_mongodb.writeRecord(
+      const result = await Lib.MongoDB.writeRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { _id: document._id },
         document
       );
@@ -175,9 +180,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
       // Query by exact tenant_id + resource_id using _id subdocument fields
-      const result = await STORE_CONFIG.lib_mongodb.query(
+      const result = await Lib.MongoDB.query(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { '_id.t': tenant_id, '_id.r': resource_id },
         { sort: { '_id.d': 1 } }
       );
@@ -227,9 +232,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const escaped_prefix = resource_id_prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
       // Query with regex prefix match on _id.r
-      const result = await STORE_CONFIG.lib_mongodb.query(
+      const result = await Lib.MongoDB.query(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         {
           '_id.t': tenant_id,
           '_id.r': { $regex: '^' + escaped_prefix }
@@ -283,9 +288,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
       // Delete matching records using _id subdocument fields
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecordsByFilter(
+      const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         {
           '_id.t': tenant_id,
           '_id.r': resource_id,
