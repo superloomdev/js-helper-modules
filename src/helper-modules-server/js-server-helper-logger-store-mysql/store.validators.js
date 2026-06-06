@@ -10,25 +10,25 @@ module.exports = function loader (shared_libs) {
 
 const Validators = {
 
-  validateConfig: function (store_config) {
+  validateConfig: function (config) {
 
     if (
-      Lib.Utils.isNullOrUndefined(store_config) ||
-      !Lib.Utils.isObject(store_config)
+      Lib.Utils.isNullOrUndefined(config) ||
+      !Lib.Utils.isObject(config)
     ) {
-      throw new Error('[js-server-helper-logger-store-mysql] STORE_CONFIG must be an object');
+      throw new Error('[js-server-helper-logger-store-mysql] config must be an object');
     }
 
     if (
-      Lib.Utils.isNullOrUndefined(store_config.table_name) ||
-      !Lib.Utils.isString(store_config.table_name) ||
-      Lib.Utils.isEmptyString(store_config.table_name)
+      Lib.Utils.isNullOrUndefined(config.table_name) ||
+      !Lib.Utils.isString(config.table_name) ||
+      Lib.Utils.isEmptyString(config.table_name)
     ) {
-      throw new Error('[js-server-helper-logger-store-mysql] STORE_CONFIG.table_name is required');
+      throw new Error('[js-server-helper-logger-store-mysql] config.table_name is required');
     }
 
-    if (Lib.Utils.isNullOrUndefined(store_config.lib_sql)) {
-      throw new Error('[js-server-helper-logger-store-mysql] STORE_CONFIG.lib_sql is required (pass Lib.MySQL)');
+    if (Lib.Utils.isNullOrUndefined(config.lib_sql)) {
+      throw new Error('[js-server-helper-logger-store-mysql] config.lib_sql is required (pass Lib.MySQL)');
     }
 
   }

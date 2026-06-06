@@ -4,8 +4,7 @@
 
 /********************************************************************
 @return {Object} result
-@return {Object} result.Lib    - { Utils, Debug, Crypto, Instance, MySQL }
-@return {Object} result.ERRORS - Minimal error catalog (SERVICE_UNAVAILABLE only)
+@return {Object} result.Lib - { Utils, Debug, Crypto, Instance, MySQL }
 *********************************************************************/
 module.exports = function loader () {
 
@@ -31,16 +30,6 @@ module.exports = function loader () {
   Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
 
 
-  // ==================== MINIMAL ERRORS CATALOG ===================== //
-
-  const ERRORS = {
-    SERVICE_UNAVAILABLE: {
-      type: 'SERVICE_UNAVAILABLE',
-      message: 'Service unavailable'
-    }
-  };
-
-
-  return { Lib: Lib, ERRORS: ERRORS };
+  return { Lib: Lib };
 
 };
