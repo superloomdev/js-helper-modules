@@ -1,25 +1,31 @@
 # js-server-helper-auth-store-sqlite. AI Reference
 
-Class F storage adapter. SQLite backend for `@superloomdev/js-server-helper-auth`. Cannot stand alone. Always loaded by the Auth parent via the factory protocol; not called directly by application code.
+Class F storage adapter. SQLite backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
 Embedded / in-process. Uses Node's built-in `node:sqlite` through the `js-server-helper-sql-sqlite` driver helper. No external service, no Docker, no network.
 
-## Adapter Factory
+## Loader Pattern
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-sqlite');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')({
+  table_name: 'sessions_user',
+  lib_sql:    Lib.SQLite
+});
+
+Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+  Store:      Store,
+  ACTOR_TYPE: 'user'
+});
 ```
 
-| Argument | Type | Source |
+| Config key | Type | Notes |
 |---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Auth config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Auth error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
+| `table_name` | String | Required. One table per actor_type |
+| `lib_sql` | Object | Required. Initialized `js-server-helper-sql-sqlite` instance |
 
-Returns a Store interface. The Auth parent retains the reference and calls the contract methods to satisfy its persistence needs.
+The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
 
-## `STORE_CONFIG`
+## Config
 
 ```js
 {
@@ -47,7 +53,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Auth module. The adapter expects `Lib`, the full Auth `CONFIG`, and the frozen Auth `ERRORS` catalog. Application code does not have those.
+1. **Call the adapter directly with its config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-sqlite')({ table_name, lib_sql })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
 2. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration. The compare happens after the primary-key read; the row is fetched first, then `token_secret_hash` is verified.
 
@@ -69,23 +75,23 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 11. **SQLite has no native TTL.** `cleanupExpiredSessions` is the only deletion path for expired rows. Application code must schedule it (cron in a persistent server). The `:memory:` mode makes cleanup moot because the database disappears on process exit; the recommendation applies to file-backed deployments.
 
-## Peer Dependencies
+## Dependencies
 
 ```
-@superloomdev/js-helper-utils                (type checks)
-@superloomdev/js-helper-debug                (structured logging)
-@superloomdev/js-server-helper-sql-sqlite    (node:sqlite wrapper)
+@superloomdev/js-helper-utils                (type checks) — direct dependency
+@superloomdev/js-helper-debug                (structured logging) — direct dependency
+@superloomdev/js-server-helper-sql-sqlite    (node:sqlite wrapper) — peer dependency
 ```
 
-These are loaded into `Lib` by the application before the Auth parent is loaded. The adapter does not require any of them directly; it accesses them through `Lib`.
+Utils and Debug are direct dependencies bundled with the adapter. The SQLite helper is a peer that the caller provides via `config.lib_sql`.
 
-## Error Catalog Used
+## Error Catalog
 
-Only one type from the Auth `ERRORS` catalog:
+The adapter defines its own error catalog internally:
 
-| Error | When |
+| Error type | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
+| `AUTH_STORE_SQLITE_SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via Debug, never surfaced raw |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
