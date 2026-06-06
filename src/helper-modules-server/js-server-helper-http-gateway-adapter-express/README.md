@@ -7,7 +7,7 @@ Express (Docker) runtime adapter for [`@superloomdev/js-server-helper-http-gatew
 
 ## What This Is
 
-A stateless adapter that reads from the Express `req` object and stores `res` as the response callback. Pass it as `CONFIG.ADAPTER` when constructing the gateway.
+A stateless adapter that reads from the Express `req` object and stores `res` as the response callback. Call it to get a ready-to-use object, then pass it as `CONFIG.Adapter` when constructing the gateway.
 
 ## Usage
 
@@ -18,8 +18,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
+
 const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-express')
+  Adapter: ExpressAdapter
 });
 
 app.post('/api/example', function (req, res) {

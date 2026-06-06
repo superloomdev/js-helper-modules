@@ -3,8 +3,8 @@
 // getCountryCode always returns null - Express has no CDN layer.
 // Projects fronting Express with CloudFront can override via a custom adapter.
 //
-// Factory loader. Each call returns an independent adapter closed over its
-// own Lib. Stateless - no per-instance resources.
+// Standalone module. Builds its own Lib, defines its own ERRORS, validates
+// its own config. Returns a ready-to-use adapter object.
 //
 // Adapter contract:
 //   extractRequest(raw_request, raw_context, response_callback)
@@ -18,24 +18,45 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Factory adapter loader. One call = one independent adapter instance
-closed over its own Lib. Called by the gateway factory as
-CONFIG.ADAPTER(Lib, CONFIG, ERRORS) at construction time.
+Standalone adapter loader. One call = one independent adapter instance
+closed over its own Lib and ERRORS. The adapter builds its own dependencies
+and validates its own config.
 
-@param {Object} shared_libs - Lib container (Utils, Debug)
-@param {Object} _config     - Merged CONFIG (accepted for contract conformance)
-@param {Object} _errors     - Error catalog (accepted for contract conformance)
+@param {Object} config - Adapter configuration (none required for Express)
 
-@return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
+@return {Object} - Ready-to-use adapter: { extractRequest, buildResponseEnvelope, getCountryCode }
 *********************************************************************/
-module.exports = function loader (shared_libs, _config, _errors) {
+module.exports = function loader (config) {
 
-  const Lib = {
-    Utils: shared_libs.Utils,
-    Debug: shared_libs.Debug
-  };
+  // ==================== BUILD OWN LIB ======================= //
 
-  return createInterface(Lib);
+  const Lib = {};
+
+  Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, {});
+  Lib.Debug = require('@superloomdev/js-helper-debug')(Lib, { LOG_LEVEL: 'error' });
+
+
+  // ==================== DEFINE OWN ERRORS ======================= //
+
+  const ERRORS = Object.freeze({
+    ADAPTER_ERROR: {
+      type: 'HTTP_GATEWAY_ADAPTER_EXPRESS_ERROR',
+      message: 'Express adapter encountered an error'
+    }
+  });
+
+
+  // ==================== VALIDATE CONFIG ======================= //
+
+  // Express adapter requires no configuration
+  if (config && !Lib.Utils.isObject(config)) {
+    throw new Error('[js-server-helper-http-gateway-adapter-express] config must be an object or null/undefined');
+  }
+
+
+  // ==================== RETURN READY ADAPTER ======================= //
+
+  return createInterface(Lib, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -44,13 +65,14 @@ module.exports = function loader (shared_libs, _config, _errors) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Build the public Adapter interface closed over Lib.
+Build the public Adapter interface closed over Lib and ERRORS.
 
-@param {Object} Lib - Dependency container (Utils, Debug)
+@param {Object} Lib     - Dependency container (Utils, Debug)
+@param {Object} _ERRORS - Frozen error catalog (reserved for future error reporting)
 
 @return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
 *********************************************************************/
-const createInterface = function (Lib) {
+const createInterface = function (Lib, _ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Adapter = {

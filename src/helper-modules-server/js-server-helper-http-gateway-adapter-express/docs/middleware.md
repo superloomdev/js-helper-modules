@@ -104,14 +104,14 @@ A minimal, idiomatic Express + gateway setup:
 ```javascript
 const express        = require('express');
 const cookieParser   = require('cookie-parser');
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: ExpressAdapter });
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: ExpressAdapter });
 
 app.post('/api/users/:user_id', function (req, res) {
   const instance = Lib.Instance.initialize();
