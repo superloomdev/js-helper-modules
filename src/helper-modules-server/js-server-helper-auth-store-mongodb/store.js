@@ -9,7 +9,7 @@
 //     hitting the B-tree directly without a regex or collection scan
 //
 // The application injects a ready-to-use MongoDB helper via
-// STORE_CONFIG.lib_mongodb (typically Lib.MongoDB). This adapter never
+// config.lib_mongodb (typically Lib.MongoDB). This adapter never
 // requires `mongodb` directly - projects not using this store never
 // load the native driver.
 //
@@ -36,26 +36,38 @@
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
-/********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own collection_name and lib_mongodb reference.
+// Adapter-local Lib: built once, shared across all instances of this adapter.
+const Lib = {
+  Utils: require('helper-utils')(null, {}),
+  Debug: require('helper-debug')(null, { LOG_LEVEL: process.env.LOG_LEVEL || 'error' })
+};
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from auth.js
+// Adapter-local ERRORS catalog (frozen). Auth.js forwards these transparently.
+const ERRORS = Object.freeze({
+  SERVICE_UNAVAILABLE: {
+    type: 'AUTH_STORE_MONGODB_SERVICE_UNAVAILABLE',
+    message: 'MongoDB backend unavailable'
+  }
+});
+
+
+/********************************************************************
+Factory loader. One call = one independent store instance with its
+own collection_name and lib_mongodb reference. Validates config at
+construction so misconfiguration fails fast at startup.
+
+@param {Object} config                   - { collection_name, lib_mongodb }
+@param {string} config.collection_name   - MongoDB collection to read/write sessions
+@param {Object} config.lib_mongodb       - Ready-to-use MongoDB helper (Lib.MongoDB)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (config) {
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Validate config - throws on misconfiguration
+  require('./store.validators').validateConfig(Lib, config);
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
-
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  return createInterface(Lib, config, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -65,16 +77,16 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 
 /********************************************************************
 Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, STORE_CONFIG, and
+private functions all close over the same Lib, config, and
 ERRORS.
 
 @param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { collection_name, lib_mongodb }
+@param {Object} config - { collection_name, lib_mongodb }
 @param {Object} ERRORS       - Error catalog forwarded from auth.js
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, config, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -121,9 +133,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const _id = _Store.composeMongoId(tenant_id, actor_id, token_key, token_secret_hash);
 
       // Fetch the document by _id - mismatch returns null naturally
-      const result = await STORE_CONFIG.lib_mongodb.getRecord(
+      const result = await config.lib_mongodb.getRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { _id: _id }
       );
 
@@ -161,9 +173,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const prefix = _Store.composeMongoActorPrefix(tenant_id, actor_id);
 
       // Query using exact equality on the indexed `prefix` field
-      const result = await STORE_CONFIG.lib_mongodb.query(
+      const result = await config.lib_mongodb.query(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { prefix: prefix }
       );
 
@@ -211,9 +223,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const doc = _Store.recordToDoc(record);
 
       // Upsert by _id - replaces existing doc or inserts if absent
-      const result = await STORE_CONFIG.lib_mongodb.writeRecord(
+      const result = await config.lib_mongodb.writeRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { _id: doc._id },
         doc
       );
@@ -274,9 +286,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const anchored = new RegExp('^' + _Store.escapeRegExp(prefix));
 
       // Run the partial $set update against the matched document
-      const result = await STORE_CONFIG.lib_mongodb.updateRecord(
+      const result = await config.lib_mongodb.updateRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { _id: anchored },
         { $set: updates }
       );
@@ -321,9 +333,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const anchored = new RegExp('^' + _Store.escapeRegExp(prefix));
 
       // Delete the matched document by prefix regex on _id
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecordsByFilter(
+      const result = await config.lib_mongodb.deleteRecordsByFilter(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { _id: anchored }
       );
 
@@ -370,9 +382,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       });
 
       // Delete all matched documents in one deleteMany round-trip
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecordsByFilter(
+      const result = await config.lib_mongodb.deleteRecordsByFilter(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { $or: or_clauses }
       );
 
@@ -414,9 +426,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Delete all documents whose expires_at is in the past
       const now = instance.time;
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecordsByFilter(
+      const result = await config.lib_mongodb.deleteRecordsByFilter(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { expires_at: { $lt: now } }
       );
 

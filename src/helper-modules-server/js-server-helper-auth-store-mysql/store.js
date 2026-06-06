@@ -4,7 +4,7 @@
 // No cross-dialect parameterisation, no shared SQL helper module.
 //
 // The application injects a ready-to-use MySQL helper via
-// STORE_CONFIG.lib_sql (typically Lib.MySQL). This adapter never
+// config.lib_sql (typically Lib.MySQL). This adapter never
 // requires `mysql2` directly - projects not using this store never load
 // the driver.
 //
@@ -43,26 +43,38 @@
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
-/********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own table_name and lib_sql driver reference.
+// Adapter-local Lib: built once, shared across all instances of this adapter.
+const Lib = {
+  Utils: require('helper-utils')(null, {}),
+  Debug: require('helper-debug')(null, { LOG_LEVEL: process.env.LOG_LEVEL || 'error' })
+};
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from auth.js
+// Adapter-local ERRORS catalog (frozen). Auth.js forwards these transparently.
+const ERRORS = Object.freeze({
+  SERVICE_UNAVAILABLE: {
+    type: 'AUTH_STORE_MYSQL_SERVICE_UNAVAILABLE',
+    message: 'MySQL backend unavailable'
+  }
+});
+
+
+/********************************************************************
+Factory loader. One call = one independent store instance with its
+own table_name and lib_sql driver reference. Validates config at
+construction so misconfiguration fails fast at startup.
+
+@param {Object} config            - { table_name, lib_sql }
+@param {string} config.table_name - MySQL table to read/write sessions
+@param {Object} config.lib_sql    - Ready-to-use MySQL helper (Lib.MySQL)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (config) {
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Validate config - throws on misconfiguration
+  require('./store.validators').validateConfig(Lib, config);
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
-
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  return createInterface(Lib, config, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -72,18 +84,18 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 
 /********************************************************************
 Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, STORE_CONFIG, and
+private functions all close over the same Lib, config, and
 ERRORS. _Store (private helpers) is defined after Store (public
 methods) and is referenced by the public methods via the closure -
 the same pattern used across all helper modules.
 
 @param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { table_name, lib_sql }
+@param {Object} config - { table_name, lib_sql }
 @param {Object} ERRORS       - Error catalog forwarded from auth.js
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, config, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -108,7 +120,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Build and execute the combined CREATE TABLE + INDEX statement
       const stmt = _Store.buildSchemaDDL();
-      const result = await STORE_CONFIG.lib_sql.write(instance, stmt);
+      const result = await config.lib_sql.write(instance, stmt);
 
       // Return a service error if the DDL failed
       if (result.success === false) {
@@ -146,7 +158,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
       // Fetch the session row by composite primary key
-      const result = await STORE_CONFIG.lib_sql.getRow(
+      const result = await config.lib_sql.getRow(
         instance,
         'SELECT * FROM ' + _Store.t +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
@@ -207,7 +219,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
       // Fetch all session rows for this actor under the given tenant
-      const result = await STORE_CONFIG.lib_sql.getRows(
+      const result = await config.lib_sql.getRows(
         instance,
         'SELECT * FROM ' + _Store.t +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
@@ -258,7 +270,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Encode the canonical record and run the UPSERT
       const params = _Store.recordToRow(record);
-      const result = await STORE_CONFIG.lib_sql.write(instance, _Store.upsert_sql, params);
+      const result = await config.lib_sql.write(instance, _Store.upsert_sql, params);
 
       // Return a service error if the driver call failed
       if (result.success === false) {
@@ -330,7 +342,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       const params = set_values.concat([tenant_id, actor_id, token_key]);
 
-      const result = await STORE_CONFIG.lib_sql.write(instance, stmt, params);
+      const result = await config.lib_sql.write(instance, stmt, params);
 
       // Return a service error if the driver call failed
       if (result.success === false) {
@@ -365,7 +377,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
       // Remove the session row by composite primary key
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await config.lib_sql.write(
         instance,
         'DELETE FROM ' + _Store.t +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
@@ -427,7 +439,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       }
 
       // Delete all matched sessions in one round-trip
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await config.lib_sql.write(
         instance,
         'DELETE FROM ' + _Store.t +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ? AND (' + clauses + ')',
@@ -471,7 +483,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Sweep all rows whose expires_at is in the past
       const now = instance.time;
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await config.lib_sql.write(
         instance,
         'DELETE FROM ' + _Store.t + ' WHERE ' + _Store.Q('expires_at') + ' < ?',
         [now]
@@ -556,7 +568,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     Quote an identifier using MySQL's native backtick style. Rejects
     any identifier containing a backtick or double-quote so identifiers
     can never inject DDL through the table_name configuration.
-    Closes over STORE_CONFIG from createInterface.
+    Closes over config from createInterface.
 
     @param {String} name - Identifier (table or column)
 
@@ -585,7 +597,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     CREATE TABLE IF NOT EXISTS. The expires_at index is inlined because
     MySQL has no CREATE INDEX IF NOT EXISTS - inlining it here makes
     both the table and the index idempotent under a single statement.
-    Closes over STORE_CONFIG from createInterface.
+    Closes over config from createInterface.
 
     @return {String} - DDL statement
     *********************************************************************/
@@ -593,8 +605,8 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Build the quoted table and index identifiers then emit full DDL
       const Q = _Store.Q;
-      const t = Q(STORE_CONFIG.table_name);
-      const idx_name = 'idx_' + STORE_CONFIG.table_name + '_expires_at';
+      const t = Q(config.table_name);
+      const idx_name = 'idx_' + config.table_name + '_expires_at';
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -639,7 +651,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)
     so a second call with the same (tenant_id, actor_id, token_key)
     replaces the mutable columns in a single round-trip.
-    Closes over STORE_CONFIG from createInterface.
+    Closes over config from createInterface.
 
     @return {String} - SQL template using `?` placeholders
     *********************************************************************/
@@ -649,7 +661,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
       const UPSERT_IMMUTABLE_COLUMNS = _Store.UPSERT_IMMUTABLE_COLUMNS;
-      const tq = Q(STORE_CONFIG.table_name);
+      const tq = Q(config.table_name);
       const cols_quoted = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';
@@ -808,7 +820,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
   // instance. Both depend only on table_name (not per-request input)
   // and appear in every write - computing them once at load time is a
   // free runtime optimisation for the common path.
-  _Store.t = _Store.Q(STORE_CONFIG.table_name);
+  _Store.t = _Store.Q(config.table_name);
   _Store.upsert_sql = _Store.buildUpsertSQL();
 
   return Store;

@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-auth-store-postgres.
 //
 // Tier 1 - Adapter unit tests (no auth.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - _Store.Q rejects identifiers with double-quotes
 //   - _Store coercions: toColumnValue / fromColumnValue for booleans + custom_data
 //   - getSession returns null on hash mismatch (no timing leak)
@@ -17,7 +17,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const AuthStorePostgresFactory = require('helper-auth-store-postgres');
 const AuthFactory              = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -42,13 +42,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_sql: Lib.Postgres
-    }
-  };
-  return AuthStorePostgresFactory(Lib, config, ERRORS);
+  return AuthStorePostgresFactory({
+    table_name: table || TEST_TABLE,
+    lib_sql:    Lib.Postgres
+  });
 
 };
 
@@ -59,11 +56,11 @@ const buildStore = function (table) {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { AuthStorePostgresFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { AuthStorePostgresFactory(); },
+      /config must be an object/
     );
 
   });
@@ -71,7 +68,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { AuthStorePostgresFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
+      function () { AuthStorePostgresFactory({ lib_sql: Lib.Postgres }); },
       /table_name is required/
     );
 
@@ -80,7 +77,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { AuthStorePostgresFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { AuthStorePostgresFactory({ table_name: 'x' }); },
       /lib_sql is required/
     );
 
@@ -102,9 +99,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        AuthStorePostgresFactory(Lib, {
-          STORE_CONFIG: { table_name: 'bad"table', lib_sql: Lib.Postgres }
-        }, ERRORS);
+        AuthStorePostgresFactory({ table_name: 'bad"table', lib_sql: Lib.Postgres });
       },
       /identifier contains double-quote/
     );
@@ -605,8 +600,7 @@ describe('Tier 1: large multi-actor list isolation', { concurrency: false }, fun
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: AuthStorePostgresFactory,
-    STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.Postgres },
+    Store:     AuthStorePostgresFactory({ table_name: TEST_TABLE, lib_sql: Lib.Postgres }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

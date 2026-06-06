@@ -1,7 +1,7 @@
 {
   "name": "@superloomdev/js-server-helper-auth",
   "description": "Session lifecycle and authentication: create, verify, list, remove. Multi-instance per actor_type. Store adapters are separate packages.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "auth.js",
   "private": false,
   "license": "MIT",
