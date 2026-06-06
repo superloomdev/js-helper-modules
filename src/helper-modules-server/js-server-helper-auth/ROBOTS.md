@@ -189,7 +189,7 @@ All errors are frozen objects from `auth.errors.js` with shape `{ type, message 
 | AUTH_ACTOR_TYPE_MISMATCH | verifySession, verifyJwt | Stored actor_type != CONFIG.ACTOR_TYPE |
 | NOT_IMPLEMENTED | setupNewStore on NoSQL backends | Operation has no meaning on this backend; provision out-of-band |
 
-> Programmer errors throw `TypeError` immediately (invalid STORE_CONFIG shape, reserved characters in actor_id, identity-field mutation). The catalog above only covers operational failures.
+> Programmer errors throw `TypeError` immediately (invalid Store config shape, reserved characters in actor_id, identity-field mutation). The catalog above only covers operational failures.
 
 ## Canonical Session Record Shape
 

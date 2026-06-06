@@ -1,6 +1,6 @@
 # API Reference. `js-server-helper-auth`
 
-Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical session-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend `STORE_CONFIG` shape see each adapter package's own README.
+Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical session-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend config shape see each adapter package's own README.
 
 ## On This Page
 
@@ -295,4 +295,4 @@ All operational errors are frozen objects from `auth.errors.js` with shape `{ ty
 | `AUTH_ACTOR_TYPE_MISMATCH` | `verifySession`, `verifyJwt` | Stored `actor_type` does not match `CONFIG.ACTOR_TYPE` |
 | `NOT_IMPLEMENTED` | `setupNewStore` on NoSQL backends | The operation has no meaning on this backend; provision the schema out-of-band |
 
-> **Programmer errors throw.** Invalid `STORE_CONFIG` shape at loader time, mutation of identity fields, and reserved characters in `actor_id` throw `TypeError` immediately. The catalog above only covers operational failures.
+> **Programmer errors throw.** Invalid `Store` config at loader time, mutation of identity fields, and reserved characters in `actor_id` throw `TypeError` immediately. The catalog above only covers operational failures.
