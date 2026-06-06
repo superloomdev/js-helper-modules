@@ -1,12 +1,12 @@
 # Configuration. `js-server-helper-verify`
 
-Loader pattern, every configuration key, the per-backend `STORE_CONFIG` shape, peer dependencies, and the testing tier. For the function reference see [API Reference](api.md). For backend selection criteria see the [Storage Adapters](../README.md#storage-adapters) section in the module README.
+Loader pattern, every configuration key, the per-backend configuration shape, peer dependencies, and the testing tier. For the function reference see [API Reference](api.md). For backend selection criteria see the [Storage Adapters](../README.md#storage-adapters) section in the module README.
 
 ## On This Page
 
 - [Loader Pattern](#loader-pattern)
 - [Configuration Keys](#configuration-keys)
-- [`STORE_CONFIG` by Backend](#store_config-by-backend)
+- [Configuration by Backend](#configuration-by-backend)
 - [Charset Overrides](#charset-overrides)
 - [Peer Dependencies](#peer-dependencies)
 - [Testing Tier](#testing-tier)
@@ -18,13 +18,17 @@ Loader pattern, every configuration key, the per-backend `STORE_CONFIG` shape, p
 Every Superloom server-side module is a factory function that takes the `Lib` container and a `CONFIG` object and returns the public interface. The verify module follows that shape exactly.
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
+  table_name: 'verification_codes',
+  lib_postgresql: Lib.PostgreSQL
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-verify-store-postgres'),
-  STORE_CONFIG: { table_name: 'verification_codes', lib_sql: Lib.Postgres }
+  Store: Store
 });
 ```
 
-**`STORE` is a factory function, not a string.** Pass the result of `require()` for the chosen adapter package, the same way you pass `Lib.Postgres` or `Lib.MongoDB`. The verify module calls the factory internally with `(Lib, CONFIG, ERRORS)` and binds the returned store to the instance.
+**`Store` is a ready-to-use object, not a factory function.** Configure and instantiate the adapter independently, then pass the resulting store object directly. Each adapter is a fully independent module that owns its own Lib, Config, and ERRORS.
 
 The factory validates `CONFIG` at construction time. Misconfiguration fails at boot with a thrown `Error`, never at runtime.
 
@@ -34,25 +38,24 @@ The factory validates `CONFIG` at construction time. Misconfiguration fails at b
 
 | Key | Type | Default | Required | Notes |
 |---|---|---|---|---|
-| `STORE` | `function` | `null` | Yes | Store factory function. Pass `require('@superloomdev/js-server-helper-verify-store-<backend>')`. Loader throws on string, object, or missing |
-| `STORE_CONFIG` | `object` | `null` | Yes | Per-adapter configuration. Shape varies by adapter; see [below](#store_config-by-backend) |
+| `Store` | `object` | `null` | Yes | Ready-to-use store object. Configure adapter independently, then pass result |
 | `PIN_CHARSET` | `string` | `'0123456789'` | No | Charset used by `createPin`. Override only if you need a non-numeric "pin" |
 | `CODE_CHARSET` | `string` | Crockford Base32 (`'0123456789ABCDEFGHJKMNPQRSTVWXYZ'`) | No | Charset used by `createCode`. The default deliberately omits `I`, `L`, `O`, `U` to avoid visual confusion |
 | `TOKEN_CHARSET` | `string` | `a-zA-Z0-9` (62 chars) | No | Charset used by `createToken`. The default is URL-safe without escaping |
 
 ---
 
-## `STORE_CONFIG` by Backend
+## Configuration by Backend
 
-The exact key set lives in each adapter package's own README. The shape generally looks like one of:
+The exact configuration key set lives in each adapter package's own README. The shape generally looks like one of:
 
-| Adapter family | Typical `STORE_CONFIG` |
+| Adapter family | Typical adapter configuration |
 |---|---|
-| SQL (sqlite, postgres, mysql) | `{ table_name: 'verification_codes', lib_sql: Lib.<Driver> }` |
+| SQL (sqlite, postgres, mysql) | `{ table_name: 'verification_codes', lib_sqlite: Lib.SQLite }` |
 | MongoDB | `{ collection_name: 'verification_codes', lib_mongodb: Lib.MongoDB }` |
 | DynamoDB | `{ table_name: 'verification_codes', lib_dynamodb: Lib.DynamoDB }` |
 
-The verify module does not validate the *contents* of `STORE_CONFIG`. Each adapter's factory validates its own required keys and throws at construction time on anything missing or malformed.
+Each adapter validates its own configuration internally and throws at construction time on anything missing or malformed.
 
 ---
 
@@ -81,7 +84,7 @@ Loaded through the standard Superloom loader. The verify module reads only from 
 | `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | `generateRandomString(charset, length)` for code generation |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | `backgroundRoutine` for the post-verify record deletion |
 
-The storage adapter (`CONFIG.STORE`) consumes its own driver helper (`Lib.SQLite`, `Lib.Postgres`, `Lib.MySQL`, `Lib.MongoDB`, or `Lib.DynamoDB`) through `CONFIG.STORE_CONFIG`. The verify module never imports a database driver helper directly.
+The storage adapter (`CONFIG.Store`) is a fully independent module that owns its own driver helper (`Lib.SQLite`, `Lib.Postgres`, `Lib.MySQL`, `Lib.MongoDB`, or `Lib.DynamoDB`). The verify module never imports a database driver helper directly.
 
 ---
 

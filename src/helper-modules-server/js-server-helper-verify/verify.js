@@ -6,13 +6,13 @@
 // value cannot be reused.
 //
 // Storage backends are provided by standalone adapter packages. The caller
-// passes the chosen store factory directly as CONFIG.STORE - no string
-// dispatch inside this module. Require only the adapter you need:
-//   js-server-helper-verify-store-sqlite
-//   js-server-helper-verify-store-postgres
-//   js-server-helper-verify-store-mysql
-//   js-server-helper-verify-store-mongodb
-//   js-server-helper-verify-store-dynamodb
+// passes the chosen ready-to-use store object directly as CONFIG.Store - no string
+// dispatch inside this module. Configure and require only the adapter you need:
+//   const Store = require('@superloomdev/js-server-helper-verify-store-sqlite')(config)
+//   const Store = require('@superloomdev/js-server-helper-verify-store-postgres')(config)
+//   const Store = require('@superloomdev/js-server-helper-verify-store-mysql')(config)
+//   const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')(config)
+//   const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(config)
 //
 // Compatibility: Node.js 24+
 'use strict';
@@ -57,10 +57,9 @@ module.exports = function loader (shared_libs, config) {
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
-  // Instantiate the store. CONFIG.STORE is the factory function passed in
-  // by the caller; it receives (Lib, CONFIG, ERRORS) and extracts its own
-  // slice from CONFIG.STORE_CONFIG internally.
-  const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
+  // Use the ready-to-use store object passed in by the caller.
+  // The adapter is a fully independent module that owns its own Lib/Config/ERRORS.
+  const store = CONFIG.Store;
 
   // Validate store contract immediately so missing methods fail at startup
   Validators.validateStoreContract(store);

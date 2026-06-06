@@ -17,20 +17,17 @@ const createMemoryStore = require('./memory-store');
 
 
 // Helper - shorthand to construct a verify instance backed by an injected
-// store fixture. The inline factory receives (Lib, CONFIG, ERRORS) and
-// returns the pre-built store object directly.
+// store fixture. The ready-to-use store object is passed directly.
 const buildVerify = function (store) {
   return VerifyFactory(Lib, {
-    STORE: function injectFactory () { return store; },
-    STORE_CONFIG: {}
+    Store: store
   });
 };
 
 
 const validBaseConfig = function () {
   return {
-    STORE:        function () { return createMemoryStore(); },
-    STORE_CONFIG: {}
+    Store: createMemoryStore()
   };
 };
 
@@ -112,38 +109,28 @@ const defaultVerifyOptions = function (overrides) {
 
 describe('Loader validation', function () {
 
-  it('throws when CONFIG.STORE is missing', function () {
+  it('throws when CONFIG.Store is missing', function () {
     assert.throws(function () {
       VerifyFactory(Lib, {});
-    }, /CONFIG\.STORE is required/);
+    }, /CONFIG\.Store is required/);
   });
 
 
-  it('throws when CONFIG.STORE is null', function () {
+  it('throws when CONFIG.Store is null', function () {
     assert.throws(function () {
-      VerifyFactory(Lib, { STORE: null });
-    }, /CONFIG\.STORE is required/);
+      VerifyFactory(Lib, { Store: null });
+    }, /CONFIG\.Store is required/);
   });
 
 
-  it('throws when CONFIG.STORE is not a function', function () {
+  it('throws when CONFIG.Store is not an object', function () {
     assert.throws(function () {
-      VerifyFactory(Lib, { STORE: 'sqlite', STORE_CONFIG: {} });
-    }, /CONFIG\.STORE is required and must be a store factory function/);
+      VerifyFactory(Lib, { Store: 'sqlite' });
+    }, /CONFIG\.Store is required and must be a ready-to-use store object/);
   });
 
 
-  it('throws when store factory throws on bad STORE_CONFIG (e.g. missing table_name)', function () {
-    assert.throws(function () {
-      VerifyFactory(Lib, {
-        STORE: function () { throw new Error('[verify] STORE_CONFIG.table_name is required for sqlite'); },
-        STORE_CONFIG: {}
-      });
-    }, /STORE_CONFIG\.table_name is required for sqlite/);
-  });
-
-
-  it('constructs successfully with a valid inline factory', function () {
+  it('constructs successfully with a valid ready-to-use store object', function () {
     const verify = buildVerify(createMemoryStore());
     assert.strictEqual(typeof verify.createPin, 'function');
     assert.strictEqual(typeof verify.createCode, 'function');

@@ -50,22 +50,12 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (config) {
 
-    // STORE must be the store factory function
+    // Store must be the ready-to-use store object
     if (
-      Lib.Utils.isNullOrUndefined(config.STORE) ||
-      !Lib.Utils.isFunction(config.STORE)
+      Lib.Utils.isNullOrUndefined(config.Store) ||
+      !Lib.Utils.isObject(config.Store)
     ) {
-      throw new Error('[js-server-helper-verify] CONFIG.STORE is required and must be a store factory function');
-    }
-
-    // STORE_CONFIG is required - each store validates its own required keys
-    if (Lib.Utils.isNullOrUndefined(config.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-verify] CONFIG.STORE_CONFIG is required (object)');
-    }
-
-    // STORE_CONFIG must be a plain object
-    if (!Lib.Utils.isObject(config.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-verify] CONFIG.STORE_CONFIG must be a plain object');
+      throw new Error('[js-server-helper-verify] CONFIG.Store is required and must be a ready-to-use store object');
     }
 
   },

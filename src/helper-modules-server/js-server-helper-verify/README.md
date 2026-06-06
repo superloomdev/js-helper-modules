@@ -18,7 +18,7 @@ A successful `verify(...)` deletes the record in the background, making the code
 
 ## Why
 
-- **No string-dispatched backends.** The chosen storage adapter is passed as a factory function via `CONFIG.STORE`. Unused backends never get loaded, never pull their npm dependencies, and the module has no internal `switch (STORE) { ... }` block to maintain.
+- **No string-dispatched backends.** The chosen storage adapter is configured and instantiated independently, then passed as a ready-to-use object via `CONFIG.Store`. Unused backends never get loaded, never pull their npm dependencies, and the module has no internal `switch (STORE) { ... }` block to maintain.
 - **One factory call. One independent instance.** No singletons. Run multiple Verify instances in parallel if you need different cooldowns or charsets for different flows.
 - **Cleanup is hygiene, not correctness.** The consume-time `instance.time > record.expires_at` check guarantees expired codes are rejected even when the sweep is delayed.
 - **Three charsets for three surfaces.** Numeric pins for SMS, Crockford Base32 for spoken or printed codes (omits visually ambiguous characters), URL-safe alphanumeric for magic links. Same call shape; same `verify` function.
@@ -27,17 +27,16 @@ A successful `verify(...)` deletes the record in the background, making the code
 
 ```
 Verify instance
- ├─ CONFIG.STORE         (store adapter factory, e.g. require('...verify-store-postgres'))
- ├─ CONFIG.STORE_CONFIG  (table_name / collection_name + lib_sql / lib_mongodb / lib_dynamodb)
- ├─ CONFIG.PIN_CHARSET   ('0123456789' by default)
- ├─ CONFIG.CODE_CHARSET  (Crockford Base32 by default)
- ├─ CONFIG.TOKEN_CHARSET ('a-zA-Z0-9' by default)
- └─ Store                (instantiated from CONFIG.STORE; reads/writes verification records)
+ ├─ CONFIG.Store          (ready-to-use store object, e.g. require('...verify-store-postgres')(config))
+ ├─ CONFIG.PIN_CHARSET    ('0123456789' by default)
+ ├─ CONFIG.CODE_CHARSET   (Crockford Base32 by default)
+ ├─ CONFIG.TOKEN_CHARSET  ('a-zA-Z0-9' by default)
+ └─ Store                 (passed directly; reads/writes verification records)
 ```
 
-`CONFIG.STORE` is the adapter factory function itself. You pass the result of `require(...)` directly, the same way you pass `Lib.Postgres` or `Lib.MongoDB` to other helpers. Every adapter uses the same `factory(Lib, CONFIG, ERRORS)` signature, so adding a new backend never changes the call-site code.
+`CONFIG.Store` is the ready-to-use store object itself. Configure and instantiate the adapter independently, then pass the resulting store object directly. Each adapter is a fully independent module that owns its own Lib, Config, and ERRORS, so adding a new backend never changes the call-site code.
 
-For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and `STORE_CONFIG` details, see each adapter package's own README (linked below).
+For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and configuration details, see each adapter package's own README (linked below).
 
 ## Storage Adapters
 
@@ -55,7 +54,7 @@ Five storage adapters are available, each a separate package. Install only the o
 
 A legitimate deviation is using a NoSQL adapter in a SQL-backed application when the verification table has different scaling characteristics from the rest of the app (very high write volume during user-onboarding bursts, short TTLs that benefit from native sweepers). Mixing SQL families (Postgres app with MySQL or SQLite verify) is not a useful pattern.
 
-Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and `STORE_CONFIG` shape. The verify module itself owns no per-backend documentation: every Class F adapter is the authoritative source for its own backend.
+Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and configuration shape. The verify module itself owns no per-backend documentation: every Class F adapter is the authoritative source for its own backend.
 
 ## Aligned with Superloom Philosophy
 
@@ -66,7 +65,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, options, lifecycle, and error catalog
-- [Configuration](docs/configuration.md). Loader pattern, every configuration key, charset overrides, per-backend `STORE_CONFIG` shape, peer dependencies, testing tier
+- [Configuration](docs/configuration.md). Loader pattern, every configuration key, charset overrides, per-backend configuration shape, peer dependencies, testing tier
 - [Data model](docs/data-model.md). Every record field, core concepts (scope, key, cooldown, fail counter), scope-and-key design guide, design decisions
 - [Runtime](docs/runtime.md). The runtime-shape differences for the verify module: post-verify background delete caveat in serverless, scheduled cleanup mechanism
 - [Superloom](https://superloom.dev). The framework
@@ -80,7 +79,7 @@ npm install @superloomdev/js-server-helper-verify \
             @superloomdev/js-server-helper-verify-store-postgres
 ```
 
-Substitute `verify-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the `STORE_CONFIG` shape for each adapter is in the adapter package's own README.
+Substitute `verify-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the configuration shape for each adapter is in the adapter package's own README.
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
