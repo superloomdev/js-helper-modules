@@ -3,13 +3,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
 
-An AWS DynamoDB-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Plug it into the parent's `STORE` config; the Logger module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+An AWS DynamoDB-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent — construct it first with its own config, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
 A thin layer between the Logger parent module and a DynamoDB log table. The base table partition key `pk` is written as `"{scope}#{entity_type}#{entity_id}"`; a GSI (`actor_pk-sort_key-index`) covers the actor query path. The `expires_at` attribute doubles as the DynamoDB TTL attribute.
 
-The adapter cannot stand alone. It is always loaded together with the Logger parent and the [`js-server-helper-nosql-aws-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-aws-dynamodb) driver helper.
+It is always used together with the Logger parent and the [`js-server-helper-nosql-aws-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-aws-dynamodb) driver helper.
 
 ## Why Use This Module
 
@@ -35,22 +35,29 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/api.md). The store contract this adapter implements and DynamoDB-specific semantics
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/configuration.md). `STORE_CONFIG` keys, IAM permissions, environment variables, testing tier, post-deployment TTL step
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/configuration.md). Config keys, IAM permissions, environment variables, testing tier, post-deployment TTL step
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/schema.md). Table design, GSI, CloudFormation snippet, access patterns. **Provisioning is out-of-band; `setupNewStore` is a no-op.**
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/cleanup.md). Native TTL vs explicit `cleanupExpiredLogs` — cost and latency tradeoffs
 - [Logger parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger). The data model, error catalog, and Logger-side configuration this adapter plugs into
 
 ## Adding to Your Project
 
-This adapter is installed alongside the Logger parent module and the `nosql-aws-dynamodb` driver helper. The loader pattern is documented in the Logger parent's README.
+This adapter is installed alongside the Logger parent module and the `nosql-aws-dynamodb` driver helper. Construct the store first, then pass it to the Logger:
+
+```js
+const Store = require('@superloomdev/js-server-helper-logger-store-dynamodb')({
+  table_name:   'action_log',
+  lib_dynamodb: Lib.DynamoDB
+});
+
+Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
+```
 
 Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
 
 ## Dependencies
 
-This module has no external dependencies.
-
-It expects three peer modules in the `Lib` container (Utils, Debug, DynamoDB). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+`js-helper-utils` and `js-helper-debug` are bundled as direct dependencies. The `js-server-helper-nosql-aws-dynamodb` driver helper is a peer dependency — install it alongside this package and pass it via `config.lib_dynamodb`. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 

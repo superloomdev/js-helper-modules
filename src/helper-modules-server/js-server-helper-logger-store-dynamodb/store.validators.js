@@ -39,36 +39,36 @@ const Validators = {
 
 
   /********************************************************************
-  Validate the STORE_CONFIG object passed to the adapter loader.
+  Validate the config object passed to the adapter loader.
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
-  @param {Object} store_config - The STORE_CONFIG value from CONFIG
+  @param {Object} config - { table_name, lib_dynamodb }
 
   @return {void}
   *********************************************************************/
-  validateConfig: function (store_config) {
+  validateConfig: function (config) {
 
-    // STORE_CONFIG must be a non-null object
+    // config must be a non-null object
     if (
-      Lib.Utils.isNullOrUndefined(store_config) ||
-      !Lib.Utils.isObject(store_config)
+      Lib.Utils.isNullOrUndefined(config) ||
+      !Lib.Utils.isObject(config)
     ) {
-      throw new Error('[js-server-helper-logger-store-dynamodb] STORE_CONFIG must be an object');
+      throw new Error('[js-server-helper-logger-store-dynamodb] config must be an object');
     }
 
     // table_name is required and must be a non-empty string
     if (
-      Lib.Utils.isNullOrUndefined(store_config.table_name) ||
-      !Lib.Utils.isString(store_config.table_name) ||
-      Lib.Utils.isEmptyString(store_config.table_name)
+      Lib.Utils.isNullOrUndefined(config.table_name) ||
+      !Lib.Utils.isString(config.table_name) ||
+      Lib.Utils.isEmptyString(config.table_name)
     ) {
-      throw new Error('[js-server-helper-logger-store-dynamodb] STORE_CONFIG.table_name is required');
+      throw new Error('[js-server-helper-logger-store-dynamodb] config.table_name is required');
     }
 
     // lib_dynamodb is required - the caller must inject the DynamoDB helper
-    if (Lib.Utils.isNullOrUndefined(store_config.lib_dynamodb)) {
-      throw new Error('[js-server-helper-logger-store-dynamodb] STORE_CONFIG.lib_dynamodb is required (pass Lib.DynamoDB)');
+    if (Lib.Utils.isNullOrUndefined(config.lib_dynamodb)) {
+      throw new Error('[js-server-helper-logger-store-dynamodb] config.lib_dynamodb is required (pass Lib.DynamoDB)');
     }
 
   }
