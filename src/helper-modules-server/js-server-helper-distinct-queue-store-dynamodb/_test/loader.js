@@ -1,7 +1,7 @@
 // Info: Test loader for js-server-helper-distinct-queue-store-dynamodb.
-// Builds the Lib container, a minimal ERRORS stub, and factory helpers so
-// tests can exercise the store adapter directly (4-method contract) and the
-// core distinct-queue module end-to-end (enqueue/claim/listByPrefix).
+// Builds the Lib container and store helpers so tests can exercise the store
+// adapter directly (4-method contract) and the core distinct-queue module
+// end-to-end (enqueue/claim/listByPrefix).
 //
 // DynamoDB connection settings are read exclusively from environment variables
 // here - test.js never reads process.env directly.
@@ -33,23 +33,9 @@ Lib.Instance = require('helper-instance')(Lib, {});
 Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, config_dynamodb);
 
 
-// ==================== MINIMAL ERRORS CATALOG =================== //
-
-// The store adapter returns ERRORS.SERVICE_UNAVAILABLE on backend failure.
-// When the core module instantiates the store it supplies its own catalog;
-// direct-store tests use this minimal stub.
-const ERRORS = {
-  SERVICE_UNAVAILABLE: {
-    type: 'SERVICE_UNAVAILABLE',
-    message: 'Service unavailable'
-  }
-};
-
-
-// Import the adapter factory - configure(config) returns loader(Lib, ERRORS)
-const StoreAdapter = require('helper-distinct-queue-store-dynamodb')({
-  table_name: TEST_TABLE,
-  lib_dynamodb: Lib.DynamoDB
+// Load the store adapter with Lib injected
+const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
+  table_name: TEST_TABLE
 });
 
 
@@ -66,17 +52,16 @@ const buildInstance = function () {
 
 
 /********************************************************************
-Instantiate the store adapter directly (no core module). Used for
+Return the loaded store adapter directly (no core module). Used for
 the 4-method store contract suite and adapter-specific tests.
 
-The adapter is pre-configured with table_name and lib_dynamodb.
-Calling it as StoreAdapter(Lib, ERRORS) returns the live store.
+The adapter owns its CONFIG and ERRORS; Lib is injected at load time.
 
 @return {Object} - Store interface
 *********************************************************************/
 const buildStore = function () {
 
-  return StoreAdapter(Lib, ERRORS);
+  return Store;
 
 };
 
@@ -85,15 +70,15 @@ const buildStore = function () {
 Instantiate the core distinct-queue module wired to the DynamoDB
 store adapter. Used for end-to-end enqueue/claim/listByPrefix tests.
 
-The adapter is pre-configured; the parent module calls it as
-CONFIG.STORE(Lib, ERRORS) to get the live store.
+The adapter is a fully independent module; the parent uses the
+store object directly via CONFIG.Store.
 
 @return {Object} - DistinctQueue interface
 *********************************************************************/
 const buildQueue = function () {
 
   return require('helper-distinct-queue')(Lib, {
-    STORE: StoreAdapter
+    Store: Store
   });
 
 };
@@ -132,7 +117,6 @@ const closeDynamoDB = async function () {
 
 module.exports = {
   Lib,
-  ERRORS,
   TEST_TABLE,
   buildInstance,
   buildStore,

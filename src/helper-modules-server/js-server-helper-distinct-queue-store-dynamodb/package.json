@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-distinct-queue-store-dynamodb",
-  "description": "DynamoDB store adapter for js-server-helper-distinct-queue. Implements the 5-method store contract backed by js-server-helper-nosql-aws-dynamodb.",
+  "description": "DynamoDB store adapter for js-server-helper-distinct-queue. Implements the 4-method store contract backed by js-server-helper-nosql-aws-dynamodb.",
   "version": "1.0.0",
   "main": "store.js",
   "private": false,
@@ -26,6 +26,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "node --test _test/test.js"
   }
 }

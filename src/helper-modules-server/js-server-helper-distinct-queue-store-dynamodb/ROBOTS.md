@@ -3,30 +3,31 @@
 ## Quick Reference
 
 **Pattern:** Store adapter for adapter-backed module (Pattern 2 + Store)  
-**Contract:** 5 methods (`setupNewStore`, `writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`)  
+**Contract:** 4 methods (`writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`) + `setupNewStore` provisioning  
 **Storage:** DynamoDB with composite key `(p, id)` — (tenant_id, sort_key)
 
 ## Usage
 
 ```js
-// Configure the adapter (adapter-local config pattern)
-const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-  table_name: 'queue_jobs',
-  lib_dynamodb: Lib.DynamoDB
+// Load the adapter with Lib injected
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+  table_name: 'queue_jobs'
 });
 
-// Pass the pre-configured adapter to the parent module
+// Pass the ready-to-use store object to the parent module
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: StoreAdapter
+  Store: Store
 });
 ```
 
 ## Adapter Configuration
 
-Pass configuration when requiring the adapter. Required keys:
+Loaded via `loader(Lib, config)`. Config keys:
 
 - `table_name` — DynamoDB table name (string, required)
-- `lib_dynamodb` — Reference to `js-server-helper-nosql-aws-dynamodb` helper (object, required)
+- `KEY_DELIMITER` — Sort key field separator (string, default `\u001F` — override with care)
+
+The DynamoDB driver is taken from the injected `Lib.DynamoDB`.
 
 ## Store Contract Methods
 
@@ -42,21 +43,21 @@ Pass configuration when requiring the adapter. Required keys:
 
 All methods return `{ success, error }` shape. On driver failure:
 - Logs via `Lib.Debug.debug` with driver error details
-- Returns `ERRORS.SERVICE_UNAVAILABLE` from parent module
+- Returns `ERRORS.SERVICE_UNAVAILABLE` from the adapter's own error catalog (`store.errors.js`)
 
 ## Dependencies
 
-**Peer dependencies (must be in Lib container):**
+**Injected via Lib container:**
 - `Lib.Utils` — Type checking
 - `Lib.Debug` — Logging
-- `Lib.DynamoDB` — DynamoDB driver (passed via adapter config `lib_dynamodb`)
+- `Lib.DynamoDB` — DynamoDB driver used for all storage operations
 
 **Parent module:**
-- `js-server-helper-distinct-queue` — Provides `ERRORS` catalog
+- `js-server-helper-distinct-queue` — Consumes the store object via `CONFIG.Store`
 
 ## Testing
 
-Uses `store-contract-suite.js` — shared tests validate the 5-method contract against real DynamoDB via Docker.
+Uses `store-contract-suite.js` — shared tests validate the 4-method contract against real DynamoDB via Docker.
 
 ```bash
 cd _test && npm install && npm test

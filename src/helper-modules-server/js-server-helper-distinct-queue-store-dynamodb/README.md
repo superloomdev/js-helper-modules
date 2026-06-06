@@ -29,13 +29,14 @@ Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-// Load distinct-queue with pre-configured DynamoDB adapter
-// The adapter owns its configuration internally; pass it to the parent module
+// Load the DynamoDB store adapter
+Lib.DistinctQueueStore = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+  table_name: 'queue_jobs'
+});
+
+// Load distinct-queue with the ready-to-use store object
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
-    table_name: 'queue_jobs',
-    lib_dynamodb: Lib.DynamoDB
-  })
+  Store: Lib.DistinctQueueStore
 });
 
 // Optional: idempotent table setup
@@ -44,12 +45,15 @@ await Lib.DistinctQueue.Store.setupNewStore(Lib.Instance.initialize());
 
 ## Configuration
 
-The adapter owns its configuration internally, like any standalone module. Pass configuration when requiring the adapter:
+The adapter is a store implementation for `js-server-helper-distinct-queue`.
+It is loaded with dependency injection: the project loader provides `Lib`
+(including `Lib.DynamoDB`), and the adapter owns its own configuration:
 
 - **`table_name`** — DynamoDB table name for queue records (required)
-- **`lib_dynamodb`** — Reference to the `js-server-helper-nosql-aws-dynamodb` instance (required)
+- **`KEY_DELIMITER`** — Sort key field separator (default: `\u001F`, override with care)
 
-The parent module calls `CONFIG.STORE(Lib, ERRORS)` to get the live store; the adapter validates its config at that point.
+The adapter returns a ready-to-use store object that the parent module
+consumes via its `CONFIG.Store` key.
 
 See [`docs/schema.md`](docs/schema.md) for detailed schema documentation and key design.
 See [`docs/configuration.md`](docs/configuration.md) for complete configuration options.

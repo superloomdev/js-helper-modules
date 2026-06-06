@@ -1,5 +1,7 @@
-// Info: DynamoDB store adapter for js-server-helper-distinct-queue. Implements
-// the 5-method store contract using a composite partition key + sort key.
+// Info: DynamoDB store adapter for js-server-helper-distinct-queue.
+// Implements the 4-method store contract using a composite partition key + sort key.
+//
+// The application injects a ready-to-use DynamoDB helper via Lib.DynamoDB.
 //
 // Schema:
 //   - PK (`p`): tenant_id (String) - partition boundary
@@ -7,80 +9,78 @@
 //   - Attributes: payload (Map), action (String), toc (Number)
 //
 // The sort key delimiter is a non-printable character (ASCII unit separator)
-// defined once in store.config.js as KEY_DELIMITER. It will never appear in
-// caller-supplied resource_ids, eliminating delimiter collision risk.
+// defined in CONFIG.KEY_DELIMITER. It will never appear in caller-supplied resource_ids.
 //
-// Query patterns:
-//   - Exact resource: Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
-//   - Prefix match:   Query with PK=tenant_id AND begins_with(SK, prefix)
-//   - Delete stale:   Query then batch delete (DynamoDB has no range delete)
-//
-// The composite key design on { p, id } supports all access patterns.
-// No Global Secondary Indexes required.
-//
-// The application injects a ready-to-use DynamoDB helper via
-// STORE_CONFIG.lib_dynamodb (typically Lib.DynamoDB).
-//
-// Store contract (identical shape across all adapters):
-//   - setupNewStore(instance)                                           -> { success, error }
+// Store contract (identical shape across all adapters, validated by the parent):
 //   - writeRecord(instance, record)                                    -> { success, error }
 //   - queryByResourceId(instance, tenant_id, resource_id)                -> { success, records, error }
 //   - queryByResourceIdPrefix(instance, tenant_id, resource_id_prefix)   -> { success, records, error }
 //   - deleteByDataVersionLte(instance, tenant_id, resource_id, dv)     -> { success, error }
+//
+// Plus an idempotent provisioning method (not part of the validated contract):
+//   - setupNewStore(instance)                                           -> { success, error }
 
 'use strict';
-
-
-// Internal storage-format constants (key delimiter). Owned by the adapter,
-// not user-tunable. See store.config.js for the rationale.
-const Config = require('./store.config');
-
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own table_name and lib_dynamodb reference.
+Factory loader. One call = one independent store instance with its
+own Lib, CONFIG, and ERRORS. Validates CONFIG at construction so
+misconfiguration fails fast at startup, not on first request.
 
-The ERRORS catalog is forwarded from distinct-queue.js so the adapter
-can return the same error shapes as the core module.
+@param {Object} shared_libs - Lib container with Utils, Debug, DynamoDB
+@param {Object} config      - Overrides merged over adapter config defaults
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from distinct-queue.js
-
-@return {Object} - Store interface (5 methods: setupNewStore, writeRecord,
-                    queryByResourceId, queryByResourceIdPrefix, deleteByDataVersionLte)
+@return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    DynamoDB: shared_libs.DynamoDB
+  };
+
+  // Merge overrides over defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
+
+  // Load internal error catalog
+  const ERRORS = require('./store.errors');
 
   // Load the validators singleton and inject Lib
   const Validators = require('./store.validators')(Lib);
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
+  // Validate CONFIG - throws on misconfiguration
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
+
 
 
 
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Builds the public Store interface for one instance. All functions
-close over the same Lib, STORE_CONFIG, and ERRORS.
+Builds the public Store interface. All functions close over
+Lib, CONFIG, and ERRORS.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { table_name, lib_dynamodb }
-@param {Object} ERRORS       - Error catalog forwarded from distinct-queue.js
+@param {Object} Lib    - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} CONFIG - Merged adapter configuration { table_name }
+@param {Object} ERRORS - Frozen error catalog
 
-@return {Object} - Store interface (5 methods)
+@return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -100,7 +100,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     setupNewStore: async function (instance) {
 
       // Provision the table idempotently with composite key {p, id}
-      const result = await STORE_CONFIG.lib_dynamodb.createTable(instance, STORE_CONFIG.table_name, {
+      const result = await Lib.DynamoDB.createTable(instance, CONFIG.table_name, {
         attribute_definitions: [
           { name: 'p',  type: 'S' },
           { name: 'id', type: 'S' }
@@ -166,9 +166,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       };
 
       // Write the record using PutItem
-      const result = await STORE_CONFIG.lib_dynamodb.writeRecord(
+      const result = await Lib.DynamoDB.writeRecord(
         instance,
-        STORE_CONFIG.table_name,
+        CONFIG.table_name,
         item
       );
 
@@ -336,9 +336,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Step 3: Batch delete the matching keys
       const keysByTable = {};
-      keysByTable[STORE_CONFIG.table_name] = keys_to_delete;
+      keysByTable[CONFIG.table_name] = keys_to_delete;
 
-      const delete_result = await STORE_CONFIG.lib_dynamodb.batchDeleteRecords(
+      const delete_result = await Lib.DynamoDB.batchDeleteRecords(
         instance,
         keysByTable
       );
@@ -378,8 +378,8 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
     /********************************************************************
     Compose the DynamoDB sort key from raw record fields. The three
-    segments are joined by Config.KEY_DELIMITER:
-      resource_id + KEY_DELIMITER + data_version + KEY_DELIMITER + request_id
+    segments are joined by CONFIG.KEY_DELIMITER:
+      resource_id + CONFIG.KEY_DELIMITER + data_version + CONFIG.KEY_DELIMITER + request_id
 
     @param {String} resource_id  - Opaque resource identifier
     @param {Number} data_version - Millisecond timestamp
@@ -388,7 +388,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     @return {String} - Composite sort key
     *********************************************************************/
     composeSortKey: function (resource_id, data_version, request_id) {
-      return resource_id + Config.KEY_DELIMITER + data_version + Config.KEY_DELIMITER + request_id;
+      return resource_id + CONFIG.KEY_DELIMITER + data_version + CONFIG.KEY_DELIMITER + request_id;
     },
 
 
@@ -401,7 +401,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     @return {Object} - { resource_id, data_version, request_id }
     *********************************************************************/
     parseSortKey: function (sort_key) {
-      const parts = sort_key.split(Config.KEY_DELIMITER);
+      const parts = sort_key.split(CONFIG.KEY_DELIMITER);
       return {
         resource_id: parts[0],
         data_version: parseInt(parts[1], 10),
@@ -420,7 +420,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     @return {String} - Prefix ending in the key delimiter
     *********************************************************************/
     exactResourcePrefix: function (resource_id) {
-      return resource_id + Config.KEY_DELIMITER;
+      return resource_id + CONFIG.KEY_DELIMITER;
     },
 
 
@@ -439,9 +439,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     @return {Promise<Object>} - Raw driver result { success, items, error }
     *********************************************************************/
     runPrefixQuery: function (instance, tenant_id, prefix_value) {
-      return STORE_CONFIG.lib_dynamodb.query(
+      return Lib.DynamoDB.query(
         instance,
-        STORE_CONFIG.table_name,
+        CONFIG.table_name,
         {
           pk: tenant_id,
           pkName: 'p',

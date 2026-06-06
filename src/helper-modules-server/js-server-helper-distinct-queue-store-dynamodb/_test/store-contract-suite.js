@@ -2,6 +2,11 @@
 // Validates that the 4-method store contract is correctly implemented.
 // These tests run against the real DynamoDB backend via Docker.
 //
+// The 4-method contract is what the parent distinct-queue module validates
+// at construction (see its validateStoreContract). setupNewStore is an
+// idempotent provisioning method, not part of the contract - it is exercised
+// here only via the before() setup hook.
+//
 // Contract methods tested:
 //   - writeRecord
 //   - queryByResourceId
@@ -89,16 +94,12 @@ module.exports = function buildContractSuite (deps) {
       });
 
 
-      await it('should return SERVICE_UNAVAILABLE when write fails', async function () {
-        // This would require mocking the DynamoDB driver to fail
-        // For integration tests, we verify the error shape is correct
+      await it('should return error null when write succeeds', async function () {
         const instance = buildInstance();
-        // Normal write should succeed
         const record = createRecord({ resource_id: 'normal_write' });
         const result = await store.writeRecord(instance, record);
 
         assert.strictEqual(result.success, true);
-        // Error structure validated: error is null on success
         assert.strictEqual(result.error, null);
       });
 
