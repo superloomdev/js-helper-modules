@@ -25,13 +25,13 @@ Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib
 
 ## Store Contract Methods
 
-| Method | Purpose | MongoDB Operation |
-|--------|---------|-------------------|
+| Method | Purpose | Wrapper Call |
+|--------|---------|--------------|
 | `setupNewStore(instance)` | No-op (implicit _id index) | N/A |
-| `writeRecord(instance, record)` | Append record | `insertOne` |
-| `queryByResourceId(instance, tenant_id, resource_id)` | Get records for exact resource | `find` + `sort` |
-| `queryByResourceIdPrefix(instance, tenant_id, prefix)` | Get records by prefix | `find` + `$regex` + `sort` |
-| `deleteByDataVersionLte(instance, tenant_id, resource_id, boundary)` | Delete stale records | `deleteMany` |
+| `writeRecord(instance, record)` | Append record | `Lib.MongoDB.writeRecord` |
+| `queryByResourceId(instance, tenant_id, resource_id)` | Get records for exact resource | `Lib.MongoDB.query` + sort |
+| `queryByResourceIdPrefix(instance, tenant_id, prefix)` | Get records by prefix | `Lib.MongoDB.query` + `$regex` + sort |
+| `deleteByDataVersionLte(instance, tenant_id, resource_id, boundary)` | Delete stale records | `Lib.MongoDB.deleteRecordsByFilter` |
 
 ## Error Handling
 

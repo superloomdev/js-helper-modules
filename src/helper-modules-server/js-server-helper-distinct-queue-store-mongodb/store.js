@@ -4,7 +4,7 @@
 // The application injects a ready-to-use MongoDB helper via Lib.MongoDB.
 //
 // Schema:
-//   - _id: { t, r, d, s } — (tenant_id, resource_id, data_version, request_id)
+//   - _id: { t, r, d, s } - (tenant_id, resource_id, data_version, request_id)
 //   - Attributes: payload (Object), action (String), toc (Number)
 //
 // The implicit _id index covers all access patterns. No secondary indexes needed.
@@ -79,15 +79,16 @@ Lib, CONFIG, and ERRORS.
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS) {
 
-  ////////////////////////////// Public Functions START ////////////////////////
+  ////////////////////////////// Public Functions START //////////////////////
   const Store = {
 
 
     // ~~~~~~~~~~~~~~~~~~~~ First-Time Provisioning ~~~~~~~~~~~~~~~~~~~~
+    // Run once on first deploy to verify the store is reachable. No-op for MongoDB.
 
     /********************************************************************
     One-time store provisioning. Run once when setting up the store for
-    the first time — not on every application boot.
+    the first time - not on every application boot.
 
     No-op for this adapter: MongoDB creates the collection and implicit
     _id index automatically on first write. No explicit setup needed.
@@ -113,9 +114,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Write Operation ~~~~~~~~~~~~~~~~~~~~
+    // Append a queue record identified by the compound _id subdocument.
 
     /********************************************************************
-    Append a record to the collection. Calls lib_mongodb.writeRecord
+    Append a record to the collection using Lib.MongoDB.writeRecord
     with the compound _id subdocument { t, r, d, s }.
 
     @param {Object} instance - Request instance
@@ -164,6 +166,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Query Operations ~~~~~~~~~~~~~~~~~~~~
+    // Read records by exact resource or by resource_id prefix.
 
     /********************************************************************
     Return all records matching (tenant_id, resource_id), sorted by
@@ -269,6 +272,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Delete Operation ~~~~~~~~~~~~~~~~~~~~
+    // Remove stale records up to and including a data_version boundary.
 
     /********************************************************************
     Delete all records for (tenant_id, resource_id) where
@@ -319,11 +323,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     }
 
 
-  };//////////////////////////// Public Functions END //////////////////////////
+  };////////////////////////////// Public Functions END //////////////////////
 
 
 
-  ///////////////////////////// Private Functions START ////////////////////////
+  ///////////////////////////// Private Functions START //////////////////////
   const _Store = {
 
     /********************************************************************
@@ -363,7 +367,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       };
     }
 
-  };/////////////////////////// Private Functions END //////////////////////////
+  };///////////////////////////// Private Functions END //////////////////////
 
   return Store;
 

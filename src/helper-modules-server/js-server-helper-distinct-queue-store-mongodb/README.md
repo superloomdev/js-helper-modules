@@ -38,7 +38,7 @@ Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib
   Store: Store
 });
 
-// Initialize collection (one-time provisioning — run only on first setup, not on every boot)
+// Initialize collection (one-time provisioning - run only on first setup, not on every boot)
 const instance = Lib.Instance.initialize();
 await Store.setupNewStore(instance);
 ```
@@ -48,7 +48,10 @@ await Store.setupNewStore(instance);
 - **`collection_name`** — MongoDB collection name for queue records (required)
 - `Lib.MongoDB` is read from the injected `Lib` container — no separate `lib_mongodb` config key
 
-See [`docs/schema.md`](docs/schema.md) for detailed schema documentation and index design.
+## Extended Documentation
+
+- [`docs/schema.md`](docs/schema.md) - Document shape, index design, query patterns, and effort analysis
+- [`docs/configuration.md`](docs/configuration.md) - Full loader pattern, configuration keys, and dependency table
 
 ## Testing
 

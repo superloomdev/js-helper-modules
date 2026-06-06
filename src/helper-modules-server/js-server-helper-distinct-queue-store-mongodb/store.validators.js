@@ -49,7 +49,7 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (config) {
 
-    // collection_name is required and must be a non-empty string
+    // Require a non-empty collection name
     if (
       Lib.Utils.isNullOrUndefined(config.collection_name) ||
       !Lib.Utils.isString(config.collection_name) ||
@@ -58,7 +58,7 @@ const Validators = {
       throw new Error('[distinct-queue-store-mongodb] CONFIG.collection_name is required and must be a non-empty string');
     }
 
-    // MongoDB driver must be injected via Lib
+    // Require the MongoDB driver to be injected via Lib
     if (Lib.Utils.isNullOrUndefined(Lib.MongoDB)) {
       throw new Error('[distinct-queue-store-mongodb] Lib.MongoDB is required');
     }
