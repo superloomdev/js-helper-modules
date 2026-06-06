@@ -20,19 +20,19 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-dynamodb');
-const store   = factory(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-auth-store-dynamodb')({
+  table_name:   'sessions_user',
+  lib_dynamodb: Lib.DynamoDB
+});
 ```
 
 | Argument | Type | Purpose |
 |---|---|---|
-| `Lib` | Object | Dependency container. Reads `Lib.Utils` and `Lib.Debug` |
-| `CONFIG` | Object | Merged Auth `CONFIG`. The factory reads `CONFIG.STORE_CONFIG` only. See [configuration.md](configuration.md) |
-| `ERRORS` | Object | Auth's frozen error catalog. The adapter uses `ERRORS.SERVICE_UNAVAILABLE` and `ERRORS.NOT_IMPLEMENTED` |
+| `config` | Object | `{ table_name, lib_dynamodb }`. See [configuration.md](configuration.md) |
 
-The factory validates `CONFIG.STORE_CONFIG` and returns a Store interface. Each factory call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different tables) coexist in the same process and share the same `Lib.DynamoDB` driver helper if it is the same instance.
+The adapter validates the config, builds its own `Lib` (Utils + Debug) and `ERRORS` catalog internally, and returns a ready-to-use Store interface. Each call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different tables) coexist in the same process and share the same `Lib.DynamoDB` driver helper if it is the same instance.
 
-The factory throws an `Error` if `STORE_CONFIG`, `STORE_CONFIG.table_name`, or `STORE_CONFIG.lib_dynamodb` is missing.
+The adapter throws an `Error` if `config.table_name` or `config.lib_dynamodb` is missing.
 
 ## Store Contract
 

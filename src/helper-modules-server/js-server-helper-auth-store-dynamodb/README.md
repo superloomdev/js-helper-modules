@@ -41,7 +41,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb/docs/api.md). The store contract this adapter implements and the adapter factory protocol
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb/docs/configuration.md). `STORE_CONFIG` keys, IAM permissions, peer dependencies, environment variables, testing tier
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb/docs/configuration.md). Config keys, IAM permissions, peer dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb/docs/schema.md). Single-table design, PK/SK strategy, CloudFormation example, attribute type mapping
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb/docs/cleanup.md). Native TTL vs application-managed cleanup, Scan-then-batchDelete fallback, operational notes
 - [Auth parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth). The data model, error catalog, and Auth-side configuration this adapter plugs into

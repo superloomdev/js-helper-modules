@@ -1,25 +1,31 @@
 # js-server-helper-auth-store-dynamodb. AI Reference
 
-Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-auth`. Cannot stand alone. Always loaded by the Auth parent via the factory protocol; not called directly by application code.
+Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
 Cloud-native. Uses a single-table design with composite Sort Key. Table provisioning is out-of-band (IaC); `setupNewStore` returns `NOT_IMPLEMENTED`. Native TTL available at the table level.
 
-## Adapter Factory
+## Loader Pattern
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-dynamodb');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')({
+  table_name:   'sessions_user',
+  lib_dynamodb: Lib.DynamoDB
+});
+
+Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+  Store:      Store,
+  ACTOR_TYPE: 'user'
+});
 ```
 
-| Argument | Type | Source |
+| Config key | Type | Notes |
 |---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Auth config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Auth error catalog; the adapter uses `SERVICE_UNAVAILABLE` and `NOT_IMPLEMENTED` |
+| `table_name` | String | Required. The DynamoDB table name |
+| `lib_dynamodb` | Object | Required. Initialized `js-server-helper-nosql-aws-dynamodb` instance |
 
-Returns a Store interface. The Auth parent retains the reference and calls the contract methods to satisfy its persistence needs.
+The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
 
-## `STORE_CONFIG`
+## Config
 
 ```js
 {
@@ -47,7 +53,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Auth module. The adapter expects `Lib`, the full Auth `CONFIG`, and the frozen Auth `ERRORS` catalog. Application code does not have those.
+1. **Call the adapter directly with its config to get a Store object, then pass that to the Auth parent.** Do not pass the factory function reference to Auth; pass the result of calling it.
 
 2. **`setupNewStore` is not implemented.** Returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`. The DynamoDB table must be provisioned out-of-band via IaC, AWS Console, or the driver helper's table-management API (if and when it gains one). Do not attempt to implement table creation in application code.
 
@@ -77,16 +83,16 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 @superloomdev/js-server-helper-nosql-aws-dynamodb    (AWS SDK wrapper)
 ```
 
-These are loaded into `Lib` by the application before the Auth parent is loaded. The adapter does not require any of them directly; it accesses them through `Lib`.
+Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-aws-dynamodb` driver helper is passed in via `config.lib_dynamodb` by the application.
 
-## Error Catalog Used
+## Error Catalog
 
-Two types from the Auth `ERRORS` catalog:
+The adapter defines its own internal ERRORS catalog. Auth forwards error envelopes transparently.
 
 | Error | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
-| `ERRORS.NOT_IMPLEMENTED` | `setupNewStore` was called. The adapter does not support on-the-fly table creation |
+| `SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
+| `NOT_IMPLEMENTED` | `setupNewStore` was called. The adapter does not support on-the-fly table creation |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
