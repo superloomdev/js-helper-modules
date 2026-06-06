@@ -6,9 +6,9 @@
 //   - SK (`id`): resource_id + '\u001F' + data_version_ms + '\u001F' + request_id (String)
 //   - Attributes: payload (Map), action (String), toc (Number)
 //
-// The delimiter '\u001F' (ASCII unit separator) is a non-printable character
-// that will never appear in caller-supplied resource_ids, eliminating
-// delimiter collision risk.
+// The sort key delimiter is a non-printable character (ASCII unit separator)
+// defined once in store.config.js as KEY_DELIMITER. It will never appear in
+// caller-supplied resource_ids, eliminating delimiter collision risk.
 //
 // Query patterns:
 //   - Exact resource: Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
@@ -29,6 +29,11 @@
 //   - deleteByDataVersionLte(instance, tenant_id, resource_id, dv)     -> { success, error }
 
 'use strict';
+
+
+// Internal storage-format constants (key delimiter). Owned by the adapter,
+// not user-tunable. See store.config.js for the rationale.
+const Config = require('./store.config');
 
 
 
@@ -109,11 +114,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Return a service error if the driver call failed
       if (result.success === false) {
-        Lib.Debug.debug('DistinctQueue dynamodb setupNewStore failed', {
-          type: ERRORS.SERVICE_UNAVAILABLE.type,
-          driver_type: result.error && result.error.type,
-          driver_message: result.error && result.error.message
-        });
+        _Store.logDriverFailure('setupNewStore', result.error);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -173,11 +174,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Return service error on failure
       if (result && result.success === false) {
-        Lib.Debug.debug('DistinctQueue dynamodb writeRecord failed', {
-          type: ERRORS.SERVICE_UNAVAILABLE.type,
-          driver_type: result.error && result.error.type,
-          driver_message: result.error && result.error.message
-        });
+        _Store.logDriverFailure('writeRecord', result.error);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -208,27 +205,17 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
-      // Query with partition key and begins_with on sort key
-      // The '\u001F' suffix ensures we match the exact resource, not a prefix
-      const result = await STORE_CONFIG.lib_dynamodb.query(
+      // The delimiter suffix pins the match to this exact resource, excluding
+      // sibling resources that merely share its prefix.
+      const result = await _Store.runPrefixQuery(
         instance,
-        STORE_CONFIG.table_name,
-        {
-          pk: tenant_id,
-          pkName: 'p',
-          skCondition: 'begins_with(id, :prefix)',
-          skValues: { ':prefix': resource_id + '\u001F' },
-          scanForward: true
-        }
+        tenant_id,
+        _Store.exactResourcePrefix(resource_id)
       );
 
       // Return service error on failure
       if (result && result.success === false) {
-        Lib.Debug.debug('DistinctQueue dynamodb queryByResourceId failed', {
-          type: ERRORS.SERVICE_UNAVAILABLE.type,
-          driver_type: result.error && result.error.type,
-          driver_message: result.error && result.error.message
-        });
+        _Store.logDriverFailure('queryByResourceId', result.error);
         return {
           success: false,
           records: null,
@@ -262,26 +249,17 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
-      // Query with partition key and begins_with on sort key
-      const result = await STORE_CONFIG.lib_dynamodb.query(
+      // The caller-supplied prefix is matched verbatim against the sort key,
+      // so it spans every resource_id beginning with it.
+      const result = await _Store.runPrefixQuery(
         instance,
-        STORE_CONFIG.table_name,
-        {
-          pk: tenant_id,
-          pkName: 'p',
-          skCondition: 'begins_with(id, :prefix)',
-          skValues: { ':prefix': resource_id_prefix },
-          scanForward: true
-        }
+        tenant_id,
+        resource_id_prefix
       );
 
       // Return service error on failure
       if (result && result.success === false) {
-        Lib.Debug.debug('DistinctQueue dynamodb queryByResourceIdPrefix failed', {
-          type: ERRORS.SERVICE_UNAVAILABLE.type,
-          driver_type: result.error && result.error.type,
-          driver_message: result.error && result.error.message
-        });
+        _Store.logDriverFailure('queryByResourceIdPrefix', result.error);
         return {
           success: false,
           records: null,
@@ -322,25 +300,15 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
       // Step 1: Query for all records for this tenant + resource
-      const query_result = await STORE_CONFIG.lib_dynamodb.query(
+      const query_result = await _Store.runPrefixQuery(
         instance,
-        STORE_CONFIG.table_name,
-        {
-          pk: tenant_id,
-          pkName: 'p',
-          skCondition: 'begins_with(id, :prefix)',
-          skValues: { ':prefix': resource_id + '\u001F' },
-          scanForward: true
-        }
+        tenant_id,
+        _Store.exactResourcePrefix(resource_id)
       );
 
       // Return service error on query failure
       if (query_result && query_result.success === false) {
-        Lib.Debug.debug('DistinctQueue dynamodb deleteByDataVersionLte query failed', {
-          type: ERRORS.SERVICE_UNAVAILABLE.type,
-          driver_type: query_result.error && query_result.error.type,
-          driver_message: query_result.error && query_result.error.message
-        });
+        _Store.logDriverFailure('deleteByDataVersionLte query', query_result.error);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -377,11 +345,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Return service error on delete failure
       if (delete_result && delete_result.success === false) {
-        Lib.Debug.debug('DistinctQueue dynamodb deleteByDataVersionLte batchDelete failed', {
-          type: ERRORS.SERVICE_UNAVAILABLE.type,
-          driver_type: delete_result.error && delete_result.error.type,
-          driver_message: delete_result.error && delete_result.error.message
-        });
+        _Store.logDriverFailure('deleteByDataVersionLte batchDelete', delete_result.error);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -410,11 +374,12 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
   ///////////////////////////// Private Functions START ////////////////////////
   const _Store = {
 
-    // ~~~~~~~~~~~~~~~~~~~~ Key Composition ~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ Key Composition & Parsing ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Compose the DynamoDB sort key from raw record fields.
-    Format: resource_id + '\u001F' + data_version + '\u001F' + request_id
+    Compose the DynamoDB sort key from raw record fields. The three
+    segments are joined by Config.KEY_DELIMITER:
+      resource_id + KEY_DELIMITER + data_version + KEY_DELIMITER + request_id
 
     @param {String} resource_id  - Opaque resource identifier
     @param {Number} data_version - Millisecond timestamp
@@ -423,39 +388,115 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     @return {String} - Composite sort key
     *********************************************************************/
     composeSortKey: function (resource_id, data_version, request_id) {
-      return resource_id + '\u001F' + data_version + '\u001F' + request_id;
+      return resource_id + Config.KEY_DELIMITER + data_version + Config.KEY_DELIMITER + request_id;
+    },
+
+
+    /********************************************************************
+    Parse a composite sort key back into its three segments. Inverse of
+    composeSortKey. data_version is coerced back to a Number.
+
+    @param {String} sort_key - The stored sort key
+
+    @return {Object} - { resource_id, data_version, request_id }
+    *********************************************************************/
+    parseSortKey: function (sort_key) {
+      const parts = sort_key.split(Config.KEY_DELIMITER);
+      return {
+        resource_id: parts[0],
+        data_version: parseInt(parts[1], 10),
+        request_id: parts[2]
+      };
+    },
+
+
+    /********************************************************************
+    Build the begins_with prefix that matches exactly one resource_id.
+    Appending the delimiter prevents matching sibling resources whose
+    ids merely start with this resource_id (e.g. "acc_1" vs "acc_12").
+
+    @param {String} resource_id - Exact resource identifier
+
+    @return {String} - Prefix ending in the key delimiter
+    *********************************************************************/
+    exactResourcePrefix: function (resource_id) {
+      return resource_id + Config.KEY_DELIMITER;
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Query Helpers ~~~~~~~~~~~~~~~~~~~~
+
+    /********************************************************************
+    Run a partition-scoped begins_with query on the sort key. Shared by
+    queryByResourceId, queryByResourceIdPrefix, and the read phase of
+    deleteByDataVersionLte. Returns the raw driver result so each caller
+    owns its own success/error shaping.
+
+    @param {Object} instance     - Request instance
+    @param {String} tenant_id    - Partition key value
+    @param {String} prefix_value - Sort key prefix to match
+
+    @return {Promise<Object>} - Raw driver result { success, items, error }
+    *********************************************************************/
+    runPrefixQuery: function (instance, tenant_id, prefix_value) {
+      return STORE_CONFIG.lib_dynamodb.query(
+        instance,
+        STORE_CONFIG.table_name,
+        {
+          pk: tenant_id,
+          pkName: 'p',
+          skCondition: 'begins_with(id, :prefix)',
+          skValues: { ':prefix': prefix_value },
+          scanForward: true
+        }
+      );
     },
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Record Reconstruction ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Reconstruct a full record from the DynamoDB item.
-    The item has PK `p`, SK `id`, and attributes payload, action, toc.
-    We parse the sort_key to extract resource_id, data_version, request_id.
+    Reconstruct a full record from the DynamoDB item. The item has PK
+    `p`, SK `id`, and attributes payload, action, toc. The sort key is
+    parsed back into resource_id, data_version, and request_id.
 
     @param {Object} item - The DynamoDB item { p, id, payload, action, toc }
 
     @return {Object} - Record with top-level tenant_id, resource_id, data_version, etc.
     *********************************************************************/
     itemToRecord: function (item) {
-      // Parse the sort_key to extract components
-      // sort_key format: resource_id + '\u001F' + data_version + '\u001F' + request_id
-      const sort_key_parts = item.id.split('\u001F');
-      const resource_id = sort_key_parts[0];
-      const data_version = parseInt(sort_key_parts[1], 10);
-      const request_id = sort_key_parts[2];
-
+      const key = _Store.parseSortKey(item.id);
       return {
         tenant_id: item.p,
-        resource_id: resource_id,
-        data_version: data_version,
-        request_id: request_id,
+        resource_id: key.resource_id,
+        data_version: key.data_version,
+        request_id: key.request_id,
         sort_key: item.id,
         payload: item.payload,
         action: item.action,
         toc: item.toc
       };
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Error Helpers ~~~~~~~~~~~~~~~~~~~~
+
+    /********************************************************************
+    Log a backend driver failure in the shape every public method uses
+    before returning ERRORS.SERVICE_UNAVAILABLE. Centralizes the debug
+    payload so the operation label is the only thing that varies.
+
+    @param {String} operation    - Label of the failing operation
+    @param {Object} driver_error - The error object from the driver result
+
+    @return {void}
+    *********************************************************************/
+    logDriverFailure: function (operation, driver_error) {
+      Lib.Debug.debug('DistinctQueue dynamodb ' + operation + ' failed', {
+        type: ERRORS.SERVICE_UNAVAILABLE.type,
+        driver_type: driver_error && driver_error.type,
+        driver_message: driver_error && driver_error.message
+      });
     }
 
 

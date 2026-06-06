@@ -11,18 +11,19 @@ Persistent, storage-agnostic last-write-wins coalescing queue keyed by `(tenant_
 ```js
 module.exports = function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
-  // Validates CONFIG at construction (STORE must be a function; STORE_CONFIG must be an object).
+  // Validates CONFIG at construction (STORE must be a function).
   // Throws synchronously on misconfiguration.
   return { enqueue, claim, listByPrefix };
 };
 ```
 
-`CONFIG.STORE` is a **factory function**, not a string. The loader calls it as `CONFIG.STORE(Lib, CONFIG, ERRORS)` and binds the returned store object to the instance. Passing a string throws `CONFIG.STORE is required and must be a store factory function`.
+`CONFIG.STORE` is a **pre-configured factory function** - the result of calling the adapter's own configure call. The loader calls it as `CONFIG.STORE(Lib, ERRORS)` and binds the returned store object to the instance. Passing a string throws `CONFIG.STORE is required and must be a store factory function`.
 
 ```js
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb'),
-  STORE_CONFIG: { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(
+    { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+  )
 });
 ```
 
@@ -58,8 +59,7 @@ Operational prefix query. Not used in the normal enqueue/claim flow.
 
 | Key | Type | Required | Notes |
 |---|---|---|---|
-| `STORE` | function | Yes | Store factory function. `require('@superloomdev/js-server-helper-distinct-queue-store-<backend>')` |
-| `STORE_CONFIG` | object | Yes | Per-adapter config. Shape lives in each adapter's README |
+| `STORE` | function | Yes | Pre-configured store adapter factory. Call the adapter's configure export with its own config and pass the result here. |
 
 ## Error Catalog
 
@@ -111,11 +111,11 @@ Every adapter must implement these methods:
 | `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on store failures |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance lifecycle |
 
-The store adapter (`CONFIG.STORE`) consumes its own driver helper (`Lib.DynamoDB`, `Lib.MongoDB`) through `CONFIG.STORE_CONFIG`. The distinct-queue module never imports a database driver directly.
+The store adapter (`CONFIG.STORE`) consumes its own driver helper (`Lib.DynamoDB`, `Lib.MongoDB`) through its own internal configuration. The distinct-queue module never imports a database driver directly.
 
 ## Documentation
 
 - `docs/api.md`. Full API reference (every function, every option, every error type)
 - `docs/configuration.md`. Loader pattern, every config key, peer dependencies, testing tier
 - `docs/data-model.md`. Record shape, core concepts, sort key design
-- Storage adapters: see the README's "Storage Adapters" section. Per-backend schema, indexes, and `STORE_CONFIG` shape live in each adapter package's own README (`@superloomdev/js-server-helper-distinct-queue-store-*`)
+- Storage adapters: see the README's "Storage Adapters" section. Per-backend schema, indexes, and configuration shape live in each adapter package's own README (`@superloomdev/js-server-helper-distinct-queue-store-*`)

@@ -17,20 +17,18 @@ const createMemoryStore = require('./memory-store');
 
 
 // Helper - shorthand to construct a distinct-queue instance backed by an
-// injected store fixture. The inline factory receives (Lib, CONFIG, ERRORS)
-// and returns the pre-built store object directly.
+// injected store fixture. The inline factory receives (Lib, ERRORS) and
+// returns the pre-built store object directly.
 const buildQueue = function (store) {
   return DistinctQueueFactory(Lib, {
-    STORE: function injectFactory () { return store; },
-    STORE_CONFIG: {}
+    STORE: function injectFactory () { return store; }
   });
 };
 
 
 const validBaseConfig = function () {
   return {
-    STORE:        function () { return createMemoryStore(); },
-    STORE_CONFIG: {}
+    STORE: function () { return createMemoryStore(); }
   };
 };
 
@@ -113,27 +111,17 @@ describe('Loader validation', function () {
   it('throws when CONFIG.STORE is not a function', function () {
     assert.throws(function () {
       DistinctQueueFactory(Lib, {
-        STORE: 'not-a-function',
-        STORE_CONFIG: {}
+        STORE: 'not-a-function'
       });
     }, /CONFIG\.STORE is required and must be a store factory function/);
   });
 
-  it('throws when CONFIG.STORE_CONFIG is missing', function () {
-    assert.throws(function () {
+  it('does not require STORE_CONFIG (adapters own their config)', function () {
+    assert.doesNotThrow(function () {
       DistinctQueueFactory(Lib, {
         STORE: function () { return createMemoryStore(); }
       });
-    }, /CONFIG\.STORE_CONFIG is required/);
-  });
-
-  it('throws when CONFIG.STORE_CONFIG is not an object', function () {
-    assert.throws(function () {
-      DistinctQueueFactory(Lib, {
-        STORE: function () { return createMemoryStore(); },
-        STORE_CONFIG: 'not-an-object'
-      });
-    }, /CONFIG\.STORE_CONFIG must be a plain object/);
+    });
   });
 
   it('throws when store is missing a required method', function () {
@@ -147,8 +135,7 @@ describe('Loader validation', function () {
 
     assert.throws(function () {
       DistinctQueueFactory(Lib, {
-        STORE: function () { return partialStore; },
-        STORE_CONFIG: {}
+        STORE: function () { return partialStore; }
       });
     }, /Invalid store contract: missing method `queryByResourceIdPrefix`/);
 
@@ -165,10 +152,10 @@ describe('Loader validation', function () {
 
     assert.throws(function () {
       DistinctQueueFactory(Lib, {
-        STORE: function () { return badStore; },
-        STORE_CONFIG: {}
+        STORE: function () { return badStore; }
       });
     }, /Invalid store contract: missing method `queryByResourceId`/);
+
 
   });
 

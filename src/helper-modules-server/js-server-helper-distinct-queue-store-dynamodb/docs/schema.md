@@ -21,6 +21,8 @@ The sort key `id` encodes three values separated by `\u001F` (ASCII unit separat
 2. `data_version` — Millisecond timestamp for sorting
 3. `request_id` — Compact UUID tie-breaker
 
+The delimiter is defined once as `KEY_DELIMITER` in `store.config.js` and is the single source of truth for both composing and parsing sort keys.
+
 ## Key Design
 
 ### Composite Primary Key (p, id)

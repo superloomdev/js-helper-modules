@@ -120,8 +120,8 @@ model.
 | DynamoDB | `@superloomdev/js-server-helper-distinct-queue-store-dynamodb` |
 | MongoDB | `@superloomdev/js-server-helper-distinct-queue-store-mongodb` |
 
-Pass the adapter factory as `CONFIG.STORE`. Each adapter's README documents
-its `STORE_CONFIG` shape, table/collection schema, and provisioning steps.
+Pass a pre-configured adapter factory as `CONFIG.STORE`. Each adapter's README documents
+its configuration shape, table/collection schema, and provisioning steps.
 
 ## Adding to Your Project
 
@@ -139,8 +139,9 @@ Substitute the adapter package for your database. The full list is in the [Stora
 const DistinctQueueFactory = require('@superloomdev/js-server-helper-distinct-queue');
 
 Lib.DistinctQueue = DistinctQueueFactory(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb'),
-  STORE_CONFIG: { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(
+    { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+  )
 });
 ```
 
@@ -163,8 +164,8 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance) an
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance for lifecycle |
 
 The store adapter (`CONFIG.STORE`) consumes its own driver helper
-(`Lib.DynamoDB`, `Lib.MongoDB`) through `CONFIG.STORE_CONFIG`. The
-distinct-queue module never imports a database driver helper directly.
+(`Lib.DynamoDB`, `Lib.MongoDB`) through its own internal configuration.
+The distinct-queue module never imports a database driver helper directly.
 
 ## Testing Status
 
@@ -177,7 +178,7 @@ The module's own tests use the in-process memory fixture (`_test/memory-store.js
 ## Extended Documentation
 
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, lifecycle, and error catalog
-- [Configuration](docs/configuration.md). Loader pattern, every configuration key, per-backend `STORE_CONFIG` shape, peer dependencies, testing tier
+- [Configuration](docs/configuration.md). Loader pattern, every configuration key, per-backend adapter setup, peer dependencies, testing tier
 - [Data model](docs/data-model.md). Every record field, core concepts, sort key design, resource_id design guide
 - [Superloom](https://superloom.dev). The framework
 

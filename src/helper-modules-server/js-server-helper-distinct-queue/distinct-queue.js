@@ -7,10 +7,9 @@
 // Public surface (3 methods): enqueue, claim, listByPrefix.
 //
 // Storage backends are provided by standalone adapter packages. The caller
-// passes the chosen store factory directly as CONFIG.STORE - no string
-// dispatch inside this module. Require only the adapter you need:
-//   js-server-helper-distinct-queue-store-dynamodb
-//   js-server-helper-distinct-queue-store-mongodb
+// passes a pre-configured store factory as CONFIG.STORE. This module never
+// references a specific backend or any storage-specific configuration - it
+// forwards only Lib and ERRORS to the store factory.
 //
 // Deployment constraint: use a single scheduled poller (e.g. one Lambda on
 // EventBridge every 10 seconds) as the sole consumer of `claim`. This module
@@ -60,10 +59,10 @@ module.exports = function loader (shared_libs, config) {
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
-  // Instantiate the store. CONFIG.STORE is the factory function passed in
-  // by the caller; it receives (Lib, CONFIG, ERRORS) and extracts its own
-  // slice from CONFIG.STORE_CONFIG internally.
-  const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
+  // Instantiate the store. CONFIG.STORE is a pre-configured factory; the
+  // adapter already owns its configuration internally, so this module
+  // forwards only Lib and ERRORS.
+  const store = CONFIG.STORE(Lib, ERRORS);
 
   // Validate store contract immediately so missing methods fail at startup
   Validators.validateStoreContract(store);
@@ -368,8 +367,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Assemble the canonical record shape for storage. The core module does
-    not construct a storage key — each adapter builds its own key from the
-    raw fields using its own delimiter and format.
+    not construct a storage key — each adapter derives its own key from
+    these raw fields.
 
     @param {String} tenant_id    - Partition boundary
     @param {String} resource_id  - Opaque resource identifier

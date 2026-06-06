@@ -1,7 +1,7 @@
 // Info: Config, options, and store contract validators for js-server-helper-distinct-queue.
 // Called once at construction time from the loader: validateConfig (CONFIG shape)
 // and validateStoreContract (instantiated store method checks). Called per-call
-// from _DistinctQueue private methods: validateEnqueueOptions, validateClaimOptions,
+// from public methods: validateEnqueueOptions, validateClaimOptions,
 // validateListByPrefixOptions.
 // Throws on the first violation so misconfiguration and programmer errors
 // surface immediately.
@@ -36,7 +36,7 @@ module.exports = function loader (shared_libs) {
 
 
 
-////////////////////////////// Public Functions START ////////////////////////
+////////////////////////////// Public Functions START //////////////////////////////
 const Validators = {
 
 
@@ -45,6 +45,8 @@ const Validators = {
 
   /********************************************************************
   Validate the merged CONFIG object passed to the distinct-queue loader.
+  Only STORE is validated here — adapter-specific config is validated
+  inside the adapter's own configure() call.
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
@@ -54,22 +56,12 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (config) {
 
-    // STORE must be the store factory function
+    // STORE must be the pre-configured store factory function
     if (
       Lib.Utils.isNullOrUndefined(config.STORE) ||
       !Lib.Utils.isFunction(config.STORE)
     ) {
       throw new Error('[helper-distinct-queue] CONFIG.STORE is required and must be a store factory function');
-    }
-
-    // STORE_CONFIG is required - each store validates its own required keys
-    if (Lib.Utils.isNullOrUndefined(config.STORE_CONFIG)) {
-      throw new Error('[helper-distinct-queue] CONFIG.STORE_CONFIG is required (object)');
-    }
-
-    // STORE_CONFIG must be a plain object
-    if (!Lib.Utils.isObject(config.STORE_CONFIG)) {
-      throw new Error('[helper-distinct-queue] CONFIG.STORE_CONFIG must be a plain object');
     }
 
   },
@@ -207,4 +199,4 @@ const Validators = {
 
   }
 
-};////////////////////////////// Public Functions END ////////////////////////
+};////////////////////////////// Public Functions END //////////////////////////////

@@ -1,10 +1,7 @@
+// Info: Error catalog for js-server-helper-distinct-queue.
+// Operational errors returned via { success: false, error }.
+// Frozen to prevent accidental mutation.
 'use strict';
-
-/**
- * Error catalog for js-server-helper-distinct-queue.
- * Operational errors returned via {success: false, error}.
- * Frozen to prevent accidental mutation.
- */
 
 module.exports = Object.freeze({
 

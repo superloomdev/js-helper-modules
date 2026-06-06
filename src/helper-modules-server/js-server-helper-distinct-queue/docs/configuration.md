@@ -11,32 +11,35 @@ at runtime.
 const DistinctQueueFactory = require('@superloomdev/js-server-helper-distinct-queue');
 
 Lib.DistinctQueue = DistinctQueueFactory(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb'),
-  STORE_CONFIG: { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(
+    { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+  )
 });
 ```
 
-`CONFIG.STORE` is a **factory function**, not a string. The loader calls it as
-`CONFIG.STORE(Lib, CONFIG, ERRORS)` and binds the returned store object to the
-instance. Passing a string throws
+`CONFIG.STORE` is a **pre-configured factory function** — the result of calling
+the adapter's own `configure(store_config)` export. The parent loader then calls
+`CONFIG.STORE(Lib, ERRORS)` to produce the live store object. Adapter config
+(table name, driver reference, key format) is closed over inside the factory and
+never passes through this module. Passing a non-function throws
 `CONFIG.STORE is required and must be a store factory function`.
 
 ## Config Keys
 
 | Key | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `STORE` | Function | Yes | `null` | Store adapter factory. Pass `require(...)` for the chosen adapter package. |
-| `STORE_CONFIG` | Object | Yes | `null` | Per-adapter configuration. Shape varies by adapter — see each adapter's README. |
+| `STORE` | Function | Yes | `null` | Pre-configured store adapter factory. Call the adapter's `configure()` export and pass the result here. |
 
-## Per-Adapter `STORE_CONFIG` Shape
+## Per-Adapter Configuration
+
+Each adapter owns its config. Pass the config object directly to the adapter's `configure()` call, not to this module.
 
 ### DynamoDB
 
 ```js
-STORE_CONFIG: {
-  table_name: 'distinct_queue',
-  lib_dynamodb: Lib.DynamoDB
-}
+STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(
+  { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
+)
 ```
 
 Table schema: partition key `p` (String), sort key `id` (String). No GSI.
@@ -45,10 +48,9 @@ See `@superloomdev/js-server-helper-distinct-queue-store-dynamodb` README.
 ### MongoDB
 
 ```js
-STORE_CONFIG: {
-  collection_name: 'distinct_queue',
-  lib_mongodb: Lib.MongoDB
-}
+STORE: require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(
+  { collection_name: 'distinct_queue', lib_mongodb: Lib.MongoDB }
+)
 ```
 
 Compound index: `{ tenant_id: 1, resource_id: 1, data_version: 1 }`.
@@ -63,8 +65,8 @@ See `@superloomdev/js-server-helper-distinct-queue-store-mongodb` README.
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance for lifecycle |
 
 The store adapter (`CONFIG.STORE`) consumes its own driver helper through
-`CONFIG.STORE_CONFIG`. The distinct-queue module never imports a database
-driver directly.
+the config object passed to its `configure()` call. The distinct-queue
+module never imports a database driver directly.
 
 ## Testing Tier
 
