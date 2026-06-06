@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-logger-store-mongodb.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - setupNewStore creates indexes (idempotent)
 //   - addLog round-trip: write then read back via getLogsByEntity
 //   - getLogsByEntity returns records most-recent first
@@ -18,7 +18,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after, afterEach, beforeEach } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const LoggerStoreMongoDBFactory = require('helper-logger-store-mongodb');
 const LoggerFactory             = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -43,13 +43,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (collection) {
 
-  const config = {
-    STORE_CONFIG: {
-      collection_name: collection || TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
-  };
-  return LoggerStoreMongoDBFactory(Lib, config, ERRORS);
+  return LoggerStoreMongoDBFactory({
+    collection_name: collection || TEST_COLLECTION,
+    lib_mongodb: Lib.MongoDB
+  });
 
 };
 
@@ -92,11 +89,11 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { LoggerStoreMongoDBFactory(); },
+      /config must be an object/
     );
 
   });
@@ -104,7 +101,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is missing', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
+      function () { LoggerStoreMongoDBFactory({ lib_mongodb: Lib.MongoDB }); },
       /collection_name is required/
     );
 
@@ -113,7 +110,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_mongodb is missing', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreMongoDBFactory({ collection_name: 'x' }); },
       /lib_mongodb is required/
     );
 
@@ -363,12 +360,12 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  const config = Object.assign({
-    STORE: LoggerStoreMongoDBFactory,
-    STORE_CONFIG: { collection_name: TEST_COLLECTION, lib_mongodb: Lib.MongoDB }
-  }, overrides || {});
+  const Store = LoggerStoreMongoDBFactory({
+    collection_name: TEST_COLLECTION,
+    lib_mongodb: Lib.MongoDB
+  });
 
-  return LoggerFactory(Lib, config);
+  return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));
 
 };
 

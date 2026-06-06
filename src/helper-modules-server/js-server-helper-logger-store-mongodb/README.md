@@ -3,13 +3,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
 
-A MongoDB-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Plug it into the parent's `STORE` config; the Logger module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+A MongoDB-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent — construct it first with its own config, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
 A thin layer between the Logger parent module and a MongoDB log collection. Uses `_id = sort_key` for deterministic document identity, compound indexes on the canonical fields for the two query paths, and a sparse TTL index on `_ttl` for automatic expiry.
 
-The adapter cannot stand alone. It is always loaded together with the Logger parent and the [`js-server-helper-nosql-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-mongodb) driver helper.
+It is always used together with the Logger parent and the [`js-server-helper-nosql-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-mongodb) driver helper.
 
 ## Why Use This Module
 
@@ -35,22 +35,29 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/api.md). The store contract this adapter implements and MongoDB-specific semantics
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/configuration.md). `STORE_CONFIG` keys, peer dependencies, environment variables, testing tier
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/configuration.md). Config keys, dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/schema.md). Document shape, compound indexes, sparse TTL index, `data` as embedded document
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/cleanup.md). Native TTL and explicit `cleanupExpiredLogs` — when to use each
 - [Logger parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger). The data model, error catalog, and Logger-side configuration this adapter plugs into
 
 ## Adding to Your Project
 
-This adapter is installed alongside the Logger parent module and the `nosql-mongodb` driver helper. The loader pattern is documented in the Logger parent's README.
+This adapter is installed alongside the Logger parent module and the `nosql-mongodb` driver helper. Construct the store first, then pass it to the Logger:
+
+```js
+const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')({
+  collection_name: 'action_log',
+  lib_mongodb:     Lib.MongoDB
+});
+
+Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
+```
 
 Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
 
 ## Dependencies
 
-This module has no external dependencies.
-
-It expects three peer modules in the `Lib` container (Utils, Debug, MongoDB). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+`js-helper-utils` and `js-helper-debug` are bundled as direct dependencies. The `js-server-helper-nosql-mongodb` driver helper is a peer dependency — install it alongside this package and pass it via `config.lib_mongodb`. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 

@@ -1,34 +1,23 @@
 # js-server-helper-logger-store-mongodb. AI Reference
 
-Class F storage adapter. MongoDB backend for `@superloomdev/js-server-helper-logger`. Cannot stand alone. Always loaded by the Logger parent via the factory protocol; not called directly by application code.
+MongoDB storage adapter for `@superloomdev/js-server-helper-logger`. Fully independent — owns its own Lib, Config, and ERRORS. Constructed first by application code and passed as a ready-to-use store object to the Logger parent.
 
-Requires a running MongoDB instance. Uses `js-server-helper-nosql-mongodb` (native driver wrapper) injected via `STORE_CONFIG.lib_mongodb`.
+Requires a running MongoDB instance. Uses `js-server-helper-nosql-mongodb` (native driver wrapper) passed via `config.lib_mongodb`.
 
-## Adapter Factory
-
-```js
-const factory = require('@superloomdev/js-server-helper-logger-store-mongodb');
-const store   = factory(Lib, CONFIG, ERRORS);
-```
-
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Logger config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Logger error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
-
-Returns a Store interface.
-
-## `STORE_CONFIG`
+## Construction
 
 ```js
-{
+const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')({
   collection_name: 'action_log',  // required. one collection per logger instance
   lib_mongodb:     Lib.MongoDB    // required. initialized js-server-helper-nosql-mongodb
-}
+});
+
+Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+  Store: Store
+});
 ```
 
-Both keys are required.
+Both config keys are required. The loader throws an `Error` if either is missing, null, or empty.
 
 ## Store Contract
 
@@ -42,7 +31,7 @@ Both keys are required.
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Logger module.
+1. **Construct the adapter before the Logger.** The adapter is fully independent. Pass the returned store object as `CONFIG.Store` to the Logger parent.
 
 2. **`_id` is set to `sort_key`.** MongoDB document ID equals `sort_key` — no auto-generated ObjectId. This is the primary deduplication key for `addLog`.
 
@@ -63,20 +52,25 @@ Both keys are required.
 
 9. **`data` is stored as a native MongoDB object** (not serialized to a string), because MongoDB supports embedded documents. This is different from SQL adapters where `data` is JSON TEXT.
 
-## Peer Dependencies
+## Dependencies
 
+Owned (bundled in package):
 ```
 @superloomdev/js-helper-utils                    (type checks)
 @superloomdev/js-helper-debug                    (structured logging)
+```
+
+Peer (caller provides via config.lib_mongodb):
+```
 @superloomdev/js-server-helper-nosql-mongodb     (MongoDB driver wrapper)
 ```
 
-## Error Catalog Used
+## Error Catalog
 
 | Error | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.error`, never surfaced to caller |
+| `SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, returned as `{ success: false, error }` |
 
 ## Single Source of Truth
 
-The store's source file is `store.js`. `_id = sort_key`. No denormalized compound keys — indexes are compound on the canonical fields. TTL field: `_ttl` (sparse index, only set when `expires_at` is non-null).
+The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. `_id = sort_key`. No denormalized compound keys — indexes are compound on the canonical fields. TTL field: `_ttl` (sparse index, only set when `expires_at` is non-null).
