@@ -31,14 +31,13 @@ HttpGateway is a **singleton module**. One `require()(Lib, config)` call injects
 
 ```
 HttpGateway (singleton)
- ├─ CONFIG.ADAPTER        (adapter factory function - set once by loader)
- ├─ CONFIG.ADAPTER_CONFIG (optional adapter-specific options)
+ ├─ CONFIG.Adapter        (ready-to-use adapter object - set once by loader)
  ├─ parts/cookies.js      (serialize, parse, SameSite compatibility)
  ├─ parts/url-parts.js    (tldts wrapper for URL parsing)
  └─ parts/params.js       (typed request parameter extraction)
 ```
 
-`CONFIG.ADAPTER` is the adapter factory function itself. Pass it as `require()` directly, the same way you pass `Lib.Postgres` to other helpers.
+`CONFIG.Adapter` is the ready-to-use adapter object. Create it by calling the adapter package with its config, then pass the result to the gateway.
 
 The loader validates configuration at construction time and throws on misconfiguration. Setup errors surface at startup, not on first request.
 
@@ -96,8 +95,9 @@ This module follows Superloom conventions. It uses the singleton loader pattern,
 Install as a peer dependency through your project's loader pattern. See [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md) for the loader pattern and [npmrc setup](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md) for GitHub Packages registry configuration.
 
 ```javascript
+const Adapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
 const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')
+  Adapter: Adapter
 });
 ```
 

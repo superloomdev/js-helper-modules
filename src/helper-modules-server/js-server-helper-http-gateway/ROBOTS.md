@@ -10,15 +10,15 @@ through runtime-specific adapters.
 ## Singleton Loader
 
 ```javascript
+const Adapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway'),
-  ADAPTER_CONFIG: {} // optional, adapter-specific
+  Adapter: Adapter
 });
 ```
 
 Node.js `require` cache guarantees the same `Gateway` object is returned on every subsequent call. One loader call per process.
 
-**Config validation:** Throws at construction time if `ADAPTER` is missing or not a function.
+**Config validation:** Throws at construction time if `Adapter` is missing or not an object.
 
 **Peer dependencies in Lib:** `Utils`, `Debug`, `Instance`
 

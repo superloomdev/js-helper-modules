@@ -45,19 +45,19 @@ function buildInstance () {
   return Lib.Instance.initialize();
 }
 
-function buildGateway (adapter_factory) {
-  return HttpGateway(Lib, { ADAPTER: adapter_factory });
+function buildGateway (adapter) {
+  return HttpGateway(Lib, { Adapter: adapter });
 }
 
 function validBaseConfig () {
-  const { factory } = HttpGatewayAdapterStub();
-  return { ADAPTER: factory };
+  const { adapter } = HttpGatewayAdapterStub();
+  return { Adapter: adapter };
 }
 
 function buildGatewayWithMemory () {
-  const { factory, sent } = HttpGatewayAdapterStub();
-  const gateway = buildGateway(factory);
-  return { gateway, factory, sent };
+  const { adapter, sent } = HttpGatewayAdapterStub();
+  const gateway = buildGateway(adapter);
+  return { gateway, adapter, sent };
 }
 
 function initInstance (gateway, raw_request) {
@@ -76,28 +76,28 @@ function initInstance (gateway, raw_request) {
 
 describe('loader validation', function () {
 
-  it('throws when ADAPTER is missing', function () {
+  it('throws when Adapter is missing', function () {
     assert.throws(function () {
       HttpGateway(Lib, {});
-    }, /CONFIG\.ADAPTER must be an adapter factory function/);
+    }, /CONFIG\.Adapter must be a ready-to-use adapter object/);
   });
 
-  it('throws when ADAPTER is a string', function () {
+  it('throws when Adapter is a string', function () {
     assert.throws(function () {
-      HttpGateway(Lib, { ADAPTER: 'aws-apigateway' });
-    }, /CONFIG\.ADAPTER must be an adapter factory function/);
+      HttpGateway(Lib, { Adapter: 'aws-apigateway' });
+    }, /CONFIG\.Adapter must be a ready-to-use adapter object/);
   });
 
-  it('throws when ADAPTER is null', function () {
+  it('throws when Adapter is null', function () {
     assert.throws(function () {
-      HttpGateway(Lib, { ADAPTER: null });
-    }, /CONFIG\.ADAPTER must be an adapter factory function/);
+      HttpGateway(Lib, { Adapter: null });
+    }, /CONFIG\.Adapter must be a ready-to-use adapter object/);
   });
 
-  it('succeeds with a valid adapter factory', function () {
-    const { factory } = HttpGatewayAdapterStub();
+  it('succeeds with a valid adapter object', function () {
+    const { adapter } = HttpGatewayAdapterStub();
     assert.doesNotThrow(function () {
-      buildGateway(factory);
+      buildGateway(adapter);
     });
   });
 
@@ -108,7 +108,7 @@ describe('loader validation', function () {
     };
 
     assert.throws(function () {
-      buildGateway(function () { return bad_adapter; });
+      buildGateway(bad_adapter);
     }, /Invalid adapter contract: missing method `extractRequest`/);
   });
 
@@ -119,7 +119,7 @@ describe('loader validation', function () {
     };
 
     assert.throws(function () {
-      buildGateway(function () { return bad_adapter; });
+      buildGateway(bad_adapter);
     }, /Invalid adapter contract: missing method `buildResponseEnvelope`/);
   });
 
@@ -130,18 +130,18 @@ describe('loader validation', function () {
     };
 
     assert.throws(function () {
-      buildGateway(function () { return bad_adapter; });
+      buildGateway(bad_adapter);
     }, /Invalid adapter contract: missing method `getCountryCode`/);
   });
 
-  it('factory contract: two gateways with different adapters are independent', function () {
-    // Build two independent stub factories with different getCountryCode behavior
-    const { factory: factoryA, sent: sentA } = HttpGatewayAdapterStub();
-    const { factory: factoryB, sent: sentB } = HttpGatewayAdapterStub();
+  it('adapter contract: two gateways with different adapters are independent', function () {
+    // Build two independent stub adapters with different getCountryCode behavior
+    const { adapter: adapterA, sent: sentA } = HttpGatewayAdapterStub();
+    const { adapter: adapterB, sent: sentB } = HttpGatewayAdapterStub();
 
-    // Build two gateways, each with its own factory
-    const gatewayA = buildGateway(factoryA);
-    const gatewayB = buildGateway(factoryB);
+    // Build two gateways, each with its own adapter
+    const gatewayA = buildGateway(adapterA);
+    const gatewayB = buildGateway(adapterB);
 
     // Prove they are independent objects
     assert.notStrictEqual(gatewayA, gatewayB);
@@ -1438,26 +1438,18 @@ describe('config absorption contract', function () {
     assert.doesNotThrow(function () { HttpGateway(Lib, validBaseConfig()); });
   });
 
-  // OVERRIDE WINS (Strategy 1): override ADAPTER with null — the null replaces
-  // the valid factory and validation must throw, proving the override reached
+  // OVERRIDE WINS (Strategy 1): override Adapter with null — the null replaces
+  // the valid object and validation must throw, proving the override reached
   // CONFIG (if the default were kept, it would not throw here).
-  it('absorbs an ADAPTER override — null override triggers the required-ADAPTER validation', function () {
+  it('absorbs an Adapter override — null override triggers the required-Adapter validation', function () {
     assert.throws(function () {
-      HttpGateway(Lib, Object.assign(validBaseConfig(), { ADAPTER: null }));
-    }, /CONFIG\.ADAPTER must be an adapter factory function/);
+      HttpGateway(Lib, Object.assign(validBaseConfig(), { Adapter: null }));
+    }, /CONFIG\.Adapter must be a ready-to-use adapter object/);
   });
 
-  // OMISSION KEEPS DEFAULT: ADAPTER_CONFIG defaults to null; omitting it from
-  // the override must not affect construction.
-  it('retains null ADAPTER_CONFIG default when the key is omitted from the override', function () {
-    const cfg = validBaseConfig();
-    delete cfg.ADAPTER_CONFIG;
-    assert.doesNotThrow(function () { HttpGateway(Lib, cfg); });
-  });
-
-  // NULL HONORED: not applicable at unit tier — both CONFIG defaults (ADAPTER,
-  // ADAPTER_CONFIG) are null. There is no key with a non-null default whose
-  // null-override would produce a distinct observable outcome at this tier.
+  // NULL HONORED: not applicable at unit tier — CONFIG default (Adapter)
+  // is null. There is no key with a non-null default whose null-override
+  // would produce a distinct observable outcome at this tier.
 
 });
 
