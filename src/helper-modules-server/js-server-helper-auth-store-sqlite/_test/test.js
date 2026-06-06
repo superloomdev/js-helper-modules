@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-auth-store-sqlite.
 //
 // Tier 1 - Adapter unit tests (this file, no auth.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - _Store.Q rejects identifiers with double-quotes
 //   - _Store coercions: toColumnValue / fromColumnValue for booleans + custom_data
 //   - getSession returns null on hash mismatch (no timing leak)
@@ -17,7 +17,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const AuthStoreSQLiteFactory = require('helper-auth-store-sqlite');
 const AuthFactory            = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -42,13 +42,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_sql: Lib.SQLite
-    }
-  };
-  return AuthStoreSQLiteFactory(Lib, config, ERRORS);
+  return AuthStoreSQLiteFactory({
+    table_name: table || TEST_TABLE,
+    lib_sql:    Lib.SQLite
+  });
 
 };
 
@@ -59,11 +56,11 @@ const buildStore = function (table) {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { AuthStoreSQLiteFactory(); },
+      /config must be an object/
     );
 
   });
@@ -71,7 +68,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
+      function () { AuthStoreSQLiteFactory({ lib_sql: Lib.SQLite }); },
       /table_name is required/
     );
 
@@ -80,7 +77,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { AuthStoreSQLiteFactory({ table_name: 'x' }); },
       /lib_sql is required/
     );
 
@@ -106,9 +103,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        AuthStoreSQLiteFactory(Lib, {
-          STORE_CONFIG: { table_name: 'bad"table', lib_sql: Lib.SQLite }
-        }, ERRORS);
+        AuthStoreSQLiteFactory({ table_name: 'bad"table', lib_sql: Lib.SQLite });
       },
       /identifier contains double-quote/
     );
@@ -614,8 +609,7 @@ describe('Tier 1: large multi-actor list isolation', function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: AuthStoreSQLiteFactory,
-    STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.SQLite },
+    Store:     AuthStoreSQLiteFactory({ table_name: TEST_TABLE, lib_sql: Lib.SQLite }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,
