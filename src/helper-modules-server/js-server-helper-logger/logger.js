@@ -11,8 +11,8 @@
 // account terminated, GDPR deletion markers).
 //
 // Storage backends: memory (tests), sqlite, postgres, mysql, mongodb,
-// dynamodb. One backend per loader call, selected via `CONFIG.STORE`.
-// Other backends never load - their npm dependencies stay uninstalled.
+// dynamodb. The caller constructs the chosen adapter independently and
+// passes the ready-to-use store object via `CONFIG.Store`.
 //
 // Writes are fire-and-forget by default via `Lib.Instance.backgroundRoutine`
 // so the request-handling path never waits on the log write. Callers that
@@ -21,7 +21,8 @@
 // Compatibility: Node.js 24+.
 //
 // Factory pattern: each loader call returns an independent Logger with its
-// own Lib, CONFIG, and store.
+// own Lib, CONFIG, and store. Adapters are fully independent modules -
+// they own their own Lib, Config, and ERRORS.
 'use strict';
 
 
@@ -65,11 +66,8 @@ module.exports = function loader (shared_libs, config) {
   // Validate the config shape so misconfiguration fails at boot
   Validators.validateConfig(CONFIG);
 
-  // Instantiate the store with canonical signature (matching verify/auth pattern)
-  const store = CONFIG.STORE(Lib, CONFIG, ERRORS);
-
-  // Validate store contract immediately so missing methods fail at startup
-  Validators.validateStoreContract(store);
+  // Receive the ready-to-use store object - already constructed by the adapter
+  const store = CONFIG.Store;
 
   return createInterface(Lib, CONFIG, ERRORS, Validators, store);
 

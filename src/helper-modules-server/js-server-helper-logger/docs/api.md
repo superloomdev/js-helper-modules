@@ -1,6 +1,6 @@
 # API Reference. `js-server-helper-logger`
 
-Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical log-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend `STORE_CONFIG` shape see each adapter package's own README.
+Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical log-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend config key shape see each adapter package's own README.
 
 ## On This Page
 
@@ -21,7 +21,7 @@ Every exported function on the public interface, with parameters, return shape, 
 | **Programmer errors throw `TypeError` synchronously** | Missing required option, wrong type, or invalid `retention` shape throw `TypeError` at the call-site. These are mistakes that should be caught in development, never at runtime |
 | **Operational errors return `{ success: false, error }`** | Store failures (adapter unavailable, network error, write rejection) come back through the response envelope. The auth-style "branch on `success`" pattern applies |
 | **Background writes never surface store errors** | The default `log()` call is fire-and-forget. Adapter failures are logged via `Lib.Debug.debug` but the caller's `Promise` resolves immediately with `{ success: true }`. To see write failures, pass `options.await: true` |
-| **One Logger instance per backend** | The factory binds one `STORE` adapter at construction time. Run multiple instances in parallel if you genuinely want to write to multiple backends (rare; usually one suffices) |
+| **One Logger instance per backend** | The factory binds one `Store` adapter at construction time. Run multiple instances in parallel if you genuinely want to write to multiple backends (rare; usually one suffices) |
 
 ---
 
