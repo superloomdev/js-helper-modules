@@ -30,7 +30,7 @@ matters at any given time — and stale jobs are discarded, not retried.
 
 ## Why
 
-- **No string-dispatched backends.** The chosen storage adapter is passed as a factory function via `CONFIG.STORE`. Unused backends never get loaded and the module has no internal `switch` block.
+- **No string-dispatched backends.** The chosen storage adapter is passed as a ready-to-use store object via `CONFIG.Store`. Unused backends never get loaded and the module has no internal `switch` block.
 - **One factory call. One independent instance.** No singletons. Run multiple queue instances with different configs if needed.
 - **Write path has zero reads.** `enqueue` is append-only. No read-before-write, no compare-and-swap. This makes the write path fast and safe to call from many concurrent request handlers.
 - **Distinctness is enforced at consumption, not at write.** Multiple records can coexist. `claim` picks the latest and discards the rest. This avoids write-time contention entirely.
@@ -120,7 +120,7 @@ model.
 | DynamoDB | `@superloomdev/js-server-helper-distinct-queue-store-dynamodb` |
 | MongoDB | `@superloomdev/js-server-helper-distinct-queue-store-mongodb` |
 
-Pass a pre-configured adapter factory as `CONFIG.STORE`. Each adapter's README documents
+Pass a ready-to-use store object as `CONFIG.Store`. Each adapter's README documents
 its configuration shape, table/collection schema, and provisioning steps.
 
 ## Adding to Your Project
@@ -139,9 +139,10 @@ Substitute the adapter package for your database. The full list is in the [Stora
 const DistinctQueueFactory = require('@superloomdev/js-server-helper-distinct-queue');
 
 Lib.DistinctQueue = DistinctQueueFactory(Lib, {
-  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(
-    { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
-  )
+  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
+    table_name: 'distinct_queue',
+    lib_dynamodb: Lib.DynamoDB
+  })
 });
 ```
 
@@ -163,9 +164,9 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance) an
 | `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on store failures |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance for lifecycle |
 
-The store adapter (`CONFIG.STORE`) consumes its own driver helper
-(`Lib.DynamoDB`, `Lib.MongoDB`) through its own internal configuration.
-The distinct-queue module never imports a database driver helper directly.
+The store adapter is a fully independent module with its own `Lib`,
+`Config`, and `ERRORS`. The distinct-queue module uses the store object
+directly through the contract interface.
 
 ## Testing Status
 

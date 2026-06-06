@@ -9,18 +9,21 @@
 ## Usage
 
 ```js
-const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb');
+// Configure the adapter (adapter-local config pattern)
+const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
+  table_name: 'queue_jobs',
+  lib_dynamodb: Lib.DynamoDB
+});
 
+// Pass the pre-configured adapter to the parent module
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: StoreAdapter,
-  STORE_CONFIG: {
-    table_name: 'queue_jobs',
-    lib_dynamodb: Lib.DynamoDB
-  }
+  STORE: StoreAdapter
 });
 ```
 
-## STORE_CONFIG
+## Adapter Configuration
+
+Pass configuration when requiring the adapter. Required keys:
 
 - `table_name` — DynamoDB table name (string, required)
 - `lib_dynamodb` — Reference to `js-server-helper-nosql-aws-dynamodb` helper (object, required)
@@ -46,7 +49,7 @@ All methods return `{ success, error }` shape. On driver failure:
 **Peer dependencies (must be in Lib container):**
 - `Lib.Utils` — Type checking
 - `Lib.Debug` — Logging
-- `Lib.DynamoDB` — DynamoDB driver (passed via `STORE_CONFIG.lib_dynamodb`)
+- `Lib.DynamoDB` — DynamoDB driver (passed via adapter config `lib_dynamodb`)
 
 **Parent module:**
 - `js-server-helper-distinct-queue` — Provides `ERRORS` catalog

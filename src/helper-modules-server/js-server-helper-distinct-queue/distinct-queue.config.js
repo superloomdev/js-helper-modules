@@ -1,15 +1,16 @@
 // Info: Configuration defaults for js-server-helper-distinct-queue.
-// Only STORE is required. The core module has no storage-specific tunables;
-// each adapter owns its own configuration internally.
+// Only Store is required. The core module has no storage-specific tunables;
+// each adapter owns its own configuration, Lib, and ERRORS internally.
 'use strict';
 
 
 module.exports = {
 
-  // Store factory function - a pre-configured store adapter. Each adapter
-  // owns its storage-specific configuration internally; this module forwards
-  // only Lib and ERRORS to it. See the chosen adapter's README for setup.
+  // Ready-to-use store object from a pre-configured adapter. Each adapter
+  // is a fully independent module with its own Lib, Config, and ERRORS.
+  // This module uses the store object directly through the contract interface.
+  // See the chosen adapter's README for setup.
   // Required.
-  STORE: null
+  Store: null
 
 };
