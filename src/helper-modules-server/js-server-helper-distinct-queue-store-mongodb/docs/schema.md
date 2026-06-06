@@ -2,7 +2,7 @@
 
 ## Collection Structure
 
-The adapter stores records in a single MongoDB collection (configurable via `STORE_CONFIG.collection_name`).
+The adapter stores records in a single MongoDB collection (configurable via the `collection_name` config key).
 
 ### Document Shape
 
