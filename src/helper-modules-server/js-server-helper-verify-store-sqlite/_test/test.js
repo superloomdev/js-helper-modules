@@ -37,23 +37,22 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_sql: Lib.SQLite
-    }
+    table_name: table || TEST_TABLE,
+    lib_sqlite: Lib.SQLite
   };
-  return VerifyStoreSQLiteFactory(Lib, config, ERRORS);
+  return VerifyStoreSQLiteFactory(config);
 
 };
 
 const buildVerify = function () {
 
+  const Store = VerifyStoreSQLiteFactory({
+    table_name: TEST_TABLE,
+    lib_sqlite: Lib.SQLite
+  });
+
   return VerifyFactory(Lib, {
-    STORE: VerifyStoreSQLiteFactory,
-    STORE_CONFIG: {
-      table_name: TEST_TABLE,
-      lib_sql: Lib.SQLite
-    }
+    Store: Store
   });
 
 };
@@ -65,11 +64,11 @@ const buildVerify = function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreSQLiteFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { VerifyStoreSQLiteFactory({}); },
+      /config.lib_sqlite is required/
     );
 
   });
@@ -77,17 +76,17 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreSQLiteFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.SQLite } }, ERRORS); },
-      /table_name is required/
+      function () { VerifyStoreSQLiteFactory({ lib_sqlite: Lib.SQLite, table_name: null }); },
+      /config.table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('throws when lib_sqlite is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreSQLiteFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
-      /lib_sql is required/
+      function () { VerifyStoreSQLiteFactory({ table_name: 'x' }); },
+      /config.lib_sqlite is required/
     );
 
   });

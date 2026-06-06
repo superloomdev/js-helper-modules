@@ -2,38 +2,39 @@
 
 ## Loader Pattern
 
-The adapter is passed to the Verify parent as a factory reference, not a constructed instance:
+The adapter is configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object:
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-sqlite')({
+  table_name: 'verification_codes',
+  lib_sqlite: Lib.SQLite
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-verify-store-sqlite'),
-  STORE_CONFIG: {
-    table_name: 'verification_codes',
-    lib_sql:    Lib.SQLite
-  }
+  Store: Store
 });
 ```
 
-The Verify parent calls the factory with `(Lib, CONFIG, ERRORS)` at initialization time. The adapter reads `CONFIG.STORE_CONFIG` and throws an `Error` on misconfiguration before any database call is made.
+The adapter validates its configuration at construction time and throws an `Error` on misconfiguration before any database call is made.
 
-## `STORE_CONFIG` Keys
+## Configuration Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the verification table. Must not contain a double-quote. One table per Verify instance. |
-| `lib_sql` | `Object` | Yes | An initialized `Lib.SQLite` instance (`@superloomdev/js-server-helper-sql-sqlite`). |
+| `lib_sqlite` | `Object` | Yes | An initialized `Lib.SQLite` instance (`@superloomdev/js-server-helper-sql-sqlite`). |
 
 The validator rejects missing, null, or empty-string values for both keys. The `table_name` double-quote guard fires at quoting time (first DDL or query call), not at validation time.
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-sqlite` | SQLite driver wrapper (`Lib.SQLite`) |
+| Package | Type | Purpose |
+|---------|------|---------|
+| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
+| `@superloomdev/js-server-helper-sql-sqlite` | Peer | SQLite driver wrapper (`Lib.SQLite`) |
 
-These are loaded into `Lib` by the application before the Verify parent is initialized. The adapter accesses them through `Lib`; it does not `require` them directly.
+The adapter loads its own Utils and Debug dependencies directly. The SQLite driver helper is provided by the caller as `lib_sqlite` in the configuration.
 
 ## Environment Variables
 
