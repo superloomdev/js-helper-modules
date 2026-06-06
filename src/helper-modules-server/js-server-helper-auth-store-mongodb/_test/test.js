@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-auth-store-mongodb.
 //
 // Tier 1 - Adapter unit tests (no auth.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - setupNewStore returns NOT_IMPLEMENTED (indexes must be provisioned out-of-band)
 //   - updateSessionActivity throws TypeError on identity fields
 //   - updateSessionActivity empty-updates is a no-op success
@@ -20,7 +20,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const AuthStoreMongoDBFactory = require('helper-auth-store-mongodb');
 const AuthFactory             = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -45,13 +45,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (collection) {
 
-  const config = {
-    STORE_CONFIG: {
-      collection_name: collection || TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
-  };
-  return AuthStoreMongoDBFactory(Lib, config, ERRORS);
+  return AuthStoreMongoDBFactory({
+    collection_name: collection || TEST_COLLECTION,
+    lib_mongodb:     Lib.MongoDB
+  });
 
 };
 
@@ -94,11 +91,11 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { AuthStoreMongoDBFactory(); },
+      /config must be an object/
     );
 
   });
@@ -106,7 +103,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is missing', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
+      function () { AuthStoreMongoDBFactory({ lib_mongodb: Lib.MongoDB }); },
       /collection_name is required/
     );
 
@@ -115,7 +112,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_mongodb is missing', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
+      function () { AuthStoreMongoDBFactory({ collection_name: 'x' }); },
       /lib_mongodb is required/
     );
 
@@ -437,8 +434,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: AuthStoreMongoDBFactory,
-    STORE_CONFIG: { collection_name: TEST_COLLECTION, lib_mongodb: Lib.MongoDB },
+    Store:     AuthStoreMongoDBFactory({ collection_name: TEST_COLLECTION, lib_mongodb: Lib.MongoDB }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

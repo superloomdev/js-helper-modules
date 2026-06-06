@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-auth-store-dynamodb.
 //
 // Tier 1 - Adapter unit tests (no auth.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - setupNewStore returns NOT_IMPLEMENTED (table must be provisioned out-of-band)
 //   - updateSessionActivity throws TypeError on identity fields
 //   - updateSessionActivity empty-updates is a no-op success
@@ -20,7 +20,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const AuthStoreDynamoDBFactory = require('helper-auth-store-dynamodb');
 const AuthFactory              = require('helper-auth');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -45,13 +45,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_dynamodb: Lib.DynamoDB
-    }
-  };
-  return AuthStoreDynamoDBFactory(Lib, config, ERRORS);
+  return AuthStoreDynamoDBFactory({
+    table_name:   table || TEST_TABLE,
+    lib_dynamodb: Lib.DynamoDB
+  });
 
 };
 
@@ -104,11 +101,11 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { AuthStoreDynamoDBFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { AuthStoreDynamoDBFactory(); },
+      /config must be an object/
     );
 
   });
@@ -116,7 +113,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { AuthStoreDynamoDBFactory(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
+      function () { AuthStoreDynamoDBFactory({ lib_dynamodb: Lib.DynamoDB }); },
       /table_name is required/
     );
 
@@ -125,7 +122,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_dynamodb is missing', function () {
 
     assert.throws(
-      function () { AuthStoreDynamoDBFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { AuthStoreDynamoDBFactory({ table_name: 'x' }); },
       /lib_dynamodb is required/
     );
 
@@ -431,8 +428,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    STORE: AuthStoreDynamoDBFactory,
-    STORE_CONFIG: { table_name: TEST_TABLE, lib_dynamodb: Lib.DynamoDB },
+    Store:     AuthStoreDynamoDBFactory({ table_name: TEST_TABLE, lib_dynamodb: Lib.DynamoDB }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,
