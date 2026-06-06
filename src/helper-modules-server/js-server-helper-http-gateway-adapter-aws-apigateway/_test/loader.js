@@ -41,7 +41,8 @@ module.exports = function loader () {
 
   // ==================== HTTP GATEWAY (WITH ADAPTER) ================ //
 
-  const httpGateway = HttpGateway(Lib, { ADAPTER: HttpGatewayAdapterAwsApiGateway });
+  const AwsAdapter = HttpGatewayAdapterAwsApiGateway({});
+  const httpGateway = HttpGateway(Lib, { Adapter: AwsAdapter });
 
 
   return { Lib: Lib, httpGateway: httpGateway };
