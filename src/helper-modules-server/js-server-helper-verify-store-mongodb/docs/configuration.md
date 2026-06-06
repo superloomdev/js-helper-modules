@@ -3,29 +3,30 @@
 ## Loader Pattern
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')({
+  collection_name: 'verification_codes',
+  lib_mongodb: Lib.MongoDB
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-verify-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'verification_codes',
-    lib_mongodb:     Lib.MongoDB
-  }
+  Store: Store
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Configuration Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `collection_name` | `String` | Yes | Name of the verification collection. One collection per Verify instance. |
 | `lib_mongodb` | `Object` | Yes | An initialized `Lib.MongoDB` instance (`@superloomdev/js-server-helper-nosql-mongodb`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-nosql-mongodb` | MongoDB driver wrapper (`Lib.MongoDB`) |
+| Package | Type | Purpose |
+|---------|------|---------|
+| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
+| `@superloomdev/js-server-helper-nosql-mongodb` | Peer | MongoDB driver wrapper (`Lib.MongoDB`) |
 
 ## Environment Variables
 

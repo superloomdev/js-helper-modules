@@ -1,25 +1,26 @@
 # js-server-helper-verify-store-mongodb. AI Reference
 
-Class F storage adapter. MongoDB backend for `@superloomdev/js-server-helper-verify`. Cannot stand alone. Always loaded by the Verify parent via the factory protocol; not called directly by application code.
+Class F storage adapter. MongoDB backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a running MongoDB instance. Uses `js-server-helper-nosql-mongodb` (native driver wrapper) injected via `STORE_CONFIG.lib_mongodb`.
+Requires a running MongoDB instance. Uses `js-server-helper-nosql-mongodb` (native driver wrapper) injected via `config.lib_mongodb`.
 
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-verify-store-mongodb');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')({
+  collection_name: 'verification_codes',
+  lib_mongodb: Lib.MongoDB
+});
 ```
 
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Verify config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Verify error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
+| Argument | Type | Required | Description |
+|---|---|---|---|
+| `collection_name` | String | Yes | Name of the verification collection |
+| `lib_mongodb` | Object | Yes | Initialized `js-server-helper-nosql-mongodb` instance |
 
-Returns a Store interface. The Verify parent retains the reference and calls the contract methods.
+Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods.
 
-## `STORE_CONFIG`
+## Configuration
 
 ```js
 {
@@ -45,7 +46,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Verify module.
+1. **Never call the adapter directly from application code.** Always go through the parent Verify module. The adapter is configured independently and passed as a ready-to-use store object to the Verify parent.
 
 2. **`getRecord` returns `record: null` on a miss.** Not an error.
 

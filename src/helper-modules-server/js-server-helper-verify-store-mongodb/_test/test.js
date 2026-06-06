@@ -39,23 +39,22 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (collection) {
 
   const config = {
-    STORE_CONFIG: {
-      collection_name: collection || TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
+    collection_name: collection || TEST_COLLECTION,
+    lib_mongodb: Lib.MongoDB
   };
-  return VerifyStoreMongoDBFactory(Lib, config, ERRORS);
+  return VerifyStoreMongoDBFactory(config);
 
 };
 
 const buildVerify = function () {
 
+  const Store = VerifyStoreMongoDBFactory({
+    collection_name: TEST_COLLECTION,
+    lib_mongodb: Lib.MongoDB
+  });
+
   return VerifyFactory(Lib, {
-    STORE: VerifyStoreMongoDBFactory,
-    STORE_CONFIG: {
-      collection_name: TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
+    Store: Store
   });
 
 };
@@ -67,11 +66,11 @@ const buildVerify = function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { VerifyStoreMongoDBFactory({}); },
+      /config.lib_mongodb is required/
     );
 
   });
@@ -79,8 +78,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory(Lib, { STORE_CONFIG: { lib_mongodb: Lib.MongoDB } }, ERRORS); },
-      /collection_name is required/
+      function () { VerifyStoreMongoDBFactory({ lib_mongodb: Lib.MongoDB, collection_name: null }); },
+      /config.collection_name is required/
     );
 
   });
@@ -88,8 +87,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_mongodb is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory(Lib, { STORE_CONFIG: { collection_name: 'x' } }, ERRORS); },
-      /lib_mongodb is required/
+      function () { VerifyStoreMongoDBFactory({ collection_name: 'x' }); },
+      /config.lib_mongodb is required/
     );
 
   });

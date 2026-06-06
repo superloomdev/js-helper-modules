@@ -1,4 +1,5 @@
-// Info: MongoDB store adapter for js-server-helper-verify. Uses a compound
+// Info: MongoDB store adapter for js-server-helper-verify. Fully independent
+// module that owns its own Lib, Config, and ERRORS. Uses a compound
 // `_id` of `{ scope, id }` so reads/writes hit the implicit `_id` index
 // without any secondary index. Native TTL is implemented via a `_ttl`
 // Date field + a TTL index (`{ _ttl: 1 }, expireAfterSeconds: 0`); the
@@ -8,7 +9,7 @@
 // verify module reads it directly during the consume-time expiry check.
 //
 // The application injects a ready-to-use MongoDB helper via
-// STORE_CONFIG.lib_mongodb (typically Lib.MongoDB).
+// config.lib_mongodb (typically Lib.MongoDB).
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                        -> { success, error }
@@ -25,25 +26,38 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own collection_name and lib_mongodb reference.
+Factory loader. Creates a fully independent store adapter with its own
+Lib, Config, and ERRORS. Returns a ready-to-use store object.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from verify.js
+@param {Object} config - Configuration object (merged with defaults)
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (config) {
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Dependencies for this instance
+  const Lib = {
+    Utils: require('@superloomdev/js-helper-utils')(),
+    Debug: require('@superloomdev/js-helper-debug')()
+  };
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
+  // Merge overrides over defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
 
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  // Load internal error catalog
+  const ERRORS = require('./store.errors');
+
+  // Load the validators
+  const Validators = require('./store.validators');
+
+  // Validate CONFIG - throws on misconfiguration
+  Validators.validateConfig(Lib, CONFIG);
+
+  return createInterface(Lib, CONFIG, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -53,15 +67,15 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 
 /********************************************************************
 Builds the public Store interface for one instance. All functions
-close over the same Lib, STORE_CONFIG, and ERRORS.
+close over the same Lib, CONFIG, and ERRORS.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { collection_name, lib_mongodb }
-@param {Object} ERRORS       - Error catalog forwarded from verify.js
+@param {Object} Lib    - Dependency container (Utils, Debug)
+@param {Object} CONFIG - { collection_name, lib_mongodb }
+@param {Object} ERRORS - Error catalog from this adapter
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -81,9 +95,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     setupNewStore: async function (instance) {
 
       // Create the TTL index on `_ttl` - idempotent via createIndex
-      const result = await STORE_CONFIG.lib_mongodb.createIndex(
+      const result = await CONFIG.lib_mongodb.createIndex(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { _ttl: 1 },
         { name: 'verify_ttl_idx', expireAfterSeconds: 0 }
       );
@@ -125,9 +139,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     getRecord: async function (instance, scope, key) {
 
       // Equality lookup on the compound _id - O(1) via the implicit index
-      const result = await STORE_CONFIG.lib_mongodb.getRecord(
+      const result = await CONFIG.lib_mongodb.getRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { _id: { scope: scope, id: key } }
       );
 
@@ -195,9 +209,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       };
 
       // Upsert via replaceOne - always overwrites by compound _id
-      const result = await STORE_CONFIG.lib_mongodb.writeRecord(
+      const result = await CONFIG.lib_mongodb.writeRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         filter,
         document
       );
@@ -236,9 +250,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     incrementFailCount: async function (instance, scope, key) {
 
       // Atomic $inc - safe under concurrent verify attempts
-      const result = await STORE_CONFIG.lib_mongodb.updateRecord(
+      const result = await CONFIG.lib_mongodb.updateRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { _id: { scope: scope, id: key } },
         { $inc: { fail_count: 1 } }
       );
@@ -277,9 +291,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     deleteRecord: async function (instance, scope, key) {
 
       // Delete by compound _id - idempotent (missing document is success)
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecord(
+      const result = await CONFIG.lib_mongodb.deleteRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { _id: { scope: scope, id: key } }
       );
 
@@ -319,9 +333,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // deleteMany all documents whose expires_at is in the past
       const now = instance.time;
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecordsByFilter(
+      const result = await CONFIG.lib_mongodb.deleteRecordsByFilter(
         instance,
-        STORE_CONFIG.collection_name,
+        CONFIG.collection_name,
         { expires_at: { $lt: now } }
       );
 
