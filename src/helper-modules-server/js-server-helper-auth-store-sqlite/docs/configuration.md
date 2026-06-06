@@ -1,11 +1,11 @@
 # Configuration
 
-The SQLite store adapter is configured through the Auth parent's `STORE` and `STORE_CONFIG` keys. The adapter itself is a factory function; the parent calls it once at load time and retains the returned Store interface.
+The SQLite store adapter is a fully independent module. Call it with its config to get a ready-to-use store object, then pass that object as `Store` to the Auth parent.
 
 ## On This Page
 
 - [Loader Pattern](#loader-pattern)
-- [`STORE_CONFIG` Keys](#store_config-keys)
+- [Config Keys](#config-keys)
 - [Peer Dependencies](#peer-dependencies)
 - [Environment Variables](#environment-variables)
 - [Testing Tier](#testing-tier)
@@ -17,23 +17,27 @@ Lib.SQLite = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, {
   FILE: '/var/data/sessions.db'   // path to a SQLite file, or ':memory:'
 });
 
+const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')({
+  table_name: 'sessions_user',
+  lib_sql:    Lib.SQLite
+});
+
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-auth-store-sqlite'),
-  STORE_CONFIG: { table_name: 'sessions_user', lib_sql: Lib.SQLite },
-  ACTOR_TYPE:   'user',
-  TTL_SECONDS:  2592000
+  Store:      Store,
+  ACTOR_TYPE: 'user',
+  TTL_SECONDS: 2592000
 });
 
 await Lib.AuthUser.setupNewStore(Lib.Instance.initialize());
 ```
 
-The adapter is passed to the parent as a **factory function reference**, not as the result of a call. The parent invokes the factory internally with the right arguments (`Lib`, the full `CONFIG`, and the frozen `ERRORS` catalog). Treat `STORE` as a function value; do not call it yourself.
+The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
-The SQLite database handle lives inside `Lib.SQLite`. The Class C `sql-sqlite` driver helper opens the database file (or the `:memory:` instance) on first access. The adapter does not open any handle of its own and inherits whatever WAL / journal-mode configuration the driver helper applies.
+The SQLite database handle lives inside `Lib.SQLite`. The `sql-sqlite` driver helper opens the database file (or the `:memory:` instance) on first access. The adapter does not open any handle of its own and inherits whatever WAL / journal-mode configuration the driver helper applies.
 
 **File-backed vs in-memory.** Set `FILE` to a filesystem path for persistent storage, or to `':memory:'` for an ephemeral database that disappears when the Node process exits. The adapter behaves identically in both modes from the contract's perspective. The choice is a deployment decision, not an application-code change.
 
-## `STORE_CONFIG` Keys
+## Config Keys
 
 | Key | Type | Required | Description |
 |---|---|---|---|
@@ -52,7 +56,7 @@ The adapter does not require these packages directly. It accesses them through `
 |---|---|
 | `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
 | `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
-| `@superloomdev/js-server-helper-sql-sqlite` | `Lib.SQLite` via `STORE_CONFIG.lib_sql` |
+| `@superloomdev/js-server-helper-sql-sqlite` | `Lib.SQLite` via `config.lib_sql` |
 
 The driver helper wraps Node's built-in `node:sqlite` module. There is no native add-on (no `better-sqlite3`, no `sqlite3`). Applications that never use this adapter never load the SQLite driver.
 
