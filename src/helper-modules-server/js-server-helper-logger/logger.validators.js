@@ -1,9 +1,7 @@
-// Info: All validators for js-server-helper-logger. Three concerns in one place:
+// Info: All validators for js-server-helper-logger. Two concerns in one place:
 //   1. Config validators  - called once at construction time, take CONFIG as a
 //      parameter, throw Error on misconfiguration.
-//   2. Store contract validator - called once at construction time, takes the
-//      instantiated store, throws Error when a required method is missing.
-//   3. Options validators - called per request, take caller options as a
+//   2. Options validators - called per request, take caller options as a
 //      parameter, throw TypeError on programmer errors.
 //
 // Singleton: Lib is injected once by the loader. Public and private objects
@@ -57,21 +55,12 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
-    // STORE must be the store factory function
+    // Store must be a ready-to-use store object (constructed by the adapter)
     if (
-      Lib.Utils.isNullOrUndefined(CONFIG.STORE) ||
-      !Lib.Utils.isFunction(CONFIG.STORE)
+      Lib.Utils.isNullOrUndefined(CONFIG.Store) ||
+      !Lib.Utils.isObject(CONFIG.Store)
     ) {
-      throw new Error('[js-server-helper-logger] CONFIG.STORE must be a store factory function');
-    }
-
-    // STORE_CONFIG is required - each store validates its own required keys
-    if (Lib.Utils.isNullOrUndefined(CONFIG.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-logger] CONFIG.STORE_CONFIG is required (object)');
-    }
-
-    if (!Lib.Utils.isObject(CONFIG.STORE_CONFIG)) {
-      throw new Error('[js-server-helper-logger] CONFIG.STORE_CONFIG must be a plain object');
+      throw new Error('[js-server-helper-logger] CONFIG.Store must be a ready-to-use store object');
     }
 
     // IP_ENCRYPT_KEY is optional, but if present it must be a non-empty string
@@ -83,41 +72,6 @@ const Validators = {
         throw new Error('[js-server-helper-logger] CONFIG.IP_ENCRYPT_KEY must be a non-empty string when set');
       }
     }
-
-  },
-
-
-  // ~~~~~~~~~~~~~~~~~~~~ Store Contract Validators ~~~~~~~~~~~~~~~~~~~~
-  // Called once at construction time from the logger.js loader, right
-  // after the store is instantiated. A missing required store method is
-  // a setup error - throw Error (not TypeError) to match validateConfig.
-
-  /********************************************************************
-  Validate that an instantiated store exposes the required method
-  contract. Throws at startup when any method is missing so runtime
-  requests never hit a partially-implemented store.
-
-    @param {Object} store - Instantiated store object
-
-    @return {void}
-  *********************************************************************/
-  validateStoreContract: function (store) {
-
-    const required = [
-      'addLog',
-      'getLogsByEntity',
-      'getLogsByActor'
-    ];
-
-    required.forEach(function (name) {
-
-      if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
-        throw new Error(
-          '[js-server-helper-logger] Invalid store contract: missing method `' + name + '`'
-        );
-      }
-
-    });
 
   },
 

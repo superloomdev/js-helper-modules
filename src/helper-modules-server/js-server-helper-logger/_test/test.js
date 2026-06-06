@@ -48,8 +48,7 @@ const waitForBackgroundQueue = async function (instance) {
 
 const validBaseConfig = function () {
   return {
-    STORE:        createMemoryStore,
-    STORE_CONFIG: {}
+    Store: createMemoryStore()
   };
 };
 
@@ -57,17 +56,15 @@ const validBaseConfig = function () {
 // Build a logger backed by the in-memory store.
 const buildLogger = function (overrides) {
   return LoggerFactory(Lib, Object.assign({
-    STORE: createMemoryStore,
-    STORE_CONFIG: {}
+    Store: createMemoryStore()
   }, overrides || {}));
 };
 
 
-// Build a logger backed by an arbitrary store factory (test fixtures).
-const buildLoggerWithStore = function (store_factory, overrides) {
+// Build a logger backed by an arbitrary ready-to-use store object.
+const buildLoggerWithStore = function (store, overrides) {
   return LoggerFactory(Lib, Object.assign({
-    STORE: store_factory,
-    STORE_CONFIG: {}
+    Store: store
   }, overrides || {}));
 };
 
@@ -102,42 +99,24 @@ const createFailingStore = function () {
 
 describe('Loader validation', function () {
 
-  it('throws when CONFIG.STORE is missing', function () {
+  it('throws when CONFIG.Store is missing', function () {
     assert.throws(function () {
       LoggerFactory(Lib, {});
-    }, /CONFIG\.STORE must be a store factory function/);
+    }, /CONFIG\.Store must be a ready-to-use store object/);
   });
 
 
-  it('throws when CONFIG.STORE is not a function', function () {
+  it('throws when CONFIG.Store is not an object', function () {
     assert.throws(function () {
-      LoggerFactory(Lib, { STORE: 'sqlite' });
-    }, /CONFIG\.STORE must be a store factory function/);
+      LoggerFactory(Lib, { Store: 'sqlite' });
+    }, /CONFIG\.Store must be a ready-to-use store object/);
   });
-
-
-
-
-  it('throws when CONFIG.STORE_CONFIG is missing', function () {
-    assert.throws(function () {
-      LoggerFactory(Lib, { STORE: createMemoryStore });
-    }, /CONFIG\.STORE_CONFIG is required/);
-  });
-
-
-  it('throws when CONFIG.STORE_CONFIG is not an object', function () {
-    assert.throws(function () {
-      LoggerFactory(Lib, { STORE: createMemoryStore, STORE_CONFIG: 'not-an-object' });
-    }, /CONFIG\.STORE_CONFIG must be a plain object/);
-  });
-
-
 
 
   it('throws when IP_ENCRYPT_KEY is the empty string', function () {
     assert.throws(function () {
       LoggerFactory(Lib, {
-        STORE: createMemoryStore, STORE_CONFIG: {},
+        Store: createMemoryStore(),
         IP_ENCRYPT_KEY: ''
       });
     }, /IP_ENCRYPT_KEY must be a non-empty string when set/);
@@ -145,7 +124,7 @@ describe('Loader validation', function () {
 
 
   it('constructs successfully with the in-memory store', function () {
-    const logger = LoggerFactory(Lib, { STORE: createMemoryStore, STORE_CONFIG: {} });
+    const logger = LoggerFactory(Lib, { Store: createMemoryStore() });
     assert.equal(typeof logger.log, 'function');
     assert.equal(typeof logger.listByEntity, 'function');
     assert.equal(typeof logger.listByActor, 'function');
@@ -154,93 +133,15 @@ describe('Loader validation', function () {
   });
 
 
-  it('throws when store is missing addLog method', function () {
-
-    // Store missing 'addLog'
-    const partialStore = {
-      getLogsByEntity: async function () {},
-      getLogsByActor: async function () {}
-    };
-
-    assert.throws(function () {
-      LoggerFactory(Lib, {
-        STORE: function () { return partialStore; },
-        STORE_CONFIG: {}
-      });
-    }, /Invalid store contract: missing method `addLog`/);
-
-  });
-
-
-  it('throws when store is missing getLogsByEntity method', function () {
-
-    // Store missing 'getLogsByEntity'
-    const partialStore = {
-      addLog: async function () {},
-      getLogsByActor: async function () {}
-    };
-
-    assert.throws(function () {
-      LoggerFactory(Lib, {
-        STORE: function () { return partialStore; },
-        STORE_CONFIG: {}
-      });
-    }, /Invalid store contract: missing method `getLogsByEntity`/);
-
-  });
-
-
-  it('throws when store is missing getLogsByActor method', function () {
-
-    // Store missing 'getLogsByActor'
-    const partialStore = {
-      addLog: async function () {},
-      getLogsByEntity: async function () {}
-    };
-
-    assert.throws(function () {
-      LoggerFactory(Lib, {
-        STORE: function () { return partialStore; },
-        STORE_CONFIG: {}
-      });
-    }, /Invalid store contract: missing method `getLogsByActor`/);
-
-  });
-
-
-  it('throws when a store method is not a function', function () {
-
-    // Store with non-function 'addLog'
-    const badStore = {
-      addLog: 'not-a-function',
-      getLogsByEntity: async function () {},
-      getLogsByActor: async function () {}
-    };
-
-    assert.throws(function () {
-      LoggerFactory(Lib, {
-        STORE: function () { return badStore; },
-        STORE_CONFIG: {}
-      });
-    }, /Invalid store contract: missing method `addLog`/);
-
-  });
-
-
   it('accepts a store with all required methods', function () {
 
-    // Minimal valid store - only the required contract methods
     const validStore = {
       addLog: async function () {},
       getLogsByEntity: async function () {},
       getLogsByActor: async function () {}
     };
 
-    // Should not throw
-    const logger = LoggerFactory(Lib, {
-      STORE: function () { return validStore; },
-      STORE_CONFIG: {}
-    });
+    const logger = LoggerFactory(Lib, { Store: validStore });
 
     assert.ok(logger);
     assert.equal(typeof logger.log, 'function');
@@ -365,7 +266,7 @@ describe('log() write behaviour', function () {
 
   it('await:true surfaces store write failure as SERVICE_UNAVAILABLE', async function () {
 
-    const logger = buildLoggerWithStore(createFailingStore);
+    const logger = buildLoggerWithStore(createFailingStore());
     const result = await logger.log(Lib.Instance.initialize(), defaultLogOptions());
 
     assert.equal(result.success, false);
@@ -376,7 +277,7 @@ describe('log() write behaviour', function () {
 
   it('await:false swallows store write failure (caller never sees it)', async function () {
 
-    const logger = buildLoggerWithStore(createFailingStore);
+    const logger = buildLoggerWithStore(createFailingStore());
     const instance = Lib.Instance.initialize();
 
     const result = await logger.log(instance, defaultLogOptions({ await: false }));
@@ -447,7 +348,7 @@ describe('IP encryption', function () {
   it('round-trips an IP address through encrypt+decrypt invisibly', async function () {
 
     const key = newKey();
-    const logger = buildLogger({ IP_ENCRYPT_KEY: key });
+    const logger = buildLogger({ Store: createMemoryStore(), IP_ENCRYPT_KEY: key });
     const instance = Lib.Instance.initialize();
 
     await logger.log(instance, defaultLogOptions({
@@ -482,7 +383,7 @@ describe('IP encryption', function () {
     };
 
     const key = newKey();
-    const logger = buildLoggerWithStore(function () { return captureStore; }, { IP_ENCRYPT_KEY: key });
+    const logger = buildLoggerWithStore(captureStore, { IP_ENCRYPT_KEY: key });
 
     await logger.log(Lib.Instance.initialize(), defaultLogOptions({
       ip: '198.51.100.7', await: true
@@ -522,10 +423,10 @@ describe('IP encryption', function () {
     const key1 = newKey();
     const key2 = newKey();
 
-    const writer = buildLoggerWithStore(function () { return captureStore; }, { IP_ENCRYPT_KEY: key1 });
+    const writer = buildLoggerWithStore(captureStore, { IP_ENCRYPT_KEY: key1 });
     await writer.log(Lib.Instance.initialize(), defaultLogOptions({ ip: '203.0.113.7', await: true }));
 
-    const reader = buildLoggerWithStore(function () { return captureStore; }, { IP_ENCRYPT_KEY: key2 });
+    const reader = buildLoggerWithStore(captureStore, { IP_ENCRYPT_KEY: key2 });
     const list = await reader.listByEntity(Lib.Instance.initialize(), {
       scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
@@ -566,7 +467,7 @@ describe('HttpHandler auto-capture', function () {
 
     const logger = LoggerFactory(
       Object.assign({}, Lib, { HttpHandler: FakeHttpHandler }),
-      { STORE: function () { return captureStore; }, STORE_CONFIG: {} }
+      { Store: captureStore }
     );
 
     const instance = Lib.Instance.initialize();
@@ -606,7 +507,7 @@ describe('HttpHandler auto-capture', function () {
 
     const logger = LoggerFactory(
       Object.assign({}, Lib, { HttpHandler: FakeHttpHandler }),
-      { STORE: function () { return captureStore; }, STORE_CONFIG: {} }
+      { Store: captureStore }
     );
 
     const instance = Lib.Instance.initialize();
@@ -680,7 +581,7 @@ describe('Store error envelopes', function () {
 
   it('listByEntity surfaces a store read failure as SERVICE_UNAVAILABLE', async function () {
 
-    const logger = buildLoggerWithStore(createFailingStore);
+    const logger = buildLoggerWithStore(createFailingStore());
     const result = await logger.listByEntity(Lib.Instance.initialize(), {
       entity_type: 'test',
       entity_id: '1'
@@ -694,7 +595,7 @@ describe('Store error envelopes', function () {
 
   it('listByActor surfaces a store read failure as SERVICE_UNAVAILABLE', async function () {
 
-    const logger = buildLoggerWithStore(createFailingStore);
+    const logger = buildLoggerWithStore(createFailingStore());
     const result = await logger.listByActor(Lib.Instance.initialize(), {
       actor_type: 'user',
       actor_id: '1'
@@ -708,7 +609,7 @@ describe('Store error envelopes', function () {
 
   it('cleanupExpiredLogs surfaces failure as SERVICE_UNAVAILABLE', async function () {
 
-    const logger = buildLoggerWithStore(createFailingStore);
+    const logger = buildLoggerWithStore(createFailingStore());
     const result = await logger.cleanupExpiredLogs(Lib.Instance.initialize());
 
     assert.equal(result.success, false);
@@ -740,7 +641,7 @@ describe('setupNewStore', function () {
       getLogsByActor: async function () { return { success: true, records: [], next_cursor: null, error: null }; }
     };
 
-    const logger = buildLoggerWithStore(function () { return minimalStore; });
+    const logger = buildLoggerWithStore(minimalStore);
     const result = await logger.setupNewStore(Lib.Instance.initialize());
     assert.equal(result.success, true);
   });
@@ -753,7 +654,7 @@ describe('setupNewStore', function () {
       getLogsByActor: async function () { return { success: true, records: [], next_cursor: null, error: null }; }
     };
 
-    const logger = buildLoggerWithStore(function () { return minimalStore; });
+    const logger = buildLoggerWithStore(minimalStore);
     const result = await logger.cleanupExpiredLogs(Lib.Instance.initialize());
     assert.equal(result.success, true);
     assert.equal(result.deleted_count, 0);
@@ -787,7 +688,7 @@ describe('config absorption contract', function () {
 
     const key = Lib.Crypto.generateRandomString('0123456789abcdef', 64);
     const logger = LoggerFactory(Lib, Object.assign(validBaseConfig(), {
-      STORE:        function () { return captureStore; },
+      Store:          captureStore,
       IP_ENCRYPT_KEY: key
     }));
 
@@ -809,7 +710,7 @@ describe('config absorption contract', function () {
 
     const cfg = validBaseConfig();
     delete cfg.IP_ENCRYPT_KEY;
-    const logger = LoggerFactory(Lib, Object.assign(cfg, { STORE: function () { return captureStore; } }));
+    const logger = LoggerFactory(Lib, Object.assign(cfg, { Store: captureStore }));
 
     await logger.log(Lib.Instance.initialize(), defaultLogOptions({ ip: '198.51.100.2', await: true }));
 
@@ -817,8 +718,8 @@ describe('config absorption contract', function () {
     assert.equal(captured[0].ip, '198.51.100.2');
   });
 
-  // NULL HONORED: not applicable at unit tier — all three CONFIG defaults are null
-  // (STORE, STORE_CONFIG, IP_ENCRYPT_KEY). There is no key with a non-null default
+  // NULL HONORED: not applicable at unit tier — both CONFIG defaults are null
+  // (Store, IP_ENCRYPT_KEY). There is no key with a non-null default
   // whose null-override would produce a distinct observable outcome at this tier.
 
 });

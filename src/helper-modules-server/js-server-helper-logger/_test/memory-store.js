@@ -16,112 +16,114 @@
 
 
 /********************************************************************
-Create a new in-process memory store. Returns an object matching the
-5-method store contract consumed by logger.js. Each call to this
-factory produces an independent array, so tests can run in isolation.
+Create a new in-process memory store. Returns a ready-to-use store
+object matching the 5-method store contract consumed by logger.js.
+Each call produces an independent array, so tests stay isolated.
 
-@return {Object} - Store interface
+@return {Object} - Ready-to-use store object
 *********************************************************************/
 module.exports = function createMemoryStore () {
 
   // Private record storage (isolated per instance)
   const _records = [];
 
-  const Store = {
 
+  /******************************************************************
+  No-op schema setup - nothing to provision for an in-memory store.
+  ******************************************************************/
+  const setupNewStore = async function (_instance) {
 
-    /******************************************************************
-    No-op schema setup - nothing to provision for an in-memory store.
-    ******************************************************************/
-    setupNewStore: async function (_instance) {
-
-      return {
-        success: true,
-        error: null
-      };
-
-    },
-
-
-    /******************************************************************
-    Add one record to the in-memory store.
-    ******************************************************************/
-    addLog: async function (_instance, record) {
-
-      _records.push(record);
-
-      return {
-        success: true,
-        error: null
-      };
-
-    },
-
-
-    /******************************************************************
-    List records by entity (entity_type + entity_id).
-    ******************************************************************/
-    getLogsByEntity: async function (_instance, query) {
-
-      const filtered = _records.filter(function (r) {
-        return r.entity_type === query.entity_type && r.entity_id === query.entity_id;
-      });
-
-      return {
-        success: true,
-        records: filtered,
-        next_cursor: null,
-        error: null
-      };
-
-    },
-
-
-    /******************************************************************
-    List records by actor (actor_type + actor_id).
-    ******************************************************************/
-    getLogsByActor: async function (_instance, query) {
-
-      const filtered = _records.filter(function (r) {
-        return r.actor_type === query.actor_type && r.actor_id === query.actor_id;
-      });
-
-      return {
-        success: true,
-        records: filtered,
-        next_cursor: null,
-        error: null
-      };
-
-    },
-
-
-    /******************************************************************
-    Clean up expired records based on expires_at timestamp.
-    ******************************************************************/
-    cleanupExpiredLogs: async function (_instance) {
-
-      const now = Date.now();
-      let deleted_count = 0;
-
-      for (let i = _records.length - 1; i >= 0; i--) {
-        if (_records[i].expires_at && _records[i].expires_at < now) {
-          _records.splice(i, 1);
-          deleted_count++;
-        }
-      }
-
-      return {
-        success: true,
-        deleted_count: deleted_count,
-        error: null
-      };
-
-    }
-
+    return {
+      success: true,
+      error: null
+    };
 
   };
 
-  return Store;
+
+  /******************************************************************
+  Add one record to the in-memory store.
+  ******************************************************************/
+  const addLog = async function (_instance, record) {
+
+    _records.push(record);
+
+    return {
+      success: true,
+      error: null
+    };
+
+  };
+
+
+  /******************************************************************
+  List records by entity (entity_type + entity_id).
+  ******************************************************************/
+  const getLogsByEntity = async function (_instance, query) {
+
+    const filtered = _records.filter(function (r) {
+      return r.entity_type === query.entity_type && r.entity_id === query.entity_id;
+    });
+
+    return {
+      success: true,
+      records: filtered,
+      next_cursor: null,
+      error: null
+    };
+
+  };
+
+
+  /******************************************************************
+  List records by actor (actor_type + actor_id).
+  ******************************************************************/
+  const getLogsByActor = async function (_instance, query) {
+
+    const filtered = _records.filter(function (r) {
+      return r.actor_type === query.actor_type && r.actor_id === query.actor_id;
+    });
+
+    return {
+      success: true,
+      records: filtered,
+      next_cursor: null,
+      error: null
+    };
+
+  };
+
+
+  /******************************************************************
+  Clean up expired records based on expires_at timestamp.
+  ******************************************************************/
+  const cleanupExpiredLogs = async function (_instance) {
+
+    const now = Date.now();
+    let deleted_count = 0;
+
+    for (let i = _records.length - 1; i >= 0; i--) {
+      if (_records[i].expires_at && _records[i].expires_at < now) {
+        _records.splice(i, 1);
+        deleted_count++;
+      }
+    }
+
+    return {
+      success: true,
+      deleted_count: deleted_count,
+      error: null
+    };
+
+  };
+
+
+  return {
+    setupNewStore,
+    addLog,
+    getLogsByEntity,
+    getLogsByActor,
+    cleanupExpiredLogs
+  };
 
 };

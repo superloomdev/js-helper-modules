@@ -16,7 +16,7 @@ The logger solves three problems every audit-logging surface faces, in one modul
 
 ## Why
 
-- **No string-dispatched backends.** The chosen storage adapter is passed as a factory function via `CONFIG.STORE`. Unused backends never get loaded, never pull their npm dependencies, and the module has no internal `switch (STORE) { ... }` block to maintain.
+- **No string-dispatched backends.** The chosen storage adapter is constructed independently and passed as a ready-to-use object via `CONFIG.Store`. Unused backends never get loaded, never pull their npm dependencies, and the module has no internal `switch` block to maintain.
 - **One factory call. One independent instance.** No singletons. Run multiple Logger instances in the same process if you genuinely need to (rare; one suffices for almost every project).
 - **No correctness dependency on cleanup.** List queries return whatever rows exist. If the cleanup cron is paused for a week, queries still work; expired rows are just included until the next sweep.
 - **Out-of-scope by design.** The logger is not a metrics system, not a structured request logger, not a notification dispatcher. It records audit-trail events. [`Lib.Debug`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-core/js-helper-debug), Datadog / Prometheus, and your own notification surface handle the rest.
@@ -25,15 +25,14 @@ The logger solves three problems every audit-logging surface faces, in one modul
 
 ```
 Logger instance
- ├─ CONFIG.STORE         (store adapter factory, e.g. require('...logger-store-postgres'))
- ├─ CONFIG.STORE_CONFIG  (table_name / collection_name + lib_sql / lib_mongodb / lib_dynamodb)
+ ├─ CONFIG.Store          (ready-to-use store object, constructed by the adapter before passing in)
  ├─ CONFIG.IP_ENCRYPT_KEY (optional AES key)
- └─ Store                (instantiated from CONFIG.STORE; reads/writes log rows)
+ └─ store                 (CONFIG.Store used directly; reads/writes log rows)
 ```
 
-`CONFIG.STORE` is the adapter factory function itself. You pass the result of `require(...)` directly, the same way you pass `Lib.Postgres` or `Lib.MongoDB` to other helpers. Every adapter uses the same `factory(Lib, CONFIG, ERRORS)` signature, so adding a new backend never changes the call-site code.
+Each store adapter is a fully independent module. Construct it first with its own config, then pass the ready-to-use object as `CONFIG.Store`. The logger never imports database drivers or invokes adapter factories internally.
 
-For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and `STORE_CONFIG` details, see each adapter package's own README (linked below).
+For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and config details, see each adapter package's own README (linked below).
 
 ## Storage Adapters
 
@@ -51,7 +50,7 @@ Five storage adapters are available, each a separate package. Install only the o
 
 A legitimate deviation is using a NoSQL adapter in a SQL-backed application when the audit log has different scaling characteristics from the rest of the app (very high write volume, append-only access pattern, separate retention policies). Mixing SQL families (Postgres app with MySQL or SQLite logger) is not a useful pattern.
 
-Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and `STORE_CONFIG` shape. The logger module itself owns no per-backend documentation: every Class F adapter is the authoritative source for its own backend.
+Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and config key shape. The logger module itself owns no per-backend documentation: every adapter is the authoritative source for its own backend.
 
 ## Aligned with Superloom Philosophy
 
@@ -62,7 +61,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, options, and error catalog
-- [Configuration](docs/configuration.md). Loader pattern, every configuration key, per-backend `STORE_CONFIG` shape, IP-encryption key handling, peer dependencies, testing tier
+- [Configuration](docs/configuration.md). Loader pattern, every configuration key, adapter integration pattern, IP-encryption key handling, peer dependencies, testing tier
 - [Data model](docs/data-model.md). Every record field, core concepts (entity, actor, scope, action), the `sort_key` design, retention quick reference, design decisions
 - [Runtime](docs/runtime.md). The runtime-shape differences for the logger: background-write lifecycle in serverless versus persistent server, scheduled cleanup mechanism
 - [Superloom](https://superloom.dev). The framework
@@ -76,7 +75,7 @@ npm install @superloomdev/js-server-helper-logger \
             @superloomdev/js-server-helper-logger-store-postgres
 ```
 
-Substitute `logger-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the `STORE_CONFIG` shape for each adapter is in the adapter package's own README.
+Substitute `logger-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the config key shape for each adapter is in the adapter package's own README.
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
