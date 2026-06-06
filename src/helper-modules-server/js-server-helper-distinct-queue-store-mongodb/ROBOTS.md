@@ -3,27 +3,25 @@
 ## Quick Reference
 
 **Pattern:** Store adapter for adapter-backed module (Pattern 2 + Store)  
-**Contract:** 5 methods (`setupNewStore`, `writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`)  
+**Contract:** 4 methods (`writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`) + `setupNewStore` provisioning  
 **Storage:** MongoDB with subdocument `_id` index on `{ t, r, d, s }` (tenant_id, resource_id, data_version, request_id)
 
 ## Usage
 
 ```js
-const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb');
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
+});
 
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: StoreAdapter,
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+  Store: Store
 });
 ```
 
-## STORE_CONFIG
+## Adapter Configuration
 
 - `collection_name` — MongoDB collection name (string, required)
-- `lib_mongodb` — Reference to `js-server-helper-nosql-mongodb` helper (object, required)
+- `Lib.MongoDB` — MongoDB driver injected via `Lib` (not a config key)
 
 ## Store Contract Methods
 
@@ -39,21 +37,18 @@ Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib
 
 All methods return `{ success, error }` shape. On driver failure:
 - Logs via `Lib.Debug.debug` with driver error details
-- Returns `ERRORS.SERVICE_UNAVAILABLE` from parent module
+- Returns adapter-owned `ERRORS.SERVICE_UNAVAILABLE` (`DISTINCT_QUEUE_MONGODB_SERVICE_UNAVAILABLE`)
 
 ## Dependencies
 
-**Peer dependencies (must be in Lib container):**
+**Injected via Lib (must be in Lib container):**
 - `Lib.Utils` — Type checking
 - `Lib.Debug` — Logging
-- `Lib.MongoDB` — MongoDB driver (passed via `STORE_CONFIG.lib_mongodb`)
-
-**Parent module:**
-- `js-server-helper-distinct-queue` — Provides `ERRORS` catalog
+- `Lib.MongoDB` — MongoDB driver helper
 
 ## Testing
 
-Uses `store-contract-suite.js` — shared tests validate the 5-method contract against real MongoDB via Docker.
+Uses `store-contract-suite.js` — shared tests validate the 4-method contract against real MongoDB via Docker.
 
 ```bash
 cd _test && npm install && npm test

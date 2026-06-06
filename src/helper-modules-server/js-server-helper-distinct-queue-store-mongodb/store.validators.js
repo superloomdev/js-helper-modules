@@ -19,7 +19,7 @@ let Lib;
 Singleton loader. Injects Lib and returns the module-scope
 Validators object.
 
-@param {Object} shared_libs - Dependency container (Utils)
+@param {Object} shared_libs - Dependency container (Utils, Debug, MongoDB)
 
 @return {Object} - Public Validators interface
 *********************************************************************/
@@ -39,36 +39,28 @@ const Validators = {
 
 
   /********************************************************************
-  Validate the STORE_CONFIG object passed to the adapter loader.
+  Validate the config object passed to the adapter loader.
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
-  @param {Object} store_config - The STORE_CONFIG value from CONFIG
+  @param {Object} config - Merged adapter configuration
 
   @return {void}
   *********************************************************************/
-  validateConfig: function (store_config) {
-
-    // STORE_CONFIG must be a non-null object
-    if (
-      Lib.Utils.isNullOrUndefined(store_config) ||
-      !Lib.Utils.isObject(store_config)
-    ) {
-      throw new Error('[helper-distinct-queue-store-mongodb] STORE_CONFIG must be an object');
-    }
+  validateConfig: function (config) {
 
     // collection_name is required and must be a non-empty string
     if (
-      Lib.Utils.isNullOrUndefined(store_config.collection_name) ||
-      !Lib.Utils.isString(store_config.collection_name) ||
-      Lib.Utils.isEmptyString(store_config.collection_name)
+      Lib.Utils.isNullOrUndefined(config.collection_name) ||
+      !Lib.Utils.isString(config.collection_name) ||
+      Lib.Utils.isEmptyString(config.collection_name)
     ) {
-      throw new Error('[helper-distinct-queue-store-mongodb] STORE_CONFIG.collection_name is required');
+      throw new Error('[distinct-queue-store-mongodb] CONFIG.collection_name is required and must be a non-empty string');
     }
 
-    // lib_mongodb is required - the caller must inject the MongoDB helper
-    if (Lib.Utils.isNullOrUndefined(store_config.lib_mongodb)) {
-      throw new Error('[helper-distinct-queue-store-mongodb] STORE_CONFIG.lib_mongodb is required (pass Lib.MongoDB)');
+    // MongoDB driver must be injected via Lib
+    if (Lib.Utils.isNullOrUndefined(Lib.MongoDB)) {
+      throw new Error('[distinct-queue-store-mongodb] Lib.MongoDB is required');
     }
 
   }

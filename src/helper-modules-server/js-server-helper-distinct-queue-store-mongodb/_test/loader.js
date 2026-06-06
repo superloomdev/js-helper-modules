@@ -1,7 +1,7 @@
 // Info: Test loader for js-server-helper-distinct-queue-store-mongodb.
-// Builds the Lib container, a minimal ERRORS stub, and factory helpers so
-// tests can exercise the store adapter directly (4-method contract) and the
-// core distinct-queue module end-to-end (enqueue/claim/listByPrefix).
+// Builds the Lib container and store helpers so tests can exercise the store
+// adapter directly (4-method contract) and the core distinct-queue module
+// end-to-end (enqueue/claim/listByPrefix).
 //
 // MongoDB connection settings are read exclusively from environment variables
 // here - test.js never reads process.env directly.
@@ -32,19 +32,6 @@ Lib.Instance = require('helper-instance')(Lib, {});
 Lib.MongoDB  = require('helper-nosql-mongodb')(Lib, config_mongodb);
 
 
-// ==================== MINIMAL ERRORS CATALOG =================== //
-
-// The store adapter returns ERRORS.SERVICE_UNAVAILABLE on backend failure.
-// When the core module instantiates the store it supplies its own catalog;
-// direct-store tests use this minimal stub.
-const ERRORS = {
-  SERVICE_UNAVAILABLE: {
-    type: 'SERVICE_UNAVAILABLE',
-    message: 'Service unavailable'
-  }
-};
-
-
 const StoreFactory = require('helper-distinct-queue-store-mongodb');
 
 
@@ -68,13 +55,9 @@ the 4-method store contract suite and adapter-specific tests.
 *********************************************************************/
 const buildStore = function () {
 
-  const config = {
-    STORE_CONFIG: {
-      collection_name: TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
-  };
-  return StoreFactory(Lib, config, ERRORS);
+  return StoreFactory(Lib, {
+    collection_name: TEST_COLLECTION
+  });
 
 };
 
@@ -88,11 +71,9 @@ store adapter. Used for end-to-end enqueue/claim/listByPrefix tests.
 const buildQueue = function () {
 
   return require('helper-distinct-queue')(Lib, {
-    STORE: StoreFactory,
-    STORE_CONFIG: {
-      collection_name: TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
+    Store: StoreFactory(Lib, {
+      collection_name: TEST_COLLECTION
+    })
   });
 
 };
@@ -128,7 +109,6 @@ const closeMongo = async function () {
 
 module.exports = {
   Lib,
-  ERRORS,
   TEST_COLLECTION,
   buildInstance,
   buildStore,

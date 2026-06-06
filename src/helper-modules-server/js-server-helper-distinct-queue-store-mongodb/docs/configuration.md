@@ -1,71 +1,100 @@
 # Configuration — js-server-helper-distinct-queue-store-mongodb
 
-## STORE_CONFIG Keys
+## Loader Pattern
 
-The adapter requires a `STORE_CONFIG` object passed to the distinct-queue loader:
+The adapter is a store implementation for `js-server-helper-distinct-queue`.
+The project loader injects `Lib` (including `Lib.MongoDB`), and the adapter
+owns its own configuration. It returns a ready-to-use store object that
+you provide to the parent module's `CONFIG.Store` key.
 
 ```javascript
+// Load the adapter with Lib injected and its own config
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
+});
+
+// Pass the ready-to-use store to the parent module
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+  Store: Store
 });
 ```
 
-### Required Keys
+## Configuration Keys
 
-- **`collection_name`** — MongoDB collection name for queue records
-- **`lib_mongodb`** — Reference to the `js-server-helper-nosql-mongodb` instance
+### `collection_name`
 
-## Peer Dependencies
+**Type:** `string`  
+**Required:** Yes
 
-The adapter expects these helpers in the `Lib` container:
+The MongoDB collection name for queue records. MongoDB creates the collection
+and implicit `_id` index automatically on first write.
 
-- `Lib.Utils` — Type checking and validation
-- `Lib.Debug` — Diagnostic logging
-- `Lib.MongoDB` — MongoDB driver helper (passed via `STORE_CONFIG.lib_mongodb`)
-
-## Environment Variables
-
-No direct environment variable reads in the adapter. The MongoDB connection string and credentials are handled by the `js-server-helper-nosql-mongodb` driver helper.
-
-Typical test environment:
-
-```bash
-MONGODB_CONNECTION_STRING=mongodb://localhost:27017/?directConnection=true
-MONGODB_DATABASE=test_db
+```javascript
+collection_name: 'myapp_queue_jobs'
 ```
 
-## Example Bootstrap
+## Injected Dependencies
+
+The adapter reads these from the injected `Lib` container:
+
+| `Lib.*` | Source | Used for |
+|---|---|---|
+| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks |
+| `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on driver failures |
+| `Lib.MongoDB` | `@superloomdev/js-server-helper-nosql-mongodb` | The MongoDB driver used for all storage operations |
+
+```javascript
+Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+  CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
+  DATABASE: process.env.MONGODB_DATABASE
+});
+```
+
+## Full Configuration Example
 
 ```javascript
 // 1. Load base helpers
 Lib.Utils = require('@superloomdev/js-helper-utils');
 Lib.Debug = require('@superloomdev/js-helper-debug')(Lib);
+Lib.Instance = require('@superloomdev/js-server-helper-instance')(Lib);
+
+// 2. Load MongoDB helper
 Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// 2. Load distinct-queue with MongoDB adapter
-const StoreAdapter = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb');
+// 3. Load the store adapter (Lib injected), then the parent module
+const Store = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
+});
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: StoreAdapter,
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+  Store: Store
 });
 
-// 3. Initialize collection (one-time provisioning — run only on first setup)
-const instance = Lib.Instance.initialize();
-await Lib.DistinctQueue.setupNewStore(instance);
+// 4. Idempotent collection setup (no-op for MongoDB — run once at first deploy)
+await Store.setupNewStore(Lib.Instance.initialize());
 ```
 
-## Index Creation
+## Local Testing Configuration
 
-`setupNewStore()` is a **one-time provisioning step** — run it once when setting up the store for the first time, not on every application boot.
+Typical test environment variables:
 
-For this MongoDB adapter it is a no-op (MongoDB creates the collection and implicit `_id` index automatically on first write). For SQL adapters, `setupNewStore` creates the table and indexes — calling it on an existing store could overwrite data.
+```bash
+MONGO_URL=mongodb://127.0.0.1:27020/?directConnection=true
+MONGO_DATABASE=test_db
+```
+
+See the `_test/` directory for a complete Docker Compose setup with MongoDB.
+
+## Validation
+
+The adapter validates configuration at load time and throws if:
+
+- `collection_name` is missing or empty
+- `Lib.MongoDB` is not injected
+
+```
+[distinct-queue-store-mongodb] CONFIG.collection_name is required and must be a non-empty string
+[distinct-queue-store-mongodb] Lib.MongoDB is required
+```
