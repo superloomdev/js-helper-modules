@@ -1,9 +1,9 @@
-// Info: Postgres store adapter for js-server-helper-verify. Fully self-contained -
-// every DDL statement, UPSERT template, and CRUD query in this file is
-// specific to Postgres.
+// Info: Postgres store adapter for js-server-helper-verify. Fully independent
+// module that owns its own Lib, Config, and ERRORS. Every DDL statement,
+// UPSERT template, and CRUD query in this file is specific to Postgres.
 //
 // The application injects a ready-to-use Postgres helper via
-// STORE_CONFIG.lib_sql (typically Lib.Postgres). This adapter never
+// config.lib_postgresql (typically Lib.PostgreSQL). This adapter never
 // requires `pg` directly - projects not using this store never load
 // the driver.
 //
@@ -28,25 +28,38 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own table_name and lib_sql driver reference.
+Factory loader. Creates a fully independent store adapter with its own
+Lib, Config, and ERRORS. Returns a ready-to-use store object.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from verify.js
+@param {Object} config - Configuration object (merged with defaults)
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (config) {
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Dependencies for this instance
+  const Lib = {
+    Utils: require('@superloomdev/js-helper-utils')(),
+    Debug: require('@superloomdev/js-helper-debug')()
+  };
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
+  // Merge overrides over defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
 
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  // Load internal error catalog
+  const ERRORS = require('./store.errors');
+
+  // Load the validators
+  const Validators = require('./store.validators');
+
+  // Validate CONFIG - throws on misconfiguration
+  Validators.validateConfig(Lib, CONFIG);
+
+  return createInterface(Lib, CONFIG, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -56,18 +69,18 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 
 /********************************************************************
 Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, STORE_CONFIG, and
+private functions all close over the same Lib, CONFIG, and
 ERRORS. _Store (private helpers) is defined after Store (public
 methods) and is referenced by the public methods via the closure -
 the same pattern used across all helper modules.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { table_name, lib_sql }
-@param {Object} ERRORS       - Error catalog forwarded from verify.js
+@param {Object} Lib    - Dependency container (Utils, Debug)
+@param {Object} CONFIG - { table_name, lib_postgresql }
+@param {Object} ERRORS - Error catalog from this adapter
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -90,7 +103,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Execute each DDL statement in order (CREATE TABLE, CREATE INDEX)
       for (const stmt of _Store.ddl) {
-        const result = await STORE_CONFIG.lib_sql.write(instance, stmt, []);
+        const result = await CONFIG.lib_postgresql.write(instance, stmt, []);
 
         // Return a service error if any DDL statement failed
         if (result.success === false) {
@@ -133,10 +146,10 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     getRecord: async function (instance, scope, key) {
 
       // Fetch the record row by composite primary key
-      const result = await STORE_CONFIG.lib_sql.getRow(
+      const result = await CONFIG.lib_postgresql.getRow(
         instance,
         'SELECT "code", "fail_count", "created_at", "expires_at"' +
-        ' FROM ' + _Store.Q(STORE_CONFIG.table_name) +
+        ' FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE "scope" = ? AND "id" = ?',
         [scope, key]
       );
@@ -180,7 +193,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     setRecord: async function (instance, scope, key, record) {
 
       // Run the UPSERT with the precomputed template
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await CONFIG.lib_postgresql.write(
         instance,
         _Store.upsert_sql,
         [scope, key, record.code, record.fail_count, record.created_at, record.expires_at]
@@ -221,9 +234,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     incrementFailCount: async function (instance, scope, key) {
 
       // Atomically increment the fail_count column for this record
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await CONFIG.lib_postgresql.write(
         instance,
-        'UPDATE ' + _Store.Q(STORE_CONFIG.table_name) +
+        'UPDATE ' + _Store.Q(CONFIG.table_name) +
         ' SET "fail_count" = "fail_count" + 1' +
         ' WHERE "scope" = ? AND "id" = ?',
         [scope, key]
@@ -264,9 +277,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     deleteRecord: async function (instance, scope, key) {
 
       // Remove the record row by composite primary key
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await CONFIG.lib_postgresql.write(
         instance,
-        'DELETE FROM ' + _Store.Q(STORE_CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE "scope" = ? AND "id" = ?',
         [scope, key]
       );
@@ -311,9 +324,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Sweep all rows whose expires_at is in the past
       const now = instance.time;
-      const result = await STORE_CONFIG.lib_sql.write(
+      const result = await CONFIG.lib_postgresql.write(
         instance,
-        'DELETE FROM ' + _Store.Q(STORE_CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE "expires_at" < ?',
         [now]
       );
@@ -351,7 +364,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
     /********************************************************************
     Quote an identifier using Postgres double-quote style. The
-    table_name arrives from STORE_CONFIG, so this guard makes
+    table_name arrives from CONFIG, so this guard makes
     identifier injection impossible even if the caller passes a
     crafted table name.
 
@@ -375,7 +388,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     /********************************************************************
     Build the CREATE TABLE + CREATE INDEX DDL array. Idempotent via
     IF NOT EXISTS. Called once at createInterface time.
-    Closes over STORE_CONFIG from createInterface.
+    Closes over CONFIG from createInterface.
 
     @return {Array<String>} - [CREATE TABLE stmt, CREATE INDEX stmt]
     *********************************************************************/
@@ -383,8 +396,8 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Build the quoted table name and deterministic index name
       const Q = _Store.Q;
-      const t = Q(STORE_CONFIG.table_name);
-      const idx = Q(STORE_CONFIG.table_name + '_expires_at_idx');
+      const t = Q(CONFIG.table_name);
+      const idx = Q(CONFIG.table_name + '_expires_at_idx');
 
       return [
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -406,14 +419,14 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     Build the Postgres UPSERT statement. Uses
       INSERT ... ON CONFLICT (scope, id) DO UPDATE SET col = excluded.col
     Called once at createInterface time.
-    Closes over STORE_CONFIG from createInterface.
+    Closes over CONFIG from createInterface.
 
     @return {String} - SQL template using `?` placeholders
     *********************************************************************/
     buildUpsertSQL: function () {
 
       // Build the quoted table name then emit the full UPSERT template
-      const t = _Store.Q(STORE_CONFIG.table_name);
+      const t = _Store.Q(CONFIG.table_name);
       return (
         'INSERT INTO ' + t +
         ' ("scope", "id", "code", "fail_count", "created_at", "expires_at")' +

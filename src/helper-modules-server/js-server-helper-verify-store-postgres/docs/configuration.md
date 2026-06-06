@@ -3,29 +3,30 @@
 ## Loader Pattern
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
+  table_name: 'verification_codes',
+  lib_postgresql: Lib.Postgres
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-verify-store-postgres'),
-  STORE_CONFIG: {
-    table_name: 'verification_codes',
-    lib_sql:    Lib.Postgres
-  }
+  Store: Store
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Configuration Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the verification table. Must not contain a double-quote. |
-| `lib_sql` | `Object` | Yes | An initialized `Lib.Postgres` instance (`@superloomdev/js-server-helper-sql-postgres`). |
+| `lib_postgresql` | `Object` | Yes | An initialized `Lib.Postgres` instance (`@superloomdev/js-server-helper-sql-postgres`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-postgres` | Postgres driver wrapper (`Lib.Postgres`) |
+| Package | Type | Purpose |
+|---------|------|---------|
+| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
+| `@superloomdev/js-server-helper-sql-postgres` | Peer | Postgres driver wrapper (`Lib.Postgres`) |
 
 ## Environment Variables
 
