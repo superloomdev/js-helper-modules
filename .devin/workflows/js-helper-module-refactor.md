@@ -12,6 +12,32 @@ Generic workflow for refactoring any JS helper module. Applicable to complex mod
 - Plan document created/updated with module-specific steps
 - Understanding of target pattern (adapter owns Lib/Config/ERRORS, returns ready-to-use object)
 
+## Command Execution Rules (READ FIRST)
+
+These rules prevent a known failure mode where the agent bloats a command with
+hundreds of trailing `exit 0` lines, blowing the output token budget so the tool
+call aborts with `generation exceeded max tokens limit` and the command never runs.
+
+- **NEVER append `exit 0` (or any repeated filler lines) to a command.** A command
+  is ONE line (or a single `&&`-joined chain). Nothing follows it.
+- **NEVER use `cd` inside the command.** Set the working directory via the tool's
+  `Cwd` parameter instead. The `cd <module_root>` lines in the steps below are
+  illustrative of *location*, not literal text to send.
+- **Pipe long output through `| tail -N`** (e.g. `| tail -40`) to keep results small.
+- **Auto-run** is controlled by the tool's `SafeToAutoRun` flag, not by shell tricks.
+  `npm run lint` and `npm test` are safe to auto-run; `rm -rf node_modules` is also
+  acceptable here because it only targets a regenerable test dir.
+
+Canonical forms (set `Cwd`, do not paste `cd`):
+
+```bash
+# Step 5 lint  (Cwd = <module_root>)
+npm run lint 2>&1 | tail -20
+
+# Step 6 tests (Cwd = <module_root>/_test)
+rm -rf node_modules package-lock.json && npm install && npm test 2>&1 | tail -40
+```
+
 ## Step 1: Update Module Code
 
 Refactor all source files to implement the new pattern:
