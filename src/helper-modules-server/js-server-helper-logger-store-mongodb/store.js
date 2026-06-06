@@ -8,8 +8,8 @@
 // (expireAfterSeconds: 0). Persistent records (expires_at: null) omit `_ttl`
 // entirely so the sparse index skips them.
 //
-// The application injects a ready-to-use MongoDB helper via
-// STORE_CONFIG.lib_mongodb (typically Lib.MongoDB).
+// The caller passes a ready-to-use MongoDB helper via config.lib_mongodb
+// (typically Lib.MongoDB).
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                      -> { success, error }
@@ -25,25 +25,32 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own collection_name and lib_mongodb reference.
+Thin loader. Builds own Lib and ERRORS, validates config via the
+Validators singleton, then delegates to createInterface. Each call
+returns an independent Store instance with its own collection_name
+and lib_mongodb reference.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from logger.js
+@param {Object} config - { collection_name, lib_mongodb }
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (config) {
+
+  // Build own Lib container from peer dependencies
+  const Lib = {};
+  Lib.Utils = require('helper-utils')(Lib, {});
+  Lib.Debug = require('helper-debug')(Lib, {});
+
+  // Own frozen error catalog
+  const ERRORS = require('./store.errors');
 
   // Load the validators singleton and inject Lib
   const Validators = require('./store.validators')(Lib);
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
+  // Validate config - throws on misconfiguration
+  Validators.validateConfig(config);
 
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  return createInterface(Lib, config, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -53,15 +60,15 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 
 /********************************************************************
 Builds the public Store interface for one instance. All functions
-close over the same Lib, STORE_CONFIG, and ERRORS.
+close over the same Lib, config, and ERRORS.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { collection_name, lib_mongodb }
-@param {Object} ERRORS       - Error catalog forwarded from logger.js
+@param {Object} Lib    - Dependency container (Utils, Debug)
+@param {Object} config - { collection_name, lib_mongodb }
+@param {Object} ERRORS - Adapter-owned error catalog
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, config, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -81,9 +88,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
     setupNewStore: async function (instance) {
 
       // Entity query index: (scope, entity_type, entity_id, sort_key DESC)
-      const entity_result = await STORE_CONFIG.lib_mongodb.createIndex(
+      const entity_result = await config.lib_mongodb.createIndex(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
         { name: 'logger_entity_idx' }
       );
@@ -101,9 +108,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       }
 
       // Actor query index: (scope, actor_type, actor_id, sort_key DESC)
-      const actor_result = await STORE_CONFIG.lib_mongodb.createIndex(
+      const actor_result = await config.lib_mongodb.createIndex(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
         { name: 'logger_actor_idx' }
       );
@@ -122,9 +129,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Sparse TTL index: _ttl Date field, expireAfterSeconds: 0
       // Sparse so persistent records (no _ttl field) are never touched by the sweeper
-      const ttl_result = await STORE_CONFIG.lib_mongodb.createIndex(
+      const ttl_result = await config.lib_mongodb.createIndex(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { _ttl: 1 },
         { name: 'logger_ttl_idx', expireAfterSeconds: 0, sparse: true }
       );
@@ -167,9 +174,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       const document = _Store.recordToDocument(record);
 
       // Upsert by _id (sort_key) - idempotent for duplicate writes
-      const result = await STORE_CONFIG.lib_mongodb.writeRecord(
+      const result = await config.lib_mongodb.writeRecord(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { _id: record.sort_key },
         document
       );
@@ -247,9 +254,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       // Wall-clock time is correct for expiry checks. instance.time drives record
       // ordering but cleanup must use the real clock so TTL rows expire on schedule.
       const now = Lib.Utils.getUnixTime();
-      const result = await STORE_CONFIG.lib_mongodb.deleteRecordsByFilter(
+      const result = await config.lib_mongodb.deleteRecordsByFilter(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         { expires_at: { $ne: null, $lte: now } }
       );
 
@@ -337,9 +344,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       // Fetch limit+1 rows to detect if there is a next page
       const limit = (query.limit || 50) + 1;
 
-      const result = await STORE_CONFIG.lib_mongodb.query(
+      const result = await config.lib_mongodb.query(
         instance,
-        STORE_CONFIG.collection_name,
+        config.collection_name,
         filter,
         { sort: { sort_key: -1 }, limit: limit }
       );

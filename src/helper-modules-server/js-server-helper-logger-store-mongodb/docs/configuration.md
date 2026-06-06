@@ -1,32 +1,35 @@
 # Configuration — js-server-helper-logger-store-mongodb
 
-## Loader Pattern
+## Construction Pattern
+
+This adapter is fully independent — it owns its own Lib and ERRORS. Construct it before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
+const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')({
+  collection_name: 'action_log',
+  lib_mongodb:     Lib.MongoDB
+});
+
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-logger-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'action_log',
-    lib_mongodb:     Lib.MongoDB
-  },
+  Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY  // optional
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Config Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `collection_name` | `String` | Yes | Name of the log collection. One collection per Logger instance. |
 | `lib_mongodb` | `Object` | Yes | An initialized `Lib.MongoDB` instance (`@superloomdev/js-server-helper-nosql-mongodb`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-nosql-mongodb` | MongoDB driver wrapper (`Lib.MongoDB`) |
+| Package | Scope | Purpose |
+|---------|-------|---------||
+| `@superloomdev/js-helper-utils` | Owned | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Owned | Structured debug logging |
+| `@superloomdev/js-server-helper-nosql-mongodb` | Peer (via `config.lib_mongodb`) | MongoDB driver wrapper |
 
 ## Environment Variables
 
