@@ -9,8 +9,8 @@
 //   - listByEntity: Query on base table (pk prefix)
 //   - listByActor: Query on GSI (actor_pk prefix)
 //
-// The application injects a ready-to-use DynamoDB helper via
-// STORE_CONFIG.lib_dynamodb (typically Lib.DynamoDB).
+// The caller passes a ready-to-use DynamoDB helper via config.lib_dynamodb
+// (typically Lib.DynamoDB).
 //
 // TTL is handled via DynamoDB's native TTL feature on expires_at.
 // Enable TTL out-of-band via IaC or AWS Console.
@@ -29,25 +29,32 @@
 /////////////////////////// Module-Loader START //////////////////////////////
 
 /********************************************************************
-Thin loader. Validates STORE_CONFIG via the Validators singleton
-then delegates to createInterface. Each call returns an independent
-Store instance with its own table_name and lib_dynamodb reference.
+Thin loader. Builds own Lib and ERRORS, validates config via the
+Validators singleton, then delegates to createInterface. Each call
+returns an independent Store instance with its own table_name and
+lib_dynamodb reference.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - Merged module configuration
-@param {Object} ERRORS - Error catalog forwarded from logger.js
+@param {Object} config - { table_name, lib_dynamodb }
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+module.exports = function loader (config) {
+
+  // Build own Lib container from peer dependencies
+  const Lib = {};
+  Lib.Utils = require('helper-utils')(Lib, {});
+  Lib.Debug = require('helper-debug')(Lib, {});
+
+  // Own frozen error catalog
+  const ERRORS = require('./store.errors');
 
   // Load the validators singleton and inject Lib
   const Validators = require('./store.validators')(Lib);
 
-  // Validate STORE_CONFIG - throws on misconfiguration
-  Validators.validateConfig(CONFIG.STORE_CONFIG);
+  // Validate config - throws on misconfiguration
+  Validators.validateConfig(config);
 
-  return createInterface(Lib, CONFIG.STORE_CONFIG, ERRORS);
+  return createInterface(Lib, config, ERRORS);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -57,16 +64,15 @@ module.exports = function loader (Lib, CONFIG, ERRORS) {
 
 /********************************************************************
 Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, STORE_CONFIG, and
-ERRORS.
+private functions all close over the same Lib, config, and ERRORS.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} STORE_CONFIG - { table_name, lib_dynamodb }
-@param {Object} ERRORS       - Error catalog forwarded from logger.js
+@param {Object} Lib    - Dependency container (Utils, Debug)
+@param {Object} config - { table_name, lib_dynamodb }
+@param {Object} ERRORS - Adapter-owned error catalog
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
+const createInterface = function (Lib, config, ERRORS) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -122,9 +128,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       });
 
       // Write the record via writeRecord (PutItem wrapper)
-      const result = await STORE_CONFIG.lib_dynamodb.writeRecord(
+      const result = await config.lib_dynamodb.writeRecord(
         instance,
-        STORE_CONFIG.table_name,
+        config.table_name,
         item
       );
 
@@ -206,7 +212,7 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
 
       // Full scan - DynamoDB has no server-side filter on scan without
       // FilterExpression support in this helper, so filter client-side.
-      const scan = await STORE_CONFIG.lib_dynamodb.scan(instance, STORE_CONFIG.table_name);
+      const scan = await config.lib_dynamodb.scan(instance, config.table_name);
       if (scan.success === false) {
         Lib.Debug.debug('Logger dynamodb cleanupExpiredLogs scan failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
@@ -224,11 +230,11 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       }
 
       const keysByTable = {};
-      keysByTable[STORE_CONFIG.table_name] = expired.map(function (item) {
+      keysByTable[config.table_name] = expired.map(function (item) {
         return { pk: item.pk, sort_key: item.sort_key };
       });
 
-      const del = await STORE_CONFIG.lib_dynamodb.batchDeleteRecords(instance, keysByTable);
+      const del = await config.lib_dynamodb.batchDeleteRecords(instance, keysByTable);
       if (del.success === false) {
         Lib.Debug.debug('Logger dynamodb cleanupExpiredLogs delete failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
@@ -292,9 +298,9 @@ const createInterface = function (Lib, STORE_CONFIG, ERRORS) {
       };
 
       // Execute query via the unified query method (supports indexName for GSI)
-      const result = await STORE_CONFIG.lib_dynamodb.query(
+      const result = await config.lib_dynamodb.query(
         instance,
-        STORE_CONFIG.table_name,
+        config.table_name,
         queryParams
       );
 

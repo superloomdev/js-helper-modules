@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-logger-store-dynamodb.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - initialize returns success (DynamoDB table provisioned out-of-band)
 //   - addRecord round-trip: write then read back via listByEntity
 //   - listByEntity returns records most-recent first
@@ -19,7 +19,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, after, beforeEach } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const LoggerStoreDynamoDBFactory = require('helper-logger-store-dynamodb');
 const LoggerFactory              = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -44,13 +44,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_dynamodb: Lib.DynamoDB
-    }
-  };
-  return LoggerStoreDynamoDBFactory(Lib, config, ERRORS);
+  return LoggerStoreDynamoDBFactory({
+    table_name: table || TEST_TABLE,
+    lib_dynamodb: Lib.DynamoDB
+  });
 
 };
 
@@ -115,11 +112,11 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { LoggerStoreDynamoDBFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { LoggerStoreDynamoDBFactory(); },
+      /config must be an object/
     );
 
   });
@@ -127,7 +124,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { LoggerStoreDynamoDBFactory(Lib, { STORE_CONFIG: { lib_dynamodb: Lib.DynamoDB } }, ERRORS); },
+      function () { LoggerStoreDynamoDBFactory({ lib_dynamodb: Lib.DynamoDB }); },
       /table_name is required/
     );
 
@@ -136,7 +133,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_dynamodb is missing', function () {
 
     assert.throws(
-      function () { LoggerStoreDynamoDBFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStoreDynamoDBFactory({ table_name: 'x' }); },
       /lib_dynamodb is required/
     );
 
@@ -410,12 +407,12 @@ describe('Tier 1: cleanupExpiredLogs', function () {
 
 const buildLogger = function (overrides) {
 
-  const config = Object.assign({
-    STORE: LoggerStoreDynamoDBFactory,
-    STORE_CONFIG: { table_name: TEST_TABLE, lib_dynamodb: Lib.DynamoDB }
-  }, overrides || {});
+  const Store = LoggerStoreDynamoDBFactory({
+    table_name: TEST_TABLE,
+    lib_dynamodb: Lib.DynamoDB
+  });
 
-  return LoggerFactory(Lib, config);
+  return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));
 
 };
 

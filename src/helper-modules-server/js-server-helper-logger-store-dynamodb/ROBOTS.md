@@ -1,34 +1,23 @@
 # js-server-helper-logger-store-dynamodb. AI Reference
 
-Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-logger`. Cannot stand alone. Always loaded by the Logger parent via the factory protocol; not called directly by application code.
+AWS DynamoDB storage adapter for `@superloomdev/js-server-helper-logger`. Fully independent — owns its own Lib, Config, and ERRORS. Constructed first by application code and passed as a ready-to-use store object to the Logger parent.
 
-Requires a DynamoDB table provisioned **out-of-band** (CloudFormation, CDK, Terraform, AWS Console). The adapter does not create the table — `setupNewStore` is a no-op that returns success. Uses `js-server-helper-nosql-aws-dynamodb` injected via `STORE_CONFIG.lib_dynamodb`.
+Requires a DynamoDB table provisioned **out-of-band** (CloudFormation, CDK, Terraform, AWS Console). The adapter does not create the table — `setupNewStore` is a no-op that returns success. Uses `js-server-helper-nosql-aws-dynamodb` passed via `config.lib_dynamodb`.
 
-## Adapter Factory
-
-```js
-const factory = require('@superloomdev/js-server-helper-logger-store-dynamodb');
-const store   = factory(Lib, CONFIG, ERRORS);
-```
-
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Logger config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Logger error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
-
-Returns a Store interface.
-
-## `STORE_CONFIG`
+## Construction
 
 ```js
-{
+const Store = require('@superloomdev/js-server-helper-logger-store-dynamodb')({
   table_name:   'action_log',  // required. one table per logger instance
   lib_dynamodb: Lib.DynamoDB   // required. initialized js-server-helper-nosql-aws-dynamodb
-}
+});
+
+Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+  Store: Store
+});
 ```
 
-Both keys are required.
+Both config keys are required. The loader throws an `Error` if either is missing, null, or empty.
 
 ## Table Design
 
@@ -53,7 +42,7 @@ GSI name: `actor_pk-sort_key-index`. GSI keys: PK=`actor_pk`, SK=`sort_key`.
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Logger module.
+1. **Construct the adapter before the Logger.** The adapter is fully independent. Pass the returned store object as `CONFIG.Store` to the Logger parent.
 
 2. **`setupNewStore` is a no-op.** Returns `{ success: true, error: null }` without calling DynamoDB. The table and GSI must be provisioned out-of-band (CloudFormation, CDK, Terraform, AWS Console). The contract is satisfied so the Logger parent's idempotent setup flow still works.
 
@@ -71,20 +60,25 @@ GSI name: `actor_pk-sort_key-index`. GSI keys: PK=`actor_pk`, SK=`sort_key`.
 
 9. **IAM permissions required:** `PutItem`, `Query`, `Scan`, `BatchWriteItem` on the table ARN and `Query` on the `actor_pk-sort_key-index` GSI ARN.
 
-## Peer Dependencies
+## Dependencies
 
+Owned (bundled in package):
 ```
 @superloomdev/js-helper-utils                        (type checks)
 @superloomdev/js-helper-debug                        (structured logging)
+```
+
+Peer (caller provides via config.lib_dynamodb):
+```
 @superloomdev/js-server-helper-nosql-aws-dynamodb    (DynamoDB wrapper)
 ```
 
-## Error Catalog Used
+## Error Catalog
 
 | Error | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.error`, never surfaced to caller |
+| `SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, returned as `{ success: false, error }` |
 
 ## Single Source of Truth
 
-The store's source file is `store.js`. Base table PK attribute: `pk`. GSI: `actor_pk-sort_key-index` (PK: `actor_pk`, SK: `sort_key`). TTL attribute: `expires_at`. `setupNewStore` is a no-op.
+The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. Base table PK attribute: `pk`. GSI: `actor_pk-sort_key-index` (PK: `actor_pk`, SK: `sort_key`). TTL attribute: `expires_at`. `setupNewStore` is a no-op.
