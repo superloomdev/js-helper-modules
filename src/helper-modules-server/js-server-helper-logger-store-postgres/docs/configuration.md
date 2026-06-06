@@ -1,32 +1,35 @@
 # Configuration — js-server-helper-logger-store-postgres
 
-## Loader Pattern
+## Construction Pattern
+
+This adapter is fully independent — it owns its own Lib and ERRORS. Construct it before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
+const Store = require('@superloomdev/js-server-helper-logger-store-postgres')({
+  table_name: 'action_log',
+  lib_sql:    Lib.Postgres
+});
+
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-logger-store-postgres'),
-  STORE_CONFIG: {
-    table_name: 'action_log',
-    lib_sql:    Lib.Postgres
-  },
+  Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY  // optional
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Config Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the log table. Must not contain a double-quote. One table per Logger instance. |
 | `lib_sql` | `Object` | Yes | An initialized `Lib.Postgres` instance (`@superloomdev/js-server-helper-sql-postgres`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-postgres` | Postgres driver wrapper (`Lib.Postgres`) |
+| Package | Scope | Purpose |
+|---------|-------|---------||
+| `@superloomdev/js-helper-utils` | Owned | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Owned | Structured debug logging |
+| `@superloomdev/js-server-helper-sql-postgres` | Peer (via `config.lib_sql`) | Postgres driver wrapper |
 
 ## Environment Variables
 

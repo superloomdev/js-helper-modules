@@ -3,13 +3,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
 
-A PostgreSQL-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Plug it into the parent's `STORE` config; the Logger module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+A PostgreSQL-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent — construct it first with its own config, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
 A thin layer between the Logger parent module and a PostgreSQL log table. Well-suited for production deployments requiring durability, connection pooling, and SQL-standard semantics.
 
-The adapter cannot stand alone. It is always loaded together with the Logger parent and the [`js-server-helper-sql-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-sql-postgres) driver helper.
+It is always used together with the Logger parent and the [`js-server-helper-sql-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-sql-postgres) driver helper.
 
 ## Why Use This Module
 
@@ -35,22 +35,29 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-postgres/docs/api.md). The store contract this adapter implements and PostgreSQL-specific semantics
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-postgres/docs/configuration.md). `STORE_CONFIG` keys, peer dependencies, environment variables, testing tier
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-postgres/docs/configuration.md). Config keys, dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-postgres/docs/schema.md). DDL, BIGINT coercion, index strategy
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-postgres/docs/cleanup.md). PostgreSQL has no native TTL; scheduled cleanup is required
 - [Logger parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger). The data model, error catalog, and Logger-side configuration this adapter plugs into
 
 ## Adding to Your Project
 
-This adapter is installed alongside the Logger parent module and the `sql-postgres` driver helper. The loader pattern is documented in the Logger parent's README.
+This adapter is installed alongside the Logger parent module and the `sql-postgres` driver helper. Construct the store first, then pass it to the Logger:
+
+```js
+const Store = require('@superloomdev/js-server-helper-logger-store-postgres')({
+  table_name: 'action_log',
+  lib_sql:    Lib.Postgres
+});
+
+Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
+```
 
 Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
 
 ## Dependencies
 
-This module has no external dependencies.
-
-It expects three peer modules in the `Lib` container (Utils, Debug, Postgres). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+`js-helper-utils` and `js-helper-debug` are bundled as direct dependencies. The `js-server-helper-sql-postgres` driver helper is a peer dependency — install it alongside this package and pass it via `config.lib_sql`. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 
