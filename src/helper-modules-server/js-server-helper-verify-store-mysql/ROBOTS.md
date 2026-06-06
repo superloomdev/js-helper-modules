@@ -1,30 +1,31 @@
 # js-server-helper-verify-store-mysql. AI Reference
 
-Class F storage adapter. MySQL / MariaDB backend for `@superloomdev/js-server-helper-verify`. Cannot stand alone. Always loaded by the Verify parent via the factory protocol; not called directly by application code.
+Class F storage adapter. MySQL / MariaDB backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a running MySQL or MariaDB instance. Uses `js-server-helper-sql-mysql` (pooled `mysql2` driver wrapper) injected via `STORE_CONFIG.lib_sql`.
+Requires a running MySQL or MariaDB instance. Uses `js-server-helper-sql-mysql` (pooled `mysql2` driver wrapper) injected via `config.lib_mysql`.
 
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-verify-store-mysql');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-verify-store-mysql')({
+  table_name: 'verification_codes',
+  lib_mysql: Lib.MySQL
+});
 ```
 
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Verify config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Verify error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
+| Argument | Type | Required | Description |
+|---|---|---|---|
+| `table_name` | String | Yes | Name of the verification table |
+| `lib_mysql` | Object | Yes | Initialized `js-server-helper-sql-mysql` instance |
 
-Returns a Store interface. The Verify parent retains the reference and calls the contract methods to satisfy its persistence needs.
+Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods to satisfy its persistence needs.
 
-## `STORE_CONFIG`
+## Configuration
 
 ```js
 {
   table_name: 'verification_codes',  // required. one table per verify instance
-  lib_sql:    Lib.MySQL              // required. initialized js-server-helper-sql-mysql
+  lib_mysql: Lib.MySQL               // required. initialized js-server-helper-sql-mysql
 }
 ```
 
@@ -45,7 +46,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Verify module.
+1. **Never call the adapter directly from application code.** Always go through the parent Verify module. The adapter is configured independently and passed as a ready-to-use store object to the Verify parent.
 
 2. **`getRecord` returns `record: null` on a miss.** Not an error.
 
