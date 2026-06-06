@@ -1,6 +1,6 @@
 # API Reference. `js-server-helper-distinct-queue`
 
-Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical record shape and sort key design see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend `STORE_CONFIG` shape see each adapter package's own README.
+Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical record shape and sort key design see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend configuration shape see each adapter package's own README.
 
 ## On This Page
 
