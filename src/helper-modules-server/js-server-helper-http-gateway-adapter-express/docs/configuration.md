@@ -5,43 +5,37 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 **Related docs:**
 - [`api.md`](api.md) for the 3-method adapter contract
 - [`middleware.md`](middleware.md) for required Express middleware setup
-- [`../../js-server-helper-http-gateway/docs/configuration.md`](../../js-server-helper-http-gateway/docs/configuration.md) for the gateway loader and `CONFIG.ADAPTER` slot
+- [`../../js-server-helper-http-gateway/docs/configuration.md`](../../js-server-helper-http-gateway/docs/configuration.md) for the gateway loader and `CONFIG.Adapter` slot
 
 ---
 
 ## Loader Pattern
 
-Pass the adapter's `require()` result as `CONFIG.ADAPTER` to the gateway singleton loader:
+Instantiate the adapter by calling it, then pass the ready-to-use object as `CONFIG.Adapter` to the gateway loader:
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
 
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: ExpressAdapter
+  Adapter: ExpressAdapter
 });
 ```
 
-Pass the adapter itself (the result of `require()`), not the result of calling it. The gateway singleton loader invokes it once at construction time with `(Lib, ADAPTER_CONFIG, errors)` and reuses the returned adapter object for every request.
+Call the adapter loader first (it builds its own Lib and ERRORS internally). Pass the resulting ready-to-use adapter object — not the `require()` result directly — to the gateway.
 
 ---
 
 ## Configuration Keys
 
-The Express adapter accepts **no configuration**. All three loader parameters are unused:
-
-| Loader parameter | Used by adapter? |
-|---|---|
-| `Lib` (the gateway's dependency container) | No |
-| `ADAPTER_CONFIG` (the `CONFIG.ADAPTER_CONFIG` you pass to the gateway) | No |
-| `errors` (the gateway's error catalog) | No |
-
-If the gateway is configured with `ADAPTER_CONFIG`, this adapter ignores it. The parameters are accepted only to satisfy the adapter contract.
+The Express adapter accepts **no configuration**. Pass an empty object `{}` or `null`/`undefined`:
 
 ```javascript
-// Both of these are equivalent for this adapter:
-require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: ExpressAdapter });
-require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: ExpressAdapter, ADAPTER_CONFIG: { anything: 'ignored' } });
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
 ```
+
+| Config key | Required | Description |
+|---|---|---|
+| *(none)* | — | This adapter requires no configuration |
 
 ---
 
@@ -64,21 +58,18 @@ See [`middleware.md`](middleware.md) for the full setup pattern.
 
 ## Country Code Customization
 
-To enable country detection when fronting Express with a CDN (e.g. CloudFront), wrap the adapter and override `getCountryCode`:
+To enable country detection when fronting Express with a CDN (e.g. CloudFront), instantiate the base adapter and extend it:
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
+const base = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
 
-function CustomAdapter (Lib, config, errors) {
-  const base = ExpressAdapter(Lib, config, errors);
-  return Object.assign({}, base, {
-    getCountryCode: function (headers) {
-      return (headers && headers['cloudfront-viewer-country']) || null;
-    }
-  });
-}
+const CustomAdapter = Object.assign({}, base, {
+  getCountryCode: function (headers) {
+    return (headers && headers['cloudfront-viewer-country']) || null;
+  }
+});
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: CustomAdapter });
+const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: CustomAdapter });
 ```
 
 The other two contract methods inherit from the base adapter unchanged.

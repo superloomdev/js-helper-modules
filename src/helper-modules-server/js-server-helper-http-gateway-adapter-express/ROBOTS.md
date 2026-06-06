@@ -5,18 +5,17 @@
 
 ---
 
-## Singleton Loader
+## Standalone Loader
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
 
-// Pass the adapter (not the result of calling it) as CONFIG.ADAPTER:
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: ExpressAdapter
+  Adapter: ExpressAdapter
 });
 ```
 
-**Peer dependencies in Lib:** `Utils` (type checks via `Lib.Utils.isString`, `Lib.Utils.isObject`, `Lib.Utils.isFunction`, `Lib.Utils.isNullOrUndefined`)
+The adapter is standalone — it builds its own `Lib` internally. No peer dependencies required from the caller.
 
 **Runtime peers:** `express@>=5`, optional `cookie-parser@>=1`
 
