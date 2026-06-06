@@ -1,76 +1,50 @@
 // Info: Config validator for js-server-helper-verify-store-postgres.
-// Called once at construction time from the store.js loader.
-// Throws Error on misconfiguration so the adapter fails before
-// serving a single request.
-//
-// Singleton: Lib is injected once by the loader. Node.js require
-// cache guarantees the same reference on every subsequent require.
+// This adapter is a fully independent module that owns its own Lib.
+// Called once at construction time. Throws Error on misconfiguration
+// so the adapter fails before serving a single request.
 
 'use strict';
 
 
-// Shared dependency injected by loader
-let Lib;
-
-
-/////////////////////////// Module-Loader START ////////////////////////////////
-
-/********************************************************************
-Singleton loader. Injects Lib and returns the module-scope
-Validators object.
-
-@param {Object} shared_libs - Dependency container (Utils)
-
-@return {Object} - Public Validators interface
-*********************************************************************/
-module.exports = function loader (shared_libs) {
-
-  // Inject shared dependency
-  Lib = shared_libs;
-
-  return Validators;
-
-};///////////////////////////// Module-Loader END ///////////////////////////////
-
-
-
-////////////////////////////// Public Functions START ////////////////////////
 const Validators = {
 
 
   /********************************************************************
-  Validate the STORE_CONFIG object passed to the adapter loader.
+  Validate the config object passed to the adapter loader.
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
-  @param {Object} store_config - The STORE_CONFIG value from CONFIG
+  @param {Object} Lib - Dependency container (Utils)
+  @param {Object} config - Configuration object
 
   @return {void}
   *********************************************************************/
-  validateConfig: function (store_config) {
+  validateConfig: function (Lib, config) {
 
-    // STORE_CONFIG must be a non-null object
+    // config must be a non-null object
     if (
-      Lib.Utils.isNullOrUndefined(store_config) ||
-      !Lib.Utils.isObject(store_config)
+      Lib.Utils.isNullOrUndefined(config) ||
+      !Lib.Utils.isObject(config)
     ) {
-      throw new Error('[js-server-helper-verify-store-postgres] STORE_CONFIG must be an object');
+      throw new Error('[js-server-helper-verify-store-postgres] config must be an object');
     }
 
     // table_name is required and must be a non-empty string
     if (
-      Lib.Utils.isNullOrUndefined(store_config.table_name) ||
-      !Lib.Utils.isString(store_config.table_name) ||
-      Lib.Utils.isEmptyString(store_config.table_name)
+      Lib.Utils.isNullOrUndefined(config.table_name) ||
+      !Lib.Utils.isString(config.table_name) ||
+      Lib.Utils.isEmptyString(config.table_name)
     ) {
-      throw new Error('[js-server-helper-verify-store-postgres] STORE_CONFIG.table_name is required');
+      throw new Error('[js-server-helper-verify-store-postgres] config.table_name is required');
     }
 
-    // lib_sql is required - the caller must inject the Postgres helper
-    if (Lib.Utils.isNullOrUndefined(store_config.lib_sql)) {
-      throw new Error('[js-server-helper-verify-store-postgres] STORE_CONFIG.lib_sql is required (pass Lib.Postgres)');
+    // lib_postgresql is required - the caller must inject the Postgres helper
+    if (Lib.Utils.isNullOrUndefined(config.lib_postgresql)) {
+      throw new Error('[js-server-helper-verify-store-postgres] config.lib_postgresql is required (pass Lib.PostgreSQL)');
     }
 
   }
 
 };////////////////////////////// Public Functions END ////////////////////////
+
+module.exports = Validators;

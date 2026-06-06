@@ -1,30 +1,31 @@
 # js-server-helper-verify-store-postgres. AI Reference
 
-Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-verify`. Cannot stand alone. Always loaded by the Verify parent via the factory protocol; not called directly by application code.
+Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a running PostgreSQL instance. Uses `js-server-helper-sql-postgres` (pooled `pg` driver wrapper) injected via `STORE_CONFIG.lib_sql`.
+Requires a running PostgreSQL instance. Uses `js-server-helper-sql-postgres` (pooled `pg` driver wrapper) injected via `config.lib_postgresql`.
 
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-verify-store-postgres');
-const store   = factory(Lib, CONFIG, ERRORS);
+const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
+  table_name: 'verification_codes',
+  lib_postgresql: Lib.Postgres
+});
 ```
 
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Verify config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Verify error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
+| Argument | Type | Required | Description |
+|---|---|---|---|
+| `table_name` | String | Yes | Name of the verification table |
+| `lib_postgresql` | Object | Yes | Initialized `js-server-helper-sql-postgres` instance |
 
-Returns a Store interface. The Verify parent retains the reference and calls the contract methods to satisfy its persistence needs.
+Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods to satisfy its persistence needs.
 
-## `STORE_CONFIG`
+## Configuration
 
 ```js
 {
   table_name: 'verification_codes',  // required. one table per verify instance
-  lib_sql:    Lib.Postgres           // required. initialized js-server-helper-sql-postgres
+  lib_postgresql: Lib.Postgres       // required. initialized js-server-helper-sql-postgres
 }
 ```
 
@@ -45,7 +46,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Verify module. The adapter expects `Lib`, the full Verify `CONFIG`, and the frozen Verify `ERRORS` catalog. Application code does not have those.
+1. **Never call the adapter directly from application code.** Always go through the parent Verify module. The adapter is configured independently and passed as a ready-to-use store object to the Verify parent.
 
 2. **`getRecord` returns `record: null` on a miss.** A missing row is not an error. The verify module checks the returned record before comparing the submitted code.
 

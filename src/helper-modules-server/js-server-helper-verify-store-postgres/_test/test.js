@@ -39,23 +39,22 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_sql: Lib.Postgres
-    }
+    table_name: table || TEST_TABLE,
+    lib_postgresql: Lib.Postgres
   };
-  return VerifyStorePostgresFactory(Lib, config, ERRORS);
+  return VerifyStorePostgresFactory(config);
 
 };
 
 const buildVerify = function () {
 
+  const Store = VerifyStorePostgresFactory({
+    table_name: TEST_TABLE,
+    lib_postgresql: Lib.Postgres
+  });
+
   return VerifyFactory(Lib, {
-    STORE: VerifyStorePostgresFactory,
-    STORE_CONFIG: {
-      table_name: TEST_TABLE,
-      lib_sql: Lib.Postgres
-    }
+    Store: Store
   });
 
 };
@@ -67,11 +66,11 @@ const buildVerify = function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { VerifyStorePostgresFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { VerifyStorePostgresFactory({}); },
+      /config.lib_postgresql is required/
     );
 
   });
@@ -79,17 +78,17 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { VerifyStorePostgresFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
-      /table_name is required/
+      function () { VerifyStorePostgresFactory({ lib_postgresql: Lib.Postgres, table_name: null }); },
+      /config.table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('throws when lib_postgresql is missing', function () {
 
     assert.throws(
-      function () { VerifyStorePostgresFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
-      /lib_sql is required/
+      function () { VerifyStorePostgresFactory({ table_name: 'x' }); },
+      /config.lib_postgresql is required/
     );
 
   });
