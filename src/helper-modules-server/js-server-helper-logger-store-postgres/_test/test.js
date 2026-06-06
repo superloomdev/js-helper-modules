@@ -1,7 +1,7 @@
 // Info: Three-tier test suite for js-server-helper-logger-store-postgres.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
-//   - Store loader rejects bad STORE_CONFIG
+//   - Store loader rejects bad config
 //   - setupNewStore creates table + indexes (idempotent)
 //   - addLog round-trip: write then read back via getLogsByEntity
 //   - getLogsByEntity returns records most-recent first
@@ -17,7 +17,7 @@
 const assert = require('node:assert/strict');
 const { describe, it, before, beforeEach } = require('node:test');
 
-const { Lib, ERRORS } = require('./loader')();
+const { Lib } = require('./loader')();
 const LoggerStorePostgresFactory = require('helper-logger-store-postgres');
 const LoggerFactory              = require('helper-logger');
 const runSharedStoreSuite = require('./store-contract-suite');
@@ -48,13 +48,10 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_sql: Lib.Postgres
-    }
-  };
-  return LoggerStorePostgresFactory(Lib, config, ERRORS);
+  return LoggerStorePostgresFactory({
+    table_name: table || TEST_TABLE,
+    lib_sql: Lib.Postgres
+  });
 
 };
 
@@ -85,11 +82,11 @@ before(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { LoggerStorePostgresFactory(); },
+      /config must be an object/
     );
 
   });
@@ -97,7 +94,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.Postgres } }, ERRORS); },
+      function () { LoggerStorePostgresFactory({ lib_sql: Lib.Postgres }); },
       /table_name is required/
     );
 
@@ -106,7 +103,7 @@ describe('Tier 1: store loader validation', function () {
   it('throws when lib_sql is missing', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
+      function () { LoggerStorePostgresFactory({ table_name: 'x' }); },
       /lib_sql is required/
     );
 
@@ -334,12 +331,12 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  const config = Object.assign({
-    STORE: LoggerStorePostgresFactory,
-    STORE_CONFIG: { table_name: TEST_TABLE, lib_sql: Lib.Postgres }
-  }, overrides || {});
+  const Store = LoggerStorePostgresFactory({
+    table_name: TEST_TABLE,
+    lib_sql: Lib.Postgres
+  });
 
-  return LoggerFactory(Lib, config);
+  return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));
 
 };
 

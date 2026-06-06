@@ -1,34 +1,23 @@
 # js-server-helper-logger-store-postgres. AI Reference
 
-Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-logger`. Cannot stand alone. Always loaded by the Logger parent via the factory protocol; not called directly by application code.
+PostgreSQL storage adapter for `@superloomdev/js-server-helper-logger`. Fully independent — owns its own Lib, Config, and ERRORS. Constructed first by application code and passed as a ready-to-use store object to the Logger parent.
 
-Requires a running PostgreSQL instance. Uses `js-server-helper-sql-postgres` (pooled `pg` driver wrapper) injected via `STORE_CONFIG.lib_sql`.
+Requires a running PostgreSQL instance. Uses `js-server-helper-sql-postgres` (pooled `pg` driver wrapper) passed via `config.lib_sql`.
 
-## Adapter Factory
-
-```js
-const factory = require('@superloomdev/js-server-helper-logger-store-postgres');
-const store   = factory(Lib, CONFIG, ERRORS);
-```
-
-| Argument | Type | Source |
-|---|---|---|
-| `Lib` | Object | Dependency container with `Utils` and `Debug` at minimum |
-| `CONFIG` | Object | Merged Logger config; the factory reads `CONFIG.STORE_CONFIG` only |
-| `ERRORS` | Object | Logger error catalog; the adapter uses `SERVICE_UNAVAILABLE` only |
-
-Returns a Store interface. The Logger parent retains the reference and calls the contract methods.
-
-## `STORE_CONFIG`
+## Construction
 
 ```js
-{
+const Store = require('@superloomdev/js-server-helper-logger-store-postgres')({
   table_name: 'action_log',  // required. one table per logger instance
   lib_sql:    Lib.Postgres   // required. initialized js-server-helper-sql-postgres
-}
+});
+
+Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+  Store: Store
+});
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+Both config keys are required. The loader throws an `Error` if either is missing, null, or empty.
 
 ## Store Contract
 
@@ -44,7 +33,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Never call the adapter directly from application code.** Always go through the parent Logger module.
+1. **Construct the adapter before the Logger.** The adapter is fully independent. Pass the returned store object as `CONFIG.Store` to the Logger parent.
 
 2. **`sort_key` is the primary key.** Globally unique, timestamp-based string from the Logger parent.
 
@@ -66,20 +55,25 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 11. **BIGINT columns (`created_at`, `created_at_ms`, `expires_at`) may be returned as strings by the `pg` driver.** The adapter coerces these to `Number` on read via `Number(row.col)`.
 
-## Peer Dependencies
+## Dependencies
 
+Owned (bundled in package):
 ```
 @superloomdev/js-helper-utils                  (type checks)
 @superloomdev/js-helper-debug                  (structured logging)
+```
+
+Peer (caller provides via config.lib_sql):
+```
 @superloomdev/js-server-helper-sql-postgres    (pg driver wrapper)
 ```
 
-## Error Catalog Used
+## Error Catalog
 
 | Error | When |
 |---|---|
-| `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.error`, never surfaced to caller |
+| `SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.error`, returned as `{ success: false, error }` |
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`. Primary key is `"sort_key"`. All three index names are derived deterministically from `STORE_CONFIG.table_name`.
+The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. Primary key is `"sort_key"`. All three index names are derived deterministically from `config.table_name`.
