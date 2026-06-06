@@ -39,23 +39,22 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   const config = {
-    STORE_CONFIG: {
-      table_name: table || TEST_TABLE,
-      lib_sql: Lib.MySQL
-    }
+    table_name: table || TEST_TABLE,
+    lib_mysql: Lib.MySQL
   };
-  return VerifyStoreMySQLFactory(Lib, config, ERRORS);
+  return VerifyStoreMySQLFactory(config);
 
 };
 
 const buildVerify = function () {
 
+  const Store = VerifyStoreMySQLFactory({
+    table_name: TEST_TABLE,
+    lib_mysql: Lib.MySQL
+  });
+
   return VerifyFactory(Lib, {
-    STORE: VerifyStoreMySQLFactory,
-    STORE_CONFIG: {
-      table_name: TEST_TABLE,
-      lib_sql: Lib.MySQL
-    }
+    Store: Store
   });
 
 };
@@ -67,11 +66,11 @@ const buildVerify = function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when STORE_CONFIG is missing', function () {
+  it('throws when config is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreMySQLFactory(Lib, {}, ERRORS); },
-      /STORE_CONFIG must be an object/
+      function () { VerifyStoreMySQLFactory({}); },
+      /config.lib_mysql is required/
     );
 
   });
@@ -79,17 +78,17 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreMySQLFactory(Lib, { STORE_CONFIG: { lib_sql: Lib.MySQL } }, ERRORS); },
-      /table_name is required/
+      function () { VerifyStoreMySQLFactory({ lib_mysql: Lib.MySQL, table_name: null }); },
+      /config.table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('throws when lib_mysql is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreMySQLFactory(Lib, { STORE_CONFIG: { table_name: 'x' } }, ERRORS); },
-      /lib_sql is required/
+      function () { VerifyStoreMySQLFactory({ table_name: 'x' }); },
+      /config.lib_mysql is required/
     );
 
   });

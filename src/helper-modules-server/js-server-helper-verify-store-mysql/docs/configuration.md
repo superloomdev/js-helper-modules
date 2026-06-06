@@ -3,29 +3,30 @@
 ## Loader Pattern
 
 ```js
+const Store = require('@superloomdev/js-server-helper-verify-store-mysql')({
+  table_name: 'verification_codes',
+  lib_mysql: Lib.MySQL
+});
+
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-verify-store-mysql'),
-  STORE_CONFIG: {
-    table_name: 'verification_codes',
-    lib_sql:    Lib.MySQL
-  }
+  Store: Store
 });
 ```
 
-## `STORE_CONFIG` Keys
+## Configuration Keys
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the verification table. Must not contain a backtick. |
-| `lib_sql` | `Object` | Yes | An initialized `Lib.MySQL` instance (`@superloomdev/js-server-helper-sql-mysql`). |
+| `lib_mysql` | `Object` | Yes | An initialized `Lib.MySQL` instance (`@superloomdev/js-server-helper-sql-mysql`). |
 
-## Peer Dependencies
+## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `@superloomdev/js-helper-utils` | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-mysql` | MySQL driver wrapper (`Lib.MySQL`) |
+| Package | Type | Purpose |
+|---------|------|---------|
+| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
+| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
+| `@superloomdev/js-server-helper-sql-mysql` | Peer | MySQL driver wrapper (`Lib.MySQL`) |
 
 ## Environment Variables
 
