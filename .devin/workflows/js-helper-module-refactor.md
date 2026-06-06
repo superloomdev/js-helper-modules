@@ -72,7 +72,7 @@ Fix until exit 0. No warnings should remain.
 
 ## Step 6: Unit Tests
 
-Run a **clean install** then tests from the `_test/` directory. Always delete `node_modules` and `package-lock.json` first — stale lock files from `file:` swaps and version resets to 1.0.0 will cause silent wrong-version installs without this step:
+Run a **clean install** then tests from the `_test/` directory. Always delete `node_modules` and `package-lock.json` first. Stale lock files from `file:` swaps and version resets to 1.0.0 will cause silent wrong-version installs without this step:
 
 ```bash
 cd <module_root>/_test/
@@ -81,7 +81,7 @@ rm -rf node_modules package-lock.json && npm install && npm test
 
 Fix all failures until all tests pass.
 
-> **If `npm install` fails with `E409 Conflict / checksum mismatch`:** The registry is temporarily inconsistent (known GitHub Packages transient bug). Wait 30–60 seconds and retry the clean install. If it persists, add `--legacy-peer-deps` as a one-time workaround, then immediately re-run `rm -rf node_modules package-lock.json && npm install` to regenerate a clean lock file. See `docs/dev/pitfalls.md` entry 21.
+> **If `npm install` fails with `E409 Conflict / checksum mismatch`:** The registry is temporarily inconsistent (known GitHub Packages transient bug). Wait 30 to 60 seconds, then re-run `rm -rf node_modules package-lock.json && npm install`. Do not use `--legacy-peer-deps`. See `docs/dev/pitfalls.md` entry 21.
 
 ## Step 7: Workflow Review
 
@@ -118,7 +118,7 @@ Delete the existing package from each registry it has been published to, so it c
 
 > **Registry scope:** The procedure below covers the **GitHub Package Registry** only.
 > If the module is also published to additional registries (e.g. NPM), delete it from
-> each one before re-publishing — add a parallel sub-section per registry under this step.
+> each one before re-publishing. Add a parallel sub-section per registry under this step.
 
 ### 10a. GitHub Package Registry
 
@@ -164,11 +164,11 @@ gh api "$BASE/versions" --jq '.[].id' | xargs -I {} gh api --method DELETE "$BAS
 
 > **Note:** Deleting the last (only) version deletes the entire package.
 
-**5. Verify deletion — this MUST return `404 Package not found`:**
+**5. Verify deletion. This MUST return `404 Package not found`:**
 ```bash
 gh api "$BASE/versions"
 ```
-If it returns a JSON array of versions, the package still exists — do not proceed.
+If it returns a JSON array of versions, the package still exists. Do not proceed.
 
 ## Step 11: Commit and Publish
 
@@ -187,7 +187,7 @@ git commit -m "refactor: convert to fully-independent module pattern
 git push
 ```
 
-> **Important:** Do NOT use `git add .` — this would include unrelated changes from other modules.
+> **Important:** Do NOT use `git add .` because this would include unrelated changes from other modules.
 > Each module refactor must be an independent commit. Stage only the files within the
 > specific module directory (source, tests, docs, package.json).
 
@@ -195,7 +195,7 @@ Wait for CI to publish, then verify the package is live on each target registry.
 
 > **Registry scope:** Publishing here targets the **GitHub Package Registry** (driven by
 > the CI workflow). If additional registries (e.g. NPM) are configured later, verify
-> publication on each one — add a parallel verification sub-step per registry.
+> publication on each one. Add a parallel verification sub-step per registry.
 
 ### 11a. GitHub Package Registry
 
