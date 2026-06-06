@@ -20,19 +20,19 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ## Adapter Factory
 
 ```js
-const factory = require('@superloomdev/js-server-helper-auth-store-mysql');
-const store   = factory(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-auth-store-mysql')({
+  table_name: 'sessions_user',
+  lib_sql:    Lib.MySQL
+});
 ```
 
 | Argument | Type | Purpose |
 |---|---|---|
-| `Lib` | Object | Dependency container. Reads `Lib.Utils` and `Lib.Debug` |
-| `CONFIG` | Object | Merged Auth `CONFIG`. The factory reads `CONFIG.STORE_CONFIG` only. See [configuration.md](configuration.md) |
-| `ERRORS` | Object | Auth's frozen error catalog. The adapter uses `ERRORS.SERVICE_UNAVAILABLE` only |
+| `config` | Object | `{ table_name, lib_sql }`. See [configuration.md](configuration.md) |
 
-The factory validates `CONFIG.STORE_CONFIG` and returns a Store interface. Each factory call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different tables) coexist in the same process.
+The adapter validates the config, builds its own `Lib` (Utils + Debug) and `ERRORS` catalog internally, and returns a ready-to-use Store interface. Each call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different tables) coexist in the same process.
 
-The factory throws an `Error` if `STORE_CONFIG`, `STORE_CONFIG.table_name`, or `STORE_CONFIG.lib_sql` is missing.
+The adapter throws an `Error` if `config.table_name` or `config.lib_sql` is missing.
 
 ## Store Contract
 

@@ -1,11 +1,11 @@
 # Configuration
 
-The MySQL store adapter is configured through the Auth parent's `STORE` and `STORE_CONFIG` keys. The adapter itself is a factory function; the parent calls it once at load time and retains the returned Store interface.
+The MySQL store adapter is a fully independent module. Call it with its config to get a ready-to-use store object, then pass that object as `Store` to the Auth parent.
 
 ## On This Page
 
 - [Loader Pattern](#loader-pattern)
-- [`STORE_CONFIG` Keys](#store_config-keys)
+- [Config Keys](#config-keys)
 - [Peer Dependencies](#peer-dependencies)
 - [Environment Variables](#environment-variables)
 - [Testing Tier](#testing-tier)
@@ -22,21 +22,25 @@ Lib.MySQL = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
   POOL_MAX: 10
 });
 
+const Store = require('@superloomdev/js-server-helper-auth-store-mysql')({
+  table_name: 'sessions_user',
+  lib_sql:    Lib.MySQL
+});
+
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
-  STORE:        require('@superloomdev/js-server-helper-auth-store-mysql'),
-  STORE_CONFIG: { table_name: 'sessions_user', lib_sql: Lib.MySQL },
-  ACTOR_TYPE:   'user',
-  TTL_SECONDS:  2592000
+  Store:      Store,
+  ACTOR_TYPE: 'user',
+  TTL_SECONDS: 2592000
 });
 ```
 
-The adapter is passed to the parent as a **factory function reference**, not as the result of a call. The parent invokes the factory internally with the right arguments (`Lib`, the full `CONFIG`, and the frozen `ERRORS` catalog). Treat `STORE` as a function value; do not call it yourself.
+The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
 The connection pool is **not** created at loader time. `Lib.MySQL` lazy-initializes on the first query. The adapter does not open any connection during construction either; the first round-trip happens on `setupNewStore` or the first runtime call.
 
 **MariaDB compatibility.** The adapter uses standard MySQL 8 SQL syntax (backtick identifiers, `INSERT ... ON DUPLICATE KEY UPDATE`, inlined `INDEX` in `CREATE TABLE`). MariaDB 10.3 and later are wire-compatible with this surface. The `Lib.MySQL` driver helper's `mysql2` connection works against both engines without changes.
 
-## `STORE_CONFIG` Keys
+## Config Keys
 
 | Key | Type | Required | Description |
 |---|---|---|---|
@@ -49,13 +53,13 @@ The validator throws an `Error` at loader time if either key is missing, null, u
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `sql-mysql` driver helper is passed in via `config.lib_sql` by the application.
 
-| Package | Reads via `Lib` |
+| Package | How it is used |
 |---|---|
-| `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
-| `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
-| `@superloomdev/js-server-helper-sql-mysql` | `Lib.MySQL` via `STORE_CONFIG.lib_sql` |
+| `@superloomdev/js-helper-utils` | Required by adapter; used for type checks in `store.validators.js` |
+| `@superloomdev/js-helper-debug` | Required by adapter; used for driver-error logging |
+| `@superloomdev/js-server-helper-sql-mysql` | Passed in via `config.lib_sql`; the adapter delegates all SQL execution to this helper |
 
 The driver helper (`Lib.MySQL`) carries its own peer dependency on `mysql2`. The adapter never `require`s `mysql2` directly; applications that never use this store never load the driver.
 
