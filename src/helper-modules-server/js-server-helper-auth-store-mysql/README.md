@@ -41,7 +41,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mysql/docs/api.md). The store contract this adapter implements and the adapter factory protocol
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mysql/docs/configuration.md). `STORE_CONFIG` keys, peer dependencies, environment variables, testing tier
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mysql/docs/configuration.md). Config keys, peer dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mysql/docs/schema.md). DDL, identifier quoting (backticks), boolean encoding (TINYINT), JSON encoding, UPSERT semantics, index strategy
 - [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mysql/docs/cleanup.md). MySQL has no row-level TTL; scheduled cleanup is required. MySQL Event Scheduler can be used as a database-side alternative
 - [Auth parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth). The data model, error catalog, and Auth-side configuration this adapter plugs into
