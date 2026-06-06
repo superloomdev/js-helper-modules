@@ -46,7 +46,11 @@ const ERRORS = {
 };
 
 
-const StoreFactory = require('helper-distinct-queue-store-dynamodb');
+// Import the adapter factory - configure(config) returns loader(Lib, ERRORS)
+const StoreAdapter = require('helper-distinct-queue-store-dynamodb')({
+  table_name: TEST_TABLE,
+  lib_dynamodb: Lib.DynamoDB
+});
 
 
 /********************************************************************
@@ -65,17 +69,14 @@ const buildInstance = function () {
 Instantiate the store adapter directly (no core module). Used for
 the 4-method store contract suite and adapter-specific tests.
 
+The adapter is pre-configured with table_name and lib_dynamodb.
+Calling it as StoreAdapter(Lib, ERRORS) returns the live store.
+
 @return {Object} - Store interface
 *********************************************************************/
 const buildStore = function () {
 
-  const config = {
-    STORE_CONFIG: {
-      table_name: TEST_TABLE,
-      lib_dynamodb: Lib.DynamoDB
-    }
-  };
-  return StoreFactory(Lib, config, ERRORS);
+  return StoreAdapter(Lib, ERRORS);
 
 };
 
@@ -84,16 +85,15 @@ const buildStore = function () {
 Instantiate the core distinct-queue module wired to the DynamoDB
 store adapter. Used for end-to-end enqueue/claim/listByPrefix tests.
 
+The adapter is pre-configured; the parent module calls it as
+CONFIG.STORE(Lib, ERRORS) to get the live store.
+
 @return {Object} - DistinctQueue interface
 *********************************************************************/
 const buildQueue = function () {
 
   return require('helper-distinct-queue')(Lib, {
-    STORE: StoreFactory,
-    STORE_CONFIG: {
-      table_name: TEST_TABLE,
-      lib_dynamodb: Lib.DynamoDB
-    }
+    STORE: StoreAdapter
   });
 
 };

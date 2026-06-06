@@ -17,13 +17,14 @@ module.exports = function loader (shared_libs, config) {
 };
 ```
 
-`CONFIG.STORE` is a **pre-configured factory function** - the result of calling the adapter's own configure call. The loader calls it as `CONFIG.STORE(Lib, ERRORS)` and binds the returned store object to the instance. Passing a string throws `CONFIG.STORE is required and must be a store factory function`.
+`CONFIG.Store` is a **ready-to-use store object** from a fully-independent adapter module. The adapter owns its own `Lib`, `Config`, and `ERRORS` internally. The parent module uses the store directly through the contract interface. Passing a non-object throws `CONFIG.Store is required and must be a store object`.
 
 ```js
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  STORE: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(
-    { table_name: 'distinct_queue', lib_dynamodb: Lib.DynamoDB }
-  )
+  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')({
+    table_name: 'distinct_queue',
+    lib_dynamodb: Lib.DynamoDB
+  })
 });
 ```
 
@@ -59,7 +60,7 @@ Operational prefix query. Not used in the normal enqueue/claim flow.
 
 | Key | Type | Required | Notes |
 |---|---|---|---|
-| `STORE` | function | Yes | Pre-configured store adapter factory. Call the adapter's configure export with its own config and pass the result here. |
+| `Store` | object | Yes | Ready-to-use store object from a fully-independent adapter module. |
 
 ## Error Catalog
 
@@ -95,7 +96,7 @@ Every adapter must implement these methods:
 ## Critical Behaviour for Code-Generating Tools
 
 - **`instance` is always the first argument.** Every function uses it for lifecycle.
-- **`STORE` is a factory function, not a string.** The loader throws on string, object, or missing.
+- **`Store` is a ready-to-use object, not a string or function.** The loader throws on string, function, or missing.
 - **Programmer errors throw, operational errors return.** Missing required options throw `TypeError`; store failures return `{ success: false, error }`.
 - **Write path is append-only.** `enqueue` never reads. Multiple records coexist; distinctness is enforced by `claim`.
 - **Single-poller deployment.** `claim` must be called by exactly one consumer at a time. The module does not implement distributed locking.
@@ -111,7 +112,7 @@ Every adapter must implement these methods:
 | `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on store failures |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance lifecycle |
 
-The store adapter (`CONFIG.STORE`) consumes its own driver helper (`Lib.DynamoDB`, `Lib.MongoDB`) through its own internal configuration. The distinct-queue module never imports a database driver directly.
+The store adapter (`CONFIG.Store`) is a fully independent module with its own `Lib`, `Config`, and `ERRORS`. The distinct-queue module uses the store object directly through the contract interface.
 
 ## Documentation
 

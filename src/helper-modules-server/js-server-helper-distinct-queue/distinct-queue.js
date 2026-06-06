@@ -7,9 +7,9 @@
 // Public surface (3 methods): enqueue, claim, listByPrefix.
 //
 // Storage backends are provided by standalone adapter packages. The caller
-// passes a pre-configured store factory as CONFIG.STORE. This module never
+// passes a ready-to-use store object as CONFIG.Store. This module never
 // references a specific backend or any storage-specific configuration - it
-// forwards only Lib and ERRORS to the store factory.
+// uses the store object directly through the contract interface.
 //
 // Deployment constraint: use a single scheduled poller (e.g. one Lambda on
 // EventBridge every 10 seconds) as the sole consumer of `claim`. This module
@@ -59,10 +59,9 @@ module.exports = function loader (shared_libs, config) {
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
-  // Instantiate the store. CONFIG.STORE is a pre-configured factory; the
-  // adapter already owns its configuration internally, so this module
-  // forwards only Lib and ERRORS.
-  const store = CONFIG.STORE(Lib, ERRORS);
+  // The caller supplies a ready-to-use store object implementing the
+  // store contract.
+  const store = CONFIG.Store;
 
   // Validate store contract immediately so missing methods fail at startup
   Validators.validateStoreContract(store);
@@ -85,7 +84,7 @@ and store.
 @param {Object} CONFIG     - Merged configuration for this instance
 @param {Object} ERRORS     - Frozen error catalog for this module
 @param {Object} Validators - Validator singleton
-@param {Object} store      - Resolved storage backend interface
+@param {Object} store      - Store object implementing the store contract
 
 @return {Object} - Public interface for this module
 *********************************************************************/

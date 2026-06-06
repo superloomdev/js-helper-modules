@@ -45,8 +45,8 @@ const Validators = {
 
   /********************************************************************
   Validate the merged CONFIG object passed to the distinct-queue loader.
-  Only STORE is validated here — adapter-specific config is validated
-  inside the adapter's own configure() call.
+  Only Store is validated here — each adapter validates its own
+  configuration.
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
@@ -56,12 +56,12 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (config) {
 
-    // STORE must be the pre-configured store factory function
+    // Store must be a ready-to-use store object (not null, not undefined)
     if (
-      Lib.Utils.isNullOrUndefined(config.STORE) ||
-      !Lib.Utils.isFunction(config.STORE)
+      Lib.Utils.isNullOrUndefined(config.Store) ||
+      !Lib.Utils.isObject(config.Store)
     ) {
-      throw new Error('[helper-distinct-queue] CONFIG.STORE is required and must be a store factory function');
+      throw new Error('[helper-distinct-queue] CONFIG.Store is required and must be a store object');
     }
 
   },
@@ -166,17 +166,17 @@ const Validators = {
 
 
   // ~~~~~~~~~~~~~~~~~~~~ Store Contract Validators ~~~~~~~~~~~~~~~~~~~~
-  // Validate that an instantiated store exposes the required method
-  // contract. Called once at construction from the loader.
+  // Validate that the store exposes the required method contract.
+  // Called once at construction from the loader.
 
   /********************************************************************
-  Validate that an instantiated store exposes the required method
-  contract. Throws at startup when any method is missing so runtime
-  requests never hit a partially-implemented store.
+  Validate that the store exposes the required method contract.
+  Throws at startup when any method is missing so runtime requests
+  never hit a partially-implemented store.
 
-    @param {Object} store - Instantiated store object
+  @param {Object} store - Store object implementing the store contract
 
-    @return {void}
+  @return {void}
   *********************************************************************/
   validateStoreContract: function (store) {
 
