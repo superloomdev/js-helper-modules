@@ -53,12 +53,12 @@ const Validators = {
   validateConfig: function (CONFIG) {
 
     if (
-      Lib.Utils.isNullOrUndefined(CONFIG.ADAPTER) ||
-      typeof CONFIG.ADAPTER !== 'function'
+      Lib.Utils.isNullOrUndefined(CONFIG.Adapter) ||
+      !Lib.Utils.isObject(CONFIG.Adapter)
     ) {
       throw new Error(
-        '[js-server-helper-http-gateway] CONFIG.ADAPTER must be an adapter factory function ' +
-        '(e.g. require("js-server-helper-http-gateway-adapter-aws-apigateway"))'
+        '[js-server-helper-http-gateway] CONFIG.Adapter must be a ready-to-use adapter object. ' +
+        'Create it first: const Adapter = require("@superloomdev/js-server-helper-http-gateway-adapter-express")(adapter_config)'
       );
     }
 

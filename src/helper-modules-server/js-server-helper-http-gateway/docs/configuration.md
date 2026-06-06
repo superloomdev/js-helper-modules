@@ -13,8 +13,9 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway`.
 The gateway is a singleton module. One `require()(Lib, config)` call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js `require` cache guarantees the same object is returned on every subsequent call — one loader call per process.
 
 ```javascript
+const Adapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')
+  Adapter: Adapter
 });
 ```
 
@@ -26,12 +27,11 @@ The loader validates configuration at construction time and throws on misconfigu
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
-| `ADAPTER` | `Function` | Yes | Adapter factory function (for example, `require('js-server-helper-http-gateway-adapter-aws-apigateway')`) |
-| `ADAPTER_CONFIG` | `Object` | No | Per-adapter configuration passed to the adapter factory |
+| `Adapter` | `Object` | Yes | Ready-to-use adapter object created by calling the adapter package |
 
-### ADAPTER
+### Adapter
 
-The adapter factory function. Pass the result of `require()` for your chosen runtime adapter. The gateway has no runtime dependencies. You install only the adapter you need.
+The ready-to-use adapter object. Create it by calling the adapter package with its config, then pass the result to the gateway.
 
 **Available adapters:**
 
@@ -42,24 +42,13 @@ The adapter factory function. Pass the result of `require()` for your chosen run
 
 **Example:**
 ```javascript
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-express')
+  Adapter: ExpressAdapter
 });
 ```
 
-### ADAPTER_CONFIG
-
-Optional configuration passed through to the adapter factory. The shape varies by adapter. See each adapter's `docs/configuration.md` for available options.
-
-**Example:**
-```javascript
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
-  ADAPTER: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway'),
-  ADAPTER_CONFIG: {
-    // Adapter-specific options
-  }
-});
-```
+Each adapter package exports a factory function. Calling it with config returns the ready-to-use adapter object. The gateway receives this object and uses it directly - no further initialization required.
 
 ---
 

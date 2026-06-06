@@ -2,16 +2,16 @@
 // data into a per-request instance object and writes responses back through
 // the runtime-specific adapter (API Gateway, Express, ...).
 //
-// Factory pattern: each loader call returns an independent HttpGateway
-// interface bound to one adapter. Stateless - no per-instance resources.
+// Each loader call returns an independent HttpGateway interface bound to one
+// ready-to-use adapter. Stateless - no per-instance resources.
 //
 // Multipart/form-data is NOT supported. Use application/json or
 // application/x-www-form-urlencoded for POST bodies.
 //
 // Runtime adapters are provided by standalone adapter packages. The caller
-// passes the chosen adapter factory directly as CONFIG.ADAPTER:
-//   js-server-helper-http-gateway-adapter-aws-apigateway
-//   js-server-helper-http-gateway-adapter-express
+// passes the chosen ready-to-use adapter object as config.Adapter:
+//   Adapter: require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(adapter_config)
+//   Adapter: require('@superloomdev/js-server-helper-http-gateway-adapter-express')(adapter_config)
 //
 // Adapter contract (3 methods every adapter must implement):
 //   extractRequest(raw_request, raw_context, response_callback)
@@ -40,8 +40,9 @@ Factory loader. One call = one independent HttpGateway instance
 bound to one adapter. Validates CONFIG at construction time so
 misconfiguration fails at startup, not on first request.
 
-@param {Object} shared_libs - Lib container with Utils, Debug, Instance
+@param {Object} shared_libs - Lib container with Utils, Debug, Instance, Time
 @param {Object} config      - Overrides merged over module config defaults
+                               Must include: { Adapter: ready-to-use adapter }
 
 @return {Object} - Public HttpGateway interface
 *********************************************************************/
@@ -65,7 +66,7 @@ module.exports = function loader (shared_libs, config) {
   const Validators = require('./http-gateway.validators')(Lib);
   Validators.validateConfig(CONFIG);
 
-  const adapter = CONFIG.ADAPTER(Lib, CONFIG, ERRORS);
+  const adapter = CONFIG.Adapter;
   Validators.validateAdapterContract(adapter);
 
   const Parts = {
