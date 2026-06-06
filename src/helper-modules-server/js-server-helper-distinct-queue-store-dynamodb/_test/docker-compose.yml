@@ -1,0 +1,21 @@
+# DynamoDB Local for distinct-queue-store-dynamodb module testing
+# Lifecycle managed by npm scripts: npm test starts -> tests -> stops and removes
+# Ephemeral - data lost on container stop
+# Port 8000
+
+name: superloom-test-distinct-queue-store-dynamodb
+
+services:
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: superloom-test-distinct-queue-store-dynamodb
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb"]
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'cat < /dev/null > /dev/tcp/localhost/8000' || exit 1"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
