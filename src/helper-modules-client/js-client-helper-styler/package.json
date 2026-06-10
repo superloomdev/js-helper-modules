@@ -1,0 +1,21 @@
+{
+  "name": "@superloomdev/js-client-helper-styler",
+  "description": "Pure JavaScript styling engine. Theme derivation from template + base + variant. Zero runtime dependencies, framework-agnostic.",
+  "version": "1.0.0",
+  "main": "styler.js",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "peerDependencies": {
+    "@superloomdev/js-helper-utils": "^1.0.0",
+    "@superloomdev/js-helper-debug": "^1.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

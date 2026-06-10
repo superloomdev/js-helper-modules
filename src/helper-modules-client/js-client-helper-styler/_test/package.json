@@ -1,0 +1,14 @@
+{
+  "name": "js-client-helper-styler-test",
+  "description": "Test cases for js-client-helper-styler",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.js"
+  },
+  "dependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-styler": "file:../"
+  }
+}
