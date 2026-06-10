@@ -8,11 +8,21 @@
 #
 # Execution Order:
 #   1. detect
+#
+#   ╔══════════════════════════════════════════════════════════════════════╗
+#   ║  GROUP 1: CORE MODULES (helper-modules-core/)                        ║
+#   ║  Foundation utilities - zero dependencies, pure JavaScript           ║
+#   ╚══════════════════════════════════════════════════════════════════════╝
 #   2. test-utils → publish-utils
 #   3. test-debug → publish-debug
 #   4. test-time → publish-time
 #   5. test-money → publish-money
 #   6. test-client-crypto → publish-client-crypto
+#
+#   ╔══════════════════════════════════════════════════════════════════════╗
+#   ║  GROUP 2: SERVER MODULES (helper-modules-server/)                    ║
+#   ║  Node.js runtime - crypto, HTTP, storage, databases, services      ║
+#   ╚══════════════════════════════════════════════════════════════════════╝
 #   7. test-server-crypto → publish-server-crypto
 #   8. test-instance → publish-instance
 #   9. test-http → publish-http
@@ -48,6 +58,12 @@
 #   39. test-distinct-queue → publish-distinct-queue
 #   40. test-distinct-queue-store-mongodb → publish-distinct-queue-store-mongodb
 #   41. test-distinct-queue-store-dynamodb → publish-distinct-queue-store-dynamodb
+#
+#   ╔══════════════════════════════════════════════════════════════════════╗
+#   ║  GROUP 3: CLIENT MODULES (helper-modules-client/)                    ║
+#   ║  Universal runtime - UI-adjacent, browser-focused                    ║
+#   ╚══════════════════════════════════════════════════════════════════════╝
+#   42. test-client-styler → publish-client-styler
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -178,6 +194,11 @@ jobs:
           echo "Publish modules: $PUBLISH_JSON"
           echo "Main push:       $IS_MAIN_PUSH"
 
+
+  # ╔═══════════════════════════════════════════════════════════════════════════╗
+  # ║  GROUP 1: CORE MODULES (helper-modules-core/)                             ║
+  # ║  Foundation utilities - zero dependencies, pure JavaScript                ║
+  # ╚═══════════════════════════════════════════════════════════════════════════╝
 
   # ###########################################################################
   #   MODULE 1: js-helper-utils (no dependencies)
@@ -494,6 +515,11 @@ jobs:
             npm publish
           fi
 
+
+  # ╔═══════════════════════════════════════════════════════════════════════════╗
+  # ║  GROUP 2: SERVER MODULES (helper-modules-server/)                         ║
+  # ║  Node.js runtime - crypto, HTTP, storage, databases, services             ║
+  # ╚═══════════════════════════════════════════════════════════════════════════╝
 
   # ###########################################################################
   #   MODULE 6: js-server-helper-crypto (needs utils, debug)
@@ -2783,6 +2809,76 @@ jobs:
         run: npm install -g npm@10
       - name: Publish
         working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ╔═══════════════════════════════════════════════════════════════════════════╗
+  # ║  GROUP 3: CLIENT MODULES (helper-modules-client/)                         ║
+  # ║  Universal runtime - UI-adjacent, browser-focused                         ║
+  # ╚═══════════════════════════════════════════════════════════════════════════╝
+
+  # ###########################################################################
+  #   MODULE 42: js-client-helper-styler (needs utils, debug)
+  #   First extension-based module - pure JS core with optional React ext
+  # ###########################################################################
+
+  test-client-styler:
+    needs: [detect, publish-distinct-queue-store-dynamodb]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-styler')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-styler
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-styler:
+    needs: [detect, test-client-styler]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-styler'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-styler')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-styler
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
