@@ -1,0 +1,22 @@
+{
+  "color": {
+    "primary": "#4F46E5",
+    "textPrimary": "#111827",
+    "backgroundPrimary": "#FFFFFF",
+    "success": "#16A34A",
+    "danger": "#DC2626",
+    "warning": "#D97706",
+    "info": "#2563EB"
+  },
+  "dimension": {
+    "fontBase": 16,
+    "fontRatio": 1.2,
+    "spaceUnit": 4,
+    "radiusUnit": 4,
+    "lineHeightRatio": 1.45
+  },
+  "font": {
+    "primaryFamily": "System",
+    "secondaryFamily": "System"
+  }
+}
