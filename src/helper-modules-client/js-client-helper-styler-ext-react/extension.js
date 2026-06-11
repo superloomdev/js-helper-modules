@@ -21,8 +21,7 @@
 
 // Injected dependencies, set by the loader (module-scope).
 let Lib;             // shared_libs container (requires Lib.React)
-// eslint-disable-next-line no-unused-vars
-let CONFIG;          // merged config (reserved for future knobs)
+let CONFIG; // eslint-disable-line no-unused-vars -- reserved for future knobs
 let React;           // injected React (required)
 let ThemeContext;    // React context object, created once in loader
 
