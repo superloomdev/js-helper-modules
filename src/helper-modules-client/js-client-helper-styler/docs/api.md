@@ -191,7 +191,7 @@ const theme = Styler.assemble(Styler.defaultTemplate, base, variant);
 For React integration, use the extension module instead of this one directly:
 
 ```js
-const Ext = require('@superloomdev/js-client-helper-styler-ext-react-native-web')({
+const Ext = require('@superloomdev/js-client-helper-styler-ext-react')({
   React: require('react')
 });
 

@@ -6,7 +6,7 @@ Think of it like this: you give it a **template** (what tokens exist and how to 
 
 The neat part? You can layer themes. Define a complete `base` theme, then send just the changes as a `variant` — perfect for server-driven theming or brand customization.
 
-> **Want React integration?** Check out the extension module: `js-client-helper-styler-ext-react-native-web`.
+> **Want React integration?** Check out the extension module: `js-client-helper-styler-ext-react`.
 
 ---
 
@@ -63,7 +63,7 @@ styles.p_a_md;               // { padding: 12 }
 Use the extension module:
 
 ```js
-const Ext = require('@superloomdev/js-client-helper-styler-ext-react-native-web')({
+const Ext = require('@superloomdev/js-client-helper-styler-ext-react')({
   React: require('react')
 });
 

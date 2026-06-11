@@ -1,0 +1,12 @@
+{
+  "color": {
+    "primary": "#4F46E5",
+    "secondary": "#0D9488"
+  },
+  "dimension": {
+    "unit": 8
+  },
+  "font": {
+    "primaryFamily": "System"
+  }
+}
