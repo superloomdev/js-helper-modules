@@ -54,7 +54,7 @@ Why this matters:
 This module is **pure JavaScript**. No React. No Vue. No Angular.
 
 Framework bindings live in **extension modules**:
-- `js-client-helper-styler-ext-react-native-web` → React hooks
+- `js-client-helper-styler-ext-react` → React hooks (works with React DOM, React Native, React Native Web)
 - (future) `js-client-helper-styler-ext-vue` → Vue composables
 
 The extension imports Styler. Styler doesn't know React exists.

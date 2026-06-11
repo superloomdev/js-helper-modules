@@ -1,0 +1,17 @@
+{
+  "name": "@superloomdev/js-client-helper-styler-ext-react-test",
+  "description": "Unit tests for js-client-helper-styler-ext-react — uses npm aliases for dependencies.",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.js"
+  },
+  "dependencies": {
+    "helper-styler": "npm:@superloomdev/js-client-helper-styler@^1.0.0",
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-styler-ext": "file:../",
+    "react": "npm:react@^18.0.0",
+    "react-test-renderer": "npm:react-test-renderer@^18.0.0"
+  }
+}
