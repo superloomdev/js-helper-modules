@@ -30,6 +30,7 @@ Identify which category the module belongs to before starting. Each category has
 | Adapter-backed factory | Factory + pluggable store adapter | Pattern 2 + Store | auth, verify, distinct-queue |
 | Store adapter | Implements a store contract for a parent module | Pattern 2 (Class F) | verify-store-dynamodb, auth-store-mongodb |
 | Vendor wrapper | Wraps a cloud SDK or external service | Pattern 2 | nosql-aws-dynamodb, storage-aws-s3 |
+| Extension module (Class H) | Framework-specific binding for a parent module (Class G) | Extension pattern | styler-ext-react |
 
 Reference examples are for pattern recognition, not copy-paste. Read them to understand the shape, then apply first principles.
 
@@ -39,6 +40,14 @@ Reference examples are for pattern recognition, not copy-paste. Read them to und
 2. **Adapters second.** Each adapter is a separate module created after the core is published. Adapters depend on the core module's error catalog (passed via `ERRORS` at loader time) and implement the contract validated by the core's `Validators.validateStoreContract`.
 3. **One adapter at a time.** Build, test, and publish adapters individually. Each has its own `docker-compose.yml` with the relevant database emulator.
 4. **Contract test suite.** Each adapter's `_test/store-contract-suite.js` contains shared tests that validate the 4-method contract against a real (emulated) backend. The core module's `_test/memory-store.js` serves as the behavioural reference.
+
+**Extension module lifecycle:** Similar to adapter-backed modules but with a different dependency pattern:
+
+1. **Parent module first.** Build and test the parent module with its standard dependencies. The parent can be any class (A through E).
+2. **Extension second.** Build the extension module after the parent is published. The extension imports the parent directly (not the other way around). The extension receives both the parent module AND the framework dependency (React, Vue, etc.) at loader time.
+3. **Entry point naming.** Extension modules use `extension.js` as the main entry point (not `index.js`). This makes the module type discoverable by filename and keeps the convention consistent with store/adapter naming.
+4. **Naming convention.** Extension modules follow `[parent-name]-ext-[framework]`. Example: `js-client-helper-styler-ext-react` (works with React DOM, React Native, React Native Web).
+5. **Documentation split.** Parent module owns `docs/configuration.md`, templates, derivation rules. Extension module owns `docs/api.md` (hooks/components) and `docs/philosophy.md` (extension pattern explanation).
 
 ### Store Adapter Implementation Rules
 
