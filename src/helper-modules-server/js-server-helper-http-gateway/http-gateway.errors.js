@@ -1,8 +1,8 @@
 'use strict';
 
 /**
- * Error catalog for js-server-helper-http-gateway.
- * Operational errors returned via { success: false, error }.
+ * Error catalog for helper-http-gateway.
+ * Errors are returned via [err, result] tuples or thrown at construction time.
  * Frozen to prevent accidental mutation.
  */
 

@@ -1,4 +1,4 @@
-// Info: All validators for js-server-helper-http-gateway.
+// Info: All validators for helper-http-gateway.
 // Two concerns in one place:
 //   1. Config validators        - called once at construction time, take CONFIG
 //      as a parameter, throw Error on misconfiguration.
@@ -57,8 +57,8 @@ const Validators = {
       !Lib.Utils.isObject(CONFIG.Adapter)
     ) {
       throw new Error(
-        '[js-server-helper-http-gateway] CONFIG.Adapter must be a ready-to-use adapter object. ' +
-        'Create it first: const Adapter = require("@superloomdev/js-server-helper-http-gateway-adapter-express")(adapter_config)'
+        '[helper-http-gateway] CONFIG.Adapter must be a ready-to-use adapter object. ' +
+        'Create it first: const Adapter = require("helper-http-gateway-adapter-express")(adapter_config)'
       );
     }
 
@@ -92,7 +92,7 @@ const Validators = {
 
       if (Lib.Utils.isNullOrUndefined(adapter[name]) || !Lib.Utils.isFunction(adapter[name])) {
         throw new Error(
-          '[js-server-helper-http-gateway] Invalid adapter contract: missing method `' + name + '`'
+          '[helper-http-gateway] Invalid adapter contract: missing method `' + name + '`'
         );
       }
 

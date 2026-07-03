@@ -1,9 +1,9 @@
-// Info: Cookie utilities for js-server-helper-http-gateway.
+// Info: Cookie utilities for helper-http-gateway.
 //
 // Cookie serialization and parsing delegate to the `cookie` npm package
 // (jshttp). Cookie handling has well-known security and correctness
-// pitfalls — encoding edge cases, prototype-pollution via headers,
-// RFC 6265 attribute grammar — that a purpose-built library handles
+// pitfalls (encoding edge cases, prototype-pollution via headers,
+// RFC 6265 attribute grammar) that a purpose-built library handles
 // reliably. We own only the SameSite=None browser-quirk detection
 // below: it is a product decision, not a spec concern, so it stays
 // in-house.
@@ -31,7 +31,7 @@ let ERRORS; // eslint-disable-line no-unused-vars
 /********************************************************************
 Singleton loader. Injects Lib, CONFIG, and ERRORS and returns the
 module-scope Cookies object directly. All three are accepted for
-signature uniformity with other parts — none are consumed today.
+signature uniformity with other parts. None are consumed today.
 
 @param {Object} shared_libs - Dependency container (Utils, Debug)
 @param {Object} config      - Merged module configuration
@@ -131,7 +131,7 @@ const Cookies = {
     - iOS 12 (WebKit bug)
     - macOS 10.14 with Safari or embedded browser (WebKit bug)
     - UC Browser < 12.13.2
-    - Chromium 51-66 (drops unrecognised SameSite values)
+    - Chromium 51-66 (drops unrecognized SameSite values)
 
   @param {String} user_agent - User-Agent request header value
 

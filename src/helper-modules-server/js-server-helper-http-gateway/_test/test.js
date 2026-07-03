@@ -1,4 +1,4 @@
-// Info: Tests for js-server-helper-http-gateway. Uses the in-process stub adapter
+// Info: Tests for helper-http-gateway. Uses the in-process stub adapter
 // (stub-adapter.js) - not a simulation of any real runtime, just a contract stub
 // that lets the gateway exercise its own logic without Lambda or Express. Covers:
 //   - Loader validation (throws on misconfiguration)
@@ -267,7 +267,7 @@ describe('returnHttpResponse', function () {
     const cookies = gateway.buildCookie(null, 'session', 'abc', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
     assert.ok('Set-Cookie' in sent[0].headers);
-    assert.ok(sent[0].headers['Set-Cookie'].includes('session=abc'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].includes('session=abc'));
   });
 
   it('sends no Set-Cookie header when cookies param is omitted', function () {
@@ -512,7 +512,7 @@ describe('returnHttpResponse with cookies', function () {
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
     assert.ok('Set-Cookie' in sent[0].headers);
-    assert.ok(sent[0].headers['Set-Cookie'].includes('sid=abc'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].includes('sid=abc'));
   });
 
   it('applies default httpOnly=true', function () {
@@ -520,7 +520,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('httponly'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].toLowerCase().includes('httponly'));
   });
 
   it('applies default secure=true', function () {
@@ -528,7 +528,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('secure'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].toLowerCase().includes('secure'));
   });
 
   it('applies default path=/', function () {
@@ -536,7 +536,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('path=/'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].toLowerCase().includes('path=/'));
   });
 
   it('applies default sameSite=lax', function () {
@@ -544,7 +544,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('samesite=lax'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].toLowerCase().includes('samesite=lax'));
   });
 
   it('option override httpOnly=false is respected', function () {
@@ -552,7 +552,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { httpOnly: false });
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(!sent[0].headers['Set-Cookie'].toLowerCase().includes('httponly'));
+    assert.ok(!sent[0].headers['Set-Cookie'][0].toLowerCase().includes('httponly'));
   });
 
   it('option override sameSite=none is applied for compatible browser', function () {
@@ -560,7 +560,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { sameSite: 'none' });
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].toLowerCase().includes('samesite=none'));
+    assert.ok(sent[0].headers['Set-Cookie'][0].toLowerCase().includes('samesite=none'));
   });
 
   it('omits SameSite entirely for iOS 12 UA when sameSite=none requested', function () {
@@ -568,7 +568,7 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': IOS_12_UA } });
     const cookies = gateway.buildCookie(null, 'sid', 'abc', 3600, { sameSite: 'none' });
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(!sent[0].headers['Set-Cookie'].toLowerCase().includes('samesite'));
+    assert.ok(!sent[0].headers['Set-Cookie'][0].toLowerCase().includes('samesite'));
   });
 
   it('serializes a clear cookie (ttl=0, empty value) with Max-Age=0', function () {
@@ -576,19 +576,24 @@ describe('returnHttpResponse with cookies', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     const cookies = gateway.buildCookie(null, 'sid', '', 0);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    const sc = sent[0].headers['Set-Cookie'];
+    const sc = sent[0].headers['Set-Cookie'][0];
     assert.ok(sc.startsWith('sid=;') || sc.startsWith('sid='));
     assert.ok(sc.toLowerCase().includes('max-age=0'));
   });
 
-  it('last cookie wins when descriptor has multiple entries (single Set-Cookie key)', function () {
+  it('sends all cookies as array when descriptor has multiple entries', function () {
     const { gateway, sent } = buildGatewayWithMemory();
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_100_UA } });
     let cookies = gateway.buildCookie(null, 'a', 'val-a', 3600);
     cookies = gateway.buildCookie(cookies, 'b', 'val-b', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    // Only one Set-Cookie key in headers; last iteration wins
+    // Set-Cookie is an array with both cookies
     assert.ok('Set-Cookie' in sent[0].headers);
+    const sc = sent[0].headers['Set-Cookie'];
+    assert.ok(Array.isArray(sc));
+    assert.equal(sc.length, 2);
+    assert.ok(sc[0].includes('a=val-a'));
+    assert.ok(sc[1].includes('b=val-b'));
   });
 
 });
@@ -1211,7 +1216,7 @@ describe('buildCookie - serialization edge cases', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
     const cookies = gateway.buildCookie(null, 'tags', 'red,green,blue', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].startsWith('tags=' + encodeURIComponent('red,green,blue')));
+    assert.ok(sent[0].headers['Set-Cookie'][0].startsWith('tags=' + encodeURIComponent('red,green,blue')));
   });
 
   it('URL-encodes a value that contains a semicolon', function () {
@@ -1219,7 +1224,7 @@ describe('buildCookie - serialization edge cases', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
     const cookies = gateway.buildCookie(null, 'note', 'a;b', 3600);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    assert.ok(sent[0].headers['Set-Cookie'].startsWith('note=' + encodeURIComponent('a;b')));
+    assert.ok(sent[0].headers['Set-Cookie'][0].startsWith('note=' + encodeURIComponent('a;b')));
   });
 
   it('accepts an empty string value (clear cookie)', function () {
@@ -1227,7 +1232,7 @@ describe('buildCookie - serialization edge cases', function () {
     const { instance } = initInstance(gateway, { headers: { 'user-agent': CHROME_UA } });
     const cookies = gateway.buildCookie(null, 'sid', '', 0);
     gateway.returnHttpResponse(instance, 200, null, cookies);
-    const sc = sent[0].headers['Set-Cookie'];
+    const sc = sent[0].headers['Set-Cookie'][0];
     assert.ok(sc.startsWith('sid=;') || sc.startsWith('sid='));
     assert.ok(sc.toLowerCase().includes('max-age=0'));
   });
@@ -1438,16 +1443,16 @@ describe('config absorption contract', function () {
     assert.doesNotThrow(function () { HttpGateway(Lib, validBaseConfig()); });
   });
 
-  // OVERRIDE WINS (Strategy 1): override Adapter with null — the null replaces
+  // OVERRIDE WINS (Strategy 1): override Adapter with null, so the null replaces
   // the valid object and validation must throw, proving the override reached
   // CONFIG (if the default were kept, it would not throw here).
-  it('absorbs an Adapter override — null override triggers the required-Adapter validation', function () {
+  it('absorbs an Adapter override: null override triggers the required-Adapter validation', function () {
     assert.throws(function () {
       HttpGateway(Lib, Object.assign(validBaseConfig(), { Adapter: null }));
     }, /CONFIG\.Adapter must be a ready-to-use adapter object/);
   });
 
-  // NULL HONORED: not applicable at unit tier — CONFIG default (Adapter)
+  // NULL HONORED: not applicable at unit tier. CONFIG default (Adapter)
   // is null. There is no key with a non-null default whose null-override
   // would produce a distinct observable outcome at this tier.
 
