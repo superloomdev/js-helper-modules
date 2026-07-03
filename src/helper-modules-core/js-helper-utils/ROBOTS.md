@@ -1,4 +1,4 @@
-# js-helper-utils - AI Agent Reference
+# helper-utils - AI Agent Reference
 
 ## Module Type
 Foundation module. Zero runtime dependencies. All other modules may depend on this; this module NEVER imports any other.
@@ -12,10 +12,10 @@ None.
 ## Loader Pattern (Singleton)
 
 ```javascript
-Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, {});
+Lib.Utils = require('helper-utils')(Lib, {});
 ```
 
-`shared_libs` accepted for interface uniformity but unused — Utils has no external lib dependencies.
+`shared_libs` accepted for interface uniformity but unused - Utils has no external lib dependencies.
 `config` reserved for future overrides.
 
 ## Config Keys
@@ -43,7 +43,7 @@ inArray(arr, element) → Boolean | async:no
 stringToJSON(str) → Object|null | async:no - safe parse, returns null on failure
 stringReverse(str) → String | async:no
 safeJoin(list, separator) → String | async:no
-arrayDistint(arr) → Array | async:no - deduplicate
+arrayDistinct(arr) → Array | async:no - deduplicate
 splitWithTrim(str, delimiter) → String[] | async:no
 stringToNumber(str) → Number | async:no
 stringToArray(delimiter, str) → String[] | async:no
@@ -104,4 +104,4 @@ generateRandomString(length) → String | async:no
 - **Self-contained:** Implements all type checks and data helpers needed across the framework
 
 ## Gotchas
-- **`overrideObject` ≠ `Object.assign`.** It is a shallow merge that SKIPS strictly-`null` values (a `null` override keeps the base value), does NOT skip `undefined` (undefined overwrites), and never deep-merges nested objects (nested objects are replaced wholesale). Use it only for "layer non-null overrides onto defaults". When a caller must set a key to `null` to clear a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead — `overrideObject` would silently retain the default and change behaviour. Do NOT blanket-replace `Object.assign` with `overrideObject` during audits.
+- **`overrideObject` ≠ `Object.assign`.** It is a shallow merge that SKIPS strictly-`null` values (a `null` override keeps the base value), does NOT skip `undefined` (undefined overwrites), and never deep-merges nested objects (nested objects are replaced wholesale). Use it only for "layer non-null overrides onto defaults". When a caller must set a key to `null` to clear a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead - `overrideObject` would silently retain the default and change behavior. Do NOT blanket-replace `Object.assign` with `overrideObject` during audits.

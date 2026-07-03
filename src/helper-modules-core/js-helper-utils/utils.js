@@ -21,7 +21,7 @@ Singleton loader. Initializes Validators and returns the module-scope
 Utils object directly. Node.js require cache guarantees a single
 instance across the process.
 
-@param {Object} shared_libs - Lib container (unused — Utils is the foundation)
+@param {Object} shared_libs - Lib container (unused - Utils is the foundation)
 @param {Object} config - Reserved for future config overrides
 
 @return {Object} - Public Utils interface
@@ -41,25 +41,61 @@ module.exports = function loader (shared_libs, config) { // eslint-disable-line 
 const Utils = {
 
   /********************************************************************
-  Copy of Util Functions from Node JS util lib
-  Link: https://github.com/isaacs/core-util-is/blob/master/lib/util.js
+  Check if value is null
+  Ported from core-util-is.
+
+  @param {Object} arg - Value to check
+
+  @return {Boolean} - true if null, false otherwise
   *********************************************************************/
   isNull: function (arg) {
     return arg === null;
   },
 
+  /********************************************************************
+  Check if value is null or undefined
+  Ported from core-util-is.
+
+  @param {Object} arg - Value to check
+
+  @return {Boolean} - true if null or undefined, false otherwise
+  *********************************************************************/
   isNullOrUndefined: function (arg) {
     return arg == null;
   },
 
+  /********************************************************************
+  Check if value is undefined
+  Ported from core-util-is.
+
+  @param {Object} arg - Value to check
+
+  @return {Boolean} - true if undefined, false otherwise
+  *********************************************************************/
   isUndefined: function (arg) {
     return arg === void 0;
   },
 
+  /********************************************************************
+  Check if value is a boolean
+  Ported from core-util-is.
+
+  @param {Object} arg - Value to check
+
+  @return {Boolean} - true if boolean, false otherwise
+  *********************************************************************/
   isBoolean: function (arg) {
     return typeof arg === 'boolean';
   },
 
+  /********************************************************************
+  Check if value is a valid number (excludes NaN)
+  Ported from core-util-is.
+
+  @param {Object} arg - Value to check
+
+  @return {Boolean} - true if a valid number, false otherwise
+  *********************************************************************/
   isNumber: function (arg) {
     return (
       (typeof arg === 'number') && // Is Number Type
@@ -67,6 +103,14 @@ const Utils = {
     );
   },
 
+  /********************************************************************
+  Check if value is a string
+  Ported from core-util-is.
+
+  @param {Object} arg - Value to check
+
+  @return {Boolean} - true if string, false otherwise
+  *********************************************************************/
   isString: function (arg) {
     return typeof arg === 'string';
   },
@@ -78,7 +122,7 @@ const Utils = {
   /********************************************************************
   Check if number is Integer (Whole Number)
 
-  @param {Mixed} num - Number to be checked
+  @param {Object} num - Number to be checked
 
   @return {Boolean} - true if Integer (10.0 | 10)
   @return {Boolean} - false if Decimal number (10.7 | 0.7)
@@ -86,7 +130,7 @@ const Utils = {
   isInteger: function (num) {
 
     // Return
-    return num % 1 == 0;
+    return num % 1 === 0;
 
   },
 
@@ -96,7 +140,7 @@ const Utils = {
   RegExp, etc.). Ported from core-util-is. Use Array.isArray() when you
   need to distinguish arrays from plain objects.
 
-  @param {Mixed} arg - Item to be checked
+  @param {Object} arg - Item to be checked
 
   @return {Boolean} - 'true' if Object otherwise 'false'
   *********************************************************************/
@@ -108,9 +152,9 @@ const Utils = {
   /********************************************************************
   Check if variable is Function
 
-  @param {Mixed} arg - Item to be checked
+  @param {Object} arg - Item to be checked
 
-  @return {Boolean} - 'true' if type id Function otherwise 'false'
+  @return {Boolean} - 'true' if type is Function otherwise 'false'
   *********************************************************************/
   isFunction: function (arg) {
     return typeof arg === 'function';
@@ -120,7 +164,7 @@ const Utils = {
   /********************************************************************
   Check if variable is Error Type
 
-  @param {Mixed} arg - Item to be checked
+  @param {Object} arg - Item to be checked
 
   @return {Boolean} - 'true' if type of object Error otherwise 'false'
   *********************************************************************/
@@ -144,7 +188,7 @@ const Utils = {
   /********************************************************************
   Check if an Object is empty with no keys {}
 
-  @param {Set} obj - Object to be checked
+  @param {Object} obj - Object to be checked
 
   @return {Boolean} - 'true' if empty otherwise 'false'
   *********************************************************************/
@@ -209,7 +253,7 @@ const Utils = {
   /********************************************************************
   Null function - For optional callback functions
 
-  @return None
+  @return {void} None
   *********************************************************************/
   nullFunc: function () {},
 
@@ -220,9 +264,9 @@ const Utils = {
   /********************************************************************
   Return JSON object from flattened string
 
-  @param {string} str - String to be converted into JSON
+  @param {String} str - String to be converted into JSON
 
-  @return - JSON Object
+  @return {Object} - JSON Object
   *********************************************************************/
   stringToJSON: function (str) {
 
@@ -244,9 +288,9 @@ const Utils = {
   Return reversed String
   Note: Only works for ASCII strings and some Unicodes
 
-  @param {string} str - String to be reversed
+  @param {String} str - String to be reversed
 
-  @return - Reversed string
+  @return {String} - Reversed string
   *********************************************************************/
   stringReverse: function (str) {
 
@@ -258,36 +302,36 @@ const Utils = {
   /********************************************************************
   Join an array of strings. If non-array, then returned as-it-is
 
-  @param {string[]|Boolean|Null} list - List of Strings to be joined. If non-array, then returned as-it-is
-  @param {string} separator - Delimiter for Split
+  @param {String[]|Boolean|Null} list - List of Strings to be joined. If non-array, then returned as-it-is
+  @param {String} separator - Delimiter for Join
 
-  @return - String
+  @return {String} - String
   *********************************************************************/
   safeJoin: function (list, separator) {
 
     if ( Array.isArray(list) ) {
       return list.join(separator); // Join and Return
     } else {
-      return list; // Return orignal value as-it-is
+      return list; // Return original value as-it-is
     }
 
   },
 
 
   /********************************************************************
-  Filter an array to only contain Distint values
+  Filter an array to only contain Distinct values
   [1, 2, 2, 3, 3, 3, 'a', 'a'] -> [1, 2, 3, 'a']
 
-  @param {string|Number[]} arr - Array to be filtered
+  @param {String|Number[]} arr - Array to be filtered
 
-  @return - Array
+  @return {Array} - Array
   *********************************************************************/
-  arrayDistint: function (arr) {
+  arrayDistinct: function (arr) {
 
     if ( Array.isArray(arr) ) {
       return [...new Set(arr)];
     } else {
-      return arr; // Return orignal value as-it-is
+      return arr; // Return original value as-it-is
     }
 
   },
@@ -296,10 +340,10 @@ const Utils = {
   /********************************************************************
   Split a String and remove Whitespaces
 
-  @param {string} str - String to be Splited
-  @param {string} delimiter - Delimiter for Split
+  @param {String} str - String to be Split
+  @param {String} delimiter - Delimiter for Split
 
-  @return - Array of String
+  @return {String[]} - Array of String
   *********************************************************************/
   splitWithTrim: function (str, delimiter) {
 
@@ -314,13 +358,13 @@ const Utils = {
   // Remove or normalize unwanted values from objects, arrays, and strings.
 
   /********************************************************************
-  Remove unwanted feilds of Object (By Ref)
+  Remove unwanted fields of Object (By Ref)
 
-  @param {Set} obj - JSON Object to be cleaned
-  @param {string[]} whitelist - All the key other then these will be removed from JSON
-  @param {string[]} blacklist - These keys will be removed from JSON
+  @param {Object} obj - JSON Object to be cleaned
+  @param {String[]} whitelist - All keys other than these will be removed from JSON
+  @param {String[]} blacklist - These keys will be removed from JSON
 
-  @return - Sanatized Object
+  @return {Object} - Sanitized Object
   *********************************************************************/
   sanitizeObject: function (obj, whitelist, blacklist) {
 
@@ -366,14 +410,14 @@ const Utils = {
 
 
   /********************************************************************
-  Sanatize each item of Array (By Ref)
+  Sanitize each item of Array (By Ref)
 
-  @param {Mixed[]} list - Array to be Cleaned
-  @param {Function} sanatize_func - Array item sanatizer
+  @param {Object[]} list - Array to be Cleaned
+  @param {Function} sanitize_func - Array item sanitizer
 
-  @return - Sanatized Object
+  @return {Object} - Sanitized Object
   *********************************************************************/
-  sanitizeArray: function (list, sanatize_func) {
+  sanitizeArray: function (list, sanitize_func) {
 
     // Return as null if list is null or undefined or not-an-array
     if (
@@ -384,27 +428,27 @@ const Utils = {
     }
 
 
-    // Sanatize each item of array
+    // Sanitize each item of array
     return list.map(function (item) {
-      return sanatize_func(item);
+      return sanitize_func(item);
     });
 
   },
 
 
   /********************************************************************
-  Return cleaned string with only characters from specific regular expresion
+  Return cleaned string with only characters from specific regular expression
   Remove all the dangerous characters excluding those who satisfy RegExp
 
-  @param {string} str - String to be sanatized/cleaned
-  @param {string} regx - The regular expression
+  @param {String} str - String to be sanitized/cleaned
+  @param {String} regx - The regular expression
 
-  @return - Sanatized string
+  @return {String} - Sanitized string
   *********************************************************************/
   sanitizeUsingRegx: function (str, regx) {
 
     // If null or undefined or zero-length, return value as-it-is
-    if (Utils.isNullOrUndefined(str) || str.length == 0) {
+    if (Utils.isNullOrUndefined(str) || str.length === 0) {
       return str;
     }
 
@@ -427,7 +471,7 @@ const Utils = {
     // Convert to Integer
     const i = parseInt( Number(num) ); // Convert String/Decimal or any type to equivalent Integer
 
-    // Check if NaN in case of Alphabates String passed as number
+    // Check if NaN in case of Alphabet String passed as number
     if ( isNaN(i) ) {
       return null; // Return Null in case it's not a number
     } else {
@@ -458,13 +502,13 @@ const Utils = {
   /********************************************************************
   Return specific/current unix timestamp in seconds
 
-  @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
+  @param {String} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
   @return {String} - Unix timestamp (Seconds)
   *********************************************************************/
   getUnixTime: function (date) {
 
-    // Return Unix Timestamp equivalant of specific date in seconds
+    // Return Unix Timestamp equivalent of specific date in seconds
     return Math.floor( Utils.getUnixTimeInMilliSeconds(date) / 1000 ); // Convert Milli-Seconds to Seconds
 
   },
@@ -473,7 +517,7 @@ const Utils = {
   /********************************************************************
   Return specific/current unix timestamp in Milli-Seconds
 
-  @param {string} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
+  @param {String} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
   @return {String} - Unix timestamp (Milli-Seconds)
   *********************************************************************/
@@ -481,9 +525,9 @@ const Utils = {
 
     // Check if custom date is sent
     if ( !Utils.isNullOrUndefined(date) ) {
-      return ( new Date(date) ); // Return Unix Timestamp equivalant of specific date in Milliseconds
+      return ( new Date(date) ); // Return Unix Timestamp equivalent of specific date in Milliseconds
     } else {
-      return ( new Date().getTime() ); // Return Unix Timestamp equivalant of current time in Milliseconds
+      return ( new Date().getTime() ); // Return Unix Timestamp equivalent of current time in Milliseconds
     }
 
   },
@@ -492,7 +536,7 @@ const Utils = {
   /********************************************************************
   Round a Decimal number to specified number of digits after decimal. Standard rounding rules
   Ref: https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
-  Note: math.round() is more precise then Number.toFixed()
+  Note: math.round() is more precise than Number.toFixed()
   (11.5249, 2) => 11.52
   (11.525, 2) => 11.53
 
@@ -550,7 +594,7 @@ const Utils = {
 
   @param {String} str - String to be converted to Number
 
-  @return {Number} - Number equivalant of the string. Null if String is Empty.
+  @return {Number} - Number equivalent of the string. Null if String is Empty.
   @return {Number} - NaN if invalid string or Array or Object
   *********************************************************************/
   stringToNumber: function (str) {
@@ -571,7 +615,7 @@ const Utils = {
   @param {String} delimiter - The boundary string
   @param {String} str - The input string. Can be NULL or Empty
 
-  @return {Boolean} - false if input sring is null or ''
+  @return {Boolean} - false if input string is null or ''
   @return {String[]} - Newly converted array of strings
   *********************************************************************/
   stringToArray: function (delimiter, str) {
@@ -603,7 +647,7 @@ const Utils = {
   @param {String|Array} keys - Array with list of keys or single item string
   @param {String|Array} values - Array with list of values or single item string
 
-  @return {Set} - Object with mearged key vale pairs
+  @return {Object} - Object with merged key value pairs
   *********************************************************************/
   keyValueToObject: function (keys, values) {
 
@@ -614,7 +658,7 @@ const Utils = {
     } else {
       keys.map( function (key, index) {
         obj[key] = values[index];
-      } ); // Create a Set from feilds-array with corrosponding values-array
+      } ); // Create a Set from fields-array with corresponding values-array
     }
 
     return obj;
@@ -626,10 +670,10 @@ const Utils = {
   Creates a new object by overriding keys of base-object with non-null keys of new-object
   Both Objects should be identical. Keys not present in base object won't be added to it
 
-  @param {Set} base_obj - Base object
-  @param {Set} new_objs - (... List) New object whose non-null keys will override base-object keys
+  @param {Object} base_obj - Base object
+  @param {Object} new_objs - (... List) New object whose non-null keys will override base-object keys
 
-  @return {Set} - Object with mearged data
+  @return {Object} - Object with merged data
   *********************************************************************/
   overrideObject: function (base_obj, ...new_objs) {
 
@@ -663,13 +707,13 @@ const Utils = {
 
   /********************************************************************
   Set a value for specific key of object (Only if value is not null or undefined)
-  By Reference: Changes are made directly in orignal object
+  By Reference: Changes are made directly in original object
 
-  @param {Set} obj - Object in which value is to be inserted
-  @param {Set} key - Key to which this value is to be assigned
-  @param {Mixed} new_val - New value
+  @param {Object} obj - Object in which value is to be inserted
+  @param {Object} key - Key to which this value is to be assigned
+  @param {Object} new_val - New value
 
-  @return {Set} obj - Updated Object
+  @return {Object} obj - Updated Object
   *********************************************************************/
   setNonEmptyKey: function (obj, key, new_val) {
 
@@ -687,10 +731,10 @@ const Utils = {
   /********************************************************************
   Set a value with fallback value if it's null/undefined
 
-  @param {Mixed} new_val - New value
-  @param {Mixed} [fallback_val] - (Optional) Falback value. Auto null if not sent in param
+  @param {Object} new_val - New value
+  @param {Object} [fallback_val] - (Optional) Fallback value. Auto null if not sent in param
 
-  @return {Set} - Object with mearged data
+  @return {Object} - Object with merged data
   *********************************************************************/
   fallback: function (new_val, fallback_val) {
 
@@ -706,7 +750,7 @@ const Utils = {
 
 
   /********************************************************************
-  Check if All chracters in string are of valid charset and string has
+  Check if All characters in string are of valid charset and string has
   minimum and maximum length
 
   @param {String} str - The variable to be checked
@@ -716,7 +760,7 @@ const Utils = {
   @return {Boolean} - true on success
   @return {Boolean} - false if validation fails
 
-  Note: Always check this function output against identic (===) FALSE to
+  Note: Always check this function output against identical (===) FALSE to
   avoid mismatches with text 'false' or '0' or empty strings
   *********************************************************************/
   validateString: function (str, min_length, max_length) {
@@ -741,12 +785,12 @@ const Utils = {
 
     // Check Min Length (Only if specified)
     if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
-      return false; // Less then minimum required length
+      return false; // Less than minimum required length
     }
 
     // Check Max Length (Only if specified)
     if ( !Utils.isNullOrUndefined(max_length) && len > max_length ) {
-      return false; // More then maximum allowed length
+      return false; // More than maximum allowed length
     }
 
 
@@ -757,7 +801,7 @@ const Utils = {
 
 
   /********************************************************************
-  Check if All chracters in string statisfy particular regular expression
+  Check if All characters in string satisfy particular regular expression
   and string has minimum and maximum length
 
   @param {String} str - The variable to be checked
@@ -790,12 +834,12 @@ const Utils = {
 
     // Check Min Length (Only if specified)
     if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
-      return false; // Less then minimum required length
+      return false; // Less than minimum required length
     }
 
     // Check Max Length (Only if specified)
     if ( !Utils.isNullOrUndefined(max_length) && len > max_length ) {
-      return false; // More then maximum allowed length
+      return false; // More than maximum allowed length
     }
 
 
@@ -1020,7 +1064,7 @@ const Utils = {
             Utils.isNullOrUndefined( rule['values'] ) || // Null means any value
               rule['values'].includes( obj[key] ) // Matches a possible allowed value
           ) {
-            required_keys = [...required_keys, ...rule['keys']]; // Add dependeny-Keys to list of required-Keys
+            required_keys = [...required_keys, ...rule['keys']]; // Add dependency-Keys to list of required-Keys
           }
 
         });
@@ -1042,7 +1086,7 @@ const Utils = {
           )
       ) {
         errs.push( // Error found. Add Error Object to List of Errors
-          Utils.error( // Cerate Error Object
+          Utils.error( // Create Error Object
             required_config[key]['error'],
             context
           )
@@ -1052,7 +1096,7 @@ const Utils = {
     });
 
     // Return Error if any
-    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+    return errs.length ? errs : false; // If Error List has more than 0 items, then return error list. Otherwise, false.
 
   },
 
@@ -1065,7 +1109,7 @@ const Utils = {
   @param {Object[]} [validation_config] - Validation rules; each must pass or an error is added
   @param {Function} [validation_config[].func] - Function returning true if valid
   @param {String[]} validation_config[].params - Object keys passed as arguments to func
-  @param {Set} validation_config[].error - Error to push when func returns false
+  @param {Object} validation_config[].error - Error to push when func returns false
   @param {Object[]} [invalidation_config] - Invalidation rules; each may return errors directly
   @param {Function} [invalidation_config[].func] - Function returning Error[] or false
   @param {String[]} invalidation_config[].params - Object keys passed as arguments to func
@@ -1099,7 +1143,7 @@ const Utils = {
             )
         ) {
           errs.push( // Error found. Add Error Object to List of Errors
-            Utils.error( // Cerate Error Object
+            Utils.error( // Create Error Object
               validation_rule['error'],
               context
             )
@@ -1140,7 +1184,7 @@ const Utils = {
     }
 
     // Return Error if any
-    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+    return errs.length ? errs : false; // If Error List has more than 0 items, then return error list. Otherwise, false.
 
   },
 
@@ -1151,7 +1195,7 @@ const Utils = {
 
   @param {Object} obj - Object to be checked
   @param {String[]} required_keys - List of required keys
-  @param {Set} dependent_keys - List of keys which are required only if another key is present
+  @param {Object} dependent_keys - List of keys which are required only if another key is present
   @param {Function} require_check_func - Function to check required-keys
   @param {Function} invalidate_check_func - Function to check invalid-keys
 
@@ -1175,7 +1219,7 @@ const Utils = {
   /********************************************************************
   Check and return Errors in each Object in a array
 
-  @param {Set[]} objs_list - List of Partiton Items
+  @param {Object[]} objs_list - List of Partition Items
   @param {Function} new_obj_check_func - Function to check required-keys of Deep-Object
   @param {Integer} [min_length] - (Optional) Minimum Length of Objects list (Including)
   @param {Error} [min_length_error] - (Optional) Error for Minimum Length
@@ -1226,7 +1270,7 @@ const Utils = {
     }
 
     // Return Errors if any
-    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+    return errs.length ? errs : false; // If Error List has more than 0 items, then return error list. Otherwise, false.
 
   },
 
@@ -1235,7 +1279,7 @@ const Utils = {
   Check and return Errors in each Object in a array
   Automatically Check if New or Edit or No-Change in object based on 'cmd'
 
-  @param {Set[]} objs_list - List of Partiton Items
+  @param {Object[]} objs_list - List of Partition Items
   @param {Function} new_obj_check_func - Function to check New Object
   @param {Function} edit_obj_check_func - Function to check Edit Object
 
@@ -1254,7 +1298,7 @@ const Utils = {
 
       // Check error
       let obj_errs;
-      if ( objs_list[key]['command'] == 'new' ) {
+      if ( objs_list[key]['command'] === 'new' ) {
         obj_errs = new_obj_check_func( objs_list[key] );
       } else { // Edit/No-Change
         obj_errs = edit_obj_check_func( objs_list[key] );
@@ -1269,7 +1313,7 @@ const Utils = {
     }
 
     // Return Errors if any
-    return errs.length ? errs : false; // If Error List has more then 0 items, then return error list. Otherwise, false.
+    return errs.length ? errs : false; // If Error List has more than 0 items, then return error list. Otherwise, false.
 
   },
 
@@ -1388,7 +1432,7 @@ const Utils = {
 
   @param {String} csv_data - CSV Data
 
-  @return {Set[]} data - List of Objects
+  @return {Object[]} data - List of Objects
   *********************************************************************/
   convertCsvToData: function (csv_data) {
 
@@ -1429,7 +1473,7 @@ const Utils = {
   Convert Data to CSV String
   NOTE: Headers are Automatically extracted from data
 
-  @param {Set[]} records - List of Records as Objects
+  @param {Object[]} records - List of Records as Objects
 
   @return {String} csv_data - CSV Data
   *********************************************************************/
@@ -1441,7 +1485,7 @@ const Utils = {
     const values = [];
 
     // If empty array (no data)
-    if (records.length == 0) {
+    if (records.length === 0) {
       return '';
     }
 
@@ -1456,16 +1500,16 @@ const Utils = {
         return Utils.fallback(record[field], ''); // if not found, replace with empty string
       });
 
-      values.push( // Push string of row (array contain record values) values seperated by comma
-        row.join(',') // join row (array contain record values) seperated by comma
+      values.push( // Push string of row (array contain record values) values separated by comma
+        row.join(',') // join row (array contain record values) separated by comma
       );
 
     });
 
-    // Join fields array elements seperated by comma
+    // Join fields array elements separated by comma
     csv_data = fields.join(',') + '\n';
 
-    // Join values array elements seperated by new line (\n)
+    // Join values array elements separated by new line (\n)
     csv_data += values.join('\n');
 
 
@@ -1479,8 +1523,8 @@ const Utils = {
   Convert Data to CSV String
   NOTE: Headers are explicitly specified along with data
 
-  @param {Set[]} fields - Array of Column Names
-  @param {Set[]} records - List of Objects
+  @param {Object[]} fields - Array of Column Names
+  @param {Object[]} records - List of Objects
 
   @return {String} csv_data - CSV Data
   *********************************************************************/
@@ -1491,7 +1535,7 @@ const Utils = {
     const values = [];
 
     // If empty array (no data)
-    if (records.length == 0) {
+    if (records.length === 0) {
       return '';
     }
 
@@ -1504,16 +1548,16 @@ const Utils = {
         return Utils.fallback(record[field], ''); // if not found, replace with empty string
       });
 
-      values.push( // Push string of row (array contain record values) values seperated by comma
-        row.join(',') // join row (array contain record values) seperated by comma
+      values.push( // Push string of row (array contain record values) values separated by comma
+        row.join(',') // join row (array contain record values) separated by comma
       );
 
     });
 
-    // Join fields array elements seperated by comma
+    // Join fields array elements separated by comma
     csv_data = fields.join(',') + '\n';
 
-    // Join values array elements seperated by new line (\n)
+    // Join values array elements separated by new line (\n)
     csv_data += values.join('\n');
 
 
@@ -1591,7 +1635,7 @@ const _Utils = {
     let copy;
 
     // Handle the 3 simple types, and null or undefined
-    if ( null == obj || 'object' != typeof obj ) {
+    if ( obj === null || typeof obj !== 'object' ) {
       return obj;
     }
 

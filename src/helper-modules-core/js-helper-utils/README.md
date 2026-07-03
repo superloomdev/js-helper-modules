@@ -1,4 +1,4 @@
-# @superloomdev/js-helper-utils
+# helper-utils
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
@@ -11,25 +11,25 @@ A flat collection of small, pure JavaScript functions covering type checks, vali
 
 ## Why Use This Module
 
-- **Zero runtime dependencies.** Adding this module to your project adds zero packages to your dependency tree. The supply chain you audit ends at this package itself.
+- **Zero runtime dependencies.** Adding this module to a project adds zero packages to the dependency tree. The supply chain audit ends at this package itself.
 
 - **Runs everywhere.** Pure JavaScript with no platform-specific globals. The same module works under Node.js, in a browser bundle, in an edge runtime, in a Lambda, in a Cloudflare Worker.
 
-- **Pre-tested at every release.** A full test suite runs in CI on every push. Your project trusts the wrapper instead of re-verifying utility plumbing on each release.
+- **Pre-tested at every release.** A full test suite runs in CI on every push. The consuming project trusts the wrapper instead of re-verifying utility plumbing on each release.
 
 - **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom in order, use the section breaks as checkpoints to mark how far they have got, and finish without ever getting lost in dense logic. This matters most when an AI assistant is generating the change and a human still has to sign off on it. Open `utils.js` to see the structure.
 
 ## Gotchas Worth Knowing
 
-A few functions have deliberate semantics that are easy to misuse if you assume they behave like their standard-library lookalikes. Read the [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/api.md) before reaching for these.
+A few functions have deliberate semantics that are easy to misuse if a caller assumes they behave like their standard-library lookalikes. Read the [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/api.md) before reaching for these.
 
-- **`overrideObject` is not `Object.assign`.** It is a shallow merge that **skips strictly-`null` values** (a `null` override keeps the base value) but does **not** skip `undefined`, and it never deep-merges nested objects. Use it only for "layer non-null overrides onto defaults" patterns. When a caller must be able to set a key to `null` to override a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead — `overrideObject` would silently retain the default and change behaviour.
+- **`overrideObject` is not `Object.assign`.** It is a shallow merge that **skips strictly-`null` values** (a `null` override keeps the base value) but does **not** skip `undefined`, and it never deep-merges nested objects. Use it only for "layer non-null overrides onto defaults" patterns. When a caller must be able to set a key to `null` to override a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead - `overrideObject` would silently retain the default and change behavior.
 
 ## Aligned with Superloom Philosophy
 
-If your project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without you needing to learn anything new. It is the foundation that every other Superloom helper module rests on, so adopting it does not introduce inconsistency into your codebase.
+If a project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without requiring anything new. It is the foundation that every other Superloom helper module rests on, so adopting it does not introduce inconsistency into the codebase.
 
-If you are not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
+For projects not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
 
 ## Extended Documentation
 Extended documentation lives alongside the source on GitHub:
@@ -38,9 +38,9 @@ Extended documentation lives alongside the source on GitHub:
 - [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/configuration.md) - loader pattern, dependency notes, testing tier
 - [Superloom](https://superloom.dev) - the framework
 
-## Adding to Your Project
+## Integration
 
-Install this module as a peer dependency in your project's `package.json` and load it through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
+Install this module as a peer dependency in the project's `package.json` and load it through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
