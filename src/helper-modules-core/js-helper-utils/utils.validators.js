@@ -1,5 +1,6 @@
 // Info: All validators for js-helper-utils. Currently empty - Utils has no
-// config and no domain-specific assertions. Placeholder for future validators.
+// domain-specific assertions. The validateConfig no-op is wired so that
+// adding the first config key requires only filling in this file.
 //
 // Singleton: No Lib dependency - Utils IS the foundation module.
 'use strict';
@@ -12,10 +13,11 @@ Singleton loader. Returns the module-scope Validators object.
 Utils validators need no Lib injection - Utils is the foundation.
 
 @param {Object} shared_libs - Lib container (unused - interface uniformity)
+@param {Object} errors - Error catalog (unused - no domain errors yet)
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) { // eslint-disable-line no-unused-vars
+module.exports = function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
 
   // Return the Validators interface
   return Validators;
@@ -28,7 +30,12 @@ module.exports = function loader (shared_libs) { // eslint-disable-line no-unuse
 
 const Validators = {
 
-  // No validators yet - Utils has no config to validate and no
-  // domain-specific assertions. Add validators here as the module grows.
+  // No-op config validator. Utils has no config keys to validate.
+  // Replace with real checks when the first config key is added.
+  validateConfig: function (config) { // eslint-disable-line no-unused-vars
+
+    // No config keys to validate yet
+
+  }
 
 };////////////////////////////// Public Functions END ////////////////////////////

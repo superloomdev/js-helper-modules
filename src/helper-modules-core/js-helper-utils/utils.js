@@ -10,26 +10,42 @@
 'use strict';
 
 
-// Validators module (singleton, set by loader)
-let Validators; // eslint-disable-line no-unused-vars
+// Merged configuration (set once by loader from defaults + caller overrides)
+let CONFIG;
+
+// Error catalog (loaded at require time, never reassigned)
+const ERRORS = require('./utils.errors');
+
+// Validators module (singleton, initialized once by loader)
+let Validators;
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Initializes Validators and returns the module-scope
-Utils object directly. Node.js require cache guarantees a single
-instance across the process.
+Singleton loader. Initializes Validators, validates config, and returns
+the module-scope Utils object directly. Node.js require cache guarantees
+a single instance across the process.
 
 @param {Object} shared_libs - Lib container (unused - Utils is the foundation)
-@param {Object} config - Reserved for future config overrides
+@param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public Utils interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) { // eslint-disable-line no-unused-vars
+module.exports = function loader (shared_libs, config) {
 
-  // Initialize validators
-  Validators = require('./utils.validators')(shared_libs);
+  // Merge overrides over defaults
+  CONFIG = Object.assign(
+    {},
+    require('./utils.config'),
+    config || {}
+  );
+
+  // Validators singleton - ERRORS injected by the main module loader
+  Validators = require('./utils.validators')(shared_libs, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
 
   return Utils;
 
@@ -41,6 +57,9 @@ module.exports = function loader (shared_libs, config) { // eslint-disable-line 
 const Utils = {
 
   /********************************************************************
+  Copy of Util Functions from Node JS util lib
+  Link: https://github.com/isaacs/core-util-is/blob/master/lib/util.js
+
   Check if value is null
   Ported from core-util-is.
 
@@ -142,7 +161,7 @@ const Utils = {
 
   @param {Object} arg - Item to be checked
 
-  @return {Boolean} - 'true' if Object otherwise 'false'
+  @return {Boolean} - true if Object, false otherwise
   *********************************************************************/
   isObject: function (arg) {
     return typeof arg === 'object' && !Utils.isNull(arg); // (null is also an object)
@@ -154,7 +173,7 @@ const Utils = {
 
   @param {Object} arg - Item to be checked
 
-  @return {Boolean} - 'true' if type is Function otherwise 'false'
+  @return {Boolean} - true if Function, false otherwise
   *********************************************************************/
   isFunction: function (arg) {
     return typeof arg === 'function';
@@ -166,7 +185,7 @@ const Utils = {
 
   @param {Object} arg - Item to be checked
 
-  @return {Boolean} - 'true' if type of object Error otherwise 'false'
+  @return {Boolean} - true if Error, false otherwise
   *********************************************************************/
   isError: function (arg) {
     return typeof arg === 'object' && (arg instanceof Error); // This won't work if the error was thrown in a different window/frame/iframe than where the check is happening
@@ -178,7 +197,7 @@ const Utils = {
 
   @param {String} str - String to be checked
 
-  @return {Boolean} - 'true' if empty otherwise 'false'
+  @return {Boolean} - true if empty, false otherwise
   *********************************************************************/
   isEmptyString: function (str) {
     return str.length === 0;
@@ -190,7 +209,7 @@ const Utils = {
 
   @param {Object} obj - Object to be checked
 
-  @return {Boolean} - 'true' if empty otherwise 'false'
+  @return {Boolean} - true if empty, false otherwise
   *********************************************************************/
   isEmptyObject: function (obj) {
     return Object.keys(obj).length === 0;
@@ -200,9 +219,9 @@ const Utils = {
   /********************************************************************
   Whether value is null or undefined or '' or {} or []
 
-  @param {String | Integer | Object} arg - Item to be checked
+  @param {*} arg - Item to be checked
 
-  @return {Boolean} - 'true' if empty otherwise 'false'
+  @return {Boolean} - true if empty, false otherwise
   *********************************************************************/
   isEmpty: function (arg) {
     return (
@@ -214,12 +233,12 @@ const Utils = {
 
 
   /********************************************************************
-  Whether an array contains a string (return 'true' if does otherwise 'false')
+  Whether an array contains an element (return true if found, false otherwise)
 
-  @param {String | Integer | Object} arr - Error object
-  @param {String} element - Item to be searched
+  @param {Array} arr - Array to search in
+  @param {*} element - Item to be searched
 
-  @return {Boolean} - 'true' if does otherwise 'false'
+  @return {Boolean} - true if found, false otherwise
   *********************************************************************/
   inArray: function (arr, element) {
     return arr.indexOf(element) > -1;
@@ -232,10 +251,10 @@ const Utils = {
   /********************************************************************
   Custom Error
 
-  @param {String | Integer | Object} err_obj - Error object with 'code' and 'message' keys
+  @param {Object} err_obj - Error object with 'code' and 'message' keys
   @param {String} [context] - ID for Handshaking
 
-  @return - JSON Object
+  @return {Error} - Normalized Error instance
   *********************************************************************/
   error: function (err_obj, context) {
 
@@ -253,7 +272,7 @@ const Utils = {
   /********************************************************************
   Null function - For optional callback functions
 
-  @return {void} None
+  @return {undefined} - Noop function return
   *********************************************************************/
   nullFunc: function () {},
 
@@ -462,7 +481,7 @@ const Utils = {
   /********************************************************************
   Return cleaned Integer. Convert String/Decimals to a whole-number.
 
-  @param {Unknown} num - Number to be cleaned
+  @param {*} num - Number to be cleaned
 
   @return {Number} - Sanitized number. Rounded to 'Floor' in case of decimal.
   *********************************************************************/
@@ -484,7 +503,7 @@ const Utils = {
   /********************************************************************
   Return cleaned Boolean. Convert String/Number to true/false
 
-  @param {Unknown} bool - Boolean to be cleaned
+  @param {*} bool - Boolean to be cleaned
 
   @return {Boolean} - Sanitized boolean value
   *********************************************************************/
@@ -504,7 +523,7 @@ const Utils = {
 
   @param {String} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
-  @return {String} - Unix timestamp (Seconds)
+  @return {Number} - Unix timestamp (Seconds)
   *********************************************************************/
   getUnixTime: function (date) {
 
@@ -519,7 +538,7 @@ const Utils = {
 
   @param {String} [date] - (Optional) Date to be converted into unix timestamp. If not sent in param, then return current time
 
-  @return {String} - Unix timestamp (Milli-Seconds)
+  @return {Number} - Unix timestamp (Milli-Seconds)
   *********************************************************************/
   getUnixTimeInMilliSeconds: function (date) {
 
@@ -621,7 +640,7 @@ const Utils = {
   stringToArray: function (delimiter, str) {
 
     if (str.length === 0) {
-      return false; //Empty string
+      return false; // Empty string
     }
 
     let arr = str.split(delimiter);        // Split into Array
@@ -781,7 +800,7 @@ const Utils = {
 
 
     // Check Min and Max length limit
-    const len = str.length; //Store var length
+    const len = str.length; // Store var length
 
     // Check Min Length (Only if specified)
     if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
@@ -830,7 +849,7 @@ const Utils = {
 
 
     // Check Min and Max length limit
-    const len = str.length; //Store var length
+    const len = str.length; // Store var length
 
     // Check Min Length (Only if specified)
     if ( !Utils.isNullOrUndefined(min_length) && len < min_length ) {
@@ -852,7 +871,7 @@ const Utils = {
   /********************************************************************
   Check if Integer is within Minimum and maximum range (including min and max)
 
-  @param {String} num - The variable to be checked
+  @param {Number} num - The variable to be checked
   @param {Number} [min_value] - (Optional) Minimum required value
   @param {Number} [max_value] - (Optional) Maximum allowed value (including)
 
@@ -921,7 +940,7 @@ const Utils = {
   *********************************************************************/
   compareObjects: function (a, b) {
 
-    // Primitive Type Comparisions. Directly compare primitive values or references
+    // Primitive Type Comparisons. Directly compare primitive values or references
     if (a === b) {
       return true;
     }
@@ -1030,7 +1049,7 @@ const Utils = {
   @param {Object} obj - Object to be checked
   @param {String} [context] - (Optional) Request context
   @param {Object} required_config - Map of key names to their validation rules
-  @param {Set} required_config[key].error - Custom-Error Object to push when key is missing
+  @param {Object} required_config[key].error - Custom-Error Object to push when key is missing
   @param {Boolean} [required_config[key].not_null] - (Optional) If true, null values are also rejected
   @param {String|Object[]} required_keys - Keys to check. Strings are always required; Objects are conditionally required
   @param {Object} [dependent_keys] - Keys that become required when another key has a specific value
@@ -1324,7 +1343,7 @@ const Utils = {
   /********************************************************************
   Check if a node module is available
 
-  @param {string} module_name - Request Instance object reference
+  @param {String} module_name - Name of the module to check
 
   @return {Boolean} - True if module is available. False if not available
   *********************************************************************/
