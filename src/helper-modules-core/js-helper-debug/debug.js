@@ -4,8 +4,8 @@
 // Compatibility: Node.js 24+.
 //
 // Factory pattern: each loader call returns an independent Debug interface
-// with its own config. shared_libs is accepted for interface uniformity but
-// unused - Debug has no external lib dependencies.
+// with its own Lib, CONFIG, ERRORS, and Validators. shared_libs is accepted
+// for interface uniformity but unused - Debug has no external lib dependencies.
 'use strict';
 
 
@@ -14,14 +14,20 @@
 
 /********************************************************************
 Factory loader. One call = one independent instance with its own
-config. shared_libs is accepted for interface uniformity but unused.
+config, ERRORS, and Validators. shared_libs is accepted for interface
+uniformity - Lib is built but not consumed by Debug functions.
 
-@param {Object} shared_libs - Lib container (unused)
+@param {Object} shared_libs - Lib container (accepted for uniformity, unused)
 @param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public interface for this module
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance
+  const Lib = {
+    Utils: shared_libs.Utils
+  };
 
   // Merge overrides over defaults
   const CONFIG = Object.assign(
@@ -30,8 +36,17 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
+  // Error catalog (frozen, shared across instances)
+  const ERRORS = require('./debug.errors');
+
+  // Validators module (singleton, initialized with Lib, ERRORS)
+  const Validators = require('./debug.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
+
   // Create and return the public interface
-  return createInterface(CONFIG);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ////////////////////////////////
 
@@ -41,13 +56,16 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public functions close
-over the provided CONFIG.
+over the provided Lib, CONFIG, ERRORS, and Validators.
 
+@param {Object} Lib - Dependency container (unused - foundation module)
 @param {Object} CONFIG - Merged configuration for this instance
+@param {Object} ERRORS - Frozen error catalog for this module
+@param {Object} Validators - Validators module instance
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (CONFIG) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ///////////////////////////Public Functions START//////////////////////////////
   const Debug = { // Public functions accessible by other modules
