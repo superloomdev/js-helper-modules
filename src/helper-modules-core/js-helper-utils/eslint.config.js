@@ -21,7 +21,7 @@ module.exports = [
       '**/*.cjs'
     ],
     languageOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 2022,
       sourceType: 'commonjs',
       globals: {
         console: 'readonly',
@@ -34,11 +34,7 @@ module.exports = [
         require: 'readonly',
         exports: 'readonly',
         structuredClone: 'readonly',
-        URL: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly'
+        URL: 'readonly'
       }
     },
     rules: {
@@ -75,10 +71,10 @@ module.exports = [
       'comma-spacing': ['error', { 'before': false, 'after': true }], // Space after comma, none before
       'curly': ['error', 'all'],                                        // All if/else/for/while must use braces
       'brace-style': ['error', '1tbs', { allowSingleLine: false }],    // Block body must be on its own line (no single-line blocks)
-      'no-unused-vars': ['error', { 'args': 'after-used', 'argsIgnorePattern': '^_', 'caughtErrorsIgnorePattern': '^_' }],  // Allow unused params before last used; underscore-prefix also ignored
+      'no-unused-vars': ['error', { 'args': 'after-used' }],          // Flag unused vars; no underscore escape - parity params use eslint-disable-line, unused catch uses catch {}
 
       // Modern JS preferences (let/const over var)
-      'no-var': 'error',                                                // Disallow `var` — use let/const instead
+      'no-var': 'error',                                                // Disallow `var` - use let/const instead
       'prefer-const': ['error', { 'destructuring': 'any' }]             // Use const when variable is never reassigned
     }
   }

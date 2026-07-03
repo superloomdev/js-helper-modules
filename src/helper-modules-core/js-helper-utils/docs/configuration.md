@@ -1,4 +1,4 @@
-# Configuration. `js-helper-utils`
+# Configuration. `helper-utils`
 
 Loader pattern, dependency notes, and testing tier. For the function reference see [API Reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/api.md).
 
@@ -20,12 +20,12 @@ This page is intentionally short. Foundation utility modules accept no config ke
 The module is a singleton. The loader initializes Validators and returns the module-scope Utils object. Node.js require cache guarantees the same reference is returned on every subsequent require.
 
 ```javascript
-Lib.Utils = require('@superloomdev/js-helper-utils')(Lib, {});
+Lib.Utils = require('helper-utils')(Lib, {});
 ```
 
 Loader call semantics:
 
-- **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Foundation utility does not read it. Pass whatever your project uses (commonly `Lib`, `null`, or `{}`).
+- **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Foundation utility does not read it. Pass whatever the project uses (commonly `Lib`, `null`, or `{}`).
 - **Second argument: config.** Accepted for interface uniformity. There are no configuration keys. Pass `{}`.
 - **Multiple loader calls return the same singleton reference.** Node.js require cache guarantees identity. The loader is idempotent.
 
@@ -47,7 +47,7 @@ None. The module never reads `process.env`.
 
 ## Peer Dependencies
 
-None. Foundation modules cannot have peer dependencies. They ARE the foundation. Every other Superloom helper may consume `js-helper-utils`; this module imports nothing.
+None. Foundation modules cannot have peer dependencies. They ARE the foundation. Every other Superloom helper may consume `helper-utils`; this module imports nothing.
 
 The wider rationale (foundation invariants, the "no upward import" rule) is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md).
 
@@ -55,7 +55,7 @@ The wider rationale (foundation invariants, the "no upward import" rule) is docu
 
 ## Direct Dependencies
 
-None. The module's `package.json` declares no `dependencies`. The supply chain you audit ends at this package.
+None. The module's `package.json` declares no `dependencies`. The supply chain audit ends at this package.
 
 ---
 

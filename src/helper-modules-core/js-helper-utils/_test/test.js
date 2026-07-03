@@ -741,25 +741,25 @@ describe('sanitizeBoolean', function () {
 // 5. ARRAY OPERATIONS
 // ============================================================================
 
-describe('arrayDistint', function () {
+describe('arrayDistinct', function () {
 
   it('should remove duplicates from [1,2,2,3,3,3,a,a]', function () {
     assert.deepStrictEqual(
-      Utils.arrayDistint([1, 2, 2, 3, 3, 3, 'a', 'a']),
+      Utils.arrayDistinct([1, 2, 2, 3, 3, 3, 'a', 'a']),
       [1, 2, 3, 'a']
     );
   });
 
   it('should return empty array when given empty array', function () {
-    assert.deepStrictEqual(Utils.arrayDistint([]), []);
+    assert.deepStrictEqual(Utils.arrayDistinct([]), []);
   });
 
   it('should return non-array value as-is when given string', function () {
-    assert.strictEqual(Utils.arrayDistint('bad input'), 'bad input');
+    assert.strictEqual(Utils.arrayDistinct('bad input'), 'bad input');
   });
 
   it('should return null as-is when given null', function () {
-    assert.strictEqual(Utils.arrayDistint(null), null);
+    assert.strictEqual(Utils.arrayDistinct(null), null);
   });
 
 });
@@ -1503,6 +1503,6 @@ describe('loader', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// Config absorption contract: exempt — the loader signature accepts (shared_libs, config)
+// Config absorption contract: exempt - the loader signature accepts (shared_libs, config)
 // for interface uniformity but config is unused. No public function reads CONFIG.
 // Nothing to assert.

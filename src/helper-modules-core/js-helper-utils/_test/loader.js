@@ -1,13 +1,13 @@
 // Info: Test loader for js-helper-utils
 // Mirrors the main project loader pattern: loads dependencies from environment
-// process.env is ONLY read here — nowhere else in test code
+// process.env is ONLY read here - nowhere else in test code
 'use strict';
 
 
 /********************************************************************
 Load all test dependencies and build the Lib container from environment.
 
-process.env is ONLY read here — never in test.js.
+process.env is ONLY read here - never in test.js.
 
 @return {Object} result - Runtime objects for testing
 @return {Object} result.Lib - Dependency container (Utils)
@@ -17,7 +17,7 @@ module.exports = function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
-  // Test-wide environment config — this module has no env-dependent values
+  // Test-wide environment config - this module has no env-dependent values
   const Config = {};
 
 
@@ -28,7 +28,7 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  // Utils — singleton loader, no dependencies
+  // Utils - singleton loader, no dependencies
   Lib.Utils = require('helper-utils')(Lib, {});
 
 

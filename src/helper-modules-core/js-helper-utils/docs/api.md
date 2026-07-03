@@ -1,4 +1,4 @@
-# API Reference. `js-helper-utils`
+# API Reference. `helper-utils`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/configuration.md).
 
@@ -19,7 +19,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free, and platform-agnostic**. There is no async function, no `instance` argument, no `success / data / error` envelope. Each function returns the type its name implies.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Type checks** (`isString`, `isNumber`, `isObject`, etc.) | Return `Boolean`. Never throw |
 | **Sanitizers** (`sanitizeObject`, `sanitizeInteger`) | Return a cleaned value. Return `null` (or the input unchanged) when the input is unsupported |
@@ -66,7 +66,7 @@ Returns a deep copy. Internally uses `structuredClone` when available, falls bac
 
 ### `compareObjects(a, b)`
 
-Deep equality. `true` when every key, every nested value, every array index matches. Behaviour mirrors Node's `assert.deepStrictEqual` but as a `Boolean`-returning function.
+Deep equality. `true` when every key, every nested value, every array index matches. Behavior mirrors Node's `assert.deepStrictEqual` but as a `Boolean`-returning function.
 
 ### `sanitizeObject(obj, whitelist, blacklist)`
 
@@ -79,19 +79,19 @@ const safe_user = Utils.sanitizeObject(user, null, ['password', 'pin']);
 
 ### `overrideObject(base_obj, ...new_objs)`
 
-Shallow merge with **null-skipping** semantics: a later object's value overwrites an earlier key **only when that value is not strictly `null`**. A strictly-`null` value (`=== null`) on an existing key is skipped and the base value is retained — so `overrideObject({a:1}, {a:null})` returns `{a:1}`, not `{a:null}`.
+Shallow merge with **null-skipping** semantics: a later object's value overwrites an earlier key **only when that value is not strictly `null`**. A strictly-`null` value (`=== null`) on an existing key is skipped and the base value is retained - so `overrideObject({a:1}, {a:null})` returns `{a:1}`, not `{a:null}`.
 
-Important behaviours that decide whether this function fits your use case:
+Important behaviors that decide whether this function fits a given use case:
 
 - **`null` is skipped; `undefined` is NOT.** The skip check is strict `=== null`. An `undefined` value still overwrites (the key is set to `undefined`). Do not rely on this function to ignore `undefined`.
-- **Shallow only.** Nested objects are replaced wholesale, never deep-merged. `overrideObject({jwt:{a:1,b:2}}, {jwt:{a:9}})` returns `{jwt:{a:9}}` — `b` is lost.
+- **Shallow only.** Nested objects are replaced wholesale, never deep-merged. `overrideObject({jwt:{a:1,b:2}}, {jwt:{a:9}})` returns `{jwt:{a:9}}` - `b` is lost.
 - **Keys absent from the base are still added** (the skip rule applies only to keys already present in the base).
 
 **Use it for:** layering partial, non-null overrides onto a defaults object where "absent or null means keep the default" is the desired rule.
 
 **Do NOT use it (use `Object.assign` instead) when:**
-- A caller must be able to set a key to `null` explicitly to override a non-null default (e.g. config merging where `{ JWT: null }` should clear the default `JWT` object). `overrideObject` would silently keep the default and change behaviour.
-- You are patch-merging and want the plain, predictable "last write wins, including null/undefined" semantics of `Object.assign`.
+- A caller must be able to set a key to `null` explicitly to override a non-null default (e.g. config merging where `{ JWT: null }` should clear the default `JWT` object). `overrideObject` would silently keep the default and change behavior.
+- The caller is patch-merging and wants the plain, predictable "last write wins, including null/undefined" semantics of `Object.assign`.
 
 `overrideObject` is **not** a drop-in replacement for `Object.assign`; they differ on null handling.
 
@@ -107,7 +107,7 @@ Returns `new_val` if non-empty, otherwise `fallback_val`. Equivalent to "use thi
 
 Returns a new array where each item has been passed through `sanitize_func`. Returns `null` if `list` is null, undefined, or not an array.
 
-### `arrayDistint(arr)`
+### `arrayDistinct(arr)`
 
 De-duplicates. Returns the input unchanged if it is not an array.
 
@@ -212,7 +212,7 @@ Useful in routing layers and link-rendering helpers. `disjoinUrl` uses the built
 |---|---|---|
 | `convertCsvToData` | `convertCsvToData(csv_data)` | Parse CSV string. Returns an array of plain objects keyed by the header row |
 | `convertDataToCsv` | `convertDataToCsv(records)` | Inverse: array of objects to CSV string. Header row is derived from the first record's keys |
-| `convertDataToCsv2` | `convertDataToCsv2(fields, records)` | Same as `convertDataToCsv` but with an explicit field list. Use when records may have varying keys or when you want a stable column order |
+| `convertDataToCsv2` | `convertDataToCsv2(fields, records)` | Same as `convertDataToCsv` but with an explicit field list. Use when records may have varying keys or when a stable column order is needed |
 
 ### Errors
 
@@ -231,7 +231,7 @@ Does **not** throw. The caller decides whether to throw the returned object or a
 
 #### `nullFunc()`
 
-A no-op. Useful where an API requires a function but no behaviour is desired (`callback || Utils.nullFunc`).
+A no-op. Useful where an API requires a function but no behavior is desired (`callback || Utils.nullFunc`).
 
 ### Module Management
 
