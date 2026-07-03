@@ -29,7 +29,7 @@ The module is the contract between a request entry-point (Express middleware, La
 
 - **Performance audit reference.** `instance.time_ms` is the unix-millisecond timestamp at the start of the request. Pass it to [`Lib.Debug.performanceAuditLog`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/api.md#performanceauditlogaction-routine-reference_time) on every external service boundary, and the resulting log lines reconstruct the full request timeline; not just the duration of the function that emitted the line.
 
-The lifecycle is summarised in the diagram below; full mechanics with worked Express and Lambda examples are in [`docs/api.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/api.md).
+The lifecycle is summarized in the diagram below; full mechanics with worked Express and Lambda examples are in [`docs/api.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/api.md).
 
 ```text
    initialize()
@@ -55,7 +55,7 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/api.md) - every exported function with its signature, parameters, return shape, and worked Express + Lambda examples
 - [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/configuration.md) - loader pattern, instance object shape, dependency notes, testing tier
-- [`js-helper-debug` performance auditing](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/api.md#performance-auditing) - the canonical use of `instance.time_ms`
+- [`helper-debug` performance auditing](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/api.md#performance-auditing) - the canonical use of `instance.time_ms`
 - [Superloom](https://superloom.dev) - the framework
 
 ## Adding to Your Project

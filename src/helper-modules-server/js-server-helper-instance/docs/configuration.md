@@ -1,4 +1,4 @@
-# Configuration. `js-server-helper-instance`
+# Configuration. `helper-instance`
 
 Loader pattern, dependency notes, and testing tier. For the function reference see [API Reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/api.md).
 
@@ -17,16 +17,16 @@ This page is intentionally short. Instance has no current configuration keys and
 
 ## Loader Pattern
 
-The module is a factory. Each loader call returns an independent public interface with its own `Lib` and `CONFIG` captured in a closure. Per-request state lives on the instance object returned by `initialize()`, not inside the loaded interface.
+The module is a factory. Each loader call returns an independent public interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators` captured in a closure. Per-request state lives on the instance object returned by `initialize()`, not inside the loaded interface.
 
 ```javascript
-Lib.Instance = require('@superloomdev/js-server-helper-instance')(Lib, {});
+Lib.Instance = require('helper-instance')(Lib, {});
 ```
 
 Loader call semantics:
 
 - **First argument: `Lib`.** A container exposing peer modules. Instance reads `Lib.Utils.getUnixTime` and `Lib.Utils.getUnixTimeInMilliSeconds` to capture timestamps in `initialize`.
-- **Second argument: config overrides.** Reserved. Pass `{}` today; future config (currently noted as `MODE: 'lambda' | 'express'`) will be merged here.
+- **Second argument: config overrides.** Merged on top of the built-in defaults from `instance.config.js`. The merged config is validated by `Validators.validateConfig` at startup (currently a no-op). No function reads it at runtime. Pass `{}`.
 - **Multiple loader calls return independent interfaces.** Functions are stateless, so two interfaces are functionally identical. Loading the module multiple times is harmless but wasteful.
 
 > **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. The uniformity is the point.
@@ -35,11 +35,7 @@ Loader call semantics:
 
 ## Configuration Keys
 
-None at this time.
-
-| Key | Type | Default | Description |
-|---|---|---|---|
-| (none) | - | - | Reserved for future use. A planned `MODE: 'lambda' \| 'express'` would let the module specialise lifecycle behaviour per runtime; the current implementation works the same way in both |
+None. The module has no configuration keys. The loader accepts a config argument for interface uniformity with other Superloom modules but no function reads it at runtime.
 
 ---
 
@@ -53,8 +49,8 @@ None. The module never reads `process.env`.
 
 | Peer | Why |
 |---|---|
-| `@superloomdev/js-helper-utils` | Used by `initialize` for `getUnixTime` and `getUnixTimeInMilliSeconds`, and by `getAge` for `getUnixTimeInMilliSeconds` |
-| `@superloomdev/js-helper-debug` | Declared in `package.json` for cross-module consistency. Not currently consumed at runtime; reserved for future audit-logging hooks |
+| `helper-utils` | Used by `initialize` for `getUnixTime` and `getUnixTimeInMilliSeconds`, and by `getAge` for `getUnixTimeInMilliSeconds` |
+| `helper-debug` | Declared in `package.json` for cross-module consistency. Not currently consumed at runtime |
 
 The peers are consumed through the standard `Lib` injection in the loader's first argument. The module does not `require()` either peer directly.
 
@@ -74,7 +70,7 @@ The module ships a single test tier:
 |---|---|---|---|
 | **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-There is no Docker container and no service emulator. Tests exercise the lifecycle ordering (initialise → register cleanup → register background → complete background → cleanup runs) directly against the module's public interface.
+There is no Docker container and no service emulator. Tests exercise the lifecycle ordering (initialize -> register cleanup -> register background -> complete background -> cleanup runs) directly against the module's public interface.
 
 ```bash
 cd _test && npm install && npm test
