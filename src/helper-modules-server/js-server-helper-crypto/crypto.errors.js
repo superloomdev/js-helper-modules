@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Error catalog for js-server-helper-crypto.
+ * Error catalog for helper-crypto.
  * This module has no operational errors - programmer errors throw TypeError.
  * Empty frozen object provided for consistency across all server modules.
  * Frozen to prevent accidental mutation.

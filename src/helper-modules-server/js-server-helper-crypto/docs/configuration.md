@@ -1,4 +1,4 @@
-# Configuration. `js-server-helper-crypto`
+# Configuration. `helper-crypto`
 
 Loader pattern, configuration keys, dependency notes, and testing tier. For the function reference see [API Reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-crypto/docs/api.md).
 
@@ -15,10 +15,10 @@ Loader pattern, configuration keys, dependency notes, and testing tier. For the 
 
 ## Loader Pattern
 
-The module is a factory. Each loader call returns an independent public interface with its own merged configuration captured in a closure.
+The module is a factory. Each loader call returns an independent public interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators` captured in a closure.
 
 ```javascript
-Lib.Crypto = require('@superloomdev/js-server-helper-crypto')(Lib, {});
+Lib.Crypto = require('helper-crypto')(Lib, {});
 ```
 
 Loader call semantics:
@@ -33,13 +33,11 @@ Loader call semantics:
 
 ## Configuration Keys
 
-Three keys, used internally by the base-conversion helpers. Override only when you need a custom display alphabet.
+One key, used internally by the base-conversion helpers. Override only when you need a custom display alphabet.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `BASE36_CHARSET` | `string` | `'0123456789abcdefghijklmnopqrstuvwxyz'` | Alphabet used by `generateCompactUUID` and the random-padding inside `generateTimeRandomString`. Must be exactly 36 unique characters in ascending base-36 order if you replace it |
-| `HEX_CHARSET` | `string` | `'0123456789abcdef'` | Reserved. Hex alphabet used by future helpers |
-| `INT_CHARSET` | `string` | `'0123456789'` | Reserved. Decimal alphabet used by future helpers |
 
 > **When to override `BASE36_CHARSET`.** Only when the application needs a custom display alphabet (for example, to avoid visually-confusable characters in a public-facing identifier). The default is the canonical base-36 alphabet.
 
@@ -55,7 +53,7 @@ None. The module never reads `process.env`. All configuration flows through the 
 
 | Peer | Why |
 |---|---|
-| `@superloomdev/js-helper-utils` | Used for input validation (`isEmpty`, `isNullOrUndefined`) |
+| `helper-utils` | Used for input validation (`isEmpty`, `isNullOrUndefined`) |
 
 The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not `require()` the peer directly.
 
@@ -65,7 +63,7 @@ The peer is consumed through the standard `Lib.Utils` injection in the loader's 
 
 | Dependency | Why |
 |---|---|
-| Node.js built-in `crypto` | All cryptographic primitives. Loaded once at module initialisation via `require('crypto')`. Not a third-party package; ships with the runtime |
+| Node.js built-in `crypto` | All cryptographic primitives. Loaded once at module initialization via `require('crypto')`. Not a third-party package; ships with the runtime |
 
 The module's `package.json` declares no `dependencies`. The supply chain you audit ends at this package, its single peer, and the Node runtime itself.
 
@@ -79,7 +77,7 @@ The module ships a single test tier:
 |---|---|---|---|
 | **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Tests verify both the deterministic behaviour (AES round-trip, hash output length, base-conversion identity) and the random-output shape (length, character set membership) using Node's built-in `crypto` for the secure paths.
+Tests verify both the deterministic behavior (AES round-trip, hash output length, base-conversion identity) and the random-output shape (length, character set membership) using Node's built-in `crypto` for the secure paths.
 
 ```bash
 cd _test && npm install && npm test

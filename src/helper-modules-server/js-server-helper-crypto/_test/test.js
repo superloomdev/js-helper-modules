@@ -1,4 +1,4 @@
-// Tests for js-server-helper-crypto
+// Tests for helper-crypto
 // Covers all exported functions with automated assertions
 'use strict';
 
@@ -449,12 +449,65 @@ describe('urlDecodeBase64', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// config absorption contract: exempt — the loader accepts a config argument
-// and merges it via Object.assign, but CONFIG is unused in createInterface
-// (eslint-disable-line no-unused-vars). The charset keys (BASE36_CHARSET,
-// HEX_CHARSET, INT_CHARSET) are defined as reference data but no public
-// function reads CONFIG — callers supply charsets as direct arguments.
-// Nothing to assert.
+// config absorption contract: active - BASE36_CHARSET is read by
+// generateTimeRandomString (padding) and hexToBase36 (private). Override
+// changes the output alphabet. HEX_CHARSET and INT_CHARSET were removed
+// as dead config (never read by any function).
+
+
+
+describe('config absorption: BASE36_CHARSET override', function () {
+
+  it('should use custom charset when overridden via loader config', function () {
+
+    // Load a second Crypto instance with a custom BASE36_CHARSET
+    const custom_charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const CustomCrypto = require('helper-crypto')(Lib, { BASE36_CHARSET: custom_charset });
+
+    // generateTimeRandomString: time prefix uses native toString(36) (lowercase),
+    // padding uses CONFIG.BASE36_CHARSET. With min_length=20 the padding portion
+    // is long enough to verify the custom charset is applied.
+    const time_prefix = CustomCrypto.intToBase36(1600000000);
+    const result = CustomCrypto.generateTimeRandomString(1600000000, 20);
+
+    assert.ok(result.length >= 20);
+
+    // Only check the padding portion (after the time prefix)
+    const padding = result.slice(time_prefix.length);
+    assert.ok(padding.length > 0, 'Should have padding characters');
+
+    for (let i = 0; i < padding.length; i++) {
+      assert.ok(
+        custom_charset.includes(padding[i]),
+        `Padding character '${padding[i]}' should be in custom charset`
+      );
+    }
+
+  });
+
+
+  it('should produce different output with custom charset vs default', function () {
+
+    const custom_charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const CustomCrypto = require('helper-crypto')(Lib, { BASE36_CHARSET: custom_charset });
+
+    const default_result = Crypto.generateCompactUUID();
+    const custom_result = CustomCrypto.generateCompactUUID();
+
+    // Both should be 25 chars
+    assert.strictEqual(default_result.length, 25);
+    assert.strictEqual(custom_result.length, 25);
+
+    // Default uses lowercase, custom uses uppercase - they should differ
+    const default_regex = /^[0-9a-z]+$/;
+    const custom_regex = /^[A-Z0-9]+$/;
+
+    assert.ok(default_regex.test(default_result), 'Default should use lowercase base36');
+    assert.ok(custom_regex.test(custom_result), 'Custom should use uppercase charset');
+
+  });
+
+});
 
 
 

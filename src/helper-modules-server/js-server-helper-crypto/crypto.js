@@ -4,7 +4,8 @@
 // Compatibility: Node.js 24+.
 //
 // Factory pattern: each loader call returns an independent Crypto interface
-// with its own Lib and CONFIG. Stateless - no per-instance resources.
+// with its own Lib, CONFIG, ERRORS, and Validators. Stateless - no per-instance
+// resources.
 'use strict';
 
 // Node.js built-in crypto module (stateless, shared across instances)
@@ -16,7 +17,7 @@ const NodeCrypto = require('crypto');
 
 /********************************************************************
 Factory loader. One call = one independent instance with its own
-Lib and CONFIG.
+Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} shared_libs - Lib container with Utils
 @param {Object} config - Overrides merged over module config defaults
@@ -37,11 +38,17 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Internal error catalog
+  // Error catalog (frozen, shared across instances)
   const ERRORS = require('./crypto.errors');
 
+  // Validators module (singleton, initialized with Lib, ERRORS)
+  const Validators = require('./crypto.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
+
   // Create and return the public interface
-  return createInterface(Lib, CONFIG, ERRORS);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -51,17 +58,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public and private
-functions close over the provided Lib, CONFIG, and ERRORS.
+functions close over the provided Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} Lib - Dependency container (Utils)
 @param {Object} CONFIG - Merged configuration for this instance
 @param {Object} ERRORS - Error catalog for this module (currently empty -
                          module has no operational errors, only programmer
                          TypeError; kept for cross-module consistency)
+@param {Object} Validators - Validators module instance
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line no-unused-vars
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ///////////////////////////Public Functions START//////////////////////////////
   const Crypto = {
@@ -208,7 +216,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Derive key and IV from secret
       const secret_hash_buffer = NodeCrypto.createHash('md5').update(secret).digest();
-      const key = secret_hash_buffer.slice(0, 16);
+      const key = secret_hash_buffer.subarray(0, 16);
       const iv = NodeCrypto.createHash('md5').update(key).update(secret).digest();
 
       // Encrypt
@@ -231,7 +239,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Derive key and IV from secret (same as encrypt)
       const secret_hash_buffer = NodeCrypto.createHash('md5').update(secret).digest();
-      const key = secret_hash_buffer.slice(0, 16);
+      const key = secret_hash_buffer.subarray(0, 16);
       const iv = NodeCrypto.createHash('md5').update(key).update(secret).digest();
 
       // Decrypt
