@@ -1,4 +1,4 @@
-# js-server-helper-instance
+# helper-instance
 
 Request lifecycle manager. Creates per-request state, tracks background routines, runs cleanup.
 
@@ -6,7 +6,7 @@ Request lifecycle manager. Creates per-request state, tracks background routines
 Server helper. Offline (no external services needed).
 
 ## Peer Dependencies
-- `@superloomdev/js-helper-utils` - injected as `Lib.Utils`
+- `helper-utils` - injected as `Lib.Utils`
 
 ## Direct Dependencies
 None.
@@ -14,13 +14,14 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Instance = require('@superloomdev/js-server-helper-instance')(Lib, { /* config overrides */ });
+Lib.Instance = require('helper-instance')(Lib, { /* config overrides */ });
 ```
 
-Each loader call returns an independent Instance interface with its own `Lib` and `CONFIG`. Stateless - the per-request instance object returned by `initialize()` is held by the caller, never inside this module.
+Each loader call returns an independent Instance interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators`. Stateless - the per-request instance object returned by `initialize()` is held by the caller, never inside this module.
+Companion files: `instance.config.js` (empty), `instance.errors.js` (empty frozen catalog), `instance.validators.js` (no-op `validateConfig`).
 
 ## Config Keys
-None currently. Future: MODE ('lambda' | 'express').
+None. The loader accepts a config argument for interface uniformity but no function reads it at runtime.
 
 ## Exported Functions
 

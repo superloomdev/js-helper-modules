@@ -1,10 +1,10 @@
-// Info: Configuration file for js-server-helper-instance
+// Info: Configuration file for helper-instance
 'use strict';
 
 
 module.exports = {
 
-  // No configuration required at this time
-  // Future: MODE ('lambda' | 'express') to control cleanup and entry point behavior
+  // No config keys - Instance is a lifecycle module with no runtime config.
+  // This file exists for structural uniformity with other Superloom modules.
 
 };

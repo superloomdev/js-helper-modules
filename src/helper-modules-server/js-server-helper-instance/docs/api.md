@@ -1,4 +1,4 @@
-# API Reference. `js-server-helper-instance`
+# API Reference. `helper-instance`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/configuration.md).
 
@@ -18,7 +18,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free with respect to module state, and never throws**. The only mutable state is on the `instance` object, which is owned by the caller. The module itself holds nothing between calls.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Instance is owned by the caller.** | The object returned by `initialize()` is a plain JavaScript object. Pass it through your call chain by reference. The module has no internal map of "active instances" |
 | **Cleanup is opt-in.** | An instance with no registered cleanup routines is fine. `cleanup(instance)` then becomes a cheap no-op |
@@ -36,7 +36,7 @@ Every function in this module is **synchronous, side-effect-free with respect to
 |---|---|---|
 | `time` | `number` | Unix time (seconds) at which `initialize()` was called. Treat as read-only |
 | `time_ms` | `number` | Unix time (milliseconds) at which `initialize()` was called. Pass to `performanceAuditLog` for request-level timing. Treat as read-only |
-| `logger_counter` | `number` | Reserved for use by `js-server-helper-logger`. Initialised to 0 |
+| `logger_counter` | `number` | Reserved for use by `helper-logger`. Initialized to 0 |
 | `background_queue` | `number` | Count of in-flight background routines. Managed by `backgroundRoutine` and its returned completion callback. **Do not mutate directly** |
 | `cleanup_queue` | `Array<Function>` | Registered cleanup callbacks. Managed by `addCleanupRoutine` and `cleanup`. **Do not mutate directly** |
 
@@ -75,7 +75,7 @@ Drains `instance.cleanup_queue` if (and only if) `instance.background_queue` is 
 |---|---|---|---|
 | `instance` | `object` | Yes | The request's instance object |
 
-Behaviour matrix:
+Behavior matrix:
 
 | `background_queue` | `cleanup_queue` | Effect |
 |---|---|---|
@@ -83,7 +83,7 @@ Behaviour matrix:
 | 0 | empty | No-op |
 | > 0 | any | No-op. The last `done()` call from the in-flight background routines will trigger `cleanup` automatically |
 
-> **Why not error when called too early.** The asymmetric "no-op when not ready" behaviour is intentional. It lets the request entry-point unconditionally call `cleanup()` at the natural end of the request flow, regardless of how many background routines are still running. The module sorts out the ordering.
+> **Why not error when called too early.** The asymmetric "no-op when not ready" behavior is intentional. It lets the request entry-point unconditionally call `cleanup()` at the natural end of the request flow, regardless of how many background routines are still running. The module sorts out the ordering.
 
 ---
 

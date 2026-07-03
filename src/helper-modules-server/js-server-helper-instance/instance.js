@@ -2,8 +2,8 @@
 // Server-only: manages per-request state for Lambda and Express deployments.
 //
 // Factory pattern: each loader call returns an independent Instance interface
-// with its own Lib and CONFIG. Stateless - the per-request instance object is
-// returned to callers and never held inside this module.
+// with its own Lib, CONFIG, ERRORS, and Validators. Stateless - the per-request
+// instance object is returned to callers and never held inside this module.
 'use strict';
 
 
@@ -12,7 +12,7 @@
 
 /********************************************************************
 Factory loader. One call = one independent instance with its own
-Lib and CONFIG.
+Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} shared_libs - Lib container with Utils
 @param {Object} config - Overrides merged over module config defaults
@@ -33,11 +33,17 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Internal error catalog
+  // Error catalog (frozen, shared across instances)
   const ERRORS = require('./instance.errors');
 
+  // Validators module (singleton, initialized with Lib, ERRORS)
+  const Validators = require('./instance.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
+
   // Create and return the public interface
-  return createInterface(Lib, CONFIG, ERRORS);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -47,17 +53,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public and private
-functions close over the provided Lib, CONFIG, and ERRORS.
+functions close over the provided Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} Lib - Dependency container (Utils)
 @param {Object} CONFIG - Merged configuration for this instance
 @param {Object} ERRORS - Error catalog for this module (currently empty -
                          module has no operational errors, only programmer
                          TypeError; kept for cross-module consistency)
+@param {Object} Validators - Validators module instance
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line no-unused-vars
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ///////////////////////////Public Functions START//////////////////////////////
   const Instance = {
@@ -105,6 +112,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     *********************************************************************/
     addCleanupRoutine: function (instance, cleanup_function) {
 
+      // Append the cleanup function to the instance's queue
       instance['cleanup_queue'].push(cleanup_function);
 
     },
@@ -171,6 +179,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     *********************************************************************/
     getBackgroundQueueCount: function (instance) {
 
+      // Return the current background queue count
       return instance['background_queue'];
 
     },
@@ -185,6 +194,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     *********************************************************************/
     getCleanupQueueCount: function (instance) {
 
+      // Return the number of registered cleanup routines
       return instance['cleanup_queue'].length;
 
     },
@@ -199,6 +209,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     *********************************************************************/
     getAge: function (instance) {
 
+      // Calculate elapsed milliseconds since instance initialization
       return Lib.Utils.getUnixTimeInMilliSeconds() - instance['time_ms'];
 
     }

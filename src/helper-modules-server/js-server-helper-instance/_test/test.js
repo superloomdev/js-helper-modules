@@ -1,4 +1,4 @@
-// Info: Test Cases for js-server-helper-instance
+// Info: Test Cases for helper-instance
 // Config comes from environment variables via loader.js
 'use strict';
 
@@ -243,11 +243,11 @@ describe('backgroundRoutine', function () {
     const done1 = Instance.backgroundRoutine(instance);
     const done2 = Instance.backgroundRoutine(instance);
 
-    // Complete first — cleanup should NOT run yet
+    // Complete first - cleanup should NOT run yet
     done1();
     assert.strictEqual(cleanup_called, false);
 
-    // Complete last — cleanup SHOULD run
+    // Complete last - cleanup SHOULD run
     done2();
     assert.strictEqual(cleanup_called, true);
 
@@ -341,6 +341,6 @@ describe('getAge', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// config absorption contract: exempt — instance.config.js is intentionally
+// config absorption contract: exempt - instance.config.js is intentionally
 // empty (no keys defined). CONFIG is accepted by the loader for future use
 // but is currently unused in createInterface. Nothing to assert.

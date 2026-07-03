@@ -1,6 +1,6 @@
-// Info: Test loader for js-server-helper-instance
+// Info: Test loader for helper-instance
 // Mirrors the main project loader pattern: loads dependencies from environment
-// process.env is ONLY read here — nowhere else in test code
+// process.env is ONLY read here - nowhere else in test code
 'use strict';
 
 
