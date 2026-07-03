@@ -18,6 +18,7 @@ Lib.Time = require('helper-time')(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent `Time` interface with its own `Lib` captured in closure. Functions are pure - no shared module-level state.
+Companion files: `time.config.js` (empty), `time.errors.js` (empty frozen catalog), `time.validators.js` (no-op `validateConfig`).
 
 ## Config Keys
 
