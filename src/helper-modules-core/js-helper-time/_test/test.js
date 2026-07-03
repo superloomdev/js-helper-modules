@@ -1,4 +1,4 @@
-// Tests for js-helper-time
+// Tests for helper-time
 // Covers all exported functions with automated assertions
 'use strict';
 
@@ -772,7 +772,6 @@ describe('getLastDayOfMonth', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// config absorption contract: exempt — the loader accepts a config argument
-// and merges it via Object.assign, but CONFIG is marked unused in createInterface
-// (eslint-disable-line no-unused-vars). No function reads CONFIG at runtime, so
+// config absorption contract: exempt - the loader accepts a config argument
+// for interface uniformity but no function reads CONFIG at runtime, so
 // there is no observable behavior to assert against at this tier.

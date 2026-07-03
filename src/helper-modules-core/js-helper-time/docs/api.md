@@ -1,4 +1,4 @@
-# API Reference. `js-helper-time`
+# API Reference. `helper-time`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-time/docs/configuration.md).
 
@@ -19,7 +19,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free, and platform-agnostic**. There is no async function, no `instance` argument, no `success / data / error` envelope. Each function returns the type its name implies.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Unixtime is in seconds.** | Every parameter and every return value labelled "unixtime" is an integer count of seconds since epoch. Multiply by 1000 to get milliseconds for the `Date` constructor |
 | **Timezones are IANA strings.** | Pass `'UTC'`, `'America/New_York'`, `'Asia/Kolkata'`. Three-letter abbreviations are not supported |
@@ -147,7 +147,7 @@ Builds an ISO 8601 string from a plural-keyed data set.
 
 Builds a unixtime (seconds) from a plural-keyed data set.
 
-> **Mixing key conventions.** The serializers above expect plural keys. If you parsed with `dateStringToDataSet` (singular keys) and want to serialize, either rewrite the keys to plural or go via `dateStringToUnixtime` and `unixtimeToDate*`.
+> **Mixing key conventions.** The serializers above expect plural keys. If the data set was parsed with `dateStringToDataSet` (singular keys) and needs to be serialized, either rewrite the keys to plural or go via `dateStringToUnixtime` and `unixtimeToDate*`.
 
 ---
 
@@ -181,7 +181,7 @@ All four functions are DST-aware. They use the runtime's built-in `Intl.DateTime
 
 ### `calcTimeWithOffset(unixtime, offset)`
 
-Adds an offset (in seconds) to a unixtime. Useful when you have a base unixtime and a known offset; it does not look up timezone data.
+Adds an offset (in seconds) to a unixtime. Useful when the caller has a base unixtime and a known offset; it does not look up timezone data.
 
 | Param | Type | Description |
 |---|---|---|
@@ -225,7 +225,7 @@ Returns the last day of the given month, accounting for leap years.
 |---|---|
 | `string` | One of `'28'`, `'29'`, `'30'`, `'31'` |
 
-> **String, not number.** The return type is intentionally a string for direct concatenation into ISO 8601 strings. Convert via `parseInt` if you need arithmetic.
+> **String, not number.** The return type is intentionally a string for direct concatenation into ISO 8601 strings. Convert via `parseInt` if arithmetic is needed.
 
 ---
 

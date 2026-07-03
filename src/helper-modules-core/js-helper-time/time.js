@@ -20,22 +20,15 @@ config.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+module.exports = function loader (shared_libs, config) { // eslint-disable-line no-unused-vars
 
   // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils
   };
 
-  // Merge overrides over defaults
-  const CONFIG = Object.assign(
-    {},
-    require('./time.config'),
-    config || {}
-  );
-
   // Create and return the public interface
-  return createInterface(Lib, CONFIG);
+  return createInterface(Lib);
 
 };/////////////////////////// Module-Loader END /////////////////////////////////
 
@@ -45,14 +38,12 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public functions close
-over the provided Lib and CONFIG.
+over the provided Lib.
 
 @param {Object} Lib - Dependency container (Utils)
-@param {Object} CONFIG - Merged configuration for this instance (reserved for future use)
-
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unused-vars
+const createInterface = function (Lib) {
 
   ///////////////////////////Public Functions START//////////////////////////////
   const Time = { // Public functions accessible by other modules
@@ -72,6 +63,7 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     dayName: function (year, month, day) {
 
+      // Build a UTC date from the input components and look up the day name
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
       const date = new Date(Date.UTC(
@@ -96,6 +88,7 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     epochDay: function (hours, minutes, seconds) {
 
+      // Convert wall-clock components to seconds past midnight
       return (
         (Number(hours || 0) * 3600) +
         (Number(minutes || 0) * 60) +
@@ -115,6 +108,7 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     reverseEpochDay: function (day_in_seconds) {
 
+      // Decompose seconds-past-midnight into hours, minutes, seconds
       const hours = Math.floor(day_in_seconds / 3600);
       const minutes = Math.floor(day_in_seconds % 3600 / 60);
       const seconds = Math.floor(day_in_seconds % 3600 % 60);
@@ -158,6 +152,7 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     unixtimeToDate: function (unixtime) {
 
+      // Convert seconds to milliseconds for the Date constructor
       return new Date(unixtime * 1000);
 
     },
@@ -395,16 +390,17 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     formatHourMinTo12HourTime: function (hours, minutes) {
 
-      minutes = (minutes < 10) ? ('0' + minutes) : ('' + minutes);
+      // Zero-pad single-digit minutes
+      const padded_minutes = (minutes < 10) ? ('0' + minutes) : ('' + minutes);
 
       if (hours === 24 || hours === 0) {
-        return `12:${minutes} AM`;
+        return `12:${padded_minutes} AM`;
       } else if (hours === 12) {
-        return `12:${minutes} PM`;
+        return `12:${padded_minutes} PM`;
       } else if (hours < 12) {
-        return `${hours}:${minutes} AM`;
+        return `${hours}:${padded_minutes} AM`;
       } else {
-        return `${hours - 12}:${minutes} PM`;
+        return `${hours - 12}:${padded_minutes} PM`;
       }
 
     },
@@ -470,8 +466,10 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
     *********************************************************************/
     getTimezoneOffset: function (unixtime, timezone) {
 
+      // Create a Date from the UTC unixtime
       const date = new Date(unixtime * 1000);
 
+      // Configure Intl.DateTimeFormat for the target timezone
       const options = {
         year: 'numeric', month: 'long', day: '2-digit',
         hour: '2-digit', minute: '2-digit', second: '2-digit',
@@ -479,20 +477,25 @@ const createInterface = function (Lib, CONFIG) { // eslint-disable-line no-unuse
         timeZone: timezone
       };
 
+      // Format the date in the target timezone and split into parts
       const new_date_string_parts = Intl.DateTimeFormat('en', options).formatToParts(date);
 
+      // Collect parts into a keyed object
       const new_date_string_data = {};
       new_date_string_parts.forEach(function (item) {
         new_date_string_data[item.type] = item.value;
       });
 
+      // Reassemble the parts into a date string
       const new_date_string = `${new_date_string_data.day} ${new_date_string_data.month} ${new_date_string_data.year},  ${new_date_string_data.hour}:${new_date_string_data.minute}:${new_date_string_data.second}`;
 
+      // Parse the string back to a timestamp and adjust for the local offset
       const time_with_fix = (
         (new Date(new_date_string)).getTime() / 1000 -
         (new Date().getTimezoneOffset() * 60)
       );
 
+      // Return the difference between wall-clock and UTC as the offset
       return (time_with_fix - unixtime);
 
     },
