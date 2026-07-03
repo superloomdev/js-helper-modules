@@ -16,7 +16,8 @@ Lib.Utils = require('helper-utils')(Lib, {});
 ```
 
 `shared_libs` accepted for interface uniformity but unused - Utils has no external lib dependencies.
-`config` reserved for future overrides.
+`config` accepted for interface uniformity, merged over defaults from `utils.config.js`. No config keys exist yet.
+Companion files: `utils.config.js` (empty defaults), `utils.errors.js` (empty frozen catalog), `utils.validators.js` (no-op `validateConfig`).
 
 ## Config Keys
 None.
@@ -80,7 +81,7 @@ round(num, digits_after_decimal) → Number | async:no
 roundWithCascading(num, digits_after_decimal, safety) → Number | async:no
 
 ### Errors & Misc
-error(err_obj, context) → Object | async:no - normalize error
+error(err_obj, context) → Error | async:no - normalize error
 nullFunc() → undefined | async:no - no-op
 moduleAvailable(module_name) → Boolean | async:no - safe require check
 

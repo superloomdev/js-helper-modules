@@ -26,7 +26,7 @@ Lib.Utils = require('helper-utils')(Lib, {});
 Loader call semantics:
 
 - **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Foundation utility does not read it. Pass whatever the project uses (commonly `Lib`, `null`, or `{}`).
-- **Second argument: config.** Accepted for interface uniformity. There are no configuration keys. Pass `{}`.
+- **Second argument: config.** Accepted for interface uniformity. Merged over defaults from `utils.config.js` (currently empty). The merged config is validated by `Validators.validateConfig` at startup. Pass `{}`.
 - **Multiple loader calls return the same singleton reference.** Node.js require cache guarantees identity. The loader is idempotent.
 
 > **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. Higher-tier modules use both arguments; foundation modules accept them and discard them. The uniformity is the point.
@@ -35,7 +35,7 @@ Loader call semantics:
 
 ## Configuration Keys
 
-None. The module has no configuration. The second argument to the loader is accepted but ignored.
+None. The module ships `utils.config.js` with an empty defaults object. The second argument to the loader is merged over these defaults and validated by `Validators.validateConfig` (currently a no-op). No config keys are defined yet.
 
 ---
 

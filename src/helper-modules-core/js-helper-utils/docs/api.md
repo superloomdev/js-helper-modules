@@ -197,8 +197,8 @@ Validates an array of objects where each item carries a `command` key (`'new'` o
 
 | Function | Signature | Returns |
 |---|---|---|
-| `disjoinUrl` | `disjoinUrl(url)` | `{ protocol, domain, port, path, query, hash }`. Each field is a string or `null` |
-| `disjoinPathname` | `disjoinPathname(pathname)` | Routing data extracted from the path (segments, query string, etc.) |
+| `disjoinUrl` | `disjoinUrl(url)` | `{ origin, protocol, username, password, hostname, host, port, pathname, search, hash }` or `false` if invalid URL |
+| `disjoinPathname` | `disjoinPathname(pathname)` | `{ route, values }` where `route` is the first path segment (or `null`) and `values` is an array of remaining segments |
 
 Useful in routing layers and link-rendering helpers. `disjoinUrl` uses the built-in `URL` constructor internally. `disjoinPathname` is pure string manipulation. Both work consistently in browser and Node.
 
