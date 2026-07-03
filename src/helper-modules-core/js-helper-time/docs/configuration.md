@@ -26,7 +26,7 @@ Lib.Time = require('helper-time')(Lib, {});
 Loader call semantics:
 
 - **First argument: `Lib`.** A container exposing peer modules. Time uses `Lib.Utils.isNullOrUndefined` in one function (`secondsToTimeString`); the rest of the surface is self-contained.
-- **Second argument: config overrides.** Accepted for interface uniformity. No function reads it at runtime. Pass `{}`.
+- **Second argument: config overrides.** Merged on top of the built-in defaults from `time.config.js`. The merged config is validated by `Validators.validateConfig` at startup (currently a no-op). No function reads it at runtime. Pass `{}`.
 - **Multiple loader calls return independent interfaces.** Functions are pure, so two interfaces are functionally identical. Loading the module multiple times is harmless but wasteful.
 
 > **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. Foundation modules accept the arguments and use what they need. The uniformity is the point.

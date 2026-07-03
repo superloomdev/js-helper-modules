@@ -4,8 +4,8 @@
 // Compatibility: Node.js 24+ (Intl.DateTimeFormat with hourCycle, native Date).
 //
 // Factory pattern: each loader call returns an independent Time interface
-// with its own config. All functions are pure - no shared module-level
-// state between instances.
+// with its own Lib, CONFIG, ERRORS, and Validators. All functions are pure -
+// no shared module-level state between instances.
 'use strict';
 
 
@@ -13,22 +13,39 @@
 
 /********************************************************************
 Factory loader. One call = one independent instance with its own
-config.
+config, ERRORS, and Validators. shared_libs is accepted for interface
+uniformity - Lib is built but only Utils is consumed by Time functions.
 
 @param {Object} shared_libs - Lib container with Utils
 @param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) { // eslint-disable-line no-unused-vars
+module.exports = function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils
   };
 
+  // Merge overrides over defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./time.config'),
+    config || {}
+  );
+
+  // Error catalog (frozen, shared across instances)
+  const ERRORS = require('./time.errors');
+
+  // Validators module (singleton, initialized with Lib, ERRORS)
+  const Validators = require('./time.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
+
   // Create and return the public interface
-  return createInterface(Lib);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };/////////////////////////// Module-Loader END /////////////////////////////////
 
@@ -38,12 +55,16 @@ module.exports = function loader (shared_libs, config) { // eslint-disable-line 
 
 /********************************************************************
 Builds the public interface for one instance. Public functions close
-over the provided Lib.
+over the provided Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} Lib - Dependency container (Utils)
+@param {Object} CONFIG - Merged configuration for this instance
+@param {Object} ERRORS - Frozen error catalog for this module
+@param {Object} Validators - Validators module instance
+
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ///////////////////////////Public Functions START//////////////////////////////
   const Time = { // Public functions accessible by other modules
