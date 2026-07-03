@@ -1,4 +1,4 @@
-# js-helper-time
+# helper-time
 
 Date/Time utility library. Platform-agnostic date math, timezone handling, formatting. Native JS Date and Intl APIs, no external dependencies.
 
@@ -6,7 +6,7 @@ Date/Time utility library. Platform-agnostic date math, timezone handling, forma
 Core module. Stateless utility. Factory pattern for interface uniformity with other helpers.
 
 ## Peer Dependencies
-- `@superloomdev/js-helper-utils` (injected as `Lib.Utils`)
+- `helper-utils` (injected as `Lib.Utils`)
 
 ## Direct Dependencies
 None.
@@ -14,19 +14,14 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Time = require('@superloomdev/js-helper-time')(Lib, { /* config overrides */ });
+Lib.Time = require('helper-time')(Lib, { /* config overrides */ });
 ```
 
-Each loader call returns an independent `Time` interface with its own `Lib` and `CONFIG` captured in closure. Functions are pure - no shared module-level state.
+Each loader call returns an independent `Time` interface with its own `Lib` captured in closure. Functions are pure - no shared module-level state.
 
 ## Config Keys
-| Key | Type | Default | Description |
-|---|---|---|---|
-| TIMEZONE_MIN_LENGTH | Number | 2 | Min valid length of timezone string (reserved) |
-| TIMEZONE_MAX_LENGTH | Number | 50 | Max valid length of timezone string (reserved) |
-| TIMEZONE_SANITIZE_REGEX | RegExp | `/[^0-9a-zA-Z/+\-_]/g` | Chars stripped from timezone input (reserved) |
 
-Config values are currently reserved - not referenced by any public function. They are merged in the loader so callers can set them today and have them honoured by future validation helpers.
+None. The loader accepts a config argument for interface uniformity but no function reads it at runtime.
 
 ## Exported Functions (24 total)
 
