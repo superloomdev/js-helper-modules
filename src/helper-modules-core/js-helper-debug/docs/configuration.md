@@ -30,7 +30,7 @@ Lib.Debug = require('helper-debug')(Lib, {
 Loader call semantics:
 
 - **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Debug does not read it. Pass whatever the project uses (commonly `Lib`, `null`, or `{}`).
-- **Second argument: config overrides.** Merged on top of the built-in defaults. Pass `{}` to use defaults unchanged.
+- **Second argument: config overrides.** Merged on top of the built-in defaults from `debug.config.js`. The merged config is validated by `Validators.validateConfig` at startup (currently a no-op). Pass `{}` to use defaults unchanged.
 - **Multiple loader calls return independent interfaces.** A noisy module under investigation can be loaded with `LOG_LEVEL: 'debug'` while the rest of the application uses `LOG_LEVEL: 'info'`. The two interfaces share no state.
 
 > **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. Foundation modules accept the `Lib` argument and discard it. The uniformity is the point.

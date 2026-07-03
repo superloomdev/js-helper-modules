@@ -16,6 +16,7 @@ Lib.Debug = require('helper-debug')(Lib, { /* config overrides */ });
 ```
 
 `shared_libs` is accepted for interface uniformity but unused - Debug has no external lib dependencies. Config overrides are merged over defaults to create an independent instance.
+Companion files: `debug.config.js` (6 config keys), `debug.errors.js` (empty frozen catalog), `debug.validators.js` (no-op `validateConfig`).
 
 ## Config Keys
 | Key | Type | Default | Description |

@@ -1,4 +1,4 @@
-// Info: Configuration file for Debug module
+// Info: Configuration file for helper-debug
 'use strict';
 
 
