@@ -1,4 +1,4 @@
-# @superloomdev/js-helper-money
+# helper-money
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
@@ -11,29 +11,30 @@ A flat collection of small, pure functions covering currency metadata lookup, fl
 
 ## Why Use This Module
 
-- **Zero runtime dependencies.** Adding this module to your project adds zero packages to your dependency tree. The supply chain you audit ends at this package itself.
+- **Zero runtime dependencies.** Adding this module to a project adds zero packages to the dependency tree. The supply chain audit ends at this package itself.
 
 - **Runs everywhere.** Pure JavaScript with no platform-specific globals. The same module works under Node.js, in a browser bundle, in an edge runtime, in a Lambda, in a Cloudflare Worker.
 
-- **Pre-tested at every release.** A full test suite runs in CI on every push. Your project trusts the wrapper instead of re-verifying money arithmetic on each release.
+- **Pre-tested at every release.** A full test suite runs in CI on every push. Projects trust the wrapper instead of re-verifying money arithmetic on each release.
 
 - **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom in order, use the section breaks as checkpoints to mark how far they have got, and finish without ever getting lost in dense logic. This matters most when an AI assistant is generating the change and a human still has to sign off on it. Open `money.js` to see the structure.
 
 ## Aligned with Superloom Philosophy
 
-If your project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without you needing to learn anything new.
+If a project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without needing to learn anything new.
 
-If you are not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
+For projects not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
 
 ## Extended Documentation
 
-- [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-money/docs/api.md) - every exported function with its signature, parameters, return shape, and worked examples
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md) - loader pattern, dependency notes, testing tier
+- [API reference](https://github.com/superloomdev/js-helper-modules/blob/main/src/helper-modules-core/js-helper-money/docs/api.md) - every exported function with its signature, parameters, return shape, and worked examples
+- [Configuration](https://github.com/superloomdev/js-helper-modules/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md) - loader pattern, dependency notes, testing tier
+- [Schemas](https://github.com/superloomdev/js-helper-modules/blob/main/src/helper-modules-core/js-helper-money/docs/schemas.md) - configuration schema, input contracts, and return conventions
 - [Superloom](https://superloom.dev) - the framework
 
 ## Adding to Your Project
 
-Install this module as a peer dependency in your project's `package.json` and load it through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
+Load this module through the standard Superloom loader. The loader merges any configuration overrides over the module defaults and returns an independent instance with its own configuration and dependencies.
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
@@ -41,7 +42,7 @@ The loader pattern, including the full `Lib` container shape, is documented in [
 
 This module has no external dependencies.
 
-This module expects two peer modules in the `Lib` container (Utils, Debug). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+This module expects one peer module in the `Lib` container (Utils). For the full dependency breakdown, see [`Configuration`](https://github.com/superloomdev/js-helper-modules/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md).
 
 ## Testing Status
 
@@ -49,7 +50,7 @@ This module expects two peer modules in the `Lib` container (Utils, Debug). For 
 |---|---|---|
 | Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Test runtime details (no Docker, no service required) live in [Configuration → Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md#testing-tiers).
+Test runtime details (no Docker, no service required) live in [Configuration → Testing Tiers](https://github.com/superloomdev/js-helper-modules/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md#testing-tiers).
 
 ## License
 

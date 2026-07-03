@@ -1,6 +1,6 @@
-# API Reference. `js-helper-money`
+# API Reference. `helper-money`
 
-Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md).
+Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](configuration.md). For configuration schema and input contracts see [Schemas](schemas.md).
 
 ## On This Page
 
@@ -17,7 +17,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free, and platform-agnostic**. There is no async function, no `instance` argument, no success/data/error envelope. Each function returns the type its name implies.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Currency codes are case-insensitive.** | `'USD'`, `'usd'`, and `'Usd'` are all valid and equivalent |
 | **Unknown currency codes return null for metadata.** | `getCurrencySymbol('xyz')` returns `null`; `getCurrencyDecimals('xyz')` returns `null` |
@@ -106,24 +106,23 @@ Lib.Money.getCurrencySymbol('xyz');  // null
 
 ---
 
-### `getCurrencySymbolForLocale(currency_code, country_code, language_code)`
+### `getCurrencySymbolForLocale(currency_code, country_code)`
 
-Returns the currency symbol considering locale preferences. If the country/language combination supports the currency in the internal language table, returns the native symbol; otherwise returns the standard symbol (e.g., `'INR'`, `'USD'`).
+Returns the currency symbol considering locale preferences. When the country_code matches the first two characters of the currency code (e.g., `'inr'` in `'in'`), returns the native symbol; otherwise returns the standard symbol (e.g., `'INR'`, `'USD'`).
 
 | Param | Type | Description |
 |---|---|---|
 | `currency_code` | `String` | Currency code |
 | `country_code` | `String` | Country code (e.g., `'in'`, `'us'`) |
-| `language_code` | `String` | Language code (e.g., `'hi_in'`, `'en_us'`) |
 
 | Returns | Description |
 |---|---|
 | `String\|null` | Selected symbol, or null if unknown currency |
 
 ```javascript
-Lib.Money.getCurrencySymbolForLocale('inr', 'in', 'hi_in');  // '₹'
-Lib.Money.getCurrencySymbolForLocale('inr', 'us', 'en_us');  // 'INR'
-Lib.Money.getCurrencySymbolForLocale('usd', 'us', 'en_us');  // '$'
+Lib.Money.getCurrencySymbolForLocale('inr', 'in');  // '₹'
+Lib.Money.getCurrencySymbolForLocale('inr', 'us');  // 'INR'
+Lib.Money.getCurrencySymbolForLocale('usd', 'us');  // '$'
 ```
 
 ---
@@ -202,7 +201,7 @@ Returns the native minor currency symbol (e.g., `'¢'` for USD, `'ส'` for THB)
 
 ---
 
-### `getCurrencySymbolMinorForLocale(currency_code, country_code, language_code)`
+### `getCurrencySymbolMinorForLocale(currency_code, country_code)`
 
 Locale-aware variant for minor symbols.
 
@@ -210,7 +209,6 @@ Locale-aware variant for minor symbols.
 |---|---|---|
 | `currency_code` | `String` | Currency code |
 | `country_code` | `String` | Country code |
-| `language_code` | `String` | Language code |
 
 | Returns | Description |
 |---|---|
@@ -356,7 +354,7 @@ Lib.Money.getTransactionalAmount(20.66666667, 'usd', null, true);  // 20.67
 
 ### `toFractionalUnits(amount, currency_code, decimals?)`
 
-Convert an amount to fractional units (e.g., `$10.57 → 1057` cents, `₹15.68 → 1600` paise). Applies transactional rounding first.
+Convert an amount to fractional units (e.g., `$10.57 -> 1057` cents, `₹15.68 -> 1600` paise). Applies transactional rounding first.
 
 | Param | Type | Required | Description |
 |---|---|---|---|
@@ -379,7 +377,7 @@ Lib.Money.toFractionalUnits(15.68, 'inr');     // 1600 (rounded to 16, then ×10
 
 ### `fromFractionalUnits(amount, currency_code, decimals?)`
 
-Convert fractional units back to large currency (e.g., `1057 → $10.57`, `1600 → ₹16`).
+Convert fractional units back to large currency (e.g., `1057 -> $10.57`, `1600 -> ₹16`).
 
 | Param | Type | Required | Description |
 |---|---|---|---|
@@ -462,4 +460,4 @@ Lib.Money.calculateTotalFromDenominations(majors, minors, 'usd');  // 100.5
 
 There is nothing to clean up. The module exposes only pure synchronous functions. Loader-time initialization captures the function bindings in a closure; after that, no module-level state changes for the lifetime of the process.
 
-For module-level setup details (loader signature, peer-dep notes) see [Configuration → Loader Pattern](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md#loader-pattern).
+For module-level setup details (loader signature, peer-dep notes) see [Configuration → Loader Pattern](configuration.md#loader-pattern).

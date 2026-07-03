@@ -1,6 +1,6 @@
 {
   "name": "js-helper-money-test",
-  "description": "Test Cases for js-helper-money",
+  "description": "Test Cases for helper-money",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,
@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
-    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
     "helper-money": "file:../"
   },
   "scripts": {

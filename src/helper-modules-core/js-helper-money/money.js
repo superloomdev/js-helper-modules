@@ -4,7 +4,7 @@
 // Compatibility: Node.js 24+ and any modern browser.
 //
 // Factory pattern: each loader call returns an independent instance with
-// its own Lib, CONFIG, and Validators. Functions close over these
+// its own Lib, CONFIG, ERRORS, and Validators. Functions close over these
 // dependencies without module-level globals.
 'use strict';
 
@@ -17,9 +17,9 @@ const CURRENCIES = require('./data/currencies.json');
 
 /********************************************************************
 Factory loader. Each call returns an independent Money interface with
-its own Lib, CONFIG, and Validators closed over the instance.
+its own Lib, CONFIG, ERRORS, and Validators closed over the instance.
 
-@param {Object} shared_libs - Lib container with Utils, Debug
+@param {Object} shared_libs - Lib container with Utils
 @param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public Money interface
@@ -28,8 +28,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
-    Utils: shared_libs.Utils,
-    Debug: shared_libs.Debug
+    Utils: shared_libs.Utils
   };
 
   // Merge overrides over defaults
@@ -39,11 +38,11 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Error catalog (frozen)
+  // Error catalog (frozen, shared across instances)
   const ERRORS = require('./money.errors');
 
-  // Validators module (singleton, initialized with Lib)
-  const Validators = require('./money.validators')(Lib);
+  // Validators module (singleton, initialized with Lib, ERRORS, CURRENCIES)
+  const Validators = require('./money.validators')(Lib, ERRORS, CURRENCIES);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
@@ -54,22 +53,22 @@ module.exports = function loader (shared_libs, config) {
 
 
 
-///////////////////////////createInterface START/////////////////////////////
+/////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
 Builds the public interface for one factory instance. Public functions
 close over the provided Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib - Dependency container (Utils, Debug)
+@param {Object} Lib - Dependency container (Utils)
 @param {Object} CONFIG - Merged configuration for this instance
-@param {Object} ERRORS - Error catalog (frozen)
+@param {Object} ERRORS - Frozen error catalog for this module
 @param {Object} Validators - Validators module instance
 
 @return {Object} - Public Money interface
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
-  // Public interface
+  /////////////////////////// Public Functions START //////////////////////////////
   const Money = {
 
     // ~~~~~~~~~~~~~~~~~~~~ Currency Metadata ~~~~~~~~~~~~~~~~~~~~
@@ -119,7 +118,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     sanitizeCurrencyCode: function (code) {
 
       // Delegate to the validators module
-      return Validators.sanitizeCurrencyCode(code);
+      return Validators.sanitizeCurrencyCode(code, CONFIG);
 
     },
 
@@ -135,7 +134,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     validateCurrencyCode: function (code) {
 
       // Delegate to the validators module
-      return Validators.validateCurrencyCode(code);
+      return Validators.validateCurrencyCode(code, CONFIG);
 
     },
 
@@ -150,7 +149,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencySymbol: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -169,14 +168,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
     @param {String} currency_code - Currency code
     @param {String} country_code  - ISO 3166-1 alpha-2 country code
-    @param {String} language_code - Locale identifier (e.g., 'hi_in')
 
     @return {String|null} - Locale-aware symbol, or null if unknown
     *********************************************************************/
-    getCurrencySymbolForLocale: function (currency_code, country_code, language_code) { // eslint-disable-line no-unused-vars
+    getCurrencySymbolForLocale: function (currency_code, country_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -207,7 +205,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencyIsoAlpha: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -228,7 +226,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencyIsoNumeric: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -249,7 +247,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencyName: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -271,7 +269,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencySymbolMinor: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -291,15 +289,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
     @param {String} currency_code - Currency code
     @param {String} country_code  - ISO 3166-1 alpha-2 country code
-    @param {String} language_code - Locale identifier (e.g., 'en_us')
 
     @return {String|null} - Locale-aware minor symbol, or null if
                             currency has no minor symbol or is unknown
     *********************************************************************/
-    getCurrencySymbolMinorForLocale: function (currency_code, country_code, language_code) { // eslint-disable-line no-unused-vars
+    getCurrencySymbolMinorForLocale: function (currency_code, country_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -338,7 +335,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencyDecimals: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -361,7 +358,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencyMinTransactionalUnit: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -383,7 +380,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getCurrencyDenominations: function (currency_code) {
 
       // Normalize and verify the currency code is known
-      const code = Validators.normalizeCurrencyCode(currency_code);
+      const code = Validators.normalizeCurrencyCode(currency_code, CONFIG);
 
       if (Lib.Utils.isNull(code)) {
         return null;
@@ -417,7 +414,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     roundAmount: function (amount, currency_code, decimals) {
 
       // Validate currency code and amount
-      const code = Validators.assertCurrencyCode(currency_code, 'roundAmount');
+      const code = Validators.assertCurrencyCode(currency_code, 'roundAmount', CONFIG);
       Validators.assertNumber(amount, 'amount', 'roundAmount');
 
       // Resolve decimal places (caller override or currency default)
@@ -443,10 +440,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
     @return {String} - Formatted amount string
     *********************************************************************/
-    formatAmount: function (amount, currency_code, decimals, no_pad = false) {
+    formatAmount: function (amount, currency_code, decimals, no_pad) {
 
       // Validate currency code and amount
-      const code = Validators.assertCurrencyCode(currency_code, 'formatAmount');
+      const code = Validators.assertCurrencyCode(currency_code, 'formatAmount', CONFIG);
       Validators.assertNumber(amount, 'amount', 'formatAmount');
 
       // Round first, then resolve decimal places for formatting
@@ -471,7 +468,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
     /********************************************************************
     Round an amount to the nearest minimum transactional unit.
-    When apply_min_unit is false, just applies standard rounding.
+    When apply_min_unit is false, applies standard rounding.
 
     @param {Number} amount - Amount to round
     @param {String} currency_code - Currency code
@@ -483,7 +480,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     getTransactionalAmount: function (amount, currency_code, decimals, apply_min_unit) {
 
       // Validate currency code and amount
-      const code = Validators.assertCurrencyCode(currency_code, 'getTransactionalAmount');
+      const code = Validators.assertCurrencyCode(currency_code, 'getTransactionalAmount', CONFIG);
       Validators.assertNumber(amount, 'amount', 'getTransactionalAmount');
 
       // Resolve decimal places (caller override or currency default)
@@ -512,7 +509,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Convert an amount to fractional units (e.g., $10.57 → 1057 cents).
+    Convert an amount to fractional units (e.g., $10.57 -> 1057 cents).
     Applies transactional rounding first.
 
     @param {Number} amount - Amount in large currency
@@ -524,7 +521,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     toFractionalUnits: function (amount, currency_code, decimals) {
 
       // Validate currency code and amount
-      const code = Validators.assertCurrencyCode(currency_code, 'toFractionalUnits');
+      const code = Validators.assertCurrencyCode(currency_code, 'toFractionalUnits', CONFIG);
       Validators.assertNumber(amount, 'amount', 'toFractionalUnits');
 
       // Resolve decimal places (caller override or currency default)
@@ -542,7 +539,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Convert fractional units back to large currency (e.g., 1057 → $10.57).
+    Convert fractional units back to large currency (e.g., 1057 -> $10.57).
 
     @param {Number} amount - Amount in fractional units
     @param {String} currency_code - Currency code
@@ -553,7 +550,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     fromFractionalUnits: function (amount, currency_code, decimals) {
 
       // Validate currency code and amount
-      const code = Validators.assertCurrencyCode(currency_code, 'fromFractionalUnits');
+      const code = Validators.assertCurrencyCode(currency_code, 'fromFractionalUnits', CONFIG);
       Validators.assertNumber(amount, 'amount', 'fromFractionalUnits');
 
       // Resolve decimal places (caller override or currency default)
@@ -584,7 +581,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     sum: function (amounts, currency_code, decimals) {
 
       // Validate currency code and optional decimals override
-      const code = Validators.assertCurrencyCode(currency_code, 'sum');
+      const code = Validators.assertCurrencyCode(currency_code, 'sum', CONFIG);
 
       Validators.assertOptionalInteger(decimals, 'decimals', 'sum');
 
@@ -618,7 +615,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     calculateTotalFromDenominations: function (majors, minors, currency_code, decimals, apply_min_unit) {
 
       // Validate currency code and optional decimals override
-      const code = Validators.assertCurrencyCode(currency_code, 'calculateTotalFromDenominations');
+      const code = Validators.assertCurrencyCode(currency_code, 'calculateTotalFromDenominations', CONFIG);
 
       Validators.assertOptionalInteger(decimals, 'decimals', 'calculateTotalFromDenominations');
 
@@ -663,9 +660,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
     }
 
-  }; // End Money interface
+  };////////////////////////////// Public Functions END //////////////////////////////
 
-  // Private functions that have access to Lib, CONFIG, and CURRENCIES
+
+
+  /////////////////////////// Private Functions START //////////////////////////////
   const _Money = {
 
     /********************************************************************
@@ -707,8 +706,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
     }
 
-  };
+  };////////////////////////////// Private Functions END //////////////////////////////
 
-  return Money; // Return the interface from createInterface
+  // Return the interface from createInterface
+  return Money;
 
-};///////////////////////////createInterface END/////////////////////////////
+};/////////////////////////// createInterface END //////////////////////////////

@@ -1,4 +1,4 @@
-# js-helper-money
+# helper-money
 
 Money utility library. Currency metadata, float-safe rounding, formatting, and aggregation. Native JS, no external dependencies.
 
@@ -10,8 +10,7 @@ Core module. Stateless utility. Factory pattern.
 
 | Peer | Why |
 |---|---|
-| `@superloomdev/js-helper-utils` | Used by `roundAmount`, `formatAmount`, `sum`, and `calculateTotalFromDenominations` for rounding, null-checks, and integer conversion |
-| `@superloomdev/js-helper-debug` | Reserved for future logging (injected but not currently used) |
+| `helper-utils` | Used by `roundAmount`, `formatAmount`, `sum`, and `calculateTotalFromDenominations` for rounding, null-checks, and integer conversion |
 
 ## Direct Dependencies
 
@@ -20,7 +19,7 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Money = require('@superloomdev/js-helper-money')(Lib, { /* config overrides */ });
+Lib.Money = require('helper-money')(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent `Money` interface with its own merged configuration captured in a closure. Functions are pure - no shared module-level state between instances.
@@ -29,7 +28,6 @@ Each loader call returns an independent `Money` interface with its own merged co
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `DEFAULT_CURRENCY_CODE` | `String` | `'usd'` | Default currency code. Validated at loader time |
 | `CURRENCY_CODE_MIN_LENGTH` | `Number` | `3` | Minimum valid length of a currency code |
 | `CURRENCY_CODE_MAX_LENGTH` | `Number` | `3` | Maximum valid length of a currency code |
 | `CURRENCY_CODE_SANITIZE_REGEX` | `RegExp` | `/[^a-zA-Z]/g` | Characters stripped from sanitized input |
@@ -48,12 +46,12 @@ All functions are synchronous. Currency codes are case-insensitive on input.
 | `sanitizeCurrencyCode` | `sanitizeCurrencyCode(code)` | `String\|null` - sanitized lowercase code or null |
 | `validateCurrencyCode` | `validateCurrencyCode(code)` | `false\|Array` - false if valid, Error[] if invalid |
 | `getCurrencySymbol` | `getCurrencySymbol(currency_code)` | `String\|null` - native symbol (e.g., '₹', '$') |
-| `getCurrencySymbolForLocale` | `getCurrencySymbolForLocale(currency_code, country_code, language_code)` | `String\|null` - locale-aware symbol selection |
+| `getCurrencySymbolForLocale` | `getCurrencySymbolForLocale(currency_code, country_code)` | `String\|null` - locale-aware symbol selection |
 | `getCurrencyIsoAlpha` | `getCurrencyIsoAlpha(currency_code)` | `String\|null` - ISO alpha code (e.g., 'USD') |
 | `getCurrencyIsoNumeric` | `getCurrencyIsoNumeric(currency_code)` | `String\|null` - ISO numeric code (e.g., '840') |
 | `getCurrencyName` | `getCurrencyName(currency_code)` | `String\|null` - English name (e.g., 'United States Dollar') |
 | `getCurrencySymbolMinor` | `getCurrencySymbolMinor(currency_code)` | `String\|null` - native minor symbol (e.g., '¢') |
-| `getCurrencySymbolMinorForLocale` | `getCurrencySymbolMinorForLocale(currency_code, country_code, language_code)` | `String\|null` - locale-aware minor symbol |
+| `getCurrencySymbolMinorForLocale` | `getCurrencySymbolMinorForLocale(currency_code, country_code)` | `String\|null` - locale-aware minor symbol |
 | `getCurrencyDecimals` | `getCurrencyDecimals(currency_code)` | `Integer\|null` - decimal places (typically 2) |
 | `getCurrencyMinTransactionalUnit` | `getCurrencyMinTransactionalUnit(currency_code)` | `Number\|null` - smallest transactable unit |
 | `getCurrencyDenominations` | `getCurrencyDenominations(currency_code)` | `Object\|null` - `{minor: [...], major: [...]}` |
@@ -88,3 +86,13 @@ All functions are synchronous. Currency codes are case-insensitive on input.
 - **Locale separation:** `getCurrencySymbol` returns the native symbol always; `getCurrencySymbolForLocale` applies locale-aware selection logic.
 - **Integer arithmetic for float safety:** `sum` and related functions convert to integer (cents/paise) internally, sum, then convert back. This prevents `0.1 + 0.2 = 0.30000000000000004` errors.
 - **Min transactional unit vs decimals:** `decimals` is for display precision (2 for USD/INR); `min_transactional_unit` is for rounding rules (0.01 for USD, 1 for INR). A currency may have 2 decimals but round to whole units for transactions.
+
+## Documentation
+
+- [`docs/schemas.md`](docs/schemas.md) - configuration schema, input contracts, and return conventions
+- [`docs/api.md`](docs/api.md) - complete function reference
+- [`docs/configuration.md`](docs/configuration.md) - loader pattern and dependencies
+
+## Critical Behaviors
+
+- **Per-instance config respected:** Validators use the per-instance CONFIG passed at loader time, not module-scope defaults. This ensures `CURRENCY_CODE_*` overrides work correctly across multiple instances.

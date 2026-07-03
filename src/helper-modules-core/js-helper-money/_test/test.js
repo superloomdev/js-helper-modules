@@ -1,4 +1,4 @@
-// Tests for js-helper-money
+// Tests for helper-money
 // Covers all exported functions with automated assertions
 'use strict';
 
@@ -10,13 +10,12 @@ const loader = require('./loader');
 const { Lib } = loader();
 const Money = Lib.Money;
 
-// Factory required directly for contract tests — money is now a factory pattern
+// Factory required directly for contract tests - money is now a factory pattern
 // so each loader call returns an independent instance with its own CONFIG.
 const MoneyFactory = require('helper-money');
 
 const validBaseConfig = function () {
   return {
-    DEFAULT_CURRENCY_CODE:    'usd',
     CURRENCY_CODE_MIN_LENGTH: 3,
     CURRENCY_CODE_MAX_LENGTH: 3,
     CURRENCY_CODE_SANITIZE_REGEX: /[^a-zA-Z]/g
@@ -108,31 +107,31 @@ describe('getCurrencySymbolForLocale', function () {
 
   it('should return native symbol when country/language supports currency', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolForLocale('inr', 'in', 'hi_in'), '₹');
-    assert.strictEqual(Money.getCurrencySymbolForLocale('usd', 'us', 'en_us'), '$');
-    assert.strictEqual(Money.getCurrencySymbolForLocale('thb', 'th', 'th_th'), '฿');
+    assert.strictEqual(Money.getCurrencySymbolForLocale('inr', 'in'), '₹');
+    assert.strictEqual(Money.getCurrencySymbolForLocale('usd', 'us'), '$');
+    assert.strictEqual(Money.getCurrencySymbolForLocale('thb', 'th'), '฿');
 
   });
 
 
   it('should return standard symbol when country/language does not support', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolForLocale('inr', 'us', 'en_us'), 'INR');
-    assert.strictEqual(Money.getCurrencySymbolForLocale('usd', 'in', 'hi_in'), 'USD');
+    assert.strictEqual(Money.getCurrencySymbolForLocale('inr', 'us'), 'INR');
+    assert.strictEqual(Money.getCurrencySymbolForLocale('usd', 'in'), 'USD');
 
   });
 
 
   it('should return standard for unknown country', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolForLocale('inr', 'zz', 'en_us'), 'INR');
+    assert.strictEqual(Money.getCurrencySymbolForLocale('inr', 'zz'), 'INR');
 
   });
 
 
   it('should return null for unknown currency', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolForLocale('xyz', 'in', 'hi_in'), null);
+    assert.strictEqual(Money.getCurrencySymbolForLocale('xyz', 'in'), null);
 
   });
 
@@ -173,21 +172,21 @@ describe('getCurrencySymbolMinorForLocale', function () {
 
   it('should return native minor symbol when country/language supports', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolMinorForLocale('usd', 'us', 'en_us'), '¢');
+    assert.strictEqual(Money.getCurrencySymbolMinorForLocale('usd', 'us'), '¢');
 
   });
 
 
   it('should return standard symbol when locale does not support', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolMinorForLocale('usd', 'in', 'hi_in'), 'USD');
+    assert.strictEqual(Money.getCurrencySymbolMinorForLocale('usd', 'in'), 'USD');
 
   });
 
 
   it('should handle null native minor gracefully', function () {
 
-    assert.strictEqual(Money.getCurrencySymbolMinorForLocale('inr', 'in', 'hi_in'), null);
+    assert.strictEqual(Money.getCurrencySymbolMinorForLocale('inr', 'in'), null);
 
   });
 
@@ -756,7 +755,7 @@ describe('Validation and new functions', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// Note: js-helper-money is now a factory pattern — each MoneyFactory(Lib, config) call
+// Note: helper-money is now a factory pattern - each MoneyFactory(Lib, config) call
 // returns an independent instance with its own CONFIG. Tests below exercise the loader
 // directly to verify config validation works correctly for each independent instance.
 
@@ -767,30 +766,14 @@ describe('config absorption contract', function () {
     assert.doesNotThrow(function () { MoneyFactory(Lib, validBaseConfig()); });
   });
 
-  // OVERRIDE WINS (Strategy 1): override DEFAULT_CURRENCY_CODE with an unknown
-  // code — validateConfig throws, proving the override reached CONFIG.
-  it('absorbs a DEFAULT_CURRENCY_CODE override that fails validation', function () {
-    assert.throws(function () {
-      MoneyFactory(Lib, Object.assign(validBaseConfig(), { DEFAULT_CURRENCY_CODE: 'INVALID' }));
-    }, /not a known currency/);
-  });
-
   // NULL HONORED (0032 canary): CURRENCY_CODE_SANITIZE_REGEX default is a RegExp
   // (non-null). Explicit null must be seen as null. With Object.assign, null
-  // replaces the RegExp → validateConfig throws. With buggy overrideObject, the
-  // default RegExp is kept → no throw.
+  // replaces the RegExp -> validateConfig throws. With buggy overrideObject, the
+  // default RegExp is kept -> no throw.
   it('honors an explicit null override of CURRENCY_CODE_SANITIZE_REGEX (a key with a non-null default)', function () {
     assert.throws(function () {
       MoneyFactory(Lib, Object.assign(validBaseConfig(), { CURRENCY_CODE_SANITIZE_REGEX: null }));
     }, /must be a RegExp/);
-  });
-
-  // OMISSION KEEPS DEFAULT: omitting DEFAULT_CURRENCY_CODE falls back to 'usd'
-  // (a known currency) — loader must not throw.
-  it('retains the default DEFAULT_CURRENCY_CODE when the key is omitted from the override', function () {
-    const cfg = validBaseConfig();
-    delete cfg.DEFAULT_CURRENCY_CODE;
-    assert.doesNotThrow(function () { MoneyFactory(Lib, cfg); });
   });
 
 });
