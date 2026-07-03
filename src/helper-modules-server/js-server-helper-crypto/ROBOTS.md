@@ -1,10 +1,10 @@
-# js-server-helper-crypto - AI Agent Reference
+# helper-crypto - AI Agent Reference
 
 ## Module Type
 Server module. Node.js-specific cryptography helpers using the built-in `crypto` module.
 
 ## Peer Dependencies
-- `@superloomdev/js-helper-utils` (injected as `Lib.Utils`)
+- `helper-utils` (injected as `Lib.Utils`)
 
 ## Direct Dependencies
 - `crypto` (Node.js built-in)
@@ -12,17 +12,16 @@ Server module. Node.js-specific cryptography helpers using the built-in `crypto`
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Crypto = require('@superloomdev/js-server-helper-crypto')(Lib, { /* config overrides */ });
+Lib.Crypto = require('helper-crypto')(Lib, { /* config overrides */ });
 ```
 
-Each loader call returns an independent Crypto interface with its own `Lib` and `CONFIG`. Stateless - no per-instance resources. The shared Node.js `crypto` module is cached at module level.
+Each loader call returns an independent Crypto interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators`. Stateless - no per-instance resources. The shared Node.js `crypto` module is cached at module level.
+Companion files: `crypto.config.js`, `crypto.errors.js` (empty frozen catalog), `crypto.validators.js` (no-op `validateConfig`).
 
 ## Config Keys
 | Key | Type | Default | Description |
 |---|---|---|---|
 | BASE36_CHARSET | String | `'0123456789abcdefghijklmnopqrstuvwxyz'` | Alphabet for base-36 conversion |
-| HEX_CHARSET | String | `'0123456789abcdef'` | Alphabet for hex |
-| INT_CHARSET | String | `'0123456789'` | Alphabet for integer strings |
 
 ## Exported Functions
 
@@ -52,7 +51,7 @@ urlEncodeBase64(str) → String | async:no - URL-safe variant (+/= → -_)
 urlDecodeBase64(str) → String | async:no
 
 ## Patterns
-- **Server-only:** Uses Node.js `crypto` module. For browser/client use `@superloomdev/js-client-helper-crypto` instead
+- **Server-only:** Uses Node.js `crypto` module. For browser/client use `helper-client-crypto` instead
 - **AES key derivation:** Uses MD5 of secret for key, MD5 of key+secret for IV - consistent with legacy encryption contracts
 - **MD5 warning:** MD5 is cryptographically broken. Only use `md5String` for checksums/legacy compatibility, never for passwords or security
 - **HMAC-SHA256:** Use `sha256String(str, secret)` for secure hashing with a secret

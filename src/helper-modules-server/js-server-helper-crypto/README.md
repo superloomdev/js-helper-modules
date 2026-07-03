@@ -13,13 +13,13 @@ A flat collection of small functions covering UUID v4 and base-36 compact identi
 
 This module is the server-side member of a runtime pair. The seven shared functions (`generateRandomString`, `generateUUID`, `generateCompactUUID`, `stringToBase64`, `base64ToString`, `urlEncodeBase64`, `urlDecodeBase64`) have the same names and the same calling shape on both sides. Switch the loader line to move between runtimes without rewriting your code.
 
-- [`@superloomdev/js-client-helper-crypto`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-client/js-client-helper-crypto) - Browser-side equivalent. Implements the shared seven functions on the Web Crypto API, omitting the server-only operations (hashing, HMAC, AES, base conversion, time-prefixed random, buffer-to-base64)
+- [`helper-client-crypto`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-client/js-client-helper-crypto) - Browser-side equivalent. Implements the shared seven functions on the Web Crypto API, omitting the server-only operations (hashing, HMAC, AES, base conversion, time-prefixed random, buffer-to-base64)
 
 ## Why Use This Module
 
 - **Zero npm dependencies.** Built on Node's audited `crypto` module, which ships with the runtime. Adding this module to your project adds zero packages to your dependency tree.
 
-- **Backed by Node's built-in crypto.** Hashing, HMAC, AES-128-CBC, and UUID v4 all delegate to OpenSSL via Node's standard library. The wrapper adds no novel cryptography; it standardises calling shape and names so they line up with the browser-side sibling.
+- **Backed by Node's built-in crypto.** Hashing, HMAC, AES-128-CBC, and UUID v4 all delegate to OpenSSL via Node's standard library. The wrapper adds no novel cryptography; it standardizes calling shape and names so they line up with the browser-side sibling.
 
 - **Pre-tested at every release.** A full test suite runs in CI on every push. Your project trusts the wrapper instead of re-verifying server-crypto plumbing on each release.
 
@@ -34,8 +34,8 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 ## Extended Documentation
 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-crypto/docs/api.md) - every exported function with its signature, parameters, return shape, and worked examples
-- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-crypto/docs/configuration.md) - loader pattern, three configuration keys, dependency notes, testing tier
-- [`js-client-helper-crypto`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-client/js-client-helper-crypto) - the browser-side sibling
+- [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-crypto/docs/configuration.md) - loader pattern, one configuration key, dependency notes, testing tier
+- [`helper-client-crypto`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-client/js-client-helper-crypto) - the browser-side sibling
 - [Superloom](https://superloom.dev) - the framework
 
 ## Adding to Your Project

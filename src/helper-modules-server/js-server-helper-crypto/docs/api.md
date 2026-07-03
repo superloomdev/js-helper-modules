@@ -1,4 +1,4 @@
-# API Reference. `js-server-helper-crypto`
+# API Reference. `helper-crypto`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For loader and configuration details see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-crypto/docs/configuration.md).
 
@@ -19,14 +19,14 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free, and built on Node's built-in `crypto` module**. There is no async function, no `instance` argument, no `success / data / error` envelope. Each function returns a string or a number.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Cryptographic strength.** | Random and UUID functions use OS-level entropy via `crypto.randomBytes` and `crypto.randomUUID`. They are suitable for tokens, salts, IDs, and short-lived secrets |
 | **Hex-encoded outputs.** | MD5, SHA256, and AES outputs are returned as lowercase hex strings. Convert via `urlEncodeBase64(stringToBase64(value))` if you need URL-safe transport |
 | **Empty-input guard.** | `generateRandomString` returns `''` on null, undefined, empty, or non-positive `length`. Other functions return the runtime's natural error type (e.g. `parseInt` returns `NaN` for invalid input) |
 | **AES key derivation.** | `aesEncrypt` and `aesDecrypt` derive the 128-bit key and 128-bit IV from the supplied `secret` via two MD5 passes (see the AES section below for the exact derivation). The pair is consistent across calls; the same `secret` reproduces the same key / IV |
 
-> **Browser parity.** The seven functions in [Random and UUIDs](#random-and-uuids), [Base64 Encoding](#base64-encoding-and-decoding), and [URL-Safe Base64](#url-safe-base64) have identical names and signatures in `@superloomdev/js-client-helper-crypto`. The remaining functions (hashing, AES, base conversion, `generateTimeRandomString`, `bufferToBase64`) are server-only.
+> **Browser parity.** The seven functions in [Random and UUIDs](#random-and-uuids), [Base64 Encoding](#base64-encoding-and-decoding), and [URL-Safe Base64](#url-safe-base64) have identical names and signatures in `helper-client-crypto`. The remaining functions (hashing, AES, base conversion, `generateTimeRandomString`, `bufferToBase64`) are server-only.
 
 ---
 
@@ -121,7 +121,7 @@ Lib.Crypto.sha256String('hello world', 'shared-secret');
 
 ## AES Encryption
 
-`aesEncrypt` and `aesDecrypt` use AES-128-CBC. Both derive the 16-byte key and 16-byte initialisation vector from the supplied `secret`:
+`aesEncrypt` and `aesDecrypt` use AES-128-CBC. Both derive the 16-byte key and 16-byte initialization vector from the supplied `secret`:
 
 - **Key:** First 16 bytes of `MD5(secret)`.
 - **IV:** `MD5(key || secret)`, where `||` is byte concatenation.
@@ -244,6 +244,6 @@ const round_trip = Lib.Crypto.base64ToString(Lib.Crypto.urlDecodeBase64(token));
 
 ## Lifecycle
 
-There is nothing to clean up. The module exposes only synchronous functions that operate on their arguments and return a value. Each loader call captures `Lib` and `CONFIG` in a closure; after that, no module-level state changes for the lifetime of the process. The Node `crypto` module itself is loaded once at module initialisation and shared across all interface instances.
+There is nothing to clean up. The module exposes only synchronous functions that operate on their arguments and return a value. Each loader call captures `Lib`, `CONFIG`, `ERRORS`, and `Validators` in a closure; after that, no module-level state changes for the lifetime of the process. The Node `crypto` module itself is loaded once at module initialization and shared across all interface instances.
 
 For module-level setup details (loader signature, configuration keys, peer-dep notes) see [Configuration → Loader Pattern](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-crypto/docs/configuration.md#loader-pattern).
