@@ -1,35 +1,37 @@
-// Info: All validators for js-helper-money. Four roles:
+// Info: All validators for helper-money. Four roles:
 //   1. Config validators - called once at loader time. Throw Error.
 //   2. Programmer-error assertions - called per request. Throw TypeError.
 //   3. Domain-style validators - return false | Error[].
 //   4. Pure normalizers - no throws.
 //
-// Singleton: Lib injected once by loader; static data required internally.
+// Singleton: Lib, ERRORS, and CURRENCIES injected once by loader.
 'use strict';
 
 
-// Static data loaded once at require time
-const CURRENCIES = require('./data/currencies.json');
-const ERRORS = require('./money.errors');
-const CONFIG = require('./money.config');
-
-// Shared dependency injected by loader
+// Shared dependencies injected by loader
 let Lib;
+let ERRORS;
+let CURRENCIES;
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and returns the module-scope Validators object.
+Singleton loader. Injects Lib, ERRORS, and CURRENCIES, then returns the
+module-scope Validators object.
 
 @param {Object} shared_libs - Lib container with Utils
+@param {Object} errors - Frozen error catalog (money.errors.js)
+@param {Object} currencies - Static currency data (data/currencies.json)
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) {
+module.exports = function loader (shared_libs, errors, currencies) {
 
-  // Inject shared dependency
+  // Inject shared dependencies
   Lib = shared_libs;
+  ERRORS = errors;
+  CURRENCIES = currencies;
 
   // Return the Validators interface
   return Validators;
@@ -38,7 +40,7 @@ module.exports = function loader (shared_libs) {
 
 
 
-////////////////////////////// Public Functions START ////////////////////////////
+///////////////////////////Public Functions START//////////////////////////////
 
 const Validators = {
 
@@ -57,18 +59,6 @@ const Validators = {
   @return {void}
   *********************************************************************/
   validateConfig: function (config) {
-
-    // DEFAULT_CURRENCY_CODE, if set, must be a known currency
-    if (
-      !Lib.Utils.isNullOrUndefined(config.DEFAULT_CURRENCY_CODE) &&
-      !(config.DEFAULT_CURRENCY_CODE.toLowerCase() in CURRENCIES)
-    ) {
-      throw new Error(
-        '[helper-money] CONFIG.DEFAULT_CURRENCY_CODE "' +
-        config.DEFAULT_CURRENCY_CODE +
-        '" is not a known currency'
-      );
-    }
 
     // CURRENCY_CODE_MIN_LENGTH must be a positive integer
     if (
@@ -112,12 +102,13 @@ const Validators = {
 
   Returns the normalized lowercase code on success.
 
-  @param {*}      code     - The currency code to validate
-  @param {String} fn_name  - Public function name for error message
+  @param {*} code - The currency code to validate
+  @param {String} fn_name - Public function name for error message
+  @param {Object} CONFIG - Configuration object for this instance
 
   @return {String} - Normalized lowercase currency code
   *********************************************************************/
-  assertCurrencyCode: function (code, fn_name) {
+  assertCurrencyCode: function (code, fn_name, CONFIG) {
 
     // Required check
     if (Lib.Utils.isNullOrUndefined(code)) {
@@ -159,8 +150,8 @@ const Validators = {
   /********************************************************************
   Throw TypeError if value is not a finite number.
 
-  @param {*}      value   - The value to check
-  @param {String} field   - Field name for error message
+  @param {*} value - The value to check
+  @param {String} field - Field name for error message
   @param {String} fn_name - Public function name for error message
 
   @return {void}
@@ -186,15 +177,15 @@ const Validators = {
   Throw TypeError if value is present and not an integer.
   null/undefined is allowed (field is optional).
 
-  @param {*}      value   - The value to check
-  @param {String} field   - Field name for error message
+  @param {*} value - The value to check
+  @param {String} field - Field name for error message
   @param {String} fn_name - Public function name for error message
 
   @return {void}
   *********************************************************************/
   assertOptionalInteger: function (value, field, fn_name) {
 
-    // Allow null/undefined — field is optional
+    // Allow null/undefined - field is optional
     if (Lib.Utils.isNullOrUndefined(value)) {
       return;
     }
@@ -218,10 +209,11 @@ const Validators = {
   Returns false if valid, or an array of error objects from the catalog.
 
   @param {*} code - The currency code to validate
+  @param {Object} CONFIG - Configuration object for this instance
 
   @return {false|Array} - false if valid, Error[] if invalid
   *********************************************************************/
-  validateCurrencyCode: function (code) {
+  validateCurrencyCode: function (code, CONFIG) {
 
     // Required check
     if (Lib.Utils.isNullOrUndefined(code)) {
@@ -265,10 +257,11 @@ const Validators = {
   of throwing.
 
   @param {*} code - The currency code to normalize
+  @param {Object} CONFIG - Configuration object for this instance
 
   @return {String|null} - Normalized lowercase code or null
   *********************************************************************/
-  normalizeCurrencyCode: function (code) {
+  normalizeCurrencyCode: function (code, CONFIG) {
 
     // Reject null/undefined or non-string
     if (Lib.Utils.isNullOrUndefined(code) || !Lib.Utils.isString(code)) {
@@ -297,10 +290,11 @@ const Validators = {
   Returns null if the result has wrong length.
 
   @param {*} code - The currency code to sanitize
+  @param {Object} CONFIG - Configuration object for this instance
 
   @return {String|null} - Sanitized code or null
   *********************************************************************/
-  sanitizeCurrencyCode: function (code) {
+  sanitizeCurrencyCode: function (code, CONFIG) {
 
     // Reject null/undefined or non-string
     if (Lib.Utils.isNullOrUndefined(code) || !Lib.Utils.isString(code)) {
@@ -323,4 +317,4 @@ const Validators = {
   }
 
 
-};////////////////////////////// Public Functions END ////////////////////////////
+};///////////////////////////Public Functions END//////////////////////////////

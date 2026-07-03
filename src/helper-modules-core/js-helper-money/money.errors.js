@@ -1,10 +1,7 @@
+// Info: Error catalog for helper-money.
+// Validation errors returned via validateCurrencyCode.
+// Frozen to prevent accidental mutation.
 'use strict';
-
-/**
- * Error catalog for js-helper-money.
- * Validation errors returned via validateCurrencyCode.
- * Frozen to prevent accidental mutation.
- */
 
 module.exports = Object.freeze({
 

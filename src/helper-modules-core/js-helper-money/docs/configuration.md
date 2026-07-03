@@ -1,8 +1,8 @@
-# Configuration. `js-helper-money`
+# Configuration. `helper-money`
 
-Loader pattern, dependency notes, and testing tier. For the function reference see [API Reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-money/docs/api.md).
+Loader pattern, dependency notes, and testing tier. For the function reference see [API Reference](api.md). For configuration schema and input contracts see [Schemas](schemas.md).
 
-This page is intentionally short. Money accepts a small reserved configuration block but reads no environment variables and exposes no service-specific tuning. The page exists for shape consistency: every Superloom module ships a `docs/configuration.md` so contributors and AI tooling can find the loader pattern and runtime details in the same place across the framework. The canonical reasoning is in [`module-categorization.md` → Universal Documentation Footprint](https://github.com/superloomdev/superloom/blob/main/docs/modules/module-categorization.md#universal-documentation-footprint).
+This page is intentionally short. Money accepts a small configuration block but reads no environment variables and exposes no service-specific tuning. The page exists for shape consistency: every Superloom module ships a `docs/configuration.md` so contributors and AI tooling can find the loader pattern and runtime details in the same place across the framework. The canonical reasoning is in [`module-categorization.md` → Universal Documentation Footprint](https://github.com/superloomdev/superloom/blob/main/docs/modules/module-categorization.md#universal-documentation-footprint).
 
 ## On This Page
 
@@ -20,7 +20,7 @@ This page is intentionally short. Money accepts a small reserved configuration b
 The module is a factory. Each loader call returns an independent public interface with its own merged configuration captured in a closure.
 
 ```javascript
-Lib.Money = require('@superloomdev/js-helper-money')(Lib, {});
+Lib.Money = require('helper-money')(Lib, {});
 ```
 
 Loader call semantics:
@@ -35,11 +35,10 @@ Loader call semantics:
 
 ## Configuration Keys
 
-Four keys. All are merged into the instance's `CONFIG` object and actively used by validators (`isCurrencyCode`, `assertCurrencyCode`, `validateCurrencyCode`, `sanitizeCurrencyCode`).
+Three keys. All are merged into the instance's `CONFIG` object and actively used by validators (`isCurrencyCode`, `assertCurrencyCode`, `validateCurrencyCode`, `sanitizeCurrencyCode`).
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `DEFAULT_CURRENCY_CODE` | `String` | `'usd'` | Default currency code. Validated at loader time (must be a known currency) |
 | `CURRENCY_CODE_MIN_LENGTH` | `Number` | `3` | Minimum valid length of a currency code |
 | `CURRENCY_CODE_MAX_LENGTH` | `Number` | `3` | Maximum valid length of a currency code |
 | `CURRENCY_CODE_SANITIZE_REGEX` | `RegExp` | `/[^a-zA-Z]/g` | Characters stripped from sanitized input |
@@ -58,16 +57,15 @@ None. The module never reads `process.env`.
 
 | Peer | Why |
 |---|---|
-| `@superloomdev/js-helper-utils` | Used by `roundAmount` for rounding, `formatAmount` for integer checks, and `sum`/`calculateTotalFromDenominations` for integer conversion. The rest of the surface is self-contained |
-| `@superloomdev/js-helper-debug` | Reserved for future logging. Injected but not currently used by any public function |
+| `helper-utils` | Used by `roundAmount` for rounding, `formatAmount` for integer checks, and `sum`/`calculateTotalFromDenominations` for integer conversion. The rest of the surface is self-contained |
 
-The peers are consumed through the standard `Lib.Utils` and `Lib.Debug` injection in the loader's first argument. The module does not `require()` the peers directly.
+The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not `require()` the peer directly.
 
 ---
 
 ## Direct Dependencies
 
-None. The module's `package.json` declares no `dependencies`. The supply chain you audit ends at this package and its two peers.
+None. The module's `package.json` declares no `dependencies`. The supply chain you audit ends at this package and its one peer.
 
 ---
 
