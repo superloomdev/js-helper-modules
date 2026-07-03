@@ -26,7 +26,7 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./config'),
+    require('./debug.config'),
     config || {}
   );
 

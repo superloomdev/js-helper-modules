@@ -1,6 +1,6 @@
 // Info: Test loader for js-helper-debug.
 // Mirrors the main project loader pattern: builds Lib container and Config.
-// process.env is not used — this module has no env-dependent values.
+// process.env is not used - this module has no env-dependent values.
 'use strict';
 
 
@@ -13,7 +13,7 @@ Load all test dependencies and build the Lib container.
 *********************************************************************/
 module.exports = function loader () {
 
-  // Test-wide config — use test-friendly defaults
+  // Test-wide config - use test-friendly defaults
   const Config = {
     LOG_LEVEL: 'debug',
     LOG_FORMAT: 'text',
