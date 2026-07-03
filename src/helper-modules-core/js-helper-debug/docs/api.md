@@ -1,4 +1,4 @@
-# API Reference. `js-helper-debug`
+# API Reference. `helper-debug`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For configuration keys and output formats see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/configuration.md).
 
@@ -16,7 +16,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free with respect to module state, and never throws**. Each call writes (or skips) one line on stdout or stderr and returns `void`.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Level threshold** | Calls below the configured `LOG_LEVEL` are suppressed. The order is `debug < info < warn < error < none`. The default is `debug` (everything writes) |
 | **Output stream** | `error` writes to stderr; everything else writes to stdout. Lambda, Docker, and journald conventions for stream-based severity routing apply |

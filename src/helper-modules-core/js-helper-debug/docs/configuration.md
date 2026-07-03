@@ -1,4 +1,4 @@
-# Configuration. `js-helper-debug`
+# Configuration. `helper-debug`
 
 Loader pattern, configuration keys, output formats, dependency notes, and testing tier. For the function reference see [API Reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/api.md).
 
@@ -19,7 +19,7 @@ Loader pattern, configuration keys, output formats, dependency notes, and testin
 The module is a factory. Each loader call returns an independent public interface with its own merged configuration captured in a closure.
 
 ```javascript
-Lib.Debug = require('@superloomdev/js-helper-debug')(Lib, {
+Lib.Debug = require('helper-debug')(Lib, {
   LOG_LEVEL:  'info',
   LOG_FORMAT: 'json',
   APP_NAME:   'orders-api',
@@ -29,7 +29,7 @@ Lib.Debug = require('@superloomdev/js-helper-debug')(Lib, {
 
 Loader call semantics:
 
-- **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Debug does not read it. Pass whatever your project uses (commonly `Lib`, `null`, or `{}`).
+- **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Debug does not read it. Pass whatever the project uses (commonly `Lib`, `null`, or `{}`).
 - **Second argument: config overrides.** Merged on top of the built-in defaults. Pass `{}` to use defaults unchanged.
 - **Multiple loader calls return independent interfaces.** A noisy module under investigation can be loaded with `LOG_LEVEL: 'debug'` while the rest of the application uses `LOG_LEVEL: 'info'`. The two interfaces share no state.
 
@@ -87,13 +87,13 @@ Both formats route `level: 'error'` to stderr and everything else to stdout. Thi
 
 None. The module never reads `process.env`. All configuration flows through the loader call.
 
-> **Recommended pattern.** If you want to drive configuration from the environment, read `process.env` in your application's bootstrap code and pass the result into the loader. This keeps the module testable without polluting the environment in tests.
+> **Recommended pattern.** To drive configuration from the environment, read `process.env` in the application's bootstrap code and pass the result into the loader. This keeps the module testable without polluting the environment in tests.
 
 ---
 
 ## Peer Dependencies
 
-None. Foundation modules cannot have peer dependencies. They ARE the foundation. Every other Superloom helper may consume `js-helper-debug`; this module imports nothing.
+None. Foundation modules cannot have peer dependencies. They ARE the foundation. Every other Superloom helper may consume `helper-debug`; this module imports nothing.
 
 The wider rationale (foundation invariants, the "no upward import" rule) is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md).
 
@@ -101,7 +101,7 @@ The wider rationale (foundation invariants, the "no upward import" rule) is docu
 
 ## Direct Dependencies
 
-None. The module's `package.json` declares no `dependencies`. The supply chain you audit ends at this package.
+None. The module's `package.json` declares no `dependencies`. The supply chain audit ends at this package.
 
 ---
 
@@ -113,7 +113,7 @@ The module ships a single test tier:
 |---|---|---|---|
 | **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-There is no Docker container and no service emulator. Tests inspect the module's stdout / stderr behaviour directly.
+There is no Docker container and no service emulator. Tests inspect the module's stdout / stderr behavior directly.
 
 ```bash
 cd _test && npm install && npm test

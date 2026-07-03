@@ -1,7 +1,7 @@
-# js-helper-debug - AI Agent Reference
+# helper-debug - AI Agent Reference
 
 ## Module Type
-Foundation module. Zero runtime dependencies. Self-contained logging - no dependency on `js-helper-utils`.
+Foundation module. Zero runtime dependencies. Self-contained logging - no dependency on `helper-utils`.
 
 ## Peer Dependencies
 None (foundation).
@@ -12,7 +12,7 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Debug = require('@superloomdev/js-helper-debug')(Lib, { /* config overrides */ });
+Lib.Debug = require('helper-debug')(Lib, { /* config overrides */ });
 ```
 
 `shared_libs` is accepted for interface uniformity but unused - Debug has no external lib dependencies. Config overrides are merged over defaults to create an independent instance.

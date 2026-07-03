@@ -1,4 +1,4 @@
-# @superloomdev/js-helper-debug
+# helper-debug
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
@@ -11,19 +11,19 @@ A flat collection of small functions covering the four standard log levels (`deb
 
 ## Why Use This Module
 
-- **Zero runtime dependencies.** Adding this module to your project adds zero packages to your dependency tree. The supply chain you audit ends at this package itself.
+- **Zero runtime dependencies.** Adding this module to a project adds zero packages to the dependency tree. The supply chain audit ends at this package itself.
 
 - **Runs everywhere.** Pure JavaScript with no platform-specific globals. The same module works under Node.js, in a browser bundle, in an edge runtime, in a Lambda, in a Cloudflare Worker. Memory usage is reported only where the runtime exposes it; the rest of the surface is universal.
 
-- **Pre-tested at every release.** A full test suite runs in CI on every push. Your project trusts the wrapper instead of re-verifying logging plumbing on each release.
+- **Pre-tested at every release.** A full test suite runs in CI on every push. A consuming project trusts the wrapper instead of re-verifying logging plumbing on each release.
 
 - **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom in order, use the section breaks as checkpoints to mark how far they have got, and finish without ever getting lost in dense logic. This matters most when an AI assistant is generating the change and a human still has to sign off on it. Open `debug.js` to see the structure.
 
 ## Aligned with Superloom Philosophy
 
-If your project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without you needing to learn anything new. It is the logging foundation that nearly every other Superloom helper depends on, so adopting it preserves consistency with the rest of the framework.
+If a project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without learning anything new. It is the logging foundation that nearly every other Superloom helper depends on, so adopting it preserves consistency with the rest of the framework.
 
-If you are not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
+For projects not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
 
 ## Extended Documentation
 
@@ -31,9 +31,9 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 - [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/configuration.md) - all six configuration keys, output-format reference, and testing tier
 - [Superloom](https://superloom.dev) - the framework
 
-## Adding to Your Project
+## Integration
 
-Install this module as a peer dependency in your project's `package.json` and load it through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
+Install this module as a peer dependency in the project's `package.json` and load it through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
