@@ -1,6 +1,6 @@
-# @superloomdev/js-server-helper-http-gateway
+# helper-http-gateway
 
-**Class:** B (Extended Utility — Node.js runtime only)
+**Class:** B (Extended Utility, Node.js runtime only)
 **Scope:** Incoming HTTP gateway for Node.js servers. Normalizes raw runtime request data
 (AWS API Gateway event, Express req) into a per-request instance and writes responses back
 through runtime-specific adapters.
@@ -10,8 +10,8 @@ through runtime-specific adapters.
 ## Singleton Loader
 
 ```javascript
-const Adapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const Adapter = require('helper-http-gateway-adapter-aws-apigateway')({});
+const Gateway = require('helper-http-gateway')(Lib, {
   Adapter: Adapter
 });
 ```
@@ -62,20 +62,20 @@ Param descriptor shape:
   is_number: Boolean,        // typecast to Number
   is_boolean: Boolean,       // typecast via Boolean(Number(v))
   is_json: Boolean,          // JSON.parse
-  trim: Boolean,             // trim whitespace, empty string → null
+  trim: Boolean,             // trim whitespace, empty string -> null
   json_func: Function,       // transform applied after JSON.parse
   sanitize_func: Function,   // sanitization function
-  validate_func: Function,   // must return truthy; failure → [null, false]
-  invalidate_func: Function  // must return falsy; truthy return → [err, false]
+  validate_func: Function,   // must return truthy; failure -> [null, false]
+  invalidate_func: Function  // must return falsy; truthy return -> [err, false]
 }
 ```
 
 ### Response Functions
 
 ```javascript
-// Send HTTP response — param order mirrors HTTP sequence: status → headers → cookies → body
+// Send HTTP response. Param order mirrors HTTP sequence: status -> headers -> cookies -> body
 Gateway.returnHttpResponse(instance, status, headers?, cookies?, body?);
-// cookies: descriptor built by buildCookie() — serialized into Set-Cookie at gateway boundary
+// cookies: descriptor built by buildCookie(), serialized into Set-Cookie at gateway boundary
 // Default headers added: Cache-Control: max-age=0, Content-Type: application/json
 // Returns: Boolean (always true)
 
@@ -97,15 +97,15 @@ Gateway.returnHttpRedirect404(instance);
 ### Cookie Builder
 
 ```javascript
-// Build (or accumulate) a cookie descriptor — pass as 4th param to returnHttpResponse
+// Build (or accumulate) a cookie descriptor. Pass as 4th param to returnHttpResponse
 Gateway.buildCookie(existing, name, value, ttl, options?);
 // existing : previous buildCookie result to append to, or null to start fresh
-// ttl      : seconds — 0 = expire/clear immediately, >0 = persistent
+// ttl      : seconds. 0 = expire/clear immediately, >0 = persistent
 // options  : attribute overrides (all optional, override gateway defaults)
 //   { httpOnly: true, secure: true, sameSite: 'lax', path: '/', domain: unset }
 // SameSite=None omitted automatically for incompatible browsers:
-//   iOS 12, macOS 10.14 Safari, UC Browser < 12.13.2, Chromium 51–66
-// Returns: Object (cookie descriptor — plain object keyed by cookie name)
+//   iOS 12, macOS 10.14 Safari, UC Browser < 12.13.2, Chromium 51-66
+// Returns: Object (cookie descriptor, plain object keyed by cookie name)
 
 // Set one cookie
 const cookies = Gateway.buildCookie(null, 'session', token, 86400);
@@ -127,19 +127,19 @@ const cookies = Gateway.buildCookie(null, 'csrf', token, 3600, { httpOnly: false
 ### Request Accessors
 
 ```javascript
-Gateway.getRequestIPAddress(instance);   // String — first IP from x-forwarded-for, or ''
-Gateway.getRequestUserAgent(instance);   // String — User-Agent header, or ''
-Gateway.getRequestOrigin(instance);      // String — Origin header, or ''
-Gateway.getRequestCountryCode(instance); // String | null — from CDN header if available
-Gateway.getBearerToken(instance);        // String | null — token from Authorization: Bearer <token>
-Gateway.isPreflightRequest(instance);    // Boolean — true if OPTIONS + Origin header present
+Gateway.getRequestIPAddress(instance);   // String. First IP from x-forwarded-for, or ''
+Gateway.getRequestUserAgent(instance);   // String. User-Agent header, or ''
+Gateway.getRequestOrigin(instance);      // String. Origin header, or ''
+Gateway.getRequestCountryCode(instance); // String | null. From CDN header if available
+Gateway.getBearerToken(instance);        // String | null. Token from Authorization: Bearer <token>
+Gateway.isPreflightRequest(instance);    // Boolean. True if OPTIONS + Origin header present
 ```
 
 ### Utilities
 
 ```javascript
 Gateway.getHttpTime(timestamp_seconds?);
-// Returns: String — HTTP-date format, e.g. "Wed, 21 Oct 2015 07:28:00 GMT"
+// Returns: String. HTTP-date format, e.g. "Wed, 21 Oct 2015 07:28:00 GMT"
 // Uses current time when no argument given
 
 Gateway.getUrlParts(url);
@@ -158,7 +158,7 @@ instance.http_request = {
   params  : { /* URL path params */ },
   method  : 'GET' | 'POST' | ...,
   url     : '/path?query=string',
-  cookies : { /* parsed Cookie header — read inbound cookies from here */ }
+  cookies : { /* parsed Cookie header, read inbound cookies from here */ }
 };
 
 instance._http_gateway = {
@@ -212,7 +212,7 @@ adapter.getCountryCode(headers);
 
 **Bundled:** `cookie@1.x`, `tldts@5.x`
 
-**Peer (in Lib):** `js-helper-utils`, `js-helper-debug`, `js-server-helper-instance`
+**Peer (in Lib):** `helper-utils`, `helper-debug`, `helper-instance`
 
 **Optional peer:** runtime adapter (`adapter-aws-apigateway` or `adapter-express`)
 
@@ -224,7 +224,7 @@ adapter.getCountryCode(headers);
 cd _test && npm install && npm test
 ```
 
-In-process stub adapter — no external services required. 133 tests covering: loader
+In-process stub adapter. No external services required. 133 tests covering: loader
 validation, all public methods, `buildCookie` (fresh/accumulate/override/clear/immutability),
 `returnHttpResponse` with cookies (defaults, overrides, SameSite=None UA guard),
 param extraction (all sources via `in` key, legacy `method` fallback, typecasts, validators),

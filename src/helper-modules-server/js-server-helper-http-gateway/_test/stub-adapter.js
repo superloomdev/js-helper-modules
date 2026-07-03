@@ -1,4 +1,4 @@
-// Info: Stub adapter for js-server-helper-http-gateway tests.
+// Info: Stub adapter for helper-http-gateway tests.
 // Satisfies the 3-method adapter contract with minimal fixed-output behavior
 // so http-gateway.js can be tested without any real runtime (Lambda or Express).
 // This is not a simulation of API Gateway or Express internals - it only

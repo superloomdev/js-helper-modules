@@ -1,4 +1,4 @@
-// Info: Request parameter extraction for js-server-helper-http-gateway.
+// Info: Request parameter extraction for helper-http-gateway.
 // Reads from the normalized instance.http_request shape (populated by the
 // adapter) and builds a clean, typed, validated args object.
 //
@@ -30,7 +30,7 @@ let ERRORS; // eslint-disable-line no-unused-vars
 /********************************************************************
 Singleton loader. Injects Lib, CONFIG, and ERRORS and returns the
 module-scope Params object directly. CONFIG and ERRORS are accepted
-for signature uniformity with other parts — not consumed today.
+for signature uniformity with other parts. They are not consumed today.
 
 @param {Object} shared_libs - Dependency container (Utils, Debug)
 @param {Object} config      - Merged module configuration
@@ -117,7 +117,7 @@ const Params = {
         param_value = param.value;
       }
 
-      Lib.Debug.log('Params raw', param.name + ': ' + param_value);
+      Lib.Debug.debug('Params raw', param.name + ': ' + param_value);
 
       // Required check - first pass (before any typecast)
       if (param.required && Lib.Utils.isNullOrUndefined(param_value)) {
@@ -178,7 +178,7 @@ const Params = {
         args[param.rename] = param.default;
       }
 
-      Lib.Debug.log(
+      Lib.Debug.debug(
         'Params clean',
         param.name + ': ' + (Lib.Utils.isObject(param_value) ? JSON.stringify(param_value) : String(param_value))
       );

@@ -1,20 +1,21 @@
 # Configuration
 
-Configuration reference for `@superloomdev/js-server-helper-http-gateway`.
+Configuration reference for `helper-http-gateway`.
 
 **Related docs:**
 - [`api.md`](api.md) for function reference
+- [`schemas.md`](schemas.md) for the validated contracts and return conventions
 - [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md) for the loader pattern
 
 ---
 
 ## Loader Pattern
 
-The gateway is a singleton module. One `require()(Lib, config)` call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js `require` cache guarantees the same object is returned on every subsequent call — one loader call per process.
+The gateway is a singleton module. One `require()(Lib, config)` call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js `require` cache guarantees the same object is returned on every subsequent call, so there is one loader call per process.
 
 ```javascript
-const Adapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const Adapter = require('helper-http-gateway-adapter-aws-apigateway')({});
+const Gateway = require('helper-http-gateway')(Lib, {
   Adapter: Adapter
 });
 ```
@@ -37,13 +38,13 @@ The ready-to-use adapter object. Create it by calling the adapter package with i
 
 | Adapter | Runtime |
 |---------|---------|
-| `@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway` | AWS Lambda + API Gateway HTTP API (payload v2.0) / Lambda Function URLs |
-| `@superloomdev/js-server-helper-http-gateway-adapter-express` | Docker or Express |
+| `helper-http-gateway-adapter-aws-apigateway` | AWS Lambda + API Gateway HTTP API (payload v2.0) / Lambda Function URLs |
+| `helper-http-gateway-adapter-express` | Docker or Express |
 
 **Example:**
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const ExpressAdapter = require('helper-http-gateway-adapter-express')({});
+const Gateway = require('helper-http-gateway')(Lib, {
   Adapter: ExpressAdapter
 });
 ```
@@ -62,7 +63,7 @@ The gateway expects these modules in the `Lib` container:
 | `Lib.Debug` | Structured logging |
 | `Lib.Instance` | Per-request instance lifecycle |
 
-These are typically provided by your application's loader setup. See [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md).
+These are typically provided by the application's loader setup. See [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md).
 
 ---
 
@@ -79,12 +80,12 @@ These npm packages are bundled with the gateway:
 
 ## Optional Peer Dependencies
 
-Runtime adapters are optional peer dependencies. Install only the adapter for your runtime:
+Runtime adapters are optional peer dependencies. A project installs only the adapter for its runtime:
 
 | Package | Version |
 |---------|---------|
-| `@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway` | ^1.0.0 |
-| `@superloomdev/js-server-helper-http-gateway-adapter-express` | ^1.0.0 |
+| `helper-http-gateway-adapter-aws-apigateway` | ^1.0.0 |
+| `helper-http-gateway-adapter-express` | ^1.0.0 |
 
 ---
 

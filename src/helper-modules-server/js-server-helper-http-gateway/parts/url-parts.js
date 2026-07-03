@@ -1,4 +1,4 @@
-// Info: URL parsing utilities for js-server-helper-http-gateway.
+// Info: URL parsing utilities for helper-http-gateway.
 // Thin wrapper around the tldts npm package that exposes a normalized
 // url-parts object. All functions are adapter-agnostic.
 //
@@ -8,7 +8,7 @@
 'use strict';
 
 
-// URL parsing library (npm: tldts). Module-scope const — loaded once.
+// URL parsing library (npm: tldts). Module-scope const, loaded once.
 const UrlParser = require('tldts');
 
 // Shared dependencies injected by loader (uniform parts signature)
@@ -22,7 +22,7 @@ let ERRORS; // eslint-disable-line no-unused-vars
 /********************************************************************
 Singleton loader. Injects Lib, CONFIG, and ERRORS and returns the
 module-scope UrlParts object directly. All three are accepted for
-signature uniformity with other parts — none are consumed today.
+signature uniformity with other parts. None are consumed today.
 
 @param {Object} shared_libs - Dependency container (Utils, Debug)
 @param {Object} config      - Merged module configuration

@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-http-gateway. Builds the base Lib
+// Info: Test loader for helper-http-gateway. Builds the base Lib
 // container (Utils, Debug, Instance, Time) used by all gateway tests.
 // No adapter packages are loaded here - tests use the in-process
 // stub adapter (stub-adapter.js).

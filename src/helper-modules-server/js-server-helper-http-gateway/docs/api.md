@@ -1,10 +1,10 @@
 # API Reference
 
-Complete function reference for `@superloomdev/js-server-helper-http-gateway`. All functions are methods on the HttpGateway interface returned by the loader.
+Complete function reference for `helper-http-gateway`. All functions are methods on the HttpGateway interface returned by the loader.
 
 **Related docs:**
 - [`configuration.md`](configuration.md) for loader pattern and config keys
-- [`ROBOTS.md`](../ROBOTS.md) for compact signature reference
+- [`schemas.md`](schemas.md) for the validated contracts and return conventions
 
 ---
 
@@ -73,7 +73,7 @@ Build a typed, validated args object from the normalized HTTP request data in `i
 | Field | Type | Description |
 |-------|------|-------------|
 | `in` | `String` | Source location (preferred): `'query'` \| `'body'` \| `'header'` \| `'params'` \| `'fixed'` |
-| `method` | `String` | HTTP verb context. Used as source fallback when `in` is absent: `'GET'`→query, `'POST'`→body, `'PATH'`→params, `'HEADER'`→header, `'FIXED'`→fixed |
+| `method` | `String` | HTTP verb context. Used as source fallback when `in` is absent: `'GET'`->query, `'POST'`->body, `'PATH'`->params, `'HEADER'`->header, `'FIXED'`->fixed |
 | `name` | `String` | Key name in the source location |
 | `rename` | `String` | Output key name in returned args object |
 | `value` | `*` | Literal value (only for `in: 'fixed'`) |
@@ -112,7 +112,7 @@ if (!args) {
 
 ### returnHttpResponse(instance, status, headers, cookies, body)
 
-Send an HTTP response back through the runtime callback. Param order mirrors the HTTP response sequence: status → headers → cookies → body. Merges default headers with caller-supplied headers, then serializes the `cookies` descriptor into `Set-Cookie` header strings before firing the response.
+Send an HTTP response back through the runtime callback. Param order mirrors the HTTP response sequence: status -> headers -> cookies -> body. Merges default headers with caller-supplied headers, then serializes the `cookies` descriptor into `Set-Cookie` header strings before firing the response.
 
 **Parameters:**
 
@@ -126,12 +126,12 @@ Send an HTTP response back through the runtime callback. Param order mirrors the
 
 **Returns:** `Boolean` (always `true`)
 
-**Example — plain response (no cookies):**
+**Example: plain response (no cookies)**
 ```javascript
 return Gateway.returnHttpResponse(instance, 200, null, null, { ok: true, data: result });
 ```
 
-**Example — response with a cookie:**
+**Example: response with a cookie**
 ```javascript
 const cookies = Gateway.buildCookie(null, 'session', token, 86400);
 return Gateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
@@ -275,7 +275,7 @@ if (!token) {
 
 ### isPreflightRequest(instance)
 
-Returns `true` if the request is a CORS preflight — HTTP method is `OPTIONS` and the `Origin` header is present.
+Returns `true` if the request is a CORS preflight. The HTTP method is `OPTIONS` and the `Origin` header is present.
 
 **Parameters:**
 
@@ -293,7 +293,7 @@ Returns `true` if the request is a CORS preflight — HTTP method is `OPTIONS` a
 
 Build a cookie descriptor object, or add a new entry to an existing one. The descriptor is a plain object keyed by cookie name. Pass it as the `cookies` argument to `returnHttpResponse` for serialization into `Set-Cookie` headers.
 
-Cookie name is used as the object key, so a second call with the same name overwrites the first — natural dedup and override. Serialization (including default attributes and SameSite=None UA detection) happens inside `returnHttpResponse`, not here.
+Cookie name is used as the object key, so a second call with the same name overwrites the first, giving natural dedup and override. Serialization (including default attributes and SameSite=None UA detection) happens inside `returnHttpResponse`, not here.
 
 **Parameters:**
 
@@ -305,7 +305,7 @@ Cookie name is used as the object key, so a second call with the same name overw
 | `ttl` | `Number` | Yes | Lifetime in seconds. `0` = expire/clear immediately |
 | `options` | `Object` | No | Attribute overrides applied at serialization |
 
-**`options` keys** (all optional — these override the gateway defaults):
+**`options` keys** (all optional, these override the gateway defaults):
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -317,26 +317,26 @@ Cookie name is used as the object key, so a second call with the same name overw
 
 **Returns:** `Object` (cookie descriptor)
 
-**Example — set one cookie:**
+**Example: set one cookie**
 ```javascript
 const cookies = Gateway.buildCookie(null, 'session', token, 86400);
 Gateway.returnHttpResponse(instance, 200, null, cookies, body);
 ```
 
-**Example — accumulate two cookies:**
+**Example: accumulate two cookies**
 ```javascript
 let cookies = Gateway.buildCookie(null, 'session', token, 86400);
 cookies = Gateway.buildCookie(cookies, 'pref', 'dark', 2592000);
 Gateway.returnHttpResponse(instance, 200, null, cookies, body);
 ```
 
-**Example — clear a cookie (ttl = 0):**
+**Example: clear a cookie (ttl = 0)**
 ```javascript
 const cookies = Gateway.buildCookie(null, 'session', '', 0);
 Gateway.returnHttpResponse(instance, 200, null, cookies, null);
 ```
 
-**Example — override httpOnly to allow JS access:**
+**Example: override httpOnly to allow JS access**
 ```javascript
 const cookies = Gateway.buildCookie(null, 'csrf', token, 3600, { httpOnly: false });
 ```
@@ -425,14 +425,14 @@ Return the viewer country code if the runtime can supply it (for example, CloudF
 
 | Affected client | Bug |
 |-----------------|-----|
-| iOS 12 (all browsers) | Treats `SameSite=None` as `SameSite=Strict` — cookie is blocked on cross-site requests |
+| iOS 12 (all browsers) | Treats `SameSite=None` as `SameSite=Strict`. Cookie is blocked on cross-site requests |
 | macOS 10.14 Safari and embedded browser | Same WebKit bug as iOS 12 |
 | UC Browser below 12.13.2 | Drops the cookie entirely when `SameSite=None` is present |
-| Chromium 51-66 | Drops any cookie with an unrecognised `SameSite` value |
+| Chromium 51-66 | Drops any cookie with an unrecognized `SameSite` value |
 
 For these clients, `returnHttpResponse` serializes the cookie without any `SameSite` attribute. Modern browsers (Chromium 67+, Safari 13+, Firefox 79+) receive `SameSite=None; Secure` as intended by RFC 6265bis.
 
-The default `sameSite` applied by the gateway is `'lax'`, which is safe for all browsers. Only set `sameSite: 'none'` in `buildCookie` options if you specifically need cross-site cookie access.
+The default `sameSite` applied by the gateway is `'lax'`, which is safe for all browsers. Set `sameSite: 'none'` in `buildCookie` options only when cross-site cookie access is required.
 
 This detection is based on the [Chromium SameSite incompatible clients list](https://www.chromium.org/updates/same-site/incompatible-clients).
 
@@ -442,4 +442,4 @@ This detection is based on the [Chromium SameSite incompatible clients list](htt
 
 This module does **not** support `multipart/form-data` request bodies. Sending a multipart request results in an empty `instance.http_request.body`. The body is not parsed and no error is raised.
 
-Use `application/json` or `application/x-www-form-urlencoded` for all POST data. Multipart support will be added in a future version via a dedicated adapter-level option.
+POST data uses `application/json` or `application/x-www-form-urlencoded`. Multipart support will be added in a future version via a dedicated adapter-level option.
