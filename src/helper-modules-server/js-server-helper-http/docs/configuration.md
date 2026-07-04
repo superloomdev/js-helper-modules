@@ -40,11 +40,11 @@ Two keys. Both have working defaults; override only when the defaults do not fit
 | Key | Type | Default | Required | Description |
 |---|---|---|---|---|
 | `TIMEOUT` | `number` | `30` | No | Default timeout for every request in seconds. Used to construct `AbortSignal.timeout(TIMEOUT * 1000)` when no per-call `options.timeout` is passed |
-| `USER_AGENT` | `string` | `'Open-Framework-HTTP/2.0'` | No | Value of the `User-Agent` header on every outbound request. A caller-supplied `options.headers['User-Agent']` overrides this value for that call |
+| `USER_AGENT` | `string` | `'Generic-HTTP-Client/1.0'` | No | Value of the `User-Agent` header on every outbound request. A caller-supplied `options.headers['User-Agent']` overrides this value for that call |
 
 > **Per-call timeout overrides.** The `options.timeout` argument on every public function overrides `CONFIG.TIMEOUT` for that single call without affecting the default. This is the recommended pattern when one specific endpoint needs a non-default budget.
 
-> **Legacy User-Agent default.** The `Open-Framework-HTTP/2.0` default predates the Superloom rename. New deployments should override `USER_AGENT` to a project-identifying value (e.g. `'YourApp/1.0 (+https://example.com)'`).
+> **User-Agent default.** The `Generic-HTTP-Client/1.0` default is intentionally generic. Override `USER_AGENT` to a project-identifying value (e.g. `'YourApp/1.0 (+https://example.com)'`) for production use.
 
 ---
 
