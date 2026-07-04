@@ -40,7 +40,7 @@ module.exports = function loader () {
 
   // ==================== HTTP GATEWAY (WITH ADAPTER) ================ //
 
-  const ExpressAdapter = HttpGatewayAdapterExpressHttp({});
+  const ExpressAdapter = HttpGatewayAdapterExpressHttp(Lib, {});
   const httpGateway = HttpGateway(Lib, { Adapter: ExpressAdapter });
 
 
