@@ -70,13 +70,13 @@ and Validators. Statelessness means createInterface closes over nothing
 beyond its four fixed slots.
 
 @param {Object} Lib         - Dependency container (Utils, Debug)
-@param {Object} _CONFIG     - Merged configuration (used at loader time only)
-@param {Object} _ERRORS     - Frozen error catalog (used at loader time only)
-@param {Object} _Validators - Validators singleton (used at loader time only)
+@param {Object} CONFIG     - Merged configuration (used at loader time only)
+@param {Object} ERRORS     - Frozen error catalog (used at loader time only)
+@param {Object} Validators - Validators singleton (used at loader time only)
 
 @return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
 *********************************************************************/
-const createInterface = function (Lib, _CONFIG, _ERRORS, _Validators) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Adapter = {
