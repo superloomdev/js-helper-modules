@@ -53,7 +53,7 @@ module.exports = {
   // Keep this lower than POOL_IDLE_TIMEOUT_MS for serverless/managed deployments.
   KEEP_ALIVE_INITIAL_DELAY_MS: 10000,
 
-  // ---- Query Behaviour ----
+  // ---- Query Behavior ----
   // Allow multiple statements per query() call, separated by semicolons.
   // SECURITY: only enable if every SQL input is trusted - injection risk is magnified.
   MULTIPLE_STATEMENTS: false,

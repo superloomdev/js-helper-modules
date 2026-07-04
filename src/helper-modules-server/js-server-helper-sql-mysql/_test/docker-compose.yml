@@ -1,7 +1,7 @@
 # MySQL 8.0.44 for module testing
 # Matches AWS Aurora MySQL 3.x compatibility version
 # Lifecycle managed by npm scripts: npm test starts → tests → stops and removes
-# Ephemeral — data lost on container stop
+# Ephemeral - data lost on container stop
 
 name: superloom-test-mysql
 

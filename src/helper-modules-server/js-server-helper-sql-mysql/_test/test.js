@@ -8,12 +8,12 @@ const { describe, it, before, after } = require('node:test');
 const MySQL2Promise = require('mysql2/promise');
 const ERRORS = require('../mysql.errors');
 
-// Load dependencies via test loader — process.env is touched only there.
+// Load dependencies via test loader - process.env is touched only there.
 const { Lib, Config } = require('./loader')();
 const MySQL = Lib.MySQL;
 const Instance = Lib.Instance;
 
-// Single test instance — represents a "request" for performance timeline.
+// Single test instance - represents a "request" for performance timeline.
 const instance = Instance.initialize();
 
 // Admin connection for schema setup/teardown. Not part of the module under test.
@@ -26,7 +26,7 @@ const ADMIN_OPTIONS = {
   multipleStatements: true
 };
 
-// Test table name — keep simple and unique
+// Test table name - keep simple and unique
 const TEST_TABLE = 'test_table';
 
 
@@ -76,7 +76,7 @@ after(async function () {
 
 
 // ============================================================================
-// 1. buildQuery / buildRawText / buildMultiCondition — pure, no I/O
+// 1. buildQuery / buildRawText / buildMultiCondition - pure, no I/O
 // ============================================================================
 
 describe('buildQuery', function () {
@@ -327,7 +327,7 @@ describe('write (atomic transaction)', function () {
     const res = await MySQL.write(instance, [
       { sql: 'INSERT INTO ?? (p_id, col_1) VALUES (?, ?)', params: [TEST_TABLE, 'tx3', 'a'] },
       { sql: 'INSERT INTO ?? (p_id, col_1) VALUES (?, ?)', params: [TEST_TABLE, 'tx1', 'dup'] }
-      // duplicate unique key — transaction must roll back
+      // duplicate unique key - transaction must roll back
     ]);
 
     assert.strictEqual(res.success, false);
@@ -497,7 +497,7 @@ describe('write (pre-built SQL strings)', function () {
 
 
 // ============================================================================
-// 5. Multiple-instance support — core reason for the closure-per-loader design
+// 5. Multiple-instance support - core reason for the closure-per-loader design
 // ============================================================================
 
 describe('multiple instances', function () {

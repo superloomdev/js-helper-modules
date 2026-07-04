@@ -1,4 +1,4 @@
-# js-server-helper-sql-mysql
+# @superloomdev/js-server-helper-sql-mysql
 
 MySQL 8.0.44+ client with connection pooling. Async/await. Multi-DB capable. **API-compatible with `js-server-helper-sql-postgres` and `js-server-helper-sql-sqlite`.** Same placeholders, same function signatures, same return shapes.
 
@@ -12,6 +12,11 @@ Server helper. Service-dependent (needs Docker for emulated, real MySQL-compatib
 
 ## Direct Dependencies
 - `mysql2` - Node.js MySQL driver (lazy-loaded)
+
+## Companion Files
+- `mysql.config.js` - default config (HOST, PORT, DATABASE, USER, PASSWORD, SSL, POOL_MAX, POOL_QUEUE_LIMIT, POOL_IDLE_TIMEOUT_MS, KEEP_ALIVE_INITIAL_DELAY_MS, MULTIPLE_STATEMENTS, CHARSET, TIMEZONE, CONNECT_TIMEOUT_MS, CLOSE_TIMEOUT_MS)
+- `mysql.errors.js` - frozen error catalog (DATABASE_CONNECTION_FAILED, DATABASE_QUERY_FAILED, DATABASE_TRANSACTION_FAILED)
+- `mysql.validators.js` - config validators singleton
 
 ## Loader Pattern (Multi-DB Capable)
 
