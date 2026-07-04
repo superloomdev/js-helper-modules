@@ -29,7 +29,7 @@ Each loader call returns an independent Http interface with its own `Lib` and `C
 | Key | Type | Default | Description |
 |---|---|---|---|
 | TIMEOUT | Number | 30 | Default request timeout in seconds (drives `AbortSignal.timeout`). Per-call override via `options.timeout` |
-| USER_AGENT | String | 'Open-Framework-HTTP/2.0' | Default `User-Agent` header. Per-call override via `options.headers['User-Agent']` |
+| USER_AGENT | String | 'Generic-HTTP-Client/1.0' | Default `User-Agent` header. Per-call override via `options.headers['User-Agent']` |
 
 ## Exported Functions
 

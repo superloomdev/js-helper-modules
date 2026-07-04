@@ -2,7 +2,8 @@
 // Server-only: uses Node.js 24+ built-in `fetch`, `AbortSignal.timeout`, `URL`, `URLSearchParams`, `Buffer`. No runtime dependencies.
 //
 // Factory pattern: each loader call returns an independent Http interface
-// with its own Lib and CONFIG. Stateless - no per-instance resources.
+// with its own Lib, CONFIG, ERRORS, and Validators. Stateless - no per-instance
+// resources.
 'use strict';
 
 
@@ -11,7 +12,7 @@
 
 /********************************************************************
 Factory loader. One call = one independent instance with its own
-Lib and CONFIG.
+Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} shared_libs - Lib container with Utils and Debug
 @param {Object} config - Overrides merged over module config defaults
@@ -33,13 +34,13 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Own frozen error catalog
+  // Error catalog (frozen, shared across instances)
   const ERRORS = require('./http.errors');
 
-  // Load the validators singleton and inject Lib + ERRORS
+  // Validators module (singleton, initialized with Lib, ERRORS)
   const Validators = require('./http.validators')(Lib, ERRORS);
 
-  // Validate config - throws on misconfiguration
+  // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
   // Create and return the public interface
@@ -289,7 +290,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       }
 
       // Log outgoing request
-      Lib.Debug.log('HTTP Request', { url: final_url, method: method });
+      Lib.Debug.debug('HTTP Request', { url: final_url, method: method });
 
       // Execute request and normalize result
       try {
@@ -355,7 +356,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         }
 
         // Unknown request setup error
-        Lib.Debug.log('HTTP Setup Error', error.message);
+        Lib.Debug.debug('HTTP Setup Error', error.message);
 
         return {
           success: false,

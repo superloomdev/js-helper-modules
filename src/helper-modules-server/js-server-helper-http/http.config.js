@@ -8,6 +8,6 @@ module.exports = {
   TIMEOUT: 30,
 
   // Default User-Agent string
-  USER_AGENT: 'Open-Framework-HTTP/2.0'
+  USER_AGENT: 'Generic-HTTP-Client/1.0'
 
 };
