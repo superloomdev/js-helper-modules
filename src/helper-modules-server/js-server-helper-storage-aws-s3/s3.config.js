@@ -1,5 +1,5 @@
-// Info: Configuration for js-server-helper-aws-s3
-// All values can be overridden via loader config injection
+// Info: Default configuration for js-server-helper-storage-aws-s3.
+// Pure defaults - the loader merges overrides on top of this. No process.env access here.
 'use strict';
 
 
@@ -18,7 +18,7 @@ module.exports = {
 
   // Enable path-style addressing (http://host/bucket/key). Required for MinIO
   // and most self-hosted S3-compatible servers. AWS S3 uses virtual-hosted
-  // style by default — leave false for real AWS.
+  // style by default - leave false for real AWS.
   FORCE_PATH_STYLE: false,
 
   // Maximum retry attempts for failed requests

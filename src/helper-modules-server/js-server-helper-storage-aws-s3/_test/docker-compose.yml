@@ -1,6 +1,6 @@
 # MinIO (S3-compatible) for module testing
 # Lifecycle managed by npm scripts: npm test starts → tests → stops and removes
-# Ephemeral — data lost on container stop
+# Ephemeral - data lost on container stop
 
 name: superloom-test-s3
 

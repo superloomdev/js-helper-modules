@@ -15,7 +15,7 @@ const {
 const ERRORS = require('../s3.errors');
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
-// process.env is NEVER accessed in test files — only in loader.js
+// process.env is NEVER accessed in test files - only in loader.js
 const { Lib, Config } = require('./loader')();
 const S3 = Lib.S3;
 const Instance = Lib.Instance;
@@ -24,7 +24,7 @@ const Instance = Lib.Instance;
 const instance = Instance.initialize();
 
 // Test infrastructure: raw AWS SDK client for bucket setup/teardown
-// Not part of the module under test — only used in before/after hooks
+// Not part of the module under test - only used in before/after hooks
 // Uses same credentials as the S3 module (both connect to the same target)
 const admin_options = {
   region: Config.s3_region,
@@ -35,7 +35,7 @@ const admin_options = {
 };
 
 // Endpoint and path-style are only set for emulated testing (MinIO)
-// For integration testing these are undefined/false — SDK uses real AWS
+// For integration testing these are undefined/false - SDK uses real AWS
 if (Config.s3_endpoint) {
   admin_options.endpoint = Config.s3_endpoint;
 }
@@ -46,7 +46,7 @@ if (Config.s3_force_path_style === true) {
 
 const AdminClient = new S3Client(admin_options);
 
-// Test bucket names (prefixed with test- — IAM policy restricts to these)
+// Test bucket names (prefixed with test- - IAM policy restricts to these)
 // Unique suffix to avoid conflicts between parallel test runs
 const SUFFIX = Date.now().toString(36);
 const TEST_BUCKET = 'test-crud-' + SUFFIX;
@@ -55,7 +55,7 @@ const TEST_BUCKET_COPY = 'test-copy-' + SUFFIX;
 
 /********************************************************************
 Empty a bucket by listing and deleting all objects. Used only by the
-teardown hook — buckets must be empty before they can be deleted.
+teardown hook - buckets must be empty before they can be deleted.
 
 @param {String} bucket - Bucket name to empty
 @return {Promise<void>}
@@ -139,7 +139,7 @@ after(async function () {
       await AdminClient.send(new DeleteBucketCommand({ Bucket: bucket }));
     }
     catch (_err) {
-      // Ignore teardown errors — re-running tests should still succeed
+      // Ignore teardown errors - re-running tests should still succeed
     }
   }
 
