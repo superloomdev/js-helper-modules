@@ -5,6 +5,11 @@
 
 ---
 
+## Companion Files
+- `adapter.config.js` - default config (empty - no adapter-specific keys)
+- `adapter.errors.js` - frozen error catalog (single construction-time type)
+- `adapter.validators.js` - config validators singleton
+
 ## Adapter Loader
 
 ```javascript

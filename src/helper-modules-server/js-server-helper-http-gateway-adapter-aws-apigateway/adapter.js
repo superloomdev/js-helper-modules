@@ -142,11 +142,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       return {
         headers: headers,
         cookies: cookies,
-        query  : get_params,
-        body   : post_params,
-        params : path_params,
-        method : method,
-        url    : url,
+        query: get_params,
+        body: post_params,
+        params: path_params,
+        method: method,
+        url: url,
         response_handler: response_handler
       };
 
@@ -194,9 +194,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the API Gateway response envelope
       return {
-        statusCode     : status,
-        headers        : headers || {},
-        body           : normalized_body,
+        statusCode: status,
+        headers: headers || {},
+        body: normalized_body,
         isBase64Encoded: is_base64
       };
 
