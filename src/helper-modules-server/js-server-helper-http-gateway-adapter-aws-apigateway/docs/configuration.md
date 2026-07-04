@@ -11,44 +11,40 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 
 ## Loader Pattern
 
-Instantiate the adapter by calling it, then pass the ready-to-use object as `CONFIG.Adapter` to the gateway loader:
+Instantiate the adapter by calling it with the shared `Lib` container and an optional config object, then pass the ready-to-use object as `CONFIG.Adapter` to the gateway loader:
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
 
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   Adapter: AwsAdapter
 });
 ```
 
-Call the adapter loader first (it builds its own Lib from peer dependencies and merges config over companion file defaults). Pass the resulting ready-to-use adapter object - not the `require()` result directly - to the gateway.
+The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It merges config over companion file defaults and returns a ready-to-use adapter object - not the `require()` result directly - to the gateway.
 
 ---
 
 ## Configuration Keys
 
-The AWS adapter accepts one optional config key. Pass an empty object `{}` for defaults:
+The AWS adapter accepts no configuration keys. Pass an empty object `{}` for defaults:
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
 ```
-
-| Config key | Required | Default | Description |
-|---|---|---|---|
-| `LOG_LEVEL` | No | `'error'` | Verbosity of the adapter's internal Debug instance. One of: `'debug'`, `'info'`, `'warn'`, `'error'` |
 
 ---
 
 ## Runtime Dependencies
 
-The adapter has two peer dependencies from the Superloom framework: `helper-utils` and `helper-debug`. No AWS SDK is required - the adapter reads from the Lambda event object directly and writes through the Lambda callback. No third-party npm packages are installed.
+The adapter receives `Utils` and `Debug` from the shared `Lib` container (injected by the application). No AWS SDK is required - the adapter reads from the Lambda event object directly and writes through the Lambda callback. No third-party npm packages are installed.
 
 ---
 
 ## Lambda Handler Pattern
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
 
 // Build the gateway once at module scope so it survives across warm invocations:
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: AwsAdapter });

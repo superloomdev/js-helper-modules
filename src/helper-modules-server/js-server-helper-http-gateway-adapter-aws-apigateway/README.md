@@ -70,12 +70,12 @@ When a CloudFront distribution sits in front of API Gateway and forwards the `Cl
 
 ## Dependencies
 
-Two peer dependencies from the Superloom framework: `helper-utils` and `helper-debug`. No AWS SDK required. No third-party npm packages.
+The adapter receives `Utils` and `Debug` from the shared `Lib` container (injected by the application). No AWS SDK required. No third-party npm packages.
 
 ## Extended Documentation
 
 - [`docs/api.md`](docs/api.md). Full 3-method adapter contract with parameter, return, and behavior tables
-- [`docs/configuration.md`](docs/configuration.md). Loader pattern, the `LOG_LEVEL` config key, Lambda handler pattern, supported runtimes
+- [`docs/configuration.md`](docs/configuration.md). Loader pattern, Lambda handler pattern, supported runtimes
 - [`docs/payload-format.md`](docs/payload-format.md). v2.0 schema reference, body-parsing rules, authorizer context, v1.0 unsupported boundary
 - [`ROBOTS.md`](ROBOTS.md). Compact reference for AI assistants
 
@@ -85,7 +85,7 @@ Two peer dependencies from the Superloom framework: `helper-utils` and `helper-d
 |------|---------|--------|
 | Integration | Node.js built-in test runner against 23 real API Gateway v2.0 event fixtures | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Tests are fixture-driven. 6 fixtures are copied verbatim from [`aws/aws-lambda-go events/testdata`](https://github.com/aws/aws-lambda-go/tree/main/events/testdata) — the exact shapes the AWS Go SDK uses to test its own event handling, which is the closest "real Lambda input" available without provisioning AWS infrastructure. 17 hand-written fixtures cover scenarios AWS does not publish (cookies, bearer/basic auth, API key, malformed body, multipart, unicode, base64, edge cases). The v1.0 REST API authorizer payload in the AWS testdata is included as a documented unsupported boundary. Direct unit tests (Group J) cover all adapter helper functions with 93 total tests.
+Tests are fixture-driven. 6 fixtures are copied verbatim from [`aws/aws-lambda-go events/testdata`](https://github.com/aws/aws-lambda-go/tree/main/events/testdata) - the exact shapes the AWS Go SDK uses to test its own event handling, which is the closest "real Lambda input" available without provisioning AWS infrastructure. 17 hand-written fixtures cover scenarios AWS does not publish (cookies, bearer/basic auth, API key, malformed body, multipart, unicode, base64, edge cases). The v1.0 REST API authorizer payload in the AWS testdata is included as a documented unsupported boundary. Direct unit tests (Group J) cover all adapter helper functions with 93 total tests.
 
 ## License
 
