@@ -12,7 +12,7 @@ const { describe, it, before, after } = require('node:test');
 const { DynamoDBClient, CreateTableCommand, DeleteTableCommand } = require('test-infra-aws-sdk');
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
-// process.env is NEVER accessed in test files — only in loader.js
+// process.env is NEVER accessed in test files - only in loader.js
 const { Lib, Config } = require('./loader')();
 const DynamoDB = Lib.DynamoDB;
 const Instance = Lib.Instance;
@@ -21,7 +21,7 @@ const Instance = Lib.Instance;
 const instance = Instance.initialize();
 
 // Test infrastructure: raw AWS SDK client for table setup/teardown
-// Not part of the module under test — only used in before/after hooks
+// Not part of the module under test - only used in before/after hooks
 // Uses same credentials as the DynamoDB module (both connect to the same target)
 const admin_options = {
   region: Config.aws_region,
@@ -32,14 +32,14 @@ const admin_options = {
 };
 
 // Endpoint is only set for emulated testing (DynamoDB Local)
-// For integration testing, this value is undefined — SDK uses real AWS
+// For integration testing, this value is undefined - SDK uses real AWS
 if (Config.dynamodb_endpoint) {
   admin_options.endpoint = Config.dynamodb_endpoint;
 }
 
 const AdminClient = new DynamoDBClient(admin_options);
 
-// Test table names (prefixed with test_ — IAM policy restricts to these)
+// Test table names (prefixed with test_ - IAM policy restricts to these)
 const TEST_TABLE = 'test_crud';
 const TEST_TABLE_COMPOSITE = 'test_composite';
 
@@ -701,7 +701,7 @@ describe('query', function () {
     assert.strictEqual(result.items.length, 1);
     assert.strictEqual(result.items[0].pk, 'proj_org');
     assert.strictEqual(result.items[0].sk, 'proj_1');
-    // Projected fields only — secret and age should be absent
+    // Projected fields only - secret and age should be absent
     assert.strictEqual(result.items[0].secret, undefined);
     assert.strictEqual(result.items[0].age, undefined);
 
@@ -1256,7 +1256,7 @@ describe('batchWriteRecords', function () {
 
   it('should handle more than 25 items via auto-chunking', async function () {
 
-    // Generate 60 items — requires 3 chunks (25 + 25 + 10)
+    // Generate 60 items - requires 3 chunks (25 + 25 + 10)
     const items = [];
     for (let i = 0; i < 60; i++) {
       items.push({ pk: 'chunk_' + String(i).padStart(3, '0'), name: 'Chunked Item ' + i });
@@ -1358,7 +1358,7 @@ describe('batchDeleteRecords', function () {
     }
     await DynamoDB.batchWriteRecords(instance, { [TEST_TABLE]: items });
 
-    // Delete all 50 — requires 2 chunks (25 + 25)
+    // Delete all 50 - requires 2 chunks (25 + 25)
     const keys = items.map(function (item) { return { pk: item.pk }; });
     const result = await DynamoDB.batchDeleteRecords(instance, { [TEST_TABLE]: keys });
 
@@ -1472,7 +1472,7 @@ describe('transactWriteRecords', function () {
 
   it('should fail when exceeding 100 actions (AWS limit)', async function () {
 
-    // Build more than 100 Put commands — AWS TransactWriteItems rejects > 100
+    // Build more than 100 Put commands - AWS TransactWriteItems rejects > 100
     const commands = [];
     for (let i = 0; i < 101; i++) {
       commands.push(DynamoDB.commandBuilderForAddRecord(TEST_TABLE, {

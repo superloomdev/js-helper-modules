@@ -1,5 +1,5 @@
-// Info: Configuration for js-server-helper-aws-dynamodb
-// All values can be overridden via loader config injection
+// Info: Default configuration for js-server-helper-nosql-aws-dynamodb.
+// Pure defaults - the loader merges overrides on top of this. No process.env access here.
 'use strict';
 
 

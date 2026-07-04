@@ -1,4 +1,4 @@
-# js-server-helper-nosql-aws-dynamodb
+# @superloomdev/js-server-helper-nosql-aws-dynamodb
 
 AWS DynamoDB CRUD, batch, query, scan. Lazy-loaded SDK v3. Explicit credentials. **API-compatible with `js-server-helper-nosql-mongodb`.** Same calling shape for single-record CRUD, batch, query / scan, and transactions.
 
@@ -13,6 +13,11 @@ Server helper. Service-dependent (needs Docker for emulated, AWS for integration
 ## Direct Dependencies
 - `@aws-sdk/client-dynamodb` - base DynamoDB client
 - `@aws-sdk/lib-dynamodb` - Document Client + Commands
+
+## Companion Files
+- `dynamodb.config.js` - default config (REGION, KEY, SECRET, ENDPOINT, MAX_RETRIES, REMOVE_UNDEFINED_VALUES)
+- `dynamodb.errors.js` - frozen error catalog (DATABASE_WRITE_FAILED, DATABASE_READ_FAILED, DATABASE_UPDATE_FAILED, DATABASE_DELETE_FAILED, DATABASE_QUERY_FAILED, DATABASE_SCAN_FAILED, DATABASE_BATCH_FAILED, DATABASE_TRANSACTION_FAILED, DATABASE_TABLE_CREATE_FAILED, DATABASE_TABLE_DELETE_FAILED)
+- `dynamodb.validators.js` - config validators singleton
 
 ## Loader Pattern (Factory)
 
