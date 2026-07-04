@@ -2,16 +2,16 @@
 // Mirrors the main project loader pattern: reads environment variables,
 // builds Lib container, returns { Lib, Config }.
 //
-// SQLite is offline by default — if SQLITE_FILE is unset the tests run
+// SQLite is offline by default - if SQLITE_FILE is unset the tests run
 // against an in-memory database. Point SQLITE_FILE at a file path to test
-// on-disk behaviour (journal_mode=WAL, etc.).
+// on-disk behavior (journal_mode=WAL, etc.).
 'use strict';
 
 
 /********************************************************************
 Load all test dependencies and build the Lib container from environment.
 
-process.env is ONLY read here — never in test.js.
+process.env is ONLY read here - never in test.js.
 
 @return {Object} result - Runtime objects for testing
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance, SQLite)
@@ -19,18 +19,12 @@ process.env is ONLY read here — never in test.js.
 *********************************************************************/
 module.exports = function loader () {
 
-  // ========================= CONFIGURATION ========================= //
-
-  // Test-wide environment config — available to test.js for admin-DB setup
+  // Test-wide environment config - available to test.js for admin-DB setup
   const Config = {
     sqlite_file: process.env.SQLITE_FILE || ':memory:'
   };
 
   // Sub-configs: each helper module receives ONLY its relevant slice
-  const config_debug = {
-    LOG_LEVEL: 'error'
-  };
-
   const config_sqlite = {
     FILE: Config.sqlite_file,
     // Keep journal_mode defaults simple for tests; skip WAL for :memory:
@@ -39,20 +33,15 @@ module.exports = function loader () {
   };
 
 
-  // ==================== DEPENDENCY CONTAINER ======================= //
-
+  // Dependencies for this instance
   const Lib = {};
 
-
-  // ==================== HELPER MODULES ============================= //
-
+  // Helper modules
   Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Debug = require('helper-debug')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
-
-  // ==================== SERVER HELPER MODULES ====================== //
-
+  // Server helper modules
   Lib.SQLite = require('helper-sql-sqlite')(Lib, config_sqlite);
 
 

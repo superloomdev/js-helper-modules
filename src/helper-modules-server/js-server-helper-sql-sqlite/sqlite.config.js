@@ -1,5 +1,5 @@
 // Info: Default configuration for js-server-helper-sqlite.
-// Pure defaults — the loader merges overrides on top of this. No process.env access here.
+// Pure defaults - the loader merges overrides on top of this. No process.env access here.
 'use strict';
 
 

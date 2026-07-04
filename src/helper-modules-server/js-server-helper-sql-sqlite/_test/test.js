@@ -7,15 +7,15 @@ const assert = require('node:assert/strict');
 const { describe, it, before, after } = require('node:test');
 const ERRORS = require('../sqlite.errors');
 
-// Load dependencies via test loader — process.env is touched only there.
+// Load dependencies via test loader - process.env is touched only there.
 const { Lib } = require('./loader')();
 const SQLite = Lib.SQLite;
 const Instance = Lib.Instance;
 
-// Single test instance — represents a "request" for performance timeline.
+// Single test instance - represents a "request" for performance timeline.
 const instance = Instance.initialize();
 
-// Test table name — keep simple and unique
+// Test table name - keep simple and unique
 const TEST_TABLE = 'test_table';
 
 
@@ -27,7 +27,7 @@ describe('SQLite', { concurrency: false }, function () {
 // 0. TABLE SETUP / TEARDOWN
 // ----------------------------------------------------------------------------
 // SQLite has no separate admin server. We reuse the module's own handle via
-// getClient() to run DDL — this keeps setup/teardown isolated from the
+// getClient() to run DDL - this keeps setup/teardown isolated from the
 // module's public write() API.
 // ============================================================================
 
@@ -63,7 +63,7 @@ after(async function () {
 
 
 // ============================================================================
-// 1. buildQuery / buildRawText / buildMultiCondition — pure, no I/O
+// 1. buildQuery / buildRawText / buildMultiCondition - pure, no I/O
 // ============================================================================
 
 describe('buildQuery', function () {
@@ -504,7 +504,7 @@ describe('write (pre-built SQL strings)', function () {
 
 
 // ============================================================================
-// 5. Multiple-instance support — core reason for the closure-per-loader design
+// 5. Multiple-instance support - core reason for the closure-per-loader design
 // ============================================================================
 
 describe('multiple instances', function () {
@@ -513,7 +513,7 @@ describe('multiple instances', function () {
 
     const ModuleFactory = require('helper-sql-sqlite');
 
-    // Two separate in-memory databases — truly independent state
+    // Two separate in-memory databases - truly independent state
     const A = ModuleFactory(Lib, {
       FILE: ':memory:',
       JOURNAL_MODE: 'MEMORY'
@@ -552,7 +552,7 @@ describe('multiple instances', function () {
 
 
 // ============================================================================
-// 6. Placeholder translator — edge cases
+// 6. Placeholder translator - edge cases
 // ============================================================================
 
 describe('placeholder translator', function () {
@@ -720,7 +720,7 @@ describe('SQLite-specific: PRAGMA', function () {
 // 8. Rigorous edge cases: formatQuery (escapeValue, formatValue, parser)
 // ============================================================================
 
-describe('formatQuery — escapeValue edge cases', function () {
+describe('formatQuery - escapeValue edge cases', function () {
 
   it('should throw on NaN', function () {
 
@@ -807,7 +807,7 @@ describe('formatQuery — escapeValue edge cases', function () {
 });
 
 
-describe('formatQuery — parser edge cases', function () {
+describe('formatQuery - parser edge cases', function () {
 
   it('should not substitute ? inside single-quoted strings', function () {
 
@@ -904,7 +904,7 @@ describe('formatQuery — parser edge cases', function () {
 });
 
 
-describe('buildMultiCondition — raw text and complex values', function () {
+describe('buildMultiCondition - raw text and complex values', function () {
 
   it('should support buildRawText in condition values', function () {
 
@@ -939,7 +939,7 @@ describe('buildMultiCondition — raw text and complex values', function () {
 // 9. Rigorous edge cases: translatePlaceholders (runtime execution path)
 // ============================================================================
 
-describe('translatePlaceholders — runtime execution edge cases', function () {
+describe('translatePlaceholders - runtime execution edge cases', function () {
 
   it('should handle mixed ?? and ? in same query', async function () {
 
@@ -1006,7 +1006,7 @@ describe('translatePlaceholders — runtime execution edge cases', function () {
 // 10. Rigorous edge cases: classifyStatement
 // ============================================================================
 
-describe('classifyStatement — via public API', function () {
+describe('classifyStatement - via public API', function () {
 
   it('should classify WITH (CTE) as read-shape', async function () {
 
@@ -1091,7 +1091,7 @@ describe('classifyStatement — via public API', function () {
 // 11. Rigorous edge cases: write() null/undefined/empty edge cases
 // ============================================================================
 
-describe('write — null/undefined/empty input', function () {
+describe('write - null/undefined/empty input', function () {
 
   it('should no-op on null', async function () {
 
@@ -1126,7 +1126,7 @@ describe('write — null/undefined/empty input', function () {
 // 12. Rigorous edge cases: transaction with mixed statement types
 // ============================================================================
 
-describe('write (transaction) — mixed statement types', function () {
+describe('write (transaction) - mixed statement types', function () {
 
   it('should handle INSERT + UPDATE in same transaction and aggregate affected_rows', async function () {
 
@@ -1196,7 +1196,7 @@ describe('write (transaction) — mixed statement types', function () {
 
     assert.strictEqual(res.success, false);
 
-    // mix3 must NOT exist — the INSERT was rolled back
+    // mix3 must NOT exist - the INSERT was rolled back
     const after = await SQLite.getValue(
       instance,
       'SELECT COUNT(*) FROM ?? WHERE p_id = ?',
@@ -1211,10 +1211,10 @@ describe('write (transaction) — mixed statement types', function () {
 
 
 // ============================================================================
-// 13. normalizeParams — runtime type coercion edge cases
+// 13. normalizeParams - runtime type coercion edge cases
 // ============================================================================
 
-describe('normalizeParams — coercion via runtime execution', function () {
+describe('normalizeParams - coercion via runtime execution', function () {
 
   it('should handle multiple type coercions in one statement', async function () {
 
@@ -1246,7 +1246,7 @@ describe('normalizeParams — coercion via runtime execution', function () {
 // 14. close() edge cases
 // ============================================================================
 
-describe('close — edge cases', function () {
+describe('close - edge cases', function () {
 
   it('should be safe to call close() on an already closed instance', async function () {
 
@@ -1256,7 +1256,7 @@ describe('close — edge cases', function () {
     // Open the handle by running a query
     await temp.getValue(instance, 'SELECT 1 AS x');
 
-    // Close twice — second call must not throw
+    // Close twice - second call must not throw
     await temp.close();
     await temp.close();
 
@@ -1267,7 +1267,7 @@ describe('close — edge cases', function () {
     const ModuleFactory = require('helper-sql-sqlite');
     const temp = ModuleFactory(Lib, { FILE: ':memory:' });
 
-    // Never ran a query — handle is null
+    // Never ran a query - handle is null
     await temp.close();
 
   });
