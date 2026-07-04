@@ -255,6 +255,15 @@ until **two consecutive full passes find zero new deviations.** Only then procee
    ```bash
    git grep -nE "\bvoid [a-zA-Z_]+;|\(_[a-zA-Z]" -- '[module-path]/**/*.js' ':!*/node_modules/*'
    ```
+   Comment-indentation alignment (must print nothing; `eslint --fix` does NOT fix comment indentation -
+   see migration-pitfalls "JSDoc blocks left at old indentation"). Run per source `.js` file:
+   // turbo
+   ```bash
+   awk '/\*{8,}\/[ ]*$/{match($0,/^[ ]*/); c=RLENGTH; f=1; next} f&&/[^ ]/{match($0,/^[ ]*/); if(RLENGTH!=c) print FILENAME" line "NR": JSDoc closer at "c" sp, code at "RLENGTH" sp"; f=0}' [module-path]/*.js
+   ```
+   On any hit: re-indent the ENTIRE JSDoc block (opener `/***`, every body line, closer `***/`) to the
+   exact column of the declaration it documents, then re-run until silent. Also visually confirm the
+   opener and body sit at the same column as the closer - the detector keys on the closer only.
    // turbo
    ```bash
    git grep -n "docs/" -- '[module-path]/**/*.js' ':!*/node_modules/*'
@@ -470,7 +479,7 @@ Derive the authoritative set from `docs/modules/complex-module-docs-guide.md`; s
 - [ ] All edits made by hand with the editor tool - zero scripts, zero bulk terminal rewrites
 - [ ] Fixes applied S1 -> S2 -> S3 -> Tier-A -> docs (ROBOTS last) -> naming; renames swept repo-wide
 - [ ] Lint exit 0; clean-install tests green
-- [ ] Sweep battery clean (em-dash, `.js` arrows, spelling, banned vocab, void/`_param`, `docs/`-in-comments, scope-leak, bare-name-leak)
+- [ ] Sweep battery clean (em-dash, `.js` arrows, spelling, banned vocab, void/`_param`, `docs/`-in-comments, scope-leak, bare-name-leak, JSDoc-indentation awk)
 - [ ] Universal Companion Files satisfied: config/errors/validators all exist; four fixed `createInterface` slots kept; single-require rule (ERRORS + data injected into validators, never self-required)
 - [ ] Skeleton conformance diff done (Phase B) and re-verified (Phase D 5b) with the verdict line; Class F modules: loader `(shared_libs, config)`, Lib by reference (no self-built Lib), no LOG_LEVEL key, no scope-form requires, no helper-utils/helper-debug peerDependencies, companion files present
 - [ ] `file:` rule satisfied (only this module is `file:`)
