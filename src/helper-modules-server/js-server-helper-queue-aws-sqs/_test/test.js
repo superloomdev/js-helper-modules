@@ -9,7 +9,7 @@ const { SQSClient, CreateQueueCommand, DeleteQueueCommand, PurgeQueueCommand } =
 const ERRORS = require('../sqs.errors');
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
-// process.env is NEVER accessed in test files — only in loader.js
+// process.env is NEVER accessed in test files - only in loader.js
 const { Lib, Config } = require('./loader')();
 const SQS = Lib.SQS;
 const Instance = Lib.Instance;
@@ -18,7 +18,7 @@ const Instance = Lib.Instance;
 const instance = Instance.initialize();
 
 // Test infrastructure: raw AWS SDK client for queue setup/teardown
-// Not part of the module under test — only used in before/after hooks
+// Not part of the module under test - only used in before/after hooks
 // Uses same credentials as the SQS module (both connect to the same target)
 const admin_options = {
   region: Config.aws_region,
@@ -29,7 +29,7 @@ const admin_options = {
 };
 
 // Endpoint is only set for emulated testing (ElasticMQ)
-// For integration testing, this value is undefined — SDK uses real AWS
+// For integration testing, this value is undefined - SDK uses real AWS
 if (Config.sqs_endpoint) {
   admin_options.endpoint = Config.sqs_endpoint;
 }
@@ -43,9 +43,7 @@ const TEST_QUEUE = 'test_sqs_module';
 describe('SQS', { concurrency: false }, function () {
 
 
-// ============================================================================
-// 0. QUEUE SETUP / TEARDOWN
-// ============================================================================
+// 0. Queue Setup / Teardown
 
 before(async function () {
 
@@ -88,7 +86,7 @@ after(async function () {
   catch (err) {
     // Ignore cleanup errors
     if (err.name !== 'AWS.SimpleQueueService.NonExistentQueue') {
-      // Silently continue — cleanup is best-effort
+      // Silently continue - cleanup is best-effort
     }
   }
 
@@ -98,9 +96,7 @@ after(async function () {
 });
 
 
-// ============================================================================
-// 1. SEND
-// ============================================================================
+// 1. Send
 
 describe('send', function () {
 
@@ -141,9 +137,7 @@ describe('send', function () {
 });
 
 
-// ============================================================================
-// 2. RECEIVE
-// ============================================================================
+// 2. Receive
 
 describe('receive', function () {
 
@@ -208,9 +202,7 @@ describe('receive', function () {
 });
 
 
-// ============================================================================
-// 3. DELETE
-// ============================================================================
+// 3. Delete
 
 describe('delete', function () {
 
@@ -240,9 +232,7 @@ describe('delete', function () {
 });
 
 
-// ============================================================================
-// 4. SEND DELAYED
-// ============================================================================
+// 4. Send Delayed
 
 describe('sendDelayed', function () {
 
