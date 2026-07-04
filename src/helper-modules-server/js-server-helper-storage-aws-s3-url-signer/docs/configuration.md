@@ -26,7 +26,7 @@ The page is split into two halves: a **reference** block (what you can set) at t
 
 ## Loader Pattern
 
-The module is a singleton. The first call configures the `S3Client` and the AWS SDK presigner; every subsequent call reuses the same client. The SDK (`@aws-sdk/client-s3` plus `@aws-sdk/s3-request-presigner`) is cached at module scope and shared across loader invocations because it is stateless. Only the configured `S3Client` instance holds region/credential state.
+The module uses a factory pattern. Each loader call constructs an independent `S3Client` from the merged config. The SDK (`@aws-sdk/client-s3` plus `@aws-sdk/s3-request-presigner`) is cached at module scope and shared across loader invocations because it is stateless. Only the configured `S3Client` instance holds region/credential state.
 
 ```javascript
 Lib.S3UrlSigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, {
@@ -92,8 +92,9 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging |
+| `@superloomdev/js-server-helper-instance` | Request lifecycle and instance management |
 
-The module is a singleton-style loader (the same client is reused across loader calls in the same process), so it does not currently take a per-request `instance` argument. If you want per-request performance logging, wrap the module with your own thin function that calls `Lib.Debug.performanceAuditLog` around the signer.
+The module uses a factory pattern (each loader call returns an independent interface with its own S3 client), so it does not currently take a per-request `instance` argument. If you want per-request performance logging, wrap the module with your own thin function that calls `Lib.Debug.performanceAuditLog` around the signer.
 
 ---
 
@@ -171,7 +172,7 @@ For any of these, set `REGION` to whatever the service expects (often `us-east-1
 
 ## Multi-Region / Multi-Account Setup
 
-Each loader call returns an independent singleton instance with its own SDK client, region, and credentials. Load the module multiple times for cross-region buckets or cross-account access:
+Each loader call returns an independent factory instance with its own SDK client, region, and credentials. Load the module multiple times for cross-region buckets or cross-account access:
 
 ```javascript
 Lib.PrimarySigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, {

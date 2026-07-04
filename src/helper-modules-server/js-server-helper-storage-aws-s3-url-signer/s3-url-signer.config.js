@@ -1,4 +1,5 @@
-// Info: Configuration file for js-server-helper-storage-aws-s3-url-signer
+// Info: Default configuration for js-server-helper-storage-aws-s3-url-signer.
+// Pure defaults - the loader merges overrides on top of this. No process.env access here.
 'use strict';
 
 

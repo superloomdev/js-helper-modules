@@ -1,4 +1,4 @@
-# js-server-helper-storage-aws-s3-url-signer
+# @superloomdev/js-server-helper-storage-aws-s3-url-signer
 
 S3 presigned URL signer for direct browser uploads and downloads. Lazy-loaded SDK v3. Explicit credentials.
 
@@ -8,18 +8,24 @@ Server helper. Service-dependent (needs Docker/MinIO for emulated, AWS for integ
 ## Peer Dependencies
 - `@superloomdev/js-helper-utils` - injected as `Lib.Utils`
 - `@superloomdev/js-helper-debug` - injected as `Lib.Debug`
+- `@superloomdev/js-server-helper-instance` - injected as `Lib.Instance`
 
 ## Direct Dependencies
 - `@aws-sdk/client-s3` - S3 client + command constructors
 - `@aws-sdk/s3-request-presigner` - Presigned URL generation
 
-## Loader Pattern (Singleton)
+## Companion Files
+- `s3-url-signer.config.js` - default config (REGION, KEY, SECRET, ENDPOINT, FORCE_PATH_STYLE, UPLOAD_URL_EXPIRY, DOWNLOAD_URL_EXPIRY)
+- `s3-url-signer.errors.js` - frozen error catalog (STORAGE_URL_GENERATION_FAILED)
+- `s3-url-signer.validators.js` - config validators singleton
+
+## Loader Pattern (Factory)
 
 ```javascript
 Lib.S3UrlSigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, { /* config overrides */ });
 ```
 
-Returns a singleton interface with shared Lib, CONFIG, and S3 client.
+Returns an independent S3 URL signer interface with its own `Lib`, `CONFIG`, and S3 client instance.
 
 ## Config Keys
 | Key | Type | Default | Required |
@@ -44,7 +50,7 @@ generateDownloadUrlGet(bucket, key, options?) → { success, url, error } | asyn
   Generate presigned GET URL for download. Default 1 hour expiry. Supports responseContentDisposition override.
 
 ## Patterns
-- Singleton pattern: shared client across all function calls
+- Factory pattern: each loader call returns an independent interface with its own S3 client
 - Lazy loading: SDK loaded on first function call via initSDK
 - Explicit credentials: KEY + SECRET via config, not implicit env chain
 - MinIO compatibility: CONFIG.FORCE_PATH_STYLE=true enables path-style addressing
