@@ -1,24 +1,24 @@
-// Info: Configuration for js-server-helper-mongodb
+// Info: Default configuration for js-server-helper-nosql-mongodb.
+// Pure defaults - the loader merges overrides on top of this. No process.env access here.
 'use strict';
 
 
 module.exports = {
 
-  // Connection URI (preferred) or build from components
-  URI: process.env.MONGODB_URI || '',
+  // ---- Connection ----
+  // MongoDB connection string. Override with Atlas URI or replica-set string in production.
+  CONNECTION_STRING: 'mongodb://localhost:27017',
 
-  // Connection components (if URI not provided)
-  HOST: process.env.MONGODB_HOST || 'localhost',
-  PORT: process.env.MONGODB_PORT || 27017,
-  HOSTS: process.env.MONGODB_HOSTS || '', // For replica sets: 'host1:port1,host2:port2'
-  DATABASE: process.env.MONGODB_DATABASE || 'test',
-  USER: process.env.MONGODB_USER || '',
-  PASSWORD: process.env.MONGODB_PASSWORD || '',
-  OPTIONS: process.env.MONGODB_OPTIONS || '', // e.g., 'replicaSet=rs0&ssl=true'
+  // Database name to select after connecting.
+  DATABASE_NAME: 'test',
 
-  // Pool settings
-  POOL_MAX: parseInt(process.env.MONGODB_POOL_MAX, 10) || 10,
-  POOL_MIN: parseInt(process.env.MONGODB_POOL_MIN, 10) || 2,
-  POOL_IDLE_TIMEOUT: parseInt(process.env.MONGODB_POOL_IDLE_TIMEOUT, 10) || 30000
+  // ---- Pool ----
+  // Maximum number of connections in the driver pool.
+  // Serverless: 1-3. Persistent: 10-20. Atlas: stay under cluster limit x 0.8.
+  MAX_POOL_SIZE: 10,
+
+  // How long the driver waits to select a server before failing.
+  // Lower for fast-fail in serverless; higher for cross-region.
+  SERVER_SELECTION_TIMEOUT: 5000
 
 };

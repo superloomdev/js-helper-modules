@@ -1,4 +1,4 @@
-# js-server-helper-nosql-mongodb
+# @superloomdev/js-server-helper-nosql-mongodb
 
 MongoDB CRUD, batch, query, scan, transactions. Lazy-loaded native driver. Connection pooling.
 
@@ -12,6 +12,11 @@ Server helper. Service-dependent (needs Docker for emulated, Atlas for integrati
 
 ## Direct Dependencies
 - `mongodb` - Native MongoDB driver (lazy-loaded)
+
+## Companion Files
+- `mongodb.config.js` - default config (CONNECTION_STRING, DATABASE_NAME, MAX_POOL_SIZE, SERVER_SELECTION_TIMEOUT)
+- `mongodb.errors.js` - frozen error catalog (DATABASE_WRITE_FAILED, DATABASE_READ_FAILED, DATABASE_UPDATE_FAILED, DATABASE_DELETE_FAILED, DATABASE_BATCH_GET_FAILED, DATABASE_BATCH_WRITE_FAILED, DATABASE_BATCH_DELETE_FAILED, DATABASE_BATCH_WRITE_DELETE_FAILED, DATABASE_TRANSACTION_FAILED, DATABASE_QUERY_FAILED)
+- `mongodb.validators.js` - config validators singleton
 
 ## Loader Pattern (Factory)
 

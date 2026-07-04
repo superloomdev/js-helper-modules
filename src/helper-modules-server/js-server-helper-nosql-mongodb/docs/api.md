@@ -49,7 +49,7 @@ Operational failures (connection lost, duplicate key, validation failure) never 
 
 Three functions reject empty filters at runtime to prevent accidental full-collection reads or wipes:
 
-| Function | Behaviour on empty / null / undefined filter |
+| Function | Behavior on empty / null / undefined filter |
 |---|---|
 | `query` | Throws `TypeError` |
 | `count` | Throws `TypeError` |

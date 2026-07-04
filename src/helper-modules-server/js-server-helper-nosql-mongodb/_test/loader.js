@@ -14,17 +14,12 @@ process.env is ONLY read here - nowhere else in test code.
 *********************************************************************/
 module.exports = function loader () {
 
-  // ========================= CONFIGURATION ========================= //
-
   const Config = {
     mongodb_connection_string: process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017',
     mongodb_database: process.env.MONGODB_DATABASE || 'test_db'
   };
 
-  const config_debug = {
-    LOG_LEVEL: 'error'
-  };
-
+  // Sub-configs: each helper module receives ONLY its relevant slice
   const config_mongodb = {
     CONNECTION_STRING: Config.mongodb_connection_string,
     DATABASE_NAME: Config.mongodb_database,
@@ -33,20 +28,15 @@ module.exports = function loader () {
   };
 
 
-  // ==================== DEPENDENCY CONTAINER ======================= //
-
+  // Dependencies for this instance
   const Lib = {};
 
-
-  // ==================== HELPER MODULES ============================= //
-
+  // Helper modules
   Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Debug = require('helper-debug')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
-
-  // ==================== SERVER HELPER MODULES ====================== //
-
+  // Server helper modules
   Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
 
 

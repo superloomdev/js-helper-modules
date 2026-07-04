@@ -1,9 +1,9 @@
 # MongoDB for module testing (single-node replica set for transaction support)
 # Lifecycle managed by npm scripts: npm test starts → tests → stops and removes
-# Ephemeral — data lost on container stop
+# Ephemeral - data lost on container stop
 #
 # Replica set is required for transaction support. This is a single-node
-# replica set — one container, no distributed sync, no extra complexity.
+# replica set - one container, no distributed sync, no extra complexity.
 # MongoDB Atlas has replica set enabled by default.
 
 name: superloom-test-mongodb
