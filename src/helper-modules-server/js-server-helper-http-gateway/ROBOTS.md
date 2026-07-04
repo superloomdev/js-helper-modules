@@ -7,20 +7,25 @@ through runtime-specific adapters.
 
 ---
 
-## Singleton Loader
+## Companion Files
+- `http-gateway.config.js` - default config (Adapter: null, required at construction)
+- `http-gateway.errors.js` - frozen error catalog (INVALID_PARAM, NOT_IMPLEMENTED)
+- `http-gateway.validators.js` - config + adapter contract validators singleton
+
+## Loader Pattern (Factory)
 
 ```javascript
-const Adapter = require('helper-http-gateway-adapter-aws-apigateway')({});
+const Adapter = require('helper-http-gateway-adapter-aws-apigateway')(Lib, {});
 const Gateway = require('helper-http-gateway')(Lib, {
   Adapter: Adapter
 });
 ```
 
-Node.js `require` cache guarantees the same `Gateway` object is returned on every subsequent call. One loader call per process.
+Each loader call returns an independent HttpGateway interface bound to one adapter. Stateless. No per-instance resources.
 
 **Config validation:** Throws at construction time if `Adapter` is missing or not an object.
 
-**Peer dependencies in Lib:** `Utils`, `Debug`, `Instance`
+**Peer dependencies in Lib:** `Utils`, `Debug`, `Instance`, `Time`
 
 ---
 

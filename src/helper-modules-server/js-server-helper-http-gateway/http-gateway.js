@@ -2,16 +2,17 @@
 // data into a per-request instance object and writes responses back through
 // the runtime-specific adapter (API Gateway, Express, ...).
 //
-// Each loader call returns an independent HttpGateway interface bound to one
-// ready-to-use adapter. Stateless - no per-instance resources.
+// Each loader call returns an independent HttpGateway interface with its own
+// Lib, CONFIG, ERRORS, and Validators, bound to one ready-to-use adapter.
+// Stateless - no per-instance resources.
 //
 // Multipart/form-data is NOT supported. Use application/json or
 // application/x-www-form-urlencoded for POST bodies.
 //
 // Runtime adapters are provided by standalone adapter packages. The caller
 // passes the chosen ready-to-use adapter object as config.Adapter:
-//   Adapter: require('helper-http-gateway-adapter-aws-apigateway')(adapter_config)
-//   Adapter: require('helper-http-gateway-adapter-express')(adapter_config)
+//   Adapter: require('helper-http-gateway-adapter-aws-apigateway')(Lib, {})
+//   Adapter: require('helper-http-gateway-adapter-express')(Lib, {})
 //
 // Adapter contract (3 methods every adapter must implement):
 //   extractRequest(raw_request, raw_context, response_callback)
@@ -36,9 +37,10 @@ const STATUS_CODES = Object.freeze({
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Factory loader. One call = one independent HttpGateway instance
-bound to one adapter. Validates CONFIG at construction time so
-misconfiguration fails at startup, not on first request.
+Factory loader. One call = one independent HttpGateway instance with its
+own Lib, CONFIG, ERRORS, and Validators, bound to one adapter. Validates
+CONFIG at construction time so misconfiguration fails at startup, not on
+first request.
 
 @param {Object} shared_libs - Lib container with Utils, Debug, Instance, Time
 @param {Object} config      - Overrides merged over module config defaults
@@ -83,8 +85,8 @@ module.exports = function loader (shared_libs, config) {
     Params: require('./parts/params')(Lib, CONFIG, ERRORS)
   };
 
-  // Create interface
-  return createInterface(Lib, CONFIG, ERRORS, Parts, adapter);
+  // Create and return the public interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators, Parts, adapter);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -94,17 +96,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Build the public HttpGateway interface closed over Lib, CONFIG,
-ERRORS, Parts, and adapter.
+ERRORS, Validators, Parts, and adapter.
 
-@param {Object} Lib     - Dependency container
-@param {Object} CONFIG  - Merged configuration
-@param {Object} ERRORS  - Error catalog
-@param {Object} Parts   - Instantiated parts (Cookies, UrlParts, Params)
-@param {Object} adapter - Instantiated adapter (3-method contract)
+@param {Object} Lib        - Dependency container
+@param {Object} CONFIG     - Merged configuration
+@param {Object} ERRORS     - Error catalog
+@param {Object} Validators - Validators singleton (used at loader time only)
+@param {Object} Parts      - Instantiated parts (Cookies, UrlParts, Params)
+@param {Object} adapter    - Instantiated adapter (3-method contract)
 
 @return {Object} - Public HttpGateway interface
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapter) {
 
   ////////////////////////////// Public Functions START ////////////////////////
   const HttpGateway = {
@@ -131,11 +134,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
       instance.http_request = {
         headers: normalized.headers,
         cookies: normalized.cookies,
-        query  : normalized.query,
-        body   : normalized.body,
-        params : normalized.params,
-        method : normalized.method,
-        url    : normalized.url
+        query: normalized.query,
+        body: normalized.body,
+        params: normalized.params,
+        method: normalized.method,
+        url: normalized.url
       };
 
       instance._http_gateway = {
@@ -470,8 +473,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Parts, adapter) {
       const descriptor = Lib.Utils.isNullOrUndefined(existing) ? {} : Object.assign({}, existing);
 
       descriptor[name] = {
-        value  : value,
-        ttl    : ttl,
+        value: value,
+        ttl: ttl,
         options: options || {}
       };
 
