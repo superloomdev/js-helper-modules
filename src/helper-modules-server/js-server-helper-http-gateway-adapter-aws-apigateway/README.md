@@ -14,7 +14,7 @@ A stateless adapter that normalizes AWS API Gateway payload format v2.0 event ob
 ## Usage
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
 
 const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   Adapter: AwsAdapter
