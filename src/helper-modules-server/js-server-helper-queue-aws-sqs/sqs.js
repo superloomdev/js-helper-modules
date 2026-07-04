@@ -42,8 +42,14 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Internal error catalog
+  // Error catalog (frozen, owned by the main module)
   const ERRORS = require('./sqs.errors');
+
+  // Validators singleton - Lib, ERRORS, and any static data injected here
+  const Validators = require('./sqs.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
 
   // Mutable per-instance state (SQS client and queue URL cache live here)
   const state = {
@@ -51,8 +57,7 @@ module.exports = function loader (shared_libs, config) {
     queue_urls: {}
   };
 
-  // Create and return the public interface
-  return createInterface(Lib, CONFIG, ERRORS, state);
+  return createInterface(Lib, CONFIG, ERRORS, Validators, state);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -62,16 +67,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public and private
-functions close over the provided Lib, CONFIG, and state.
+functions close over the provided Lib, CONFIG, ERRORS, Validators,
+and state.
 
 @param {Object} Lib - Dependency container (Utils, Debug, Instance)
 @param {Object} CONFIG - Merged configuration for this instance
-@param {Object} ERRORS - Error catalog for this module
+@param {Object} ERRORS - Frozen error catalog for this module
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 @param {Object} state - Mutable state holder (SQS client, queue URL cache)
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS, state) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
   ///////////////////////////Public Functions START//////////////////////////////
   const SQS = {
@@ -92,9 +99,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
 
       // Initialize SQS client on first use
       _SQS.initIfNot();
-
-      // Record operation start time
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -125,7 +129,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         const response = await state.client.send(command);
 
         // Log successful send operation
-        Lib.Debug.performanceAuditLog('SQS-Send', queue_name, start_ms, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQS Send - ' + queue_name, instance['time_ms']);
 
         // Return successful response with message ID
         return {
@@ -173,9 +177,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Initialize SQS client on first use
       _SQS.initIfNot();
 
-      // Record operation start time
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       try {
 
         // Resolve queue URL from name (cached after first lookup)
@@ -210,7 +211,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         }
 
         // Log successful receive operation
-        Lib.Debug.performanceAuditLog('SQS-Receive', queue_name + ' (' + messages.length + ')', start_ms, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQS Receive - ' + queue_name + ' (' + messages.length + ')', instance['time_ms']);
 
         // Return successful response with messages array
         return {
@@ -255,9 +256,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Initialize SQS client on first use
       _SQS.initIfNot();
 
-      // Record operation start time
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       try {
 
         // Resolve queue URL from name (cached after first lookup)
@@ -274,7 +272,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         await state.client.send(command);
 
         // Log successful delete operation
-        Lib.Debug.performanceAuditLog('SQS-Delete', queue_name, start_ms, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQS Delete - ' + queue_name, instance['time_ms']);
 
         // Return successful response
         return {
@@ -361,7 +359,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Adapter must be loaded before client creation
       _SQS.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'SQS Client', Lib.Utils.getUnixTimeInMilliSeconds());
+      // Record init start time for performance logging
+      const init_start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Base client options - region and retry config
       const client_options = {
@@ -385,7 +384,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
       // Build SQS client
       state.client = new SQSAdapter.SQSClient(client_options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'SQS Client', Lib.Utils.getUnixTimeInMilliSeconds());
+      Lib.Debug.performanceAuditLog('End', 'SQS Client Init', init_start_ms);
       Lib.Debug.debug('SQS Client Initialized', {
         region: CONFIG.REGION,
         endpoint: CONFIG.ENDPOINT || null

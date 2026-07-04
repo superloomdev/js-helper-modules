@@ -75,7 +75,7 @@ module.exports = [
       'no-unused-vars': ['error', { 'args': 'after-used', 'argsIgnorePattern': '^_' }], // Flag unused vars; args only checked after last used arg
 
       // Modern JS preferences (let/const over var)
-      'no-var': 'error',                                                // Disallow `var` — use let/const instead
+      'no-var': 'error',                                                // Disallow `var` - use let/const instead
       'prefer-const': ['error', { 'destructuring': 'any' }]             // Use const when variable is never reassigned
     }
   }

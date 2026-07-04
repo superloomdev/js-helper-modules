@@ -56,7 +56,7 @@ This module bundles one runtime npm package:
 
 - **`@aws-sdk/client-sqs`** (AWS). SQS API client for send, receive, delete. Used because the AWS SDK is the only supported mechanism for communicating with SQS; no alternative exists
 
-It expects two peer modules in the `Lib` container (Utils, Debug). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+It expects three peer modules in the `Lib` container (Utils, Debug, Instance). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 

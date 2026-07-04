@@ -39,7 +39,7 @@ Every function takes a **queue name**, not a queue URL. The module resolves the 
 
 There are two resolution modes:
 
-| Mode | When | Behaviour |
+| Mode | When | Behavior |
 |---|---|---|
 | API lookup | `QUEUE_URL_PREFIX` is unset | The module calls `GetQueueUrl` once per name and caches the URL |
 | Prefix construction | `QUEUE_URL_PREFIX` is set in config | The URL is built directly: `<prefix><queue_name>` |

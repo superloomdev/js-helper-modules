@@ -66,7 +66,7 @@ Loader call semantics:
 
 The module always works in terms of **queue names**. SQS internally identifies queues by URL. The module resolves names to URLs in one of two ways:
 
-| `QUEUE_URL_PREFIX` | Behaviour | Cost | IAM impact |
+| `QUEUE_URL_PREFIX` | Behavior | Cost | IAM impact |
 |---|---|---|---|
 | Not set | Calls `GetQueueUrl(name)` once per name, caches the result | One extra round-trip per cold queue | Requires `sqs:GetQueueUrl` |
 | Set to e.g. `https://sqs.us-east-1.amazonaws.com/123456789012/` | Constructs `<prefix><name>` directly | Zero round-trips, zero cache cost | No `sqs:GetQueueUrl` needed |
