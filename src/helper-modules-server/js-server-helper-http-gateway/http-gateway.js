@@ -48,6 +48,7 @@ misconfiguration fails at startup, not on first request.
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
+  // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
@@ -55,26 +56,34 @@ module.exports = function loader (shared_libs, config) {
     Instance: shared_libs.Instance
   };
 
+  // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
     require('./http-gateway.config'),
     config || {}
   );
 
+  // Error catalog (frozen, owned by the main module)
   const ERRORS = require('./http-gateway.errors');
 
-  const Validators = require('./http-gateway.validators')(Lib);
+  // Validators singleton - Lib, ERRORS, and any static data injected here
+  const Validators = require('./http-gateway.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
+  // Adapter + contract validation
   const adapter = CONFIG.Adapter;
   Validators.validateAdapterContract(adapter);
 
+  // Parts (Cookies, UrlParts, Params)
   const Parts = {
     Cookies: require('./parts/cookies')(Lib, CONFIG, ERRORS),
     UrlParts: require('./parts/url-parts')(Lib, CONFIG, ERRORS),
     Params: require('./parts/params')(Lib, CONFIG, ERRORS)
   };
 
+  // Create interface
   return createInterface(Lib, CONFIG, ERRORS, Parts, adapter);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
