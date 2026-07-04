@@ -1,4 +1,4 @@
-# js-server-helper-sql-sqlite
+# @superloomdev/js-server-helper-sql-sqlite
 
 SQLite client built on Node.js built-in `node:sqlite` module.
 Async/await. Multi-DB capable. **API-compatible with `js-server-helper-sql-mysql`
@@ -15,6 +15,11 @@ Server helper. Offline (no Docker, no network - uses `:memory:` or a local file)
 
 ## Direct Dependencies
 - `node:sqlite` - Node.js built-in SQLite driver (lazy-loaded, requires Node 24+)
+
+## Companion Files
+- `sqlite.config.js` - default config (FILE, READONLY, ENABLE_FOREIGN_KEYS, TIMEOUT_MS, JOURNAL_MODE, SYNCHRONOUS, CLOSE_TIMEOUT_MS)
+- `sqlite.errors.js` - frozen error catalog (DATABASE_CONNECTION_FAILED, DATABASE_QUERY_FAILED, DATABASE_TRANSACTION_FAILED)
+- `sqlite.validators.js` - config validators singleton
 
 ## Loader Pattern (Multi-DB Capable)
 

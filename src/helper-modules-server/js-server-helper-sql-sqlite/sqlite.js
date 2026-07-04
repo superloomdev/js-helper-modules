@@ -53,16 +53,21 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Internal error catalog
+  // Error catalog (frozen, owned by the main module)
   const ERRORS = require('./sqlite.errors');
+
+  // Validators singleton - Lib, ERRORS, and any static data injected here
+  const Validators = require('./sqlite.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
 
   // Mutable per-instance state (db handle lives here)
   const state = {
     db: null
   };
 
-  // Create and return the public interface
-  return createInterface(Lib, CONFIG, ERRORS, state);
+  return createInterface(Lib, CONFIG, ERRORS, Validators, state);
 
 };/////////////////////////// Module-Loader END /////////////////////////////////
 
@@ -72,16 +77,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public and private
-functions close over the provided Lib, CONFIG, and state.
+functions close over the provided Lib, CONFIG, ERRORS, Validators,
+and state.
 
 @param {Object} Lib - Dependency container (Utils, Debug)
 @param {Object} CONFIG - Merged configuration for this instance
-@param {Object} ERRORS - Error catalog for this module
+@param {Object} ERRORS - Frozen error catalog for this module
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 @param {Object} state - Mutable state holder (db handle)
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS, state) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
   ///////////////////////////Public Functions START//////////////////////////////
   const SQLite = { // Public functions accessible by other modules
@@ -1199,7 +1206,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, state) {
         return {
           success: false,
           rows: [],
-          fields: [],
           affected_rows: 0,
           insert_id: null,
           error: ERRORS.DATABASE_QUERY_FAILED
