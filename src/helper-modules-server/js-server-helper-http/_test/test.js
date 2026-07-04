@@ -1,5 +1,5 @@
 // Info: Test Cases for js-server-helper-http
-// Uses postman-echo.com for real HTTP verification — requires network access.
+// Uses postman-echo.com for real HTTP verification - requires network access.
 'use strict';
 
 const { describe, it } = require('node:test');
@@ -253,7 +253,7 @@ describe('Response structure', function () {
 // ============================================================================
 // CONFIG ABSORPTION CONTRACT
 // ============================================================================
-// config absorption contract: exempt (Strategy 4 — integration tier) —
+// config absorption contract: exempt (Strategy 4 - integration tier) -
 // CONFIG.TIMEOUT and CONFIG.USER_AGENT are consumed by _Http.fetch when
 // making real outgoing HTTP requests. Their override effects are only
 // observable through live network calls (postman-echo.com), not at the unit tier.

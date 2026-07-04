@@ -33,11 +33,17 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Internal error catalog
+  // Own frozen error catalog
   const ERRORS = require('./http.errors');
 
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./http.validators')(Lib, ERRORS);
+
+  // Validate config - throws on misconfiguration
+  Validators.validateConfig(CONFIG);
+
   // Create and return the public interface
-  return createInterface(Lib, CONFIG, ERRORS);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -47,15 +53,16 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public and private
-functions close over the provided Lib, CONFIG, and ERRORS.
+functions close over the provided Lib, CONFIG, ERRORS, and Validators.
 
 @param {Object} Lib - Dependency container (Utils, Debug)
 @param {Object} CONFIG - Merged configuration for this instance
 @param {Object} ERRORS - Error catalog for this module
+@param {Object} Validators - Validators singleton (used at loader time only)
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ///////////////////////////Public Functions START//////////////////////////////
   const Http = {

@@ -5,6 +5,11 @@ Outgoing HTTP client. Thin wrapper over Node's native `fetch` with a normalized 
 ## Type
 Server helper. Class B (depends only on Node built-ins). Real-network test tier (requires outbound HTTP access).
 
+## Companion Files
+- `http.config.js` - default config keys (TIMEOUT, USER_AGENT)
+- `http.errors.js` - frozen error catalog (NETWORK_REQUEST_FAILED, NETWORK_TIMEOUT, NETWORK_SETUP_FAILED)
+- `http.validators.js` - config validation singleton (validates TIMEOUT and USER_AGENT types)
+
 ## Peer Dependencies
 - `@superloomdev/js-helper-utils` - injected as `Lib.Utils`
 - `@superloomdev/js-helper-debug` - injected as `Lib.Debug`
