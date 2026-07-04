@@ -2,8 +2,8 @@
 // Normalizes API Gateway payload format v2.0 (HTTP API / Lambda Function URLs)
 // into the standard instance.http_request shape consumed by the gateway.
 //
-// Fully independent: builds its own Lib, owns its own CONFIG, ERRORS, and
-// Validators. Returns a ready-to-use adapter object that the parent
+// Standard factory shape: receives shared_libs, owns its own CONFIG, ERRORS,
+// and Validators. Returns a ready-to-use adapter object that the parent
 // consumes via CONFIG.Adapter.
 //
 // Adapter contract:
@@ -20,16 +20,24 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Builds own Lib and ERRORS from peer dependencies,
-validates config via the Validators singleton, then delegates to
-createInterface. Each call returns an independent Adapter instance.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Adapter instance.
 
+@param {Object} shared_libs - Dependency container (Utils, Debug)
 @param {Object} config - Overrides merged over adapter config defaults
-                         ({ LOG_LEVEL, ... } - adapter-specific)
+                         (adapter-specific keys)
 
 @return {Object} - Adapter interface (the parent's adapter contract)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug
+  };
 
   // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
@@ -37,11 +45,6 @@ module.exports = function loader (config) {
     require('./adapter.config'),
     config || {}
   );
-
-  // Build own Lib container from aliased peer dependencies
-  const Lib = {};
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, { LOG_LEVEL: CONFIG.LOG_LEVEL });
 
   // Own frozen error catalog
   const ERRORS = require('./adapter.errors');

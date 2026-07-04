@@ -38,7 +38,7 @@ Normalize an API Gateway v2.0 event into a plain request object and return a `re
 | `method` | `event.requestContext.http.method` (uppercased) | `String` or `null` |
 | `headers` | `event.headers` (all keys lowercased) | `Object` |
 | `query` | `event.queryStringParameters` | `Object` |
-| `body` | Parsed body — see [`payload-format.md`](payload-format.md#body-parsing) | `Object` |
+| `body` | Parsed body - see [`payload-format.md`](payload-format.md#body-parsing) | `Object` |
 | `params` | `event.pathParameters` (or `{}`) | `Object` |
 | `cookies` | Parsed from `event.cookies` array (or `{}`) | `Object` |
 | `response_handler` | Wraps `lambda_callback(err, envelope)` | `Function` |
@@ -65,7 +65,7 @@ Build the Lambda response envelope. The gateway uses this to assemble the final 
 |-----------|------|----------|-------------|
 | `status` | `Integer` | Yes | HTTP status code |
 | `headers` | `Object` | No | Response headers (defaults to `{}`) |
-| `body` | `*` | No | Body — string, object, Buffer, or null |
+| `body` | `*` | No | Body - string, object, Buffer, or null |
 
 **Body normalization:**
 
@@ -76,7 +76,7 @@ Build the Lambda response envelope. The gateway uses this to assemble the final 
 | `Object` | `JSON.stringify(body)` | `false` |
 | Any other | `String(body)` | `false` |
 
-**Returns:** `Object` — `{ statusCode, headers, body, isBase64Encoded }`
+**Returns:** `Object` - `{ statusCode, headers, body, isBase64Encoded }`
 
 This is the exact shape API Gateway expects from a Lambda proxy integration with v2.0 payload format.
 
@@ -138,4 +138,4 @@ exports.handler = function (event, context, callback) {
 };
 ```
 
-This is intentional — the adapter does not impose a single authorizer schema across HTTP API, REST API, and custom authorizer payloads. Each application reads what it needs.
+This is intentional - the adapter does not impose a single authorizer schema across HTTP API, REST API, and custom authorizer payloads. Each application reads what it needs.

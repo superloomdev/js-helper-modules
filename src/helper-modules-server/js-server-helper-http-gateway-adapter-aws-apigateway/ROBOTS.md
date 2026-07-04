@@ -8,16 +8,16 @@
 ## Adapter Loader
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
+const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
 
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   Adapter: AwsAdapter
 });
 ```
 
-The adapter is fully independent - it builds its own `Lib` from aliased peer dependencies (`helper-utils`, `helper-debug`) and owns its own `CONFIG`, `ERRORS`, and `Validators` companion files.
+The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It owns its own `CONFIG`, `ERRORS`, and `Validators` companion files.
 
-**Runtime peers:** `helper-utils`, `helper-debug` (Superloom framework modules). No AWS SDK required, no Docker required, no external services.
+**Runtime deps:** `Utils` and `Debug` from the shared `Lib` container. No AWS SDK required, no Docker required, no external services.
 
 ---
 

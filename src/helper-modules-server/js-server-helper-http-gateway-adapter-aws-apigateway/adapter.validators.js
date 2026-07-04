@@ -52,9 +52,8 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (config) { // eslint-disable-line no-unused-vars
 
-    // No config keys to validate beyond LOG_LEVEL (string check deferred
-    // to the Debug module's own config validation). Replace with real
-    // checks when the first adapter-specific config key is added.
+    // No config keys to validate. Replace with real checks when the
+    // first adapter-specific config key is added.
 
   }
 

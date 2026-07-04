@@ -5,8 +5,7 @@
 
 module.exports = {
 
-  // Verbosity of the adapter's internal Debug instance.
-  // One of: 'debug', 'info', 'warn', 'error'. Default 'error' (silent except errors).
-  LOG_LEVEL: 'error'
+  // No adapter-specific config keys. The companion file exists per the
+  // Universal Companion Files rule. Add keys here as the adapter grows.
 
 };
