@@ -44,16 +44,21 @@ module.exports = function loader (shared_libs, config) {
     config || {}
   );
 
-  // Internal error catalog
+  // Error catalog (frozen, owned by the main module)
   const ERRORS = require('./dynamodb.errors');
+
+  // Validators singleton - Lib, ERRORS, and any static data injected here
+  const Validators = require('./dynamodb.validators')(Lib, ERRORS);
+
+  // Validate config immediately so misconfiguration fails at startup
+  Validators.validateConfig(CONFIG);
 
   // Mutable per-instance state (DocumentClient lives here)
   const state = {
     client: null
   };
 
-  // Create and return the public interface
-  return createInterface(Lib, CONFIG, ERRORS, state);
+  return createInterface(Lib, CONFIG, ERRORS, Validators, state);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -63,16 +68,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public interface for one instance. Public and private
-functions close over the provided Lib, CONFIG, and state.
+functions close over the provided Lib, CONFIG, ERRORS, Validators,
+and state.
 
 @param {Object} Lib - Dependency container (Utils, Debug, Instance)
 @param {Object} CONFIG - Merged configuration for this instance
-@param {Object} ERRORS - Error catalog for this module
+@param {Object} ERRORS - Frozen error catalog for this module
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 @param {Object} state - Mutable state holder (e.g. DocumentClient reference)
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS, state) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
   ///////////////////////////Public Functions START//////////////////////////////
   const DynamoDB = {
