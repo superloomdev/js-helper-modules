@@ -100,6 +100,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Initialize SQS client on first use
       _SQS.initIfNot();
 
+      // Record operation start time
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Resolve queue URL from name (cached after first lookup)
@@ -129,7 +132,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log successful send operation
-        Lib.Debug.performanceAuditLog('End', 'SQS Send - ' + queue_name, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQS Send - ' + queue_name, start_ms);
 
         // Return successful response with message ID
         return {
@@ -177,6 +180,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Initialize SQS client on first use
       _SQS.initIfNot();
 
+      // Record operation start time
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Resolve queue URL from name (cached after first lookup)
@@ -211,7 +217,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         }
 
         // Log successful receive operation
-        Lib.Debug.performanceAuditLog('End', 'SQS Receive - ' + queue_name + ' (' + messages.length + ')', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQS Receive - ' + queue_name + ' (' + messages.length + ')', start_ms);
 
         // Return successful response with messages array
         return {
@@ -256,6 +262,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Initialize SQS client on first use
       _SQS.initIfNot();
 
+      // Record operation start time
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Resolve queue URL from name (cached after first lookup)
@@ -272,7 +281,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log successful delete operation
-        Lib.Debug.performanceAuditLog('End', 'SQS Delete - ' + queue_name, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQS Delete - ' + queue_name, start_ms);
 
         // Return successful response
         return {
