@@ -1,29 +1,29 @@
 # @superloomdev/js-server-helper-http-gateway-adapter-express
 
-**Class:** B (Extended Utility - Node.js runtime only)
-**Scope:** Express (Docker) runtime adapter for `js-server-helper-http-gateway`. Reads from `req`, writes through `res`, conforms to the 3-method adapter contract. Stateless singleton.
+**Class:** F (Dependent adapter - transport)
+**Scope:** Express (Docker) runtime adapter for `js-server-helper-http-gateway`. Reads from `req`, writes through `res`, conforms to the 3-method adapter contract. Stateless - `createInterface` closes over nothing beyond its four fixed slots.
 
 ---
 
-## Standalone Loader
+## Adapter Loader
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
 
 const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   Adapter: ExpressAdapter
 });
 ```
 
-The adapter is standalone — it builds its own `Lib` internally. No peer dependencies required from the caller.
+The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It owns its own `CONFIG`, `ERRORS`, and `Validators` companion files.
 
-**Runtime peers:** `express@>=5`, optional `cookie-parser@>=1`
+**Runtime deps:** `Utils` and `Debug` from the shared `Lib` container. No AWS SDK required, no Docker required, no external services.
 
 ---
 
 ## Public Interface
 
-The adapter exposes the 3-method contract consumed by the gateway. Application code does **not** call the adapter directly — it calls `Gateway.*` methods which delegate.
+The adapter exposes the 3-method contract consumed by the gateway. Application code does **not** call the adapter directly - it calls `Gateway.*` methods which delegate.
 
 ```javascript
 // Extract normalized request data for the gateway to write into instance
@@ -77,13 +77,13 @@ Tested against Express 5.x (`express@^5.2.0`).
 
 | Concern | Status |
 |---|---|
-| `express.json` middleware | Compatible — no adapter changes |
-| `express.urlencoded` middleware | Compatible — no adapter changes |
-| `cookie-parser` middleware | Compatible — no adapter changes |
+| `express.json` middleware | Compatible - no adapter changes |
+| `express.urlencoded` middleware | Compatible - no adapter changes |
+| `cookie-parser` middleware | Compatible - no adapter changes |
 | Optional route param syntax (`/path/:id?`) | **Removed in Express 5.** Register two explicit routes instead |
 | Default query parser | Still returns arrays for repeated keys (`?tag=a&tag=b` → `['a','b']`) |
 | Malformed JSON body | Short-circuited by `express.json()` with 400 **before** reaching the adapter |
-| `text/plain` body without `express.text()` | `req.body` is `{}` — adapter passes through cleanly |
+| `text/plain` body without `express.text()` | `req.body` is `{}` - adapter passes through cleanly |
 
 ---
 
@@ -105,6 +105,6 @@ Tests boot a real Express server on a random free port (`app.listen(0)`), exerci
 cd _test && npm install && npm test
 ```
 
-**Coverage:** 54 tests across 8 groups — request normalization, auth patterns, cookies (with and without cookie-parser), response building, full parameter-extraction pipeline, edge cases (unicode, large bodies, multi-value query, X-Forwarded-For), graceful error handling (malformed JSON, text/plain, empty body).
+**Coverage:** 54 tests across 8 groups - request normalization, auth patterns, cookies (with and without cookie-parser), response building, full parameter-extraction pipeline, edge cases (unicode, large bodies, multi-value query, X-Forwarded-For), graceful error handling (malformed JSON, text/plain, empty body).
 
 See [`docs/api.md`](docs/api.md) and [`docs/middleware.md`](docs/middleware.md) for extended documentation.

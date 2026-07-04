@@ -1,6 +1,6 @@
 # API Reference
 
-Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-express`. Application code rarely calls these methods directly — they are invoked by the gateway. This document describes what each method does so adapter behavior is fully transparent.
+Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-express`. Application code rarely calls these methods directly - they are invoked by the gateway. This document describes what each method does so adapter behavior is fully transparent.
 
 **Related docs:**
 - [`middleware.md`](middleware.md) for the Express middleware setup the adapter relies on
@@ -57,7 +57,7 @@ Build the response envelope. The gateway uses this to assemble the final payload
 |-----------|------|----------|-------------|
 | `status` | `Integer` | Yes | HTTP status code |
 | `headers` | `Object` | No | Response headers (defaults to `{}`) |
-| `body` | `*` | No | Body — string, object, Buffer, or null |
+| `body` | `*` | No | Body - string, object, Buffer, or null |
 
 **Body normalization:**
 
@@ -68,7 +68,7 @@ Build the response envelope. The gateway uses this to assemble the final payload
 | `Object` | `JSON.stringify(body)` |
 | Any other | `String(body)` |
 
-**Returns:** `Object` — `{ statusCode, headers, body }`
+**Returns:** `Object` - `{ statusCode, headers, body }`
 
 ---
 

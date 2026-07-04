@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
+const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
 
 const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
   Adapter: ExpressAdapter
@@ -65,9 +65,9 @@ The gateway calls `instance._http_gateway.response_handler(null, response)` when
 
 ## Dependencies
 
-No runtime dependencies. Zero npm packages installed.
+The adapter receives `Utils` and `Debug` from the shared `Lib` container (injected by the application). No third-party npm packages installed.
 
-The adapter relies on the application providing standard Express middleware (`express.json`, `express.urlencoded`, optional `cookie-parser`) — see [`docs/middleware.md`](docs/middleware.md).
+The adapter relies on the application providing standard Express middleware (`express.json`, `express.urlencoded`, optional `cookie-parser`) - see [`docs/middleware.md`](docs/middleware.md).
 
 ## Extended Documentation
 
