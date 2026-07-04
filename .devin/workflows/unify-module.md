@@ -98,9 +98,29 @@ its own `node_modules` and breaks in CI (`docs/dev/pitfalls.md` entry 8). This i
    - `codebase-superloom/docs/dev/testing-local-modules.md`, `docs/dev/pitfalls.md`
    - This module's section in `__dev__/reviews/0051-module-consistency-findings.md`
 
-4. **Re-derive the fingerprint from a clean sibling.** Read one clean reference module of the same
+   **Proof-of-read (hard gate).** For each doc above, quote ONE rule verbatim (with its line/section)
+   in the reply, read from disk **this run**. "Read earlier this session" or "read in the previous
+   module's pass" does NOT count - a skipped re-read is exactly how citations drift into working-memory
+   guesses. No quotes = Phase A is not done.
+
+4. **Re-derive the fingerprint from the class skeleton + a clean sibling.** First read this module's
+   class skeleton section in `module-structure-js.md` verbatim (factory skeleton for Class A/B/C/D,
+   "Storage Adapter Skeleton" for Class F stores, "Adapter Skeleton" for Class F adapters, the Class G/H
+   sections for extensions) - the skeleton, not memory, defines the loader shape, step comments,
+   companion files, and `createInterface` slots. Then read one clean reference module of the same
    class in full (`s3`, `dynamodb`, `verify`/`verify-store-*`, `styler` - **never `utils`**). Capture the
    shape it actually uses: loader, file layout, banners, JSDoc, config/errors/validators, test wiring, docs set.
+   If the skeleton and the reference module disagree, STOP and report - do not pick one silently
+   (`migration-pitfalls.md` "Verification scoped to the fix list instead of the class skeleton").
+
+   **Class F adapters (`-adapter-[name]`) - additional binding rules** (from `module-structure-js.md`
+   "Adapter Skeleton", hardened 2026-07-04): fully-independent factory `loader(config)` (the singleton
+   `loader(shared_libs)` shape is deprecated); companion files `adapter.config.js` / `adapter.errors.js` /
+   `adapter.validators.js` exist even when minimal (inline `ERRORS` object or inline `if`/`throw` config
+   validation in the loader is a violation); `LOG_LEVEL` comes from `CONFIG.LOG_LEVEL` (default `'error'`
+   in `adapter.config.js`), never hardcoded in the `Lib.Debug` require; source requires use alias names
+   (`require('helper-utils')`) with the alias mapped in the module's own `package.json` dependencies;
+   `createInterface(Lib, CONFIG, ERRORS, Validators)` fixed slots.
 
 5. **Output a binding-rules checklist** - short, each line citing its `docs/` path/section or reference
    `file:line`. This is the bar the module is held to. No rule without a citation.
@@ -122,10 +142,28 @@ its own `node_modules` and breaks in CI (`docs/dev/pitfalls.md` entry 8). This i
    Read from line 1 to the last line - never rely on offsets, summaries, or search hits as a substitute
    for reading the file. Tick each file on the checklist only after both passes.
 
+   **Read-evidence table (hard gate).** After both passes, output a table in the reply:
+   `file | lines | pass 1 done | pass 2 done | one pass-2-only observation`. The pass-2 observation must be
+   something a grep cannot find (a structural note, a banner-width check, a return-shape confirmation,
+   "clean - verified banners and 3/2/1 spacing"). Greps and sweeps are NOT a substitute for pass 2 -
+   they catch mechanical issues only; the two-read rule exists for structural ones. No table = Phase B
+   is not done and Phase C may not start.
+
 3. **Assemble the gap list** as the union of:
    - the module's **0051 findings** (S1/S2/S3 + Tier-A), each re-confirmed against current source;
    - a **fresh line-by-line audit** against the Phase A checklist (do not rely on 0051 alone - it predates this pass);
-   - **0052 doc-standard gaps** (voice, `schemas.md` if a `*.validators.js` exists, config/root hygiene, loader-first README, ROBOTS-last);
+   - a **skeleton conformance diff**: the module's entry file compared element by element against the
+     Phase A class skeleton - info banner shape, loader statement groups **and their step comments**,
+     companion-file wiring, validators loader signature (`(Lib, ERRORS)`), `createInterface` slots,
+     section banners. Record every structural mismatch as a gap item;
+   - the **Universal Companion Files audit** (`module-structure-js.md` "Universal Companion Files"):
+     (a) `[name].config.js`, `[name].errors.js`, `[name].validators.js` all exist - create empty/no-op
+     ones if missing; (b) the loader wires all four fixed slots and calls `Validators.validateConfig(CONFIG)`;
+     (c) `createInterface` signature is `(Lib, CONFIG, ERRORS, Validators, [Parts,] [store|adapter|state])` -
+     unused slots KEPT (crypto precedent), never removed as dead code; (d) **single-require rule**: only
+     `[name].js` requires the companions and `data/*.json` - validators/parts receive `ERRORS` and static
+     data **by injection** (`(Lib, ERRORS[, static data])` for the validators loader), never by self-require;
+   - **0052 doc-standard gaps** (voice, `schemas.md` if the validators enforce real contracts, config/root hygiene, loader-first README, ROBOTS-last);
    - the **naming conversion** (any `@superloomdev/...` outside `package.json` -> alias `helper-...`).
 
 4. Record each item as `file:line -> rule (citation) -> action`, grouped S1 -> S2 -> S3 -> Tier-A -> docs -> naming.
@@ -220,24 +258,69 @@ until **two consecutive full passes find zero new deviations.** Only then procee
    **Manual checks** (not greppable): table cells do not end with a period; README has no signatures/config
    tables/`npm install`; `ROBOTS.md` signatures match `docs/api.md` exactly (spot-check 3).
 
-4. **`file:` rule check** - the only `file:` in `_test/package.json` is this module:
+4. **Companion-files + injection checks** (Universal Companion Files rule):
+   // turbo
+   ```bash
+   # Cwd = codebase-js-helper-modules - all three companion files must exist
+   ls [module-path] | grep -E "\.(config|errors|validators)\.js$"
+   ```
+   // turbo
+   ```bash
+   # Must return NOTHING - validators/parts never self-require errors or data
+   git grep -nE "require\('\./[a-z-]+\.errors'\)|require\('\./data/" -- '[module-path]/**/*.validators.js' '[module-path]/parts/*.js' ':!*/node_modules/*'
+   ```
+   Then confirm by reading `[name].js`: the loader requires ERRORS + data once, injects them into the
+   validators loader, and forwards `(Lib, CONFIG, ERRORS, Validators, ...)` to `createInterface`.
+
+5. **`file:` rule check** - the only `file:` in `_test/package.json` is this module:
    // turbo
    ```bash
    # Cwd = [module_root]/_test
    grep -n "file:" package.json
    ```
 
-5. **Code/doc review pass** - run the existing review workflow and apply anything it surfaces, then loop:
+5b. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton from Phase A next to the
+   module's entry file and re-verify the structural elements one by one: loader statement groups each
+   carry their step comment, companion files wired (no inline ERRORS, no inline config validation),
+   validators loader takes `(Lib, ERRORS)`, `createInterface` slots fixed, banners standard. For Class F
+   adapters additionally grep for the two mechanical violations:
+   // turbo
+   ```bash
+   # Must return NOTHING - hardcoded Debug level and scope-form requires are violations
+   git grep -nE "LOG_LEVEL: '(error|warn|info|debug)'" -- '[module-path]/*.js' ':!*/node_modules/*' ':!*.config.js'
+   ```
+   // turbo
+   ```bash
+   git grep -n "require('@superloomdev/" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   ```
+   The reply MUST contain a line `Skeleton conformance: [clean | N mismatches -> fixed]`. A convergence
+   claim without it is invalid (`migration-pitfalls.md` "Verification scoped to the fix list instead of
+   the class skeleton").
+
+6. **Code/doc review pass (hard gate - produces a visible verdict).** Run the existing review workflow
+   and apply anything it surfaces, then loop:
    ```
    /js-helper-module review
    ```
+   Read `.devin/workflows/js-helper-module.md` (review section) from disk and execute its checks. The
+   reply MUST contain a line of the form `Review verdict: [clean | N findings applied]`. A convergence
+   claim without this verdict line is invalid. This step is skipped ONLY if the file does not exist -
+   and then say so explicitly.
 
-6. **State convergence explicitly:** "Pass N found zero new deviations; previous pass also clean - converged."
+7. **State convergence explicitly:** "Pass N found zero new deviations; previous pass also clean - converged."
+   This statement is valid ONLY if the reply also contains the Phase B read-evidence table and the
+   step 6 review verdict. Convergence without evidence is the previous wave's failure mode.
 
 ## Phase E - Present All Changes (approval gate - never skip)
 
 After convergence and **before anything touches the registry or git history**, show the user the
 complete picture of what this pass changed and WAIT for approval.
+
+0. **Filled Per-run Verification Checklist first (hard gate).** Open the Phase E report with the
+   Per-run Verification Checklist (bottom of this file), every line ticked or explicitly marked
+   `SKIPPED: [reason]`, each tick pointing to where in this conversation the evidence lives (the
+   proof-of-read quotes, the read-evidence table, the review verdict, the sweep outputs). An unticked
+   or unexplained line blocks Phase E. This is the user's one screen to catch silently skipped steps.
 
 1. **Overview:**
    // turbo
@@ -276,6 +359,8 @@ complete picture of what this pass changed and WAIT for approval.
    # Your own user account:
    BASE=/user/packages/npm/PACKAGE_NAME
    ```
+   > **Verified 2026-07-04 (utils pass):** `@superloomdev` is an **Organization**, so for this repo the
+   > base is always `/orgs/superloomdev/packages/npm/PACKAGE_NAME`. Step 2's lookup can be skipped.
 
 4. **List, then delete all versions:**
    ```bash
@@ -312,8 +397,19 @@ complete picture of what this pass changed and WAIT for approval.
    - capture the failure mode via `/learn` into the correct pitfall doc **before** moving on, then `/compile-agents-md`;
    - refine **this `unify-module.md`** (add the missing check/sweep) so the next module benefits.
 
-3. **STOP and ask.** "Module [name] unified, verified, and published at 1.0.0. Continue to next module?"
-   Wait for explicit confirmation. **Never auto-continue.**
+3. **STOP and ask, with the next command ready.** Look up the **first unticked module** in the 0053
+   plan's "Module sequence" and resolve its path (core modules live under `src/helper-modules-core/`,
+   server modules under `src/helper-modules-server/`, client modules under `src/helper-modules-client/` -
+   verify with `ls` if unsure). End the report with:
+
+   > Module [name] unified, verified, and published at 1.0.0.
+   > Next in sequence: **[next-name]**. To continue, run:
+   > `/unify-module [next-module-path]`
+
+   Example: `/unify-module src/helper-modules-core/js-helper-debug`
+
+   Wait for explicit confirmation. **Never auto-continue.** If all modules are ticked, say so and point
+   to the plan's Final step (wrap-up) instead.
 
 ---
 
@@ -349,10 +445,12 @@ Derive the authoritative set from `docs/modules/complex-module-docs-guide.md`; s
 - [ ] Fixes applied S1 -> S2 -> S3 -> Tier-A -> docs (ROBOTS last) -> naming; renames swept repo-wide
 - [ ] Lint exit 0; clean-install tests green
 - [ ] Sweep battery clean (em-dash, `.js` arrows, spelling, banned vocab, void/`_param`, `docs/`-in-comments, scope-leak, bare-name-leak)
+- [ ] Universal Companion Files satisfied: config/errors/validators all exist; four fixed `createInterface` slots kept; single-require rule (ERRORS + data injected into validators, never self-required)
+- [ ] Skeleton conformance diff done (Phase B) and re-verified (Phase D 5b) with the verdict line; Class F adapters: no hardcoded LOG_LEVEL, no scope-form requires, companion files present
 - [ ] `file:` rule satisfied (only this module is `file:`)
 - [ ] `/js-helper-module review` clean
 - [ ] Audit converged: two consecutive clean passes
 - [ ] Phase E change report presented (grouped, cited); user explicitly approved before publish
 - [ ] Package deleted (404 verified); module-only commit; CI published 1.0.0 (verified live)
 - [ ] Plan ticked; new failure modes captured via `/learn`; workflow self-improved if needed
-- [ ] STOPPED and asked the user before the next module
+- [ ] STOPPED and asked the user before the next module, ending with the ready-to-run `/unify-module [next-module-path]` command
