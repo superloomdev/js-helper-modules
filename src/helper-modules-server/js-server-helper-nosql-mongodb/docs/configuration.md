@@ -115,9 +115,9 @@ Each instance maintains its own pool and lifecycle. Call `close(instance)` on ea
 
 | Category | Recommended `MAX_POOL_SIZE` | Reasoning |
 |---|---|---|
-| **Serverless** (cloud functions, on-demand workers) | `1–3` | Each invocation holds a small slice. Larger pools waste warm-pool capacity. |
-| **Persistent** (containers, virtual machines, orchestrated platforms) | `10–20` | Tune per instance against the cluster's connection limit. |
-| **Managed clusters** (e.g. Atlas) | Match the cluster's allotted connection budget | Atlas's M-tier connection limit is shared across all clients. Stay under `cluster_limit × 0.8`. |
+| **Serverless** (cloud functions, on-demand workers) | `1-3` | Each invocation holds a small slice. Larger pools waste warm-pool capacity. |
+| **Persistent** (containers, virtual machines, orchestrated platforms) | `10-20` | Tune per instance against the cluster's connection limit. |
+| **Managed clusters** (e.g. Atlas) | Match the cluster's allotted connection budget | Atlas's M-tier connection limit is shared across all clients. Stay under `cluster_limit x 0.8`. |
 
 ---
 

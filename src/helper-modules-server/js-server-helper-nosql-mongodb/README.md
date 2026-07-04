@@ -69,7 +69,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance). F
 | Emulated | MongoDB 7 single-node replica set in Docker | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 | Integration | Real MongoDB cluster (Atlas or self-hosted) | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
-The emulated tier runs as a single-node replica set so transaction behaviour is exercised too. Test runtime details (Docker lifecycle, environment variables, integration setup, replica-set notes) live in [Configuration → Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-nosql-mongodb/docs/configuration.md#testing-tiers).
+The emulated tier runs as a single-node replica set so transaction behavior is exercised too. Test runtime details (Docker lifecycle, environment variables, integration setup, replica-set notes) live in [Configuration → Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-nosql-mongodb/docs/configuration.md#testing-tiers).
 
 ## License
 

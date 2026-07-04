@@ -9,7 +9,7 @@ const { MongoClient } = require('mongodb');
 const ERRORS = require('../mongodb.errors');
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
-// process.env is NEVER accessed in test files — only in loader.js
+// process.env is NEVER accessed in test files - only in loader.js
 const { Lib, Config } = require('./loader')();
 const MongoDB = Lib.MongoDB;
 const Instance = Lib.Instance;
