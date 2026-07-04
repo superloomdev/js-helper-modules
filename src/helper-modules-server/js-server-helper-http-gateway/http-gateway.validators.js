@@ -7,25 +7,30 @@
 'use strict';
 
 
-// Shared dependency injected by loader
+// Shared dependencies injected by loader
 let Lib;
+let ERRORS; // eslint-disable-line no-unused-vars
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and returns the module-scope Validators
-object. Takes only Lib - no CONFIG or ERRORS - because validators run
-before CONFIG is validated.
+Singleton loader. Injects Lib and ERRORS, then returns the module-scope
+Validators object. Takes Lib and ERRORS - no CONFIG - because validators
+run before CONFIG is validated.
 
 @param {Object} shared_libs - Dependency container (Utils)
+@param {Object} errors - Frozen error catalog (http-gateway.errors.js)
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) {
+module.exports = function loader (shared_libs, errors) {
 
+  // Inject shared dependencies
   Lib = shared_libs;
+  ERRORS = errors;
 
+  // Return the Validators interface
   return Validators;
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
