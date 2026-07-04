@@ -83,7 +83,7 @@ module.exports = [
       'no-unused-vars': ['error', { 'args': 'after-used', 'argsIgnorePattern': '^_' }],  // Allow unused params before last used; underscore-prefix also ignored
 
       // Modern JS preferences (let/const over var)
-      'no-var': 'error',                                                // Disallow `var` — use let/const instead
+      'no-var': 'error',                                                // Disallow `var` - use let/const instead
       'prefer-const': ['error', { 'destructuring': 'any' }]             // Use const when variable is never reassigned
     }
   }
