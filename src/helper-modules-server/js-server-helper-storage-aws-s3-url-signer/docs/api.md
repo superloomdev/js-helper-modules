@@ -209,7 +209,7 @@ The browser navigates straight to S3. Your application server is not in the data
 
 ## Lifecycle
 
-The module is a singleton. The first call lazy-loads `@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner` and constructs an `S3Client` from the loader-merged config. Every subsequent call reuses the same client instance.
+The module uses a factory pattern. Each loader call lazy-loads `@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner` and constructs an independent `S3Client` from the loader-merged config.
 
 There is no `close()` function. The S3 client is stateless from a network perspective (signing is an in-memory cryptographic operation; the SDK does not hold persistent connections for presigner-only usage). Nothing needs to be torn down at process exit.
 

@@ -1,40 +1,59 @@
-// Test loader for js-server-helper-storage-aws-s3-url-signer
+// Info: Test loader for js-server-helper-storage-aws-s3-url-signer
+// Mirrors the main project loader pattern: loads dependencies, merges config from environment
+// Same loader works for both emulated (dev) and integration testing - env vars control the target
 'use strict';
 
-// Mock Utils and Debug for testing
-const Utils = {
-  isString: (val) => typeof val === 'string',
-  isObject: (val) => val !== null && typeof val === 'object',
-  isEmpty: (val) => val == null || val === ''
-};
 
-const Debug = {
-  log: (message, data) => {
-    if (process.env.NODE_ENV !== 'test') {
-      console.log(`[DEBUG] ${message}`, data || '');
-    }
-  },
-  debug: (message, data) => {
-    if (process.env.NODE_ENV !== 'test') {
-      console.log(`[DEBUG] ${message}`, data || '');
-    }
-  }
-};
+/********************************************************************
+Load all test dependencies, build Lib container from environment
 
-const Config = {
-  REGION: process.env.S3_REGION || 'us-east-1',
-  KEY: process.env.S3_ACCESS_KEY,
-  SECRET: process.env.S3_SECRET_KEY,
-  ENDPOINT: process.env.S3_ENDPOINT,
-  FORCE_PATH_STYLE: process.env.S3_FORCE_PATH_STYLE === 'true',
-  UPLOAD_URL_EXPIRY: 900,
-  DOWNLOAD_URL_EXPIRY: 3600
-};
+process.env is ONLY read here - nowhere else in test code.
 
-module.exports = {
-  Lib: {
-    Utils,
-    Debug
-  },
-  Config
+Config = test-wide environment values, available to test.js for any purpose
+  (e.g., AdminClient setup, assertions, debugging). Independent of any module.
+config_s3_url_signer = module-specific config slice, only passed to the S3 URL signer module.
+
+@return {Object} result - Runtime objects for testing
+@return {Object} result.Lib - Dependency container (Utils, Debug, Instance, S3UrlSigner)
+@return {Object} result.Config - Test-wide environment values for test infrastructure
+*********************************************************************/
+module.exports = function loader () {
+
+  // Test-wide environment config - available to test.js for test infrastructure
+  // This is NOT a module config. It holds raw env values that test.js may need
+  // (e.g., endpoint for URL validation, assertions)
+  const Config = {
+    s3_region: process.env.S3_REGION,
+    s3_access_key: process.env.S3_ACCESS_KEY,
+    s3_secret_key: process.env.S3_SECRET_KEY,
+    s3_endpoint: process.env.S3_ENDPOINT,
+    s3_force_path_style: process.env.S3_FORCE_PATH_STYLE === 'true'
+  };
+
+  // Sub-configs: each helper module receives ONLY its relevant config slice
+  // process.env is ONLY read here - nowhere else in test code
+  const config_s3_url_signer = {
+    REGION: process.env.S3_REGION,
+    KEY: process.env.S3_ACCESS_KEY,
+    SECRET: process.env.S3_SECRET_KEY,
+    ENDPOINT: process.env.S3_ENDPOINT,
+    FORCE_PATH_STYLE: process.env.S3_FORCE_PATH_STYLE === 'true'
+  };
+
+
+  // Dependencies for this instance
+  const Lib = {};
+
+  // Helper modules
+  Lib.Utils = require('helper-utils')(Lib, {});
+  Lib.Debug = require('helper-debug')(Lib, {});
+  Lib.Instance = require('helper-instance')(Lib, {});
+
+  // Server helper modules
+  Lib.S3UrlSigner = require('helper-storage-aws-s3-url-signer')(Lib, config_s3_url_signer);
+
+
+  // Return runtime objects
+  return { Lib, Config };
+
 };
