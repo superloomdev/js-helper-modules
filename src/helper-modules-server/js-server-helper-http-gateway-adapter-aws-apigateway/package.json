@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway",
-  "description": "AWS Lambda + API Gateway adapter for js-server-helper-http-gateway. Supports payload format v2.0 only (HTTP API / Lambda Function URLs). Implements the 3-method adapter contract.",
+  "description": "AWS Lambda + API Gateway adapter for helper-http-gateway. Supports payload format v2.0 only (HTTP API / Lambda Function URLs). Implements the 3-method adapter contract.",
   "version": "1.0.0",
   "main": "adapter.js",
   "private": false,
@@ -18,8 +18,8 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "@superloomdev/js-helper-utils": "^1.0.0",
-    "@superloomdev/js-helper-debug": "^1.0.0"
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0"
   },
   "devDependencies": {
     "eslint": "^10.2.0",

@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-http-gateway-adapter-aws-apigateway.
+// Info: Test loader for helper-http-gateway-adapter-aws-apigateway.
 // Builds the base Lib container (Utils, Debug, Instance) and loads the
 // http-gateway with this AWS API Gateway adapter injected. Tests can then
 // feed real AWS event fixtures through the full pipeline (adapter -> gateway)

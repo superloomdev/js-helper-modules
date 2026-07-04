@@ -9,7 +9,7 @@ AWS Lambda + API Gateway runtime adapter for [`@superloomdev/js-server-helper-ht
 
 A stateless adapter that normalizes AWS API Gateway payload format v2.0 event objects (HTTP API, Lambda Function URLs) into the standard `instance.http_request` shape consumed by the gateway. Call it to get a ready-to-use object, then pass it as `CONFIG.Adapter` when constructing the gateway.
 
-**For REST API (payload format v1.0) support,** use `js-server-helper-http-gateway-adapter-aws-apigateway-v1` (if available) or implement a custom adapter.
+**For REST API (payload format v1.0) support,** use `helper-http-gateway-adapter-aws-apigateway-v1` (if available) or implement a custom adapter.
 
 ## Usage
 
@@ -58,8 +58,8 @@ API Gateway **REST API** uses payload format v1.0 and is **not supported** by th
 
 | Content-Type | Behavior |
 |-------------|---------|
-| `application/json` | `JSON.parse` → object. Falls back to `{}` on parse error |
-| `application/x-www-form-urlencoded` | `URLSearchParams` parse → object |
+| `application/json` | `JSON.parse` -> object. Falls back to `{}` on parse error |
+| `application/x-www-form-urlencoded` | `URLSearchParams` parse -> object |
 | Any other | `{}` (not parsed) |
 
 Base64-encoded bodies (`event.isBase64Encoded = true`) are decoded before parsing.
@@ -70,12 +70,12 @@ When a CloudFront distribution sits in front of API Gateway and forwards the `Cl
 
 ## Dependencies
 
-No runtime dependencies. Zero npm packages installed. No AWS SDK required.
+Two peer dependencies from the Superloom framework: `helper-utils` and `helper-debug`. No AWS SDK required. No third-party npm packages.
 
 ## Extended Documentation
 
 - [`docs/api.md`](docs/api.md). Full 3-method adapter contract with parameter, return, and behavior tables
-- [`docs/configuration.md`](docs/configuration.md). Loader pattern, the (zero) configuration keys, Lambda handler pattern, supported runtimes
+- [`docs/configuration.md`](docs/configuration.md). Loader pattern, the `LOG_LEVEL` config key, Lambda handler pattern, supported runtimes
 - [`docs/payload-format.md`](docs/payload-format.md). v2.0 schema reference, body-parsing rules, authorizer context, v1.0 unsupported boundary
 - [`ROBOTS.md`](ROBOTS.md). Compact reference for AI assistants
 

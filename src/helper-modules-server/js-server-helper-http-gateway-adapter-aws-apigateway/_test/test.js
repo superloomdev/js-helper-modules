@@ -1,4 +1,4 @@
-// Info: Tests for js-server-helper-http-gateway-adapter-aws-apigateway. Exercises
+// Info: Tests for helper-http-gateway-adapter-aws-apigateway. Exercises
 // the adapter against REAL API Gateway v2.0 event fixtures, not synthetic mocks.
 // Fixtures live in _test/fixtures/. The official `apigw-v2-*.json` files are
 // verbatim copies from aws/aws-lambda-go events/testdata - they are the exact
@@ -559,7 +559,7 @@ describe('Group F - integration with gateway', function () {
     httpGateway.returnHttpResponse(instance, 200, null, cookies, { ok: true });
 
     assert.ok('Set-Cookie' in captured.response.headers);
-    assert.ok(captured.response.headers['Set-Cookie'].includes('sid=session-xyz'));
+    assert.ok(captured.response.headers['Set-Cookie'][0].includes('sid=session-xyz'));
   });
 
 });

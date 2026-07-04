@@ -1,6 +1,6 @@
 # API Reference
 
-Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway`. Application code rarely calls these methods directly — they are invoked by the gateway. This document describes what each method does so adapter behavior is fully transparent.
+Complete reference for `@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway`. Application code rarely calls these methods directly - they are invoked by the gateway. This document describes what each method does so adapter behavior is fully transparent.
 
 **Related docs:**
 - [`payload-format.md`](payload-format.md) for the v2.0 event schema and unsupported v1.0 boundary
@@ -91,7 +91,7 @@ Returns the viewer country code from the `CloudFront-Viewer-Country` header in t
 **Example:**
 ```javascript
 // instance.http_request.headers['cloudfront-viewer-country'] === 'US'
-Gateway.getRequestCountryCode(instance);  // → 'US'
+Gateway.getRequestCountryCode(instance);  // -> 'US'
 ```
 
 The lookup is case-insensitive because the adapter lowercases all header keys during request normalization.
@@ -105,7 +105,7 @@ When `Gateway.returnHttpResponse(instance, status, headers, body)` is called ins
 1. Gateway merges caller-supplied headers over its defaults (`Cache-Control: max-age=0`, `Content-Type: application/json`)
 2. Gateway calls `adapter.buildResponseEnvelope(status, merged_headers, body)`
 3. Gateway calls `instance._http_gateway.response_handler(null, envelope)`
-4. Adapter's callback invokes the Lambda `callback(null, envelope)` — Lambda returns the envelope to API Gateway
+4. Adapter's callback invokes the Lambda `callback(null, envelope)` - Lambda returns the envelope to API Gateway
 
 For `async`/Promise-based Lambda handlers, the `callback` argument is still accepted by AWS Lambda. The gateway invokes it identically.
 
@@ -115,7 +115,7 @@ For `async`/Promise-based Lambda handlers, the `callback` argument is still acce
 
 **Reading:** API Gateway v2.0 delivers cookies as a JSON array of name=value strings under `event.cookies`. The adapter parses each entry into `instance.http_request.cookies`. URL-encoded values are decoded.
 
-**Writing:** `Gateway.buildCookie(...)` returns a cookie descriptor object. `Gateway.returnHttpResponse(...)` serializes it and the adapter places the resulting value in response headers under `Set-Cookie`. See [`../../js-server-helper-http-gateway/docs/api.md`](../../js-server-helper-http-gateway/docs/api.md) for the full cookie API.
+**Writing:** `Gateway.buildCookie(...)` returns a cookie descriptor object. `Gateway.returnHttpResponse(...)` serializes each cookie and collects them into a `Set-Cookie` header array. See [`../../js-server-helper-http-gateway/docs/api.md`](../../js-server-helper-http-gateway/docs/api.md) for the full cookie API.
 
 ---
 

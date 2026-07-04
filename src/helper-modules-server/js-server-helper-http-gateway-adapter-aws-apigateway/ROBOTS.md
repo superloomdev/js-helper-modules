@@ -1,11 +1,11 @@
 # @superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway
 
-**Class:** B (Extended Utility - Node.js runtime only)
-**Scope:** AWS Lambda + API Gateway HTTP API runtime adapter for `js-server-helper-http-gateway`. Supports payload format **v2.0 only** (HTTP API and Lambda Function URLs). Stateless singleton.
+**Class:** F (Dependent adapter - transport)
+**Scope:** AWS Lambda + API Gateway HTTP API runtime adapter for `helper-http-gateway`. Supports payload format **v2.0 only** (HTTP API and Lambda Function URLs). Stateless - `createInterface` closes over nothing beyond its four fixed slots.
 
 ---
 
-## Standalone Loader
+## Adapter Loader
 
 ```javascript
 const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')({});
@@ -15,15 +15,15 @@ const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
 });
 ```
 
-The adapter is standalone — it builds its own `Lib` internally. No peer dependencies required from the caller.
+The adapter is fully independent - it builds its own `Lib` from aliased peer dependencies (`helper-utils`, `helper-debug`) and owns its own `CONFIG`, `ERRORS`, and `Validators` companion files.
 
-**Runtime peers:** none — no AWS SDK required, no Docker required, no external services
+**Runtime peers:** `helper-utils`, `helper-debug` (Superloom framework modules). No AWS SDK required, no Docker required, no external services.
 
 ---
 
 ## Public Interface
 
-The adapter exposes the 3-method contract consumed by the gateway. Application code does **not** call the adapter directly — it calls `Gateway.*` methods which delegate.
+The adapter exposes the 3-method contract consumed by the gateway. Application code does **not** call the adapter directly - it calls `Gateway.*` methods which delegate.
 
 ```javascript
 // Extract normalized request data for the gateway to write into instance
@@ -62,7 +62,7 @@ adapter.getCountryCode(headers);
 | `event.headers['content-type']` | Behavior |
 |---|---|
 | `application/json` | `JSON.parse(body)` then accept only **plain objects** (not arrays, not primitives). Falls back to `{}` on parse error |
-| `application/x-www-form-urlencoded` | `URLSearchParams` parse → object |
+| `application/x-www-form-urlencoded` | `URLSearchParams` parse -> object |
 | Any other (including `multipart/form-data`, `text/plain`, `application/xml`) | `{}` (not parsed) |
 | Missing or empty body | `{}` |
 
@@ -75,7 +75,7 @@ If `event.isBase64Encoded === true`, the body is base64-decoded **before** conte
 | Format | Used by | Supported |
 |---|---|---|
 | v2.0 | API Gateway **HTTP API**, **Lambda Function URLs** | ✅ Yes |
-| v1.0 | API Gateway **REST API** | ❌ No — `instance.http_request.method` will be `null` |
+| v1.0 | API Gateway **REST API** | No - `instance.http_request.method` will be `null` |
 
 The adapter does not throw on v1.0 events; it degrades gracefully so a downstream handler can return a clean 400 response. See [`docs/payload-format.md`](docs/payload-format.md) for the full v2.0 schema reference.
 
@@ -85,7 +85,7 @@ The adapter does not throw on v1.0 events; it degrades gracefully so a downstrea
 
 **Multipart/form-data not supported.** API Gateway v2.0 does support multipart payloads, but the adapter does not parse them. `body` will be `{}` for multipart requests.
 
-**JSON root must be a plain object.** `body` is always a key/value map. JSON arrays and primitive root values (`["a","b"]`, `42`, `"hello"`) are rejected; `body` becomes `{}`. This is a root-level rule — array and primitive values **inside** a JSON object are preserved normally.
+**JSON root must be a plain object.** `body` is always a key/value map. JSON arrays and primitive root values (`["a","b"]`, `42`, `"hello"`) are rejected; `body` becomes `{}`. This is a root-level rule - array and primitive values **inside** a JSON object are preserved normally.
 
 **Authorizer context is not promoted.** JWT claims, IAM identity, and Lambda authorizer payloads remain on the raw event at `event.requestContext.authorizer`. The adapter does not surface them as standard `instance.http_request` fields. Read them from the raw event if needed.
 
@@ -101,6 +101,6 @@ Tests run against **23 real API Gateway v2.0 event fixtures** (6 copied verbatim
 cd _test && npm install && npm test
 ```
 
-**Coverage:** 66 tests across 10 groups — official AWS fixture compatibility (including the documented v1.0 unsupported boundary), method/path/query, headers, cookies, body parsing (JSON, urlencoded, base64, malformed, multipart, empty, unicode), response envelope, full gateway integration, country code, IP/UA/origin, and defensive edge cases.
+**Coverage:** 66 tests across 10 groups - official AWS fixture compatibility (including the documented v1.0 unsupported boundary), method/path/query, headers, cookies, body parsing (JSON, urlencoded, base64, malformed, multipart, empty, unicode), response envelope, full gateway integration, country code, IP/UA/origin, and defensive edge cases.
 
 See [`docs/api.md`](docs/api.md) and [`docs/payload-format.md`](docs/payload-format.md) for extended documentation.
