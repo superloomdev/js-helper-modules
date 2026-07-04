@@ -309,6 +309,14 @@ until **two consecutive full passes find zero new deviations.** Only then procee
    # Must return NOTHING - scope-form requires and adapter-owned LOG_LEVEL are violations
    git grep -nE "require\('@superloomdev/|LOG_LEVEL" -- '[module-path]/*.js' ':!*/node_modules/*' ':!*/_test/*'
    ```
+   // turbo
+   ```bash
+   # Must return NOTHING - underscore-prefixed createInterface slots are a violation.
+   # Canonical names (Lib, CONFIG, ERRORS, Validators) are mandatory; unused trailing
+   # slots get `// eslint-disable-line no-unused-vars` on the createInterface line
+   # (module-structure-js.md "Unused fixed slots are kept, not removed")
+   git grep -nE "createInterface = function \(.*_(CONFIG|ERRORS|Validators)" -- '[module-path]/*.js' ':!*/node_modules/*' ':!*/_test/*'
+   ```
    Also verify the loader signature is `(shared_libs, config)` and `package.json` `peerDependencies`
    does not list `helper-utils`/`helper-debug`.
    The reply MUST contain a line `Skeleton conformance: [clean | N mismatches -> fixed]`. A convergence
