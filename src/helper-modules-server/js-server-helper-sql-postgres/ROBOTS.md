@@ -1,4 +1,4 @@
-# js-server-helper-sql-postgres
+# @superloomdev/js-server-helper-sql-postgres
 
 PostgreSQL 15+ client with connection pooling.
 Async/await. Multi-DB capable. **API-compatible with `js-server-helper-mysql`** -
@@ -14,6 +14,11 @@ Server helper. Service-dependent (needs Docker for emulated, real PostgreSQL-com
 
 ## Direct Dependencies
 - `pg` - Node.js Postgres driver (lazy-loaded)
+
+## Companion Files
+- `postgres.config.js` - default config (HOST, PORT, DATABASE, USER, PASSWORD, SSL, POOL_MAX, POOL_MIN, POOL_IDLE_TIMEOUT_MS, KEEP_ALIVE_INITIAL_DELAY_MS, CONNECT_TIMEOUT_MS, STATEMENT_TIMEOUT_MS, APPLICATION_NAME, CLOSE_TIMEOUT_MS)
+- `postgres.errors.js` - frozen error catalog (DATABASE_CONNECTION_FAILED, DATABASE_QUERY_FAILED, DATABASE_TRANSACTION_FAILED)
+- `postgres.validators.js` - config validators singleton
 
 ## Loader Pattern (Multi-DB Capable)
 

@@ -8,12 +8,12 @@ const { describe, it, before, after } = require('node:test');
 const { Client } = require('pg');
 const ERRORS = require('../postgres.errors');
 
-// Load dependencies via test loader — process.env is touched only there.
+// Load dependencies via test loader - process.env is touched only there.
 const { Lib, Config } = require('./loader')();
 const Postgres = Lib.Postgres;
 const Instance = Lib.Instance;
 
-// Single test instance — represents a "request" for performance timeline.
+// Single test instance - represents a "request" for performance timeline.
 const instance = Instance.initialize();
 
 // Admin connection for schema setup/teardown. Not part of the module under test.
@@ -25,7 +25,7 @@ const ADMIN_OPTIONS = {
   database: Config.postgres_database
 };
 
-// Test table name — keep simple and unique
+// Test table name - keep simple and unique
 const TEST_TABLE = 'test_table';
 
 
@@ -74,7 +74,7 @@ after(async function () {
 
 
 // ============================================================================
-// 1. buildQuery / buildRawText / buildMultiCondition — pure, no I/O
+// 1. buildQuery / buildRawText / buildMultiCondition - pure, no I/O
 // ============================================================================
 
 describe('buildQuery', function () {
@@ -511,7 +511,7 @@ describe('write (pre-built SQL strings)', function () {
 
 
 // ============================================================================
-// 5. Multiple-instance support — core reason for the closure-per-loader design
+// 5. Multiple-instance support - core reason for the closure-per-loader design
 // ============================================================================
 
 describe('multiple instances', function () {
@@ -553,7 +553,7 @@ describe('multiple instances', function () {
 
 
 // ============================================================================
-// 6. Placeholder translator — edge cases
+// 6. Placeholder translator - edge cases
 // ============================================================================
 
 describe('placeholder translator', function () {

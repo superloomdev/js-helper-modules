@@ -165,13 +165,13 @@ The right `POOL_MAX` depends on your deployment shape and the database's `max_co
 | Category | Recommended `POOL_MAX` | Reasoning |
 |---|---|---|
 | **Serverless** (cloud functions, on-demand workers. E.g. Lambda, Cloud Functions, Cloud Run) | `1` | Each invocation holds one connection. Larger pools waste warm-pool capacity and exhaust `max_connections` under concurrency. |
-| **Persistent** (containers, virtual machines, orchestrated platforms. E.g. Docker, Kubernetes, EC2) | `10–20` | Tune per instance: `POOL_MAX × instance_count ≤ db_max_connections × 0.8`. |
-| **Auto-scaling managed databases** (e.g. Aurora Serverless v2, scale-to-zero clusters) | `5–10` | Scale-down behaviour means very large pools can hold connections through scale events. |
+| **Persistent** (containers, virtual machines, orchestrated platforms. E.g. Docker, Kubernetes, EC2) | `10-20` | Tune per instance: `POOL_MAX x instance_count <= db_max_connections x 0.8`. |
+| **Auto-scaling managed databases** (e.g. Aurora Serverless v2, scale-to-zero clusters) | `5-10` | Scale-down behavior means very large pools can hold connections through scale events. |
 
 **General formula** for persistent deployments:
 
 ```
-POOL_MAX × app_instance_count ≤ db_max_connections × 0.8
+POOL_MAX x app_instance_count <= db_max_connections x 0.8
 ```
 
 The `0.8` leaves headroom for database admin connections, monitoring, and burst handling. Cross this threshold and new connection attempts will fail under load.

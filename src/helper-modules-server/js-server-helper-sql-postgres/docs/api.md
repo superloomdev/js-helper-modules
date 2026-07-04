@@ -46,7 +46,7 @@ At query time the wrapper translates `?` to Postgres-native `$1, $2, …` and in
 
 ## `insert_id` Semantics
 
-Postgres does not have `LAST_INSERT_ID()`. The module emulates MySQL's behaviour by reading the `id` column returned by `RETURNING`:
+Postgres does not have `LAST_INSERT_ID()`. The module emulates MySQL's behavior by reading the `id` column returned by `RETURNING`:
 
 | Pattern | `insert_id` value |
 |---|---|

@@ -8,7 +8,7 @@
 /********************************************************************
 Load all test dependencies and build the Lib container from environment.
 
-process.env is ONLY read here — never in test.js.
+process.env is ONLY read here - never in test.js.
 
 @return {Object} result - Runtime objects for testing
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance, Postgres)
@@ -16,9 +16,7 @@ process.env is ONLY read here — never in test.js.
 *********************************************************************/
 module.exports = function loader () {
 
-  // ========================= CONFIGURATION ========================= //
-
-  // Test-wide environment config — available to test.js for AdminClient setup
+  // Test-wide environment config - available to test.js for AdminClient setup
   const Config = {
     postgres_host: process.env.POSTGRES_HOST,
     postgres_port: parseInt(process.env.POSTGRES_PORT, 10),
@@ -28,10 +26,6 @@ module.exports = function loader () {
   };
 
   // Sub-configs: each helper module receives ONLY its relevant slice
-  const config_debug = {
-    LOG_LEVEL: 'error'
-  };
-
   const config_postgres = {
     HOST: Config.postgres_host,
     PORT: Config.postgres_port,
@@ -42,20 +36,15 @@ module.exports = function loader () {
   };
 
 
-  // ==================== DEPENDENCY CONTAINER ======================= //
-
+  // Dependencies for this instance
   const Lib = {};
 
-
-  // ==================== HELPER MODULES ============================= //
-
+  // Helper modules
   Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Debug = require('helper-debug')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
-
-  // ==================== SERVER HELPER MODULES ====================== //
-
+  // Server helper modules
   Lib.Postgres = require('helper-sql-postgres')(Lib, config_postgres);
 
 
