@@ -113,14 +113,29 @@ its own `node_modules` and breaks in CI (`docs/dev/pitfalls.md` entry 8). This i
    If the skeleton and the reference module disagree, STOP and report - do not pick one silently
    (`migration-pitfalls.md` "Verification scoped to the fix list instead of the class skeleton").
 
-   **Class F adapters (`-adapter-[name]`) - additional binding rules** (from `module-structure-js.md`
-   "Adapter Skeleton", hardened 2026-07-04): fully-independent factory `loader(config)` (the singleton
-   `loader(shared_libs)` shape is deprecated); companion files `adapter.config.js` / `adapter.errors.js` /
-   `adapter.validators.js` exist even when minimal (inline `ERRORS` object or inline `if`/`throw` config
-   validation in the loader is a violation); `LOG_LEVEL` comes from `CONFIG.LOG_LEVEL` (default `'error'`
-   in `adapter.config.js`), never hardcoded in the `Lib.Debug` require; source requires use alias names
-   (`require('helper-utils')`) with the alias mapped in the module's own `package.json` dependencies;
-   `createInterface(Lib, CONFIG, ERRORS, Validators)` fixed slots.
+   **Class F modules (stores AND adapters) - additional binding rules** (from `module-structure-js.md`
+   "Storage Adapter Skeleton" / "Adapter Skeleton", revised 2026-07-04 to the injected-Lib shape):
+   standard factory `loader(shared_libs, config)` - identical signature to every other helper module.
+   `Lib` is picked **by reference** from the injected container (`const Lib = { Utils: shared_libs.Utils,
+   Debug: shared_libs.Debug };`). TWO shapes are deprecated and must be converted on sight:
+   (1) module-scope singleton (`let Lib;` at module scope); (2) self-built-Lib factory (`loader(config)`
+   with `require('helper-utils')(Lib, {})` inside - duplicates instances, breaks mock injection).
+   Conversion steps for a module on the self-built shape:
+   - loader signature `(config)` -> `(shared_libs, config)`; replace the `require('helper-utils')(Lib, {})` /
+     `require('helper-debug')(Lib, ...)` block with the by-reference pick (step comment: `// Dependencies
+     for this instance - by reference from the shared container`)
+   - remove `helper-utils` / `helper-debug` from the module's own `package.json` `peerDependencies`
+     (the container supplies them); driver helpers still arrive via config keys (`lib_sql`, `lib_dynamodb`)
+   - remove any `LOG_LEVEL` key from `*.config.js` and its docs row (log level is the caller's concern;
+     the shared `Lib.Debug` instance carries the app-wide level)
+   - update `_test/loader.js` to pass `Lib` when instantiating the module under test; drop the now-unneeded
+     `helper-utils`/`helper-debug` deps from `_test/package.json` ONLY if the test loader itself no longer
+     needs them (it usually still builds the container, so they usually stay)
+   - docs sweep: README/ROBOTS/docs must not claim "builds its own Lib", "standalone", or "fully
+     independent"; usage snippets show `require('...')(Lib, { ... })`
+   Companion files `adapter.config.js` / `adapter.errors.js` / `adapter.validators.js` (or `store.*`)
+   exist even when minimal or empty (inline `ERRORS` object or inline `if`/`throw` config validation in
+   the loader is a violation); `createInterface(Lib, CONFIG, ERRORS, Validators)` fixed slots.
 
 5. **Output a binding-rules checklist** - short, each line citing its `docs/` path/section or reference
    `file:line`. This is the bar the module is held to. No rule without a citation.
@@ -283,16 +298,19 @@ until **two consecutive full passes find zero new deviations.** Only then procee
    module's entry file and re-verify the structural elements one by one: loader statement groups each
    carry their step comment, companion files wired (no inline ERRORS, no inline config validation),
    validators loader takes `(Lib, ERRORS)`, `createInterface` slots fixed, banners standard. For Class F
-   adapters additionally grep for the two mechanical violations:
+   modules (stores and adapters) additionally grep for the mechanical violations of the injected-Lib shape:
    // turbo
    ```bash
-   # Must return NOTHING - hardcoded Debug level and scope-form requires are violations
-   git grep -nE "LOG_LEVEL: '(error|warn|info|debug)'" -- '[module-path]/*.js' ':!*/node_modules/*' ':!*.config.js'
+   # Must return NOTHING - self-built Lib inside a Class F loader is a violation
+   git grep -nE "require\('helper-(utils|debug)'\)\(" -- '[module-path]/*.js' ':!*/node_modules/*' ':!*/_test/*'
    ```
    // turbo
    ```bash
-   git grep -n "require('@superloomdev/" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   # Must return NOTHING - scope-form requires and adapter-owned LOG_LEVEL are violations
+   git grep -nE "require\('@superloomdev/|LOG_LEVEL" -- '[module-path]/*.js' ':!*/node_modules/*' ':!*/_test/*'
    ```
+   Also verify the loader signature is `(shared_libs, config)` and `package.json` `peerDependencies`
+   does not list `helper-utils`/`helper-debug`.
    The reply MUST contain a line `Skeleton conformance: [clean | N mismatches -> fixed]`. A convergence
    claim without it is invalid (`migration-pitfalls.md` "Verification scoped to the fix list instead of
    the class skeleton").
@@ -446,7 +464,7 @@ Derive the authoritative set from `docs/modules/complex-module-docs-guide.md`; s
 - [ ] Lint exit 0; clean-install tests green
 - [ ] Sweep battery clean (em-dash, `.js` arrows, spelling, banned vocab, void/`_param`, `docs/`-in-comments, scope-leak, bare-name-leak)
 - [ ] Universal Companion Files satisfied: config/errors/validators all exist; four fixed `createInterface` slots kept; single-require rule (ERRORS + data injected into validators, never self-required)
-- [ ] Skeleton conformance diff done (Phase B) and re-verified (Phase D 5b) with the verdict line; Class F adapters: no hardcoded LOG_LEVEL, no scope-form requires, companion files present
+- [ ] Skeleton conformance diff done (Phase B) and re-verified (Phase D 5b) with the verdict line; Class F modules: loader `(shared_libs, config)`, Lib by reference (no self-built Lib), no LOG_LEVEL key, no scope-form requires, no helper-utils/helper-debug peerDependencies, companion files present
 - [ ] `file:` rule satisfied (only this module is `file:`)
 - [ ] `/js-helper-module review` clean
 - [ ] Audit converged: two consecutive clean passes
