@@ -19,30 +19,20 @@ route handlers can invoke gateway methods directly.
 *********************************************************************/
 module.exports = function loader () {
 
-  const config_debug = { LOG_LEVEL: 'error' };
-
-
-  // ==================== DEPENDENCY CONTAINER ======================= //
-
+  // Dependencies for this instance
   const Lib = {};
 
-
-  // ==================== FOUNDATION MODULES ========================= //
-
+  // Foundation modules
   Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Debug = require('helper-debug')(Lib, {});
+  Lib.Time = require('helper-time')(Lib, {});
 
-
-  // ==================== SERVER HELPER MODULES ====================== //
-
+  // Server helper modules
   Lib.Instance = require('helper-instance')(Lib, {});
 
-
-  // ==================== HTTP GATEWAY (WITH ADAPTER) ================ //
-
+  // HTTP Gateway (with this Express adapter injected)
   const ExpressAdapter = HttpGatewayAdapterExpressHttp(Lib, {});
   const httpGateway = HttpGateway(Lib, { Adapter: ExpressAdapter });
-
 
   return { Lib: Lib, httpGateway: httpGateway };
 

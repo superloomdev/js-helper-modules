@@ -65,11 +65,12 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Build the public Adapter interface closed over Lib, CONFIG, ERRORS,
-and Validators.
+and Validators. Statelessness means createInterface closes over nothing
+beyond its four fixed slots.
 
-@param {Object} Lib       - Dependency container (Utils, Debug)
-@param {Object} CONFIG   - Merged adapter configuration
-@param {Object} ERRORS   - Frozen error catalog
+@param {Object} Lib         - Dependency container (Utils, Debug)
+@param {Object} CONFIG     - Merged adapter configuration
+@param {Object} ERRORS     - Frozen error catalog
 @param {Object} Validators - Config validators
 
 @return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
@@ -155,11 +156,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       return {
         headers: headers,
         cookies: cookies,
-        query  : (req.query && Lib.Utils.isObject(req.query)) ? req.query : {},
-        body   : (req.body && Lib.Utils.isObject(req.body)) ? req.body : {},
-        params : (req.params && Lib.Utils.isObject(req.params)) ? req.params : {},
-        method : req.method ? req.method.toUpperCase() : null,
-        url    : req.originalUrl || req.url || '',
+        query: (req.query && Lib.Utils.isObject(req.query)) ? req.query : {},
+        body: (req.body && Lib.Utils.isObject(req.body)) ? req.body : {},
+        params: (req.params && Lib.Utils.isObject(req.params)) ? req.params : {},
+        method: req.method ? req.method.toUpperCase() : null,
+        url: req.originalUrl || req.url || '',
         response_handler: response_handler
       };
 
@@ -208,8 +209,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Build the Express response envelope
       return {
         statusCode: status,
-        headers   : headers || {},
-        body      : normalized_body
+        headers: headers || {},
+        body: normalized_body
       };
 
     },

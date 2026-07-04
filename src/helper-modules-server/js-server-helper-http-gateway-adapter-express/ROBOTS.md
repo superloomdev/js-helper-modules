@@ -5,6 +5,11 @@
 
 ---
 
+## Companion Files
+- `adapter.config.js` - default config (empty - no adapter-specific keys)
+- `adapter.errors.js` - frozen error catalog (single construction-time type)
+- `adapter.validators.js` - config validators singleton
+
 ## Adapter Loader
 
 ```javascript
@@ -27,7 +32,7 @@ The adapter exposes the 3-method contract consumed by the gateway. Application c
 
 ```javascript
 // Extract normalized request data for the gateway to write into instance
-adapter.extractRequest(req, _context, res);
+adapter.extractRequest(req, context, res);
 // Returns: { headers, cookies, query, body, params, method, url, response_handler }
 
 // Build the response envelope sent through res.status().set().send()
