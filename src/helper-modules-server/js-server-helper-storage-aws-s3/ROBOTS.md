@@ -1,4 +1,4 @@
-# js-server-helper-storage-aws-s3
+# @superloomdev/js-server-helper-storage-aws-s3
 
 AWS S3 file storage: list, upload, download, delete, copy, move. Lazy-loaded SDK v3. Explicit credentials.
 
@@ -12,6 +12,11 @@ Server helper. Service-dependent (needs Docker/MinIO for emulated, AWS for integ
 
 ## Direct Dependencies
 - `@aws-sdk/client-s3` - S3 client + command constructors
+
+## Companion Files
+- `s3.config.js` - default config (REGION, KEY, SECRET, ENDPOINT, FORCE_PATH_STYLE, MAX_RETRIES)
+- `s3.errors.js` - frozen error catalog (STORAGE_UPLOAD_FAILED, STORAGE_DOWNLOAD_FAILED, STORAGE_NOT_FOUND, STORAGE_DELETE_FAILED, STORAGE_COPY_FAILED, STORAGE_LIST_FAILED, STORAGE_BATCH_UPLOAD_FAILED, STORAGE_BATCH_DELETE_FAILED)
+- `s3.validators.js` - config validators singleton
 
 ## Loader Pattern (Factory)
 

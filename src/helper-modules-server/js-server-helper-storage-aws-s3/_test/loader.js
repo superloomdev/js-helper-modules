@@ -1,13 +1,13 @@
 // Info: Test loader for js-server-helper-aws-s3
 // Mirrors the main project loader pattern: loads dependencies, merges config from environment
-// Same loader works for both emulated (dev) and integration testing — env vars control the target
+// Same loader works for both emulated (dev) and integration testing - env vars control the target
 'use strict';
 
 
 /********************************************************************
 Load all test dependencies, build Lib container from environment
 
-process.env is ONLY read here — nowhere else in test code.
+process.env is ONLY read here - nowhere else in test code.
 
 Config = test-wide environment values, available to test.js for any purpose
   (e.g., AdminClient setup, assertions, debugging). Independent of any module.
@@ -19,9 +19,7 @@ config_s3 = module-specific config slice, only passed to the S3 module.
 *********************************************************************/
 module.exports = function loader () {
 
-  // ========================= CONFIGURATION ========================= //
-
-  // Test-wide environment config — available to test.js for test infrastructure
+  // Test-wide environment config - available to test.js for test infrastructure
   // This is NOT a module config. It holds raw env values that test.js may need
   // (e.g., AdminClient credentials, endpoint for bucket setup/teardown)
   const Config = {
@@ -33,11 +31,7 @@ module.exports = function loader () {
   };
 
   // Sub-configs: each helper module receives ONLY its relevant config slice
-  // process.env is ONLY read here — nowhere else in test code
-  const config_debug = {
-    LOG_LEVEL: 'error'
-  };
-
+  // process.env is ONLY read here - nowhere else in test code
   const config_s3 = {
     REGION: process.env.S3_REGION,
     KEY: process.env.S3_ACCESS_KEY,
@@ -47,20 +41,15 @@ module.exports = function loader () {
   };
 
 
-  // ==================== DEPENDENCY CONTAINER ======================= //
-
+  // Dependencies for this instance
   const Lib = {};
 
-
-  // ==================== HELPER MODULES ============================= //
-
+  // Helper modules
   Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Debug = require('helper-debug')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
-
-  // ==================== SERVER HELPER MODULES ====================== //
-
+  // Server helper modules
   Lib.S3 = require('helper-storage-aws-s3')(Lib, config_s3);
 
 
