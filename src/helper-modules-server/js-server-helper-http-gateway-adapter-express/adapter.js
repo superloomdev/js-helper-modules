@@ -68,13 +68,13 @@ Build the public Adapter interface closed over Lib, CONFIG, ERRORS,
 and Validators.
 
 @param {Object} Lib       - Dependency container (Utils, Debug)
-@param {Object} _CONFIG   - Merged adapter configuration
-@param {Object} _ERRORS   - Frozen error catalog
-@param {Object} _Validators - Config validators
+@param {Object} CONFIG   - Merged adapter configuration
+@param {Object} ERRORS   - Frozen error catalog
+@param {Object} Validators - Config validators
 
 @return {Object} - { extractRequest, buildResponseEnvelope, getCountryCode }
 *********************************************************************/
-const createInterface = function (Lib, _CONFIG, _ERRORS, _Validators) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Adapter = {
