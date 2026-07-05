@@ -78,6 +78,6 @@ patch(url, params?, options?)    - PATCH with JSON body
 - **Content-type driven body encoding.** `json` → `JSON.stringify`. `urlencoded` → `new URLSearchParams(params).toString()`. `multipart` → caller passes a `FormData` instance, `fetch` sets the boundary
 - **Timeouts via `AbortSignal.timeout(ms)`.** Caught separately and mapped to `NETWORK_TIMEOUT`
 - **Basic auth** uses `Buffer.from('user:pass').toString('base64')`. No external crypto dependency
-- **Performance audit on every request.** `Lib.Debug.performanceAuditLog('HTTP <METHOD>', url, start_ms)` on both success and failure paths
+- **Performance audit on every request.** `Lib.Debug.performanceAuditLog('End', 'HTTP <METHOD> - <url>', start_ms)` on success, `('Error', ...)` on failure
 - **Caller headers override defaults.** `options.headers` is merged last; user `User-Agent`, `Accept`, etc. win over framework defaults
 - **Empty auth values are ignored.** `auth.bearer_token` that is `''`/`null`/`undefined` is treated as no auth; same for `auth.basic.username`
