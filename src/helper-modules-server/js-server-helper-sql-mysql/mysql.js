@@ -487,7 +487,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Fall back to force-destroy if graceful close ran past the timeout
       if (result === 'timeout') {
-        Lib.Debug.warning('MySQL: Pool close timed out, force destroying');
+        Lib.Debug.warn('MySQL: Pool close timed out, force destroying');
         _MySQL.destroyPool();
       } else {
         Lib.Debug.debug('MySQL: Pool closed gracefully');
@@ -521,23 +521,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Check out a dedicated pool connection for manual transaction control.
     Must be paired with releaseClient() or the pool will leak.
 
-    @param {Object} instance - Request instance with performance timeline
+    @param {Object} instance - Request instance (kept for API parity with Postgres/SQLite)
 
     @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
-    getClient: async function (instance) {
+    getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
       // Build pool on first call
       _MySQL.initIfNot();
 
-      Lib.Debug.performanceAuditLog('Start', 'MySQL getClient', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
         // Pull a connection out of the pool. Caller must release() it later.
         const client = await state.pool.getConnection();
 
-        Lib.Debug.performanceAuditLog('End', 'MySQL getClient', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'MySQL getClient', start_ms);
 
         return {
           success: true,
@@ -628,7 +628,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Adapter must be loaded before pool creation
       _MySQL.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'MySQL Pool', Lib.Utils.getUnixTimeInMilliSeconds());
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Driver options resolved from the merged CONFIG
       const options = {
@@ -660,8 +660,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Pool is lazy - TCP connections open on the first real query
       state.pool = MySQLDriverPromise.createPool(options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'MySQL Pool', Lib.Utils.getUnixTimeInMilliSeconds());
-      Lib.Debug.debug('MySQL Pool Initialized', {
+      Lib.Debug.performanceAuditLog('End', 'MySQL Pool', start_ms);
+      Lib.Debug.info('MySQL Pool Initialized', {
         host: CONFIG.HOST,
         database: CONFIG.DATABASE,
         pool_max: CONFIG.POOL_MAX
@@ -713,7 +713,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Run any SQL. The core workhorse - all other I/O functions route through here.
     Placeholders: ? for values, ?? for identifiers.
 
-    @param {Object} instance - Request instance (for time_ms tracing)
+    @param {Object} instance - Request instance
     @param {String} sql - SQL with ?/?? placeholders
     @param {Array} [params] - Placeholder values
 
@@ -724,15 +724,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Build pool on first call
       _MySQL.initIfNot();
 
-      // Start performance timeline
-      Lib.Debug.performanceAuditLog('Start', 'MySQL Query', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
         // Run the query. The pool checks out and releases a connection automatically.
-        const [result, fields] = await state.pool.query(sql, params || []);
+        const [result] = await state.pool.query(sql, params || []);
 
-        Lib.Debug.performanceAuditLog('End', 'MySQL Query', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'MySQL Query', start_ms);
 
         // SELECT returns an array of rows; DML returns a ResultSetHeader object
         const is_header = !Array.isArray(result);
@@ -743,7 +742,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         return {
           success: true,
           rows: is_header ? [] : result,
-          fields: fields || [],
           affected_rows: is_header ? (result.affectedRows || 0) : 0,
           insert_id: is_header ? (result.insertId || null) : null,
           error: null
@@ -827,7 +825,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Holds the checked-out connection so both success and error paths can release it
       let conn = null;
 
-      Lib.Debug.performanceAuditLog('Start', 'MySQL Transaction', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -847,7 +845,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await conn.commit();
         conn.release();
 
-        Lib.Debug.performanceAuditLog('End', 'MySQL Transaction', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'MySQL Transaction', start_ms);
 
         return {
           success: true,
