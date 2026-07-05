@@ -15,7 +15,7 @@ Server helper. Service-dependent (needs Docker for emulated, Atlas for integrati
 
 ## Companion Files
 - `mongodb.config.js` - default config (CONNECTION_STRING, DATABASE_NAME, MAX_POOL_SIZE, SERVER_SELECTION_TIMEOUT)
-- `mongodb.errors.js` - frozen error catalog (DATABASE_WRITE_FAILED, DATABASE_READ_FAILED, DATABASE_UPDATE_FAILED, DATABASE_DELETE_FAILED, DATABASE_BATCH_GET_FAILED, DATABASE_BATCH_WRITE_FAILED, DATABASE_BATCH_DELETE_FAILED, DATABASE_BATCH_WRITE_DELETE_FAILED, DATABASE_TRANSACTION_FAILED, DATABASE_QUERY_FAILED)
+- `mongodb.errors.js` - frozen error catalog (DATABASE_WRITE_FAILED, DATABASE_READ_FAILED, DATABASE_UPDATE_FAILED, DATABASE_DELETE_FAILED, DATABASE_BATCH_GET_FAILED, DATABASE_BATCH_WRITE_FAILED, DATABASE_BATCH_DELETE_FAILED, DATABASE_BATCH_WRITE_DELETE_FAILED, DATABASE_TRANSACTION_FAILED, DATABASE_CONNECTION_FAILED, DATABASE_QUERY_FAILED)
 - `mongodb.validators.js` - config validators singleton
 
 ## Loader Pattern (Factory)
@@ -30,13 +30,13 @@ Each loader call returns an independent MongoDB interface with its own `Lib`, `C
 | Key | Type | Default | Required |
 |---|---|---|---|
 | CONNECTION_STRING | String | 'mongodb://localhost:27017' | yes |
-| DATABASE_NAME | String | undefined | yes |
+| DATABASE_NAME | String | 'test' | yes |
 | MAX_POOL_SIZE | Number | 10 | no |
 | SERVER_SELECTION_TIMEOUT | Number | 5000 | no |
 
 ## Exported Functions (15 total)
 
-All functions with `instance` param use instance for request-level performance tracing.
+All functions accept `instance` as their first argument for request context and performance logging.
 
 ### Convenience (single-record CRUD)
 
@@ -120,7 +120,8 @@ All functions return standardized response format:
 ```
 
 ## Patterns
-- Lazy loading: MongoDB driver loaded only when first function is called
+- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
+- **Lazy loading:** MongoDB driver loaded only when first function is called
 - Connection pooling: Configurable pool size (MAX_POOL_SIZE)
 - Instance isolation: Each factory call creates independent connection
 - Automatic cleanup: Use close() to release resources

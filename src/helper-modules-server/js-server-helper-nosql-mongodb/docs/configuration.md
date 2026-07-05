@@ -45,14 +45,12 @@ Loader call semantics:
 
 | Key | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `CONNECTION_STRING` | `String` | Yes | `''` | MongoDB connection string. Standard `mongodb://...` or `mongodb+srv://...` URI. Supports auth, replica set, options |
-| `DATABASE_NAME` | `String` | Yes | *(undefined)* | Database name to bind the loader instance to |
+| `CONNECTION_STRING` | `String` | Yes | `'mongodb://localhost:27017'` | MongoDB connection string. Standard `mongodb://...` or `mongodb+srv://...` URI. Supports auth, replica set, options |
+| `DATABASE_NAME` | `String` | Yes | `'test'` | Database name to bind the loader instance to |
 | `MAX_POOL_SIZE` | `Number` | No | `10` | Maximum connections in the pool. See [Multi-Database Setup](#multi-database-setup) for tuning across deployment categories |
 | `SERVER_SELECTION_TIMEOUT` | `Number` | No | `5000` | Maximum milliseconds the driver will wait for a server to be selected before failing |
 
-`CONNECTION_STRING` and `DATABASE_NAME` have no useful defaults. Every project must override them. The other keys have reasonable defaults for most workloads.
-
-> **Implementation note:** the `mongodb.config.js` defaults file currently lists keys (`URI`, `HOST`, `POOL_MAX`, etc.) that the source code does not read. Only the four keys above flow through to the `MongoClient`. The defaults file will be reconciled in a follow-up; pass the four keys above explicitly to be sure.
+`CONNECTION_STRING` defaults to localhost for development. Every production deployment must override it. `DATABASE_NAME` defaults to `'test'` for local development. The other keys have reasonable defaults for most workloads.
 
 ---
 
@@ -77,7 +75,7 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-operation timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance.time_ms` used by performance logging |
+| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
 
 ---
 

@@ -32,7 +32,7 @@ Every exported function with its signature, parameters, return shape, semantics,
 
 ## Conventions
 
-All I/O functions are **async** and accept `instance` as their first argument. The `instance` is built once per request by `Lib.Instance.initialize()` and threaded through the call chain; it is what gives every database operation a stable `instance.time_ms` for request-level timing.
+All I/O functions are **async** and accept `instance` as their first argument. The `instance` is built once per request by `Lib.Instance.initialize()` and threaded through the call chain for request context and performance logging via `Lib.Debug.performanceAuditLog`.
 
 Every function returns a consistent response envelope:
 
