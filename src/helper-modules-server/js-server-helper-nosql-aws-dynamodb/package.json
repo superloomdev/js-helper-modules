@@ -1,7 +1,7 @@
 {
   "name": "@superloomdev/js-server-helper-nosql-aws-dynamodb",
   "description": "AWS DynamoDB CRUD, batch, query, scan. Lazy-loaded SDK v3. Explicit credentials.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dynamodb.js",
   "private": false,
   "license": "MIT",

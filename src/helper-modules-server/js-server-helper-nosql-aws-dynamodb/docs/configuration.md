@@ -89,7 +89,7 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-operation timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance.time_ms` used by performance logging |
+| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
 
 ---
 
