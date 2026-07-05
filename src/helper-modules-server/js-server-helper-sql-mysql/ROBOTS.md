@@ -8,7 +8,7 @@ Server helper. Service-dependent (needs Docker for emulated, real MySQL-compatib
 ## Peer Dependencies
 - `@superloomdev/js-helper-utils` - injected as `Lib.Utils`
 - `@superloomdev/js-helper-debug` - injected as `Lib.Debug`
-- `@superloomdev/js-server-helper-instance` - injected as `Lib.Instance` (for `instance.time_ms`)
+- `@superloomdev/js-server-helper-instance` - injected as `Lib.Instance`
 
 ## Direct Dependencies
 - `mysql2` - Node.js MySQL driver (lazy-loaded)
@@ -102,7 +102,7 @@ close() → Promise<void> | async:yes
 - **Factory per loader:** every loader call returns its own instance with its own pool. No module-level singletons.
 - **Lazy adapter load:** `mysql2` and `mysql2/promise` are `require()`-d on first use via `ensureAdapter()`. The adapter modules are cached at module scope and shared across every instance because they are stateless.
 - **Lazy pool init:** pool is created on the first query, not at loader time. Friendly to serverless functions.
-- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using `instance.time_ms`.
+- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholders:** `?` for values, `??` for identifiers. MySQL native, no translation needed.
 - **Spatial data:** use `buildRawText()` - no dedicated geometry helpers.
 - **Private workhorses:** `query()`, `execute()`, and `transaction()` are internal helpers. The public API exposes only the high-level `get/getRow/getRows/getValue/write` helpers plus `getClient/releaseClient` for manual transaction control.
