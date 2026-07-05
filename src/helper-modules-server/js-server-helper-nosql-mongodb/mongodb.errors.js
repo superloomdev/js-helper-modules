@@ -53,6 +53,11 @@ module.exports = Object.freeze({
     message: 'Database transaction failed'
   }),
 
+  DATABASE_CONNECTION_FAILED: Object.freeze({
+    type: 'DATABASE_CONNECTION_FAILED',
+    message: 'Database connection failed'
+  }),
+
   DATABASE_QUERY_FAILED: Object.freeze({
     type: 'DATABASE_QUERY_FAILED',
     message: 'Database query operation failed'

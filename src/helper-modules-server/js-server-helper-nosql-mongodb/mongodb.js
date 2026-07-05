@@ -91,7 +91,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get a single record from a collection by filter (typically _id).
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - MongoDB query filter (e.g. { _id: 'abc' }, { email: 'user@test.com' })
     @param {Object} [options] - findOne options
@@ -106,10 +106,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute findOne command
         const document = await state.db.collection(collection).findOne(filter, options || {});
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB getRecord', start_ms);
 
         // Return successful response with document
         return {
@@ -145,7 +149,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     the filter matches nothing, replaces if it matches. Callers never need
     to think about insert vs replace.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - Filter to identify the record (e.g. { _id: 'user_1' })
     @param {Object} document - Full replacement document (no $ operators). Must include _id if filter uses _id.
@@ -157,10 +161,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute replaceOne with upsert hardcoded to true
         const result = await state.db.collection(collection).replaceOne(filter, document, { upsert: true });
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB writeRecord', start_ms);
 
         // Return successful response with operation counts
         return {
@@ -198,7 +206,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Delete a single record from a collection.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - Filter to match the record (e.g. { _id: 'user_1' }, { email: 'user@test.com' })
 
@@ -209,10 +217,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute deleteOne command
         const result = await state.db.collection(collection).deleteOne(filter);
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB deleteRecord', start_ms);
 
         // Return successful response with deleted count
         return {
@@ -246,7 +258,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Update fields in a single record.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - Filter to match the record (e.g. { _id: 'user_1' })
     @param {Object} update - MongoDB update operators
@@ -264,10 +276,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute updateOne command
         const result = await state.db.collection(collection).updateOne(filter, update);
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB updateRecord', start_ms);
 
         // Return successful response with modified count
         return {
@@ -308,7 +324,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     to prevent accidental full-collection scans. Use scan() for intentional
     full-collection reads.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - MongoDB query filter (must not be empty)
     @param {String|Number|Boolean} filter.<field> - Exact match (e.g. { status: 'active' })
@@ -336,10 +352,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute find command and convert cursor to array
         const documents = await state.db.collection(collection).find(filter, options || {}).toArray();
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB query', start_ms);
 
         // Return successful response with documents
         return {
@@ -373,7 +393,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Count documents matching a filter.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - MongoDB query filter (must not be empty). Same filter syntax as query().
 
@@ -389,10 +409,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute countDocuments command
         const count = await state.db.collection(collection).countDocuments(filter);
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB count', start_ms);
 
         // Return successful response with count
         return {
@@ -430,7 +454,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     Use sparingly on large collections.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} [filter] - Optional MongoDB query filter. Same filter syntax as query(). Omit or pass null for all documents.
     @param {Object} [options] - find options
@@ -446,6 +470,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Use empty filter if none provided (intentional full-collection scan)
@@ -453,6 +479,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         // Execute find command and convert cursor to array
         const documents = await state.db.collection(collection).find(query_filter, options || {}).toArray();
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB scan', start_ms);
 
         // Return successful response with documents and count
         return {
@@ -495,7 +523,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     DynamoDB requires explicit keys for bulk deletes; this uses filter-based
     deleteMany which is native to MongoDB.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} filter - MongoDB query filter (must not be empty). Same filter syntax as query().
 
@@ -511,10 +539,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Execute deleteMany command
         const result = await state.db.collection(collection).deleteMany(filter);
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB deleteRecordsByFilter', start_ms);
 
         // Return successful response with deleted count
         return {
@@ -556,7 +588,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Note: MongoDB does not natively support multi-collection batch get.
     This function internally loops through each collection and merges results.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {Object} idsByCollection - Map of collection names to _id arrays
     @param {Array<String|Number>} idsByCollection.<collectionName> - Array of _id values to fetch
 
@@ -566,6 +598,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -584,6 +618,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
             .toArray();
 
         }
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB batchGetRecords', start_ms);
 
         // Return successful response with documents grouped by collection
         return {
@@ -624,7 +660,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     This function internally loops through each collection and runs
     bulkWrite per collection.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {Object} operationsByCollection - Map of collection names to operation arrays
     @param {Object[]} operationsByCollection.<collectionName> - Array of operations for this collection
     @param {Object} [operationsByCollection.<collectionName>[]..put] - Document to insert (e.g. { _id: 'x', name: 'New' })
@@ -636,6 +672,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -669,6 +707,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           };
 
         }
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB batchWriteAndDeleteRecords', start_ms);
 
         // Return successful response with per-collection results
         return {
@@ -706,7 +746,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     This function internally loops through each collection and runs
     insertMany per collection.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {Object} documentsByCollection - Map of collection names to document arrays
     @param {Object[]} documentsByCollection.<collectionName> - Array of documents to insert (each should include _id)
 
@@ -716,6 +756,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -736,6 +778,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           };
 
         }
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB batchWriteRecords', start_ms);
 
         // Return successful response with per-collection results
         return {
@@ -773,7 +817,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     This function internally loops through each collection and runs
     deleteMany with an $in filter per collection.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {Object} idsByCollection - Map of collection names to _id arrays
     @param {Array<String|Number>} idsByCollection.<collectionName> - Array of _id values to delete
 
@@ -783,6 +827,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -803,6 +849,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           };
 
         }
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB batchDeleteRecords', start_ms);
 
         // Return successful response with per-collection results
         return {
@@ -848,7 +896,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     inside the callback must pass { session } as an option to participate
     in the transaction.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {Function} callback - async function(session, db) { ... }
     @param {ClientSession} callback.session - MongoDB session. Pass as { session } option to all operations.
     @param {Db} callback.db - MongoDB database reference. Use db.collection('name') to access collections.
@@ -859,6 +907,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -873,6 +923,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           });
 
         });
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB transactWriteRecords', start_ms);
 
         // Return successful response with transaction result
         return {
@@ -912,7 +964,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     the same name and spec, which means callers can safely invoke this
     at boot time on every startup without worrying about duplicates.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
     @param {String} collection - Collection name
     @param {Object} spec - Index key spec (e.g. { field: 1 } ascending, { field: -1 } descending, { field: 'text' } text index)
     @param {Object} [options] - createIndex options
@@ -925,15 +977,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     createIndex: async function (instance, collection, spec, options) {
 
-      void instance;
-
       // Ensure MongoDB client is initialized
       await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
         // MongoDB's createIndex returns the index name
         const index_name = await state.db.collection(collection).createIndex(spec, options || {});
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB createIndex', start_ms);
 
         return {
           success: true,
@@ -969,11 +1023,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Close the MongoDB connection for this instance.
 
-    @param {Object} instance - Request instance for performance tracing
+    @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    close: async function (_instance) {
+    close: async function (instance) { // eslint-disable-line no-unused-vars
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -983,6 +1039,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           state.client = null;
           state.db = null;
         }
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB close', start_ms);
 
         // Return successful response
         return {
@@ -1002,7 +1060,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         // Return error response
         return {
           success: false,
-          error: ERRORS.DATABASE_READ_FAILED
+          error: ERRORS.DATABASE_CONNECTION_FAILED
         };
 
       }
@@ -1049,7 +1107,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Adapter must be loaded before client creation
       _MongoDB.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'MongoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Build MongoClient with connection pooling options
       state.client = new MongoClient(CONFIG.CONNECTION_STRING, {
@@ -1063,8 +1121,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Cache the database reference
       state.db = state.client.db(CONFIG.DATABASE_NAME);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'MongoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
-      Lib.Debug.debug('MongoDB Client Initialized', {
+      Lib.Debug.performanceAuditLog('End', 'MongoDB Client', start_ms);
+      Lib.Debug.info('MongoDB Client Initialized', {
         database: CONFIG.DATABASE_NAME
       });
 
