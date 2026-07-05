@@ -39,7 +39,7 @@ Each loader call returns an independent DynamoDB interface with its own `Lib`, `
 
 ## Exported Functions (19 total)
 
-All functions with `instance` param use instance.time_ms for request-level performance timeline.
+All functions accept `instance` as their first argument for request context and performance logging.
 
 ### Builders (pure, no I/O - used by executors, transactWriteRecords, and updateRecord)
 
@@ -141,8 +141,8 @@ Pattern 2 is the dominant real-world usage - most update commands are built indi
 ## Patterns
 - 3-layer DRY: Builder → Command Executor → Convenience function
 - Instance first: every I/O function receives instance for request-level performance tracking
+- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - Lazy loading: SDK loaded on first function call via initIfNot
-- Performance: Lib.Debug.performanceAuditLog with instance.time_ms
 - Credentials: explicit KEY + SECRET via config, not implicit env chain
 - Reserved words: builders use ExpressionAttributeNames (#n1, #n2) to avoid DynamoDB reserved word conflicts
 - Batch limits: batchWriteRecords/batchDeleteRecords handle 25-item AWS limit with recursion

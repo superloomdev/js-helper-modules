@@ -219,7 +219,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Execute a pre-built Put command (from commandBuilderForAddRecord).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
@@ -229,6 +229,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Send pre-built Put command
@@ -236,7 +238,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB Put - ' + service_params.TableName, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB Put - ' + service_params.TableName, start_ms);
 
         return {
           success: true,
@@ -266,7 +268,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
@@ -276,6 +278,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Send pre-built Delete command
@@ -283,7 +287,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB Delete - ' + service_params.TableName, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB Delete - ' + service_params.TableName, start_ms);
 
         return {
           success: true,
@@ -313,7 +317,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Execute a pre-built Update command (from commandBuilderForUpdateRecord).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, attributes, error }
@@ -323,6 +327,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Send pre-built Update command
@@ -330,7 +336,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB Update - ' + service_params.TableName, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB Update - ' + service_params.TableName, start_ms);
 
         // Return updated attributes
         return {
@@ -366,7 +372,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get a single record by primary key.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} key - Primary key { pk, sk } or { id }
 
@@ -377,6 +383,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Build and send Get command
@@ -384,7 +392,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB Get - ' + table, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB Get - ' + table, start_ms);
 
         // Return item if found, null if not
         return {
@@ -418,7 +426,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Write (create or replace) a record. Always upsert - inserts if absent,
     replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} item - Item to store
 
@@ -438,7 +446,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteRecord.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} key - Primary key
 
@@ -459,7 +467,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Update an item using structured builder (SET/REMOVE/INCREMENT/DECREMENT).
     DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} key - Primary key
     @param {Object} [update_data] - Key-value pairs to SET
@@ -486,7 +494,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Query items by partition key with full feature set.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} params - Query parameters
     @param {String} params.pk - Partition key value
@@ -506,6 +514,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -558,7 +568,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB Query - ' + table, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB Query - ' + table, start_ms);
 
         // Determine last evaluated key for pagination
         const last_key = !Lib.Utils.isNullOrUndefined(response.LastEvaluatedKey)
@@ -599,7 +609,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Count records matching a partition key (uses query with SELECT='COUNT').
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} params - Same as query params (pk, pkName, skCondition, skValues, indexName)
 
@@ -608,8 +618,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     count: async function (instance, table, params) {
 
       // Set select to COUNT and delegate to query (DRY)
-      params.select = 'COUNT';
-      const result = await DynamoDB.query(instance, table, params);
+      const query_params = Object.assign({}, params, { select: 'COUNT' });
+      const result = await DynamoDB.query(instance, table, query_params);
 
       return {
         success: result.success,
@@ -623,7 +633,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Scan entire table (use sparingly on large tables).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} [filter] - Filter expression { expression, names, values }
 
@@ -633,6 +643,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -651,7 +663,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB Scan - ' + table, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB Scan - ' + table, start_ms);
 
         return {
           success: true,
@@ -685,7 +697,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Batch get multiple items from one or more tables.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} keysByTable - { tableName: [key1, key2, ...] }
 
     @return {Promise<Object>} - { success, items, error }
@@ -694,6 +706,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -708,7 +722,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB BatchGet', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB BatchGet', start_ms);
 
         return {
           success: true,
@@ -739,7 +753,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Batch write (put/delete) items across one or more tables.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} requestsByTable - { tableName: [{ put: item }, { delete: key }] }
 
     @return {Promise<Object>} - { success, unprocessed, error }
@@ -748,6 +762,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -759,7 +775,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB BatchWrite', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB BatchWrite', start_ms);
 
         return {
           success: true,
@@ -792,7 +808,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     AWS BatchWriteItem limit is 25 items per request. This function handles
     any number of items by recursively splitting into 25-item chunks.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} itemsByTable - { tableName: [item1, item2, ...] }
 
     @return {Promise<Object>} - { success, error }
@@ -801,6 +817,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Split items into chunks of 25 and remaining
       const chunk = {};
@@ -842,7 +860,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB AddBatchRecords', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB AddBatchRecords', start_ms);
 
         // If remaining items exist, recursively process them
         if (Object.keys(remaining).length > 0) {
@@ -878,7 +896,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     AWS BatchWriteItem limit is 25 items per request. This function handles
     any number of keys by recursively splitting into 25-item chunks.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} keysByTable - { tableName: [key1, key2, ...] }
 
     @return {Promise<Object>} - { success, error }
@@ -887,6 +905,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Split keys into chunks of 25 and remaining
       const chunk = {};
@@ -928,7 +948,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB DeleteBatchRecords', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB DeleteBatchRecords', start_ms);
 
         // If remaining keys exist, recursively process them
         if (Object.keys(remaining).length > 0) {
@@ -968,7 +988,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     production, prefer infrastructure-as-code (CloudFormation / Terraform)
     for table provisioning.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} params - Table definition
     @param {Object[]} params.attribute_definitions - [{ name, type: 'S'|'N'|'B' }]
@@ -981,8 +1001,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     createTable: async function (instance, table, params) {
 
       _DynamoDB.initIfNot();
-
-      void instance;
 
       const attribute_definitions = params.attribute_definitions.map(function (a) {
         return { AttributeName: a.name, AttributeType: a.type };
@@ -1052,7 +1070,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     table lifecycle should be managed by IaC. Idempotent - returns
     success when the table is already absent.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} table - Table name
 
     @return {Promise<Object>} - { success, already_absent, error }
@@ -1060,7 +1078,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     deleteTable: async function (instance, table) {
 
       _DynamoDB.initIfNot();
-      void instance;
 
       try {
 
@@ -1103,7 +1120,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Uses pre-built command objects from commandBuilderForAddRecord, commandBuilderForDeleteRecord,
     and commandBuilderForUpdateRecord.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object[]} [add_records] - Array of Put service params
     @param {Object[]} [update_records] - Array of Update service params
     @param {Object[]} [delete_records] - Array of Delete service params
@@ -1114,6 +1131,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -1147,7 +1166,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'DynamoDB TransactWrite', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB TransactWrite', start_ms);
 
         return {
           success: true,
@@ -1264,7 +1283,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Adapter must be loaded before client creation
       _DynamoDB.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'DynamoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Base client options - region and retry config
       const client_options = {
@@ -1298,8 +1317,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Wrap base client in Document Client for simplified data access
       state.client = DynamoDBLib.DynamoDBDocumentClient.from(base_client, document_options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'DynamoDB Client', Lib.Utils.getUnixTimeInMilliSeconds());
-      Lib.Debug.debug('DynamoDB Client Initialized', {
+      Lib.Debug.performanceAuditLog('End', 'DynamoDB Client', start_ms);
+      Lib.Debug.info('DynamoDB Client Initialized', {
         region: CONFIG.REGION,
         endpoint: CONFIG.ENDPOINT || null
       });
