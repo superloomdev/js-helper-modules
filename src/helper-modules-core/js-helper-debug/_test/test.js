@@ -424,7 +424,7 @@ describe('performanceAuditLog', function () {
   it('should set elapsed_ms to null when no reference_time provided', function () {
 
     const Debug = createDebug({ LOG_LEVEL: 'debug', LOG_FORMAT: 'json', INCLUDE_MEMORY_USAGE: false });
-    const output = captureOutput(function () { Debug.performanceAuditLog('Start', 'Init'); });
+    const output = captureOutput(function () { Debug.performanceAuditLog('End', 'Init'); });
 
     const parsed = JSON.parse(output[0].args[0]);
     assert.strictEqual(parsed.data.elapsed_ms, null);

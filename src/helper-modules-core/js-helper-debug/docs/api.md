@@ -105,7 +105,7 @@ Measures elapsed time (in milliseconds) and current heap usage, and writes one s
 
 | Param | Type | Required | Description |
 |---|---|---|---|
-| `action` | `string` | Yes | An action identifier. Conventions: `'Start'`, `'End'`, `'Error'`, `'Init-End'` |
+| `action` | `string` | Yes | An action identifier. Conventions: `'End'`, `'Error'` |
 | `routine` | `string` | Yes | Name of the routine being audited (e.g. `'Postgres Query - get_user_by_id'`) |
 | `reference_time` | `number` | No | A unix-millisecond timestamp from which to compute elapsed time. When omitted, the line records `elapsed_ms: null` |
 
@@ -121,15 +121,17 @@ The structured payload always includes:
 | `timestamp_ms` | `number` | Current unix-millisecond timestamp |
 | `heap_used_mb` | `number` | Current `process.memoryUsage().heapUsed` rounded to 3 decimal places. Only included when `INCLUDE_MEMORY_USAGE` is true and the runtime exposes `process.memoryUsage` |
 
-### Canonical pattern. Use `instance.time_ms` as the reference
+### Canonical pattern. Capture a local `start_ms` at operation entry
 
-In a Superloom server, the request lifecycle module (`js-server-helper-instance`) sets `instance.time_ms` to the unix-millisecond timestamp at the start of the request. Pass that as the third argument to `performanceAuditLog` and every audit line for the rest of the request shows elapsed time **since the request started**, not since the function entered. This is what makes it possible to reconstruct a request timeline from the logs.
+In every external service operation, capture the start time in a local variable and pass it as the third argument to a single `'End'` call after the operation completes. The `elapsed_ms` field then reports the operation's actual duration.
 
 ```javascript
-Lib.Debug.performanceAuditLog('Start', 'Postgres Query - get_user_by_id', instance.time_ms);
+const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 const user = await Lib.Db.getRow(instance, sql, params);
-Lib.Debug.performanceAuditLog('End',   'Postgres Query - get_user_by_id', instance.time_ms);
+Lib.Debug.performanceAuditLog('End', 'Postgres Query - get_user_by_id', start_ms);
 ```
+
+Never pass `instance.time_ms` - it is the request-start timestamp, constant for the life of the request, so `elapsed_ms` would report request age instead of operation duration. Request-level timing is `helper-instance`'s job (`Instance.getAge`), not the audit line's.
 
 ---
 
