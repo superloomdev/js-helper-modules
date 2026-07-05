@@ -264,6 +264,21 @@ until **two consecutive full passes find zero new deviations.** Only then procee
    On any hit: re-indent the ENTIRE JSDoc block (opener `/***`, every body line, closer `***/`) to the
    exact column of the declaration it documents, then re-run until silent. Also visually confirm the
    opener and body sit at the same column as the closer - the detector keys on the closer only.
+   Performance-audit reference time (must print nothing; `instance['time_ms']` is the request-start
+   constant - passing it reports request age, not operation duration; see migration-pitfalls
+   "Performance Logging Issues"):
+   // turbo
+   ```bash
+   git grep -nE "performanceAuditLog\([^)]*instance\[" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   ```
+   // turbo
+   ```bash
+   git grep -nE "performanceAuditLog\('(Start|Init-Start)'" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   ```
+   On any hit: capture `const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();` at the operation's
+   entry and pass it as the third argument to a single `'End'` call; delete the `'Start'`/`'Init-Start'`
+   line. Then manually confirm every remaining call's third argument is a local start capture, not a
+   timestamp created on the same line (the grep cannot see that variant).
    // turbo
    ```bash
    git grep -n "docs/" -- '[module-path]/**/*.js' ':!*/node_modules/*'
