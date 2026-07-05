@@ -39,7 +39,7 @@ The translator walks the SQL character-by-character and skips placeholders insid
 ## insert_id semantics
 SQLite provides `sqlite3_last_insert_rowid()` out-of-the-box - no `RETURNING` clause needed (unlike Postgres). For tables with `INTEGER PRIMARY KEY`, `insert_id` equals the primary key value. For `INSERT ... RETURNING *`, `insert_id` is also extracted from the returned row's `id` column when present.
 
-## Param normalisation
+## Param normalization
 node:sqlite can bind only `null | number | bigint | string | Buffer | TypedArray | DataView`. The module converts additional types at bind time:
 - `undefined` → `null`
 - `boolean` → `1` / `0`
@@ -119,7 +119,7 @@ close() → Promise<void> | async:yes
 - **Factory per loader:** every loader call returns its own instance with its own handle. No module-level singletons.
 - **Lazy adapter load:** `node:sqlite` is `require()`-d on first use via `ensureAdapter()`. Cached at module scope and shared across every instance because the driver module is stateless.
 - **Lazy handle init:** handle is created on the first query, not at loader time. Friendly to serverless functions.
-- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using `instance.time_ms`.
+- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholder translation:** `?`/`??` in source SQL → native `?` with identifiers inlined before `prepare()`.
 - **Quote-aware walker:** translator respects string literals, quoted identifiers, and line comments.
 - **Private workhorses:** `query()`, `execute()`, and `transaction()` are internal helpers. The public API exposes only the high-level `get/getRow/getRows/getValue/write` helpers plus `getClient/releaseClient` for manual transaction control.

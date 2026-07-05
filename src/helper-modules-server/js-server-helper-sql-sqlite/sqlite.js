@@ -511,21 +511,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Must be paired with releaseClient() for API parity with MySQL / Postgres
     (it is a no-op for SQLite but callers should still pair them).
 
-    @param {Object} instance - Request instance with performance timeline
+    @param {Object} instance - Request instance (kept for API parity with MySQL/Postgres)
 
     @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
-    getClient: async function (instance) {
+    getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
       // Build handle on first call
       _SQLite.initIfNot();
 
-      Lib.Debug.performanceAuditLog('Start', 'SQLite getClient', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
         // SQLite has a single handle per instance - return it directly
-        Lib.Debug.performanceAuditLog('End', 'SQLite getClient', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQLite getClient', start_ms);
 
         return {
           success: true,
@@ -612,7 +612,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Adapter must be loaded before handle creation
       _SQLite.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'SQLite Handle', Lib.Utils.getUnixTimeInMilliSeconds());
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Constructor options resolved from the merged CONFIG
       const options = {
@@ -633,7 +633,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         state.db.exec('PRAGMA synchronous = ' + _SQLite.escapePragmaValue(CONFIG.SYNCHRONOUS));
       }
 
-      Lib.Debug.performanceAuditLog('Init-End', 'SQLite Handle', Lib.Utils.getUnixTimeInMilliSeconds());
+      Lib.Debug.performanceAuditLog('End', 'SQLite Handle', start_ms);
       Lib.Debug.info('SQLite Handle Initialized', {
         file: CONFIG.FILE,
         readonly: options.readOnly,
@@ -1118,7 +1118,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Dispatches to statement.all() for read-shape queries and statement.run()
     for write-shape queries, based on classifyStatement().
 
-    @param {Object} instance - Request instance (for time_ms tracing)
+    @param {Object} instance - Request instance
     @param {String} sql - SQL with ?/?? placeholders
     @param {Array} [params] - Placeholder values
 
@@ -1129,8 +1129,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Build handle on first call
       _SQLite.initIfNot();
 
-      // Start performance timeline
-      Lib.Debug.performanceAuditLog('Start', 'SQLite Query', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -1162,7 +1161,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
             }
           }
 
-          Lib.Debug.performanceAuditLog('End', 'SQLite Query', instance['time_ms']);
+          Lib.Debug.performanceAuditLog('End', 'SQLite Query', start_ms);
 
           return {
             success: true,
@@ -1184,7 +1183,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const is_insert = shape.first_word === 'INSERT' || shape.first_word === 'REPLACE';
         const insert_id = is_insert && last_id > 0 ? last_id : null;
 
-        Lib.Debug.performanceAuditLog('End', 'SQLite Query', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQLite Query', start_ms);
 
         return {
           success: true,
@@ -1271,7 +1270,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Build handle on first call
       _SQLite.initIfNot();
 
-      Lib.Debug.performanceAuditLog('Start', 'SQLite Transaction', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       let begun = false;
 
@@ -1322,7 +1321,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         state.db.exec('COMMIT');
         begun = false;
 
-        Lib.Debug.performanceAuditLog('End', 'SQLite Transaction', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'SQLite Transaction', start_ms);
 
         return {
           success: true,

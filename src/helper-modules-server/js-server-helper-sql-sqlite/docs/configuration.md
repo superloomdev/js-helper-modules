@@ -81,9 +81,9 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-query timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance.time_ms` used by performance logging |
+| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
 
-The `Lib.Instance` peer is technically optional. The module reads `instance.time_ms` defensively. But every production deployment should pass a real instance. Otherwise performance logging is degraded.
+The `Lib.Instance` peer is technically optional. The module accepts `instance` as the first argument to all I/O functions for API parity. But every production deployment should pass a real instance.
 
 ---
 
@@ -135,7 +135,7 @@ In-memory databases are completely isolated per loader instance. Two `:memory:` 
 
 SQLite's journal mode determines how transactions are persisted to disk and which concurrency model the database uses. The default for this module is **`WAL`** (Write-Ahead Logging), which is the recommended mode for on-disk databases with concurrent readers.
 
-| Mode | Behaviour | When to use |
+| Mode | Behavior | When to use |
 |---|---|---|
 | `'WAL'` | Writers and readers do not block each other. Concurrent reads + one writer. Two extra files (`-wal`, `-shm`) live next to the database. | **Default.** On-disk databases with concurrent reads. |
 | `'DELETE'` | Classic rollback journal. Readers block on writes and vice versa. | Single-process applications where you don't want the `-wal`/`-shm` sidecar files. |
@@ -145,7 +145,7 @@ SQLite's journal mode determines how transactions are persisted to disk and whic
 
 **`SYNCHRONOUS`** trades durability for throughput:
 
-| Value | Behaviour |
+| Value | Behavior |
 |---|---|
 | `'OFF'` | Returns from `write()` before disk has confirmed. Can corrupt on power loss. |
 | `'NORMAL'` | **Default.** Syncs at critical moments. Good balance for WAL. |
@@ -174,7 +174,7 @@ By default the tests open an in-memory database. Nothing is persisted. The `node
 
 ### Optional: Test Against a File
 
-To exercise on-disk behaviour (WAL journal, durable writes, busy-handler timeouts):
+To exercise on-disk behavior (WAL journal, durable writes, busy-handler timeouts):
 
 ```bash
 export SQLITE_FILE=/tmp/sqlite-test.db
