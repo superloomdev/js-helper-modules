@@ -483,7 +483,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Fall back to force-destroy if graceful close ran past the timeout
       if (result === 'timeout') {
-        Lib.Debug.warning('Postgres: Pool close timed out, force destroying');
+        Lib.Debug.warn('Postgres: Pool close timed out, force destroying');
         _Postgres.destroyPool();
       } else {
         Lib.Debug.debug('Postgres: Pool closed gracefully');
@@ -517,23 +517,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Check out a dedicated pool connection for manual transaction control.
     Must be paired with releaseClient() or the pool will leak.
 
-    @param {Object} instance - Request instance with performance timeline
+    @param {Object} instance - Request instance (kept for API parity with MySQL/SQLite)
 
     @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
-    getClient: async function (instance) {
+    getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
       // Build pool on first call
       _Postgres.initIfNot();
 
-      Lib.Debug.performanceAuditLog('Start', 'Postgres getClient', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
         // Pull a connection out of the pool. Caller must release() it later.
         const client = await state.pool.connect();
 
-        Lib.Debug.performanceAuditLog('End', 'Postgres getClient', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'Postgres getClient', start_ms);
 
         return {
           success: true,
@@ -618,7 +618,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Adapter must be loaded before pool creation
       _Postgres.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'Postgres Pool', Lib.Utils.getUnixTimeInMilliSeconds());
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Driver options resolved from the merged CONFIG
       const options = {
@@ -652,7 +652,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         Lib.Debug.debug('Postgres idle client error', { error: err.message });
       });
 
-      Lib.Debug.performanceAuditLog('Init-End', 'Postgres Pool', Lib.Utils.getUnixTimeInMilliSeconds());
+      Lib.Debug.performanceAuditLog('End', 'Postgres Pool', start_ms);
       Lib.Debug.info('Postgres Pool Initialized', {
         host: CONFIG.HOST,
         database: CONFIG.DATABASE,
@@ -666,6 +666,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Destroy every connection in the pool. Internal helper used by close()
     when graceful shutdown times out. Public code should call close().
 
+    pg.Pool does not expose internal connection arrays like mysql2. The
+    graceful `pool.end()` in close() is the correct teardown path. This
+    method exists for API parity with the MySQL module but relies on
+    pool.end() rather than reaching into pool internals.
+
     @return {void}
     *********************************************************************/
     destroyPool: function () {
@@ -675,21 +680,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       try {
-        // Reach into the pool internals and destroy every connection
-        if (Array.isArray(state.pool._allConnections)) {
-          state.pool._allConnections.forEach(function (conn) {
-            if (conn && typeof conn.destroy === 'function') {
-              conn.destroy();
-            }
-          });
-        }
-        if (Array.isArray(state.pool._freeConnections)) {
-          state.pool._freeConnections.forEach(function (conn) {
-            if (conn && typeof conn.destroy === 'function') {
-              conn.destroy();
-            }
-          });
-        }
+        // pg.Pool does not expose _allConnections / _freeConnections.
+        // Rely on close()'s pool.end() for graceful teardown.
+        // This method is kept for API parity with the MySQL module.
       } catch {
         // Ignore errors during force destroy
       }
@@ -1054,19 +1047,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Run any SQL. The core workhorse - all other I/O functions route through here.
     Placeholders: ? for values, ?? for identifiers (translated to $N at runtime).
 
-    @param {Object} instance - Request instance (for time_ms tracing)
+    @param {Object} instance - Request instance
     @param {String} sql - SQL with ?/?? placeholders
     @param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, rows, fields, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
     *********************************************************************/
     query: async function (instance, sql, params) {
 
       // Build pool on first call
       _Postgres.initIfNot();
 
-      // Start performance timeline
-      Lib.Debug.performanceAuditLog('Start', 'Postgres Query', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -1076,7 +1068,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         // Execute - pool.query auto-checks-out and releases a connection
         const result = await state.pool.query(compiled.sql, compiled.params);
 
-        Lib.Debug.performanceAuditLog('End', 'Postgres Query', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'Postgres Query', start_ms);
 
         // pg returns rowCount always; rows is empty for DML unless RETURNING clause is used
         // affected_rows = rows modified (0 for SELECT)
@@ -1084,7 +1076,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         return {
           success: true,
           rows: result.rows || [],
-          fields: result.fields || [],
           affected_rows: result.rowCount || 0,
           insert_id: _Postgres.extractInsertId(result),
           error: null
@@ -1102,7 +1093,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         return {
           success: false,
           rows: [],
-          fields: [],
           affected_rows: 0,
           insert_id: null,
           error: ERRORS.DATABASE_QUERY_FAILED
@@ -1172,7 +1162,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Holds the checked-out connection so both success and error paths can release it
       let client = null;
 
-      Lib.Debug.performanceAuditLog('Start', 'Postgres Transaction', instance['time_ms']);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -1193,7 +1183,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await client.query('COMMIT');
         client.release();
 
-        Lib.Debug.performanceAuditLog('End', 'Postgres Transaction', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'Postgres Transaction', start_ms);
 
         return {
           success: true,
