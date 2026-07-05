@@ -38,7 +38,7 @@ Each loader call returns an independent S3 interface with its own `Lib`, `CONFIG
 
 ## Exported Functions (13 total)
 
-All functions with `instance` param use `instance.time_ms` for request-level performance timeline.
+All functions accept `instance` as their first argument for request context and performance logging.
 
 ### Builders (pure, no I/O - used by executors and custom orchestration)
 
@@ -101,8 +101,8 @@ moveFile(instance, source_bucket, source_key, dest_bucket, dest_key, is_public?)
 ## Patterns
 - 3-layer DRY: Builder → Command Executor → Convenience function
 - Instance first: every I/O function receives instance for request-level performance tracking
+- **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - Lazy loading: SDK loaded on first function call via ensureAdapter + initIfNot
-- Performance: Lib.Debug.performanceAuditLog with instance.time_ms
 - Credentials: explicit KEY + SECRET via config, not implicit env chain
 - Stream reading: SDK v3 Body.transformToByteArray() / transformToString() (no manual chunking)
 - Batch limits: deleteFiles handles 1000-item AWS limit with recursion
