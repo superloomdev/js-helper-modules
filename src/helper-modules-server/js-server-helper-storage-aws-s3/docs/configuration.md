@@ -91,7 +91,7 @@ These come from your project's `Lib` container, not from this module's `package.
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-operation timing |
 
-The module also expects an **`instance` object** to be passed as the first argument to every I/O function. The conventional source is [`@superloomdev/js-server-helper-instance`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-instance), which provides per-request `instance.time_ms` for the performance log line. The instance helper does not need to be in this module's `Lib` container. The caller passes the `instance` value directly.
+The module also expects an **`instance` object** to be passed as the first argument to every I/O function. The conventional source is [`@superloomdev/js-server-helper-instance`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-instance), which provides per-request context for performance logging. The instance helper does not need to be in this module's `Lib` container. The caller passes the `instance` value directly.
 
 ---
 

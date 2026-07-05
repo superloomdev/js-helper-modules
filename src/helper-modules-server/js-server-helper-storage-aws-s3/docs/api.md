@@ -30,7 +30,7 @@ Every exported function with its signature, parameters, return shape, semantics,
 
 ## Conventions
 
-All I/O functions are **async** and accept `instance` as their first argument. The `instance` is built once per request by your application's loader (typically using [`@superloomdev/js-server-helper-instance`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-instance)) and threaded through the call chain; it is what gives every operation a stable `instance.time_ms` for request-level timing.
+All I/O functions are **async** and accept `instance` as their first argument. The `instance` is built once per request by your application's loader (typically using [`@superloomdev/js-server-helper-instance`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-instance)) and threaded through the call chain for request context and performance logging via `Lib.Debug.performanceAuditLog`.
 
 Every function returns a consistent response envelope:
 

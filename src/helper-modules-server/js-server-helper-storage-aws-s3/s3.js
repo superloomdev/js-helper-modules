@@ -202,7 +202,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Execute a pre-built PutObject command (from commandBuilderForUploadObject).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, etag, error }
@@ -212,6 +212,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure S3 client is initialized
       _S3.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Send pre-built PutObject command
@@ -219,7 +221,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const response = await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 PutObject - ' + service_params.Bucket + '/' + service_params.Key, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 PutObject - ' + service_params.Bucket + '/' + service_params.Key, start_ms);
 
         return {
           success: true,
@@ -253,7 +255,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Execute a pre-built GetObject command (from commandBuilderForGetObject).
     Drains the response stream and returns the body as Buffer or string.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
     @param {Boolean} [output_as_string] - If true returns body as UTF-8 string, else Buffer
 
@@ -263,6 +265,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -280,7 +284,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         }
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 GetObject - ' + service_params.Bucket + '/' + service_params.Key, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 GetObject - ' + service_params.Bucket + '/' + service_params.Key, start_ms);
 
         return {
           success: true,
@@ -320,7 +324,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
@@ -330,6 +334,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure S3 client is initialized
       _S3.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Send pre-built DeleteObject command
@@ -337,7 +343,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 DeleteObject - ' + service_params.Bucket + '/' + service_params.Key, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 DeleteObject - ' + service_params.Bucket + '/' + service_params.Key, start_ms);
 
         return {
           success: true,
@@ -368,7 +374,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
@@ -378,6 +384,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Ensure S3 client is initialized
       _S3.initIfNot();
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       try {
 
         // Send pre-built CopyObject command
@@ -385,7 +393,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         await state.client.send(command);
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 CopyObject - ' + service_params.Bucket + '/' + service_params.Key, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 CopyObject - ' + service_params.Bucket + '/' + service_params.Key, start_ms);
 
         return {
           success: true,
@@ -423,7 +431,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     List objects in a bucket with an optional prefix filter. Returns up to
     1000 keys in a single call (S3 ListObjectsV2 default page size).
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
     @param {String} [prefix] - Key prefix filter
 
@@ -433,6 +441,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Build list params - prefix is sent only when provided
       const service_params = { Bucket: bucket };
@@ -454,7 +464,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           });
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 ListObjectsV2 - ' + bucket, instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 ListObjectsV2 - ' + bucket, start_ms);
 
         return {
           success: true,
@@ -486,7 +496,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObject.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
     @param {String} key - Object key
     @param {Buffer|Uint8Array|Blob|string|Readable} body - File content
@@ -512,7 +522,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     signature as an object. Returns aggregate success only when every upload
     succeeds; the results array contains per-file outcomes.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {Object[]} files - Array of file descriptors
     @param {String} files[].bucket - S3 bucket name
     @param {String} files[].key - Object key
@@ -527,6 +537,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -549,7 +561,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         });
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 BatchUpload (' + files.length + ')', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 BatchUpload (' + files.length + ')', start_ms);
 
         return {
           success: all_ok,
@@ -581,7 +593,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
     @param {String} key - Object key
     @param {Boolean} [output_as_string] - If true returns body as UTF-8 string, else Buffer
@@ -602,7 +614,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObject.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
     @param {String} key - Object key
 
@@ -624,7 +636,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     AWS DeleteObjects limit is 1000 keys per request; this function handles
     any number of keys by recursively splitting into 1000-item chunks.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
     @param {String[]} keys - Array of object keys to delete
 
@@ -634,6 +646,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Fast path - nothing to do
       if (Lib.Utils.isEmpty(keys)) {
@@ -673,7 +687,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           });
 
         // Log operation performance
-        Lib.Debug.performanceAuditLog('End', 'S3 DeleteObjects (' + chunk_keys.length + ')', instance['time_ms']);
+        Lib.Debug.performanceAuditLog('End', 'S3 DeleteObjects (' + chunk_keys.length + ')', start_ms);
 
         // Recurse for remaining keys if any
         if (remaining_keys.length > 0) {
@@ -716,7 +730,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} source_bucket - Source bucket name
     @param {String} source_key - Source object key
     @param {String} dest_bucket - Destination bucket name
@@ -741,7 +755,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     the source is left intact. Deletion failure is non-fatal - the copy has
     succeeded and the destination is authoritative.
 
-    @param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance
     @param {String} source_bucket - Source bucket name
     @param {String} source_key - Source object key
     @param {String} dest_bucket - Destination bucket name
@@ -810,7 +824,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Adapter must be loaded before client creation
       _S3.ensureAdapter();
 
-      Lib.Debug.performanceAuditLog('Init-Start', 'S3 Client', Lib.Utils.getUnixTimeInMilliSeconds());
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Base client options - region and retry config
       const client_options = {
@@ -839,8 +853,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Build S3 client
       state.client = new S3Lib.S3Client(client_options);
 
-      Lib.Debug.performanceAuditLog('Init-End', 'S3 Client', Lib.Utils.getUnixTimeInMilliSeconds());
-      Lib.Debug.debug('S3 Client Initialized', {
+      Lib.Debug.performanceAuditLog('End', 'S3 Client', start_ms);
+      Lib.Debug.info('S3 Client Initialized', {
         region: CONFIG.REGION,
         endpoint: CONFIG.ENDPOINT || null,
         force_path_style: CONFIG.FORCE_PATH_STYLE === true
