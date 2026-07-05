@@ -45,7 +45,7 @@ const Validators = {
 
   /********************************************************************
   Validate the merged CONFIG object passed to the distinct-queue loader.
-  Only Store is validated here — each adapter validates its own
+  Only Store is validated here  -  each adapter validates its own
   configuration.
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.

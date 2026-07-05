@@ -8,9 +8,9 @@ A persistent, last-write-wins coalescing queue keyed by tenant and resource. N r
 ## What It Does
 
 Many systems integrate with external data sources that push updates via
-webhooks. When the external source changes rapidly — a product catalog updated
+webhooks. When the external source changes rapidly  -  a product catalog updated
 ten times in thirty seconds, a configuration object changed by multiple actors
-in parallel — the receiving system is flooded with update requests for the same
+in parallel  -  the receiving system is flooded with update requests for the same
 resource. Processing every one of them wastes compute and risks interleaved
 writes. Only the most recent one contains the current state.
 
@@ -26,7 +26,7 @@ payload.
 This pattern is a **last-write-wins coalescing queue**. It is different from a
 FIFO job queue (which processes every item in arrival order) and from a message
 broker (which fans out to subscribers). Here, only one execution per resource
-matters at any given time — and stale jobs are discarded, not retried.
+matters at any given time  -  and stale jobs are discarded, not retried.
 
 ## Why
 
@@ -41,7 +41,7 @@ Every job is identified by two caller-supplied strings.
 
 **`tenant_id`** is the partition boundary. All jobs belonging to the same
 tenant live under the same partition. This isolates tenants from each other
-completely — one tenant's jobs can never interfere with another's — and enables
+completely  -  one tenant's jobs can never interfere with another's  -  and enables
 efficient tenant-level cleanup (removing all jobs for a tenant is a single
 partitioned delete, not a full-table scan).
 
@@ -55,7 +55,7 @@ that two different resources never share the same slot:
 // A product inside a catalog inside an account
 resource_id: account_id + '.' + catalog_id + '.' + product_id
 
-// A configuration object inside a workspace inside an organisation
+// A configuration object inside a workspace inside an organization
 resource_id: org_id + '.' + workspace_id + '.' + config_object_id
 
 // A user profile inside a region
@@ -87,9 +87,9 @@ await Lib.DistinctQueue.enqueue(instance, {
 
 **Worker side** (runs inside the single scheduled poller):
 
-1. Call `claim(instance, { tenant_id, resource_id })` — finds the latest
+1. Call `claim(instance, { tenant_id, resource_id })`  -  finds the latest
    record, deletes all stale records, returns the winning payload and action.
-2. If `payload` is null, stop — nothing to process.
+2. If `payload` is null, stop  -  nothing to process.
 3. Execute the work using the returned payload.
 4. Loop back to step 1.
 
@@ -109,7 +109,7 @@ await processSync(result.payload, result.action);
 
 **Deployment constraint:** use a single scheduled worker (e.g. a Lambda on
 EventBridge every 10 seconds) as the sole consumer of `claim`. Do not run
-multiple parallel consumers against the same queue — this module does not
+multiple parallel consumers against the same queue  -  this module does not
 implement distributed locking. One poller per queue is the correct operating
 model.
 

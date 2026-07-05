@@ -1,4 +1,4 @@
-# THOUGHTS.md — js-server-helper-distinct-queue
+# THOUGHTS.md  -  js-server-helper-distinct-queue
 
 Engineering decision journal. Documents the thinking process, alternatives
 considered, and dead ends avoided so future contributors do not re-litigate
@@ -6,7 +6,7 @@ solved problems.
 
 ---
 
-## Problem 1 — Rapid-fire webhook bursts
+## Problem 1  -  Rapid-fire webhook bursts
 
 External systems hit our webhook endpoint multiple times for the same resource
 within milliseconds. Only the most recent payload matters. Processing all of
@@ -15,16 +15,16 @@ them wastes compute and risks interleaved writes.
 **Decision:** persist all incoming records (do not overwrite), but at claim time
 pick only the latest and discard everything older. Multiple records can coexist
 in the store; the "distinct" property is enforced at consumption time, not at
-write time. Write path is append-only — no reads required on enqueue.
+write time. Write path is append-only  -  no reads required on enqueue.
 
 **Why append-only:** a read-then-write pattern on enqueue creates a race
 condition when multiple Lambda instances enqueue for the same resource
-simultaneously. Append-only eliminates the race entirely — every write
+simultaneously. Append-only eliminates the race entirely  -  every write
 succeeds independently.
 
 ---
 
-## Problem 2 — What is "latest"?
+## Problem 2  -  What is "latest"?
 
 Third-party webhooks do not supply a source timestamp. We cannot dictate their
 payload format. Arrival time at our server is the best available ordering signal.
@@ -60,7 +60,7 @@ module's job is to handle the common case correctly, and `Date.now()` does that.
 
 ---
 
-## Problem 3 — Sort key design without GSI
+## Problem 3  -  Sort key design without GSI
 
 We need to query all records for a `(tenant_id, resource_id)` without a Global
 Secondary Index. The sort key must support `begins_with` prefix queries.
@@ -81,7 +81,7 @@ and is returned to the caller for correlation.
 
 ---
 
-## Problem 4 — Double-claim with multiple Lambda instances
+## Problem 4  -  Double-claim with multiple Lambda instances
 
 If multiple Lambda instances run concurrently and all call `claim`, they could
 return the same record to multiple workers (double-processing).
@@ -103,7 +103,7 @@ forever and blocks all future claims. A TTL workaround adds config complexity
 flag is both valid and stale.
 
 **Why sentinel record was rejected:** same fundamental problem as `in_progress`
-— it requires a separate lifecycle (create, check, clear) that creates stuck
+ -  it requires a separate lifecycle (create, check, clear) that creates stuck
 state on crash. The single-poller pattern eliminates the problem at zero cost.
 
 **Why atomic conditional delete was deferred:** correct but unnecessary under
@@ -130,7 +130,7 @@ poller) does not need it - it acts on `payload` and `action`.
 
 ---
 
-## Problem 6 — Separate `clean` method
+## Problem 6  -  Separate `clean` method
 
 Early design had three worker-side methods: `claim`, `clean`, `listByPrefix`.
 `clean` was a separate post-processing step that deleted stale records and
@@ -149,7 +149,7 @@ thing without a redundant boolean.
 
 **Why `has_more` was dropped:** the poller always loops claim until
 `payload` is null. A separate flag telling the poller "there might be more"
-is redundant — the next claim call answers that question definitively. It
+is redundant  -  the next claim call answers that question definitively. It
 also saved an extra store round-trip (the re-query after delete).
 
 **Why `data_version` was dropped from the return:** it is an internal
@@ -178,7 +178,7 @@ separate `clean(data_version)` step anymore, so the caller has no use for it.
   null. The flag was redundant and required an extra store round-trip.
 - **`data_version` in claim return.** Removed. Internal ordering concept with
   no caller use case after `clean` was removed.
-- **`parseSortKey` helper.** Removed. Dead code — no callers.
+- **`parseSortKey` helper.** Removed. Dead code  -  no callers.
 - **`deleteBatch` method.** Dropped. `claim` handles all deletion internally.
 - **`get` method.** Dropped. `claim` returns the payload directly.
 - **`list` method.** Dropped. Only one logical slot per resource at any time
@@ -194,7 +194,7 @@ separate `clean(data_version)` step anymore, so the caller has no use for it.
 
 1. **Same-millisecond arrivals are treated as equivalent.** If two enqueues
    happen within the same millisecond for the same resource, the tiebreak is
-   the random sort key suffix — which has no semantic meaning. Both records
+   the random sort key suffix  -  which has no semantic meaning. Both records
    are deleted together at claim time.
 
 2. **Single-poller assumption.** The module does not enforce single-consumer

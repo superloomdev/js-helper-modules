@@ -1,6 +1,6 @@
 # Note: README.md, ROBOTS.md, and docs/ are intentionally NOT excluded.
 # The npm registry renders README.md on the package page and README.md links
-# to docs/ and ROBOTS.md — excluding them would break those links for consumers.
+# to docs/ and ROBOTS.md  -  excluding them would break those links for consumers.
 
 # Engineering decision journal (internal contributor notes, not for package consumers)
 THOUGHTS.md

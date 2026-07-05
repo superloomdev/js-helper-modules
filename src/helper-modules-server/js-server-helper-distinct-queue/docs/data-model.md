@@ -1,4 +1,4 @@
-# Data Model — js-server-helper-distinct-queue
+# Data Model  -  js-server-helper-distinct-queue
 
 ## Core Concepts
 
@@ -12,7 +12,7 @@ partitioned query).
 ### `resource_id`
 
 The unique identifier of the thing being updated within a tenant. The caller
-constructs this as an opaque string — typically a concatenation of whatever
+constructs this as an opaque string  -  typically a concatenation of whatever
 hierarchy the calling application knows about (e.g.
 `account_id + '.' + catalog_id + '.' + product_id`). The module stores and
 queries it as-is. It never parses or interprets it.
@@ -26,7 +26,7 @@ latest and is the only one that should execute.
 
 **Ordering granularity is one millisecond.** `data_version` resolves to whole
 milliseconds, so two enqueues for the same resource that differ by at least
-one millisecond are strictly ordered — the later write always wins. This is
+one millisecond are strictly ordered  -  the later write always wins. This is
 the resolution the queue guarantees; callers must not depend on any finer
 ordering.
 
@@ -36,7 +36,7 @@ resource arrive within the same millisecond, they carry identical
 pick a single, stable winner, `claim` breaks the tie on `request_id`
 (lexicographically larger wins). Because `request_id` is a random compact
 UUID, this choice is **deterministic for a given set of records but arbitrary
-with respect to actual write order** — it is not a "latest wins" guarantee
+with respect to actual write order**  -  it is not a "latest wins" guarantee
 within the same millisecond. This is an accepted trade-off: jobs that land in
 the same millisecond for one resource are treated as interchangeable.
 
@@ -67,7 +67,7 @@ keys, but must reconstruct all of them on read.
 | `action` | String | caller | Opaque label for the worker. Returned by `claim`. |
 | `toc` | Number | module | Same as `data_version` for v1 (both = enqueue time). |
 
-The write path is append-only — `enqueue` never reads and never overwrites.
+The write path is append-only  -  `enqueue` never reads and never overwrites.
 Multiple records can coexist for the same `(tenant_id, resource_id)`. The
 "distinct" property is enforced at consumption time (`claim`), not at write
 time.
@@ -75,13 +75,13 @@ time.
 ## `resource_id` Design Guide
 
 A good `resource_id` encodes every dimension that makes the resource unique
-within a tenant. The module never parses it — it is stored and queried as-is.
+within a tenant. The module never parses it  -  it is stored and queried as-is.
 
 ```
 // A product inside a catalog inside an account
 resource_id: account_id + '.' + catalog_id + '.' + product_id
 
-// A configuration object inside a workspace inside an organisation
+// A configuration object inside a workspace inside an organization
 resource_id: org_id + '.' + workspace_id + '.' + config_object_id
 
 // A user profile inside a region
@@ -89,7 +89,7 @@ resource_id: region_id + '.' + user_id
 ```
 
 **Avoid overly broad resource IDs.** A resource ID of `account_id` alone
-means the entire account shares one queue slot — any product update for any
+means the entire account shares one queue slot  -  any product update for any
 catalog under that account would supersede any other. A resource ID of
 `account_id + '.' + catalog_id + '.' + product_id` scopes each product
 independently.
@@ -108,11 +108,11 @@ resource_id + DELIMITER + data_version_ms + DELIMITER + request_id
 
 - `resource_id` enables `begins_with(resource_id + DELIMITER)` prefix queries.
 - `data_version_ms` is a 13-digit millisecond timestamp, lexicographically
-  monotonic until year 2286 — no zero-padding needed.
+  monotonic until year 2286  -  no zero-padding needed.
 - `request_id` (full compact UUID) breaks ties and ensures uniqueness.
 
 The delimiter is `\u001F` (ASCII Unit Separator). It is hardcoded inside
-each string-based adapter — it is not a configurable option in the core
+each string-based adapter  -  it is not a configurable option in the core
 module. This character is a non-printable control character that cannot
 appear in normal caller-supplied strings.
 
@@ -120,7 +120,7 @@ appear in normal caller-supplied strings.
 > that does will corrupt sort key parsing in string-based adapters.
 
 For document-based backends (e.g. MongoDB), the adapter stores the fields as
-a subdocument `_id: { t, r, d, s }` — no delimiter is needed.
+a subdocument `_id: { t, r, d, s }`  -  no delimiter is needed.
 
 ## Indexing Requirements
 
