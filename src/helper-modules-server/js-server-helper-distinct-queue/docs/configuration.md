@@ -1,10 +1,10 @@
-# Configuration — js-server-helper-distinct-queue
+# Configuration  -  js-server-helper-distinct-queue
 
 ## Loader Pattern
 
 The module exports a factory function. Each call returns an independent
 instance with its own `Lib`, `CONFIG`, and store. Config is validated at
-construction time — misconfiguration throws synchronously at startup, never
+construction time  -  misconfiguration throws synchronously at startup, never
 at runtime.
 
 ```js
@@ -69,7 +69,7 @@ directly through the contract interface.
 
 ## Testing Tier
 
-The core module tests run at **Tier 2** — no Docker, no database. The
+The core module tests run at **Tier 2**  -  no Docker, no database. The
 in-process `memory-store.js` fixture implements the full 4-method store
 contract in a plain JavaScript array. Integration tests against real backends
 live in each adapter package.

@@ -1,7 +1,7 @@
 {
   "name": "@superloomdev/js-server-helper-distinct-queue",
   "description": "Persistent, storage-agnostic last-write-wins coalescing queue keyed by tenant and resource. N rapid-fire writes collapse into at most one execution of the latest payload. Built-in stores for DynamoDB and MongoDB.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "distinct-queue.js",
   "private": false,
   "license": "MIT",

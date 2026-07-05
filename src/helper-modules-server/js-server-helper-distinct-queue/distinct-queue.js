@@ -104,7 +104,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     On success, returns the generated request_id so the caller can log or
     return it to the external service that submitted the job.
 
-    @param {Object} instance - Request instance for time and lifecycle
+    @param {Object} instance - Request instance
     @param {Object} options - Per-call parameters
     @param {String} options.tenant_id - Partition boundary
     @param {String} options.resource_id - Opaque resource identifier within the tenant
@@ -117,6 +117,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Programmer errors (bad args) throw synchronously
       Validators.validateEnqueueOptions(options);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Generate the ordering signal and unique request ID
       const data_version = _DistinctQueue.generateDataVersion();
@@ -146,6 +148,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
             error: ERRORS.SERVICE_UNAVAILABLE
           };
         }
+
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue enqueue', start_ms);
 
         return {
           success: true,
@@ -185,7 +189,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     payload is null (nothing to process). The poller loops claim until
     payload is null.
 
-    @param {Object} instance - Request instance for time and lifecycle
+    @param {Object} instance - Request instance
     @param {Object} options - Per-call parameters
     @param {String} options.tenant_id - Partition boundary
     @param {String} options.resource_id - Opaque resource identifier within the tenant
@@ -196,6 +200,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Programmer errors (bad args) throw synchronously
       Validators.validateClaimOptions(options);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -252,6 +258,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         }
 
         // Return the winning record's payload and action
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue claim', start_ms);
+
         return {
           success: true,
           payload: winner.payload,
@@ -283,7 +291,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Operational query. Returns all records whose resource_id begins with
     resource_id_prefix. Not used in the normal enqueue/claim flow.
 
-    @param {Object} instance - Request instance for time and lifecycle
+    @param {Object} instance - Request instance
     @param {Object} options - Per-call parameters
     @param {String} options.tenant_id - Partition boundary
     @param {String} options.resource_id_prefix - Prefix to match
@@ -294,6 +302,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Programmer errors (bad args) throw synchronously
       Validators.validateListByPrefixOptions(options);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -319,6 +329,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         }
 
         // Return matched records
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue listByPrefix', start_ms);
+
         return {
           success: true,
           records: query_result.records || [],
@@ -366,7 +378,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Assemble the canonical record shape for storage. The core module does
-    not construct a storage key — each adapter derives its own key from
+    not construct a storage key - each adapter derives its own key from
     these raw fields.
 
     @param {String} tenant_id    - Partition boundary
@@ -376,7 +388,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     @param {Number} data_version - Millisecond timestamp
     @param {String} request_id   - Compact UUID for uniqueness and tiebreaking
 
-    @return {Object} - Canonical record
+    @return {Object} - Canonical record with fields: tenant_id, resource_id,
+    data_version, request_id, payload, action, toc (copy of data_version for
+    store adapter indexing)
     *********************************************************************/
     buildRecord: function (tenant_id, resource_id, payload, action, data_version, request_id) {
 

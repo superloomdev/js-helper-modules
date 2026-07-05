@@ -44,7 +44,7 @@ Append a new job record for a `(tenant_id, resource_id)` pair.
 ```js
 {
   success: true,           // Boolean
-  request_id: 'a1b2c3...', // String — compact UUID generated for this enqueue
+  request_id: 'a1b2c3...', // String  -  compact UUID generated for this enqueue
   error: null              // null on success, ERRORS object on failure
 }
 ```
@@ -83,8 +83,8 @@ Query all records for a resource. Pick the latest. Delete all stale records. Ret
 ```js
 {
   success: true,             // Boolean
-  payload: { ... },          // Object — the winning record's payload (null when no records exist)
-  action: 'sync-catalog',    // String — the winning record's action (null when no records exist)
+  payload: { ... },          // Object  -  the winning record's payload (null when no records exist)
+  action: 'sync-catalog',    // String  -  the winning record's action (null when no records exist)
   error: null
 }
 ```
@@ -96,7 +96,7 @@ Query all records for a resource. Pick the latest. Delete all stale records. Ret
 3. If no records, return `{ payload: null, action: null }`.
 4. Pick the record with the highest `data_version` (ties broken by lexicographic `request_id` comparison).
 5. Call `store.deleteByDataVersionLte(instance, tenant_id, resource_id, winner.data_version)`.
-6. Deletion failure is logged but non-fatal — the claim still returns the winner.
+6. Deletion failure is logged but non-fatal  -  the claim still returns the winner.
 7. Return `{ payload, action }`.
 
 ---
