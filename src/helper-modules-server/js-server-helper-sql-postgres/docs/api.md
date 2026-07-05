@@ -29,7 +29,7 @@ Every exported function with its signature, parameters, return shape, semantics,
 
 ## Conventions
 
-- Every I/O function accepts an `instance` (from `Lib.Instance.initialize()`) as its first argument. This lets each query be timed against the active request via `instance.time_ms` and routed through `Lib.Debug.performanceAuditLog`.
+- Every I/O function accepts an `instance` (from `Lib.Instance.initialize()`) as its first argument. This provides request context and is threaded through the call chain for performance logging via `Lib.Debug.performanceAuditLog`.
 - Every return value follows the `{ success, ...data, error }` envelope. `success` is always a boolean; `error` is `null` on success or a `{ type, message }` object on failure. Functions never `throw` for operational errors. Programmer errors (wrong argument types) still throw.
 - The factory returns an independent instance per loader call. Two loader calls = two pools = two independent lifecycles. See [Multi-Database Setup](configuration.md#multi-database-setup) for usage.
 
