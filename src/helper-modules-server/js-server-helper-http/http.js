@@ -301,7 +301,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         const data = await _Http.readResponseBody(response);
 
         // Log performance of completed request
-        Lib.Debug.performanceAuditLog('HTTP ' + method, final_url, start_ms);
+        Lib.Debug.performanceAuditLog('End', 'HTTP ' + method + ' - ' + final_url, start_ms);
 
         // HTTP-level success vs error (4xx/5xx is not a thrown exception)
         if (response.ok) {
@@ -327,7 +327,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       } catch (error) {
 
         // Log performance of failed request
-        Lib.Debug.performanceAuditLog('HTTP ' + method + ' (failed)', final_url, start_ms);
+        Lib.Debug.performanceAuditLog('Error', 'HTTP ' + method + ' - ' + final_url, start_ms);
 
         // Timeout from AbortSignal.timeout()
         if (error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
