@@ -42,13 +42,13 @@ log(...args) → void | async:no - backward-compatible console.log, logs at 'inf
 ### Performance
 performanceAuditLog(action, routine, reference_time) → void | async:no
   Measures elapsed time (ms) and heap memory since reference_time.
-  Use `instance.time_ms` as reference_time for request-level performance tracking.
-  action examples: 'Start', 'End', 'Error', 'Init-End'
+  Pass a local `start_ms` captured at operation entry as reference_time.
+  action examples: 'End', 'Error'
 
 ## Patterns
 - **Foundation:** Zero runtime dependencies. All other modules may depend on this; this module depends on nothing
 - **Log level suppression:** Messages below LOG_LEVEL threshold are suppressed (not written)
 - **JSON format:** When LOG_FORMAT='json', logs are structured objects compatible with CloudWatch and log aggregators
 - **Text format:** When LOG_FORMAT='text', logs are human-readable with timestamp + level prefix
-- **Performance tracking:** Always call `performanceAuditLog` at every external service boundary (DB, cloud API, HTTP, queue). Use `instance.time_ms` for request-level timeline
+- **Performance tracking:** Always call `performanceAuditLog` at every external service boundary (DB, cloud API, HTTP, queue). Capture `const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();` at operation entry and pass it as `reference_time`
 - **Raw type checks allowed:** As a foundation module, this uses raw type checks (`typeof`, `!== null`). All OTHER modules must use `Lib.Utils` instead

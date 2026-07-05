@@ -167,7 +167,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Performance audit log. Measures elapsed time and heap memory usage.
     Use to track connection times, query durations, and API response times.
 
-    @param {String} action - Action identifier (e.g., 'Start', 'End')
+    @param {String} action - Action identifier (e.g., 'End', 'Error')
     @param {String} routine - Process name being audited
     @param {Number} [reference_time] - (Optional) Start time in unix-milliseconds
 
