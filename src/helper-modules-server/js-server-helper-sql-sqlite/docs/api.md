@@ -6,7 +6,7 @@ Every exported function with its signature, parameters, return shape, semantics,
 
 - [Conventions](#conventions)
 - [Placeholders](#placeholders)
-- [Parameter Normalisation](#parameter-normalisation)
+- [Parameter Normalization](#parameter-normalization)
 - [`insert_id` Semantics](#insert_id-semantics)
 - [Statement Classification](#statement-classification)
 - [Read Helpers](#read-helpers)
@@ -64,7 +64,7 @@ const { rows } = await Lib.SqlDB.getRows(
 
 ---
 
-## Parameter Normalisation
+## Parameter Normalization
 
 `node:sqlite` accepts only `null | number | bigint | string | Buffer | TypedArray | DataView` for bound parameters. This module converts additional JavaScript types at bind time:
 
