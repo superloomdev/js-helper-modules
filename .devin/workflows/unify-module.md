@@ -125,7 +125,12 @@ its own `node_modules` and breaks in CI (`docs/dev/pitfalls.md` entry 8). This i
      `require('helper-debug')(Lib, ...)` block with the by-reference pick (step comment: `// Dependencies
      for this instance - by reference from the shared container`)
    - remove `helper-utils` / `helper-debug` from the module's own `package.json` `peerDependencies`
-     (the container supplies them); driver helpers still arrive via config keys (`lib_sql`, `lib_dynamodb`)
+     (the container supplies them); the backend driver ALSO arrives via the container, never via config
+     keys (frozen 2026-07-07 in module-structure-js.md "Driver injection and container key naming"):
+     pick it into `Lib` by reference (`Lib.SQL` for any `helper-sql-*` dialect; backend-specific
+     `Lib.MongoDB` / `Lib.DynamoDB` for non-interchangeable APIs), replace every `config.lib_*` read
+     with the `Lib.[Driver]` call, and drop the `lib_*` key from `*.config.js`, the validators, and
+     every docs row that lists it - config carries plain data only, never live objects
    - remove any `LOG_LEVEL` key from `*.config.js` and its docs row (log level is the caller's concern;
      the shared `Lib.Debug` instance carries the app-wide level)
    - update `_test/loader.js` to pass `Lib` when instantiating the module under test; drop the now-unneeded
