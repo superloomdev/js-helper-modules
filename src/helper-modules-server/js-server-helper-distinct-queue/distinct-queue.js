@@ -53,8 +53,8 @@ module.exports = function loader (shared_libs, config) {
   // Load internal error catalog
   const ERRORS = require('./distinct-queue.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./distinct-queue.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./distinct-queue.validators')(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
@@ -118,8 +118,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // Programmer errors (bad args) throw synchronously
       Validators.validateEnqueueOptions(options);
 
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Generate the ordering signal and unique request ID
       const data_version = _DistinctQueue.generateDataVersion();
       const request_id = _DistinctQueue.generateRequestId();
@@ -148,8 +146,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
             error: ERRORS.SERVICE_UNAVAILABLE
           };
         }
-
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue enqueue', start_ms);
 
         return {
           success: true,
@@ -200,8 +196,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Programmer errors (bad args) throw synchronously
       Validators.validateClaimOptions(options);
-
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
@@ -258,8 +252,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         }
 
         // Return the winning record's payload and action
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue claim', start_ms);
-
         return {
           success: true,
           payload: winner.payload,
@@ -303,8 +295,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // Programmer errors (bad args) throw synchronously
       Validators.validateListByPrefixOptions(options);
 
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       try {
 
         // Query store for all records matching the prefix
@@ -329,8 +319,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         }
 
         // Return matched records
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue listByPrefix', start_ms);
-
         return {
           success: true,
           records: query_result.records || [],

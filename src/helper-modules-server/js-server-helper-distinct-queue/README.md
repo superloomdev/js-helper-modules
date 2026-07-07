@@ -155,12 +155,13 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 
 This module has no external dependencies.
 
-It expects three peer modules in the `Lib` container (Utils, Debug, Instance) and one adapter package for your storage backend. Peer dependencies:
+It expects four peer modules in the `Lib` container (Utils, Debug, Crypto, Instance) and one adapter package for your storage backend. Peer dependencies:
 
 | `Lib.*` | Source | Used for |
 |---|---|---|
 | `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks, isEmpty, isNullOrUndefined |
 | `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on store failures |
+| `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | Compact UUID generation for `request_id` |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance for lifecycle |
 
 The store adapter is a fully independent module with its own `Lib`,

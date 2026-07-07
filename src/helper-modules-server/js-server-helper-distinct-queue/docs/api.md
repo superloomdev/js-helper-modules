@@ -15,7 +15,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 ## Conventions
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()` |
 | **Programmer errors throw `TypeError` synchronously** | Missing required option or wrong type throws at the call-site. These are development-time mistakes, never operational failures |

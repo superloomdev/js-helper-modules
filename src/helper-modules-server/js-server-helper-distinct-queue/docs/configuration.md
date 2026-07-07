@@ -46,9 +46,8 @@ See `@superloomdev/js-server-helper-distinct-queue-store-dynamodb` README.
 ### MongoDB
 
 ```js
-Store: require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')({
-  collection_name: 'distinct_queue',
-  lib_mongodb: Lib.MongoDB
+Store: require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'distinct_queue'
 })
 ```
 
@@ -61,6 +60,7 @@ See `@superloomdev/js-server-helper-distinct-queue-store-mongodb` README.
 |---|---|---|
 | `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks (`isEmpty`, `isNullOrUndefined`, `isObject`, `isFunction`, `isInteger`) |
 | `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging when store operations fail |
+| `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | Compact UUID generation for `request_id` |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance for lifecycle |
 
 The store adapter (`CONFIG.Store`) is a fully independent module with its own

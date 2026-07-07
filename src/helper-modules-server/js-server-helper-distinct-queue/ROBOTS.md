@@ -94,8 +94,7 @@ Every adapter must implement these methods:
 
 ## Critical Behavior for Code-Generating Tools
 
-- **`instance` is always the first argument.** Every function uses it for request context and performance logging.
-- **Performance logging.** `Lib.Debug.performanceAuditLog('End', ...)` on every public function using a local `start_ms` captured at operation entry.
+- **`instance` is always the first argument.** Every function uses it for request context.
 - **`Store` is a ready-to-use object, not a string or function.** The loader throws on string, function, or missing.
 - **Programmer errors throw, operational errors return.** Missing required options throw `TypeError`; store failures return `{ success: false, error }`.
 - **Write path is append-only.** `enqueue` never reads. Multiple records coexist; distinctness is enforced by `claim`.
@@ -109,7 +108,8 @@ Every adapter must implement these methods:
 | `Lib.*` | Source | Used for |
 |---|---|---|
 | `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks |
-| `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on store failures, `performanceAuditLog` for per-operation timing |
+| `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on store failures |
+| `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | Compact UUID generation for `request_id` |
 | `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance lifecycle |
 
 The store adapter (`CONFIG.Store`) is a fully independent module with its own `Lib`, `Config`, and `ERRORS`. The distinct-queue module uses the store object directly through the contract interface.
