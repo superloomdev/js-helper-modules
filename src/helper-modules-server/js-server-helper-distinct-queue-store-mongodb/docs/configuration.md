@@ -3,17 +3,19 @@
 ## Loader Pattern
 
 The adapter is a store implementation for `helper-distinct-queue`.
-The parent module receives the store factory function and store config
-separately, then calls the factory internally to instantiate the store.
+The project loader injects `Lib` (including `Lib.MongoDB`), and the adapter
+owns its own configuration. It returns a ready-to-use store object that
+you provide to the parent module's `CONFIG.Store` key.
 
 ```javascript
-// Load the adapter factory and pass it to the parent module
+// Load the adapter with Lib injected and its own config
+const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'distinct_queue_jobs'
+});
+
+// Pass the ready-to-use store to the parent module
 Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
-  STORE: require('helper-distinct-queue-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+  Store: Store
 });
 ```
 
@@ -62,19 +64,15 @@ Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// 3. Load distinct-queue with the store factory and its config
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
-  STORE: require('helper-distinct-queue-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
-});
-
-// 4. Idempotent collection setup (no-op for MongoDB - run once at first deploy)
+// 3. Load the store adapter (Lib injected), then the parent module
 const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
   collection_name: 'queue_jobs'
 });
+Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+  Store: Store
+});
+
+// 4. Idempotent collection setup (no-op for MongoDB - run once at first deploy)
 await Store.setupNewStore(Lib.Instance.initialize());
 ```
 

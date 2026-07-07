@@ -9,12 +9,14 @@
 ## Usage
 
 ```js
+// Load the adapter with Lib injected
+const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
+});
+
+// Pass the ready-to-use store object to the parent module
 Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
-  STORE: require('helper-distinct-queue-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+  Store: Store
 });
 ```
 

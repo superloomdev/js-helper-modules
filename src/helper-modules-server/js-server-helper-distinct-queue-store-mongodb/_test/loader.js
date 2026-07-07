@@ -34,6 +34,11 @@ Lib.MongoDB  = require('helper-nosql-mongodb')(Lib, config_mongodb);
 
 const StoreFactory = require('helper-distinct-queue-store-mongodb');
 
+// Load the store adapter with Lib injected
+const Store = StoreFactory(Lib, {
+  collection_name: TEST_COLLECTION
+});
+
 
 /********************************************************************
 Create a fresh request instance for each test.
@@ -48,16 +53,14 @@ const buildInstance = function () {
 
 
 /********************************************************************
-Instantiate the store adapter directly (no core module). Used for
+Return the loaded store adapter directly (no core module). Used for
 the 4-method store contract suite and adapter-specific tests.
 
 @return {Object} - Store interface
 *********************************************************************/
 const buildStore = function () {
 
-  return StoreFactory(Lib, {
-    collection_name: TEST_COLLECTION
-  });
+  return Store;
 
 };
 
@@ -66,19 +69,15 @@ const buildStore = function () {
 Instantiate the core distinct-queue module wired to the MongoDB
 store adapter. Used for end-to-end enqueue/claim/listByPrefix tests.
 
-The parent module receives the store factory function and store
-config separately, then calls the factory internally.
+The adapter owns its CONFIG and ERRORS; Lib is injected at load time.
+The parent uses the store object directly via CONFIG.Store.
 
 @return {Object} - DistinctQueue interface
 *********************************************************************/
 const buildQueue = function () {
 
   return require('helper-distinct-queue')(Lib, {
-    STORE: StoreFactory,
-    STORE_CONFIG: {
-      collection_name: TEST_COLLECTION,
-      lib_mongodb: Lib.MongoDB
-    }
+    Store: Store
   });
 
 };
