@@ -1,7 +1,7 @@
 {
   "name": "@superloomdev/js-server-helper-distinct-queue-store-mongodb",
   "description": "MongoDB store adapter for helper-distinct-queue. Implements the 4-method store contract backed by helper-nosql-mongodb.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "store.js",
   "private": false,
   "license": "MIT",
