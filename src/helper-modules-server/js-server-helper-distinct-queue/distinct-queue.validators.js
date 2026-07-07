@@ -22,10 +22,11 @@ Singleton loader. Injects Lib and returns the module-scope
 Validators object.
 
 @param {Object} shared_libs - Dependency container (Utils)
+@param {Object} ERRORS - Frozen error catalog for this module
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) {
+module.exports = function loader (shared_libs, ERRORS) { // eslint-disable-line no-unused-vars
 
   // Inject shared dependency
   Lib = shared_libs;
