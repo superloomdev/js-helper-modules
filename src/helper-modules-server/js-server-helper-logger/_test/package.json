@@ -1,6 +1,6 @@
 {
   "name": "js-server-helper-logger-test",
-  "description": "Test Cases for js-server-helper-logger",
+  "description": "Test Cases for helper-logger",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

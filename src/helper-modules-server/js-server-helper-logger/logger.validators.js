@@ -1,4 +1,4 @@
-// Info: All validators for js-server-helper-logger. Two concerns in one place:
+// Info: All validators for helper-logger. Two concerns in one place:
 //   1. Config validators  - called once at construction time, take CONFIG as a
 //      parameter, throw Error on misconfiguration.
 //   2. Options validators - called per request, take caller options as a
@@ -17,18 +17,24 @@ let Lib;
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and returns the module-scope Validators
-object. Takes only Lib - no CONFIG or ERRORS - because validators run
-before CONFIG is validated and never consume the error catalog.
+Singleton loader. Injects Lib and ERRORS, returns the module-scope
+Validators object. ERRORS is injected per the universal companion rule
+even when validators do not consume it today.
 
 @param {Object} shared_libs - Dependency container (Utils)
+@param {Object} ERRORS - Frozen error catalog for this module
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) {
+module.exports = function loader (shared_libs, ERRORS) {
 
   // Inject shared dependency
   Lib = shared_libs;
+
+  // ERRORS is accepted per the universal companion rule even when
+  // validators do not consume it today. Removing the parameter is a
+  // consistency violation, not dead-code cleanup.
+  void ERRORS;
 
   return Validators;
 
@@ -36,7 +42,7 @@ module.exports = function loader (shared_libs) {
 
 
 
-////////////////////////////// Public Functions START //////////////////////////
+////////////////////////////Public Functions START//////////////////////////////
 const Validators = {
 
 
@@ -60,7 +66,7 @@ const Validators = {
       Lib.Utils.isNullOrUndefined(CONFIG.Store) ||
       !Lib.Utils.isObject(CONFIG.Store)
     ) {
-      throw new Error('[js-server-helper-logger] CONFIG.Store must be a ready-to-use store object');
+      throw new Error('[helper-logger] CONFIG.Store must be a ready-to-use store object');
     }
 
     // IP_ENCRYPT_KEY is optional, but if present it must be a non-empty string
@@ -69,7 +75,7 @@ const Validators = {
         !Lib.Utils.isString(CONFIG.IP_ENCRYPT_KEY) ||
         Lib.Utils.isEmptyString(CONFIG.IP_ENCRYPT_KEY)
       ) {
-        throw new Error('[js-server-helper-logger] CONFIG.IP_ENCRYPT_KEY must be a non-empty string when set');
+        throw new Error('[helper-logger] CONFIG.IP_ENCRYPT_KEY must be a non-empty string when set');
       }
     }
 
@@ -91,7 +97,7 @@ const Validators = {
   validateLogOptions: function (options) {
 
     if (Lib.Utils.isNullOrUndefined(options) || !Lib.Utils.isObject(options)) {
-      throw new TypeError('[js-server-helper-logger] log() options must be an object');
+      throw new TypeError('[helper-logger] log() options must be an object');
     }
 
     Validators.requireNonEmptyString(options, 'entity_type');
@@ -109,22 +115,22 @@ const Validators = {
         !Lib.Utils.isInteger(options.retention.ttl_seconds) ||
         options.retention.ttl_seconds <= 0
       ) {
-        throw new TypeError('[js-server-helper-logger] options.retention must be "persistent" or { ttl_seconds: positive_integer }');
+        throw new TypeError('[helper-logger] options.retention must be "persistent" or { ttl_seconds: positive_integer }');
       }
     }
 
     // Optional fields
     if (!Lib.Utils.isNullOrUndefined(options.data) && !Lib.Utils.isObject(options.data)) {
-      throw new TypeError('[js-server-helper-logger] options.data must be an object when present');
+      throw new TypeError('[helper-logger] options.data must be an object when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.ip) && !Lib.Utils.isString(options.ip)) {
-      throw new TypeError('[js-server-helper-logger] options.ip must be a string when present');
+      throw new TypeError('[helper-logger] options.ip must be a string when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.user_agent) && !Lib.Utils.isString(options.user_agent)) {
-      throw new TypeError('[js-server-helper-logger] options.user_agent must be a string when present');
+      throw new TypeError('[helper-logger] options.user_agent must be a string when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.await) && !Lib.Utils.isBoolean(options.await)) {
-      throw new TypeError('[js-server-helper-logger] options.await must be a boolean when present');
+      throw new TypeError('[helper-logger] options.await must be a boolean when present');
     }
 
   },
@@ -173,32 +179,32 @@ const Validators = {
   validateListOptionsShape: function (options) {
 
     if (Lib.Utils.isNullOrUndefined(options) || !Lib.Utils.isObject(options)) {
-      throw new TypeError('[js-server-helper-logger] list options must be an object');
+      throw new TypeError('[helper-logger] list options must be an object');
     }
     if (!Lib.Utils.isNullOrUndefined(options.scope) && !Lib.Utils.isString(options.scope)) {
-      throw new TypeError('[js-server-helper-logger] list options.scope must be a string when present');
+      throw new TypeError('[helper-logger] list options.scope must be a string when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.actions)) {
       if (!Array.isArray(options.actions)) {
-        throw new TypeError('[js-server-helper-logger] list options.actions must be an array of strings when present');
+        throw new TypeError('[helper-logger] list options.actions must be an array of strings when present');
       }
       for (const item of options.actions) {
         if (!Lib.Utils.isString(item) || Lib.Utils.isEmptyString(item)) {
-          throw new TypeError('[js-server-helper-logger] list options.actions entries must be non-empty strings');
+          throw new TypeError('[helper-logger] list options.actions entries must be non-empty strings');
         }
       }
     }
     if (!Lib.Utils.isNullOrUndefined(options.start_time_ms) && !Lib.Utils.isInteger(options.start_time_ms)) {
-      throw new TypeError('[js-server-helper-logger] list options.start_time_ms must be an integer (epoch ms) when present');
+      throw new TypeError('[helper-logger] list options.start_time_ms must be an integer (epoch ms) when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.end_time_ms) && !Lib.Utils.isInteger(options.end_time_ms)) {
-      throw new TypeError('[js-server-helper-logger] list options.end_time_ms must be an integer (epoch ms) when present');
+      throw new TypeError('[helper-logger] list options.end_time_ms must be an integer (epoch ms) when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.limit) && (!Lib.Utils.isInteger(options.limit) || options.limit <= 0)) {
-      throw new TypeError('[js-server-helper-logger] list options.limit must be a positive integer when present');
+      throw new TypeError('[helper-logger] list options.limit must be a positive integer when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.cursor) && !Lib.Utils.isString(options.cursor)) {
-      throw new TypeError('[js-server-helper-logger] list options.cursor must be a string when present');
+      throw new TypeError('[helper-logger] list options.cursor must be a string when present');
     }
 
   },
@@ -219,10 +225,10 @@ const Validators = {
       !Lib.Utils.isString(options[field]) ||
       Lib.Utils.isEmptyString(options[field])
     ) {
-      throw new TypeError('[js-server-helper-logger] options.' + field + ' is required (non-empty string)');
+      throw new TypeError('[helper-logger] options.' + field + ' is required (non-empty string)');
     }
 
   }
 
 
-};///////////////////////////// Public Functions END //////////////////////////
+};/////////////////////////////Public Functions END//////////////////////////////

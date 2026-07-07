@@ -1,4 +1,4 @@
-# Data Model. `js-server-helper-logger`
+# Data Model. `helper-logger`
 
 Every log event is stored as a single flat record. This document explains what each field means, why it exists, and how to populate it correctly. For the function reference see [API Reference](api.md). For configuration keys see [Configuration](configuration.md).
 
@@ -39,13 +39,13 @@ The entity and actor are often different. For example, an admin (`actor`) deleti
 
 ```
 scope: 'tenant.42'        // SaaS tenant ID
-scope: 'org.acme'         // organisation slug
+scope: 'org.acme'         // organization slug
 scope: ''                 // single-tenant / no isolation needed (default)
 ```
 
-Choose the grain that matches your tenancy model. For a SaaS product, use the tenant/organisation ID. For a single-tenant deployment, leave it empty. Scope is **not** a security boundary on its own. Your application must ensure the caller's scope is authoritative before passing it in.
+The grain matches the tenancy model: a SaaS product uses the tenant or organization ID; a single-tenant deployment leaves it empty. Scope is **not** a security boundary on its own. The application must ensure the caller's scope is authoritative before it is passed in.
 
-**Action.** A dot-notation string that names the event. The logger treats this as an opaque string; your application owns the namespace.
+**Action.** A dot-notation string that names the event. The logger treats this as an opaque string; the application owns the namespace.
 
 ```
 'auth.login'
@@ -56,7 +56,7 @@ Choose the grain that matches your tenancy model. For a SaaS product, use the te
 'account.deleted'
 ```
 
-Convention: `[domain].[noun].[verb]` or `[domain].[verb]`. Use past tense or present continuous consistently across your codebase. Avoid generic names like `'update'`. The action should be self-describing in an audit report.
+Convention: `[domain].[noun].[verb]` or `[domain].[verb]`. Past tense or present continuous, applied consistently across the codebase. Generic names like `'update'` are avoided. The action should be self-describing in an audit report.
 
 ---
 
@@ -113,7 +113,7 @@ data: { job: 'billing-renewal', affected_subscription_ids: ['sub_1', 'sub_2'] }
 data: null
 ```
 
-Do **not** store secrets, full card numbers, raw passwords, or large blobs in `data`. The `data` column is stored as-is; it is not encrypted by this module.
+Secrets, full card numbers, raw passwords, and large blobs do not belong in `data`: the column is stored as-is and is not encrypted by this module.
 
 ---
 
@@ -135,7 +135,7 @@ Do **not** store secrets, full card numbers, raw passwords, or large blobs in `d
 
 ### Why flat records?
 
-Every log event is one row. No joins, no foreign keys, no normalisation. This makes queries fast and simple: "show me everything that happened to this user" is a single indexed lookup.
+Every log event is one row. No joins, no foreign keys, no normalization. This makes queries fast and simple: "show me everything that happened to this user" is a single indexed lookup.
 
 ### Why per-row retention?
 

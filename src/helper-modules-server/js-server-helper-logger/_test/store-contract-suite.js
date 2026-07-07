@@ -2,7 +2,7 @@
 // adapter runs this suite from its own test file so a regression in any
 // backend - or a divergence between backends - is surfaced immediately.
 //
-// Source of truth: js-server-helper-logger/_test/store-contract-suite.js
+// Source of truth: helper-logger/_test/store-contract-suite.js
 // Copy to each adapter's _test/ directory - do not edit in place.
 //
 // Contract under test (5 methods):
