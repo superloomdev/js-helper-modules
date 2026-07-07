@@ -1,21 +1,19 @@
-# Configuration — js-server-helper-distinct-queue-store-mongodb
+# Configuration - helper-distinct-queue-store-mongodb
 
 ## Loader Pattern
 
-The adapter is a store implementation for `js-server-helper-distinct-queue`.
-The project loader injects `Lib` (including `Lib.MongoDB`), and the adapter
-owns its own configuration. It returns a ready-to-use store object that
-you provide to the parent module's `CONFIG.Store` key.
+The adapter is a store implementation for `helper-distinct-queue`.
+The parent module receives the store factory function and store config
+separately, then calls the factory internally to instantiate the store.
 
 ```javascript
-// Load the adapter with Lib injected and its own config
-const Store = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'queue_jobs'
-});
-
-// Pass the ready-to-use store to the parent module
-Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  Store: Store
+// Load the adapter factory and pass it to the parent module
+Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+  STORE: require('helper-distinct-queue-store-mongodb'),
+  STORE_CONFIG: {
+    collection_name: 'queue_jobs',
+    lib_mongodb: Lib.MongoDB
+  }
 });
 ```
 
@@ -39,12 +37,12 @@ The adapter reads these from the injected `Lib` container:
 
 | `Lib.*` | Source | Used for |
 |---|---|---|
-| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks |
-| `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostic logging on driver failures |
-| `Lib.MongoDB` | `@superloomdev/js-server-helper-nosql-mongodb` | The MongoDB driver used for all storage operations |
+| `Lib.Utils` | `helper-utils` | Type checks |
+| `Lib.Debug` | `helper-debug` | Diagnostic logging on driver failures |
+| `Lib.MongoDB` | `helper-nosql-mongodb` | The MongoDB driver used for all storage operations |
 
 ```javascript
-Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE: process.env.MONGODB_DATABASE
 });
@@ -54,25 +52,29 @@ Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
 
 ```javascript
 // 1. Load base helpers
-Lib.Utils = require('@superloomdev/js-helper-utils');
-Lib.Debug = require('@superloomdev/js-helper-debug')(Lib);
-Lib.Instance = require('@superloomdev/js-server-helper-instance')(Lib);
+Lib.Utils = require('helper-utils');
+Lib.Debug = require('helper-debug')(Lib);
+Lib.Instance = require('helper-instance')(Lib);
 
 // 2. Load MongoDB helper
-Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// 3. Load the store adapter (Lib injected), then the parent module
-const Store = require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'queue_jobs'
-});
-Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  Store: Store
+// 3. Load distinct-queue with the store factory and its config
+Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+  STORE: require('helper-distinct-queue-store-mongodb'),
+  STORE_CONFIG: {
+    collection_name: 'queue_jobs',
+    lib_mongodb: Lib.MongoDB
+  }
 });
 
-// 4. Idempotent collection setup (no-op for MongoDB — run once at first deploy)
+// 4. Idempotent collection setup (no-op for MongoDB - run once at first deploy)
+const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
+});
 await Store.setupNewStore(Lib.Instance.initialize());
 ```
 

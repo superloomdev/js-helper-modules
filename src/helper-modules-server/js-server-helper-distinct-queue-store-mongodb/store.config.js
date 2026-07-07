@@ -1,4 +1,4 @@
-// Info: Configuration defaults for js-server-helper-distinct-queue-store-mongodb.
+// Info: Configuration defaults for helper-distinct-queue-store-mongodb.
 // The caller merges overrides over these defaults at loader time.
 'use strict';
 

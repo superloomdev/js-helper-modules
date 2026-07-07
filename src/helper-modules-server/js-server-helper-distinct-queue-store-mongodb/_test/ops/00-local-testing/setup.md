@@ -1,4 +1,4 @@
-# Local Testing Setup — js-server-helper-distinct-queue-store-mongodb
+# Local Testing Setup - helper-distinct-queue-store-mongodb
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@
 cd _test
 
 # Start MongoDB container
-docker-compose up -d
+docker compose up -d
 
 # Install dependencies
 npm install
@@ -20,7 +20,7 @@ npm install
 npm test
 
 # Stop MongoDB container
-docker-compose down
+docker compose down
 ```
 
 ## Environment Variables
@@ -29,8 +29,8 @@ The loader reads these environment variables (with defaults):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MONGODB_CONNECTION_STRING` | `mongodb://localhost:27017/?directConnection=true` | MongoDB connection URI |
-| `MONGODB_DATABASE` | `test_db` | Database name |
+| `MONGO_URL` | `mongodb://127.0.0.1:27020/?directConnection=true` | MongoDB connection URI |
+| `MONGO_DATABASE` | `test_db` | Database name |
 
 ## Troubleshooting
 
@@ -39,8 +39,8 @@ The loader reads these environment variables (with defaults):
 Ensure MongoDB container is running:
 
 ```bash
-docker-compose ps
-docker-compose logs mongodb
+docker compose ps
+docker compose logs mongodb
 ```
 
 ### Port already in use
@@ -55,7 +55,7 @@ ports:
 Then update the connection string:
 
 ```bash
-export MONGODB_CONNECTION_STRING="mongodb://localhost:27018/?directConnection=true"
+export MONGO_URL="mongodb://localhost:27018/?directConnection=true"
 ```
 
 ### Permission errors on Linux

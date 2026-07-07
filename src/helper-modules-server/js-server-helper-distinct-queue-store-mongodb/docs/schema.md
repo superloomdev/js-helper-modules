@@ -1,4 +1,4 @@
-# Schema — js-server-helper-distinct-queue-store-mongodb
+# Schema - helper-distinct-queue-store-mongodb
 
 ## Collection Structure
 
@@ -20,7 +20,7 @@ The adapter stores records in a single MongoDB collection (configurable via the 
 }
 ```
 
-The `_id` is a **compound subdocument** — not a string or ObjectId. This design uses MongoDB's implicit `_id` index for all access patterns, eliminating the need for secondary indexes.
+The `_id` is a **compound subdocument** - not a string or ObjectId. This design uses MongoDB's implicit `_id` index for all access patterns, eliminating the need for secondary indexes.
 
 ## Index Design
 
@@ -32,33 +32,33 @@ MongoDB automatically creates a unique index on `_id`. Because `_id` is a subdoc
 { "_id.t": 1, "_id.r": 1, "_id.d": 1, "_id.s": 1 }
 ```
 
-This is a **smart index** — you can retrieve records without knowing the full `{ t, r, d, s }` key. The index prefix on `{ t, r }` enables "begins with" queries that return all records for a resource even when `data_version` and `request_id` are unknown.
+This is a **smart index** - you can retrieve records without knowing the full `{ t, r, d, s }` key. The index prefix on `{ t, r }` enables "begins with" queries that return all records for a resource even when `data_version` and `request_id` are unknown.
 
 **Key Retrieval Goals:**
 
 | Goal | What We Know | Index Usage |
 |------|--------------|-------------|
-| Get all records for a resource | `tenant_id`, `resource_id` | Query `{ "_id.t": t, "_id.r": r }` — uses index prefix on `{ t, r }` |
-| Get records by prefix | `tenant_id`, `resource_id_prefix` | Query `{ "_id.t": t, "_id.r": { $regex: '^prefix' } }` — range scan on index |
-| Delete stale records | `tenant_id`, `resource_id`, `data_version_boundary` | Query `{ "_id.t": t, "_id.r": r, "_id.d": { $lte: N } }` — uses `{ t, r, d }` prefix |
+| Get all records for a resource | `tenant_id`, `resource_id` | Query `{ "_id.t": t, "_id.r": r }` - uses index prefix on `{ t, r }` |
+| Get records by prefix | `tenant_id`, `resource_id_prefix` | Query `{ "_id.t": t, "_id.r": { $regex: '^prefix' } }` - range scan on index |
+| Delete stale records | `tenant_id`, `resource_id`, `data_version_boundary` | Query `{ "_id.t": t, "_id.r": r, "_id.d": { $lte: N } }` - uses `{ t, r, d }` prefix |
 
 **Why This Works:**
 
 We store `data_version` and `request_id` inside `_id` (as `d` and `s`) not for query specificity, but for:
-1. **Sorting** — `_id.d` provides chronological ordering
-2. **Tie-breaking** — `_id.s` ensures uniqueness when multiple records have same millisecond timestamp (stores `request_id`)
-3. **Uniqueness** — the full `{ t, r, d, s }` combination is unique per document
+1. **Sorting** - `_id.d` provides chronological ordering
+2. **Tie-breaking** - `_id.s` ensures uniqueness when multiple records have same millisecond timestamp (stores `request_id`)
+3. **Uniqueness** - the full `{ t, r, d, s }` combination is unique per document
 
 But for retrieval, we only need `tenant_id` and `resource_id`. The index "begins with" pattern (`$regex: '^resource_id'`) efficiently scans all records for that resource, then MongoDB sorts by `d` and `s` within the result set.
 
 **Benefits:**
-- No secondary indexes needed — single implicit `_id` index handles all access patterns
+- No secondary indexes needed - single implicit `_id` index handles all access patterns
 - Zero extra storage overhead
 - Automatic uniqueness guarantee on the full `{ t, r, d, s }` combination
 
 ## Query Patterns & Operational Effort
 
-MongoDB's cost is measured in **operations performed** (not documents scanned or returned). All our access patterns use **single-roundtrip index lookups** — no collection scans.
+MongoDB's cost is measured in **operations performed** (not documents scanned or returned). All our access patterns use **single-roundtrip index lookups** - no collection scans.
 
 ### writeRecord
 
@@ -100,7 +100,7 @@ find(
 )
 ```
 
-**Effort:** Single index range scan. The anchored `$regex` (`^`) uses the index efficiently — MongoDB seeks to the prefix start and scans until the prefix no longer matches.  
+**Effort:** Single index range scan. The anchored `$regex` (`^`) uses the index efficiently - MongoDB seeks to the prefix start and scans until the prefix no longer matches.  
 Returns all resources starting with the prefix, sorted by `data_version`.
 
 ### deleteByDataVersionLte
@@ -125,7 +125,7 @@ Deletes all stale records in one roundtrip.
 | `find` (prefix) | 1 index range scan | Uses `{ t, r }` prefix with range |
 | `deleteMany` | 1 delete | Uses `{ t, r, d }` prefix |
 
-**Note:** All operations complete in a single roundtrip to the database. The "begins with" query requires the same effort whether it returns 1 record or 100 records — only one index scan is performed.
+**Note:** All operations complete in a single roundtrip to the database. The "begins with" query requires the same effort whether it returns 1 record or 100 records - only one index scan is performed.
 
 ## Setup
 

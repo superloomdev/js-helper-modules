@@ -1,4 +1,4 @@
-// Info: Test runner for js-server-helper-distinct-queue-store-mongodb.
+// Info: Test runner for helper-distinct-queue-store-mongodb.
 //
 // Tier 1 - Store contract suite: validates the 4-method contract against the
 //          adapter, driven directly on the instantiated store.
@@ -8,7 +8,7 @@
 
 'use strict';
 
-const assert = require('node:assert');
+const assert = require('node:assert/strict');
 const { describe, it, before, beforeEach, after } = require('node:test');
 
 const {

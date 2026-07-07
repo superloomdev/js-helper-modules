@@ -1,4 +1,4 @@
-// Info: MongoDB store adapter for js-server-helper-distinct-queue.
+// Info: MongoDB store adapter for helper-distinct-queue.
 // Implements the 4-method store contract using a subdocument _id.
 //
 // The application injects a ready-to-use MongoDB helper via Lib.MongoDB.
@@ -26,40 +26,46 @@
 
 /********************************************************************
 Factory loader. One call = one independent store instance with its
-own Lib, CONFIG, and ERRORS. Validates CONFIG at construction so
+own Lib, CONFIG, ERRORS, and Validators. Validates CONFIG at construction so
 misconfiguration fails fast at startup, not on first request.
 
 @param {Object} shared_libs - Lib container with Utils, Debug, MongoDB
-@param {Object} config      - Overrides merged over adapter config defaults
+@param {Object} config      - Store config (standalone) or parent CONFIG with STORE_CONFIG (parent call)
 
 @return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
+  // When called by the parent module, config is the parent's full CONFIG
+  // and the store-specific config is in config.STORE_CONFIG.
+  // When called standalone, config is the store config directly.
+  const store_config = (config && config.STORE_CONFIG) ? config.STORE_CONFIG : (config || {});
+
   // Dependencies for this instance
+  // MongoDB driver: from STORE_CONFIG.lib_mongodb (parent call) or shared_libs.MongoDB (standalone)
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
-    MongoDB: shared_libs.MongoDB
+    MongoDB: store_config.lib_mongodb || shared_libs.MongoDB
   };
 
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
     require('./store.config'),
-    config || {}
+    store_config
   );
 
   // Load internal error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, CONFIG, ERRORS);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -69,17 +75,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public Store interface. All functions close over
-Lib, CONFIG, and ERRORS.
+Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib    - Dependency container (Utils, Debug, MongoDB)
-@param {Object} CONFIG - Merged adapter configuration { collection_name }
-@param {Object} ERRORS - Frozen error catalog
+@param {Object} Lib       - Dependency container (Utils, Debug, MongoDB)
+@param {Object} CONFIG    - Merged adapter configuration { collection_name }
+@param {Object} ERRORS    - Frozen error catalog
+@param {Object} Validators - Config validators (unused, kept for cross-module consistency)
 
 @return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
-  ////////////////////////////// Public Functions START //////////////////////
+  ////////////////////////////// Public Functions START //////////////////////////////
   const Store = {
 
 
@@ -128,6 +135,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     writeRecord: async function (instance, record) {
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // Build the document with compound _id
       const document = {
         _id: _Store.composeId(record.tenant_id, record.resource_id, record.data_version, record.request_id),
@@ -136,7 +145,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         toc: record.toc
       };
 
-      // Insert the record using upsert — compound _id guarantees uniqueness
+      // Insert the record using upsert - compound _id guarantees uniqueness
       const result = await Lib.MongoDB.writeRecord(
         instance,
         CONFIG.collection_name,
@@ -151,11 +160,14 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb writeRecord - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb writeRecord - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -182,6 +194,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // Query by exact tenant_id + resource_id using _id subdocument fields
       const result = await Lib.MongoDB.query(
         instance,
@@ -197,6 +211,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceId - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           records: null,
@@ -206,6 +221,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Reconstruct records from _id subdocument to match expected shape
       const records = (result.documents || []).map(_Store.docToRecord);
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceId - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -231,6 +248,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // Escape regex special characters in the prefix to prevent injection
       const escaped_prefix = resource_id_prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -252,6 +271,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceIdPrefix - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           records: null,
@@ -261,6 +281,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Reconstruct records from _id subdocument to match expected shape
       const records = (result.documents || []).map(_Store.docToRecord);
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceIdPrefix - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -291,6 +313,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // Delete matching records using _id subdocument fields
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
@@ -309,11 +333,14 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb deleteByDataVersionLte - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb deleteByDataVersionLte - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -323,11 +350,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     }
 
 
-  };////////////////////////////// Public Functions END //////////////////////
+  };////////////////////////////// Public Functions END //////////////////////////////
 
 
 
-  ///////////////////////////// Private Functions START //////////////////////
+  ///////////////////////////// Private Functions START //////////////////////////////
   const _Store = {
 
     /********************************************************************
@@ -367,8 +394,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       };
     }
 
-  };///////////////////////////// Private Functions END //////////////////////
+  };///////////////////////////// Private Functions END //////////////////////////////
 
   return Store;
 
-};///////////////////////////// createInterface END ////////////////////////////
+};/////////////////////////// createInterface END //////////////////////////////

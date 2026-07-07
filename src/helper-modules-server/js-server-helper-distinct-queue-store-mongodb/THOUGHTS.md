@@ -1,4 +1,4 @@
-# THOUGHTS.md - js-server-helper-distinct-queue-store-mongodb
+# THOUGHTS.md - helper-distinct-queue-store-mongodb
 
 Engineering decision journal. Not published to npm.
 

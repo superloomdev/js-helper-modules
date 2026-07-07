@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-distinct-queue-store-mongodb.
+// Info: Test loader for helper-distinct-queue-store-mongodb.
 // Builds the Lib container and store helpers so tests can exercise the store
 // adapter directly (4-method contract) and the core distinct-queue module
 // end-to-end (enqueue/claim/listByPrefix).
@@ -66,14 +66,19 @@ const buildStore = function () {
 Instantiate the core distinct-queue module wired to the MongoDB
 store adapter. Used for end-to-end enqueue/claim/listByPrefix tests.
 
+The parent module receives the store factory function and store
+config separately, then calls the factory internally.
+
 @return {Object} - DistinctQueue interface
 *********************************************************************/
 const buildQueue = function () {
 
   return require('helper-distinct-queue')(Lib, {
-    Store: StoreFactory(Lib, {
-      collection_name: TEST_COLLECTION
-    })
+    STORE: StoreFactory,
+    STORE_CONFIG: {
+      collection_name: TEST_COLLECTION,
+      lib_mongodb: Lib.MongoDB
+    }
   });
 
 };
