@@ -59,9 +59,10 @@ module.exports = function loader (shared_libs, config) {
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
+  // Build the public Store interface
   return createInterface(Lib, CONFIG, ERRORS, Validators);
 
-};///////////////////////////// Module-Loader END ///////////////////////////////
+};/////////////////////////// Module-Loader END ////////////////////////////////
 
 
 
@@ -74,13 +75,13 @@ Lib, CONFIG, ERRORS, and Validators.
 @param {Object} Lib       - Dependency container (Utils, Debug, MongoDB)
 @param {Object} CONFIG    - Merged adapter configuration { collection_name }
 @param {Object} ERRORS    - Frozen error catalog
-@param {Object} Validators - Config validators (unused, kept for cross-module consistency)
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
-  ////////////////////////////// Public Functions START //////////////////////////////
+  //////////////////////////// Public Functions START ////////////////////////////
   const Store = {
 
 
@@ -129,8 +130,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     writeRecord: async function (instance, record) {
 
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Build the document with compound _id
       const document = {
         _id: _Store.composeId(record.tenant_id, record.resource_id, record.data_version, record.request_id),
@@ -154,14 +153,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb writeRecord - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb writeRecord - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -188,8 +184,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Query by exact tenant_id + resource_id using _id subdocument fields
       const result = await Lib.MongoDB.query(
         instance,
@@ -205,7 +199,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceId - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           records: null,
@@ -215,8 +208,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Reconstruct records from _id subdocument to match expected shape
       const records = (result.documents || []).map(_Store.docToRecord);
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceId - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -242,8 +233,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Escape regex special characters in the prefix to prevent injection
       const escaped_prefix = resource_id_prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -265,7 +254,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceIdPrefix - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           records: null,
@@ -275,8 +263,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Reconstruct records from _id subdocument to match expected shape
       const records = (result.documents || []).map(_Store.docToRecord);
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb queryByResourceIdPrefix - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -307,8 +293,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Delete matching records using _id subdocument fields
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
@@ -327,14 +311,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
           driver_type: result.error && result.error.type,
           driver_message: result.error && result.error.message
         });
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb deleteByDataVersionLte - ' + CONFIG.collection_name, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue mongodb deleteByDataVersionLte - ' + CONFIG.collection_name, start_ms);
 
       return {
         success: true,
@@ -344,11 +325,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     }
 
 
-  };////////////////////////////// Public Functions END //////////////////////////////
+  };//////////////////////////// Public Functions END ////////////////////////////
 
 
 
-  ///////////////////////////// Private Functions START //////////////////////////////
+  //////////////////////////// Private Functions START ///////////////////////////
   const _Store = {
 
     /********************************************************************
@@ -388,7 +369,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       };
     }
 
-  };///////////////////////////// Private Functions END //////////////////////////////
+  };//////////////////////////// Private Functions END ///////////////////////////
 
   return Store;
 
