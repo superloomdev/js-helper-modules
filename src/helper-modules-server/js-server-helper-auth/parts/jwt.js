@@ -168,10 +168,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
           throw new Error('JWT decode failed');
         }
 
-      } catch (err) {
+      } catch {
 
         // Treat any decode/parse failure as a malformed token
-        void err;
         return { success: false, claims: null, error_code: 'MALFORMED' };
 
       }
@@ -196,10 +195,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
           'base64'
         );
 
-      } catch (err) {
+      } catch {
 
         // Treat any buffer decode failure as a malformed token
-        void err;
         return { success: false, claims: null, error_code: 'MALFORMED' };
 
       }

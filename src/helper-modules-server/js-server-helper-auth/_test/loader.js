@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-auth. Builds the base Lib
+// Info: Test loader for helper-auth. Builds the base Lib
 // container (Utils, Debug, Crypto, Instance) used by pure and JWT tests.
 // No database drivers are loaded here - auth's own tests use the in-process
 // memory store (memory-store.js). Backend integration tests live in the
@@ -35,7 +35,7 @@ module.exports = function loader () {
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
-  // Stub gateway — auth tests only need buildCookie; real serialization
+  // Stub gateway - auth tests only need buildCookie; real serialization
   // is tested inside js-server-helper-http-gateway's own test suite.
   Lib.HttpGateway = {
     buildCookie: function (existing, name, value, ttl) {

@@ -177,7 +177,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         !Lib.Utils.isString(fields[key]) ||
         Lib.Utils.isEmptyString(fields[key])
       ) {
-        throw new TypeError('[js-server-helper-auth] record field ' + key + ' must be a non-empty string');
+        throw new TypeError('[helper-auth] record field ' + key + ' must be a non-empty string');
       }
 
     },
@@ -199,7 +199,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         !Lib.Utils.isNumber(fields[key]) ||
         !Lib.Utils.isInteger(fields[key])
       ) {
-        throw new TypeError('[js-server-helper-auth] record field ' + key + ' must be an integer');
+        throw new TypeError('[helper-auth] record field ' + key + ' must be an integer');
       }
 
     },
@@ -269,7 +269,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Throw on non-integer values (no silent coercion for numeric fields)
       if (!Lib.Utils.isNumber(value) || !Lib.Utils.isInteger(value)) {
-        throw new TypeError('[js-server-helper-auth] record integer field must be an integer or null');
+        throw new TypeError('[helper-auth] record integer field must be an integer or null');
       }
 
       // Return the validated integer

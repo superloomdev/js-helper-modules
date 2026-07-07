@@ -1,4 +1,4 @@
-# @superloomdev/js-server-helper-auth
+# helper-auth
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
@@ -14,19 +14,19 @@ Two operating modes share the same public surface:
 - **DB-mode** (default). Every `verifySession` reads the store. Session revocation is immediate. The cookie or `Authorization: Bearer <auth_id>` header is the credential.
 - **JWT-mode** (`ENABLE_JWT: true`). `verifyJwt` is a stateless HS256 check that does not read the store. A single-use rotating refresh token (RFC 6819) extends the session. Access-token revocation latency is bounded by `JWT.access_token_ttl_seconds`.
 
-Storage backends are independent packages. Install only the adapter for the database you use. The module's contract is the same across all five: every adapter implements the eight-method store interface and returns the canonical session record shape.
+Storage backends are independent packages. A project installs only the adapter for the database it uses. The module's contract is the same across all five: every adapter implements the eight-method store interface and returns the canonical session record shape.
 
 ## Why Use This Module
 
 - **One module, five storage backends.** SQLite, PostgreSQL, MySQL, MongoDB, AWS DynamoDB. The calling shape is identical across all of them. Swap backend by changing one config value; no rewrite of business logic.
 
-- **Library updates won't break your code.** When an upstream driver or AWS SDK ships a breaking change, only the adapter package needs updating. Your application code stays exactly as it is.
+- **Library updates do not break calling code.** When an upstream driver or AWS SDK ships a breaking change, only the adapter package needs updating. The application code stays exactly as it is.
 
-- **Pre-tested at every release.** A shared store contract suite (`_test/store-contract-suite.js`) runs every adapter through the same end-to-end coverage on every push. Auth's own unit tests use an in-process memory fixture, so the package itself runs offline. Your project trusts the wrapper instead of re-verifying session plumbing on each release.
+- **Pre-tested at every release.** A shared store contract suite (`_test/store-contract-suite.js`) runs every adapter through the same end-to-end coverage on every push. Auth's own unit tests use an in-process memory fixture, so the package itself runs offline. A project trusts the wrapper instead of re-verifying session plumbing on each release.
 
-- **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) and split into single-purpose `parts/` helpers (policy, auth-id, jwt, token-source, record-shape). A reviewer can read the entry-point top to bottom and follow the dispatches without ever getting lost in dense logic. Open `auth.js` and `parts/` to see the structure.
+- **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) and split into single-purpose `parts/` helpers (policy, auth-id, jwt, token-source, record-shape). A reviewer can read the entry-point top to bottom and follow the dispatches without getting lost in dense logic. The structure is visible in `auth.js` and `parts/`.
 
-- **Built-in observability.** Every store call is timed against the active request via `Lib.Debug.performanceAuditLog`. Slow-store review, request profiling, and the toggle to silence it in production are all built in. No instrumentation code to write.
+- **Built-in observability.** Every store call is logged through `Lib.Debug.debug` on failure, and the module reads `instance.time` for all timestamps.
 
 ## Architecture Overview
 
@@ -40,23 +40,23 @@ Auth instance
  └─ store              (CONFIG.Store used directly; reads/writes sessions)
 ```
 
-Store adapters are **fully independent modules**. Each adapter builds its own `Lib`, defines its own `ERRORS`, validates its own config, and returns a ready-to-use store object. Auth receives that object via `CONFIG.Store` and uses it directly — no factory invocation, no shared dependencies.
+Store adapters are **fully independent modules**. Each adapter builds its own `Lib`, defines its own `ERRORS`, validates its own config, and returns a ready-to-use store object. Auth receives that object via `CONFIG.Store` and uses it directly - no factory invocation, no shared dependencies.
 
 For the full data-model walk-through and design rationale, see [`docs/data-model.md`](docs/data-model.md). For per-backend index, TTL, and store config details, see each adapter package's own README (linked below).
 
 ## Storage Adapters
 
-Five storage adapters are available, each a separate package. Install only the one you need.
+Five storage adapters are available, each a separate package. A project installs only the one it needs.
 
 | Adapter | Backend |
 |---|---|
-| [`@superloomdev/js-server-helper-auth-store-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-sqlite) | SQLite (embedded, in-process) |
-| [`@superloomdev/js-server-helper-auth-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-postgres) | PostgreSQL |
-| [`@superloomdev/js-server-helper-auth-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mysql) | MySQL or MariaDB |
-| [`@superloomdev/js-server-helper-auth-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mongodb) | MongoDB |
-| [`@superloomdev/js-server-helper-auth-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb) | AWS DynamoDB |
+| [`helper-auth-store-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-sqlite) | SQLite (embedded, in-process) |
+| [`helper-auth-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-postgres) | PostgreSQL |
+| [`helper-auth-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mysql) | MySQL or MariaDB |
+| [`helper-auth-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mongodb) | MongoDB |
+| [`helper-auth-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb) | AWS DynamoDB |
 
-**Pick the one that matches your application's database.** A Postgres-backed app uses `auth-store-postgres`, a MongoDB app uses `auth-store-mongodb`, and so on. The auth module's calling shape is identical across all five backends, so the choice is operational, not application-code.
+**Each application selects the adapter that matches its own database.** A Postgres-backed app uses `auth-store-postgres`, a MongoDB app uses `auth-store-mongodb`, and so on. The auth module's calling shape is identical across all five backends, so the choice is operational, not application-code.
 
 A legitimate deviation is using a NoSQL adapter for auth in a SQL-backed application when sessions need different scaling characteristics from the rest of the app (burstiness, serverless cold-start, compliance segregation). Mixing SQL families (Postgres app with MySQL or SQLite auth) is not a useful pattern.
 
@@ -64,14 +64,15 @@ Each adapter package ships its own README with the backend-specific schema, inde
 
 ## Aligned with Superloom Philosophy
 
-If your project is built on Superloom conventions (the same loader pattern, the same testing model, the same `instance`-first call shape), this module slots in without you needing to learn anything new. Every function takes `instance` as its first argument and routes its store calls through `Lib.Debug.performanceAuditLog`.
+A project built on Superloom conventions (the same loader pattern, the same testing model, the same `instance`-first call shape) adopts this module without learning anything new. Every function takes `instance` as its first argument and reads `instance.time` for timestamps.
 
-If you are not yet using Superloom, the principles are documented at [superloom.dev](https://superloom.dev).
+The principles are documented at [superloom.dev](https://superloom.dev) for projects not yet using Superloom.
 
 ## Extended Documentation
 
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, options, and error types. DB-mode and JWT-mode functions side by side
 - [Configuration](docs/configuration.md). Loader pattern, every configuration key, per-backend adapter config shape, peer dependencies, testing tiers
+- [Schemas](docs/schemas.md). The validated input contracts (CONFIG, JWT, call options), the eight-method store contract, and the response envelope
 - [Data model](docs/data-model.md). Every session-record field, the design decisions behind the composite primary key, the throttled `last_active_at` refresh, and the `custom_data` extension point
 - [Runtime](docs/runtime.md). The two or three concrete differences between running the auth module in a persistent-server runtime and a serverless-function runtime
 - [Push notifications](docs/push-notifications.md). The push-token contract the auth module exposes for a future `js-server-helper-push` to consume
@@ -79,22 +80,15 @@ If you are not yet using Superloom, the principles are documented at [superloom.
 
 ## Adding to Your Project
 
-Install this module **and** the one storage adapter you need as peer dependencies in your project's `package.json` and load them through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
+This module and the one storage adapter it needs are declared as dependencies in the project's `package.json` and loaded through the standard Superloom loader. The published packages are the supported integration path; vendoring the source or using a local file dependency is not.
 
-```bash
-npm install @superloomdev/js-server-helper-auth \
-            @superloomdev/js-server-helper-auth-store-postgres
-```
-
-Substitute `auth-store-postgres` with the adapter for your database. The full list is in the [Storage Adapters](#storage-adapters) section above; the store config shape for each adapter is in the adapter package's own README.
-
-The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
+The adapter is configured and instantiated independently, then passed to the auth loader as a ready-to-use `CONFIG.Store` object. The adapter list is in the [Storage Adapters](#storage-adapters) section above, and the per-backend store config shape is in [Configuration](docs/configuration.md) and each adapter package's own README. The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). One-time GitHub Packages registry setup is in the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
 ## Dependencies
 
 This module has no external dependencies.
 
-It expects five peer modules in the `Lib` container (Utils, Debug, Crypto, Instance, HttpGateway) and one optional peer adapter package for your storage backend. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+It expects five peer modules in the `Lib` container (Utils, Debug, Crypto, Instance, HttpGateway) and one optional peer adapter package for the storage backend. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 
@@ -102,9 +96,9 @@ It expects five peer modules in the `Lib` container (Utils, Debug, Crypto, Insta
 |---|---|---|
 | Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Auth's own tests use the in-process memory fixture (`MemoryStore` in `_test/`) which implements the full eight-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`js-server-helper-auth-store-*`) and run the shared store contract suite against real backends.
+Auth's own tests use the in-process memory fixture (`MemoryStore` in `_test/`) which implements the full eight-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-auth-store-*`) and run the shared store contract suite against real backends.
 
-Test runtime details live in [Configuration → Testing Tiers](docs/configuration.md#testing-tiers).
+Test runtime details live in [Configuration - Testing Tiers](docs/configuration.md#testing-tiers).
 
 ## License
 

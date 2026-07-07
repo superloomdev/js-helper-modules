@@ -1,5 +1,5 @@
 // Info: Shared end-to-end suite exercised against every backend
-// (sqlite + postgres + mysql + dynamodb + mongodb). Focuses on the
+// (sqlite + postgres + mysql + dynamodb + mongodb) for helper-auth. Focuses on the
 // public Auth API paths that talk to the store. Pure-helper tests
 // stay in test.js so they only run once.
 //

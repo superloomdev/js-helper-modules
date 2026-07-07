@@ -1,4 +1,4 @@
-# Push Notifications & the Auth Module
+# Push Notifications. `helper-auth`
 
 The auth module owns the source of truth for **which devices belong to which actor** because that information is already kept on every session record. A separate "devices" table would duplicate state and force the application to keep two writers in sync.
 
@@ -102,7 +102,7 @@ Sessions with null push fields and expired sessions are filtered out automatical
 
 ```
 ┌─────────────────┐   1) login            ┌─────────────────┐
-│  Mobile / Web   │ ────────────────────> │  Your backend   │
+│  Mobile / Web   │ ────────────────────> │  The backend    │
 │     client      │ <─── auth_id cookie ──┤                 │
 └────────┬────────┘                       └────────┬────────┘
          │                                         │
@@ -127,9 +127,9 @@ The client always sends the request authenticated via the existing session cooki
 
 ## 4. Provider failure handling
 
-When the push provider tells you a token is permanently invalid (APNs `BadDeviceToken`, FCM `UNREGISTERED`, etc.), call `detachDeviceFromSession` immediately so future fan-outs don't keep paying for a doomed send.
+When the push provider reports a token permanently invalid (APNs `BadDeviceToken`, FCM `UNREGISTERED`), `detachDeviceFromSession` is called immediately so future fan-outs stop paying for a doomed send.
 
-For transient failures, leave the row alone. A subsequent `attachDeviceToSession` from a successful client refresh will overwrite the token.
+Transient failures leave the row alone; a subsequent `attachDeviceToSession` from a successful client refresh overwrites the token.
 
 ---
 
@@ -137,7 +137,7 @@ For transient failures, leave the row alone. A subsequent `attachDeviceToSession
 
 Sessions per actor are bounded by `CONFIG.LIMITS.total_max`. Push targets are a strict subset, so the same bound caps the fan-out per actor. There is no need to paginate `listPushTargetsByActor`. Typical caps are 5 to 20 sessions per actor, a single index-supported read across every backend.
 
-For tenant-wide broadcasts, the **push module** should iterate actors and call `listPushTargetsByActor` per actor; the auth module does not expose a "list every push target in the tenant" function on purpose, because doing so would create a Hot Path that bypasses the actor-level cap and the per-actor authorisation check.
+For tenant-wide broadcasts, the **push module** should iterate actors and call `listPushTargetsByActor` per actor; the auth module does not expose a "list every push target in the tenant" function on purpose, because doing so would create a hot path that bypasses the actor-level cap and the per-actor authorization check.
 
 ---
 

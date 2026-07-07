@@ -1,4 +1,4 @@
-// Info: All validators for js-server-helper-auth. Three concerns in one place:
+// Info: All validators for helper-auth. Three concerns in one place:
 //   1. Config validators         - called once at construction time, take CONFIG
 //      as a parameter, throw Error on misconfiguration.
 //   2. Store contract validators - called once at construction time after store
@@ -23,15 +23,16 @@ const FORM_FACTOR_VALUES = ['mobile', 'tablet', 'desktop', 'tv', 'watch', 'other
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and returns the module-scope Validators
-object. Takes only Lib - no CONFIG or ERRORS - because validators run
-before CONFIG is validated and never consume the error catalog.
+Singleton loader. Injects Lib and ERRORS, returns the module-scope
+Validators object. Takes Lib and ERRORS - no CONFIG - because validators
+run before CONFIG is validated.
 
 @param {Object} shared_libs - Dependency container (Utils)
+@param {Object} errors - Error catalog for this module
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) {
+module.exports = function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
 
   // Inject shared dependency
   Lib = shared_libs;
@@ -67,7 +68,7 @@ const Validators = {
       Lib.Utils.isNullOrUndefined(CONFIG.Store) ||
       !Lib.Utils.isObject(CONFIG.Store)
     ) {
-      throw new Error('[js-server-helper-auth] CONFIG.Store must be a ready-to-use store object from an adapter (e.g. require("js-server-helper-auth-store-sqlite")({...}))');
+      throw new Error('[helper-auth] CONFIG.Store must be a ready-to-use store object from an adapter (e.g. require("helper-auth-store-sqlite")({...}))');
     }
 
     // ACTOR_TYPE is required and must be a non-empty string
@@ -76,7 +77,7 @@ const Validators = {
       !Lib.Utils.isString(CONFIG.ACTOR_TYPE) ||
       Lib.Utils.isEmptyString(CONFIG.ACTOR_TYPE)
     ) {
-      throw new Error('[js-server-helper-auth] CONFIG.ACTOR_TYPE is required (non-empty string)');
+      throw new Error('[helper-auth] CONFIG.ACTOR_TYPE is required (non-empty string)');
     }
 
     // TTL_SECONDS must be a positive integer
@@ -85,7 +86,7 @@ const Validators = {
       !Lib.Utils.isInteger(CONFIG.TTL_SECONDS) ||
       CONFIG.TTL_SECONDS <= 0
     ) {
-      throw new Error('[js-server-helper-auth] CONFIG.TTL_SECONDS must be a positive integer');
+      throw new Error('[helper-auth] CONFIG.TTL_SECONDS must be a positive integer');
     }
 
     // LAST_ACTIVE_UPDATE_INTERVAL_SECONDS must be a non-negative integer
@@ -94,12 +95,12 @@ const Validators = {
       !Lib.Utils.isInteger(CONFIG.LAST_ACTIVE_UPDATE_INTERVAL_SECONDS) ||
       CONFIG.LAST_ACTIVE_UPDATE_INTERVAL_SECONDS < 0
     ) {
-      throw new Error('[js-server-helper-auth] CONFIG.LAST_ACTIVE_UPDATE_INTERVAL_SECONDS must be a non-negative integer');
+      throw new Error('[helper-auth] CONFIG.LAST_ACTIVE_UPDATE_INTERVAL_SECONDS must be a non-negative integer');
     }
 
     // LIMITS object required with proper shape
     if (Lib.Utils.isNullOrUndefined(CONFIG.LIMITS) || !Lib.Utils.isObject(CONFIG.LIMITS)) {
-      throw new Error('[js-server-helper-auth] CONFIG.LIMITS is required (plain object)');
+      throw new Error('[helper-auth] CONFIG.LIMITS is required (plain object)');
     }
 
     if (
@@ -107,11 +108,11 @@ const Validators = {
       !Lib.Utils.isInteger(CONFIG.LIMITS.total_max) ||
       CONFIG.LIMITS.total_max <= 0
     ) {
-      throw new Error('[js-server-helper-auth] CONFIG.LIMITS.total_max must be a positive integer');
+      throw new Error('[helper-auth] CONFIG.LIMITS.total_max must be a positive integer');
     }
 
     if (!Lib.Utils.isBoolean(CONFIG.LIMITS.evict_oldest_on_limit)) {
-      throw new Error('[js-server-helper-auth] CONFIG.LIMITS.evict_oldest_on_limit must be a boolean');
+      throw new Error('[helper-auth] CONFIG.LIMITS.evict_oldest_on_limit must be a boolean');
     }
 
     // JWT mode: when enabled, signing key + issuer + audience are mandatory.
@@ -120,7 +121,7 @@ const Validators = {
     if (CONFIG.ENABLE_JWT === true) {
 
       if (Lib.Utils.isNullOrUndefined(CONFIG.JWT) || !Lib.Utils.isObject(CONFIG.JWT)) {
-        throw new Error('[js-server-helper-auth] CONFIG.JWT must be a plain object when ENABLE_JWT is true');
+        throw new Error('[helper-auth] CONFIG.JWT must be a plain object when ENABLE_JWT is true');
       }
 
       if (
@@ -128,7 +129,7 @@ const Validators = {
         !Lib.Utils.isString(CONFIG.JWT.signing_key) ||
         CONFIG.JWT.signing_key.length < 32
       ) {
-        throw new Error('[js-server-helper-auth] CONFIG.JWT.signing_key must be a string of at least 32 chars when ENABLE_JWT is true');
+        throw new Error('[helper-auth] CONFIG.JWT.signing_key must be a string of at least 32 chars when ENABLE_JWT is true');
       }
 
       if (
@@ -136,7 +137,7 @@ const Validators = {
         !Lib.Utils.isString(CONFIG.JWT.issuer) ||
         Lib.Utils.isEmptyString(CONFIG.JWT.issuer)
       ) {
-        throw new Error('[js-server-helper-auth] CONFIG.JWT.issuer is required (non-empty string) when ENABLE_JWT is true');
+        throw new Error('[helper-auth] CONFIG.JWT.issuer is required (non-empty string) when ENABLE_JWT is true');
       }
 
       if (
@@ -144,7 +145,7 @@ const Validators = {
         !Lib.Utils.isString(CONFIG.JWT.audience) ||
         Lib.Utils.isEmptyString(CONFIG.JWT.audience)
       ) {
-        throw new Error('[js-server-helper-auth] CONFIG.JWT.audience is required (non-empty string) when ENABLE_JWT is true');
+        throw new Error('[helper-auth] CONFIG.JWT.audience is required (non-empty string) when ENABLE_JWT is true');
       }
 
       if (
@@ -152,7 +153,7 @@ const Validators = {
         !Lib.Utils.isInteger(CONFIG.JWT.access_token_ttl_seconds) ||
         CONFIG.JWT.access_token_ttl_seconds <= 0
       ) {
-        throw new Error('[js-server-helper-auth] CONFIG.JWT.access_token_ttl_seconds must be a positive integer when ENABLE_JWT is true');
+        throw new Error('[helper-auth] CONFIG.JWT.access_token_ttl_seconds must be a positive integer when ENABLE_JWT is true');
       }
 
       if (
@@ -160,7 +161,7 @@ const Validators = {
         !Lib.Utils.isInteger(CONFIG.JWT.refresh_token_ttl_seconds) ||
         CONFIG.JWT.refresh_token_ttl_seconds <= 0
       ) {
-        throw new Error('[js-server-helper-auth] CONFIG.JWT.refresh_token_ttl_seconds must be a positive integer when ENABLE_JWT is true');
+        throw new Error('[helper-auth] CONFIG.JWT.refresh_token_ttl_seconds must be a positive integer when ENABLE_JWT is true');
       }
 
     }
@@ -198,7 +199,7 @@ const Validators = {
 
       if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
         throw new Error(
-          '[js-server-helper-auth] Invalid store contract: missing method `' + name + '`'
+          '[helper-auth] Invalid store contract: missing method `' + name + '`'
         );
       }
 
@@ -230,8 +231,8 @@ const Validators = {
 
     // Separator-character constraints (plan 0042): createSession is the only
     // function that mints wire auth_id and composite store keys from a
-    // project-supplied actor_id. Catching reserved chars here — before any
-    // store I/O — prevents orphaned session writes.
+    // project-supplied actor_id. Catching reserved chars here - before any
+    // store I/O - prevents orphaned session writes.
     _Validators.assertNoWireSeparators(options.actor_id, 'actor_id', 'createSession');
     _Validators.assertNoHashSeparator(options.tenant_id, 'tenant_id', 'createSession');
 
@@ -244,7 +245,7 @@ const Validators = {
       _Validators.assertNonEmptyString(options.install_id, 'install_id', 'createSession');
     }
 
-    // Each client_* field is independently optional — type only checked when present
+    // Each client_* field is independently optional - type only checked when present
     _Validators.assertOptionalString(options.client_name, 'client_name', 'createSession');
     _Validators.assertOptionalString(options.client_version, 'client_version', 'createSession');
     _Validators.assertOptionalBoolean(options.client_is_browser, 'client_is_browser', 'createSession');
@@ -260,7 +261,7 @@ const Validators = {
 
       // Reject non-object values (arrays, strings, etc.)
       if (!Lib.Utils.isObject(options.custom_data)) {
-        throw new TypeError('[js-server-helper-auth] createSession options.custom_data must be a plain object');
+        throw new TypeError('[helper-auth] createSession options.custom_data must be a plain object');
       }
 
     }
@@ -279,21 +280,21 @@ const Validators = {
   *********************************************************************/
   validateVerifySessionOptions: function (options) {
 
-    // verifySession options is allowed to be empty — everything will
+    // verifySession options is allowed to be empty - everything will
     // be read from instance via token-source. We just guard against
     // wrong types when keys are present.
 
-    // Allow null/undefined — caller is relying on token-source
+    // Allow null/undefined - caller is relying on token-source
     if (Lib.Utils.isNullOrUndefined(options)) {
       return;
     }
 
     // Reject non-object values when options is provided
     if (!Lib.Utils.isObject(options)) {
-      throw new TypeError('[js-server-helper-auth] verifySession options must be a plain object');
+      throw new TypeError('[helper-auth] verifySession options must be a plain object');
     }
 
-    // auth_id explicitly supplied — must be a non-empty string
+    // auth_id explicitly supplied - must be a non-empty string
     if (!Lib.Utils.isNullOrUndefined(options.auth_id)) {
       _Validators.assertNonEmptyString(options.auth_id, 'auth_id', 'verifySession');
     }
@@ -442,12 +443,12 @@ const _Validators = {
 
     // Throw if options was not passed at all
     if (Lib.Utils.isNullOrUndefined(options)) {
-      throw new TypeError('[js-server-helper-auth] ' + fn_name + ' options object is required');
+      throw new TypeError('[helper-auth] ' + fn_name + ' options object is required');
     }
 
     // Throw if options is not a plain object
     if (!Lib.Utils.isObject(options)) {
-      throw new TypeError('[js-server-helper-auth] ' + fn_name + ' options must be a plain object');
+      throw new TypeError('[helper-auth] ' + fn_name + ' options must be a plain object');
     }
 
   },
@@ -470,7 +471,7 @@ const _Validators = {
       !Lib.Utils.isString(value) ||
       Lib.Utils.isEmptyString(value)
     ) {
-      throw new TypeError('[js-server-helper-auth] ' + fn_name + ' options.' + field + ' must be a non-empty string');
+      throw new TypeError('[helper-auth] ' + fn_name + ' options.' + field + ' must be a non-empty string');
     }
 
   },
@@ -488,14 +489,14 @@ const _Validators = {
   *********************************************************************/
   assertOptionalString: function (value, field, fn_name) {
 
-    // Allow null/undefined — field is optional
+    // Allow null/undefined - field is optional
     if (Lib.Utils.isNullOrUndefined(value)) {
       return;
     }
 
     // Throw if a non-null value is not a string
     if (!Lib.Utils.isString(value)) {
-      throw new TypeError('[js-server-helper-auth] ' + fn_name + ' options.' + field + ' must be a string when provided');
+      throw new TypeError('[helper-auth] ' + fn_name + ' options.' + field + ' must be a string when provided');
     }
 
   },
@@ -513,14 +514,14 @@ const _Validators = {
   *********************************************************************/
   assertOptionalBoolean: function (value, field, fn_name) {
 
-    // Allow null/undefined — field is optional
+    // Allow null/undefined - field is optional
     if (Lib.Utils.isNullOrUndefined(value)) {
       return;
     }
 
     // Throw if a non-null value is not a boolean
     if (!Lib.Utils.isBoolean(value)) {
-      throw new TypeError('[js-server-helper-auth] ' + fn_name + ' options.' + field + ' must be a boolean when provided');
+      throw new TypeError('[helper-auth] ' + fn_name + ' options.' + field + ' must be a boolean when provided');
     }
 
   },
@@ -538,14 +539,14 @@ const _Validators = {
   *********************************************************************/
   assertOptionalInteger: function (value, field, fn_name) {
 
-    // Allow null/undefined — field is optional
+    // Allow null/undefined - field is optional
     if (Lib.Utils.isNullOrUndefined(value)) {
       return;
     }
 
     // Throw if a non-null value is not an integer
     if (!Lib.Utils.isNumber(value) || !Lib.Utils.isInteger(value)) {
-      throw new TypeError('[js-server-helper-auth] ' + fn_name + ' options.' + field + ' must be an integer when provided');
+      throw new TypeError('[helper-auth] ' + fn_name + ' options.' + field + ' must be an integer when provided');
     }
 
   },
@@ -570,7 +571,7 @@ const _Validators = {
       allowed.indexOf(value) === -1
     ) {
       throw new TypeError(
-        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        '[helper-auth] ' + fn_name + ' options.' + field +
         ' must be one of: ' + allowed.join(', ')
       );
     }
@@ -594,7 +595,7 @@ const _Validators = {
     // Reject '-' (wire auth_id separator)
     if (value.indexOf('-') !== -1) {
       throw new TypeError(
-        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        '[helper-auth] ' + fn_name + ' options.' + field +
         ' must not contain "-" or "#" (reserved auth_id / composite-key separators)'
       );
     }
@@ -602,7 +603,7 @@ const _Validators = {
     // Reject '#' (composite store key separator)
     if (value.indexOf('#') !== -1) {
       throw new TypeError(
-        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        '[helper-auth] ' + fn_name + ' options.' + field +
         ' must not contain "-" or "#" (reserved auth_id / composite-key separators)'
       );
     }
@@ -626,7 +627,7 @@ const _Validators = {
     // Reject '#' (composite store key separator)
     if (value.indexOf('#') !== -1) {
       throw new TypeError(
-        '[js-server-helper-auth] ' + fn_name + ' options.' + field +
+        '[helper-auth] ' + fn_name + ' options.' + field +
         ' must not contain "#" (reserved composite-key separator)'
       );
     }

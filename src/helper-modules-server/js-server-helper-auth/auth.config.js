@@ -1,4 +1,4 @@
-// Info: Configuration defaults for js-server-helper-auth.
+// Info: Configuration defaults for helper-auth.
 // Most fields are required at construction time and validated by the loader.
 // One actor_type per loader call. Keys with a default of `null` mean "must
 // be supplied by the project" - the loader throws if they are still null.
@@ -7,14 +7,9 @@
 
 module.exports = {
 
-  // Ready-to-use store object from the chosen adapter package.
-  // The adapter is pre-configured with its own Lib and config.
-  //   Store: require('@superloomdev/js-server-helper-auth-store-sqlite')({ table_name: 'sessions_user', lib_sql: Lib.SQLite })
-  //   Store: require('@superloomdev/js-server-helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres })
-  //   Store: require('@superloomdev/js-server-helper-auth-store-mysql')({ table_name: 'sessions_user', lib_sql: Lib.MySQL })
-  //   Store: require('@superloomdev/js-server-helper-auth-store-mongodb')({ collection_name: 'sessions_user', lib_mongodb: Lib.MongoDB })
-  //   Store: require('@superloomdev/js-server-helper-auth-store-dynamodb')({ table_name: 'sessions_user', lib_dynamodb: Lib.DynamoDB })
-  // Required.
+  // Ready-to-use store object from the chosen adapter package, pre-configured
+  // with its own Lib and config. Validated at construction. Required.
+  // Per-backend wiring: docs/configuration.md.
   Store: null,
 
   // The actor_type this instance owns. Stamped onto every record (defense

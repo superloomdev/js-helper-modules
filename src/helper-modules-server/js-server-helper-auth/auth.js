@@ -16,16 +16,16 @@
 //
 // Schema management: setupNewStore is supported only on SQL backends
 // (sqlite, postgres, mysql) - it issues idempotent CREATE TABLE +
-// CREATE INDEX. NoSQL backends (mongodb, dynamodb) return NOT_IMPLEMENTED;
+// CREATE INDEX. NoSQL backends (mongodb, dynamodb) return AUTH_NOT_IMPLEMENTED;
 // provision those out-of-band until the underlying helpers gain schema APIs.
 // Storage backends are provided by standalone adapter packages. The caller
 // passes a ready-to-use store object via CONFIG.Store - the adapter is
 // pre-configured with its own Lib and config. Require only the adapter you need:
-//   js-server-helper-auth-store-sqlite
-//   js-server-helper-auth-store-postgres
-//   js-server-helper-auth-store-mysql
-//   js-server-helper-auth-store-mongodb
-//   js-server-helper-auth-store-dynamodb
+//   helper-auth-store-sqlite
+//   helper-auth-store-postgres
+//   helper-auth-store-mysql
+//   helper-auth-store-mongodb
+//   helper-auth-store-dynamodb
 //
 // Compatibility: Node.js 24+
 'use strict';
@@ -46,7 +46,7 @@ misconfiguration fails fast at startup, not on first request.
 module.exports = function loader (shared_libs, config) {
 
   // Dependencies for this instance. Store adapters build their own Lib
-  // internally — auth does not inject driver helpers into them.
+  // internally - auth does not inject driver helpers into them.
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
@@ -67,7 +67,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Singleton validators: config + options validators in one place.
   // validateConfig runs immediately so misconfiguration fails fast at startup.
-  const Validators = require('./auth.validators')(Lib);
+  const Validators = require('./auth.validators')(Lib, ERRORS);
   Validators.validateConfig(CONFIG);
 
   // Use the ready-to-use store object passed in via config.Store.
@@ -132,7 +132,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     /********************************************************************
     Create a new session for an actor. Enforces tier limits + same-install
     replacement via the list-then-filter algorithm. Returns a cookie descriptor
-    in `cookies` when COOKIE_PREFIX is configured — pass it to
+    in `cookies` when COOKIE_PREFIX is configured - pass it to
     Lib.HttpGateway.returnHttpResponse as the cookies argument.
 
     @param {Object} instance - Request instance (provides time + lifecycle)
@@ -167,7 +167,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         return {
           success: false,
           auth_id: null,
+          access_token: null,
+          refresh_token: null,
           session: null,
+          cookies: null,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
@@ -187,7 +190,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         return {
           success: false,
           auth_id: null,
+          access_token: null,
+          refresh_token: null,
           session: null,
+          cookies: null,
           error: ERRORS.LIMIT_REACHED
         };
       }
@@ -262,7 +268,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         return {
           success: false,
           auth_id: null,
+          access_token: null,
+          refresh_token: null,
           session: null,
+          cookies: null,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
@@ -371,7 +380,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         !Lib.Utils.isString(safe_options.tenant_id) ||
         Lib.Utils.isEmptyString(safe_options.tenant_id)
       ) {
-        throw new TypeError('[js-server-helper-auth] verifySession requires options.tenant_id');
+        throw new TypeError('[helper-auth] verifySession requires options.tenant_id');
       }
 
       // Hash the secret to compare against the stored hash
@@ -475,6 +484,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         Lib.Debug.debug('Auth removeSession: store delete failed', { error: result.error });
         return {
           success: false,
+          cookies: null,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
@@ -598,6 +608,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         return {
           success: false,
           removed_count: 0,
+          cookies: null,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
@@ -625,6 +636,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         return {
           success: false,
           removed_count: 0,
+          cookies: null,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
@@ -881,12 +893,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     IF NOT EXISTS for the expires_at index in a single call. Safe to
     run on every boot.
 
-    NoSQL backends (mongodb, dynamodb) do not implement this method -
-    schema setup (collections, tables, secondary indexes, native TTL)
-    must be provisioned out-of-band via infra-as-code or a one-shot
-    script using the underlying helper module. Calling setupNewStore
-    on a NoSQL backend throws TypeError; the caller picks the backend
-    at config time and is expected to know what it supports.
+    NoSQL backends (mongodb, dynamodb) implement this method as a no-op
+    that returns { success: false, error: AUTH_NOT_IMPLEMENTED } - their
+    schema (collections, tables, secondary indexes, native TTL) must be
+    provisioned out-of-band via infra-as-code or a one-shot script using
+    the underlying helper module. A custom store that omits the method
+    entirely trips the capability gate below and throws TypeError.
 
     @param {Object} instance - Request instance
 
@@ -899,7 +911,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       // a generic envelope error.
       if (!Lib.Utils.isFunction(store.setupNewStore)) {
         throw new TypeError(
-          '[js-server-helper-auth] setupNewStore is not supported by this store - provision the schema out-of-band'
+          '[helper-auth] setupNewStore is not supported by this store - provision the schema out-of-band'
         );
       }
 
@@ -925,7 +937,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       // leaking a synthetic envelope error to the caller.
       if (!Lib.Utils.isFunction(store.cleanupExpiredSessions)) {
         throw new Error(
-          '[js-server-helper-auth] store does not implement cleanupExpiredSessions'
+          '[helper-auth] store does not implement cleanupExpiredSessions'
         );
       }
 
@@ -1007,11 +1019,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
       // Guard: this method is inert unless JWT mode is enabled
       if (CONFIG.ENABLE_JWT !== true) {
-        throw new Error('[js-server-helper-auth] verifyJwt requires CONFIG.ENABLE_JWT=true');
+        throw new Error('[helper-auth] verifyJwt requires CONFIG.ENABLE_JWT=true');
       }
-
-      // instance is accepted for API consistency but not used in stateless verify
-      void instance;
 
       // Verify the compact JWS string against the configured key and claims
       const safe_options = options || {};
@@ -1086,7 +1095,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
       // Guard: this method is inert unless JWT mode is enabled
       if (CONFIG.ENABLE_JWT !== true) {
-        throw new Error('[js-server-helper-auth] signSessionJwt requires CONFIG.ENABLE_JWT=true');
+        throw new Error('[helper-auth] signSessionJwt requires CONFIG.ENABLE_JWT=true');
       }
 
       // Sign and return a short-lived access JWT for the given session
@@ -1129,7 +1138,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
       // Guard: this method is inert unless JWT mode is enabled
       if (CONFIG.ENABLE_JWT !== true) {
-        throw new Error('[js-server-helper-auth] refreshSessionJwt requires CONFIG.ENABLE_JWT=true');
+        throw new Error('[helper-auth] refreshSessionJwt requires CONFIG.ENABLE_JWT=true');
       }
 
       // Validate inputs and snapshot request time

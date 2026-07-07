@@ -1,4 +1,4 @@
-# Data Model
+# Data Model. `helper-auth`
 
 Every session is stored as a single flat record. This document explains what each field means, why it exists, and how to populate it correctly.
 
@@ -8,11 +8,11 @@ Every session is stored as a single flat record. This document explains what eac
 
 ```
 tenant_id: 'tenant_42'        // SaaS tenant
-tenant_id: 'org_acme'         // organisation slug
+tenant_id: 'org_acme'         // organization slug
 tenant_id: 'default'          // single-tenant deployment (one known value)
 ```
 
-Tenant isolation is enforced at every store method. There is no cross-tenant query. Your application must ensure the tenant_id passed in is authoritative for the caller before passing it to auth.
+Tenant isolation is enforced at every store method. There is no cross-tenant query. The application must ensure the `tenant_id` passed in is authoritative for the caller before it reaches auth.
 
 **Actor.** The authenticated principal. An actor has a `type` (what kind of actor it is) and an `id` (which specific principal). The Auth module is instantiated once per `actor_type`; the instance only ever reads and writes sessions for that type.
 
@@ -91,13 +91,13 @@ install_id: null                  // omit when the platform has no stable device
 | Windows desktop app | `'windows'` | `'desktop'` |
 | CLI / server tool | `'other'` | `'other'` |
 
-These values feed directly into `LIMITS.by_platform_max` and `LIMITS.by_form_factor_max`. Use consistent values across your codebase; a typo silently creates a new bucket that never hits any cap.
+These values feed directly into `LIMITS.by_platform_max` and `LIMITS.by_form_factor_max`. Values must stay consistent across the codebase; a typo silently creates a new bucket that never hits any cap.
 
 ---
 
 ## custom_data Convention
 
-`custom_data` is the extension point for any per-session state your application needs to carry without adding a join. It is stored verbatim and returned on every successful `verifySession`.
+`custom_data` is the extension point for any per-session state an application needs to carry without adding a join. It is stored verbatim and returned on every successful `verifySession`.
 
 ```javascript
 // Store the user's role at login time so the request handler doesn't need a DB call
@@ -110,7 +110,7 @@ custom_data: { oauth_provider: 'google', oauth_sub: '1047283904' }
 custom_data: null
 ```
 
-Do **not** store secrets, session tokens from other systems, or large blobs in `custom_data`. The column is stored as-is and returned to any code that calls `verifySession`.
+Secrets, session tokens from other systems, and large blobs do not belong in `custom_data`: the column is stored as-is and returned to any code that calls `verifySession`.
 
 ---
 
@@ -129,7 +129,7 @@ The primary key is `(tenant_id, actor_id, token_key)`. This enables:
 
 ### Why Immutable install_id?
 
-The `install_id` never changes after creation. If a user reinstalls your app (new install_id), they get a new session slot rather than replacing the old one. This is intentional: a reinstall is a "new device" from a security perspective.
+The `install_id` never changes after creation. If a user reinstalls the app (new `install_id`), they get a new session slot rather than replacing the old one. This is intentional: a reinstall is a "new device" from a security perspective.
 
 ### Why Throttled last_active_at?
 
@@ -137,4 +137,4 @@ Updating `last_active_at` on every request would create a database write for eve
 
 ### Why Token Secret Hash?
 
-The actual `token_secret` is never stored. If your database is compromised, attackers cannot impersonate users even with full table access. They only have hashes, not the tokens clients hold.
+The actual `token_secret` is never stored. If the database is compromised, attackers cannot impersonate users even with full table access: they hold only hashes, not the tokens clients carry.
