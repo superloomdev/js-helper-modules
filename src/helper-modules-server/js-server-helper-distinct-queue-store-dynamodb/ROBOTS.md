@@ -1,31 +1,31 @@
-# ROBOTS.md — js-server-helper-distinct-queue-store-dynamodb
+# ROBOTS.md - helper-distinct-queue-store-dynamodb
 
 ## Quick Reference
 
 **Pattern:** Store adapter for adapter-backed module (Pattern 2 + Store)  
 **Contract:** 4 methods (`writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`) + `setupNewStore` provisioning  
-**Storage:** DynamoDB with composite key `(p, id)` — (tenant_id, sort_key)
+**Storage:** DynamoDB with composite key `(p, id)` - (tenant_id, sort_key)
 
 ## Usage
 
 ```js
 // Load the adapter with Lib injected
-const Store = require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
   table_name: 'queue_jobs'
 });
 
 // Pass the ready-to-use store object to the parent module
-Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
   Store: Store
 });
 ```
 
 ## Adapter Configuration
 
-Loaded via `loader(Lib, config)`. Config keys:
+Loaded via `loader(shared_libs, config)`. Config keys:
 
-- `table_name` — DynamoDB table name (string, required)
-- `KEY_DELIMITER` — Sort key field separator (string, default `\u001F` — override with care)
+- `table_name` - DynamoDB table name (string, required)
+- `KEY_DELIMITER` - Sort key field separator (string, default `\u001F` - override with care)
 
 The DynamoDB driver is taken from the injected `Lib.DynamoDB`.
 
@@ -48,16 +48,16 @@ All methods return `{ success, error }` shape. On driver failure:
 ## Dependencies
 
 **Injected via Lib container:**
-- `Lib.Utils` — Type checking
-- `Lib.Debug` — Logging
-- `Lib.DynamoDB` — DynamoDB driver used for all storage operations
+- `Lib.Utils` - Type checking
+- `Lib.Debug` - Logging
+- `Lib.DynamoDB` - DynamoDB driver used for all storage operations
 
 **Parent module:**
-- `js-server-helper-distinct-queue` — Consumes the store object via `CONFIG.Store`
+- `helper-distinct-queue` - Consumes the store object via `CONFIG.Store`
 
 ## Testing
 
-Uses `store-contract-suite.js` — shared tests validate the 4-method contract against real DynamoDB via Docker.
+Uses `store-contract-suite.js` - shared tests validate the 4-method contract against real DynamoDB via Docker.
 
 ```bash
 cd _test && npm install && npm test

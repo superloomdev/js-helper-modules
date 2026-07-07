@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-distinct-queue-store-dynamodb.
+// Info: Test loader for helper-distinct-queue-store-dynamodb.
 // Builds the Lib container and store helpers so tests can exercise the store
 // adapter directly (4-method contract) and the core distinct-queue module
 // end-to-end (enqueue/claim/listByPrefix).
@@ -70,8 +70,8 @@ const buildStore = function () {
 Instantiate the core distinct-queue module wired to the DynamoDB
 store adapter. Used for end-to-end enqueue/claim/listByPrefix tests.
 
-The adapter is a fully independent module; the parent uses the
-store object directly via CONFIG.Store.
+The adapter owns its CONFIG and ERRORS; Lib is injected at load time.
+The parent uses the store object directly via CONFIG.Store.
 
 @return {Object} - DistinctQueue interface
 *********************************************************************/

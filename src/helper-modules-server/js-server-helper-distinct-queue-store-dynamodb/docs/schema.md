@@ -1,4 +1,4 @@
-# Schema — js-server-helper-distinct-queue-store-dynamodb
+# Schema - helper-distinct-queue-store-dynamodb
 
 ## Table Structure
 
@@ -17,9 +17,9 @@ The adapter stores records in a single DynamoDB table (configurable via `table_n
 ```
 
 The sort key `id` encodes three values separated by `\u001F` (ASCII unit separator):
-1. `resource_id` — The resource identifier
-2. `data_version` — Millisecond timestamp for sorting
-3. `request_id` — Compact UUID tie-breaker
+1. `resource_id` - The resource identifier
+2. `data_version` - Millisecond timestamp for sorting
+3. `request_id` - Compact UUID tie-breaker
 
 The delimiter is defined once as `KEY_DELIMITER` in `store.config.js` and is the single source of truth for both composing and parsing sort keys.
 
@@ -31,7 +31,7 @@ DynamoDB requires a primary key. We use a composite key design:
 
 | Attribute | Role | Value |
 |-----------|------|-------|
-| `p` | Partition key | `tenant_id` — isolates tenants |
+| `p` | Partition key | `tenant_id` - isolates tenants |
 | `id` | Sort key | Full sort_key with resource + version + request_id |
 
 **Benefits:**
