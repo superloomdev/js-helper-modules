@@ -10,7 +10,7 @@
 
 'use strict';
 
-const assert = require('node:assert');
+const assert = require('node:assert/strict');
 const { describe, it, before, beforeEach } = require('node:test');
 
 
