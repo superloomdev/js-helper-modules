@@ -34,7 +34,7 @@ Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
 });
 
 // Optional: idempotent table setup
-await Store.setupNewStore(Lib.Instance.initialize());
+await Lib.DistinctQueueStore.setupNewStore(Lib.Instance.initialize());
 ```
 
 ## Configuration

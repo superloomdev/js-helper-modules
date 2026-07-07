@@ -100,9 +100,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     setupNewStore: async function (instance) {
 
-      // Start performance timeline
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Provision the table idempotently with composite key {p, id}
       const result = await Lib.DynamoDB.createTable(instance, CONFIG.table_name, {
         attribute_definitions: [
@@ -119,7 +116,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Return a service error if the driver call failed
       if (result.success === false) {
         _Store.logDriverFailure('setupNewStore', result.error);
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb setupNewStore - ' + CONFIG.table_name, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -131,7 +127,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         type: 'SETUP_COMPLETE',
         already_exists: result.already_exists
       });
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb setupNewStore - ' + CONFIG.table_name, start_ms);
 
       return {
         success: true,
@@ -154,9 +149,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (instance, record) {
-
-      // Start performance timeline
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Compose the sort key from raw fields
       const sort_key = _Store.composeSortKey(
@@ -184,14 +176,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Return service error on failure
       if (result && result.success === false) {
         _Store.logDriverFailure('writeRecord', result.error);
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb writeRecord - ' + record.tenant_id + '/' + record.resource_id, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb writeRecord - ' + record.tenant_id + '/' + record.resource_id, start_ms);
 
       return {
         success: true,
@@ -217,9 +206,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
-      // Start performance timeline
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // The delimiter suffix pins the match to this exact resource, excluding
       // sibling resources that merely share its prefix.
       const result = await _Store.runPrefixQuery(
@@ -231,7 +217,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Return service error on failure
       if (result && result.success === false) {
         _Store.logDriverFailure('queryByResourceId', result.error);
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceId - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: false,
           records: null,
@@ -241,8 +226,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Reconstruct records from DynamoDB items
       const records = (result.items || []).map(_Store.itemToRecord);
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceId - ' + tenant_id + '/' + resource_id, start_ms);
 
       return {
         success: true,
@@ -267,9 +250,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
-      // Start performance timeline
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // The caller-supplied prefix is matched verbatim against the sort key,
       // so it spans every resource_id beginning with it.
       const result = await _Store.runPrefixQuery(
@@ -281,7 +261,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Return service error on failure
       if (result && result.success === false) {
         _Store.logDriverFailure('queryByResourceIdPrefix', result.error);
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceIdPrefix - ' + tenant_id + '/' + resource_id_prefix, start_ms);
         return {
           success: false,
           records: null,
@@ -291,8 +270,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Reconstruct records from DynamoDB items
       const records = (result.items || []).map(_Store.itemToRecord);
-
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceIdPrefix - ' + tenant_id + '/' + resource_id_prefix, start_ms);
 
       return {
         success: true,
@@ -323,9 +300,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
-      // Start performance timeline
-      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
-
       // Step 1: Query for all records for this tenant + resource
       const query_result = await _Store.runPrefixQuery(
         instance,
@@ -336,7 +310,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Return service error on query failure
       if (query_result && query_result.success === false) {
         _Store.logDriverFailure('deleteByDataVersionLte query', query_result.error);
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -356,7 +329,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Short-circuit if nothing to delete
       if (keys_to_delete.length === 0) {
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: true,
           error: null
@@ -375,7 +347,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Return service error on delete failure
       if (delete_result && delete_result.success === false) {
         _Store.logDriverFailure('deleteByDataVersionLte batchDelete', delete_result.error);
-        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -388,7 +359,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         resource_id: resource_id,
         boundary: data_version_boundary
       });
-      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
 
       return {
         success: true,
@@ -398,7 +368,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     }
 
 
-  };//////////////////////////// Public Functions END ///////////////////////////
+  };//////////////////////////// Public Functions END ////////////////////////////
 
 
 
@@ -531,7 +501,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     }
 
 
-  };//////////////////////////// Private Functions END //////////////////////////
+  };//////////////////////////// Private Functions END ///////////////////////////
 
   return Store;
 
