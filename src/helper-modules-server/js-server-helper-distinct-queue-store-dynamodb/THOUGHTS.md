@@ -1,4 +1,4 @@
-# THOUGHTS.md — js-server-helper-distinct-queue-store-dynamodb
+# THOUGHTS.md - helper-distinct-queue-store-dynamodb
 
 Engineering decision journal. Not published to npm.
 
@@ -8,13 +8,13 @@ Engineering decision journal. Not published to npm.
 
 **Decision:** Use a single sort key `id` composed as `resource_id + KEY_DELIMITER + data_version + KEY_DELIMITER + request_id`.
 
-**Why:** DynamoDB `begins_with` queries on a sort key let us retrieve all records for a given `resource_id` (exact match: append the delimiter) or all records under a resource prefix (prefix match: pass verbatim) — both without a Global Secondary Index (GSI). A GSI would add cost, latency, and eventual-consistency hazards.
+**Why:** DynamoDB `begins_with` queries on a sort key let us retrieve all records for a given `resource_id` (exact match: append the delimiter) or all records under a resource prefix (prefix match: pass verbatim) - both without a Global Secondary Index (GSI). A GSI would add cost, latency, and eventual-consistency hazards.
 
 **Why the delimiter is `\u001F`:** ASCII Unit Separator (US) is a non-printable control character. Caller-supplied `resource_id` values are human-readable strings (dot-separated paths, UUIDs, etc.) that will never contain this character. This guarantees the three sort key segments can be split unambiguously without escaping.
 
-**Rejected alternative — GSI on resource_id:** Would allow a direct `resource_id = X` key condition, but adds per-write cost, a GSI maintenance burden, and eventual-consistency exposure. The `begins_with` approach on a composite sort key is strictly better for this workload.
+**Rejected alternative - GSI on resource_id:** Would allow a direct `resource_id = X` key condition, but adds per-write cost, a GSI maintenance burden, and eventual-consistency exposure. The `begins_with` approach on a composite sort key is strictly better for this workload.
 
-**Rejected alternative — resource_id as the sort key directly:** Would support exact-resource queries but not prefix queries. Prefix queries (`queryByResourceIdPrefix`) are a first-class contract method, so this was a non-starter.
+**Rejected alternative - resource_id as the sort key directly:** Would support exact-resource queries but not prefix queries. Prefix queries (`queryByResourceIdPrefix`) are a first-class contract method, so this was a non-starter.
 
 ---
 
@@ -24,7 +24,7 @@ Engineering decision journal. Not published to npm.
 
 **Why:** DynamoDB has no native range delete. The `begins_with` query on `(tenant_id, resource_id + KEY_DELIMITER)` retrieves only the target resource's records; the post-filter to `data_version <= boundary` runs on the small result set. This is correct and efficient for queue workloads where `deleteByDataVersionLte` is called after a `claim` that has already loaded the same records.
 
-**Rejected alternative — Scan + FilterExpression:** Would read the entire table. Completely wrong for a multi-tenant system.
+**Rejected alternative - Scan + FilterExpression:** Would read the entire table. Completely wrong for a multi-tenant system.
 
 ---
 
@@ -34,7 +34,7 @@ Engineering decision journal. Not published to npm.
 
 **Why:** Decouples adapter and parent. The only coupling point is the return contract shape: `{ success, error }` on all methods. This allows adapter versioning and replacement without touching parent module code. Adopted as part of Plan 0045.
 
-**Previous pattern (removed):** The adapter originally received `ERRORS` from the parent via loader arguments and depended on the parent's error catalog. This created tight coupling — changing the parent's error catalog forced adapter changes. Now each module owns its errors.
+**Previous pattern (removed):** The adapter originally received `ERRORS` from the parent via loader arguments and depended on the parent's error catalog. This created tight coupling - changing the parent's error catalog forced adapter changes. Now each module owns its errors.
 
 ---
 

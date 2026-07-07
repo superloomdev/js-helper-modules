@@ -1,4 +1,4 @@
-// Info: Error catalog for js-server-helper-distinct-queue-store-dynamodb.
+// Info: Error catalog for helper-distinct-queue-store-dynamodb.
 // Operational errors returned via { success: false, error }.
 // Frozen to prevent accidental mutation.
 'use strict';

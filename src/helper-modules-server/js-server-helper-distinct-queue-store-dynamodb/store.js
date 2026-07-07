@@ -1,4 +1,4 @@
-// Info: DynamoDB store adapter for js-server-helper-distinct-queue.
+// Info: DynamoDB store adapter for helper-distinct-queue.
 // Implements the 4-method store contract using a composite partition key + sort key.
 //
 // The application injects a ready-to-use DynamoDB helper via Lib.DynamoDB.
@@ -27,7 +27,7 @@
 
 /********************************************************************
 Factory loader. One call = one independent store instance with its
-own Lib, CONFIG, and ERRORS. Validates CONFIG at construction so
+own Lib, CONFIG, ERRORS, and Validators. Validates CONFIG at construction so
 misconfiguration fails fast at startup, not on first request.
 
 @param {Object} shared_libs - Lib container with Utils, Debug, DynamoDB
@@ -54,16 +54,16 @@ module.exports = function loader (shared_libs, config) {
   // Load internal error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
   // Build the public Store interface
-  return createInterface(Lib, CONFIG, ERRORS);
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
-};///////////////////////////// Module-Loader END ///////////////////////////////
+};/////////////////////////// Module-Loader END ////////////////////////////////
 
 
 
@@ -72,17 +72,18 @@ module.exports = function loader (shared_libs, config) {
 
 /********************************************************************
 Builds the public Store interface. All functions close over
-Lib, CONFIG, and ERRORS.
+Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib    - Dependency container (Utils, Debug, DynamoDB)
-@param {Object} CONFIG - Merged adapter configuration { table_name }
-@param {Object} ERRORS - Frozen error catalog
+@param {Object} Lib       - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} CONFIG    - Merged adapter configuration { table_name }
+@param {Object} ERRORS    - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
-  ////////////////////////////// Public Functions START ////////////////////////
+  //////////////////////////// Public Functions START ////////////////////////////
   const Store = {
 
 
@@ -98,6 +99,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
+
+      // Start performance timeline
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Provision the table idempotently with composite key {p, id}
       const result = await Lib.DynamoDB.createTable(instance, CONFIG.table_name, {
@@ -115,6 +119,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Return a service error if the driver call failed
       if (result.success === false) {
         _Store.logDriverFailure('setupNewStore', result.error);
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb setupNewStore - ' + CONFIG.table_name, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -126,6 +131,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         type: 'SETUP_COMPLETE',
         already_exists: result.already_exists
       });
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb setupNewStore - ' + CONFIG.table_name, start_ms);
 
       return {
         success: true,
@@ -148,6 +154,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (instance, record) {
+
+      // Start performance timeline
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Compose the sort key from raw fields
       const sort_key = _Store.composeSortKey(
@@ -175,11 +184,14 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Return service error on failure
       if (result && result.success === false) {
         _Store.logDriverFailure('writeRecord', result.error);
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb writeRecord - ' + record.tenant_id + '/' + record.resource_id, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb writeRecord - ' + record.tenant_id + '/' + record.resource_id, start_ms);
 
       return {
         success: true,
@@ -205,6 +217,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
+      // Start performance timeline
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // The delimiter suffix pins the match to this exact resource, excluding
       // sibling resources that merely share its prefix.
       const result = await _Store.runPrefixQuery(
@@ -216,6 +231,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Return service error on failure
       if (result && result.success === false) {
         _Store.logDriverFailure('queryByResourceId', result.error);
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceId - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: false,
           records: null,
@@ -225,6 +241,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Reconstruct records from DynamoDB items
       const records = (result.items || []).map(_Store.itemToRecord);
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceId - ' + tenant_id + '/' + resource_id, start_ms);
 
       return {
         success: true,
@@ -249,6 +267,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
+      // Start performance timeline
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // The caller-supplied prefix is matched verbatim against the sort key,
       // so it spans every resource_id beginning with it.
       const result = await _Store.runPrefixQuery(
@@ -260,6 +281,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Return service error on failure
       if (result && result.success === false) {
         _Store.logDriverFailure('queryByResourceIdPrefix', result.error);
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceIdPrefix - ' + tenant_id + '/' + resource_id_prefix, start_ms);
         return {
           success: false,
           records: null,
@@ -269,6 +291,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Reconstruct records from DynamoDB items
       const records = (result.items || []).map(_Store.itemToRecord);
+
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb queryByResourceIdPrefix - ' + tenant_id + '/' + resource_id_prefix, start_ms);
 
       return {
         success: true,
@@ -299,6 +323,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
+      // Start performance timeline
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
       // Step 1: Query for all records for this tenant + resource
       const query_result = await _Store.runPrefixQuery(
         instance,
@@ -309,6 +336,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Return service error on query failure
       if (query_result && query_result.success === false) {
         _Store.logDriverFailure('deleteByDataVersionLte query', query_result.error);
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -328,6 +356,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Short-circuit if nothing to delete
       if (keys_to_delete.length === 0) {
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: true,
           error: null
@@ -346,6 +375,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       // Return service error on delete failure
       if (delete_result && delete_result.success === false) {
         _Store.logDriverFailure('deleteByDataVersionLte batchDelete', delete_result.error);
+        Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
@@ -358,6 +388,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         resource_id: resource_id,
         boundary: data_version_boundary
       });
+      Lib.Debug.performanceAuditLog('End', 'DistinctQueue dynamodb deleteByDataVersionLte - ' + tenant_id + '/' + resource_id, start_ms);
 
       return {
         success: true,
@@ -367,11 +398,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     }
 
 
-  };//////////////////////////// Public Functions END //////////////////////////
+  };//////////////////////////// Public Functions END ///////////////////////////
 
 
 
-  ///////////////////////////// Private Functions START ////////////////////////
+  //////////////////////////// Private Functions START ///////////////////////////
   const _Store = {
 
     // ~~~~~~~~~~~~~~~~~~~~ Key Composition & Parsing ~~~~~~~~~~~~~~~~~~~~
@@ -500,8 +531,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     }
 
 
-  };/////////////////////////// Private Functions END //////////////////////////
+  };//////////////////////////// Private Functions END //////////////////////////
 
   return Store;
 
-};///////////////////////////// createInterface END ////////////////////////////
+};/////////////////////////// createInterface END //////////////////////////////

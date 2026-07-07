@@ -1,4 +1,4 @@
-# Local Testing Setup — DynamoDB Adapter
+# Local Testing Setup - DynamoDB Adapter
 
 ## Prerequisites
 
@@ -15,9 +15,9 @@ npm test
 ```
 
 The `npm test` command handles everything:
-1. `pretest` — Starts DynamoDB Local via Docker Compose (port 8000)
-2. `test` — Runs the test suite against the local DynamoDB instance
-3. `posttest` — Stops and removes the Docker containers
+1. `pretest` - Starts DynamoDB Local via Docker Compose (port 8000)
+2. `test` - Runs the test suite against the local DynamoDB instance
+3. `posttest` - Stops and removes the Docker containers
 
 ## Manual Docker Management
 
