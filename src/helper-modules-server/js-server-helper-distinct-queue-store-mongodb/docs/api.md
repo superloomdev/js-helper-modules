@@ -135,9 +135,3 @@ All methods return an envelope shape. On driver failure:
 | `SERVICE_UNAVAILABLE` | `DISTINCT_QUEUE_MONGODB_SERVICE_UNAVAILABLE` | MongoDB backend unavailable |
 
 ---
-
-## Performance Logging
-
-All 4 contract methods (`writeRecord`, `queryByResourceId`, `queryByResourceIdPrefix`, `deleteByDataVersionLte`) emit a `Lib.Debug.performanceAuditLog('End', ...)` call with a local `start_ms` captured at operation entry. The audit log is emitted on both success and error exit paths.
-
-`setupNewStore` is a no-op (no external service call) and does not emit a performance audit log.
