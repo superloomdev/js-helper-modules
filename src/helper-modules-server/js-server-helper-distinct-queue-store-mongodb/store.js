@@ -30,30 +30,24 @@ own Lib, CONFIG, ERRORS, and Validators. Validates CONFIG at construction so
 misconfiguration fails fast at startup, not on first request.
 
 @param {Object} shared_libs - Lib container with Utils, Debug, MongoDB
-@param {Object} config      - Store config (standalone) or parent CONFIG with STORE_CONFIG (parent call)
+@param {Object} config      - Overrides merged over adapter config defaults
 
 @return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
-  // When called by the parent module, config is the parent's full CONFIG
-  // and the store-specific config is in config.STORE_CONFIG.
-  // When called standalone, config is the store config directly.
-  const store_config = (config && config.STORE_CONFIG) ? config.STORE_CONFIG : (config || {});
-
   // Dependencies for this instance
-  // MongoDB driver: from STORE_CONFIG.lib_mongodb (parent call) or shared_libs.MongoDB (standalone)
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
-    MongoDB: store_config.lib_mongodb || shared_libs.MongoDB
+    MongoDB: shared_libs.MongoDB
   };
 
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
     require('./store.config'),
-    store_config
+    config || {}
   );
 
   // Load internal error catalog

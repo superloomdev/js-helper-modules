@@ -22,20 +22,18 @@ Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// Load distinct-queue with the store factory and its config
+// Load the MongoDB store adapter
+Lib.DistinctQueueStore = require('helper-distinct-queue-store-mongodb')(Lib, {
+  collection_name: 'queue_jobs'
+});
+
+// Load distinct-queue with the ready-to-use store object
 Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
-  STORE: require('helper-distinct-queue-store-mongodb'),
-  STORE_CONFIG: {
-    collection_name: 'queue_jobs',
-    lib_mongodb: Lib.MongoDB
-  }
+  Store: Lib.DistinctQueueStore
 });
 
 // Optional: idempotent collection setup (run once at first deploy)
-const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'queue_jobs'
-});
-await Store.setupNewStore(Lib.Instance.initialize());
+await Lib.DistinctQueueStore.setupNewStore(Lib.Instance.initialize());
 ```
 
 ## Configuration
