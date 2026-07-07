@@ -284,6 +284,22 @@ until **two consecutive full passes find zero new deviations.** Only then procee
    entry and pass it as the third argument to a single `'End'` call; delete the `'Start'`/`'Init-Start'`
    line. Then manually confirm every remaining call's third argument is a local start capture, not a
    timestamp created on the same line (the grep cannot see that variant).
+   Performance-audit ownership (see code-formatting-js.md "Performance Logging" and migration-pitfalls
+   "Duplicate audit lines from layered performance logging"). Each timed interval is logged exactly
+   once, by the layer that owns the work. List every call site:
+   // turbo
+   ```bash
+   git grep -n "performanceAuditLog" -- '[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_test/*'
+   ```
+   If the module IS a service-boundary driver (`nosql-*`, `sql-*`, `queue-*`, `storage-*`, `http`):
+   built-in instrumentation is part of its contract - confirm every I/O method and the
+   client/connection initialization each emit exactly one `'End'` call.
+   If the module is NOT a driver (store adapter, composite/parent module, core utility): judge each
+   hit. DELETE any call that times a delegated call into another helper - the callee's built-in
+   instrumentation already logs that interval - and remove its now-unused local `start_ms` capture.
+   KEEP a call only if it measures the module's OWN substantial in-process work (batch analysis,
+   heavy transformation, algorithm phase) and its routine names that work, not the delegated call.
+   Expected outcome for store adapters and thin composite wrappers: zero calls.
    // turbo
    ```bash
    git grep -n "docs/" -- '[module-path]/**/*.js' ':!*/node_modules/*'
