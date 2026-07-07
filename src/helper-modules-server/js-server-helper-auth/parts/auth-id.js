@@ -302,7 +302,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         !Lib.Utils.isString(value) ||
         Lib.Utils.isEmptyString(value)
       ) {
-        throw new TypeError('[js-server-helper-auth] ' + name + ' must be a non-empty string');
+        throw new TypeError('[helper-auth] ' + name + ' must be a non-empty string');
       }
 
     },
@@ -322,7 +322,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Throw if the value contains the '-' wire-format separator
       if (value.indexOf('-') !== -1) {
-        throw new TypeError('[js-server-helper-auth] ' + name + ' must not contain "-" (reserved as auth_id separator)');
+        throw new TypeError('[helper-auth] ' + name + ' must not contain "-" (reserved as auth_id separator)');
       }
 
       // Also check for the '#' composite-key separator
@@ -346,7 +346,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Throw if the value contains the '#' composite-key separator
       if (value.indexOf('#') !== -1) {
-        throw new TypeError('[js-server-helper-auth] ' + name + ' must not contain "#" (reserved as composite key separator)');
+        throw new TypeError('[helper-auth] ' + name + ' must not contain "#" (reserved as composite key separator)');
       }
 
     }

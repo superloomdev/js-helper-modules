@@ -85,7 +85,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       }
 
-      // Priority 3: Cookie — read from the pre-parsed cookies map on instance.http_request
+      // Priority 3: Cookie - read from the pre-parsed cookies map on instance.http_request
       if (
         !Lib.Utils.isNullOrUndefined(options.cookie_prefix) &&
         !Lib.Utils.isNullOrUndefined(options.tenant_id)

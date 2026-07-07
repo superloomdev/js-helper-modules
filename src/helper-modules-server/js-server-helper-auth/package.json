@@ -36,6 +36,6 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "node --test _test/test.js"
+    "test": "node --test _test/test.js _test/test-jwt.js"
   }
 }

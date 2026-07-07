@@ -1,4 +1,4 @@
-// Info: Pure-helper tests for js-server-helper-auth. Exercises every
+// Info: Pure-helper tests for helper-auth. Exercises every
 // stateless part (auth-id, record-shape, cookie, token-source, policy)
 // directly via its factory + a small set of loader-validation cases
 // using the in-process memory store (no DB driver required).
@@ -181,7 +181,7 @@ describe('config absorption contract', function () {
   });
 
   // OVERRIDE WINS: a negative TTL overrides the default 2592000 and fails
-  // validation — proves the override reached the effective CONFIG.
+  // validation - proves the override reached the effective CONFIG.
   it('absorbs an override that changes the validation outcome', function () {
     assert.throws(function () {
       AuthFactory(Lib, Object.assign(validBaseConfig(), { TTL_SECONDS: -1 }));
@@ -198,7 +198,7 @@ describe('config absorption contract', function () {
   });
 
   // SHALLOW MERGE (intentional): a partial JWT object replaces the whole
-  // default JWT object, so access_token_ttl_seconds is missing → throws.
+  // default JWT object, so access_token_ttl_seconds is missing -> throws.
   it('replaces nested objects wholesale (shallow merge is intentional)', function () {
     assert.throws(function () {
       AuthFactory(Lib, Object.assign(validBaseConfig(), {
@@ -417,7 +417,7 @@ describe('parts/token-source', function () {
 
 
 // ============================================================================
-// SESSION LIFECYCLE — cookie descriptor (uses in-process memory store)
+// SESSION LIFECYCLE - cookie descriptor (uses in-process memory store)
 // ============================================================================
 
 describe('createSession / removeSession cookie descriptor', function () {
@@ -708,7 +708,7 @@ describe('parts/policy', function () {
 
 
 // ============================================================================
-// WIRE-FORMAT VALIDATION — actor_id / tenant_id separator constraints (plan 0042)
+// WIRE-FORMAT VALIDATION - actor_id / tenant_id separator constraints (plan 0042)
 // ============================================================================
 
 describe('createSession wire-format validation (plan 0042)', function () {
@@ -797,7 +797,7 @@ describe('createSession wire-format validation (plan 0042)', function () {
     const auth = AuthFactory(Lib, valid_base_config);
     const instance = buildInstance(1000);
 
-    // Attempt createSession with a bad actor_id — must throw
+    // Attempt createSession with a bad actor_id - must throw
     await assert.rejects(
       auth.createSession(instance, {
         tenant_id: 'T', actor_id: 'orphan-test',

@@ -60,7 +60,6 @@ function createMemoryStore () {
     ******************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
-      void instance;
       const key = makeKey(tenant_id, actor_id, token_key);
       const record = _map.get(key);
 
@@ -82,7 +81,6 @@ function createMemoryStore () {
     ******************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
-      void instance;
       const records = [];
 
       for (const record of _map.values()) {
@@ -103,7 +101,6 @@ function createMemoryStore () {
     ******************************************************************/
     setSession: async function (instance, record) {
 
-      void instance;
       const key = makeKey(record.tenant_id, record.actor_id, record.token_key);
       const existing = _map.get(key);
 
@@ -131,8 +128,6 @@ function createMemoryStore () {
     Identity / key fields are blocked.
     ******************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
-
-      void instance;
 
       const IDENTITY_BLOCKLIST = [
         'tenant_id', 'actor_id', 'actor_type', 'token_key', 'token_secret_hash',
@@ -165,7 +160,6 @@ function createMemoryStore () {
     ******************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
-      void instance;
       _map.delete(makeKey(tenant_id, actor_id, token_key));
       return { success: true, error: null };
 
@@ -177,8 +171,6 @@ function createMemoryStore () {
     { actor_id, token_key } objects.
     ******************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
-
-      void instance;
 
       for (const k of keys) {
         _map.delete(makeKey(tenant_id, k.actor_id, k.token_key));

@@ -1,4 +1,4 @@
-// Info: JWT-mode tests for js-server-helper-auth.
+// Info: JWT-mode tests for helper-auth.
 // JWT logic is store-agnostic. We back these tests with the in-process
 // memory store (no DB driver required). The few code paths that need a
 // real store (chiefly refreshSessionJwt) work correctly with it.

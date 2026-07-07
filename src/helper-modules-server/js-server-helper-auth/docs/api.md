@@ -1,4 +1,4 @@
-# API Reference. `js-server-helper-auth`
+# API Reference. `helper-auth`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical session-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend config shape see each adapter package's own README.
 
@@ -20,7 +20,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 | Pattern | Behaviour |
 |---|---|
-| **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` for timestamps, calls `Lib.Debug.performanceAuditLog` against `instance.time_ms` on every store call, and (for cookie-driven flows) reads `instance.http_request.cookies` (already parsed by the HTTP gateway) |
+| **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` for timestamps, logs store failures through `Lib.Debug.debug`, and (for cookie-driven flows) reads `instance.http_request.cookies` (already parsed by the HTTP gateway) |
 | **Never throws on operational failures** | HTTP errors, store driver failures, expired tokens, malformed tokens, cap rejections, and mismatched actor types all return `{ success: false, error }`. The only thrown errors are `TypeError`s on **programmer** mistakes (missing required option, reserved characters in `actor_id`, identity-field mutation) which surface in development |
 | **`success` is the discriminator** | Branch once on `result.success`. On success, read the named fields (`session`, `auth_id`, `access_token`, etc.). On failure, read `result.error.type` and `result.error.message` |
 | **One instance per `actor_type`** | The Auth instance is bound to the `ACTOR_TYPE` it was constructed with. Sessions stored under another `actor_type` are rejected by `verifySession` with `ACTOR_TYPE_MISMATCH` even when the token is otherwise valid |
@@ -36,7 +36,7 @@ Every async function resolves to an object with this shape (named fields vary by
 |---|---|---|
 | `success` | `boolean` | `true` on success. `false` on any operational failure |
 | `error` | `object \| null` | `{ type, message }` on failure. `null` on success. See [Error Catalog](#error-catalog) |
-| `session` | `object` | Canonical session record (on success, where applicable). See [Data Model → Record Fields](data-model.md#record-fields) |
+| `session` | `object` | Canonical session record (on success, where applicable). See [Data Model - Record Fields](data-model.md#record-fields) |
 | `auth_id` | `string` | Wire-format token (on `createSession`). See [Pure Helpers](#pure-helpers) |
 | `sessions` | `array` | Array of canonical records (on list functions) |
 | `count` | `number` | Count (on `countSessions`) |
@@ -52,7 +52,7 @@ Every async function resolves to an object with this shape (named fields vary by
 
 ### `createSession(instance, options)` *(async)*
 
-Validates options, runs the limit policy (list-then-filter), batch-deletes evicted sessions, and inserts the new session record. Returns a cookie descriptor in `cookies` when `COOKIE_PREFIX` is configured — pass it to `Lib.HttpGateway.returnHttpResponse`. In JWT mode also mints and returns the access and refresh tokens.
+Validates options, runs the limit policy (list-then-filter), batch-deletes evicted sessions, and inserts the new session record. Returns a cookie descriptor in `cookies` when `COOKIE_PREFIX` is configured - pass it to `Lib.HttpGateway.returnHttpResponse`. In JWT mode also mints and returns the access and refresh tokens.
 
 | Option | Type | Required | Description |
 |---|---|---|---|
@@ -85,7 +85,7 @@ Extracts the token from `Authorization: Bearer` header or the cookie, looks up t
 | `tenant_id` | `string` | Yes | Must match the session record |
 | `auth_id` | `string` | No | Override the token source. When supplied, the module verifies this token directly instead of reading the request |
 
-Token-source priority (when `auth_id` is not supplied): `Authorization: Bearer <token>` header → cookie named `${COOKIE_PREFIX}${tenant_id}`.
+Token-source priority (when `auth_id` is not supplied): `Authorization: Bearer <token>` header -> cookie named `${COOKIE_PREFIX}${tenant_id}`.
 
 **Side effect.** On success, sets `instance.session` to the canonical record so downstream code can use it without another lookup. The throttled `last_active_at` refresh runs as a background routine on `Lib.Instance` so it does not block the response.
 
@@ -205,9 +205,9 @@ Returns every active session for the actor that has both `push_provider` and `pu
 
 Idempotent schema setup for SQL backends. Issues `CREATE TABLE IF NOT EXISTS` plus a `CREATE INDEX IF NOT EXISTS` on `expires_at`. Safe to call on every boot.
 
-NoSQL backends (`auth-store-mongodb`, `auth-store-dynamodb`) do **not** implement this method. Calling it throws `TypeError`. Provision the collection or table and any required secondary indexes or native TTL out-of-band via IaC or a one-shot script.
+The shipped NoSQL adapters (`auth-store-mongodb`, `auth-store-dynamodb`) implement this method as a no-op that returns `{ success: false, error: AUTH_NOT_IMPLEMENTED }`. Their collection or table and any secondary indexes or native TTL are provisioned out-of-band via IaC or a one-shot script. A custom store that omits the method entirely trips the parent's call-time capability gate and throws `TypeError`.
 
-**Returns** `{ success, error }`.
+**Returns** `{ success, error }`. On the shipped NoSQL adapters the `error` is `AUTH_NOT_IMPLEMENTED`.
 
 ### `cleanupExpiredSessions(instance)` *(async)*
 
@@ -243,7 +243,7 @@ Inverse of `createAuthId`. Returns `{ actor_id, token_key, token_secret }` on a 
 
 ## JWT-Mode Functions
 
-These functions are inert in DB mode. They become available when `CONFIG.ENABLE_JWT: true`. See [Configuration → JWT mode](configuration.md#jwt-mode) for the required keys.
+These functions are inert in DB mode. They become available when `CONFIG.ENABLE_JWT: true`. See [Configuration - JWT mode](configuration.md#jwt-mode) for the required keys.
 
 ### `verifyJwt(instance, options)` *(sync)*
 
@@ -293,6 +293,6 @@ All operational errors are frozen objects from `auth.errors.js` with shape `{ ty
 | `AUTH_INVALID_TOKEN` | `verifySession`, `verifyJwt`, `refreshSessionJwt` | Malformed token, wrong secret, missing row, or replayed refresh token |
 | `AUTH_SESSION_EXPIRED` | `verifySession`, `verifyJwt`, `refreshSessionJwt` | `expires_at` is in the past |
 | `AUTH_ACTOR_TYPE_MISMATCH` | `verifySession`, `verifyJwt` | Stored `actor_type` does not match `CONFIG.ACTOR_TYPE` |
-| `NOT_IMPLEMENTED` | `setupNewStore` on NoSQL backends | The operation has no meaning on this backend; provision the schema out-of-band |
+| `AUTH_NOT_IMPLEMENTED` | `setupNewStore` on NoSQL backends | The operation has no meaning on this backend; provision the schema out-of-band |
 
 > **Programmer errors throw.** Invalid `Store` config at loader time, mutation of identity fields, and reserved characters in `actor_id` throw `TypeError` immediately. The catalog above only covers operational failures.

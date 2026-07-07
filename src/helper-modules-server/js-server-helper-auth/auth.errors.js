@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Error catalog for js-server-helper-auth.
+ * Error catalog for helper-auth.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
@@ -34,7 +34,7 @@ module.exports = Object.freeze({
   }),
 
   NOT_IMPLEMENTED: Object.freeze({
-    type: 'NOT_IMPLEMENTED',
+    type: 'AUTH_NOT_IMPLEMENTED',
     message: 'This operation is not yet implemented for this backend'
   })
 

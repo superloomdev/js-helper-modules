@@ -1,4 +1,4 @@
-# Configuration. `js-server-helper-auth`
+# Configuration. `helper-auth`
 
 Loader pattern, every configuration key, the per-backend store config shape, peer dependencies, and the testing tier. For the function reference see [API Reference](api.md). For backend selection criteria see the [Storage Adapters](../README.md#storage-adapters) section in the module README.
 
@@ -21,8 +21,8 @@ Loader pattern, every configuration key, the per-backend store config shape, pee
 The module is a factory. Each `require(...)(Lib, config)` call returns an independent public interface bound to one `actor_type`, one store, and one configuration. Two simultaneous instances (e.g. one for `user` sessions and one for `admin` sessions) share no state.
 
 ```javascript
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
-  Store:        require('@superloomdev/js-server-helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
+Lib.AuthUser = require('helper-auth')(Lib, {
+  Store:        require('helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
   LIMITS:       { total_max: 20, evict_oldest_on_limit: true },
@@ -32,7 +32,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 Loader call semantics:
 
-- **First argument: `Lib`.** A container exposing peer modules. Auth reads `Lib.Utils` (type checks, validation), `Lib.Debug` (logging, performance audit), `Lib.Crypto` (token generation, SHA-256 hashing), `Lib.Instance` (request lifecycle, `instance.time`), and `Lib.HttpGateway` (cookie descriptor building). The chosen store adapter is a fully independent module that builds its own `Lib` internally — auth does not inject dependencies into it.
+- **First argument: `Lib`.** A container exposing peer modules. Auth reads `Lib.Utils` (type checks, validation), `Lib.Debug` (logging), `Lib.Crypto` (token generation, SHA-256 hashing), `Lib.Instance` (request lifecycle, `instance.time`), and `Lib.HttpGateway` (cookie descriptor building). The chosen store adapter is a fully independent module that builds its own `Lib` internally - auth does not inject dependencies into it.
 - **Second argument: config overrides.** Merged on top of `auth.config.js` defaults. Required keys (`Store`, `ACTOR_TYPE`) throw `TypeError` at loader time when absent. JWT-required keys (`JWT.signing_key`, `JWT.issuer`, `JWT.audience`) throw at loader time when `ENABLE_JWT: true` and they are still `null`.
 - **One instance per `actor_type`.** Calling the loader twice with the same `ACTOR_TYPE` and a different `TTL_SECONDS` is allowed but rarely useful. The common pattern is one loader call per actor type, each bound to a different store instance.
 
@@ -52,7 +52,7 @@ All keys are merged over `auth.config.js` defaults. Keys with a `null` default a
 
 | Key | Type | Default | Required | Description |
 |---|---|---|---|---|
-| `Store` | `object` | `null` | Yes | A ready-to-use store object from the chosen adapter. Call the adapter with its config: `require('@superloomdev/js-server-helper-auth-store-*')({...})`. The value must be a plain object with the required store methods |
+| `Store` | `object` | `null` | Yes | A ready-to-use store object from the chosen adapter. Call the adapter with its config: `require('helper-auth-store-*')({...})`. The value must be a plain object with the required store methods |
 | `ACTOR_TYPE` | `string` | `null` | Yes | Non-empty string naming the kind of actor (`'user'`, `'admin'`, `'merchant'`, ...). Stamped on every record and verified on every read |
 | `TTL_SECONDS` | `number` | `2592000` (30 days) | No | Session lifetime in seconds. `expires_at` rolls forward by `TTL_SECONDS` on each throttled activity refresh |
 | `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | `number` | `600` (10 min) | No | Minimum gap between `last_active_at` write-backs. Prevents one DB write per request on busy actors |
@@ -78,7 +78,7 @@ Each adapter is a fully independent module that validates its own config interna
 Example: Postgres
 
 ```javascript
-Store: require('@superloomdev/js-server-helper-auth-store-postgres')({
+Store: require('helper-auth-store-postgres')({
   table_name: 'sessions_user',
   lib_sql:    Lib.Postgres
 })
@@ -87,7 +87,7 @@ Store: require('@superloomdev/js-server-helper-auth-store-postgres')({
 Example: MongoDB
 
 ```javascript
-Store: require('@superloomdev/js-server-helper-auth-store-mongodb')({
+Store: require('helper-auth-store-mongodb')({
   collection_name: 'sessions_user',
   lib_mongodb:     Lib.MongoDB
 })
@@ -109,7 +109,7 @@ Enable with `ENABLE_JWT: true`. When enabled, `createSession` additionally retur
 | `refresh_token_ttl_seconds` | `number` | `2592000` (30 days) | No | Refresh token lifetime. Also drives `expires_at` on the session record in JWT mode |
 | `rotate_refresh_token` | `boolean` | `true` | No | Rotate the refresh token on every `refreshSessionJwt` call. RFC 6819 best practice |
 
-**Revocation latency.** Access tokens remain valid until `JWT.access_token_ttl_seconds` elapses after logout. This is inherent to stateless JWTs. Reduce `access_token_ttl_seconds` to tighten the window. Set `ENABLE_JWT: false` to eliminate it entirely.
+**Revocation latency.** Access tokens remain valid until `JWT.access_token_ttl_seconds` elapses after logout. This is inherent to stateless JWTs. A lower `access_token_ttl_seconds` tightens the window; `ENABLE_JWT: false` eliminates it entirely.
 
 **Refresh token replay protection.** When `rotate_refresh_token: true` (the default), the stored `refresh_token_hash` is rotated on every refresh. A second use of an already-rotated token returns `INVALID_TOKEN`. The optional `refresh_family_id` is reserved for future token-family replay detection.
 
@@ -150,19 +150,19 @@ The auth module itself reads no environment variables. All configuration flows t
 
 | Package | Purpose |
 |---|---|
-| `@superloomdev/js-helper-utils` | Type checks, validation, sanitization (`Lib.Utils`) |
-| `@superloomdev/js-helper-debug` | Structured logging, performance audit (`Lib.Debug`) |
-| `@superloomdev/js-server-helper-crypto` | Token generation (UUID, random hex strings), SHA-256 hashing, HMAC for JWT (`Lib.Crypto`) |
-| `@superloomdev/js-server-helper-instance` | Per-request lifecycle, `instance.time`, background routines (`Lib.Instance`) |
-| `@superloomdev/js-server-helper-http-gateway` | Cookie descriptor building via `buildCookie`. Serialization into `Set-Cookie` headers happens at the gateway boundary, not inside auth (`Lib.HttpGateway`) |
+| `helper-utils` | Type checks, validation, sanitization (`Lib.Utils`) |
+| `helper-debug` | Structured logging (`Lib.Debug`) |
+| `helper-crypto` | Token generation (UUID, random hex strings), SHA-256 hashing, HMAC for JWT (`Lib.Crypto`) |
+| `helper-instance` | Per-request lifecycle, `instance.time`, background routines (`Lib.Instance`) |
+| `helper-http-gateway` | Cookie descriptor building via `buildCookie`. Serialization into `Set-Cookie` headers happens at the gateway boundary, not inside auth (`Lib.HttpGateway`) |
 
-The chosen storage adapter package brings its own peer dependency on the relevant database driver helper (`js-server-helper-sql-postgres`, `js-server-helper-nosql-mongodb`, `js-server-helper-nosql-aws-dynamodb`, ...).
+The chosen storage adapter package brings its own peer dependency on the relevant database driver helper (`sql-postgres`, `nosql-mongodb`, `nosql-aws-dynamodb`, ...).
 
 ---
 
 ## Direct Dependencies
 
-None. The module's `package.json` declares no `dependencies`. JWT signing and verification use Node's built-in `crypto` module (consumed indirectly via `Lib.Crypto`). The supply chain you audit ends at this package and its five peers plus the chosen adapter.
+None. The module's `package.json` declares no `dependencies`. JWT signing and verification use Node's built-in `crypto` module (consumed indirectly via `Lib.Crypto`). The audited supply chain ends at this package and its five peers plus the chosen adapter.
 
 ---
 
@@ -188,6 +188,6 @@ Coverage:
 
 **Shared store contract suite.** `_test/store-contract-suite.js` contains the end-to-end coverage that every adapter runs against its real backend. It is **not exported** from the auth package. Each adapter ships its own copy as a local file in its own `_test/` directory. The copy acts as a snapshot of the exact contract shape the adapter was built against, making version-compatibility audits straightforward.
 
-Integration tests for each storage backend live in the corresponding adapter package (`js-server-helper-auth-store-*`). Those packages have their own `docker-compose.yml` (where needed) and run real network round-trips against PostgreSQL, MySQL, MongoDB, DynamoDB Local, or in-process SQLite.
+Integration tests for each storage backend live in the corresponding adapter package (`helper-auth-store-*`). Those packages have their own `docker-compose.yml` (where needed) and run real network round-trips against PostgreSQL, MySQL, MongoDB, DynamoDB Local, or in-process SQLite.
 
 For the framework-wide testing architecture see [Module Testing](https://github.com/superloomdev/superloom/blob/main/docs/testing/module-testing.md).

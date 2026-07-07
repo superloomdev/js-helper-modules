@@ -1,4 +1,4 @@
-# Runtime. `js-server-helper-auth`
+# Runtime. `helper-auth`
 
 The auth module is runtime-agnostic at the call-site: every function takes `instance` as its first argument and reads from / writes to `instance.http_request` and `instance.http_response`. What differs between a **persistent server** (Express, Fastify, Koa, plain Node HTTP, ...) and a **serverless function** (AWS Lambda, Google Cloud Functions, Azure Functions, ...) is how those two objects are constructed from the runtime's native event shape and how the response gets back out.
 
@@ -69,7 +69,7 @@ Build the `Lib` container at **module scope** so it survives between warm invoca
 
 ## Scheduled Cleanup
 
-Whether `cleanupExpiredSessions(instance)` needs to be scheduled depends on the chosen storage adapter (some adapters' native TTL makes the cron optional). See your adapter's README for whether scheduling is required.
+Whether `cleanupExpiredSessions(instance)` needs to be scheduled depends on the chosen storage adapter (some adapters' native TTL makes the cron optional). See the chosen adapter's README for whether scheduling is required.
 
 When it is required, the call is identical in both runtimes:
 
