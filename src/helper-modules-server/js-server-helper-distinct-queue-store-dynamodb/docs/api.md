@@ -91,6 +91,3 @@ All methods return `{ success, error }` shape. On driver failure:
 - Logs via `Lib.Debug.debug` with driver error details
 - Returns `ERRORS.SERVICE_UNAVAILABLE` from the adapter's own error catalog (`store.errors.js`)
 
-## Performance Logging
-
-Every method captures a local `start_ms` at entry and emits one `Lib.Debug.performanceAuditLog('End', ...)` call after the operation completes, on both success and error paths.
