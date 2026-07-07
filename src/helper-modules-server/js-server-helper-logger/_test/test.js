@@ -1,4 +1,4 @@
-// Info: Unit-level tests for js-server-helper-logger. Uses inline factory
+// Info: Unit-level tests for helper-logger. Uses inline factory
 // functions so each test owns isolated state and no external service is
 // required.
 //

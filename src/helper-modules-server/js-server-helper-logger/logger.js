@@ -60,8 +60,8 @@ module.exports = function loader (shared_libs, config) {
   // Internal error catalog (frozen)
   const ERRORS = require('./logger.errors');
 
-  // Load validators singleton
-  const Validators = require('./logger.validators')(Lib);
+  // Load validators singleton - Lib and ERRORS injected per the universal companion rule
+  const Validators = require('./logger.validators')(Lib, ERRORS);
 
   // Validate the config shape so misconfiguration fails at boot
   Validators.validateConfig(CONFIG);
@@ -69,6 +69,7 @@ module.exports = function loader (shared_libs, config) {
   // Receive the ready-to-use store object - already constructed by the adapter
   const store = CONFIG.Store;
 
+  // Build the public interface, closing over Lib, CONFIG, ERRORS, Validators, and store
   return createInterface(Lib, CONFIG, ERRORS, Validators, store);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
@@ -90,7 +91,7 @@ Builds the public interface for one instance.
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
-  ////////////////////////////// Public Functions START //////////////////////////
+  ////////////////////////////Public Functions START//////////////////////////////
   const Logger = {
 
 
@@ -157,10 +158,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
             action: record.action,
             error: write_result.error
           });
-          return { success: false, error: ERRORS.SERVICE_UNAVAILABLE };
+          return {
+            success: false,
+            error: ERRORS.SERVICE_UNAVAILABLE
+          };
         }
 
-        return { success: true, error: null };
+        return {
+          success: true,
+          error: null
+        };
 
       }
 
@@ -187,7 +194,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           completeBackgroundRoutine();
         });
 
-      return { success: true, error: null };
+      return {
+        success: true,
+        error: null
+      };
 
     },
 
@@ -246,6 +256,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     Same return shape as listByEntity. See listByEntity for the options
     contract - `actor_type` / `actor_id` replace entity_* on this side.
+
+    @param {Object} instance - Request instance
+    @param {Object} options - Query options (see listByEntity)
+
+    @return {Promise<Object>} - `{ success, records, next_cursor, error }`
     *********************************************************************/
     listByActor: async function (instance, options) {
 
@@ -292,7 +307,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     cleanupExpiredLogs: async function (instance) {
 
       if (!Lib.Utils.isFunction(store.cleanupExpiredLogs)) {
-        return { success: true, deleted_count: 0, error: null };
+        return {
+          success: true,
+          deleted_count: 0,
+          error: null
+        };
       }
 
       const result = await store.cleanupExpiredLogs(instance);
@@ -318,11 +337,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     IF NOT EXISTS + indexes on (entity_pk) / (actor_pk) / (expires_at).
     MongoDB: TTL index on `_ttl` + compound indexes on the two query
     paths. DynamoDB: CreateTable with the GSI for actor queries.
+
+    @param {Object} instance - Request instance
+
+    @return {Promise<Object>} - `{ success, error }`
     *********************************************************************/
     setupNewStore: async function (instance) {
 
       if (!Lib.Utils.isFunction(store.setupNewStore)) {
-        return { success: true, error: null };
+        return {
+          success: true,
+          error: null
+        };
       }
 
       return await store.setupNewStore(instance);
@@ -330,11 +356,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     }
 
 
-  };////////////////////////////// Public Functions END ////////////////////////
+  };//////////////////////////////Public Functions END//////////////////////////////
 
 
 
-  ///////////////////////////// Private Helpers START //////////////////////////
+  //////////////////////////Private Functions START//////////////////////////////
   const _Logger = {
 
 
@@ -396,19 +422,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       const sort_key = created_at_ms + '-' + Lib.Crypto.generateRandomString('abcdefghijklmnopqrstuvwxyz', 3);
 
       return {
-        scope:         options.scope || '',
-        entity_type:   options.entity_type,
-        entity_id:     options.entity_id,
-        actor_type:    options.actor_type,
-        actor_id:      options.actor_id,
-        action:        options.action,
-        data:          options.data || null,
-        ip:            Lib.Utils.isNullOrUndefined(ip) ? null : ip,
-        user_agent:    Lib.Utils.isNullOrUndefined(user_agent) ? null : user_agent,
-        created_at:    created_at,
+        scope: options.scope || '',
+        entity_type: options.entity_type,
+        entity_id: options.entity_id,
+        actor_type: options.actor_type,
+        actor_id: options.actor_id,
+        action: options.action,
+        data: options.data || null,
+        ip: Lib.Utils.isNullOrUndefined(ip) ? null : ip,
+        user_agent: Lib.Utils.isNullOrUndefined(user_agent) ? null : user_agent,
+        created_at: created_at,
         created_at_ms: created_at_ms,
-        sort_key:      sort_key,
-        expires_at:    expires_at
+        sort_key: sort_key,
+        expires_at: expires_at
       };
 
     },
@@ -421,16 +447,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     buildQuery: function (options) {
 
       return {
-        scope:          options.scope || '',
-        entity_type:    options.entity_type || null,
-        entity_id:      options.entity_id || null,
-        actor_type:     options.actor_type || null,
-        actor_id:       options.actor_id || null,
-        actions:        options.actions || null,
-        start_time_ms:  Lib.Utils.isNullOrUndefined(options.start_time_ms) ? null : options.start_time_ms,
-        end_time_ms:    Lib.Utils.isNullOrUndefined(options.end_time_ms) ? null : options.end_time_ms,
-        cursor:         options.cursor || null,
-        limit:          options.limit || 50
+        scope: options.scope || '',
+        entity_type: options.entity_type || null,
+        entity_id: options.entity_id || null,
+        actor_type: options.actor_type || null,
+        actor_id: options.actor_id || null,
+        actions: options.actions || null,
+        start_time_ms: Lib.Utils.isNullOrUndefined(options.start_time_ms) ? null : options.start_time_ms,
+        end_time_ms: Lib.Utils.isNullOrUndefined(options.end_time_ms) ? null : options.end_time_ms,
+        cursor: options.cursor || null,
+        limit: options.limit || 50
       };
 
     },
@@ -462,7 +488,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     }
 
 
-  };////////////////////////////// Private Helpers END /////////////////////////
+  };/////////////////////////////Private Functions END////////////////////////////
 
 
   return Logger;

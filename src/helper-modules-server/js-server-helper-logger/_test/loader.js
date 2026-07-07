@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-logger.
+// Info: Test loader for helper-logger.
 // Mirrors the main project loader pattern. The logger module under test is
 // NOT loaded here - tests construct it per-case with their own STORE adapter
 // so each test owns isolated state.

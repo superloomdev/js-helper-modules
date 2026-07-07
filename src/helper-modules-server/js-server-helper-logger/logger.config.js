@@ -1,4 +1,4 @@
-// Info: Configuration defaults for js-server-helper-logger.
+// Info: Configuration defaults for helper-logger.
 // Most fields are required at construction time and validated by the loader.
 // Keys with a default of `null` mean "must be supplied by the project" -
 // the loader throws if they are still null.
@@ -7,14 +7,9 @@
 
 module.exports = {
 
-  // Ready-to-use store object. Construct the chosen adapter first, then pass
-  // the result here.
-  //   Store: require('@superloomdev/js-server-helper-logger-store-sqlite')({ table_name, lib_sql })
-  //   Store: require('@superloomdev/js-server-helper-logger-store-postgres')({ table_name, lib_sql })
-  //   Store: require('@superloomdev/js-server-helper-logger-store-mysql')({ table_name, lib_sql })
-  //   Store: require('@superloomdev/js-server-helper-logger-store-mongodb')({ collection_name, lib_mongodb })
-  //   Store: require('@superloomdev/js-server-helper-logger-store-dynamodb')({ table_name, lib_dynamodb })
-  // Required.
+  // Ready-to-use store object from the chosen adapter package, constructed
+  // with its own config before being passed here. Validated at construction.
+  // Required. Per-backend wiring: docs/configuration.md.
   Store: null,
 
   // Optional symmetric key for IP-address encryption at rest. When set,

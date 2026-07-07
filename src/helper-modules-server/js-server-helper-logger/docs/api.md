@@ -1,6 +1,6 @@
-# API Reference. `js-server-helper-logger`
+# API Reference. `helper-logger`
 
-Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the canonical log-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend config key shape see each adapter package's own README.
+Every exported function on the public interface, with parameters, return shape, and notes. For loader semantics and configuration keys see [Configuration](configuration.md). For the validated input contracts and the store contract see [Schemas](schemas.md). For the canonical log-record shape and per-field design rationale see [Data Model](data-model.md). For backend selection see the [Storage Adapters](../README.md#storage-adapters) section in the module README; for per-backend config key shape see each adapter package's own README.
 
 ## On This Page
 
@@ -21,7 +21,7 @@ Every exported function on the public interface, with parameters, return shape, 
 | **Programmer errors throw `TypeError` synchronously** | Missing required option, wrong type, or invalid `retention` shape throw `TypeError` at the call-site. These are mistakes that should be caught in development, never at runtime |
 | **Operational errors return `{ success: false, error }`** | Store failures (adapter unavailable, network error, write rejection) come back through the response envelope. The auth-style "branch on `success`" pattern applies |
 | **Background writes never surface store errors** | The default `log()` call is fire-and-forget. Adapter failures are logged via `Lib.Debug.debug` but the caller's `Promise` resolves immediately with `{ success: true }`. To see write failures, pass `options.await: true` |
-| **One Logger instance per backend** | The factory binds one `Store` adapter at construction time. Run multiple instances in parallel if you genuinely want to write to multiple backends (rare; usually one suffices) |
+| **One Logger instance per backend** | The factory binds one `Store` adapter at construction time. Multiple instances run in parallel when a deployment genuinely needs to write to multiple backends (rare; usually one suffices) |
 
 ---
 
@@ -53,7 +53,7 @@ Validates options, builds the canonical record, auto-captures `ip` and `user_age
 | `actor_type` | `string` | Yes | What kind of agent triggered the event (`'user'`, `'admin'`, `'system'`, `'webhook'`, ...) |
 | `actor_id` | `string` | Yes | The specific agent |
 | `action` | `string` | Yes | Dot-notation event name (`'auth.login'`, `'profile.name.changed'`). Application-owned namespace |
-| `data` | `object \| null` | No | Free-form JSON payload. Opaque to the logger. Do not store secrets, full card numbers, raw passwords, or large blobs here |
+| `data` | `object \| null` | No | Free-form JSON payload. Opaque to the logger. Secrets, full card numbers, raw passwords, and large blobs do not belong here |
 | `ip` | `string \| null` | No | Request origin IP. Auto-captured from `instance.http_request` when `Lib.HttpHandler` is in the `Lib` container. AES-encrypted at rest when `CONFIG.IP_ENCRYPT_KEY` is set |
 | `user_agent` | `string \| null` | No | HTTP `User-Agent`. Same auto-capture pattern as `ip` |
 | `retention` | `'persistent' \| { ttl_seconds: positive_integer }` | Yes | Per-row retention. `'persistent'` writes `expires_at = null` (never deleted). `{ ttl_seconds: N }` writes `expires_at = created_at + N` |
@@ -128,13 +128,13 @@ List events performed by one actor, most-recent first. Same shape, same paginati
 
 ### `setupNewStore(instance)` *(async)*
 
-Idempotent backend setup. The actual work depends on the chosen storage adapter. SQL adapters typically run `CREATE TABLE IF NOT EXISTS` plus index DDL. The memory adapter is a no-op. NoSQL adapters may provision indexes or rely on out-of-band IaC. See your adapter's README for the exact behaviour.
+Idempotent backend setup. The actual work depends on the chosen storage adapter. SQL adapters typically run `CREATE TABLE IF NOT EXISTS` plus index DDL. The memory adapter is a no-op. NoSQL adapters may provision indexes or rely on out-of-band IaC. See the chosen adapter's README for the exact behaviour.
 
 **Return shape.** `{ success, error }`.
 
 ### `cleanupExpiredLogs(instance)` *(async)*
 
-Bulk-delete rows whose `expires_at` is in the past. Rows with `expires_at = null` (persistent) are never touched. Some adapters' native TTL handles expiry automatically; in those cases this function is the explicit fallback and is safe to call even when nothing needs deleting. See your adapter's README for whether scheduling is required.
+Bulk-delete rows whose `expires_at` is in the past. Rows with `expires_at = null` (persistent) are never touched. Some adapters' native TTL handles expiry automatically; in those cases this function is the explicit fallback and is safe to call even when nothing needs deleting. See the chosen adapter's README for whether scheduling is required.
 
 **Return shape.** `{ success, deleted_count, error }`.
 
@@ -148,7 +148,7 @@ The logger module exports exactly one operational error type. Programmer errors 
 |---|---|---|
 | `LOGGER_SERVICE_UNAVAILABLE` | The chosen storage adapter returned `{ success: false }` from `addLog`, `getLogsByEntity`, `getLogsByActor`, or `cleanupExpiredLogs` | `log(..., { await: true })`, `listByEntity`, `listByActor`, `cleanupExpiredLogs` |
 
-Background `log()` calls do not surface `LOGGER_SERVICE_UNAVAILABLE`. Adapter failures during background writes are logged through `Lib.Debug.debug` and the caller's `Promise` still resolves with `{ success: true }`. If you need the write to be guaranteed durable before responding to the user (password change, GDPR deletion request, financial event), pass `options.await: true`.
+Background `log()` calls do not surface `LOGGER_SERVICE_UNAVAILABLE`. Adapter failures during background writes are logged through `Lib.Debug.debug` and the caller's `Promise` still resolves with `{ success: true }`. A write that must be durable before responding to the user (password change, GDPR deletion request, financial event) requires `options.await: true`.
 
 Error shape is frozen at construction time:
 

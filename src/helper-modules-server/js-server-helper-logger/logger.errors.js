@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Error catalog for js-server-helper-logger.
+ * Error catalog for helper-logger.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */

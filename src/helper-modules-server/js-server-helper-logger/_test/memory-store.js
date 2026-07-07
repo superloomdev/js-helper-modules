@@ -97,9 +97,9 @@ module.exports = function createMemoryStore () {
   /******************************************************************
   Clean up expired records based on expires_at timestamp.
   ******************************************************************/
-  const cleanupExpiredLogs = async function (_instance) {
+  const cleanupExpiredLogs = async function (instance) {
 
-    const now = Date.now();
+    const now = instance.time;
     let deleted_count = 0;
 
     for (let i = _records.length - 1; i >= 0; i--) {

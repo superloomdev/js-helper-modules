@@ -1,10 +1,10 @@
-# ROBOTS.md. `js-server-helper-logger`
+# ROBOTS.md. `helper-logger`
 
 Compact, AI-targeted reference for the public interface. Humans should read `README.md` and `docs/`.
 
 ## Module Overview
 
-Compliance-friendly action log. One immutable row per log-worthy event recording `actor_type` / `actor_id`, `entity_type` / `entity_id`, dot-notation `action`, structured per-action `data`, optional `ip` / `user_agent`. Storage backends are fully-independent adapter packages (`@superloomdev/js-server-helper-logger-store-*`); the caller constructs the chosen adapter first and passes the ready-to-use store object as `CONFIG.Store`. Background-by-default writes via `Lib.Instance.backgroundRoutine`; per-row retention (`'persistent'` or `{ ttl_seconds: N }`); optional AES IP encryption at rest.
+Compliance-friendly action log. One immutable row per log-worthy event recording `actor_type` / `actor_id`, `entity_type` / `entity_id`, dot-notation `action`, structured per-action `data`, optional `ip` / `user_agent`. Storage backends are fully-independent adapter packages (`helper-logger-store-*`); the caller constructs the chosen adapter first and passes the ready-to-use store object as `CONFIG.Store`. Background-by-default writes via `Lib.Instance.backgroundRoutine`; per-row retention (`'persistent'` or `{ ttl_seconds: N }`); optional AES IP encryption at rest.
 
 ## Factory Pattern
 
@@ -20,12 +20,12 @@ module.exports = function loader (shared_libs, config) {
 `CONFIG.Store` is a **ready-to-use store object**, constructed by the adapter before being passed in. The adapter is a fully independent module that owns its own Lib, Config, and ERRORS.
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-postgres')({
+const Store = require('helper-logger-store-postgres')({
   table_name: 'action_log',
   lib_sql:    Lib.Postgres
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+Lib.Logger = require('helper-logger')(Lib, {
   Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY    // optional
 });
@@ -84,7 +84,7 @@ Idempotent backend setup. Behaviour varies by adapter: SQL creates table + index
 
 | Key | Type | Required | Notes |
 |---|---|---|---|
-| `Store` | object | Yes | Ready-to-use store object. Construct the adapter first: `require('@superloomdev/js-server-helper-logger-store-<backend>')({ ... })` |
+| `Store` | object | Yes | Ready-to-use store object. Construct the adapter first: `require('helper-logger-store-<backend>')({ ... })` |
 | `IP_ENCRYPT_KEY` | string \| null | No | When set, AES-encrypts `ip` at rest via `Lib.Crypto.aesEncrypt` |
 
 ## Error Catalog
@@ -105,33 +105,35 @@ Error shape is frozen at module load: `{ type: 'LOGGER_SERVICE_UNAVAILABLE', mes
    - Auto-capture `ip` / `user_agent` from `instance.http_request` when `Lib.HttpHandler` is in `Lib` and the option was not provided.
    - AES-encrypt `ip` under `CONFIG.IP_ENCRYPT_KEY` if configured.
 3. If `options.await === true`: `await store.addLog(...)`. Map adapter failure to `LOGGER_SERVICE_UNAVAILABLE`.
-4. Otherwise: register `Lib.Instance.backgroundRoutine(instance, () => store.addLog(...))`. Return `{ success: true }` immediately. Adapter failures during background writes are logged via `Lib.Debug.debug` and never surface to the caller.
+4. Otherwise: register `Lib.Instance.backgroundRoutine(instance)` to get a completion callback, then chain `store.addLog(...)` with `.then()/.catch()/.finally()`. Return `{ success: true }` immediately. Adapter failures during background writes are logged via `Lib.Debug.debug` and never surface to the caller.
 
 ## Critical Behaviour for Code-Generating Tools
 
-- **`instance` is always the first argument.** Every function reads `instance.time` and routes timing through `Lib.Debug.performanceAuditLog`.
+- **`instance` is always the first argument.** Every function reads `instance.time` and `instance.time_ms` for timestamps.
 - **`Store` is a ready-to-use object, not a factory.** The adapter is constructed before passing it in. The loader throws on missing or non-object.
 - **Background writes never surface store errors.** Use `await: true` for compliance writes that must be durable before responding.
 - **Programmer errors throw, operational errors return.** Type errors and missing required options throw `TypeError`; store failures return `{ success: false, error }`.
 - **One Logger instance per backend.** The factory binds one adapter at construction time; instances are independent.
 - **Sort-key collisions are statistically impossible.** Millisecond timestamp + 3 random alpha characters per row. The `sort_key` doubles as `_id` in MongoDB and the range key in DynamoDB, making `addLog` idempotent on duplicate delivery.
+- **The store contract is not checked at construction.** Hot-path methods (`addLog`, `getLogsByEntity`, `getLogsByActor`) throw `TypeError` if a custom store omits them; `setupNewStore` and `cleanupExpiredLogs` are optional and become a no-op returning `{ success: true }` when absent. See `docs/schemas.md`.
 
 ## Peer Dependencies
 
 | `Lib.*` | Source | Used for |
 |---|---|---|
-| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks |
-| `Lib.Debug` | `@superloomdev/js-helper-debug` | `performanceAuditLog`, `debug` for background-write diagnostics |
-| `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | `generateRandomString` (sort-key randomisation), `aesEncrypt` / `aesDecrypt` (IP encryption) |
-| `Lib.Instance` | `@superloomdev/js-server-helper-instance` | `backgroundRoutine` for non-blocking `log()` writes |
-| `Lib.HttpHandler` *(optional)* | `@superloomdev/js-server-helper-http` | `getHttpRequestIPAddress`, `getHttpRequestUserAgent` for auto-capture |
+| `Lib.Utils` | `helper-utils` | Type checks |
+| `Lib.Debug` | `helper-debug` | `debug` for background-write diagnostics |
+| `Lib.Crypto` | `helper-crypto` | `generateRandomString` (sort-key randomization), `aesEncrypt` / `aesDecrypt` (IP encryption) |
+| `Lib.Instance` | `helper-instance` | `backgroundRoutine` for non-blocking `log()` writes |
+| `Lib.HttpHandler` *(optional)* | `helper-http` | `getHttpRequestIPAddress`, `getHttpRequestUserAgent` for auto-capture |
 
 The store adapter (`CONFIG.Store`) is a fully independent module. It owns its own Lib (including the DB driver), Config, and ERRORS. The logger module never imports database drivers directly.
 
 ## Documentation
 
 - `docs/api.md`. Full API reference (every function, every option, every error type)
+- `docs/schemas.md`. Validated contracts (CONFIG, log options, list options), the five-method store contract, throw-vs-return, response envelope
 - `docs/configuration.md`. Loader pattern, every config key, peer dependencies, testing tier
 - `docs/data-model.md`. Canonical record shape, core concepts, design decisions
 - `docs/runtime.md`. The runtime-shape differences for the logger (background-write lifecycle in serverless, scheduled cleanup mechanism). Not a framework cookbook
-- Storage adapters: see the README's "Storage Adapters" section for the list + selection rule. Per-backend schema, indexes, TTL, IaC notes, and config key shape live in each adapter package's own README (`@superloomdev/js-server-helper-logger-store-*`)
+- Storage adapters: see the README's "Storage Adapters" section for the list + selection rule. Per-backend schema, indexes, TTL, IaC notes, and config key shape live in each adapter package's own README (`helper-logger-store-*`)
