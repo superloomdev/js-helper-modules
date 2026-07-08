@@ -1,13 +1,12 @@
-# Configuration — js-server-helper-logger-store-mysql
+# Configuration - helper-logger-store-mysql
 
 ## Construction Pattern
 
-This adapter is fully independent — it owns its own Lib and ERRORS. Construct it before the Logger parent and pass it as `CONFIG.Store`.
+Construct this adapter before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-mysql')({
-  table_name: 'action_log',
-  lib_sql:    Lib.MySQL
+const Store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, {
+  table_name: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -21,19 +20,18 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the log table. Must not contain a backtick. |
-| `lib_sql` | `Object` | Yes | An initialized `Lib.MySQL` instance (`@superloomdev/js-server-helper-sql-mysql`). |
 
 ## Dependencies
 
-| Package | Scope | Purpose |
-|---------|-------|---------||
-| `@superloomdev/js-helper-utils` | Owned | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Owned | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-mysql` | Peer (via `config.lib_sql`) | MySQL driver wrapper |
+| Package | Type | Purpose |
+|---------|------|----------|
+| `helper-utils` | Injected via `shared_libs.Utils` | Type checks |
+| `helper-debug` | Injected via `shared_libs.Debug` | Structured debug logging |
+| `helper-sql-mysql` | Injected via `shared_libs.SQL` | MySQL driver wrapper |
 
 ## Environment Variables
 
-Consumed only by `_test/loader.js` — never read by the adapter itself.
+Consumed only by `_test/loader.js` - never read by the adapter itself.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -50,7 +48,7 @@ Consumed only by `_test/loader.js` — never read by the adapter itself.
 | Contract + Integration | MySQL via Docker Compose | `pretest`/`posttest` manage the Docker lifecycle |
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test
 ```
 
 The `pretest` script runs `docker compose down -v` then `docker compose up -d --wait`. Never start Docker manually before running tests.

@@ -1,9 +1,9 @@
-// Info: MySQL store adapter for js-server-helper-logger. Fully self-contained -
-// every DDL statement, INSERT template, query builder, value coercion,
-// and identifier-quoting rule in this file is specific to MySQL.
+// Info: MySQL store adapter for helper-logger. Every DDL statement,
+// INSERT template, query builder, value coercion, and identifier-quoting
+// rule in this file is specific to MySQL.
 //
-// The caller passes a ready-to-use MySQL helper via config.lib_sql
-// (typically Lib.MySQL). This adapter never requires `mysql2` directly.
+// Standard factory shape: receives shared_libs, picks SQL driver as
+// Lib.SQL (generic SQL key - hot-swappable across sql-* dialect helpers).
 //
 // MySQL-specific quirks handled here:
 //   - Identifiers are backtick-quoted (`col`).
@@ -26,24 +26,41 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Builds own Lib and ERRORS, validates config via the
-Validators singleton, then delegates to createInterface.
+Loader. Picks dependencies from the injected shared_libs container,
+merges config over defaults, validates, then delegates to createInterface.
 
-@param {Object} config - { table_name, lib_sql }
+@param {Object} shared_libs - Injected Lib container (Utils, Debug, SQL)
+@param {Object} config      - { table_name }
 
 @return {Object} - Store interface (5 methods)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  const Lib = {};
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    SQL: shared_libs.SQL
+  };
 
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
+
+  // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  const Validators = require('./store.validators')(Lib);
-  Validators.validateConfig(config);
-  return createInterface(Lib, config, ERRORS);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
+
+  // Validate config - throws on misconfiguration
+  Validators.validateConfig(CONFIG);
+
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -52,13 +69,14 @@ module.exports = function loader (config) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} config - { table_name, lib_sql }
-@param {Object} ERRORS - Adapter-owned error catalog
+@param {Object} Lib        - Dependency container (Utils, Debug, SQL)
+@param {Object} CONFIG     - Merged adapter config
+@param {Object} ERRORS     - Adapter-owned error catalog
+@param {Object} Validators - Validator singleton (unused at interface level)
 
 @return {Object} - Store interface (5 methods)
 *********************************************************************/
-function createInterface (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
 
   ////////////////////////////// Public Functions START ////////////////////////
@@ -76,7 +94,7 @@ function createInterface (Lib, config, ERRORS) {
 
       // MySQL has no CREATE INDEX IF NOT EXISTS, so all indexes are inlined
       // into CREATE TABLE. A single idempotent statement handles both.
-      const result = await config.lib_sql.write(instance, _Store.buildCreateTableSQL(), []);
+      const result = await Lib.SQL.write(instance, _Store.buildCreateTableSQL(), []);
       if (result.success === false) {
         Lib.Debug.error('logger-store-mysql setupNewStore: CREATE TABLE failed', { error: result.error });
         return { success: false, error: ERRORS.SERVICE_UNAVAILABLE };
@@ -100,7 +118,7 @@ function createInterface (Lib, config, ERRORS) {
       const sql = _Store.buildInsertSQL();
       const values = _Store.recordToRow(record);
 
-      const result = await config.lib_sql.write(instance, sql, values);
+      const result = await Lib.SQL.write(instance, sql, values);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-mysql addLog: write failed', { error: result.error });
@@ -123,7 +141,7 @@ function createInterface (Lib, config, ERRORS) {
     getLogsByEntity: async function (instance, query) {
 
       const { sql, values } = _Store.buildEntityQuery(query);
-      const result = await config.lib_sql.getRows(instance, sql, values);
+      const result = await Lib.SQL.getRows(instance, sql, values);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-mysql getLogsByEntity: read failed', { error: result.error });
@@ -156,7 +174,7 @@ function createInterface (Lib, config, ERRORS) {
     getLogsByActor: async function (instance, query) {
 
       const { sql, values } = _Store.buildActorQuery(query);
-      const result = await config.lib_sql.getRows(instance, sql, values);
+      const result = await Lib.SQL.getRows(instance, sql, values);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-mysql getLogsByActor: read failed', { error: result.error });
@@ -189,12 +207,12 @@ function createInterface (Lib, config, ERRORS) {
 
       const now_sec = Lib.Utils.getUnixTime();
       const sql = (
-        'DELETE FROM ' + _Store.Q(config.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('expires_at') + ' IS NOT NULL' +
         '   AND ' + _Store.Q('expires_at') + ' <= ?'
       );
 
-      const result = await config.lib_sql.write(instance, sql, [now_sec]);
+      const result = await Lib.SQL.write(instance, sql, [now_sec]);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-mysql cleanupExpiredLogs: delete failed', { error: result.error });
@@ -239,7 +257,7 @@ function createInterface (Lib, config, ERRORS) {
     Q: function (name) {
 
       if (name.indexOf('`') !== -1) {
-        throw new Error('[js-server-helper-logger-store-mysql] identifier contains backtick: ' + name);
+        throw new Error('[helper-logger-store-mysql] identifier contains backtick: ' + name);
       }
 
       return '`' + name + '`';
@@ -255,8 +273,8 @@ function createInterface (Lib, config, ERRORS) {
     buildCreateTableSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
-      const tn = config.table_name;
+      const t = Q(CONFIG.table_name);
+      const tn = CONFIG.table_name;
 
       // All indexes are inlined because MySQL does not support CREATE INDEX IF NOT EXISTS.
       // Inlining makes the single CREATE TABLE IF NOT EXISTS statement fully idempotent.
@@ -295,7 +313,7 @@ function createInterface (Lib, config, ERRORS) {
 
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const cols = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';
@@ -321,7 +339,7 @@ function createInterface (Lib, config, ERRORS) {
     buildEntityQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 
@@ -362,7 +380,7 @@ function createInterface (Lib, config, ERRORS) {
     buildActorQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 
@@ -440,9 +458,9 @@ function createInterface (Lib, config, ERRORS) {
     }
 
 
-  };////////////////////////////// Private Helpers END /////////////////////////
+  };////////////////////////////// Private Functions END ///////////////////////
 
 
   return Store;
 
-}////////////////////////////// createInterface END ////////////////////////////
+};//////////////////////////// createInterface END ////////////////////////////

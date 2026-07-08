@@ -1,4 +1,4 @@
-# Schema — js-server-helper-logger-store-mysql
+# Schema - helper-logger-store-mysql
 
 ## DDL
 
@@ -68,8 +68,8 @@ JSON-serialized TEXT. Parsed back on read. `null` for no payload.
 
 ### Index Strategy
 
-- **`idx_<table>_entity_sort`** — compound `(scope, entity_type, entity_id, sort_key)` covering `getLogsByEntity` + cursor pagination (`sort_key < ?` then `ORDER BY sort_key DESC`).
-- **`idx_<table>_actor_sort`** — compound `(scope, actor_type, actor_id, sort_key)` covering `getLogsByActor` + cursor pagination.
-- **`idx_<table>_expires_at`** — single column covering `cleanupExpiredLogs`. MySQL indexes `NULL` values, unlike SQLite's partial index; the `IS NOT NULL` filter in the query WHERE clause is evaluated after the index scan.
+- **`idx_<table>_entity_sort`** - compound `(scope, entity_type, entity_id, sort_key)` covering `getLogsByEntity` + cursor pagination (`sort_key < ?` then `ORDER BY sort_key DESC`).
+- **`idx_<table>_actor_sort`** - compound `(scope, actor_type, actor_id, sort_key)` covering `getLogsByActor` + cursor pagination.
+- **`idx_<table>_expires_at`** - single column covering `cleanupExpiredLogs`. MySQL indexes `NULL` values, unlike SQLite's partial index; the `IS NOT NULL` filter in the query WHERE clause is evaluated after the index scan.
 
-Index names follow the pattern `idx_{table_name}_{suffix}`, computed deterministically from `STORE_CONFIG.table_name`.
+Index names follow the pattern `idx_{table_name}_{suffix}`, computed deterministically from `config.table_name`.

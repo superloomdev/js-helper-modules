@@ -1,4 +1,4 @@
-// Info: Frozen error catalog for js-server-helper-logger-store-mysql.
+// Info: Frozen error catalog for helper-logger-store-mysql.
 // Every error object is frozen so callers cannot mutate them.
 'use strict';
 
