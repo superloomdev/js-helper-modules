@@ -1,11 +1,10 @@
-# Configuration — js-server-helper-verify-store-postgres
+# Configuration - helper-verify-store-postgres
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
-  table_name: 'verification_codes',
-  lib_postgresql: Lib.Postgres
+const Store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, {
+  table_name: 'verification_codes'
 });
 
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
@@ -18,19 +17,18 @@ Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the verification table. Must not contain a double-quote. |
-| `lib_postgresql` | `Object` | Yes | An initialized `Lib.Postgres` instance (`@superloomdev/js-server-helper-sql-postgres`). |
 
 ## Dependencies
 
 | Package | Type | Purpose |
 |---------|------|---------|
-| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-postgres` | Peer | Postgres driver wrapper (`Lib.Postgres`) |
+| `helper-utils` | Injected via `shared_libs.Utils` | Type checks |
+| `helper-debug` | Injected via `shared_libs.Debug` | Structured debug logging |
+| `helper-sql-postgres` | Injected via `shared_libs.SQL` | Postgres driver wrapper |
 
 ## Environment Variables
 
-Consumed only by `_test/loader.js` — never read by the adapter itself.
+Consumed only by `_test/loader.js` - never read by the adapter itself.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -47,7 +45,7 @@ Consumed only by `_test/loader.js` — never read by the adapter itself.
 | Contract + Integration | PostgreSQL via Docker | `pretest`/`posttest` manage the Docker lifecycle |
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test  # run from _test/
 ```
 
 The `pretest` script runs `docker compose down -v` then `docker compose up -d --wait`. Never start Docker manually before running tests.

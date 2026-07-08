@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-verify-store-postgres.
+// Info: Test loader for helper-verify-store-postgres.
 // Builds the Lib container and a minimal ERRORS stub so both Tier 1
 // (adapter unit tests, no verify.js) and Tier 3 (full verify lifecycle
 // via the store contract suite) can share the same runtime objects.
@@ -47,7 +47,8 @@ module.exports = function loader () {
 
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.Postgres = require('helper-sql-postgres')(Lib, config_postgres);
+  Lib.SQL = require('helper-sql-postgres')(Lib, config_postgres);
+  Lib.Postgres = Lib.SQL;
 
 
   // ==================== MINIMAL ERRORS CATALOG ===================== //

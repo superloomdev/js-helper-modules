@@ -1,4 +1,4 @@
-# Schema — js-server-helper-verify-store-postgres
+# Schema - helper-verify-store-postgres
 
 ## DDL
 
@@ -19,7 +19,7 @@ CREATE INDEX IF NOT EXISTS "verification_codes_expires_at_idx"
   ON "verification_codes" ("expires_at");
 ```
 
-The table name and index name are derived from `STORE_CONFIG.table_name` at runtime.
+The table name and index name are derived from `CONFIG.table_name` at runtime.
 
 ## Column Mapping
 
@@ -65,4 +65,4 @@ A single index on `expires_at` supports the `cleanupExpiredRecords` range scan. 
 
 ## Index Name
 
-The index name is `{table_name}_expires_at_idx`, computed deterministically from `STORE_CONFIG.table_name` at `createInterface` time.
+The index name is `{table_name}_expires_at_idx`, computed deterministically from `CONFIG.table_name` at `createInterface` time.
