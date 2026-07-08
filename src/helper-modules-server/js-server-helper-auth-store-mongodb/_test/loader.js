@@ -1,7 +1,7 @@
-// Info: Test loader for js-server-helper-auth-store-mongodb.
-// Builds the Lib container and a minimal ERRORS stub so both Tier 1
-// (adapter unit tests, no auth.js) and Tier 3 (full auth lifecycle
-// via the store contract suite) can share the same runtime objects.
+// Info: Test loader for helper-auth-store-mongodb.
+// Builds the Lib container so both Tier 1 (adapter unit tests, no auth.js)
+// and Tier 3 (full auth lifecycle via the store contract suite) can share
+// the same runtime objects.
 //
 // MongoDB connection settings are read exclusively from environment
 // variables here - test.js never reads process.env directly.
@@ -9,13 +9,12 @@
 
 
 /********************************************************************
-Build the dependency container and a minimal ERRORS catalog.
+Build the dependency container.
 
 process.env is ONLY read here - never in test.js.
 
 @return {Object} result
 @return {Object} result.Lib    - { Utils, Debug, Crypto, Instance, MongoDB }
-@return {Object} result.ERRORS - Minimal error catalog (SERVICE_UNAVAILABLE only)
 *********************************************************************/
 module.exports = function loader () {
 
@@ -54,23 +53,6 @@ module.exports = function loader () {
   Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
 
 
-  // ==================== MINIMAL ERRORS CATALOG ===================== //
-
-  // Tier 1 tests call the store loader directly (no auth.js). The
-  // store requires SERVICE_UNAVAILABLE and NOT_IMPLEMENTED from ERRORS.
-  // Tier 3 tests load auth.js which supplies its own full ERRORS catalog internally.
-  const ERRORS = {
-    SERVICE_UNAVAILABLE: {
-      type: 'SERVICE_UNAVAILABLE',
-      message: 'Service unavailable'
-    },
-    NOT_IMPLEMENTED: {
-      type: 'NOT_IMPLEMENTED',
-      message: 'This operation is not yet implemented for this backend'
-    }
-  };
-
-
-  return { Lib: Lib, ERRORS: ERRORS };
+  return { Lib: Lib };
 
 };

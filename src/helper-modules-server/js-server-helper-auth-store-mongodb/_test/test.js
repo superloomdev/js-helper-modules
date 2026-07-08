@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-auth-store-mongodb.
+// Info: Three-tier test suite for helper-auth-store-mongodb.
 //
 // Tier 1 - Adapter unit tests (no auth.js dependency):
 //   - Store loader rejects bad config
@@ -45,9 +45,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (collection) {
 
-  return AuthStoreMongoDBFactory({
-    collection_name: collection || TEST_COLLECTION,
-    lib_mongodb:     Lib.MongoDB
+  return AuthStoreMongoDBFactory(Lib, {
+    collection_name: collection || TEST_COLLECTION
   });
 
 };
@@ -91,30 +90,29 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when collection_name is empty string', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when collection_name is missing', function () {
-
-    assert.throws(
-      function () { AuthStoreMongoDBFactory({ lib_mongodb: Lib.MongoDB }); },
+      function () { AuthStoreMongoDBFactory(Lib, { collection_name: '' }); },
       /collection_name is required/
     );
 
   });
 
-  it('throws when lib_mongodb is missing', function () {
+  it('throws when collection_name is null', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory({ collection_name: 'x' }); },
-      /lib_mongodb is required/
+      function () { AuthStoreMongoDBFactory(Lib, { collection_name: null }); },
+      /collection_name is required/
     );
+
+  });
+
+  it('returns a store object when config is valid', function () {
+
+    const store = AuthStoreMongoDBFactory(Lib, { collection_name: 'valid_col' });
+    assert.ok(store);
+    assert.ok(typeof store.setupNewStore === 'function');
 
   });
 
@@ -129,7 +127,7 @@ describe('Tier 1: setupNewStore returns NOT_IMPLEMENTED', function () {
     const result = await store.setupNewStore(buildInstance(0));
 
     assert.equal(result.success, false);
-    assert.equal(result.error.type, 'NOT_IMPLEMENTED');
+    assert.equal(result.error.type, 'AUTH_STORE_MONGODB_NOT_IMPLEMENTED');
     assert.ok(result.error.message.includes('not yet implemented'));
 
   });
@@ -434,7 +432,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    Store:     AuthStoreMongoDBFactory({ collection_name: TEST_COLLECTION, lib_mongodb: Lib.MongoDB }),
+    Store:     AuthStoreMongoDBFactory(Lib, { collection_name: TEST_COLLECTION }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,
