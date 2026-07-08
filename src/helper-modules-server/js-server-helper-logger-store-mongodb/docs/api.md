@@ -1,11 +1,13 @@
-# API Reference — js-server-helper-logger-store-mongodb
+# API Reference - helper-logger-store-mongodb
 
-This adapter implements the 5-method store contract consumed by `js-server-helper-logger`. This document focuses on the MongoDB-specific semantics.
+This adapter implements the 5-method store contract consumed by `helper-logger`. This document focuses on the MongoDB-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
+  collection_name: 'action_log'
+});
 ```
 
 ## Store Contract
@@ -111,4 +113,4 @@ Returns `deleted_count` from the driver's `deletedCount`.
 
 ## Error Handling
 
-All methods return `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` on driver failure. The underlying error is logged via `Lib.Debug.error`.
+All methods return `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` on driver failure. The underlying error is logged via `Lib.Debug.debug`.

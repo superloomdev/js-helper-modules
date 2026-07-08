@@ -1,4 +1,4 @@
-// Info: MongoDB store adapter for js-server-helper-logger. Uses sort_key as
+// Info: MongoDB store adapter for helper-logger. Uses sort_key as
 // the document `_id` (guaranteed unique per log event). Two compound indexes
 // serve the two query paths:
 //   - entity_idx: (scope, entity_type, entity_id, sort_key DESC)
@@ -8,8 +8,8 @@
 // (expireAfterSeconds: 0). Persistent records (expires_at: null) omit `_ttl`
 // entirely so the sparse index skips them.
 //
-// The caller passes a ready-to-use MongoDB helper via config.lib_mongodb
-// (typically Lib.MongoDB).
+// Standard factory shape: receives shared_libs, owns its own CONFIG, ERRORS,
+// and Validators. Returns a ready-to-use store object.
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                      -> { success, error }
@@ -25,32 +25,44 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Builds own Lib and ERRORS, validates config via the
-Validators singleton, then delegates to createInterface. Each call
-returns an independent Store instance with its own collection_name
-and lib_mongodb reference.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config - { collection_name, lib_mongodb }
+@param {Object} shared_libs - Dependency container (Utils, Debug, MongoDB)
+@param {Object} config - Overrides merged over adapter config defaults
+                         ({ collection_name } - plain data only)
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  // Build own Lib container from peer dependencies
-  const Lib = {};
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    MongoDB: shared_libs.MongoDB
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
 
   // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  Validators.validateConfig(config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -60,15 +72,16 @@ module.exports = function loader (config) {
 
 /********************************************************************
 Builds the public Store interface for one instance. All functions
-close over the same Lib, config, and ERRORS.
+close over the same Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} config - { collection_name, lib_mongodb }
-@param {Object} ERRORS - Adapter-owned error catalog
+@param {Object} Lib        - Dependency container (Utils, Debug, MongoDB)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-const createInterface = function (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -88,9 +101,9 @@ const createInterface = function (Lib, config, ERRORS) {
     setupNewStore: async function (instance) {
 
       // Entity query index: (scope, entity_type, entity_id, sort_key DESC)
-      const entity_result = await config.lib_mongodb.createIndex(
+      const entity_result = await Lib.MongoDB.createIndex(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
         { name: 'logger_entity_idx' }
       );
@@ -108,9 +121,9 @@ const createInterface = function (Lib, config, ERRORS) {
       }
 
       // Actor query index: (scope, actor_type, actor_id, sort_key DESC)
-      const actor_result = await config.lib_mongodb.createIndex(
+      const actor_result = await Lib.MongoDB.createIndex(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
         { name: 'logger_actor_idx' }
       );
@@ -129,9 +142,9 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Sparse TTL index: _ttl Date field, expireAfterSeconds: 0
       // Sparse so persistent records (no _ttl field) are never touched by the sweeper
-      const ttl_result = await config.lib_mongodb.createIndex(
+      const ttl_result = await Lib.MongoDB.createIndex(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { _ttl: 1 },
         { name: 'logger_ttl_idx', expireAfterSeconds: 0, sparse: true }
       );
@@ -174,9 +187,9 @@ const createInterface = function (Lib, config, ERRORS) {
       const document = _Store.recordToDocument(record);
 
       // Upsert by _id (sort_key) - idempotent for duplicate writes
-      const result = await config.lib_mongodb.writeRecord(
+      const result = await Lib.MongoDB.writeRecord(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { _id: record.sort_key },
         document
       );
@@ -254,9 +267,9 @@ const createInterface = function (Lib, config, ERRORS) {
       // Wall-clock time is correct for expiry checks. instance.time drives record
       // ordering but cleanup must use the real clock so TTL rows expire on schedule.
       const now = Lib.Utils.getUnixTime();
-      const result = await config.lib_mongodb.deleteRecordsByFilter(
+      const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { expires_at: { $ne: null, $lte: now } }
       );
 
@@ -344,9 +357,9 @@ const createInterface = function (Lib, config, ERRORS) {
       // Fetch limit+1 rows to detect if there is a next page
       const limit = (query.limit || 50) + 1;
 
-      const result = await config.lib_mongodb.query(
+      const result = await Lib.MongoDB.query(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         filter,
         { sort: { sort_key: -1 }, limit: limit }
       );
@@ -459,4 +472,4 @@ const createInterface = function (Lib, config, ERRORS) {
 
   return Store;
 
-};///////////////////////////// createInterface END /////////////////////////////
+};/////////////////////////// createInterface END //////////////////////////////

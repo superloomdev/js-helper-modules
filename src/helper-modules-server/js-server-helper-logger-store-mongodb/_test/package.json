@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-logger-store-mongodb-test",
-  "description": "Test suite for js-server-helper-logger-store-mongodb",
+  "name": "helper-logger-store-mongodb-test",
+  "description": "Test suite for helper-logger-store-mongodb",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,
