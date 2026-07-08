@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-verify-test",
-  "description": "Test Cases for js-server-helper-verify",
+  "name": "helper-verify-test",
+  "description": "Test Cases for helper-verify",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-verify",
-  "description": "One-time verification code lifecycle: generate, store, validate, consume. Built-in stores for sqlite / postgres / mysql / mongodb / dynamodb. Supports numeric pins, alphanumeric codes, and URL-safe magic-link tokens.",
+  "description": "One-time verification code lifecycle: generate, store, validate, consume. Pluggable storage adapters for sqlite, postgres, mysql, mongodb, and dynamodb. Supports numeric pins, alphanumeric codes, and URL-safe magic-link tokens.",
   "version": "1.0.0",
   "main": "verify.js",
   "private": false,

@@ -1,4 +1,4 @@
-# Runtime. `js-server-helper-verify`
+# Runtime. `helper-verify`
 
 The verify module is runtime-agnostic at the call-site: every function takes `instance` as its first argument and is identical in shape across persistent-server and serverless-function runtimes. There are no cookies to write, no request headers to read on the request path.
 
@@ -32,11 +32,11 @@ The expiry and `max_fail_count` guards still apply (the record is not invisible;
 2. **Frequent cleanup.** Running `cleanupExpiredRecords` on a high-frequency schedule (every few minutes via EventBridge) keeps the table sweep close to real-time.
 3. **Native TTL on the adapter.** Both MongoDB and DynamoDB adapters expose native TTL; the record disappears without requiring an explicit delete call. SQL adapters do not.
 
-The verify module does not currently expose an `await: true` option on `verify(...)` to force a synchronous delete. If your security model demands a synchronous one-time guarantee in serverless, the architectural choice is to use a native-TTL adapter and short TTLs rather than relying on the post-verify background delete.
+The verify module does not currently expose an `await: true` option on `verify(...)` to force a synchronous delete. A security model that demands a synchronous one-time guarantee in serverless uses a native-TTL adapter with short TTLs rather than relying on the post-verify background delete.
 
 ## Scheduled Cleanup
 
-Whether `cleanupExpiredRecords(instance)` needs to be scheduled depends on the chosen storage adapter (the MongoDB and DynamoDB adapters' native TTL makes the cron optional; SQL adapters require it). See your adapter's README for whether scheduling is required and the recommended cadence.
+Whether `cleanupExpiredRecords(instance)` needs to be scheduled depends on the chosen storage adapter (the MongoDB and DynamoDB adapters' native TTL makes the cron optional; SQL adapters require it). The chosen adapter's README states whether scheduling is required and the recommended cadence.
 
 When it is required, the call is identical in both runtimes:
 
