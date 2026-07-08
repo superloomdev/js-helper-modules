@@ -1,6 +1,6 @@
 # Configuration
 
-The MySQL store adapter is a fully independent module. Call it with its config to get a ready-to-use store object, then pass that object as `Store` to the Auth parent.
+The MySQL store adapter receives a `Lib` container and config to produce a ready-to-use store object, which is then passed as `Store` to the Auth parent.
 
 ## On This Page
 
@@ -21,10 +21,10 @@ Lib.MySQL = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
   PASSWORD: process.env.DB_PASSWORD,
   POOL_MAX: 10
 });
+Lib.SQL = Lib.MySQL;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-mysql')({
-  table_name: 'sessions_user',
-  lib_sql:    Lib.MySQL
+const Store = require('@superloomdev/js-server-helper-auth-store-mysql')(Lib, {
+  table_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -34,7 +34,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 });
 ```
 
-The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
+The adapter receives the `Lib` container and picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference. It defines its own `CONFIG` and `ERRORS` internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
 The connection pool is **not** created at loader time. `Lib.MySQL` lazy-initializes on the first query. The adapter does not open any connection during construction either; the first round-trip happens on `setupNewStore` or the first runtime call.
 
@@ -45,21 +45,20 @@ The connection pool is **not** created at loader time. `Lib.MySQL` lazy-initiali
 | Key | Type | Required | Description |
 |---|---|---|---|
 | `table_name` | String | Yes | Name of the sessions table. Use one table per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
-| `lib_sql` | Object | Yes | Initialized `Lib.MySQL` instance. The adapter delegates all SQL execution to this helper |
 
-The validator throws an `Error` at loader time if either key is missing, null, undefined, or (for `table_name`) the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `table_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
 `table_name` cannot contain a backtick character. The check happens lazily on first SQL build, not at config-validation time. Use lowercase, underscored identifiers (`sessions_user`, not `` `Sessions` ``).
 
 ## Peer Dependencies
 
-Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `sql-mysql` driver helper is passed in via `config.lib_sql` by the application.
+The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
-| Package | How it is used |
+| Package | Reads via `Lib` |
 |---|---|
-| `@superloomdev/js-helper-utils` | Required by adapter; used for type checks in `store.validators.js` |
-| `@superloomdev/js-helper-debug` | Required by adapter; used for driver-error logging |
-| `@superloomdev/js-server-helper-sql-mysql` | Passed in via `config.lib_sql`; the adapter delegates all SQL execution to this helper |
+| `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
+| `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
+| `@superloomdev/js-server-helper-sql-mysql` | `Lib.SQL` (set by caller as `Lib.SQL = Lib.MySQL`) |
 
 The driver helper (`Lib.MySQL`) carries its own peer dependency on `mysql2`. The adapter never `require`s `mysql2` directly; applications that never use this store never load the driver.
 
@@ -80,7 +79,7 @@ The adapter reads no environment variables at runtime. The variables below are c
 Service-dependent. The contract test suite runs against a real MySQL 8 container. The Docker lifecycle is fully automated by `npm test`:
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test
 ```
 
 `pretest` runs `docker compose down -v --remove-orphans` (defensive cleanup) then `docker compose up -d --wait` to start the MySQL 8 container on port 3307. `posttest` removes containers and volumes (the image stays cached for next time). No manual `docker compose up` step is required.
