@@ -1,11 +1,13 @@
-# API Reference — js-server-helper-verify-store-mysql
+# API Reference - helper-verify-store-mysql
 
-This adapter implements the 6-method store contract consumed by `js-server-helper-verify`. This document focuses on the MySQL-specific semantics.
+This adapter implements the 6-method store contract consumed by `helper-verify`. This document focuses on the MySQL-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-mysql')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-verify-store-mysql')(Lib, {
+  table_name: 'verification_codes'
+});
 ```
 
 ## Store Contract
@@ -23,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `verification_codes` (
   `created_at` BIGINT       NOT NULL,
   `expires_at` BIGINT       NOT NULL,
   PRIMARY KEY (`scope`, `id`),
-  INDEX `idx_verification_codes_expires_at` (`expires_at`)
+  INDEX `verification_codes_expires_at_idx` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
 
@@ -88,7 +90,7 @@ DELETE FROM `verification_codes`
 WHERE `expires_at` < ?
 ```
 
-Bound parameter is `Lib.Utils.getUnixTime()` (real wall-clock seconds). MySQL has no native TTL; schedule this on a cron.
+Bound parameter is `instance.time` (request-instance unix epoch seconds). MySQL has no native TTL; schedule this on a cron.
 
 **Return:** `{ success, deleted_count, error }`
 

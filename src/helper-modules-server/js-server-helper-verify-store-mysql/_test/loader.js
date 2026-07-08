@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-verify-store-mysql.
+// Info: Test loader for helper-verify-store-mysql.
 // Builds the Lib container and a minimal ERRORS stub so both Tier 1
 // (adapter unit tests, no verify.js) and Tier 3 (full verify lifecycle
 // via the store contract suite) can share the same runtime objects.
@@ -45,7 +45,8 @@ module.exports = function loader () {
 
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
+  Lib.SQL = require('helper-sql-mysql')(Lib, config_mysql);
+  Lib.MySQL = Lib.SQL;
 
 
   // ==================== MINIMAL ERRORS CATALOG ===================== //

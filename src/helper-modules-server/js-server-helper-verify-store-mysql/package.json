@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-verify-store-mysql",
-  "description": "MySQL store adapter for js-server-helper-verify. Implements the 6-method store contract backed by js-server-helper-sql-mysql.",
+  "description": "MySQL store adapter for helper-verify. Implements the 6-method store contract backed by helper-sql-mysql.",
   "version": "1.0.0",
   "main": "store.js",
   "private": false,
@@ -15,12 +15,8 @@
   "engines": {
     "node": ">=24"
   },
-  "dependencies": {
-    "@superloomdev/js-helper-debug": "^1.0.0",
-    "@superloomdev/js-helper-utils": "^1.0.0"
-  },
   "peerDependencies": {
-    "@superloomdev/js-server-helper-sql-mysql": ">=1.0.0"
+    "helper-sql-mysql": "npm:@superloomdev/js-server-helper-sql-mysql@^1.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
