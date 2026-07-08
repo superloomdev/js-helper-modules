@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-logger-store-mysql.
+// Info: Test loader for helper-logger-store-mysql.
 'use strict';
 
 
@@ -28,6 +28,7 @@ module.exports = function loader () {
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
   Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
+  Lib.SQL = Lib.MySQL;
 
 
   return { Lib: Lib };

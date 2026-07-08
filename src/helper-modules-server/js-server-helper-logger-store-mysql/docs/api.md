@@ -1,11 +1,11 @@
-# API Reference — js-server-helper-logger-store-mysql
+# API Reference - helper-logger-store-mysql
 
-This adapter implements the 5-method store contract consumed by `js-server-helper-logger`. This document focuses on the MySQL-specific semantics.
+This adapter implements the 5-method store contract consumed by `helper-logger`. This document focuses on the MySQL-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, { table_name: 'action_log' });
 ```
 
 ## Store Contract
@@ -52,7 +52,7 @@ VALUES (?, ?, ...)
 ON DUPLICATE KEY UPDATE `sort_key` = `sort_key`
 ```
 
-A `sort_key` collision results in a no-op update — the existing row is unchanged. `record.data` is JSON-serialized to TEXT.
+A `sort_key` collision results in a no-op update - the existing row is unchanged. `record.data` is JSON-serialized to TEXT.
 
 **Return:** `{ success, error }`
 

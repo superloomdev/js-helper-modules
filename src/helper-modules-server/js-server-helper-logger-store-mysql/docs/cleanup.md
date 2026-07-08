@@ -1,4 +1,4 @@
-# Cleanup — js-server-helper-logger-store-mysql
+# Cleanup - helper-logger-store-mysql
 
 ## No Native TTL
 
@@ -23,14 +23,14 @@ WHERE `expires_at` IS NOT NULL
   AND `expires_at` <= ?
 ```
 
-The bound parameter is `Lib.Utils.getUnixTime()` — real wall-clock seconds.
+The bound parameter is `Lib.Utils.getUnixTime()` - real wall-clock seconds.
 
 ## Cadence Guidance
 
 | Deployment | Recommended cadence |
 |------------|---------------------|
-| Production | Every 1–6 hours |
-| High-volume | Every 15–30 minutes |
+| Production | Every 1-6 hours |
+| High-volume | Every 15-30 minutes |
 | Development / test | Not critical; container restarts reset state |
 
 ## Operational Notes
