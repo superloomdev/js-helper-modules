@@ -1,15 +1,15 @@
-# @superloomdev/js-server-helper-logger-store-sqlite
+# helper-logger-store-sqlite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
 
-A SQLite-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent — construct it first with its own config, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+A SQLite-backed implementation of the [helper-logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent - construct it first with its own config, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
-A thin layer between the Logger parent module and a SQLite log table. SQLite runs in-process through Node's built-in `node:sqlite` module — no external database, no network round-trip. Well-suited for offline-first applications, single-node deployments, command-line audit trails, and ephemeral test fixtures.
+A thin layer between the Logger parent module and a SQLite log table. SQLite runs in-process through Node's built-in `node:sqlite` module - no external database, no network round-trip. Well-suited for offline-first applications, single-node deployments, command-line audit trails, and ephemeral test fixtures.
 
-It is always used together with the Logger parent and the [`js-server-helper-sql-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-sql-sqlite) driver helper.
+It is always used together with the Logger parent and the [`helper-sql-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-sql-sqlite) driver helper.
 
 ## Why Use This Module
 
@@ -27,10 +27,10 @@ It is always used together with the Logger parent and the [`js-server-helper-sql
 
 This adapter is part of the `logger-store-*` family. Every sibling implements the same store contract. Swap by changing one config value; the rest of your code keeps working.
 
-- [`@superloomdev/js-server-helper-logger-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-postgres) - PostgreSQL
-- [`@superloomdev/js-server-helper-logger-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mysql) - MySQL or MariaDB
-- [`@superloomdev/js-server-helper-logger-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mongodb) - MongoDB
-- [`@superloomdev/js-server-helper-logger-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb) - AWS DynamoDB
+- [`helper-logger-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-postgres) - PostgreSQL
+- [`helper-logger-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mysql) - MySQL or MariaDB
+- [`helper-logger-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mongodb) - MongoDB
+- [`helper-logger-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb) - AWS DynamoDB
 
 ## Aligned with Superloom Philosophy
 
@@ -49,9 +49,8 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 This adapter is installed alongside the Logger parent module and the `sql-sqlite` driver helper. Construct the store first, then pass it to the Logger:
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-sqlite')({
-  table_name: 'action_log',
-  lib_sql:    Lib.SQLite
+const Store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
+  table_name: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
@@ -61,7 +60,7 @@ Do not vendor the source or use it as a local file dependency. The published pac
 
 ## Dependencies
 
-`js-helper-utils` and `js-helper-debug` are bundled as direct dependencies. The `js-server-helper-sql-sqlite` driver helper is a peer dependency — install it alongside this package and pass it via `config.lib_sql`. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+The `helper-sql-sqlite` driver helper is a peer dependency. Inject it via `shared_libs.SQL`. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 
@@ -69,7 +68,7 @@ Do not vendor the source or use it as a local file dependency. The published pac
 |---|---|---|
 | Contract + Integration | SQLite (`:memory:`, in-process via `node:sqlite`) | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration → Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-sqlite/docs/configuration.md#testing-tier).
+Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration - Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-sqlite/docs/configuration.md#testing-tier).
 
 ## License
 

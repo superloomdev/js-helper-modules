@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-logger-store-sqlite.
+// Info: Three-tier test suite for helper-logger-store-sqlite.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
 //   - Store loader rejects bad config
@@ -48,9 +48,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return LoggerStoreSQLiteFactory({
-    table_name: table || TEST_TABLE,
-    lib_sql: Lib.SQLite
+  return LoggerStoreSQLiteFactory(Lib, {
+    table_name: table || TEST_TABLE
   });
 
 };
@@ -80,30 +79,30 @@ before(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is an empty string', function () {
 
     assert.throws(
-      function () { LoggerStoreSQLiteFactory(); },
-      /config must be an object/
+      function () { LoggerStoreSQLiteFactory(Lib, { table_name: '' }); },
+      /config.table_name is required/
     );
 
   });
 
-  it('throws when table_name is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { LoggerStoreSQLiteFactory({ lib_sql: Lib.SQLite }); },
-      /table_name is required/
+      function () { LoggerStoreSQLiteFactory(Lib, { table_name: null }); },
+      /config.table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('returns a store object when config is valid', function () {
 
-    assert.throws(
-      function () { LoggerStoreSQLiteFactory({ table_name: 'x' }); },
-      /lib_sql is required/
-    );
+    const store = LoggerStoreSQLiteFactory(Lib, { table_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.addLog, 'function');
+    assert.equal(typeof store.getLogsByEntity, 'function');
 
   });
 
@@ -117,7 +116,7 @@ describe('Tier 1: Q() identifier quoting', function () {
     assert.throws(
       function () {
         // Build a store with a bad table name to trigger Q() on it
-        LoggerStoreSQLiteFactory({ table_name: 'bad"name', lib_sql: Lib.SQLite });
+        LoggerStoreSQLiteFactory(Lib, { table_name: 'bad"name' });
       },
       Error
     );
@@ -361,9 +360,8 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  const Store = LoggerStoreSQLiteFactory({
-    table_name: TEST_TABLE,
-    lib_sql: Lib.SQLite
+  const Store = LoggerStoreSQLiteFactory(Lib, {
+    table_name: TEST_TABLE
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));

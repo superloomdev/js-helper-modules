@@ -1,8 +1,8 @@
-# Cleanup — js-server-helper-logger-store-sqlite
+# Cleanup - helper-logger-store-sqlite
 
 ## No Native TTL
 
-SQLite has no background TTL sweeper. Log records with a non-null `expires_at` remain in the table until explicitly deleted by `cleanupExpiredLogs`. Persistent records (where `expires_at IS NULL`) are never swept — they accumulate until manually deleted.
+SQLite has no background TTL sweeper. Log records with a non-null `expires_at` remain in the table until explicitly deleted by `cleanupExpiredLogs`. Persistent records (where `expires_at IS NULL`) are never swept - they accumulate until manually deleted.
 
 For file-backed deployments, schedule `cleanupExpiredLogs` on a regular cron. For `:memory:` deployments, cleanup is moot because the database disappears on process exit.
 
@@ -27,15 +27,15 @@ WHERE "expires_at" IS NOT NULL
   AND "expires_at" <= ?
 ```
 
-The bound parameter is `Lib.Utils.getUnixTime()` — real wall-clock seconds, not `instance.time`. The `expires_at` single-column index serves the range scan; SQLite's planner uses the index for the `IS NOT NULL` + range comparison.
+The bound parameter is `Lib.Utils.getUnixTime()` - real wall-clock seconds, not `instance.time`. The `expires_at` single-column index serves the range scan; SQLite's planner uses the index for the `IS NOT NULL` + range comparison.
 
 ## Cadence Guidance
 
 | Deployment | Recommended cadence |
 |------------|---------------------|
-| File-backed (production) | Every 1–6 hours |
-| High-volume (many TTL rows) | Every 15–30 minutes |
-| `:memory:` (tests / dev) | Not needed — database resets on process exit |
+| File-backed (production) | Every 1-6 hours |
+| High-volume (many TTL rows) | Every 15-30 minutes |
+| `:memory:` (tests / dev) | Not needed - database resets on process exit |
 
 ## Operational Notes
 
