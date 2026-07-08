@@ -47,7 +47,7 @@ These modules follow Superloom conventions. If your project already uses Superlo
 
 - [Framework docs](https://superloom.dev/docs/) — architecture, patterns, standards
 - [Getting started](https://superloom.dev/docs/guide/getting-started) — how to add modules to your project
-- [Module structure](https://superloom.dev/docs/modules/module-structure-js) — how modules are organized
+- [Module structure](https://superloom.dev/docs/languages/js/module-structure) — how modules are organized
 - [Testing guide](https://superloom.dev/docs/dev/testing-local-modules) — how to run module tests
 
 ## Adding to Your Project
