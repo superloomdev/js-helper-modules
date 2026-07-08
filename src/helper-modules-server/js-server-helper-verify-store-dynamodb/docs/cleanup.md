@@ -1,8 +1,8 @@
-# Cleanup — js-server-helper-verify-store-dynamodb
+# Cleanup - helper-verify-store-dynamodb
 
 ## Native TTL (Automatic)
 
-DynamoDB's native TTL feature automatically deletes items whose `expires_at` Unix epoch timestamp has passed. The sweeper runs asynchronously with up to ~48 hours of lag — items may remain readable for up to 48 hours after expiry. For most verification use cases (email codes, SMS pins) this lag is acceptable because the verify module checks `expires_at` at verify time regardless.
+DynamoDB's native TTL feature automatically deletes items whose `expires_at` Unix epoch timestamp has passed. The sweeper runs asynchronously with up to ~48 hours of lag - items may remain readable for up to 48 hours after expiry. For most verification use cases (email codes, SMS pins) this lag is acceptable because the verify module checks `expires_at` at verify time regardless.
 
 Enable TTL after `setupNewStore` (one-time operation per table):
 
@@ -25,7 +25,7 @@ setInterval(async function () {
 }, 3600 * 1000);
 ```
 
-The implementation does a full table `Scan`, filters client-side for `expires_at <= now`, then calls `batchDeleteRecords`. At high table sizes, a full scan is expensive. Use this judiciously — for most deployments, relying on native TTL is preferable.
+The implementation does a `Scan` with FilterExpression `#ea < :now` bound to `instance.time`, then calls `batchDeleteRecords`. At high table sizes, a full scan is expensive. Use this judiciously - for most deployments, relying on native TTL is preferable.
 
 ## Cadence Guidance
 

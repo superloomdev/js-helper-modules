@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-verify-store-dynamodb.
+// Info: Three-tier test suite for helper-verify-store-dynamodb.
 //
 // Tier 1 - Adapter unit tests (this file, no verify.js dependency):
 //   - Store loader rejects bad STORE_CONFIG
@@ -38,19 +38,16 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  const config = {
-    table_name: table || TEST_TABLE,
-    lib_dynamodb: Lib.DynamoDB
-  };
-  return VerifyStoreDynamoDBFactory(config);
+  return VerifyStoreDynamoDBFactory(Lib, {
+    table_name: table || TEST_TABLE
+  });
 
 };
 
 const buildVerify = function () {
 
-  const Store = VerifyStoreDynamoDBFactory({
-    table_name: TEST_TABLE,
-    lib_dynamodb: Lib.DynamoDB
+  const Store = VerifyStoreDynamoDBFactory(Lib, {
+    table_name: TEST_TABLE
   });
 
   return VerifyFactory(Lib, {
@@ -61,35 +58,35 @@ const buildVerify = function () {
 
 
 // ============================================================================
-// TIER 1 — ADAPTER UNIT TESTS
+// TIER 1 - ADAPTER UNIT TESTS
 // ============================================================================
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is an empty string', function () {
 
     assert.throws(
-      function () { VerifyStoreDynamoDBFactory({}); },
-      /config.lib_dynamodb is required/
-    );
-
-  });
-
-  it('throws when table_name is missing', function () {
-
-    assert.throws(
-      function () { VerifyStoreDynamoDBFactory({ lib_dynamodb: Lib.DynamoDB, table_name: null }); },
+      function () { VerifyStoreDynamoDBFactory(Lib, { table_name: '' }); },
       /config.table_name is required/
     );
 
   });
 
-  it('throws when lib_dynamodb is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { VerifyStoreDynamoDBFactory({ table_name: 'x' }); },
-      /config.lib_dynamodb is required/
+      function () { VerifyStoreDynamoDBFactory(Lib, { table_name: null }); },
+      /config.table_name is required/
     );
+
+  });
+
+  it('returns a store object when config is valid', function () {
+
+    const store = VerifyStoreDynamoDBFactory(Lib, { table_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.getRecord, 'function');
+    assert.equal(typeof store.setRecord, 'function');
 
   });
 
@@ -97,7 +94,7 @@ describe('Tier 1: store loader validation', function () {
 
 
 // ============================================================================
-// TIER 1 — DIRECT STORE METHOD TESTS
+// TIER 1 - DIRECT STORE METHOD TESTS
 // ============================================================================
 
 const cleanTable = async function () {
@@ -300,7 +297,7 @@ describe('Tier 1: cleanupExpiredRecords accuracy', function () {
 
 
 // ============================================================================
-// TIER 3 — VERIFY + ADAPTER INTEGRATION
+// TIER 3 - VERIFY + ADAPTER INTEGRATION
 // ============================================================================
 
 const cleanupBetweenTests = async function () {

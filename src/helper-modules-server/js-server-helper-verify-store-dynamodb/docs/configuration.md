@@ -1,11 +1,10 @@
-# Configuration — js-server-helper-verify-store-dynamodb
+# Configuration - helper-verify-store-dynamodb
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')({
-  table_name:   'verification_codes',
-  lib_dynamodb: Lib.DynamoDB
+const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, {
+  table_name: 'verification_codes'
 });
 
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
@@ -16,28 +15,27 @@ Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
 ## Configuration Keys
 
 | Key | Type | Required | Description |
-|-----|------|----------|-------------|
+|-----|------|----------|--------------|
 | `table_name` | `String` | Yes | Name of the DynamoDB table. |
-| `lib_dynamodb` | `Object` | Yes | An initialized `Lib.DynamoDB` instance (`@superloomdev/js-server-helper-nosql-aws-dynamodb`). |
 
 ## Dependencies
 
 | Package | Type | Purpose |
 |---------|------|---------|
-| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
-| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | Peer | DynamoDB wrapper (`Lib.DynamoDB`) |
+| `helper-utils` | Injected via `shared_libs.Utils` | Type checks |
+| `helper-debug` | Injected via `shared_libs.Debug` | Structured debug logging |
+| `helper-nosql-aws-dynamodb` | Injected via `shared_libs.DynamoDB` | DynamoDB driver wrapper |
 
 ## Environment Variables
 
-Consumed only by `_test/loader.js` — never read by the adapter itself.
+Consumed only by `_test/loader.js` - never read by the adapter itself.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DYNAMO_ENDPOINT` | `http://127.0.0.1:8002` | DynamoDB endpoint (DynamoDB Local for tests) |
 | `AWS_REGION` | `us-east-1` | AWS region |
 
-The test script also sets `AWS_ACCESS_KEY_ID=local` and `AWS_SECRET_ACCESS_KEY=local` to prevent the AWS SDK from walking the EC2 credential chain (which causes a 1–2 second timeout per call in non-EC2 environments).
+The test script also sets `AWS_ACCESS_KEY_ID=local` and `AWS_SECRET_ACCESS_KEY=local` to prevent the AWS SDK from walking the EC2 credential chain (which causes a 1-2 second timeout per call in non-EC2 environments).
 
 ## Testing Tier
 
@@ -46,7 +44,7 @@ The test script also sets `AWS_ACCESS_KEY_ID=local` and `AWS_SECRET_ACCESS_KEY=l
 | Contract + Integration | DynamoDB Local via Docker Compose | `pretest`/`posttest` manage the Docker lifecycle |
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test  # run from _test/
 ```
 
 The `pretest` script runs `docker compose down -v` then `docker compose up -d --wait`. Never start Docker manually before running tests.
@@ -61,4 +59,4 @@ aws dynamodb update-time-to-live \
   --time-to-live-specification "Enabled=true, AttributeName=expires_at"
 ```
 
-Or via CloudFormation / CDK — see [`docs/schema.md`](./schema.md) for the IaC snippet.
+Or via CloudFormation / CDK - see [`docs/schema.md`](./schema.md) for the IaC snippet.

@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-verify-store-dynamodb-test",
-  "description": "Test suite for js-server-helper-verify-store-dynamodb",
+  "name": "helper-verify-store-dynamodb-test",
+  "description": "Test suite for helper-verify-store-dynamodb",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,
