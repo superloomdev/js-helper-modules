@@ -1,4 +1,4 @@
-# Schema — js-server-helper-logger-store-postgres
+# Schema - helper-logger-store-postgres
 
 ## DDL
 
@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS "idx_action_log_expires_at"
   ON "action_log" ("expires_at");
 ```
 
-The table name and index names are derived from `STORE_CONFIG.table_name` at runtime.
+The table name and index names are derived from `config.table_name` at runtime.
 
 ## Column Mapping
 
@@ -72,10 +72,10 @@ JSON-serialized TEXT. Parsed back on read. `null` for no payload.
 
 ### Index Strategy
 
-- **`idx_<table>_entity_sort`** — compound `(scope, entity_type, entity_id, sort_key)` covering `getLogsByEntity` queries including cursor pagination. Cursor pagination uses `sort_key < ?` with `ORDER BY sort_key DESC`; the planner walks the B-tree backward.
-- **`idx_<table>_actor_sort`** — compound `(scope, actor_type, actor_id, sort_key)` covering `getLogsByActor` queries.
-- **`idx_<table>_expires_at`** — single column covering `cleanupExpiredLogs` range scan. Not partial (unlike SQLite) — PostgreSQL handles NULL comparisons efficiently via the planner.
+- **`idx_<table>_entity_sort`** - compound `(scope, entity_type, entity_id, sort_key)` covering `getLogsByEntity` queries including cursor pagination. Cursor pagination uses `sort_key < ?` with `ORDER BY sort_key DESC`; the planner walks the B-tree backward.
+- **`idx_<table>_actor_sort`** - compound `(scope, actor_type, actor_id, sort_key)` covering `getLogsByActor` queries.
+- **`idx_<table>_expires_at`** - single column covering `cleanupExpiredLogs` range scan. Not partial (unlike SQLite) - PostgreSQL handles NULL comparisons efficiently via the planner.
 
 ## Index Names
 
-Index names follow the pattern `idx_{table_name}_{suffix}`, computed deterministically by `buildCreateIndexSQL(suffix, columns)` from `STORE_CONFIG.table_name`. Suffixes are `entity_sort`, `actor_sort`, `expires_at`.
+Index names follow the pattern `idx_{table_name}_{suffix}`, computed deterministically by `buildCreateIndexSQL(suffix, columns)` from `config.table_name`. Suffixes are `entity_sort`, `actor_sort`, `expires_at`.

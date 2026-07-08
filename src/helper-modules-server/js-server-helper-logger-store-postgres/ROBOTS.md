@@ -1,15 +1,14 @@
-# js-server-helper-logger-store-postgres. AI Reference
+# helper-logger-store-postgres. AI Reference
 
-PostgreSQL storage adapter for `@superloomdev/js-server-helper-logger`. Fully independent — owns its own Lib, Config, and ERRORS. Constructed first by application code and passed as a ready-to-use store object to the Logger parent.
+PostgreSQL storage adapter for `helper-logger`. Constructed first by application code and passed as a ready-to-use store object to the Logger parent. Receives `shared_libs` (Utils, Debug, SQL) by injection.
 
-Requires a running PostgreSQL instance. Uses `js-server-helper-sql-postgres` (pooled `pg` driver wrapper) passed via `config.lib_sql`.
+Requires a running PostgreSQL instance. Uses `helper-sql-postgres` (pooled `pg` driver wrapper) injected via `shared_libs.SQL`.
 
 ## Construction
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-postgres')({
-  table_name: 'action_log',  // required. one table per logger instance
-  lib_sql:    Lib.Postgres   // required. initialized js-server-helper-sql-postgres
+const Store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, {
+  table_name: 'action_log'  // required. one table per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -17,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-Both config keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -57,15 +56,11 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Dependencies
 
-Owned (bundled in package):
+All injected via `shared_libs`:
 ```
-@superloomdev/js-helper-utils                  (type checks)
-@superloomdev/js-helper-debug                  (structured logging)
-```
-
-Peer (caller provides via config.lib_sql):
-```
-@superloomdev/js-server-helper-sql-postgres    (pg driver wrapper)
+helper-utils           (type checks)       shared_libs.Utils
+helper-debug           (structured logging) shared_libs.Debug
+helper-sql-postgres    (pg driver wrapper)  shared_libs.SQL
 ```
 
 ## Error Catalog
@@ -76,4 +71,4 @@ Peer (caller provides via config.lib_sql):
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. Primary key is `"sort_key"`. All three index names are derived deterministically from `config.table_name`.
+The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. Primary key is `"sort_key"`. All three index names are derived deterministically from `CONFIG.table_name`.
