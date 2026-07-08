@@ -1,14 +1,16 @@
-# API Reference — js-server-helper-verify-store-sqlite
+# API Reference - helper-verify-store-sqlite
 
-This adapter implements the 6-method store contract consumed by `js-server-helper-verify`. The contract shape is identical across all `verify-store-*` adapters; this document focuses on the SQLite-specific semantics.
+This adapter implements the 6-method store contract consumed by `helper-verify`. The contract shape is identical across all `verify-store-*` adapters; this document focuses on the SQLite-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-sqlite')(Lib, CONFIG, ERRORS);
+const store = require('helper-verify-store-sqlite')(Lib, {
+  table_name: 'verification_codes'
+});
 ```
 
-The factory validates `CONFIG.STORE_CONFIG`, builds the DDL array and UPSERT template once, and returns the Store interface. Calling the factory a second time with a different `table_name` returns an independent Store instance — each instance manages its own table.
+The factory validates the config, builds the DDL array and UPSERT template once, and returns the Store interface. Calling the factory a second time with a different `table_name` returns an independent Store instance - each instance manages its own table.
 
 ## Store Contract
 
@@ -16,8 +18,8 @@ The factory validates `CONFIG.STORE_CONFIG`, builds the DDL array and UPSERT tem
 
 Executes two idempotent DDL statements in order:
 
-1. `CREATE TABLE IF NOT EXISTS "{table_name}" (...)` — creates the verification table.
-2. `CREATE INDEX IF NOT EXISTS "{table_name}_expires_at_idx" ON "{table_name}" ("expires_at")` — creates the cleanup index.
+1. `CREATE TABLE IF NOT EXISTS "{table_name}" (...)` - creates the verification table.
+2. `CREATE INDEX IF NOT EXISTS "{table_name}_expires_at_idx" ON "{table_name}" ("expires_at")` - creates the cleanup index.
 
 Both statements use `IF NOT EXISTS`, making repeated calls on every boot safe. Returns `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` if any statement fails.
 
@@ -27,7 +29,7 @@ Both statements use `IF NOT EXISTS`, making repeated calls on every boot safe. R
 
 ### `getRecord(instance, scope, key)`
 
-Fetches one record by composite primary key `("scope", "id")`. Returns `record: null` when the row does not exist — this is not an error.
+Fetches one record by composite primary key `("scope", "id")`. Returns `record: null` when the row does not exist - this is not an error.
 
 The query selects only the columns the verify module needs: `code`, `fail_count`, `created_at`, `expires_at`.
 
@@ -65,7 +67,7 @@ SET "fail_count" = "fail_count" + 1
 WHERE "scope" = ? AND "id" = ?
 ```
 
-Safe under concurrent verify attempts — each call adds exactly 1. Does not read the current value before writing.
+Safe under concurrent verify attempts - each call adds exactly 1. Does not read the current value before writing.
 
 **Return:** `{ success, error }`
 
@@ -95,7 +97,7 @@ DELETE FROM "{table_name}"
 WHERE "expires_at" < ?
 ```
 
-The bound parameter is `Lib.Utils.getUnixTime()` (real wall-clock seconds), not `instance.time`. This ensures cleanup sweeps on schedule regardless of when the request's frozen clock was captured.
+The bound parameter is `instance.time` (the request instance's frozen clock), not `Lib.Utils.getUnixTime()`. This keeps cleanup consistent with the verify-time expiry check.
 
 Returns `deleted_count` equal to the number of rows removed (`result.affected_rows || 0`).
 
@@ -109,4 +111,4 @@ SQLite has no native TTL; this method is the only automated deletion path for ex
 
 All methods return `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` on driver failure. The underlying driver error is logged via `Lib.Debug.debug` with the driver type and message. It is never surfaced to the caller.
 
-`getRecord` on a missing row is **not** a failure — it returns `{ success: true, record: null, error: null }`.
+`getRecord` on a missing row is **not** a failure - it returns `{ success: true, record: null, error: null }`.

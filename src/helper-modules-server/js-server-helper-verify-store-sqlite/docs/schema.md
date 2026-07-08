@@ -1,4 +1,4 @@
-# Schema — js-server-helper-verify-store-sqlite
+# Schema - helper-verify-store-sqlite
 
 ## DDL
 
@@ -42,7 +42,7 @@ All identifiers (table name and column names) are double-quoted (`"col"`), which
 
 SQLite has no separate `BIGINT` or `VARCHAR` type enforcement. Columns declared as `TEXT` store any text string; columns declared as `INTEGER` store any integer. The schema expresses intent; SQLite does not enforce length constraints.
 
-`expires_at` and `created_at` are stored as Unix epoch seconds (INTEGER). No coercion is needed on read — `node:sqlite` returns INTEGER values as native JavaScript Numbers.
+`expires_at` and `created_at` are stored as Unix epoch seconds (INTEGER). No coercion is needed on read - `node:sqlite` returns INTEGER values as native JavaScript Numbers.
 
 ### Primary Key
 
@@ -69,9 +69,9 @@ This syntax requires SQLite 3.24+ (2018), which is available everywhere `node:sq
 
 ### Index Strategy
 
-A single index on `expires_at` supports the `cleanupExpiredRecords` range scan. There is no partial index (unlike the existing README description — the actual `buildDDL()` in `store.js` does not emit a `WHERE` clause on the index).
+A single index on `expires_at` supports the `cleanupExpiredRecords` range scan. There is no partial index (unlike the existing README description - the actual `buildDDL()` in `store.js` does not emit a `WHERE` clause on the index).
 
-The entity access path (`getRecord`, `setRecord`, `incrementFailCount`, `deleteRecord`) uses the composite primary key index — no secondary index needed.
+The entity access path (`getRecord`, `setRecord`, `incrementFailCount`, `deleteRecord`) uses the composite primary key index - no secondary index needed.
 
 ## Index Name
 
