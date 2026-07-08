@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-logger-store-mongodb.
+// Info: Three-tier test suite for helper-logger-store-mongodb.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
 //   - Store loader rejects bad config
@@ -43,9 +43,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (collection) {
 
-  return LoggerStoreMongoDBFactory({
-    collection_name: collection || TEST_COLLECTION,
-    lib_mongodb: Lib.MongoDB
+  return LoggerStoreMongoDBFactory(Lib, {
+    collection_name: collection || TEST_COLLECTION
   });
 
 };
@@ -89,31 +88,28 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when collection_name is empty string', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when collection_name is missing', function () {
-
-    assert.throws(
-      function () { LoggerStoreMongoDBFactory({ lib_mongodb: Lib.MongoDB }); },
+      function () { LoggerStoreMongoDBFactory(Lib, { collection_name: '' }); },
       /collection_name is required/
     );
 
   });
 
-  it('throws when lib_mongodb is missing', function () {
+  it('throws when collection_name is null', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory({ collection_name: 'x' }); },
-      /lib_mongodb is required/
+      function () { LoggerStoreMongoDBFactory(Lib, { collection_name: null }); },
+      /collection_name is required/
     );
 
+  });
+
+  it('returns a store object for valid config', function () {
+    const store = LoggerStoreMongoDBFactory(Lib, { collection_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.addLog, 'function');
   });
 
 });
@@ -360,9 +356,8 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  const Store = LoggerStoreMongoDBFactory({
-    collection_name: TEST_COLLECTION,
-    lib_mongodb: Lib.MongoDB
+  const Store = LoggerStoreMongoDBFactory(Lib, {
+    collection_name: TEST_COLLECTION
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));

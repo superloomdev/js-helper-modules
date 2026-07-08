@@ -1,4 +1,4 @@
-# Cleanup — js-server-helper-logger-store-mongodb
+# Cleanup - helper-logger-store-mongodb
 
 ## Native TTL (Automatic)
 

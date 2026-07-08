@@ -1,4 +1,4 @@
-// Info: Frozen error catalog for js-server-helper-logger-store-mongodb.
+// Info: Frozen error catalog for helper-logger-store-mongodb.
 // Every error object is frozen so callers cannot mutate them.
 'use strict';
 

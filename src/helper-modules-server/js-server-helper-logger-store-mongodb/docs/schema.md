@@ -1,4 +1,4 @@
-# Schema — js-server-helper-logger-store-mongodb
+# Schema - helper-logger-store-mongodb
 
 ## Collection Structure
 

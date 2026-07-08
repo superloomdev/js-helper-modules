@@ -1,15 +1,14 @@
-# js-server-helper-logger-store-mongodb. AI Reference
+# helper-logger-store-mongodb. AI Reference
 
-MongoDB storage adapter for `@superloomdev/js-server-helper-logger`. Fully independent — owns its own Lib, Config, and ERRORS. Constructed first by application code and passed as a ready-to-use store object to the Logger parent.
+MongoDB storage adapter for `helper-logger`. Fully independent - owns its own Lib, CONFIG, and ERRORS. Constructed first by application code and passed as a ready-to-use store object to the Logger parent.
 
-Requires a running MongoDB instance. Uses `js-server-helper-nosql-mongodb` (native driver wrapper) passed via `config.lib_mongodb`.
+Requires a running MongoDB instance. Uses `helper-nosql-mongodb` (native driver wrapper) injected via `shared_libs.MongoDB`.
 
 ## Construction
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')({
-  collection_name: 'action_log',  // required. one collection per logger instance
-  lib_mongodb:     Lib.MongoDB    // required. initialized js-server-helper-nosql-mongodb
+const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
+  collection_name: 'action_log'  // required. one collection per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -17,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-Both config keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`collection_name` is required. The loader throws an `Error` if it is missing, null, or empty. `Lib.MongoDB` must be present on the injected `shared_libs` container.
 
 ## Store Contract
 
@@ -54,15 +53,11 @@ Both config keys are required. The loader throws an `Error` if either is missing
 
 ## Dependencies
 
-Owned (bundled in package):
+All three dependencies are injected via `shared_libs`:
 ```
-@superloomdev/js-helper-utils                    (type checks)
-@superloomdev/js-helper-debug                    (structured logging)
-```
-
-Peer (caller provides via config.lib_mongodb):
-```
-@superloomdev/js-server-helper-nosql-mongodb     (MongoDB driver wrapper)
+shared_libs.Utils    - helper-utils        (type checks)
+shared_libs.Debug    - helper-debug        (structured logging)
+shared_libs.MongoDB  - helper-nosql-mongodb (MongoDB driver wrapper)
 ```
 
 ## Error Catalog
