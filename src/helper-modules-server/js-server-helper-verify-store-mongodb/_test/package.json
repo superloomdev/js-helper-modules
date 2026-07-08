@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-verify-store-mongodb-test",
-  "description": "Test suite for js-server-helper-verify-store-mongodb",
+  "name": "helper-verify-store-mongodb-test",
+  "description": "Test suite for helper-verify-store-mongodb",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

@@ -1,4 +1,4 @@
-# Schema — js-server-helper-verify-store-mongodb
+# Schema - helper-verify-store-mongodb
 
 ## Collection Structure
 
@@ -36,7 +36,7 @@ MongoDB does not use DDL. `setupNewStore` creates one index; the schema is enfor
 { _ttl: 1 }, { name: 'verify_ttl_idx', expireAfterSeconds: 0 }
 ```
 
-- **`expireAfterSeconds: 0`** — MongoDB deletes the document as soon as the `_ttl` Date passes (with up to ~60s sweeper lag).
+- **`expireAfterSeconds: 0`** - MongoDB deletes the document as soon as the `_ttl` Date passes (with up to ~60s sweeper lag).
 - The index is non-sparse: every verify record has a `_ttl` (verify codes always expire), so there are no documents to skip.
 
 The compound `_id` is the primary access path for all record operations. No secondary indexes are needed.
@@ -53,8 +53,8 @@ The `_id` field is a plain JavaScript object `{ scope, id }`. MongoDB stores it 
 
 ### `_ttl` vs `expires_at`
 
-- `expires_at` — canonical Unix epoch seconds stored for the verify module's expiry check.
-- `_ttl` — Date field derived from `expires_at` used exclusively by the MongoDB TTL index. The adapter sets this on write and strips it on read. Application code never sees `_ttl`.
+- `expires_at` - canonical Unix epoch seconds stored for the verify module's expiry check.
+- `_ttl` - Date field derived from `expires_at` used exclusively by the MongoDB TTL index. The adapter sets this on write and strips it on read. Application code never sees `_ttl`.
 
 ### Atomic `fail_count` Increment
 
