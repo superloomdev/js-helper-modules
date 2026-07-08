@@ -1,14 +1,16 @@
-# API Reference — js-server-helper-verify-store-postgres
+# API Reference - helper-verify-store-postgres
 
-This adapter implements the 6-method store contract consumed by `js-server-helper-verify`. The contract shape is identical across all `verify-store-*` adapters; this document focuses on the PostgreSQL-specific semantics.
+This adapter implements the 6-method store contract consumed by `helper-verify`. The contract shape is identical across all `verify-store-*` adapters; this document focuses on the PostgreSQL-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, {
+  table_name: 'verification_codes'
+});
 ```
 
-The factory validates `CONFIG.STORE_CONFIG`, builds the DDL array and UPSERT template once, and returns the Store interface.
+The factory validates config, builds the DDL array and UPSERT template once, and returns the Store interface.
 
 ## Store Contract
 
@@ -16,8 +18,8 @@ The factory validates `CONFIG.STORE_CONFIG`, builds the DDL array and UPSERT tem
 
 Executes two idempotent DDL statements in order:
 
-1. `CREATE TABLE IF NOT EXISTS "..." (...)` — creates the verification table.
-2. `CREATE INDEX IF NOT EXISTS "..." ON "..." ("expires_at")` — creates the cleanup index.
+1. `CREATE TABLE IF NOT EXISTS "..." (...)` - creates the verification table.
+2. `CREATE INDEX IF NOT EXISTS "..." ON "..." ("expires_at")` - creates the cleanup index.
 
 Both statements use `IF NOT EXISTS`, making repeated calls on every boot safe.
 
@@ -27,7 +29,7 @@ Both statements use `IF NOT EXISTS`, making repeated calls on every boot safe.
 
 ### `getRecord(instance, scope, key)`
 
-Fetches one record by composite primary key `("scope", "id")`. Returns `record: null` when the row does not exist — this is not an error.
+Fetches one record by composite primary key `("scope", "id")`. Returns `record: null` when the row does not exist - this is not an error.
 
 ```sql
 SELECT "code", "fail_count", "created_at", "expires_at"
@@ -90,7 +92,7 @@ DELETE FROM "{table_name}"
 WHERE "expires_at" < ?
 ```
 
-The bound parameter is `Lib.Utils.getUnixTime()` (real wall-clock seconds). Returns `deleted_count` equal to `result.affected_rows || 0`. PostgreSQL has no native TTL; schedule this on a cron.
+The bound parameter is `instance.time` (request-instance unix epoch seconds). Returns `deleted_count` equal to `result.affected_rows || 0`. PostgreSQL has no native TTL; schedule this on a cron.
 
 **Return:** `{ success, deleted_count, error }`
 

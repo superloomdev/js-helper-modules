@@ -1,22 +1,21 @@
-# js-server-helper-verify-store-postgres. AI Reference
+# helper-verify-store-postgres. AI Reference
 
-Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
+Class F storage adapter. PostgreSQL backend for `helper-verify`. Fully independent module that owns its own CONFIG, ERRORS, and Validators. Standard factory shape: `(shared_libs, config)`. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a running PostgreSQL instance. Uses `js-server-helper-sql-postgres` (pooled `pg` driver wrapper) injected via `config.lib_postgresql`.
+Requires a running PostgreSQL instance. Uses `helper-sql-postgres` (pooled `pg` driver wrapper) injected via `shared_libs.SQL`.
 
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
-  table_name: 'verification_codes',
-  lib_postgresql: Lib.Postgres
+const Store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, {
+  table_name: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
+| `shared_libs` | Object | Yes | Dependency container (Utils, Debug, SQL) |
 | `table_name` | String | Yes | Name of the verification table |
-| `lib_postgresql` | Object | Yes | Initialized `js-server-helper-sql-postgres` instance |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods to satisfy its persistence needs.
 
@@ -24,12 +23,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  table_name: 'verification_codes',  // required. one table per verify instance
-  lib_postgresql: Lib.Postgres       // required. initialized js-server-helper-sql-postgres
+  table_name: 'verification_codes'  // required. one table per verify instance
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver is injected via `shared_libs.SQL`.
 
 ## Store Contract
 
@@ -52,11 +50,11 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 3. **`setRecord` is a full UPSERT.** Uses `INSERT ... ON CONFLICT ("scope", "id") DO UPDATE SET col = excluded.col`. Re-inserting the same `(scope, id)` composite key replaces all mutable columns (`code`, `fail_count`, `created_at`, `expires_at`) in one round-trip.
 
-4. **`incrementFailCount` is an atomic in-place UPDATE.** Issues `SET "fail_count" = "fail_count" + 1`. Safe under concurrent verify attempts — each call adds exactly 1. Does not read the current value before writing.
+4. **`incrementFailCount` is an atomic in-place UPDATE.** Issues `SET "fail_count" = "fail_count" + 1`. Safe under concurrent verify attempts - each call adds exactly 1. Does not read the current value before writing.
 
 5. **`deleteRecord` is idempotent.** A missing row is treated as success; callers never need to check existence first.
 
-6. **`cleanupExpiredRecords` uses real wall-clock time (`Lib.Utils.getUnixTime()`).** Not `instance.time`. Cleanup must use the real clock so expired rows sweep on schedule.
+6. **`cleanupExpiredRecords` uses `instance.time`.** The bound parameter is the request-instance unix epoch seconds. Not `Lib.Utils.getUnixTime()`.
 
 7. **Identifiers are double-quoted (`"col"`).** Same quoting style as SQLite. The adapter rejects any `table_name` containing a double-quote at quoting time.
 
@@ -71,16 +69,16 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ## Peer Dependencies
 
 ```
-@superloomdev/js-helper-utils                  (type checks)
-@superloomdev/js-helper-debug                  (structured logging)
-@superloomdev/js-server-helper-sql-postgres    (pg driver wrapper)
+helper-utils              (type checks - via shared_libs.Utils)
+helper-debug              (structured logging - via shared_libs.Debug)
+helper-sql-postgres       (pg driver wrapper - via shared_libs.SQL)
 ```
 
-These are loaded into `Lib` by the application before the Verify parent is loaded. The adapter does not require any of them directly; it accesses them through `Lib`.
+All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never requires any of them directly; it picks them from the injected container.
 
-## Error Catalog Used
+## Error Catalog
 
-Only one type from the Verify `ERRORS` catalog:
+This adapter owns its own `store.errors.js`. Only one type:
 
 | Error | When |
 |---|---|
