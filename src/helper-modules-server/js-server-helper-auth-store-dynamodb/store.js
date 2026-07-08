@@ -1,4 +1,4 @@
-// Info: DynamoDB session store adapter for js-server-helper-auth.
+// Info: DynamoDB session store adapter for helper-auth.
 // Uses a single-table design tuned for the auth query patterns:
 //
 //   Partition Key:  tenant_id
@@ -19,8 +19,7 @@
 // so (tenant_id, actor_id, token_key) stays a unique triple - a second
 // call with the same triple overwrites the old record.
 //
-// The application injects a ready-to-use DynamoDB helper via
-// config.lib_dynamodb (typically Lib.DynamoDB).
+// The caller injects a ready-to-use DynamoDB helper as Lib.DynamoDB.
 //
 // Schema management (table creation, TTL configuration) is out of scope
 // for this adapter. The table must be provisioned out-of-band via IaC,
@@ -45,42 +44,45 @@
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
-// Adapter-local Lib: built once, shared across all instances of this adapter.
-const Lib = {
-  Utils: require('helper-utils')(null, {}),
-  Debug: require('helper-debug')(null, { LOG_LEVEL: process.env.LOG_LEVEL || 'error' })
-};
-
-// Adapter-local ERRORS catalog (frozen). Auth.js forwards these transparently.
-const ERRORS = Object.freeze({
-  SERVICE_UNAVAILABLE: {
-    type: 'AUTH_STORE_DYNAMODB_SERVICE_UNAVAILABLE',
-    message: 'DynamoDB backend unavailable'
-  },
-  NOT_IMPLEMENTED: {
-    type: 'NOT_IMPLEMENTED',
-    message: 'This operation is not yet implemented for this backend'
-  }
-});
-
-
 /********************************************************************
-Factory loader. One call = one independent store instance with its
-own table_name and lib_dynamodb reference. Validates config at
-construction so misconfiguration fails fast at startup.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config               - { table_name, lib_dynamodb }
-@param {string} config.table_name    - DynamoDB table to read/write sessions
-@param {Object} config.lib_dynamodb  - Ready-to-use DynamoDB helper (Lib.DynamoDB)
+@param {Object} shared_libs - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} config - Overrides merged over adapter config defaults
+                         ({ table_name } - plain data only)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    DynamoDB: shared_libs.DynamoDB
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
+
+  // Own frozen error catalog
+  const ERRORS = require('./store.errors');
+
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  require('./store.validators').validateConfig(Lib, config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -89,17 +91,17 @@ module.exports = function loader (config) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, config, and
-ERRORS.
+Builds the public Store interface for one instance. All functions
+close over the same Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} config - { table_name, lib_dynamodb }
-@param {Object} ERRORS       - Error catalog forwarded from auth.js
+@param {Object} Lib        - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-const createInterface = function (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -140,11 +142,19 @@ const createInterface = function (Lib, config, ERRORS) {
     /********************************************************************
     Exact key lookup. Hash compare after the read stays local so a
     wrong secret looks like "record not found" (no timing leak).
+
+    @param {Object} instance          - Request instance
+    @param {string} tenant_id         - Tenant identifier
+    @param {string} actor_id          - Actor identifier
+    @param {string} token_key         - Token key
+    @param {string} token_secret_hash - Expected hash for constant-time compare
+
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
       // Fetch the item by composite primary key
-      const result = await config.lib_dynamodb.getRecord(instance, config.table_name, {
+      const result = await Lib.DynamoDB.getRecord(instance, CONFIG.table_name, {
         tenant_id: tenant_id,
         session_key: _Store.sortKey(actor_id, token_key)
       });
@@ -193,9 +203,13 @@ const createInterface = function (Lib, config, ERRORS) {
 
     /********************************************************************
     Query by partition key with SK begins_with - hits the composite
-    key's primary index, no scan. The helper's query() only auto-aliases
-    the partition key (#pk); the sort-key clause is appended verbatim,
-    so we use the real attribute name "session_key" directly.
+    key's primary index, no scan.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -203,7 +217,7 @@ const createInterface = function (Lib, config, ERRORS) {
       const prefix = actor_id + '#';
 
       // Query using the PK + SK begins_with condition
-      const result = await config.lib_dynamodb.query(instance, config.table_name, {
+      const result = await Lib.DynamoDB.query(instance, CONFIG.table_name, {
         pk: tenant_id,
         pkName: 'tenant_id',
         skCondition: 'begins_with(session_key, :sk)',
@@ -247,13 +261,18 @@ const createInterface = function (Lib, config, ERRORS) {
     /********************************************************************
     Upsert via PutItem. The same (tenant_id, actor_id, token_key)
     triple overwrites the existing item.
+
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical session record
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
       // Encode the canonical record to a DynamoDB item and write it
-      const result = await config.lib_dynamodb.writeRecord(
+      const result = await Lib.DynamoDB.writeRecord(
         instance,
-        config.table_name,
+        CONFIG.table_name,
         _Store.recordToItem(record)
       );
 
@@ -280,9 +299,16 @@ const createInterface = function (Lib, config, ERRORS) {
 
 
     /********************************************************************
-    Partial update via UpdateItem (SET expression). The helper builds
-    the ExpressionAttributeNames / Values internally. Identity-column
-    guard mirrors the SQL stores so programmer errors fail fast.
+    Partial update via UpdateItem (SET expression). Throws TypeError
+    on identity fields.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+    @param {Object} updates   - Partial record (mutable fields only)
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -300,15 +326,15 @@ const createInterface = function (Lib, config, ERRORS) {
       for (const k of update_keys) {
         if (_Store.UPDATE_IDENTITY_BLOCKLIST.indexOf(k) !== -1) {
           throw new TypeError(
-            '[js-server-helper-auth-store-dynamodb] updateSessionActivity cannot modify identity field "' + k + '"'
+            '[helper-auth-store-dynamodb] updateSessionActivity cannot modify identity field "' + k + '"'
           );
         }
       }
 
       // Run the partial UpdateItem against the target session item
-      const result = await config.lib_dynamodb.updateRecord(
+      const result = await Lib.DynamoDB.updateRecord(
         instance,
-        config.table_name,
+        CONFIG.table_name,
         { tenant_id: tenant_id, session_key: _Store.sortKey(actor_id, token_key) },
         updates
       );
@@ -343,13 +369,20 @@ const createInterface = function (Lib, config, ERRORS) {
 
     /********************************************************************
     Delete one session by composite key.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
       // Remove the item by its composite primary key
-      const result = await config.lib_dynamodb.deleteRecord(
+      const result = await Lib.DynamoDB.deleteRecord(
         instance,
-        config.table_name,
+        CONFIG.table_name,
         { tenant_id: tenant_id, session_key: _Store.sortKey(actor_id, token_key) }
       );
 
@@ -376,9 +409,14 @@ const createInterface = function (Lib, config, ERRORS) {
 
 
     /********************************************************************
-    Batch delete many sessions. AWS limits the batch to 25 items; the
-    helper chunks automatically. Skips the round-trip if the keys list
-    is empty.
+    Batch delete many sessions. AWS 25-item limit; helper chunks
+    automatically. No-op success if keys is empty.
+
+    @param {Object}   instance  - Request instance
+    @param {string}   tenant_id - Tenant identifier
+    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -392,7 +430,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Build the batchDeleteRecords key map for this table
       const keysByTable = {};
-      keysByTable[config.table_name] = keys.map(function (k) {
+      keysByTable[CONFIG.table_name] = keys.map(function (k) {
         return {
           tenant_id: tenant_id,
           session_key: _Store.sortKey(k.actor_id, k.token_key)
@@ -400,7 +438,7 @@ const createInterface = function (Lib, config, ERRORS) {
       });
 
       // Delete all matched items in one (or more, if chunked) round-trips
-      const result = await config.lib_dynamodb.batchDeleteRecords(instance, keysByTable);
+      const result = await Lib.DynamoDB.batchDeleteRecords(instance, keysByTable);
 
       // Return a service error if the driver call failed
       if (result.success === false) {
@@ -433,17 +471,19 @@ const createInterface = function (Lib, config, ERRORS) {
     // matches the TTL-attribute format AWS expects).
 
     /********************************************************************
-    Sweep expired sessions. DynamoDB does not support a single-shot
-    DELETE by predicate - we Scan with a filter then batchDelete.
-    Since cleanup runs rarely (cron-driven), this is acceptable.
+    Sweep expired sessions. Scan with filter then batchDelete.
     Production deployments may enable DynamoDB TTL on expires_at
-    out-of-band for automatic expiry without scans.
+    for automatic expiry without scans.
+
+    @param {Object} instance - Request instance
+
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
       // Scan for all items whose expires_at is in the past
       const now = instance.time;
-      const scan_result = await config.lib_dynamodb.scan(instance, config.table_name, {
+      const scan_result = await Lib.DynamoDB.scan(instance, CONFIG.table_name, {
         expression: '#ea < :now',
         names: { '#ea': 'expires_at' },
         values: { ':now': now }
@@ -474,12 +514,12 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Build the batchDelete key map from the scanned items
       const keysByTable = {};
-      keysByTable[config.table_name] = scan_result.items.map(function (item) {
+      keysByTable[CONFIG.table_name] = scan_result.items.map(function (item) {
         return { tenant_id: item.tenant_id, session_key: item.session_key };
       });
 
       // Delete the expired items in one (or more, if chunked) batch call
-      const delete_result = await config.lib_dynamodb.batchDeleteRecords(instance, keysByTable);
+      const delete_result = await Lib.DynamoDB.batchDeleteRecords(instance, keysByTable);
 
       // Return a service error if the batch delete failed
       if (delete_result.success === false) {

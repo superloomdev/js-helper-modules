@@ -1,15 +1,14 @@
-# js-server-helper-auth-store-dynamodb. AI Reference
+# helper-auth-store-dynamodb. AI Reference
 
-Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
+Class F storage adapter. AWS DynamoDB backend for `helper-auth`. Standard factory shape: receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
 Cloud-native. Uses a single-table design with composite Sort Key. Table provisioning is out-of-band (IaC); `setupNewStore` returns `NOT_IMPLEMENTED`. Native TTL available at the table level.
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')({
-  table_name:   'sessions_user',
-  lib_dynamodb: Lib.DynamoDB
+const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
+  table_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -21,20 +20,18 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 | Config key | Type | Notes |
 |---|---|---|
 | `table_name` | String | Required. The DynamoDB table name |
-| `lib_dynamodb` | Object | Required. Initialized `js-server-helper-nosql-aws-dynamodb` instance |
 
-The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
+The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.DynamoDB` by reference from the injected container. Auth forwards error envelopes transparently.
 
 ## Config
 
 ```js
 {
-  table_name:   'sessions_user',  // required. the DynamoDB table name
-  lib_dynamodb: Lib.DynamoDB      // required. initialized js-server-helper-nosql-aws-dynamodb
+  table_name: 'sessions_user'  // required. the DynamoDB table name
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -53,7 +50,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter directly with its config to get a Store object, then pass that to the Auth parent.** Do not pass the factory function reference to Auth; pass the result of calling it.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-dynamodb')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
 2. **`setupNewStore` is not implemented.** Returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`. The DynamoDB table must be provisioned out-of-band via IaC, AWS Console, or the driver helper's table-management API (if and when it gains one). Do not attempt to implement table creation in application code.
 
@@ -78,21 +75,21 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ## Peer Dependencies
 
 ```
-@superloomdev/js-helper-utils                        (type checks)
-@superloomdev/js-helper-debug                        (structured logging)
-@superloomdev/js-server-helper-nosql-aws-dynamodb    (AWS SDK wrapper)
+Lib.Utils    (@superloomdev/js-helper-utils)                    injected via shared_libs
+Lib.Debug    (@superloomdev/js-helper-debug)                    injected via shared_libs
+Lib.DynamoDB (@superloomdev/js-server-helper-nosql-aws-dynamodb) injected via shared_libs
 ```
 
-Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-aws-dynamodb` driver helper is passed in via `config.lib_dynamodb` by the application.
+All three are injected by the caller. The adapter owns no runtime dependencies of its own.
 
 ## Error Catalog
 
-The adapter defines its own internal ERRORS catalog. Auth forwards error envelopes transparently.
+The adapter defines its own error catalog in `store.errors.js`. Auth forwards error envelopes transparently.
 
-| Error | When |
-|---|---|
-| `SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
-| `NOT_IMPLEMENTED` | `setupNewStore` was called. The adapter does not support on-the-fly table creation |
+| Error | Type | When |
+|---|---|---|
+| `SERVICE_UNAVAILABLE` | `AUTH_STORE_DYNAMODB_SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, never surfaced |
+| `NOT_IMPLEMENTED` | `AUTH_STORE_DYNAMODB_NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
