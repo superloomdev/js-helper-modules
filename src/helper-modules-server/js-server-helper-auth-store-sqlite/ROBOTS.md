@@ -1,15 +1,16 @@
-# js-server-helper-auth-store-sqlite. AI Reference
+# helper-auth-store-sqlite. AI Reference
 
-Class F storage adapter. SQLite backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
+Class F storage adapter. SQLite backend for `helper-auth`. Standard factory shape: receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
 Embedded / in-process. Uses Node's built-in `node:sqlite` through the `js-server-helper-sql-sqlite` driver helper. No external service, no Docker, no network.
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')({
-  table_name: 'sessions_user',
-  lib_sql:    Lib.SQLite
+Lib.SQL = Lib.SQLite;  // alias so the adapter picks Lib.SQL
+
+const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')(Lib, {
+  table_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -21,20 +22,18 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 | Config key | Type | Notes |
 |---|---|---|
 | `table_name` | String | Required. One table per actor_type |
-| `lib_sql` | Object | Required. Initialized `js-server-helper-sql-sqlite` instance |
 
-The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
+The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the injected container. Auth forwards error envelopes transparently.
 
 ## Config
 
 ```js
 {
-  table_name: 'sessions_user',  // required. one table per actor_type
-  lib_sql:    Lib.SQLite        // required. initialized js-server-helper-sql-sqlite
+  table_name: 'sessions_user'  // required. one table per actor_type
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -53,7 +52,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter directly with its config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-sqlite')({ table_name, lib_sql })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-sqlite')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`. Ensure `Lib.SQL` is set to `Lib.SQLite` before calling.
 
 2. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration. The compare happens after the primary-key read; the row is fetched first, then `token_secret_hash` is verified.
 
@@ -78,16 +77,16 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ## Dependencies
 
 ```
-@superloomdev/js-helper-utils                (type checks) — direct dependency
-@superloomdev/js-helper-debug                (structured logging) — direct dependency
-@superloomdev/js-server-helper-sql-sqlite    (node:sqlite wrapper) — peer dependency
+Lib.Utils    (@superloomdev/js-helper-utils)             injected via shared_libs
+Lib.Debug    (@superloomdev/js-helper-debug)             injected via shared_libs
+Lib.SQL      (@superloomdev/js-server-helper-sql-sqlite) injected via shared_libs as alias
 ```
 
-Utils and Debug are direct dependencies bundled with the adapter. The SQLite helper is a peer that the caller provides via `config.lib_sql`.
+All three are injected by the caller. The adapter owns no runtime dependencies of its own.
 
 ## Error Catalog
 
-The adapter defines its own error catalog internally:
+The adapter defines its own error catalog in `store.errors.js`:
 
 | Error type | When |
 |---|---|

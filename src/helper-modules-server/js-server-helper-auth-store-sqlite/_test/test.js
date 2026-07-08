@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-auth-store-sqlite.
+// Info: Three-tier test suite for helper-auth-store-sqlite.
 //
 // Tier 1 - Adapter unit tests (this file, no auth.js dependency):
 //   - Store loader rejects bad config
@@ -42,9 +42,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return AuthStoreSQLiteFactory({
-    table_name: table || TEST_TABLE,
-    lib_sql:    Lib.SQLite
+  return AuthStoreSQLiteFactory(Lib, {
+    table_name: table || TEST_TABLE
   });
 
 };
@@ -56,30 +55,29 @@ const buildStore = function (table) {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when table_name is missing', function () {
-
-    assert.throws(
-      function () { AuthStoreSQLiteFactory({ lib_sql: Lib.SQLite }); },
+      function () { AuthStoreSQLiteFactory(Lib, { table_name: '' }); },
       /table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory({ table_name: 'x' }); },
-      /lib_sql is required/
+      function () { AuthStoreSQLiteFactory(Lib, { table_name: null }); },
+      /table_name is required/
     );
+
+  });
+
+  it('returns a store object when config is valid', function () {
+
+    const store = AuthStoreSQLiteFactory(Lib, { table_name: 'valid_table' });
+    assert.ok(store);
+    assert.ok(typeof store.setupNewStore === 'function');
 
   });
 
@@ -103,7 +101,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        AuthStoreSQLiteFactory({ table_name: 'bad"table', lib_sql: Lib.SQLite });
+        AuthStoreSQLiteFactory(Lib, { table_name: 'bad"table' });
       },
       /identifier contains double-quote/
     );
@@ -609,7 +607,7 @@ describe('Tier 1: large multi-actor list isolation', function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    Store:     AuthStoreSQLiteFactory({ table_name: TEST_TABLE, lib_sql: Lib.SQLite }),
+    Store:     AuthStoreSQLiteFactory(Lib, { table_name: TEST_TABLE }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

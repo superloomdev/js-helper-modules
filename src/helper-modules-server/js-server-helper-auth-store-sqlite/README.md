@@ -1,9 +1,9 @@
-# @superloomdev/js-server-helper-auth-store-sqlite
+# helper-auth-store-sqlite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
 
-A SQLite-backed implementation of the [Auth](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth) module's storage contract. Call it with its config to get a ready-to-use store object, then pass that as `Store` to the Auth parent. The Auth module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+A SQLite-backed implementation of the [helper-auth](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth) module's storage contract. Call it with a `Lib` container and config to get a ready-to-use store object, then pass that as `Store` to the Auth parent. The Auth module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
@@ -19,18 +19,16 @@ The adapter cannot stand alone. It is always loaded together with the Auth paren
 
 - **Designed for human review.** The adapter is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom and follow each store-contract method without ever getting lost in dense logic. Open `store.js` to see the structure.
 
-- **Built-in observability.** Every store call is timed against the active request via `Lib.Debug.performanceAuditLog`, the same way every other Superloom helper does. Slow-store review and request profiling are built in. No instrumentation code to write.
-
 - **Embedded persistence, no infrastructure.** Runs in-process. No external database to provision, no network to debug, no connection string to manage. The same adapter powers offline-first apps, single-node deployments, `:memory:` test fixtures, and edge runtimes. Schema creation (`setupNewStore`) and expired-row cleanup (`cleanupExpiredSessions`) are built in and work the same way as every sibling adapter. The schema, the index strategy, and the recommended cleanup cadence live in [`docs/schema.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-sqlite/docs/schema.md) and [`docs/cleanup.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-sqlite/docs/cleanup.md).
 
 ## Hot-Swappable with Other Backends
 
 This adapter is part of the `auth-store-*` family. Every sibling implements the same store contract. Swap by changing one config value; the rest of your code keeps working.
 
-- [`@superloomdev/js-server-helper-auth-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-postgres) - PostgreSQL
-- [`@superloomdev/js-server-helper-auth-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mysql) - MySQL or MariaDB
-- [`@superloomdev/js-server-helper-auth-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mongodb) - MongoDB
-- [`@superloomdev/js-server-helper-auth-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb) - AWS DynamoDB
+- [`helper-auth-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-postgres) - PostgreSQL
+- [`helper-auth-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mysql) - MySQL or MariaDB
+- [`helper-auth-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-mongodb) - MongoDB
+- [`helper-auth-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth-store-dynamodb) - AWS DynamoDB
 
 ## Aligned with Superloom Philosophy
 
@@ -57,9 +55,9 @@ The loader pattern, including the full `Lib` container shape and how the adapter
 
 ## Dependencies
 
-This module has no external dependencies.
+This module has no runtime dependencies of its own.
 
-It expects three peer modules in the `Lib` container (Utils, Debug, SQLite). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+It receives Utils, Debug, and SQLite through the `Lib` container injected by the caller. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 
@@ -67,7 +65,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, SQLite). For
 |---|---|---|
 | Contract + Integration | SQLite (`:memory:`, in-process via `node:sqlite`) | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration → Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-sqlite/docs/configuration.md#testing-tier).
+Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration - Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-sqlite/docs/configuration.md#testing-tier).
 
 ## License
 
