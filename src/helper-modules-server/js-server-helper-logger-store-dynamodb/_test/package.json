@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-logger-store-dynamodb-test",
-  "description": "Test suite for js-server-helper-logger-store-dynamodb",
+  "name": "helper-logger-store-dynamodb-test",
+  "description": "Test suite for helper-logger-store-dynamodb",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

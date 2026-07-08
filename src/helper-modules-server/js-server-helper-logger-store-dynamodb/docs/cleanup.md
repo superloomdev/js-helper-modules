@@ -1,4 +1,4 @@
-# Cleanup — js-server-helper-logger-store-dynamodb
+# Cleanup - helper-logger-store-dynamodb
 
 ## Native TTL (Automatic)
 

@@ -1,9 +1,9 @@
-# @superloomdev/js-server-helper-logger-store-dynamodb
+# helper-logger-store-dynamodb
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
 
-An AWS DynamoDB-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent — construct it first with its own config, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+An AWS DynamoDB-backed implementation of the [Logger](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger) module's storage contract. Fully independent - construct it first, then pass it as `CONFIG.Store` to the Logger parent. The Logger's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
@@ -19,14 +19,14 @@ It is always used together with the Logger parent and the [`js-server-helper-nos
 
 - **Native TTL.** Enable TTL on `expires_at` out-of-band; DynamoDB handles automatic expiry asynchronously (~48h). `cleanupExpiredLogs` provides explicit deterministic cleanup when needed.
 
-- **`setupNewStore` is a no-op.** Tables are provisioned out-of-band (CloudFormation, CDK, Terraform, AWS Console). The method returns success on every call — safe to invoke at every boot to satisfy the Logger parent's idempotent setup contract.
+- **`setupNewStore` is a no-op.** Tables are provisioned out-of-band (CloudFormation, CDK, Terraform, AWS Console). The method returns success on every call - safe to invoke at every boot to satisfy the Logger parent's idempotent setup contract.
 
 ## Hot-Swappable with Other Backends
 
-- [`@superloomdev/js-server-helper-logger-store-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-sqlite) - SQLite (embedded, zero-network, dev/test)
-- [`@superloomdev/js-server-helper-logger-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-postgres) - PostgreSQL
-- [`@superloomdev/js-server-helper-logger-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mysql) - MySQL or MariaDB
-- [`@superloomdev/js-server-helper-logger-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mongodb) - MongoDB
+- [`helper-logger-store-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-sqlite) - SQLite (embedded, zero-network, dev/test)
+- [`helper-logger-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-postgres) - PostgreSQL
+- [`helper-logger-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mysql) - MySQL or MariaDB
+- [`helper-logger-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger-store-mongodb) - MongoDB
 
 ## Aligned with Superloom Philosophy
 
@@ -45,9 +45,8 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 This adapter is installed alongside the Logger parent module and the `nosql-aws-dynamodb` driver helper. Construct the store first, then pass it to the Logger:
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-dynamodb')({
-  table_name:   'action_log',
-  lib_dynamodb: Lib.DynamoDB
+const Store = require('@superloomdev/js-server-helper-logger-store-dynamodb')(Lib, {
+  table_name: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
@@ -57,7 +56,7 @@ Do not vendor the source or use it as a local file dependency. The published pac
 
 ## Dependencies
 
-`js-helper-utils` and `js-helper-debug` are bundled as direct dependencies. The `js-server-helper-nosql-aws-dynamodb` driver helper is a peer dependency — install it alongside this package and pass it via `config.lib_dynamodb`. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+`helper-utils`, `helper-debug`, and `helper-nosql-aws-dynamodb` are injected via `shared_libs` (the standard Lib container). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 
@@ -65,7 +64,7 @@ Do not vendor the source or use it as a local file dependency. The published pac
 |---|---|---|
 | Contract + Integration | DynamoDB Local via Docker Compose | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Docker lifecycle is fully automatic — `npm test` from `_test/` manages `pretest`/`posttest`. Test runtime details live in [Configuration → Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/configuration.md#testing-tier).
+Docker lifecycle is fully automatic - `npm test` from `_test/` manages `pretest`/`posttest`. Test runtime details live in [Configuration - Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/configuration.md#testing-tier).
 
 ## License
 

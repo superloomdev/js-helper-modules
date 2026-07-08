@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-logger-store-dynamodb.
+// Info: Three-tier test suite for helper-logger-store-dynamodb.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
 //   - Store loader rejects bad config
@@ -44,9 +44,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return LoggerStoreDynamoDBFactory({
-    table_name: table || TEST_TABLE,
-    lib_dynamodb: Lib.DynamoDB
+  return LoggerStoreDynamoDBFactory(Lib, {
+    table_name: table || TEST_TABLE
   });
 
 };
@@ -112,31 +111,28 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { LoggerStoreDynamoDBFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when table_name is missing', function () {
-
-    assert.throws(
-      function () { LoggerStoreDynamoDBFactory({ lib_dynamodb: Lib.DynamoDB }); },
+      function () { LoggerStoreDynamoDBFactory(Lib, { table_name: '' }); },
       /table_name is required/
     );
 
   });
 
-  it('throws when lib_dynamodb is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { LoggerStoreDynamoDBFactory({ table_name: 'x' }); },
-      /lib_dynamodb is required/
+      function () { LoggerStoreDynamoDBFactory(Lib, { table_name: null }); },
+      /table_name is required/
     );
 
+  });
+
+  it('returns a store object for valid config', function () {
+    const store = LoggerStoreDynamoDBFactory(Lib, { table_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.addLog, 'function');
   });
 
 });
@@ -407,9 +403,8 @@ describe('Tier 1: cleanupExpiredLogs', function () {
 
 const buildLogger = function (overrides) {
 
-  const Store = LoggerStoreDynamoDBFactory({
-    table_name: TEST_TABLE,
-    lib_dynamodb: Lib.DynamoDB
+  const Store = LoggerStoreDynamoDBFactory(Lib, {
+    table_name: TEST_TABLE
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));
