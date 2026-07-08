@@ -1,7 +1,8 @@
-// Info: Test loader for js-server-helper-auth-store-mysql.
-// Builds the Lib container and a minimal ERRORS stub so both Tier 1
-// (adapter unit tests, no auth.js) and Tier 3 (full auth lifecycle
-// via the store contract suite) can share the same runtime objects.
+// Info: Test loader for helper-auth-store-mysql.
+// Builds the Lib container so both Tier 1 (adapter unit tests, no auth.js)
+// and Tier 3 (full auth lifecycle via the store contract suite) can share
+// the same runtime objects. Sets Lib.SQL = Lib.MySQL so the injected-Lib
+// factory can pick the driver by its generic key.
 //
 // MySQL connection settings are read exclusively from environment
 // variables here - test.js never reads process.env directly.
@@ -9,13 +10,12 @@
 
 
 /********************************************************************
-Build the dependency container and a minimal ERRORS catalog.
+Build the dependency container.
 
 process.env is ONLY read here - never in test.js.
 
 @return {Object} result
-@return {Object} result.Lib    - { Utils, Debug, Crypto, Instance, MySQL }
-@return {Object} result.ERRORS - Minimal error catalog (SERVICE_UNAVAILABLE only)
+@return {Object} result.Lib    - { Utils, Debug, SQL, Crypto, Instance, MySQL }
 *********************************************************************/
 module.exports = function loader () {
 
@@ -55,19 +55,11 @@ module.exports = function loader () {
   Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
 
 
-  // ==================== MINIMAL ERRORS CATALOG ===================== //
-
-  // Tier 1 tests call the store loader directly (no auth.js). The
-  // store requires only SERVICE_UNAVAILABLE from ERRORS. Tier 3 tests
-  // load auth.js which supplies its own full ERRORS catalog internally.
-  const ERRORS = {
-    SERVICE_UNAVAILABLE: {
-      type: 'SERVICE_UNAVAILABLE',
-      message: 'Service unavailable'
-    }
-  };
+  // The store factory now picks Lib.SQL from the shared container.
+  // Alias MySQL so the adapter can use Lib.SQL without knowing the dialect.
+  Lib.SQL = Lib.MySQL;
 
 
-  return { Lib: Lib, ERRORS: ERRORS };
+  return { Lib: Lib };
 
 };

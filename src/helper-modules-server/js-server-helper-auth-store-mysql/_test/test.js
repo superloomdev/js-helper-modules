@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-auth-store-mysql.
+// Info: Three-tier test suite for helper-auth-store-mysql.
 //
 // Tier 1 - Adapter unit tests (no auth.js dependency):
 //   - Store loader rejects bad config
@@ -48,9 +48,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return AuthStoreMySQLFactory({
-    table_name: table || TEST_TABLE,
-    lib_sql:    Lib.MySQL
+  return AuthStoreMySQLFactory(Lib, {
+    table_name: table || TEST_TABLE
   });
 
 };
@@ -62,30 +61,29 @@ const buildStore = function (table) {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { AuthStoreMySQLFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when table_name is missing', function () {
-
-    assert.throws(
-      function () { AuthStoreMySQLFactory({ lib_sql: Lib.MySQL }); },
+      function () { AuthStoreMySQLFactory(Lib, { table_name: '' }); },
       /table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { AuthStoreMySQLFactory({ table_name: 'x' }); },
-      /lib_sql is required/
+      function () { AuthStoreMySQLFactory(Lib, { table_name: null }); },
+      /table_name is required/
     );
+
+  });
+
+  it('returns a store object when config is valid', function () {
+
+    const store = AuthStoreMySQLFactory(Lib, { table_name: 'valid_table' });
+    assert.ok(store);
+    assert.ok(typeof store.setupNewStore === 'function');
 
   });
 
@@ -105,7 +103,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        AuthStoreMySQLFactory({ table_name: 'bad`table', lib_sql: Lib.MySQL });
+        AuthStoreMySQLFactory(Lib, { table_name: 'bad`table' });
       },
       /identifier contains backtick/
     );
@@ -116,7 +114,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        AuthStoreMySQLFactory({ table_name: 'bad"table', lib_sql: Lib.MySQL });
+        AuthStoreMySQLFactory(Lib, { table_name: 'bad"table' });
       },
       /identifier contains double-quote/
     );
@@ -617,7 +615,7 @@ describe('Tier 1: large multi-actor list isolation', { concurrency: false }, fun
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    Store:     AuthStoreMySQLFactory({ table_name: TEST_TABLE, lib_sql: Lib.MySQL }),
+    Store:     AuthStoreMySQLFactory(Lib, { table_name: TEST_TABLE }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

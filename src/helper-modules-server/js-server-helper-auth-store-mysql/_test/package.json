@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-auth-store-mysql-test",
-  "description": "Test suite for js-server-helper-auth-store-mysql",
+  "name": "helper-auth-store-mysql-test",
+  "description": "Test suite for helper-auth-store-mysql",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,
