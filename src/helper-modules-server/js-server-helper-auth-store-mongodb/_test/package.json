@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-auth-store-mongodb-test",
-  "description": "Test suite for js-server-helper-auth-store-mongodb",
+  "name": "helper-auth-store-mongodb-test",
+  "description": "Test suite for helper-auth-store-mongodb",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

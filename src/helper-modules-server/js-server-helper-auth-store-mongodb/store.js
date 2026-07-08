@@ -1,4 +1,4 @@
-// Info: MongoDB session store adapter for js-server-helper-auth.
+// Info: MongoDB session store adapter for helper-auth.
 // Uses the composite
 //   "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
 // as the document _id so:
@@ -8,10 +8,9 @@
 //   - listSessionsByActor uses equality on an indexed `prefix` field,
 //     hitting the B-tree directly without a regex or collection scan
 //
-// The application injects a ready-to-use MongoDB helper via
-// config.lib_mongodb (typically Lib.MongoDB). This adapter never
-// requires `mongodb` directly - projects not using this store never
-// load the native driver.
+// The caller injects a ready-to-use MongoDB helper as Lib.MongoDB.
+// This adapter never requires `mongodb` directly - projects not using
+// this store never load the native driver.
 //
 // Schema management (collection creation, secondary indexes, TTL) is
 // out of scope for this adapter. MongoDB auto-creates the collection on
@@ -36,42 +35,45 @@
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
-// Adapter-local Lib: built once, shared across all instances of this adapter.
-const Lib = {
-  Utils: require('helper-utils')(null, {}),
-  Debug: require('helper-debug')(null, { LOG_LEVEL: process.env.LOG_LEVEL || 'error' })
-};
-
-// Adapter-local ERRORS catalog (frozen). Auth.js forwards these transparently.
-const ERRORS = Object.freeze({
-  SERVICE_UNAVAILABLE: {
-    type: 'AUTH_STORE_MONGODB_SERVICE_UNAVAILABLE',
-    message: 'MongoDB backend unavailable'
-  },
-  NOT_IMPLEMENTED: {
-    type: 'NOT_IMPLEMENTED',
-    message: 'This operation is not yet implemented for this backend'
-  }
-});
-
-
 /********************************************************************
-Factory loader. One call = one independent store instance with its
-own collection_name and lib_mongodb reference. Validates config at
-construction so misconfiguration fails fast at startup.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config                   - { collection_name, lib_mongodb }
-@param {string} config.collection_name   - MongoDB collection to read/write sessions
-@param {Object} config.lib_mongodb       - Ready-to-use MongoDB helper (Lib.MongoDB)
+@param {Object} shared_libs - Dependency container (Utils, Debug, MongoDB)
+@param {Object} config - Overrides merged over adapter config defaults
+                         ({ collection_name } - plain data only)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    MongoDB: shared_libs.MongoDB
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
+
+  // Own frozen error catalog
+  const ERRORS = require('./store.errors');
+
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  require('./store.validators').validateConfig(Lib, config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -80,17 +82,17 @@ module.exports = function loader (config) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, config, and
-ERRORS.
+Builds the public Store interface for one instance. All functions
+close over the same Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} config - { collection_name, lib_mongodb }
-@param {Object} ERRORS       - Error catalog forwarded from auth.js
+@param {Object} Lib        - Dependency container (Utils, Debug, MongoDB)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-const createInterface = function (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -130,6 +132,14 @@ const createInterface = function (Lib, config, ERRORS) {
     Direct read by composite _id. The token_secret_hash is baked into
     _id so a wrong secret produces a miss (no timing leak, no extra
     read). Returns null record when the document is not found.
+
+    @param {Object} instance          - Request instance
+    @param {string} tenant_id         - Tenant identifier
+    @param {string} actor_id          - Actor identifier
+    @param {string} token_key         - Token key
+    @param {string} token_secret_hash - Hash baked into _id
+
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -137,9 +147,9 @@ const createInterface = function (Lib, config, ERRORS) {
       const _id = _Store.composeMongoId(tenant_id, actor_id, token_key, token_secret_hash);
 
       // Fetch the document by _id - mismatch returns null naturally
-      const result = await config.lib_mongodb.getRecord(
+      const result = await Lib.MongoDB.getRecord(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { _id: _id }
       );
 
@@ -170,6 +180,12 @@ const createInterface = function (Lib, config, ERRORS) {
     /********************************************************************
     List all sessions for (tenant_id, actor_id). Uses equality on the
     pre-computed `prefix` field so we hit the B-tree index directly.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -177,9 +193,9 @@ const createInterface = function (Lib, config, ERRORS) {
       const prefix = _Store.composeMongoActorPrefix(tenant_id, actor_id);
 
       // Query using exact equality on the indexed `prefix` field
-      const result = await config.lib_mongodb.query(
+      const result = await Lib.MongoDB.query(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { prefix: prefix }
       );
 
@@ -220,6 +236,11 @@ const createInterface = function (Lib, config, ERRORS) {
     Upsert a session document. replaceOne+upsert on _id ensures the
     same (tenant_id, actor_id, token_key, token_secret_hash) quadruple
     yields exactly one document.
+
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical session record
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
@@ -227,9 +248,9 @@ const createInterface = function (Lib, config, ERRORS) {
       const doc = _Store.recordToDoc(record);
 
       // Upsert by _id - replaces existing doc or inserts if absent
-      const result = await config.lib_mongodb.writeRecord(
+      const result = await Lib.MongoDB.writeRecord(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { _id: doc._id },
         doc
       );
@@ -259,8 +280,15 @@ const createInterface = function (Lib, config, ERRORS) {
     /********************************************************************
     Partial update via $set. Uses an anchored prefix regex on _id to
     locate the document (the caller only has actor_id + token_key,
-    not the hash baked into _id). Identity-column guard mirrors the
-    SQL stores so programmer errors fail fast.
+    not the hash baked into _id). Throws TypeError on identity fields.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+    @param {Object} updates   - Partial record (mutable fields only)
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -278,7 +306,7 @@ const createInterface = function (Lib, config, ERRORS) {
       for (const k of update_keys) {
         if (_Store.UPDATE_IDENTITY_BLOCKLIST.indexOf(k) !== -1) {
           throw new TypeError(
-            '[js-server-helper-auth-store-mongodb] updateSessionActivity cannot modify identity field "' + k + '"'
+            '[helper-auth-store-mongodb] updateSessionActivity cannot modify identity field "' + k + '"'
           );
         }
       }
@@ -290,9 +318,9 @@ const createInterface = function (Lib, config, ERRORS) {
       const anchored = new RegExp('^' + _Store.escapeRegExp(prefix));
 
       // Run the partial $set update against the matched document
-      const result = await config.lib_mongodb.updateRecord(
+      const result = await Lib.MongoDB.updateRecord(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { _id: anchored },
         { $set: updates }
       );
@@ -327,8 +355,14 @@ const createInterface = function (Lib, config, ERRORS) {
 
     /********************************************************************
     Delete by (tenant_id, actor_id, token_key). Uses an anchored prefix
-    regex on _id since the caller does not have the hash. At most one
-    document matches this prefix.
+    regex on _id since the caller does not have the hash.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
@@ -337,9 +371,9 @@ const createInterface = function (Lib, config, ERRORS) {
       const anchored = new RegExp('^' + _Store.escapeRegExp(prefix));
 
       // Delete the matched document by prefix regex on _id
-      const result = await config.lib_mongodb.deleteRecordsByFilter(
+      const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { _id: anchored }
       );
 
@@ -366,8 +400,14 @@ const createInterface = function (Lib, config, ERRORS) {
 
 
     /********************************************************************
-    Bulk delete by $or over all _id prefixes. One deleteMany round-trip
-    regardless of how many keys are in the list.
+    Bulk delete by $or over all _id prefixes. One deleteMany round-trip.
+    No-op success if keys array is empty.
+
+    @param {Object}   instance  - Request instance
+    @param {string}   tenant_id - Tenant identifier
+    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -386,9 +426,9 @@ const createInterface = function (Lib, config, ERRORS) {
       });
 
       // Delete all matched documents in one deleteMany round-trip
-      const result = await config.lib_mongodb.deleteRecordsByFilter(
+      const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { $or: or_clauses }
       );
 
@@ -423,16 +463,20 @@ const createInterface = function (Lib, config, ERRORS) {
 
     /********************************************************************
     Sweep expired sessions using the expires_at integer field. MongoDB
-    native TTL requires a Date-typed field, so this manual deleteMany
-    is the garbage-collection path - run it on a cron.
+    native TTL requires a Date-typed field; this manual deleteMany is
+    the garbage-collection path - run it on a cron.
+
+    @param {Object} instance - Request instance
+
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
       // Delete all documents whose expires_at is in the past
       const now = instance.time;
-      const result = await config.lib_mongodb.deleteRecordsByFilter(
+      const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        config.collection_name,
+        CONFIG.collection_name,
         { expires_at: { $lt: now } }
       );
 

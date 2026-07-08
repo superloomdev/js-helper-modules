@@ -1,13 +1,12 @@
-# js-server-helper-auth-store-mongodb. AI Reference
+# helper-auth-store-mongodb. AI Reference
 
-Class F storage adapter. MongoDB backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
+Class F storage adapter. MongoDB backend for `helper-auth`. Standard factory shape: receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')({
-  collection_name: 'sessions_user',
-  lib_mongodb:     Lib.MongoDB
+const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
+  collection_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -19,20 +18,18 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 | Config key | Type | Notes |
 |---|---|---|
 | `collection_name` | String | Required. One collection per actor_type |
-| `lib_mongodb` | Object | Required. Initialized `js-server-helper-nosql-mongodb` instance |
 
-The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
+The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.MongoDB` by reference from the injected container. Auth forwards error envelopes transparently.
 
 ## Config
 
 ```js
 {
-  collection_name: 'sessions_user',  // required. one collection per actor_type
-  lib_mongodb:     Lib.MongoDB       // required. initialized js-server-helper-nosql-mongodb
+  collection_name: 'sessions_user'  // required. one collection per actor_type
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`collection_name` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -68,7 +65,7 @@ Each session is a single document. The shape is the canonical record plus two ad
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter directly with its config to get a Store object, then pass that to the Auth parent.** Do not pass the factory function reference to Auth; pass the result of calling it.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-mongodb')(Lib, { collection_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
 2. **`setupNewStore` is not implemented.** Always returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`. Indexes and the collection are provisioned out-of-band. Generated code that calls `setupNewStore` on this backend must handle the `NOT_IMPLEMENTED` error envelope; do not assume it succeeds.
 
@@ -93,21 +90,21 @@ Each session is a single document. The shape is the canonical record plus two ad
 ## Peer Dependencies
 
 ```
-@superloomdev/js-helper-utils                  (type checks)
-@superloomdev/js-helper-debug                  (structured logging)
-@superloomdev/js-server-helper-nosql-mongodb   (MongoDB driver wrapper)
+Lib.Utils    (@superloomdev/js-helper-utils)               injected via shared_libs
+Lib.Debug    (@superloomdev/js-helper-debug)               injected via shared_libs
+Lib.MongoDB  (@superloomdev/js-server-helper-nosql-mongodb) injected via shared_libs
 ```
 
-Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-mongodb` driver helper is passed in via `config.lib_mongodb` by the application.
+All three are injected by the caller. The adapter owns no runtime dependencies of its own.
 
 ## Error Catalog
 
-The adapter defines its own internal ERRORS catalog. Auth forwards error envelopes transparently.
+The adapter defines its own error catalog in `store.errors.js`. Auth forwards error envelopes transparently.
 
-| Error | When |
-|---|---|
-| `SERVICE_UNAVAILABLE` | Driver-level call failed. The driver's underlying error is logged via `Lib.Debug.debug` and never surfaced |
-| `NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
+| Error | Type | When |
+|---|---|---|
+| `SERVICE_UNAVAILABLE` | `AUTH_STORE_MONGODB_SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, never surfaced |
+| `NOT_IMPLEMENTED` | `AUTH_STORE_MONGODB_NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 

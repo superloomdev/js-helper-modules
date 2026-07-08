@@ -1,6 +1,6 @@
 # Configuration
 
-The MongoDB store adapter is a fully independent module. Call it with its config to get a ready-to-use store object, then pass that object as `Store` to the Auth parent.
+The MongoDB store adapter receives a `Lib` container and config to produce a ready-to-use store object, which is then passed as `Store` to the Auth parent.
 
 ## On This Page
 
@@ -20,9 +20,8 @@ Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
   SERVER_SELECTION_TIMEOUT: 5000
 });
 
-const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')({
-  collection_name: 'sessions_user',
-  lib_mongodb:     Lib.MongoDB
+const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
+  collection_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -32,7 +31,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 });
 ```
 
-The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
+The adapter receives the `Lib` container and picks `Lib.Utils`, `Lib.Debug`, and `Lib.MongoDB` by reference. It defines its own `CONFIG` and `ERRORS` internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
 The MongoDB client is **not** created at loader time. `Lib.MongoDB` lazy-initializes on the first query. The adapter does not open any connection during construction either; the first round-trip happens on the first `getSession`, `setSession`, or `cleanupExpiredSessions` call.
 
@@ -43,19 +42,18 @@ The MongoDB client is **not** created at loader time. `Lib.MongoDB` lazy-initial
 | Key | Type | Required | Description |
 |---|---|---|---|
 | `collection_name` | String | Yes | Name of the sessions collection. Use one collection per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
-| `lib_mongodb` | Object | Yes | Initialized `Lib.MongoDB` instance. The adapter delegates all driver execution to this helper |
 
-The validator throws an `Error` at loader time if either key is missing, null, undefined, or (for `collection_name`) the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `collection_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
 ## Peer Dependencies
 
-Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-mongodb` driver helper is passed in via `config.lib_mongodb` by the application.
+The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
-| Package | How it is used |
+| Package | Reads via `Lib` |
 |---|---|
-| `@superloomdev/js-helper-utils` | Required by adapter; used for type checks in `store.validators.js` |
-| `@superloomdev/js-helper-debug` | Required by adapter; used for driver-error logging |
-| `@superloomdev/js-server-helper-nosql-mongodb` | Passed in via `config.lib_mongodb`; the adapter delegates all driver execution to this helper |
+| `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
+| `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
+| `@superloomdev/js-server-helper-nosql-mongodb` | `Lib.MongoDB` injected by the caller |
 
 The driver helper (`Lib.MongoDB`) carries its own peer dependency on the native `mongodb` driver. The adapter never `require`s `mongodb` directly; applications that never use this store never load the driver.
 
@@ -73,7 +71,7 @@ The adapter reads no environment variables at runtime. The variables below are c
 Service-dependent. The contract test suite runs against a real MongoDB container. The Docker lifecycle is fully automated by `npm test`:
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test
 ```
 
 `pretest` runs `docker compose down -v --remove-orphans` (defensive cleanup) then `docker compose up -d --wait` to start the MongoDB container on port 27018. `posttest` removes containers and volumes (the image stays cached for next time). No manual `docker compose up` step is required.
