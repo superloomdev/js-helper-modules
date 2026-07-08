@@ -1,14 +1,16 @@
-# API Reference — js-server-helper-logger-store-sqlite
+# API Reference - helper-logger-store-sqlite
 
-This adapter implements the 5-method store contract consumed by `js-server-helper-logger`. The contract shape is identical across all `logger-store-*` adapters; this document focuses on the SQLite-specific semantics.
+This adapter implements the 5-method store contract consumed by `helper-logger`. The contract shape is identical across all `logger-store-*` adapters; this document focuses on the SQLite-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
+  table_name: 'action_log'
+});
 ```
 
-The factory validates `CONFIG.STORE_CONFIG`, builds the DDL array and INSERT template once, and returns the Store interface.
+The factory merges config over defaults, validates it, builds the INSERT template once, and returns the Store interface.
 
 ## Store Contract
 
@@ -16,10 +18,10 @@ The factory validates `CONFIG.STORE_CONFIG`, builds the DDL array and INSERT tem
 
 Executes four idempotent DDL statements in order:
 
-1. `CREATE TABLE IF NOT EXISTS "{table_name}" (...)` — creates the log table with `sort_key` as the sole primary key.
-2. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_entity" ON ...` — covers entity query path.
-3. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_actor" ON ...` — covers actor query path.
-4. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_expires_at" ON ...` — covers cleanup path.
+1. `CREATE TABLE IF NOT EXISTS "{table_name}" (...)` - creates the log table with `sort_key` as the sole primary key.
+2. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_entity" ON ...` - covers entity query path.
+3. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_actor" ON ...` - covers actor query path.
+4. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_expires_at" ON ...` - covers cleanup path.
 
 All use `IF NOT EXISTS`, making repeated calls on every boot safe.
 
@@ -37,7 +39,7 @@ VALUES (?, ?, ...)
 ON CONFLICT ("sort_key") DO NOTHING
 ```
 
-This makes `addLog` idempotent — re-sending the same `sort_key` is not an error.
+This makes `addLog` idempotent - re-sending the same `sort_key` is not an error.
 
 `record.data` is JSON-serialized to TEXT before insert. `record.expires_at` may be `null` for persistent records.
 

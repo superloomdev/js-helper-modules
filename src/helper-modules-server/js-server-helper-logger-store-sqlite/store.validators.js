@@ -1,31 +1,33 @@
-// Info: Config validator for js-server-helper-logger-store-sqlite.
+// Info: Config validator for helper-logger-store-sqlite.
 // Called once at construction time from the store.js loader.
 // Throws Error on misconfiguration so the adapter fails before
 // serving a single request.
 //
-// Singleton: Lib is injected once by the loader. Node.js require
-// cache guarantees the same reference on every subsequent require.
+// Singleton pattern: Lib and ERRORS are injected at loader time and
+// close over the module-scope validators object.
 'use strict';
 
 
-// Shared dependency injected by loader
+// Shared dependencies injected by loader (singleton pattern)
 let Lib;
+let ERRORS; // eslint-disable-line no-unused-vars
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and returns the module-scope
+Singleton loader. Injects Lib and ERRORS into the module-scope
 Validators object.
 
-@param {Object} shared_libs - Dependency container (Utils)
+@param {Object} shared_libs - Dependency container (Utils, Debug)
+@param {Object} errors      - Frozen error catalog
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) {
+module.exports = function loader (shared_libs, errors) {
 
-  // Inject shared dependency
   Lib = shared_libs;
+  ERRORS = errors;
 
   return Validators;
 
@@ -42,19 +44,11 @@ const Validators = {
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
-  @param {Object} config - { table_name, lib_sql }
+  @param {Object} config - Merged configuration object
 
   @return {void}
   *********************************************************************/
   validateConfig: function (config) {
-
-    // config must be a non-null object
-    if (
-      Lib.Utils.isNullOrUndefined(config) ||
-      !Lib.Utils.isObject(config)
-    ) {
-      throw new Error('[js-server-helper-logger-store-sqlite] config must be an object');
-    }
 
     // table_name is required and must be a non-empty string
     if (
@@ -62,12 +56,7 @@ const Validators = {
       !Lib.Utils.isString(config.table_name) ||
       Lib.Utils.isEmptyString(config.table_name)
     ) {
-      throw new Error('[js-server-helper-logger-store-sqlite] config.table_name is required');
-    }
-
-    // lib_sql is required - the caller must inject the SQLite helper
-    if (Lib.Utils.isNullOrUndefined(config.lib_sql)) {
-      throw new Error('[js-server-helper-logger-store-sqlite] config.lib_sql is required (pass Lib.SQLite)');
+      throw new Error('[helper-logger-store-sqlite] config.table_name is required');
     }
 
   }

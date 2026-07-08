@@ -1,4 +1,4 @@
-// Info: Frozen error catalog for js-server-helper-logger-store-sqlite.
+// Info: Frozen error catalog for helper-logger-store-sqlite.
 // Every error object is frozen so callers cannot mutate them.
 'use strict';
 

@@ -1,8 +1,8 @@
-# Schema — js-server-helper-logger-store-sqlite
+# Schema - helper-logger-store-sqlite
 
 ## DDL
 
-`setupNewStore` issues four idempotent DDL statements (built by `_Store.buildDDL()` at `createInterface` time):
+`setupNewStore` issues four idempotent DDL statements (built by `_Store.buildCreateTableSQL()`, `buildCreateEntityIndexSQL()`, `buildCreateActorIndexSQL()`, `buildCreateTTLIndexSQL()` at `createInterface` time):
 
 ```sql
 CREATE TABLE IF NOT EXISTS "action_log" (
@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS "idx_action_log_expires_at"
   ON "action_log" ("expires_at");
 ```
 
-The table name and index names are derived from `STORE_CONFIG.table_name` at runtime.
+The table name and index names are derived from `config.table_name` at runtime.
 
 ## Column Mapping
 
@@ -60,11 +60,11 @@ All identifiers are double-quoted (`"col"`). The adapter rejects any `table_name
 
 ### Primary Key
 
-The sole primary key is `"sort_key"`. Unlike the SQL adapters in the `auth-store-*` family, the logger does not use a composite primary key — `sort_key` alone provides global uniqueness.
+The sole primary key is `"sort_key"`. Unlike the SQL adapters in the `auth-store-*` family, the logger does not use a composite primary key - `sort_key` alone provides global uniqueness.
 
 ### `addLog` Idempotency
 
-`addLog` uses `INSERT ... ON CONFLICT ("sort_key") DO NOTHING`. A duplicate `sort_key` is silently ignored, not an error. This makes log ingestion idempotent — retrying a failed write is always safe.
+`addLog` uses `INSERT ... ON CONFLICT ("sort_key") DO NOTHING`. A duplicate `sort_key` is silently ignored, not an error. This makes log ingestion idempotent - retrying a failed write is always safe.
 
 ### `data` Column
 
@@ -76,10 +76,10 @@ The sole primary key is `"sort_key"`. Unlike the SQL adapters in the `auth-store
 
 ### Index Strategy
 
-- **`idx_<table>_entity`** — covers `getLogsByEntity` (scope + entity_type + entity_id + sort_key DESC).
-- **`idx_<table>_actor`** — covers `getLogsByActor` (scope + actor_type + actor_id + sort_key DESC).
-- **`idx_<table>_expires_at`** — single-column index covering the `cleanupExpiredLogs` range scan.
+- **`idx_<table>_entity`** - covers `getLogsByEntity` (scope + entity_type + entity_id + sort_key DESC).
+- **`idx_<table>_actor`** - covers `getLogsByActor` (scope + actor_type + actor_id + sort_key DESC).
+- **`idx_<table>_expires_at`** - single-column index covering the `cleanupExpiredLogs` range scan.
 
 ## Index Names
 
-Index names follow the pattern `idx_{table_name}_{suffix}`, computed deterministically from `STORE_CONFIG.table_name` at `createInterface` time. Suffixes are `entity`, `actor`, `expires_at`.
+Index names follow the pattern `idx_{table_name}_{suffix}`, computed deterministically from `config.table_name` at `createInterface` time. Suffixes are `entity`, `actor`, `expires_at`.

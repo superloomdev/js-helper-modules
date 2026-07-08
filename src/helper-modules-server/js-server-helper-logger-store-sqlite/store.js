@@ -1,11 +1,10 @@
-// Info: SQLite store adapter for js-server-helper-logger. Fully self-contained -
-// every DDL statement, INSERT template, query, value coercion, and
-// identifier-quoting rule in this file is specific to SQLite.
+// Info: SQLite store adapter for helper-logger. Every DDL statement,
+// INSERT template, query, value coercion, and identifier-quoting rule
+// in this file is specific to SQLite.
 // No cross-dialect parameterisation, no shared SQL helper module.
 //
-// The caller passes a ready-to-use SQLite helper via config.lib_sql
-// (typically Lib.SQLite). This adapter never requires `node:sqlite`
-// directly - projects not using this store never load the driver.
+// Standard factory shape: receives shared_libs, picks SQL driver as
+// Lib.SQL (generic SQL key - hot-swappable across sql-* dialect helpers).
 //
 // SQLite-specific quirks handled here:
 //   - Identifiers are double-quoted ("col"), same as Postgres.
@@ -30,32 +29,43 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Builds own Lib and ERRORS, validates config via the
-Validators singleton, then delegates to createInterface. Each call
-returns an independent Store instance with its own table_name and
-lib_sql driver reference.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config - { table_name, lib_sql }
+@param {Object} shared_libs - Dependency container (Utils, Debug, SQL)
+@param {Object} config      - Overrides merged over adapter config defaults
 
 @return {Object} - Store interface (5 methods)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  // Build own Lib container from peer dependencies
-  const Lib = {};
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    SQL: shared_libs.SQL
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
 
   // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  Validators.validateConfig(config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -70,13 +80,14 @@ ERRORS. _Store (private helpers) is defined after Store (public
 methods) and is referenced by the public methods via the closure -
 the same pattern used across all helper modules.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} config - { table_name, lib_sql }
-@param {Object} ERRORS - Adapter-owned error catalog
+@param {Object} Lib        - Dependency container (Utils, Debug, SQL)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface
 *********************************************************************/
-const createInterface = function (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -96,7 +107,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Create table
       const table_stmt = _Store.buildCreateTableSQL();
-      const table_result = await config.lib_sql.write(instance, table_stmt);
+      const table_result = await Lib.SQL.write(instance, table_stmt);
 
       // Return a service error if the table creation failed
       if (table_result.success === false) {
@@ -113,7 +124,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Create entity index (scope + entity_type + entity_id + sort_key)
       const entity_idx = _Store.buildCreateEntityIndexSQL();
-      const entity_result = await config.lib_sql.write(instance, entity_idx);
+      const entity_result = await Lib.SQL.write(instance, entity_idx);
 
       if (entity_result.success === false) {
         Lib.Debug.debug('Logger sqlite setupNewStore (entity index) failed', {
@@ -129,7 +140,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Create actor index (scope + actor_type + actor_id + sort_key)
       const actor_idx = _Store.buildCreateActorIndexSQL();
-      const actor_result = await config.lib_sql.write(instance, actor_idx);
+      const actor_result = await Lib.SQL.write(instance, actor_idx);
 
       if (actor_result.success === false) {
         Lib.Debug.debug('Logger sqlite setupNewStore (actor index) failed', {
@@ -145,7 +156,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Create expires_at index for cleanup scans
       const ttl_idx = _Store.buildCreateTTLIndexSQL();
-      const ttl_result = await config.lib_sql.write(instance, ttl_idx);
+      const ttl_result = await Lib.SQL.write(instance, ttl_idx);
 
       if (ttl_result.success === false) {
         Lib.Debug.debug('Logger sqlite setupNewStore (ttl index) failed', {
@@ -182,7 +193,7 @@ const createInterface = function (Lib, config, ERRORS) {
     addLog: async function (instance, record) {
 
       const params = _Store.recordToRow(record);
-      const result = await config.lib_sql.write(instance, insert_sql, params);
+      const result = await Lib.SQL.write(instance, insert_sql, params);
 
       // Return a service error if the insert failed
       if (result.success === false) {
@@ -220,7 +231,7 @@ const createInterface = function (Lib, config, ERRORS) {
     getLogsByEntity: async function (instance, query) {
 
       const { sql, params } = _Store.buildListSQL('entity', query);
-      const result = await config.lib_sql.getRows(instance, sql, params);
+      const result = await Lib.SQL.getRows(instance, sql, params);
 
       // Return a service error if the query failed
       if (result.success === false) {
@@ -268,7 +279,7 @@ const createInterface = function (Lib, config, ERRORS) {
     getLogsByActor: async function (instance, query) {
 
       const { sql, params } = _Store.buildListSQL('actor', query);
-      const result = await config.lib_sql.getRows(instance, sql, params);
+      const result = await Lib.SQL.getRows(instance, sql, params);
 
       // Return a service error if the query failed
       if (result.success === false) {
@@ -322,12 +333,12 @@ const createInterface = function (Lib, config, ERRORS) {
       // and then call this method after the real clock has advanced past it.
       const now_sec = Lib.Utils.getUnixTime();
       const sql = (
-        'DELETE FROM ' + _Store.Q(config.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('expires_at') + ' IS NOT NULL' +
         '   AND ' + _Store.Q('expires_at') + ' <= ?'
       );
 
-      const result = await config.lib_sql.write(instance, sql, [now_sec]);
+      const result = await Lib.SQL.write(instance, sql, [now_sec]);
 
       // Return a service error if the delete failed
       if (result.success === false) {
@@ -410,7 +421,7 @@ const createInterface = function (Lib, config, ERRORS) {
     buildCreateTableSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -443,7 +454,7 @@ const createInterface = function (Lib, config, ERRORS) {
     buildCreateEntityIndexSQL: function () {
 
       const Q = _Store.Q;
-      const t = config.table_name;
+      const t = CONFIG.table_name;
       const idx = Q('idx_' + t + '_entity');
 
       return (
@@ -468,7 +479,7 @@ const createInterface = function (Lib, config, ERRORS) {
     buildCreateActorIndexSQL: function () {
 
       const Q = _Store.Q;
-      const t = config.table_name;
+      const t = CONFIG.table_name;
       const idx = Q('idx_' + t + '_actor');
 
       return (
@@ -492,7 +503,7 @@ const createInterface = function (Lib, config, ERRORS) {
     buildCreateTTLIndexSQL: function () {
 
       const Q = _Store.Q;
-      const t = config.table_name;
+      const t = CONFIG.table_name;
       const idx = Q('idx_' + t + '_expires_at');
 
       return (
@@ -511,7 +522,7 @@ const createInterface = function (Lib, config, ERRORS) {
     buildInsertSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const cols = _Store.COLUMNS.map(Q).join(', ');
       const placeholders = _Store.COLUMNS.map(function () {
         return '?';
@@ -535,7 +546,7 @@ const createInterface = function (Lib, config, ERRORS) {
     buildListSQL: function (mode, query) {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const parts = [];
       const params = [];
 

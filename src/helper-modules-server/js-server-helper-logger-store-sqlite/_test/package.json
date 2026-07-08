@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-logger-store-sqlite-test",
-  "description": "Test suite for js-server-helper-logger-store-sqlite",
+  "name": "helper-logger-store-sqlite-test",
+  "description": "Test suite for helper-logger-store-sqlite",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,
