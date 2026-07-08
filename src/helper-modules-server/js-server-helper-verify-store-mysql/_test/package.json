@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-verify-store-mysql-test",
-  "description": "Test suite for js-server-helper-verify-store-mysql",
+  "name": "helper-verify-store-mysql-test",
+  "description": "Test suite for helper-verify-store-mysql",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

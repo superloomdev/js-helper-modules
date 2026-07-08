@@ -1,8 +1,8 @@
-# Schema — js-server-helper-verify-store-mysql
+# Schema - helper-verify-store-mysql
 
 ## DDL
 
-`setupNewStore` issues one idempotent DDL statement (built by `_Store.buildSchemaDDL()` at `createInterface` time) with all indexes inlined:
+`setupNewStore` issues one idempotent DDL statement (built by `_Store.buildDDL()` at `createInterface` time) with all indexes inlined:
 
 ```sql
 CREATE TABLE IF NOT EXISTS `verification_codes` (
@@ -13,11 +13,11 @@ CREATE TABLE IF NOT EXISTS `verification_codes` (
   `created_at` BIGINT       NOT NULL,
   `expires_at` BIGINT       NOT NULL,
   PRIMARY KEY (`scope`, `id`),
-  INDEX `idx_verification_codes_expires_at` (`expires_at`)
+  INDEX `verification_codes_expires_at_idx` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
 
-The table name and index name are derived from `STORE_CONFIG.table_name` at runtime.
+The table name and index name are derived from `CONFIG.table_name` at runtime.
 
 ## Column Mapping
 
@@ -67,4 +67,4 @@ ON DUPLICATE KEY UPDATE
 
 ## Index Name
 
-The index name is `idx_{table_name}_expires_at`, computed deterministically from `STORE_CONFIG.table_name` at `createInterface` time.
+The index name is `{table_name}_expires_at_idx`, computed deterministically from `CONFIG.table_name` at `createInterface` time.

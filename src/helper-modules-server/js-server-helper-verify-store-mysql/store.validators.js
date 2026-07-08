@@ -1,11 +1,37 @@
-// Info: Config validator for js-server-helper-verify-store-mysql.
-// This adapter is a fully independent module that owns its own Lib.
+// Info: Config validator for helper-verify-store-mysql.
+// This adapter is a fully independent module that owns its own Validators.
 // Called once at construction time. Throws Error on misconfiguration
 // so the adapter fails before serving a single request.
-
+//
+// Singleton pattern: Lib and ERRORS are injected at loader time and
+// close over the module-scope validators object.
 'use strict';
 
 
+// Shared dependencies injected by loader (singleton pattern)
+let Lib;
+let ERRORS; // eslint-disable-line no-unused-vars
+
+
+/********************************************************************
+Loader. Injects Lib and ERRORS into the module-scope validators object.
+
+@param {Object} shared_libs - Dependency container (Utils, Debug)
+@param {Object} errors      - Frozen error catalog
+
+@return {Object} - Validators singleton
+*********************************************************************/
+module.exports = function loader (shared_libs, errors) {
+
+  Lib = shared_libs;
+  ERRORS = errors;
+
+  return Validators;
+
+};
+
+
+//////////////////////////// Public Functions START //////////////////////////
 const Validators = {
 
 
@@ -14,20 +40,11 @@ const Validators = {
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
-  @param {Object} Lib - Dependency container (Utils)
-  @param {Object} config - Configuration object
+  @param {Object} config - Merged configuration object
 
   @return {void}
   *********************************************************************/
-  validateConfig: function (Lib, config) {
-
-    // config must be a non-null object
-    if (
-      Lib.Utils.isNullOrUndefined(config) ||
-      !Lib.Utils.isObject(config)
-    ) {
-      throw new Error('[js-server-helper-verify-store-mysql] config must be an object');
-    }
+  validateConfig: function (config) {
 
     // table_name is required and must be a non-empty string
     if (
@@ -35,16 +52,9 @@ const Validators = {
       !Lib.Utils.isString(config.table_name) ||
       Lib.Utils.isEmptyString(config.table_name)
     ) {
-      throw new Error('[js-server-helper-verify-store-mysql] config.table_name is required');
-    }
-
-    // lib_mysql is required - the caller must inject the MySQL helper
-    if (Lib.Utils.isNullOrUndefined(config.lib_mysql)) {
-      throw new Error('[js-server-helper-verify-store-mysql] config.lib_mysql is required (pass Lib.MySQL)');
+      throw new Error('[helper-verify-store-mysql] config.table_name is required');
     }
 
   }
 
-};////////////////////////////// Public Functions END ////////////////////////
-
-module.exports = Validators;
+};//////////////////////////// Public Functions END ///////////////////////////

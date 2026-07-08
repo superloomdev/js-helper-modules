@@ -1,4 +1,4 @@
-# Cleanup — js-server-helper-verify-store-mysql
+# Cleanup - helper-verify-store-mysql
 
 ## No Native TTL
 
@@ -22,13 +22,13 @@ DELETE FROM `verification_codes`
 WHERE `expires_at` < ?
 ```
 
-The bound parameter is `Lib.Utils.getUnixTime()` — real wall-clock seconds, not `instance.time`. The `expires_at` index makes this a fast range scan.
+The bound parameter is `instance.time` - request-instance unix epoch seconds. The `expires_at` index makes this a fast range scan.
 
 ## Cadence Guidance
 
 | Deployment | Recommended cadence |
 |------------|---------------------|
-| Production | Every 1–6 hours |
+| Production | Every 1-6 hours |
 | Development / test | Not critical; container restarts reset state |
 
 ## Operational Notes

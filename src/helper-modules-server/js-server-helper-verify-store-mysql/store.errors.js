@@ -1,4 +1,4 @@
-// Info: Error catalog for js-server-helper-verify-store-mysql.
+// Info: Error catalog for helper-verify-store-mysql.
 // This adapter is a fully independent module that owns its own error catalog.
 // Errors are frozen at module load time to prevent accidental mutation.
 'use strict';

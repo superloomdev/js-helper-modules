@@ -1,11 +1,10 @@
-# Configuration — js-server-helper-verify-store-mysql
+# Configuration - helper-verify-store-mysql
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-mysql')({
-  table_name: 'verification_codes',
-  lib_mysql: Lib.MySQL
+const Store = require('@superloomdev/js-server-helper-verify-store-mysql')(Lib, {
+  table_name: 'verification_codes'
 });
 
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
@@ -16,21 +15,20 @@ Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
 ## Configuration Keys
 
 | Key | Type | Required | Description |
-|-----|------|----------|-------------|
+|-----|------|----------|--------------|
 | `table_name` | `String` | Yes | Name of the verification table. Must not contain a backtick. |
-| `lib_mysql` | `Object` | Yes | An initialized `Lib.MySQL` instance (`@superloomdev/js-server-helper-sql-mysql`). |
 
 ## Dependencies
 
 | Package | Type | Purpose |
 |---------|------|---------|
-| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-mysql` | Peer | MySQL driver wrapper (`Lib.MySQL`) |
+| `helper-utils` | Injected via `shared_libs.Utils` | Type checks |
+| `helper-debug` | Injected via `shared_libs.Debug` | Structured debug logging |
+| `helper-sql-mysql` | Injected via `shared_libs.SQL` | MySQL driver wrapper |
 
 ## Environment Variables
 
-Consumed only by `_test/loader.js` — never read by the adapter itself.
+Consumed only by `_test/loader.js` - never read by the adapter itself.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -47,7 +45,7 @@ Consumed only by `_test/loader.js` — never read by the adapter itself.
 | Contract + Integration | MySQL via Docker Compose | `pretest`/`posttest` manage the Docker lifecycle |
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test  # run from _test/
 ```
 
 The `pretest` script runs `docker compose down -v` then `docker compose up -d --wait`. Never start Docker manually before running tests.

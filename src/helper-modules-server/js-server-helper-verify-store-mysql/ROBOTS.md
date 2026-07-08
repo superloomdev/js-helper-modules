@@ -1,22 +1,21 @@
-# js-server-helper-verify-store-mysql. AI Reference
+# helper-verify-store-mysql. AI Reference
 
-Class F storage adapter. MySQL / MariaDB backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
+Class F storage adapter. MySQL / MariaDB backend for `helper-verify`. Fully independent module that owns its own CONFIG, ERRORS, and Validators. Standard factory shape: `(shared_libs, config)`. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a running MySQL or MariaDB instance. Uses `js-server-helper-sql-mysql` (pooled `mysql2` driver wrapper) injected via `config.lib_mysql`.
+Requires a running MySQL or MariaDB instance. Uses `helper-sql-mysql` (pooled `mysql2` driver wrapper) injected via `shared_libs.SQL`.
 
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-mysql')({
-  table_name: 'verification_codes',
-  lib_mysql: Lib.MySQL
+const Store = require('@superloomdev/js-server-helper-verify-store-mysql')(Lib, {
+  table_name: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
+| `shared_libs` | Object | Yes | Dependency container (Utils, Debug, SQL) |
 | `table_name` | String | Yes | Name of the verification table |
-| `lib_mysql` | Object | Yes | Initialized `js-server-helper-sql-mysql` instance |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods to satisfy its persistence needs.
 
@@ -24,12 +23,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  table_name: 'verification_codes',  // required. one table per verify instance
-  lib_mysql: Lib.MySQL               // required. initialized js-server-helper-sql-mysql
+  table_name: 'verification_codes'  // required. one table per verify instance
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver is injected via `shared_libs.SQL`.
 
 ## Store Contract
 
@@ -56,7 +54,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 5. **`deleteRecord` is idempotent.** A missing row is treated as success.
 
-6. **`cleanupExpiredRecords` uses real wall-clock time.** Not `instance.time`.
+6. **`cleanupExpiredRecords` uses `instance.time`.** The bound parameter is the request-instance unix epoch seconds. Not `Lib.Utils.getUnixTime()`.
 
 7. **Identifiers are backtick-quoted (`` `col` ``).** The adapter rejects any `table_name` containing a backtick at quoting time.
 
@@ -71,12 +69,16 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ## Peer Dependencies
 
 ```
-@superloomdev/js-helper-utils               (type checks)
-@superloomdev/js-helper-debug               (structured logging)
-@superloomdev/js-server-helper-sql-mysql    (mysql2 driver wrapper)
+helper-utils              (type checks - via shared_libs.Utils)
+helper-debug              (structured logging - via shared_libs.Debug)
+helper-sql-mysql          (mysql2 driver wrapper - via shared_libs.SQL)
 ```
 
-## Error Catalog Used
+All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never requires any of them directly; it picks them from the injected container.
+
+## Error Catalog
+
+This adapter owns its own `store.errors.js`. Only one type:
 
 | Error | When |
 |---|---|

@@ -1,11 +1,12 @@
-// Info: MySQL store adapter for js-server-helper-verify. Fully independent
-// module that owns its own Lib, Config, and ERRORS. Every DDL statement,
-// UPSERT template, and CRUD query in this file is specific to MySQL.
+// Info: MySQL store adapter for helper-verify. Fully independent
+// module that owns its own CONFIG, ERRORS, and Validators. Every DDL
+// statement, UPSERT template, and CRUD query in this file is specific
+// to MySQL.
 //
-// The application injects a ready-to-use MySQL helper via
-// config.lib_mysql (typically Lib.MySQL). This adapter never
-// requires `mysql2` directly - projects not using this store never
-// load the driver.
+// Standard factory shape: receives shared_libs, picks dependencies by
+// reference. The SQL driver arrives as shared_libs.SQL (any helper-sql-*
+// dialect satisfies the interface). This adapter never requires `mysql2`
+// directly - projects not using this store never load the driver.
 //
 // MySQL-specific details:
 //   - Identifiers are backtick-quoted (`col`).
@@ -30,38 +31,43 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Factory loader. Creates a fully independent store adapter with its own
-Lib, Config, and ERRORS. Returns a ready-to-use store object.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config - Configuration object (merged with defaults)
+@param {Object} shared_libs - Dependency container (Utils, Debug, SQL)
+@param {Object} config      - Overrides merged over adapter config defaults
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  // Dependencies for this instance
+  // Dependencies for this instance - by reference from the shared container
   const Lib = {
-    Utils: require('@superloomdev/js-helper-utils')(),
-    Debug: require('@superloomdev/js-helper-debug')()
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    SQL: shared_libs.SQL
   };
 
-  // Merge overrides over defaults
+  // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
     require('./store.config'),
     config || {}
   );
 
-  // Load internal error catalog
+  // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators
-  const Validators = require('./store.validators');
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
-  // Validate CONFIG - throws on misconfiguration
-  Validators.validateConfig(Lib, CONFIG);
+  // Validate config - throws on misconfiguration
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, CONFIG, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -76,13 +82,14 @@ ERRORS. _Store (private helpers) is defined after Store (public
 methods) and is referenced by the public methods via the closure -
 the same pattern used across all helper modules.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - { table_name, lib_mysql }
-@param {Object} ERRORS - Error catalog from this adapter
+@param {Object} Lib        - Dependency container (Utils, Debug, SQL)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -106,7 +113,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Execute each DDL statement in order
       for (const stmt of _Store.ddl) {
-        const result = await CONFIG.lib_mysql.write(instance, stmt, []);
+        const result = await Lib.SQL.write(instance, stmt, []);
 
         // Return a service error if any DDL statement failed
         if (result.success === false) {
@@ -149,7 +156,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     getRecord: async function (instance, scope, key) {
 
       // Fetch the record row by composite primary key
-      const result = await CONFIG.lib_mysql.getRow(
+      const result = await Lib.SQL.getRow(
         instance,
         'SELECT `code`, `fail_count`, `created_at`, `expires_at`' +
         ' FROM ' + _Store.BT(CONFIG.table_name) +
@@ -196,7 +203,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     setRecord: async function (instance, scope, key, record) {
 
       // Run the UPSERT with the precomputed template
-      const result = await CONFIG.lib_mysql.write(
+      const result = await Lib.SQL.write(
         instance,
         _Store.upsert_sql,
         [scope, key, record.code, record.fail_count, record.created_at, record.expires_at]
@@ -237,7 +244,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     incrementFailCount: async function (instance, scope, key) {
 
       // Atomically increment the fail_count column for this record
-      const result = await CONFIG.lib_mysql.write(
+      const result = await Lib.SQL.write(
         instance,
         'UPDATE ' + _Store.BT(CONFIG.table_name) +
         ' SET `fail_count` = `fail_count` + 1' +
@@ -280,7 +287,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     deleteRecord: async function (instance, scope, key) {
 
       // Remove the record row by composite primary key
-      const result = await CONFIG.lib_mysql.write(
+      const result = await Lib.SQL.write(
         instance,
         'DELETE FROM ' + _Store.BT(CONFIG.table_name) +
         ' WHERE `scope` = ? AND `id` = ?',
@@ -327,7 +334,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Sweep all rows whose expires_at is in the past
       const now = instance.time;
-      const result = await CONFIG.lib_mysql.write(
+      const result = await Lib.SQL.write(
         instance,
         'DELETE FROM ' + _Store.BT(CONFIG.table_name) +
         ' WHERE `expires_at` < ?',
@@ -378,7 +385,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Reject identifiers that would break the backtick escaping
       if (name.indexOf('`') !== -1) {
-        throw new Error('[js-server-helper-verify-store-mysql] identifier contains backtick: ' + name);
+        throw new Error('[helper-verify-store-mysql] identifier contains backtick: ' + name);
       }
 
       // Wrap in MySQL backtick style
