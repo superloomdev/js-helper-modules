@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-auth-store-dynamodb.
+// Info: Three-tier test suite for helper-auth-store-dynamodb.
 //
 // Tier 1 - Adapter unit tests (no auth.js dependency):
 //   - Store loader rejects bad config
@@ -45,9 +45,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return AuthStoreDynamoDBFactory({
-    table_name:   table || TEST_TABLE,
-    lib_dynamodb: Lib.DynamoDB
+  return AuthStoreDynamoDBFactory(Lib, {
+    table_name: table || TEST_TABLE
   });
 
 };
@@ -101,30 +100,29 @@ after(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { AuthStoreDynamoDBFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when table_name is missing', function () {
-
-    assert.throws(
-      function () { AuthStoreDynamoDBFactory({ lib_dynamodb: Lib.DynamoDB }); },
+      function () { AuthStoreDynamoDBFactory(Lib, { table_name: '' }); },
       /table_name is required/
     );
 
   });
 
-  it('throws when lib_dynamodb is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { AuthStoreDynamoDBFactory({ table_name: 'x' }); },
-      /lib_dynamodb is required/
+      function () { AuthStoreDynamoDBFactory(Lib, { table_name: null }); },
+      /table_name is required/
     );
+
+  });
+
+  it('returns a store object when config is valid', function () {
+
+    const store = AuthStoreDynamoDBFactory(Lib, { table_name: 'valid_table' });
+    assert.ok(store);
+    assert.ok(typeof store.setupNewStore === 'function');
 
   });
 
@@ -139,7 +137,7 @@ describe('Tier 1: setupNewStore returns NOT_IMPLEMENTED', function () {
     const result = await store.setupNewStore(buildInstance(0));
 
     assert.equal(result.success, false);
-    assert.equal(result.error.type, 'NOT_IMPLEMENTED');
+    assert.equal(result.error.type, 'AUTH_STORE_DYNAMODB_NOT_IMPLEMENTED');
     assert.ok(result.error.message.includes('not yet implemented'));
 
   });
@@ -428,7 +426,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    Store:     AuthStoreDynamoDBFactory({ table_name: TEST_TABLE, lib_dynamodb: Lib.DynamoDB }),
+    Store:     AuthStoreDynamoDBFactory(Lib, { table_name: TEST_TABLE }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

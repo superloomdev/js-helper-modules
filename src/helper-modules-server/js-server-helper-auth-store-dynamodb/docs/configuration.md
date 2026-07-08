@@ -1,6 +1,6 @@
 # Configuration
 
-The DynamoDB store adapter is a fully independent module. Call it with its config to get a ready-to-use store object, then pass that object as `Store` to the Auth parent.
+The DynamoDB store adapter receives a `Lib` container and config to produce a ready-to-use store object, which is then passed as `Store` to the Auth parent.
 
 ## On This Page
 
@@ -19,9 +19,8 @@ Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib,
   REGION:   process.env.AWS_REGION        // required: AWS region
 });
 
-const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')({
-  table_name:   'sessions_user',
-  lib_dynamodb: Lib.DynamoDB
+const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
+  table_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -31,7 +30,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 });
 ```
 
-The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
+The adapter receives the `Lib` container and picks `Lib.Utils`, `Lib.Debug`, and `Lib.DynamoDB` by reference. It defines its own `CONFIG` and `ERRORS` internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
 The AWS SDK client is **not** created at loader time. `Lib.DynamoDB` lazy-initializes on the first operation. The adapter does not open any connection during construction either.
 
@@ -40,9 +39,8 @@ The AWS SDK client is **not** created at loader time. `Lib.DynamoDB` lazy-initia
 | Key | Type | Required | Description |
 |---|---|---|---|
 | `table_name` | String | Yes | Name of the DynamoDB table. Must match the table name provisioned out-of-band |
-| `lib_dynamodb` | Object | Yes | Initialized `Lib.DynamoDB` instance. The adapter delegates all AWS SDK calls to this helper |
 
-The validator throws an `Error` at loader time if either key is missing, null, undefined, or (for `table_name`) the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `table_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
 The table must exist before the adapter is used. `setupNewStore` is not implemented for DynamoDB; table provisioning is out-of-band via IaC, AWS Console, or the driver helper's table-management API (if it gains one).
 
@@ -90,13 +88,13 @@ The adapter does not interact with IAM credential acquisition. The driver helper
 
 ## Peer Dependencies
 
-Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `nosql-aws-dynamodb` driver helper is passed in via `config.lib_dynamodb` by the application.
+The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
-| Package | How it is used |
+| Package | Reads via `Lib` |
 |---|---|
-| `@superloomdev/js-helper-utils` | Required by adapter; used for type checks in `store.validators.js` |
-| `@superloomdev/js-helper-debug` | Required by adapter; used for driver-error logging |
-| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | Passed in via `config.lib_dynamodb`; the adapter delegates all AWS SDK calls to this helper |
+| `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
+| `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
+| `@superloomdev/js-server-helper-nosql-aws-dynamodb` | `Lib.DynamoDB` injected by the caller |
 
 The driver helper carries its own dependency on the AWS SDK for JavaScript v3. The adapter never `require`s the AWS SDK directly; applications that never use this store never load the DynamoDB client.
 
@@ -118,7 +116,7 @@ The endpoint port is **8001**, not 8000. This avoids collision with other local 
 Service-dependent. The contract test suite runs against the DynamoDB Local emulator via Docker.
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test
 ```
 
 Docker lifecycle is fully automated by `npm test`:

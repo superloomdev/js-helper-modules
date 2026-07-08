@@ -20,19 +20,19 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-auth-store-dynamodb')({
-  table_name:   'sessions_user',
-  lib_dynamodb: Lib.DynamoDB
+const store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
+  table_name: 'sessions_user'
 });
 ```
 
 | Argument | Type | Purpose |
 |---|---|---|
-| `config` | Object | `{ table_name, lib_dynamodb }`. See [configuration.md](configuration.md) |
+| `shared_libs` | Object | Dependency container (`Lib`). Must have `Lib.Utils`, `Lib.Debug`, `Lib.DynamoDB` |
+| `config` | Object | `{ table_name }`. See [configuration.md](configuration.md) |
 
-The adapter validates the config, builds its own `Lib` (Utils + Debug) and `ERRORS` catalog internally, and returns a ready-to-use Store interface. Each call returns an independent Store; multiple Auth instances (different `ACTOR_TYPE` values, different tables) coexist in the same process and share the same `Lib.DynamoDB` driver helper if it is the same instance.
+The adapter picks its dependencies from the injected container, merges config over defaults, validates at construction, and returns a ready-to-use Store interface. Each call returns an independent Store; multiple Auth instances coexist in the same process.
 
-The adapter throws an `Error` if `config.table_name` or `config.lib_dynamodb` is missing.
+The adapter throws an `Error` if `config.table_name` is missing, null, or empty.
 
 ## Store Contract
 
