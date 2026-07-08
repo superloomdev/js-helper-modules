@@ -1,4 +1,4 @@
-# Cleanup — js-server-helper-verify-store-mongodb
+# Cleanup - helper-verify-store-mongodb
 
 ## Native TTL (Automatic)
 
@@ -21,10 +21,10 @@ setInterval(async function () {
 
 The filter used:
 ```js
-{ expires_at: { $ne: null, $lte: Lib.Utils.getUnixTime() } }
+{ expires_at: { $lt: instance.time } }
 ```
 
-This is a collection scan unless a secondary index on `expires_at` is added manually. For high-volume collections, consider adding `{ expires_at: 1 }` as a regular ascending index out-of-band.
+Bound value is `instance.time` (request-instance unix epoch seconds). This is a collection scan unless a secondary index on `expires_at` is added manually. For high-volume collections, consider adding `{ expires_at: 1 }` as a regular ascending index out-of-band.
 
 ## Cadence Guidance
 
@@ -42,4 +42,4 @@ On replica sets, the TTL sweeper runs only on the primary. Secondaries receive t
 
 ### Rebuilding the TTL Index
 
-If the `_ttl` index is dropped manually, run `setupNewStore` again to recreate it. `createIndex` is idempotent in MongoDB — calling it on an already-existing index with identical options is a no-op.
+If the `_ttl` index is dropped manually, run `setupNewStore` again to recreate it. `createIndex` is idempotent in MongoDB - calling it on an already-existing index with identical options is a no-op.

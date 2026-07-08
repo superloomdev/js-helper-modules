@@ -1,11 +1,13 @@
-# API Reference — js-server-helper-verify-store-mongodb
+# API Reference - helper-verify-store-mongodb
 
-This adapter implements the 6-method store contract consumed by `js-server-helper-verify`. This document focuses on the MongoDB-specific semantics.
+This adapter implements the 6-method store contract consumed by `helper-verify`. This document focuses on the MongoDB-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, {
+  collection_name: 'verification_codes'
+});
 ```
 
 ## Store Contract
@@ -19,9 +21,9 @@ Creates one index (idempotent via MongoDB's `createIndex`):
 createIndex({ _ttl: 1 }, { name: 'verify_ttl_idx', expireAfterSeconds: 0 })
 ```
 
-Every verify record always has a `_ttl` field (verify codes always expire), so the index is non-sparse — there are no persistent records to skip.
+Every verify record always has a `_ttl` field (verify codes always expire), so the index is non-sparse - there are no persistent records to skip.
 
-The compound `_id` (`{ scope, id }`) is the primary key; MongoDB creates a unique index on `_id` automatically — no separate call needed.
+The compound `_id` (`{ scope, id }`) is the primary key; MongoDB creates a unique index on `_id` automatically - no separate call needed.
 
 **Return:** `{ success, error }`
 
@@ -61,7 +63,7 @@ replacement: { _id: ..., code, fail_count, created_at, expires_at, _ttl }
 options:     { upsert: true }
 ```
 
-The `_ttl` field is set to `new Date(record.expires_at * 1000)` on every write. Verify codes always carry an `expires_at`, so every document has `_ttl` — the TTL index is non-sparse and covers every record.
+The `_ttl` field is set to `new Date(record.expires_at * 1000)` on every write. Verify codes always carry an `expires_at`, so every document has `_ttl` - the TTL index is non-sparse and covers every record.
 
 **Return:** `{ success, error }`
 
@@ -95,10 +97,10 @@ Idempotent delete by compound `_id`. A missing document is treated as success.
 Explicit sweep complementing the native TTL index:
 
 ```js
-filter: { expires_at: { $ne: null, $lte: Lib.Utils.getUnixTime() } }
+filter: { expires_at: { $lt: instance.time } }
 ```
 
-Returns `deleted_count` from the driver's `deletedCount`. Use this when you need deterministic `deleted_count` reporting independent of the ~60-second TTL sweeper lag.
+Bound value is `instance.time` (request-instance unix epoch seconds). Returns `deleted_count` from the driver's `deletedCount`. Use this when you need deterministic `deleted_count` reporting independent of the ~60-second TTL sweeper lag.
 
 **Return:** `{ success, deleted_count, error }`
 

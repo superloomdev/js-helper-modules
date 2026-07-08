@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-verify-store-mongodb.
+// Info: Three-tier test suite for helper-verify-store-mongodb.
 //
 // Tier 1 - Adapter unit tests (this file, no verify.js dependency):
 //   - Store loader rejects bad STORE_CONFIG
@@ -38,19 +38,16 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (collection) {
 
-  const config = {
-    collection_name: collection || TEST_COLLECTION,
-    lib_mongodb: Lib.MongoDB
-  };
-  return VerifyStoreMongoDBFactory(config);
+  return VerifyStoreMongoDBFactory(Lib, {
+    collection_name: collection || TEST_COLLECTION
+  });
 
 };
 
 const buildVerify = function () {
 
-  const Store = VerifyStoreMongoDBFactory({
-    collection_name: TEST_COLLECTION,
-    lib_mongodb: Lib.MongoDB
+  const Store = VerifyStoreMongoDBFactory(Lib, {
+    collection_name: TEST_COLLECTION
   });
 
   return VerifyFactory(Lib, {
@@ -61,35 +58,35 @@ const buildVerify = function () {
 
 
 // ============================================================================
-// TIER 1 — ADAPTER UNIT TESTS
+// TIER 1 - ADAPTER UNIT TESTS
 // ============================================================================
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when collection_name is an empty string', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory({}); },
-      /config.lib_mongodb is required/
-    );
-
-  });
-
-  it('throws when collection_name is missing', function () {
-
-    assert.throws(
-      function () { VerifyStoreMongoDBFactory({ lib_mongodb: Lib.MongoDB, collection_name: null }); },
+      function () { VerifyStoreMongoDBFactory(Lib, { collection_name: '' }); },
       /config.collection_name is required/
     );
 
   });
 
-  it('throws when lib_mongodb is missing', function () {
+  it('throws when collection_name is null', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory({ collection_name: 'x' }); },
-      /config.lib_mongodb is required/
+      function () { VerifyStoreMongoDBFactory(Lib, { collection_name: null }); },
+      /config.collection_name is required/
     );
+
+  });
+
+  it('returns a store object when config is valid', function () {
+
+    const store = VerifyStoreMongoDBFactory(Lib, { collection_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.getRecord, 'function');
+    assert.equal(typeof store.setRecord, 'function');
 
   });
 
@@ -97,7 +94,7 @@ describe('Tier 1: store loader validation', function () {
 
 
 // ============================================================================
-// TIER 1 — DIRECT STORE METHOD TESTS
+// TIER 1 - DIRECT STORE METHOD TESTS
 // ============================================================================
 
 const cleanCollection = async function () {
@@ -298,7 +295,7 @@ describe('Tier 1: cleanupExpiredRecords accuracy', function () {
 
 
 // ============================================================================
-// TIER 3 — VERIFY + ADAPTER INTEGRATION
+// TIER 3 - VERIFY + ADAPTER INTEGRATION
 // ============================================================================
 
 const cleanupBetweenTests = async function () {
