@@ -1,16 +1,15 @@
-# Configuration — js-server-helper-verify-store-sqlite
+# Configuration - helper-verify-store-sqlite
 
 ## Loader Pattern
 
 The adapter is configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object:
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-sqlite')({
-  table_name: 'verification_codes',
-  lib_sqlite: Lib.SQLite
+const Store = require('helper-verify-store-sqlite')(Lib, {
+  table_name: 'verification_codes'
 });
 
-Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
+Lib.Verify = require('helper-verify')(Lib, {
   Store: Store
 });
 ```
@@ -22,23 +21,22 @@ The adapter validates its configuration at construction time and throws an `Erro
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the verification table. Must not contain a double-quote. One table per Verify instance. |
-| `lib_sqlite` | `Object` | Yes | An initialized `Lib.SQLite` instance (`@superloomdev/js-server-helper-sql-sqlite`). |
 
-The validator rejects missing, null, or empty-string values for both keys. The `table_name` double-quote guard fires at quoting time (first DDL or query call), not at validation time.
+The validator rejects missing, null, or empty-string values. The `table_name` double-quote guard fires at quoting time (first DDL or query call), not at validation time. The SQL driver arrives via `shared_libs.SQL` (injected by the application).
 
 ## Dependencies
 
 | Package | Type | Purpose |
 |---------|------|---------|
-| `@superloomdev/js-helper-utils` | Direct | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Direct | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-sqlite` | Peer | SQLite driver wrapper (`Lib.SQLite`) |
+| `helper-utils` | Injected | Type checks |
+| `helper-debug` | Injected | Structured debug logging |
+| `helper-sql-sqlite` | Injected | SQLite driver wrapper (`Lib.SQL`) |
 
-The adapter loads its own Utils and Debug dependencies directly. The SQLite driver helper is provided by the caller as `lib_sqlite` in the configuration.
+All three dependencies are injected by the application through the `shared_libs` container. The adapter picks them by reference and does not require them directly.
 
 ## Environment Variables
 
-Consumed only by `_test/loader.js` — never read by the adapter itself.
+Consumed only by `_test/loader.js` - never read by the adapter itself.
 
 | Variable | Default | Description |
 |----------|---------|-------------|

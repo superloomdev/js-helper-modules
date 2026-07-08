@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-verify-store-sqlite.
+// Info: Three-tier test suite for helper-verify-store-sqlite.
 //
 // Tier 1 - Adapter unit tests (this file, no verify.js dependency):
 //   - Store loader rejects bad STORE_CONFIG
@@ -37,18 +37,16 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   const config = {
-    table_name: table || TEST_TABLE,
-    lib_sqlite: Lib.SQLite
+    table_name: table || TEST_TABLE
   };
-  return VerifyStoreSQLiteFactory(config);
+  return VerifyStoreSQLiteFactory(Lib, config);
 
 };
 
 const buildVerify = function () {
 
-  const Store = VerifyStoreSQLiteFactory({
-    table_name: TEST_TABLE,
-    lib_sqlite: Lib.SQLite
+  const Store = VerifyStoreSQLiteFactory(Lib, {
+    table_name: TEST_TABLE
   });
 
   return VerifyFactory(Lib, {
@@ -59,16 +57,16 @@ const buildVerify = function () {
 
 
 // ============================================================================
-// TIER 1 — ADAPTER UNIT TESTS
+// TIER 1 - ADAPTER UNIT TESTS
 // ============================================================================
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is an empty string', function () {
 
     assert.throws(
-      function () { VerifyStoreSQLiteFactory({}); },
-      /config.lib_sqlite is required/
+      function () { VerifyStoreSQLiteFactory(Lib, { table_name: '' }); },
+      /config.table_name is required/
     );
 
   });
@@ -76,18 +74,18 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is missing', function () {
 
     assert.throws(
-      function () { VerifyStoreSQLiteFactory({ lib_sqlite: Lib.SQLite, table_name: null }); },
+      function () { VerifyStoreSQLiteFactory(Lib, { table_name: null }); },
       /config.table_name is required/
     );
 
   });
 
-  it('throws when lib_sqlite is missing', function () {
+  it('returns a store object when config is valid', function () {
 
-    assert.throws(
-      function () { VerifyStoreSQLiteFactory({ table_name: 'x' }); },
-      /config.lib_sqlite is required/
-    );
+    const store = VerifyStoreSQLiteFactory(Lib, { table_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.getRecord, 'function');
+    assert.equal(typeof store.setRecord, 'function');
 
   });
 
@@ -125,7 +123,7 @@ describe('Tier 1: setRecord round-trip', function () {
 
     const store = buildStore();
     await store.setupNewStore(buildInstance(0));
-    await Lib.SQLite.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
+    await Lib.SQL.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
 
   });
 
@@ -173,7 +171,7 @@ describe('Tier 1: incrementFailCount', function () {
 
     const store = buildStore();
     await store.setupNewStore(buildInstance(0));
-    await Lib.SQLite.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
+    await Lib.SQL.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
 
   });
 
@@ -212,7 +210,7 @@ describe('Tier 1: deleteRecord', function () {
 
     const store = buildStore();
     await store.setupNewStore(buildInstance(0));
-    await Lib.SQLite.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
+    await Lib.SQL.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
 
   });
 
@@ -249,7 +247,7 @@ describe('Tier 1: cleanupExpiredRecords accuracy', function () {
 
     const store = buildStore();
     await store.setupNewStore(buildInstance(0));
-    await Lib.SQLite.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
+    await Lib.SQL.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
 
   });
 
@@ -280,7 +278,7 @@ describe('Tier 1: cleanupExpiredRecords on empty table', function () {
 
     const store = buildStore();
     await store.setupNewStore(buildInstance(0));
-    await Lib.SQLite.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
+    await Lib.SQL.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
 
   });
 
@@ -298,12 +296,12 @@ describe('Tier 1: cleanupExpiredRecords on empty table', function () {
 
 
 // ============================================================================
-// TIER 3 — VERIFY + ADAPTER INTEGRATION
+// TIER 3 - VERIFY + ADAPTER INTEGRATION
 // ============================================================================
 
 const cleanupBetweenTests = async function () {
 
-  await Lib.SQLite.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
+  await Lib.SQL.write(buildInstance(0), 'DELETE FROM "' + TEST_TABLE + '"');
 
 };
 
@@ -320,7 +318,7 @@ before(async function () {
 
 after(async function () {
 
-  await Lib.SQLite.close();
+  await Lib.SQL.close();
 
 });
 

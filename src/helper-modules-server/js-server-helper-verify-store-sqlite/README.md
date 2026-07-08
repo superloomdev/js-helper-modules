@@ -1,4 +1,4 @@
-# @superloomdev/js-server-helper-verify-store-sqlite
+# helper-verify-store-sqlite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
@@ -9,7 +9,7 @@ A SQLite-backed implementation of the [Verify](https://github.com/superloomdev/s
 
 A thin layer between the Verify parent module and a SQLite verification table. SQLite runs in-process through Node's built-in `node:sqlite` module, so there is no external database to provision and no network round-trip on a query. The adapter is well suited to offline-first applications, single-node deployments, command-line tools, and ephemeral test fixtures; for high-concurrency production deployments the Postgres, MySQL, or MongoDB adapter is a better fit.
 
-The adapter cannot stand alone. It is always loaded together with the Verify parent and the underlying [`js-server-helper-sql-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-sql-sqlite) driver helper.
+The adapter cannot stand alone. It is always loaded together with the Verify parent and the underlying [`helper-sql-sqlite`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-sql-sqlite) driver helper.
 
 ## Why Use This Module
 
@@ -27,10 +27,10 @@ The adapter cannot stand alone. It is always loaded together with the Verify par
 
 This adapter is part of the `verify-store-*` family. Every sibling implements the same store contract. Swap by changing one config value; the rest of your code keeps working.
 
-- [`@superloomdev/js-server-helper-verify-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-postgres) - PostgreSQL
-- [`@superloomdev/js-server-helper-verify-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-mysql) - MySQL or MariaDB
-- [`@superloomdev/js-server-helper-verify-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-mongodb) - MongoDB
-- [`@superloomdev/js-server-helper-verify-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-dynamodb) - AWS DynamoDB
+- [`helper-verify-store-postgres`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-postgres) - PostgreSQL
+- [`helper-verify-store-mysql`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-mysql) - MySQL or MariaDB
+- [`helper-verify-store-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-mongodb) - MongoDB
+- [`helper-verify-store-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-verify-store-dynamodb) - AWS DynamoDB
 
 ## Aligned with Superloom Philosophy
 
@@ -54,7 +54,7 @@ Do not vendor the source or use it as a local file dependency. The published pac
 
 This module has no external dependencies.
 
-It expects three peer modules in the `Lib` container (Utils, Debug, SQLite). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+It expects three dependencies in the `Lib` container (Utils, Debug, SQL). The SQL driver helper is injected by the application. For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 
@@ -62,7 +62,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, SQLite). For
 |---|---|---|
 | Contract + Integration | SQLite (`:memory:`, in-process via `node:sqlite`) | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration → Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-verify-store-sqlite/docs/configuration.md#testing-tier).
+Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration -> Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-verify-store-sqlite/docs/configuration.md#testing-tier).
 
 ## License
 

@@ -1,4 +1,4 @@
-# Cleanup — js-server-helper-verify-store-sqlite
+# Cleanup - helper-verify-store-sqlite
 
 ## No Native TTL
 
@@ -28,7 +28,7 @@ DELETE FROM "verification_codes"
 WHERE "expires_at" < ?
 ```
 
-The bound parameter is `Lib.Utils.getUnixTime()` — the real wall-clock time in Unix epoch seconds. This is intentionally not `instance.time`; cleanup must use the real clock so rows expire on schedule regardless of when the request instance was initialized.
+The bound parameter is `instance.time` (the request instance's frozen clock). This keeps cleanup consistent with the verify-time expiry check - a code that expired before the request instance was initialized will be swept on the next cleanup pass.
 
 The `expires_at` index makes this a fast range scan even as the table grows.
 
@@ -36,8 +36,8 @@ The `expires_at` index makes this a fast range scan even as the table grows.
 
 | Deployment | Recommended cadence |
 |------------|---------------------|
-| File-backed (production) | Every 1–6 hours |
-| `:memory:` (tests / dev) | Not needed — database resets on process exit |
+| File-backed (production) | Every 1-6 hours |
+| `:memory:` (tests / dev) | Not needed - database resets on process exit |
 
 ## Operational Notes
 
