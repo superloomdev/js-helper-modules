@@ -1,11 +1,13 @@
-# API Reference — js-server-helper-verify-store-dynamodb
+# API Reference - helper-verify-store-dynamodb
 
-This adapter implements the 6-method store contract consumed by `js-server-helper-verify`. This document focuses on the DynamoDB-specific semantics.
+This adapter implements the 6-method store contract consumed by `helper-verify`. This document focuses on the DynamoDB-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, {
+  table_name: 'verification_codes'
+});
 ```
 
 ## Store Contract
@@ -20,7 +22,7 @@ Sort key (SK):      id     (String)
 Billing:            PAY_PER_REQUEST
 ```
 
-`ResourceInUseException` (table already exists) is treated as success, making repeated calls idempotent. The adapter does not call `UpdateTimeToLive` — enable TTL on `expires_at` out-of-band after the first `setupNewStore`.
+`ResourceInUseException` (table already exists) is treated as success, making repeated calls idempotent. The adapter does not call `UpdateTimeToLive` - enable TTL on `expires_at` out-of-band after the first `setupNewStore`.
 
 **Return:** `{ success, error }`
 
@@ -80,7 +82,7 @@ Does not read the current value. Safe under concurrent verify attempts.
 
 ### `deleteRecord(instance, scope, key)`
 
-`DeleteItem` by composite key. DynamoDB `DeleteItem` on a missing key is a no-op — this is inherently idempotent.
+`DeleteItem` by composite key. DynamoDB `DeleteItem` on a missing key is a no-op - this is inherently idempotent.
 
 **Return:** `{ success, error }`
 
@@ -90,9 +92,8 @@ Does not read the current value. Safe under concurrent verify attempts.
 
 Full table `Scan` then `BatchDelete` on expired items:
 
-1. `Scan` — returns all items in the table.
-2. Client-side filter: `typeof item.expires_at === 'number' && item.expires_at > 0 && item.expires_at <= Lib.Utils.getUnixTime()`.
-3. `batchDeleteRecords` — deletes the expired items.
+1. `Scan` with FilterExpression `#ea < :now` bound to `instance.time` (request-instance unix epoch seconds) - returns only expired items.
+2. `batchDeleteRecords` - deletes the expired items.
 
 Returns `deleted_count` equal to the number of items deleted. DynamoDB native TTL handles automatic expiry asynchronously with ~48h lag; this method provides explicit, deterministic cleanup.
 

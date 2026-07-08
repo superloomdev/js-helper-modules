@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-verify-store-dynamodb.
+// Info: Test loader for helper-verify-store-dynamodb.
 // Builds the Lib container and a minimal ERRORS stub so both Tier 1
 // (adapter unit tests, no verify.js) and Tier 3 (full verify lifecycle
 // via the store contract suite) can share the same runtime objects.

@@ -1,22 +1,21 @@
-# js-server-helper-verify-store-dynamodb. AI Reference
+# helper-verify-store-dynamodb. AI Reference
 
-Class F storage adapter. AWS DynamoDB backend for `@superloomdev/js-server-helper-verify`. Fully independent module that owns its own Lib, Config, and ERRORS. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
+Class F storage adapter. AWS DynamoDB backend for `helper-verify`. Fully independent module that owns its own CONFIG, ERRORS, and Validators. Standard factory shape: `(shared_libs, config)`. Configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object.
 
-Requires a DynamoDB table provisioned out-of-band (IaC, AWS Console, or CloudFormation). The adapter provisions the table itself via `setupNewStore` using `PAY_PER_REQUEST` billing mode. Uses `js-server-helper-nosql-aws-dynamodb` injected via `config.lib_dynamodb`.
+The adapter provisions the table itself via `setupNewStore` using `PAY_PER_REQUEST` billing mode. Uses `helper-nosql-aws-dynamodb` injected via `shared_libs.DynamoDB`.
 
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')({
-  table_name:   'verification_codes',
-  lib_dynamodb: Lib.DynamoDB
+const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, {
+  table_name: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
+| `shared_libs` | Object | Yes | Dependency container (Utils, Debug, DynamoDB) |
 | `table_name` | String | Yes | Name of the DynamoDB table |
-| `lib_dynamodb` | Object | Yes | Initialized `js-server-helper-nosql-aws-dynamodb` instance |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods.
 
@@ -24,12 +23,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  table_name:   'verification_codes',  // required. one table per verify instance
-  lib_dynamodb: Lib.DynamoDB           // required. initialized js-server-helper-nosql-aws-dynamodb
+  table_name: 'verification_codes'  // required. one table per verify instance
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. The DynamoDB driver is injected via `shared_libs.DynamoDB`.
 
 ## Store Contract
 
@@ -64,7 +62,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 5. **`deleteRecord` is idempotent.** DynamoDB `DeleteItem` on a missing key is a no-op success.
 
-6. **`setupNewStore` provisions the DynamoDB table** using `createTable` with `PAY_PER_REQUEST` billing. It is safe to call on every boot — the adapter handles the `ResourceInUseException` (table already exists) as success.
+6. **`setupNewStore` provisions the DynamoDB table** using `createTable` with `PAY_PER_REQUEST` billing. It is safe to call on every boot - the adapter handles the `ResourceInUseException` (table already exists) as success.
 
 7. **`cleanupExpiredRecords` does a full `Scan` then `BatchDelete`.** DynamoDB native TTL handles automatic expiry asynchronously (~48h sweep lag). The explicit scan+delete provides deterministic `deleted_count` reporting.
 
@@ -75,12 +73,16 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ## Peer Dependencies
 
 ```
-@superloomdev/js-helper-utils                        (type checks)
-@superloomdev/js-helper-debug                        (structured logging)
-@superloomdev/js-server-helper-nosql-aws-dynamodb    (DynamoDB wrapper)
+helper-utils                (type checks - via shared_libs.Utils)
+helper-debug                (structured logging - via shared_libs.Debug)
+helper-nosql-aws-dynamodb   (DynamoDB wrapper - via shared_libs.DynamoDB)
 ```
 
-## Error Catalog Used
+All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never requires any of them directly; it picks them from the injected container.
+
+## Error Catalog
+
+This adapter owns its own `store.errors.js`. Only one type:
 
 | Error | When |
 |---|---|

@@ -1,5 +1,5 @@
-// Info: DynamoDB store adapter for js-server-helper-verify. Fully independent
-// module that owns its own Lib, Config, and ERRORS. Schema:
+// Info: DynamoDB store adapter for helper-verify. Fully independent
+// module that owns its own CONFIG, ERRORS, and Validators. Schema:
 //   PK: scope (S)
 //   SK: id    (S)
 //   Attributes: code (S), fail_count (N), created_at (N), expires_at (N)
@@ -10,8 +10,8 @@
 // `instance.time > record.expires_at` check guarantees correctness even
 // if cleanup runs late.
 //
-// The application injects a ready-to-use DynamoDB helper via
-// config.lib_dynamodb (typically Lib.DynamoDB).
+// Standard factory shape: receives shared_libs, picks DynamoDB driver as
+// Lib.DynamoDB (backend-specific key - not interchangeable with other NoSQL).
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                      -> { success, error }
@@ -28,38 +28,43 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Factory loader. Creates a fully independent store adapter with its own
-Lib, Config, and ERRORS. Returns a ready-to-use store object.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config - Configuration object (merged with defaults)
+@param {Object} shared_libs - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} config      - Overrides merged over adapter config defaults
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  // Dependencies for this instance
+  // Dependencies for this instance - by reference from the shared container
   const Lib = {
-    Utils: require('@superloomdev/js-helper-utils')(),
-    Debug: require('@superloomdev/js-helper-debug')()
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    DynamoDB: shared_libs.DynamoDB
   };
 
-  // Merge overrides over defaults
+  // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
     require('./store.config'),
     config || {}
   );
 
-  // Load internal error catalog
+  // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators
-  const Validators = require('./store.validators');
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
-  // Validate CONFIG - throws on misconfiguration
-  Validators.validateConfig(Lib, CONFIG);
+  // Validate config - throws on misconfiguration
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, CONFIG, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -71,13 +76,14 @@ module.exports = function loader (config) {
 Builds the public Store interface for one instance. All functions
 close over the same Lib, CONFIG, and ERRORS.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} CONFIG - { table_name, lib_dynamodb }
-@param {Object} ERRORS - Error catalog from this adapter
+@param {Object} Lib        - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-const createInterface = function (Lib, CONFIG, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -96,7 +102,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     setupNewStore: async function (instance) {
 
       // Provision the table idempotently with composite key {scope, id}
-      const result = await CONFIG.lib_dynamodb.createTable(instance, CONFIG.table_name, {
+      const result = await Lib.DynamoDB.createTable(instance, CONFIG.table_name, {
         attribute_definitions: [
           { name: 'scope', type: 'S' },
           { name: 'id',    type: 'S' }
@@ -144,7 +150,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     getRecord: async function (instance, scope, key) {
 
       // Direct GetItem on the composite key
-      const result = await CONFIG.lib_dynamodb.getRecord(
+      const result = await Lib.DynamoDB.getRecord(
         instance,
         CONFIG.table_name,
         { scope: scope, id: key }
@@ -211,7 +217,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       };
 
       // PutItem - DynamoDB always overwrites by composite key
-      const result = await CONFIG.lib_dynamodb.writeRecord(
+      const result = await Lib.DynamoDB.writeRecord(
         instance,
         CONFIG.table_name,
         item
@@ -251,7 +257,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     incrementFailCount: async function (instance, scope, key) {
 
       // Atomic ADD via the helper's increment parameter
-      const result = await CONFIG.lib_dynamodb.updateRecord(
+      const result = await Lib.DynamoDB.updateRecord(
         instance,
         CONFIG.table_name,
         { scope: scope, id: key },
@@ -294,7 +300,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     deleteRecord: async function (instance, scope, key) {
 
       // DeleteItem by composite key - idempotent (missing item is success)
-      const result = await CONFIG.lib_dynamodb.deleteRecord(
+      const result = await Lib.DynamoDB.deleteRecord(
         instance,
         CONFIG.table_name,
         { scope: scope, id: key }
@@ -337,7 +343,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
       // Scan for all items whose expires_at is in the past
       const now = instance.time;
-      const scan_result = await CONFIG.lib_dynamodb.scan(
+      const scan_result = await Lib.DynamoDB.scan(
         instance,
         CONFIG.table_name,
         {
@@ -376,7 +382,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         return { scope: item.scope, id: item.id };
       });
 
-      const delete_result = await CONFIG.lib_dynamodb.batchDeleteRecords(
+      const delete_result = await Lib.DynamoDB.batchDeleteRecords(
         instance,
         keysByTable
       );

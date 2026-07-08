@@ -1,4 +1,4 @@
-# Schema — js-server-helper-verify-store-dynamodb
+# Schema - helper-verify-store-dynamodb
 
 ## Table Design
 
@@ -6,8 +6,8 @@ DynamoDB uses a single-table design with composite keys:
 
 | Attribute | DynamoDB Type | Role |
 |-----------|---------------|------|
-| `scope` | String (S) | Partition key (PK) — logical namespace |
-| `id` | String (S) | Sort key (SK) — verification key (called `key` in the store contract) |
+| `scope` | String (S) | Partition key (PK) - logical namespace |
+| `id` | String (S) | Sort key (SK) - verification key (called `key` in the store contract) |
 | `code` | String (S) | The verification code (hashed or plain) |
 | `fail_count` | Number (N) | Count of failed verify attempts |
 | `created_at` | Number (N) | Unix epoch seconds |
@@ -32,7 +32,7 @@ DynamoDB uses a single-table design with composite keys:
 }
 ```
 
-`ResourceInUseException` (table already exists) is treated as success. The adapter does **not** call `UpdateTimeToLive` — enable TTL separately after the table is created.
+`ResourceInUseException` (table already exists) is treated as success. The adapter does **not** call `UpdateTimeToLive` - enable TTL separately after the table is created.
 
 ## CloudFormation / CDK Snippet
 
@@ -79,4 +79,4 @@ aws dynamodb update-time-to-live \
 | `deleteRecord` | `DeleteItem` | PK=`scope`, SK=`id` |
 | `cleanupExpiredRecords` | `Scan` + `BatchWriteItem` | Full table scan |
 
-All access patterns except cleanup use the primary key — no GSIs are required for the verify store.
+All access patterns except cleanup use the primary key - no GSIs are required for the verify store.
