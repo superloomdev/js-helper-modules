@@ -59,9 +59,9 @@ Read the source of truth in authority order. Do not skim summaries — the nuanc
    find docs -name '*.md' | sort
    ```
 
-3. **Read every file the enumeration returns — all of them, in full.** Do not cherry-pick and do not skim. Whatever a document states is the rule. The `foundations/`, `modules/`, `dev/`, and `testing/` subtrees carry the rules for code style, module structure, process, and tests — give those the closest reading, but read the whole set so nothing is missed.
+3. **Read every file the enumeration returns — all of them, in full.** Do not cherry-pick and do not skim. Whatever a document states is the rule. The `principles/`, `languages/js/`, `ai/`, and `dev/` subtrees carry the rules for code style, module structure, process, and tests - give those the closest reading, but read the whole set so nothing is missed.
 
-4. **Re-read the sibling workflows** in this repo: `.devin/workflows/js-helper-module.md` and `.devin/workflows/js-helper-module-refactor.md`.
+4. **Re-read the sibling workflow** in this repo: `.devin/workflows/module.md` (including its embedded Standard block).
 
 5. **Output a binding-rules checklist** — a short list that *links back* to the doc each rule comes from. Do not restate the rules in detail; the doc is the authority.
 
@@ -76,7 +76,7 @@ Convention is whatever the real, passing modules do. Re-derive it; do not recall
    find src/helper-modules-core src/helper-modules-server src/helper-modules-client -maxdepth 1 -type d | sort
    ```
 
-2. **Categorize each** using `docs/modules/module-categorization.md` (stateless singleton, stateful factory, adapter-backed factory, store adapter, vendor wrapper).
+2. **Categorize each** using `docs/languages/js/module-classes.md` (stateless singleton, stateful factory, adapter-backed factory, store adapter, vendor wrapper).
 
 3. **Read one reference module per category in full** — every file: `[name].js`, `[name].config.js`, `[name].errors.js`, `[name].validators.js`, `package.json`, `_test/loader.js`, `_test/package.json`, `_test/test.js`, `README.md`, `ROBOTS.md`, and `docs/`.
 
@@ -114,13 +114,13 @@ These are the *dimensions* to audit, each paired with where its rules actually l
 
 | Dimension | Where its rules live |
 |---|---|
-| Code formatting, comments, spacing | `foundations/code-formatting-js.md` |
-| Module structure, loader, public/private surface, exports | `modules/module-structure-js.md`, `modules/factory-vs-singleton-decision.md` |
-| Dependency and peer-dependency wiring | `modules/peer-dependencies.md` |
+| Code formatting, comments, spacing | `languages/js/code-formatting.md` |
+| Module structure, loader, public/private surface, exports | `languages/js/module-structure.md`, `languages/js/factory-vs-singleton.md` |
+| Dependency and peer-dependency wiring | `languages/js/dependencies.md` |
 | Test layout, loader, and dependency wiring | `dev/testing-local-modules.md` |
-| Error handling and catalogs | `foundations/error-handling.md` |
-| Validation | `foundations/validation-approach.md` |
-| Documentation files and their content | `dev/documentation-authoring.md`, `modules/module-readme-structure.md` |
+| Error handling and catalogs | `languages/js/error-handling.md` |
+| Validation | `languages/js/validation.md` |
+| Documentation files and their content | `principles/documentation-authoring.md`, `languages/js/module-docs.md` |
 | Naming consistency (no stale or legacy tokens anywhere) | the cross-reference scrub above + the reference modules |
 
 This table is a starting set, not a closed list. If the target needs a dimension not shown, find its governing document yourself and audit against that.
@@ -151,9 +151,9 @@ Do not proceed to the report after a single pass. Re-run this phase until **two 
    - **Gate results** — lint and test status, and confirmation the audit converged (two clean consecutive passes).
    - **Plan state** — active plan + in-progress step.
 
-2. **Do not auto-fix.** Hand the corrective actions to the existing review workflow:
+2. **Do not auto-fix.** Hand the corrective actions to the module workflow:
    ```
-   /js-helper-module review
+   /module review [module-path]
    ```
 
 3. **STOP and ask.** Wait for explicit user confirmation before any source change.
@@ -174,4 +174,4 @@ Do not proceed to the report after a single pass. Re-run this phase until **two 
 - [ ] Lint run; tests run via clean install
 - [ ] Stale-name / cross-reference scrub run
 - [ ] Drift root cause diagnosed; plan re-anchored; new failure modes captured via `/learn` if any
-- [ ] Report presented in chat; fixes handed to `/js-helper-module review`; stopped for user confirmation
+- [ ] Report presented in chat; fixes handed to `/module review`; stopped for user confirmation
