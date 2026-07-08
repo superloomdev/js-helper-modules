@@ -1,10 +1,10 @@
-# ROBOTS.md. `js-server-helper-verify`
+# ROBOTS.md. `helper-verify`
 
 Compact, AI-targeted reference for the public interface. Humans should read `README.md` and `docs/`.
 
 ## Module Overview
 
-One-time verification code lifecycle: generate, store, validate, consume. Three create interfaces (`createPin`, `createCode`, `createToken`) over one shared flow, plus one `verify` function that consumes any of them. Three independent defenses against abuse: cooldown on creation, expiry (TTL), per-record fail counter. Successful verify deletes the record in the background. Storage backends are standalone Class F adapter packages (`@superloomdev/js-server-helper-verify-store-*`); the caller passes the ready-to-use store object directly as `CONFIG.Store`.
+One-time verification code lifecycle: generate, store, validate, consume. Three create interfaces (`createPin`, `createCode`, `createToken`) over one shared flow, plus one `verify` function that consumes any of them. Three independent defenses against abuse: cooldown on creation, expiry (TTL), per-record fail counter. Successful verify deletes the record in the background. Storage backends are standalone Class F adapter packages (`helper-verify-store-*`); the caller passes the ready-to-use store object directly as `CONFIG.Store`.
 
 ## Factory Pattern
 
@@ -20,12 +20,12 @@ module.exports = function loader (shared_libs, config) {
 `CONFIG.Store` is a **ready-to-use store object**, not a factory function. The loader uses it directly. The adapter is a fully independent module that owns its own Lib/Config/ERRORS. Passing a factory function throws `CONFIG.Store is required and must be a ready-to-use store object`.
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
+const Store = require('helper-verify-store-postgres')({
   table_name: 'verification_codes',
   lib_postgresql: Lib.PostgreSQL
 });
 
-Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
+Lib.Verify = require('helper-verify')(Lib, {
   Store: Store
 });
 ```
@@ -117,14 +117,18 @@ Error shape is frozen at module load: `{ type: 'VERIFY_NOT_FOUND', message: 'Ver
 - **One-time guarantee via background delete.** On successful verify, the record is removed in the background. In serverless runtimes, the container freeze may defer the delete; see `docs/runtime.md` for the caveat and mitigations.
 - **No notification delivery.** The module returns the generated code; sending it via SMS, email, or push is the caller's responsibility.
 
+## Store Contract
+
+Six async methods, each returning a result envelope: `getRecord(instance, scope, key) -> { success, record, error }` (record `null` when absent); `setRecord`, `incrementFailCount`, `deleteRecord` -> `{ success, error }`; `setupNewStore(instance) -> { success, error }`; `cleanupExpiredRecords(instance) -> { success, deleted_count, error }`. Construction hard-validates four (`getRecord`, `setRecord`, `incrementFailCount`, `deleteRecord`); a missing one throws at boot. `setupNewStore` is optional (no-op when absent); `cleanupExpiredRecords` throws when absent and called. Full contract in `docs/schemas.md`.
+
 ## Peer Dependencies
 
 | `Lib.*` | Source | Used for |
 |---|---|---|
-| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks |
-| `Lib.Debug` | `@superloomdev/js-helper-debug` | Diagnostics for the post-verify background delete |
-| `Lib.Crypto` | `@superloomdev/js-server-helper-crypto` | `generateRandomString(charset, length)` |
-| `Lib.Instance` | `@superloomdev/js-server-helper-instance` | `backgroundRoutine` for post-verify record deletion |
+| `Lib.Utils` | `helper-utils` | Type checks |
+| `Lib.Debug` | `helper-debug` | Diagnostics for the post-verify background delete |
+| `Lib.Crypto` | `helper-crypto` | `generateRandomString(charset, length)` |
+| `Lib.Instance` | `helper-instance` | `backgroundRoutine` for post-verify record deletion |
 
 The store adapter (`CONFIG.Store`) is a fully independent module that owns its own driver helper (`Lib.SQLite`, `Lib.Postgres`, `Lib.MySQL`, `Lib.MongoDB`, or `Lib.DynamoDB`). The verify module never imports a database driver helper directly.
 
@@ -137,7 +141,8 @@ The store adapter (`CONFIG.Store`) is a fully independent module that owns its o
 ## Documentation
 
 - `docs/api.md`. Full API reference (every function, every option, every error type)
-- `docs/configuration.md`. Loader pattern, every config key, charset overrides, peer dependencies, testing tier
+- `docs/configuration.md`. Loader pattern, every config key, charset overrides, environment-variable boundary, peer dependencies, testing tier
+- `docs/schemas.md`. Validated input contracts (CONFIG, create options, verify options), the six-method store contract, and the response envelope
 - `docs/data-model.md`. Canonical record shape, core concepts, design decisions
 - `docs/runtime.md`. The runtime-shape differences for the verify module (post-verify background delete caveat in serverless, scheduled cleanup mechanism). Not a framework cookbook
-- Storage adapters: see the README's "Storage Adapters" section for the list plus selection rule. Per-backend schema, indexes, TTL, IaC notes, and configuration shape live in each adapter package's own README (`@superloomdev/js-server-helper-verify-store-*`)
+- Storage adapters: see the README's "Storage Adapters" section for the list plus selection rule. Per-backend schema, indexes, TTL, IaC notes, and configuration shape live in each adapter package's own README (`helper-verify-store-*`)

@@ -1,4 +1,4 @@
-// Tests for js-server-helper-verify
+// Tests for helper-verify
 // Offline module - storage adapter is injected per-test (in-memory implementation).
 // process.env is NEVER accessed in test files - only in loader.js
 'use strict';
@@ -764,7 +764,7 @@ describe('config absorption contract', function () {
     assert.doesNotThrow(function () { VerifyFactory(Lib, validBaseConfig()); });
   });
 
-  // OVERRIDE WINS: override PIN_CHARSET to a single character 'X' — every
+  // OVERRIDE WINS: override PIN_CHARSET to a single character 'X' - every
   // generated digit must be 'X', proving the override reached CONFIG.
   it('absorbs a PIN_CHARSET override that changes generated output', async function () {
     const verify = VerifyFactory(Lib, Object.assign(validBaseConfig(), { PIN_CHARSET: 'X' }));

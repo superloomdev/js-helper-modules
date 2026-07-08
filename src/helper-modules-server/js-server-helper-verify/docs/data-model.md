@@ -1,6 +1,6 @@
-# Data Model. `js-server-helper-verify`
+# Data Model. `helper-verify`
 
-Every verification attempt is represented as a single flat record. This document explains what each field means, why it exists, and how to populate it correctly. For the function reference see [API Reference](api.md). For configuration keys see [Configuration](configuration.md).
+Every verification attempt is represented as a single flat record. This document explains what each field means, why it exists, and how to populate it correctly. For the validated input and store contracts see [Schemas](schemas.md). For the function reference see [API Reference](api.md). For configuration keys see [Configuration](configuration.md).
 
 ## On This Page
 
@@ -22,7 +22,7 @@ scope: 'tenant.42'              // tenant-level namespace
 scope: ''                       // single-tenant / no isolation needed (default)
 ```
 
-Scope is **not** a security boundary on its own. Your application must ensure the caller's scope is authoritative before passing it in. Two callers with different scopes cannot see each other's codes; two callers with the same scope can (assuming they also know the key).
+Scope is **not** a security boundary on its own. The application must establish that the caller's scope is authoritative before passing it in. Two callers with different scopes cannot see each other's codes; two callers with the same scope can (assuming they also know the key).
 
 **Key.** The specific purpose or channel within the scope. Together with `scope` it forms the composite primary key. One `(scope, key)` pair holds at most one active code at a time. A new `createPin` / `createCode` / `createToken` call replaces the previous record.
 
@@ -33,7 +33,7 @@ key: 'password-reset'               // password reset token (one per user, under
 key: 'totp-setup'                   // TOTP enrollment confirmation
 ```
 
-Convention: `[purpose].[channel-identifier]`. The key is opaque to the module. Choose a naming scheme that lets your application reconstruct it at verify time without looking it up.
+Convention: `[purpose].[channel-identifier]`. The key is opaque to the module. A naming scheme that the application can reconstruct at verify time, without a lookup, keeps the key self-describing.
 
 **Code types.** Three generators covering the three common surfaces:
 
@@ -71,7 +71,7 @@ cooldown_seconds: 0      // no cooldown (e.g. for test environments)
 
 ## Scope and Key Design Guide
 
-The two keys together answer "what is this code for and who owns it?" Design them so your application can reconstruct both values from the same information available at verify time.
+The two keys together answer "what is this code for and who owns it?" They are designed so the application can reconstruct both values from the same information available at verify time.
 
 ```javascript
 // Phone OTP. Scope is the user, key identifies the phone number.
@@ -91,7 +91,7 @@ scope: 'user.' + user.id
 key:   'totp-setup'
 ```
 
-A new `create*` call for the same `(scope, key)` **replaces** the previous record. There is no accumulation. If your flow needs two simultaneous codes for the same user (for example, phone plus email), use distinct keys.
+A new `create*` call for the same `(scope, key)` **replaces** the previous record. There is no accumulation. A flow that needs two simultaneous codes for the same user (for example, phone plus email) uses distinct keys.
 
 ---
 
@@ -111,7 +111,7 @@ Only one active code per purpose. If a user requests a new OTP, the old one is i
 
 ### Why fail counter instead of immediate lockout?
 
-The fail counter allows forgiving typos while still preventing brute force. Set `max_fail_count` based on your threat model (3-5 is typical for SMS, higher for less sensitive flows).
+The fail counter allows forgiving typos while still preventing brute force. The `max_fail_count` value follows the flow's threat model (3 to 5 is typical for SMS, higher for less sensitive flows).
 
 ### Why cooldown instead of global rate limit?
 

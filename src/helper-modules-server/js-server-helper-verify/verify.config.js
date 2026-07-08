@@ -1,6 +1,8 @@
-// Info: Configuration defaults for js-server-helper-verify.
-// All fields are optional except Store. Charsets can be overridden by the
-// project, but the defaults are picked for human typing and URL safety.
+// Info: Configuration defaults for helper-verify.
+// All fields are optional except Store, a required injection: the loader must
+// be passed a ready-to-use store object from the chosen adapter. Charsets can
+// be overridden by the project; the defaults are picked for human typing and
+// URL safety. Per-backend adapter wiring is documented in docs/configuration.md.
 'use strict';
 
 
@@ -19,29 +21,8 @@ module.exports = {
   // Highest entropy per char, safe to drop into query strings without escaping.
   TOKEN_CHARSET: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
 
-  // Ready-to-use store object. Configure and instantiate the chosen adapter
-  // package, then pass the resulting store object directly.
-  //   const Store = require('@superloomdev/js-server-helper-verify-store-sqlite')({
-  //     table_name: 'verification_codes',
-  //     lib_sqlite: Lib.SQLite
-  //   });
-  //   const Store = require('@superloomdev/js-server-helper-verify-store-postgres')({
-  //     table_name: 'verification_codes',
-  //     lib_postgresql: Lib.PostgreSQL
-  //   });
-  //   const Store = require('@superloomdev/js-server-helper-verify-store-mysql')({
-  //     table_name: 'verification_codes',
-  //     lib_mysql: Lib.MySQL
-  //   });
-  //   const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')({
-  //     collection_name: 'verification_codes',
-  //     lib_mongodb: Lib.MongoDB
-  //   });
-  //   const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')({
-  //     table_name: 'verification_codes',
-  //     lib_dynamodb: Lib.DynamoDB
-  //   });
-  // Required. Validated at loader time.
+  // Ready-to-use store object from the chosen adapter package. Required.
+  // Validated at construction. Per-backend wiring: docs/configuration.md.
   Store: null
 
 };

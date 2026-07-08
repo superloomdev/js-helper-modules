@@ -8,11 +8,11 @@
 // Storage backends are provided by standalone adapter packages. The caller
 // passes the chosen ready-to-use store object directly as CONFIG.Store - no string
 // dispatch inside this module. Configure and require only the adapter you need:
-//   const Store = require('@superloomdev/js-server-helper-verify-store-sqlite')(config)
-//   const Store = require('@superloomdev/js-server-helper-verify-store-postgres')(config)
-//   const Store = require('@superloomdev/js-server-helper-verify-store-mysql')(config)
-//   const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')(config)
-//   const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(config)
+//   const Store = require('helper-verify-store-sqlite')(config)
+//   const Store = require('helper-verify-store-postgres')(config)
+//   const Store = require('helper-verify-store-mysql')(config)
+//   const Store = require('helper-verify-store-mongodb')(config)
+//   const Store = require('helper-verify-store-dynamodb')(config)
 //
 // Compatibility: Node.js 24+
 'use strict';
@@ -51,8 +51,8 @@ module.exports = function loader (shared_libs, config) {
   // Load internal error catalog
   const ERRORS = require('./verify.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./verify.validators')(Lib);
+  // Load the validators singleton - Lib and ERRORS injected
+  const Validators = require('./verify.validators')(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);
@@ -169,7 +169,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     @param {Integer} options.max_fail_count - Reject after this many failed attempts
 
     @return {Promise<Object>} - { success, error }. On failure, error.type
-    is one of: NOT_FOUND, EXPIRED, MAX_FAILS, WRONG_VALUE, SERVICE_UNAVAILABLE.
+    is one of: VERIFY_NOT_FOUND, VERIFY_EXPIRED, VERIFY_MAX_FAILS, VERIFY_WRONG_VALUE, VERIFY_SERVICE_UNAVAILABLE.
     *********************************************************************/
     verify: async function (instance, options) {
 
@@ -411,7 +411,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // at runtime.
       if (!Lib.Utils.isFunction(store.cleanupExpiredRecords)) {
         throw new Error(
-          '[js-server-helper-verify] store does not implement cleanupExpiredRecords'
+          '[helper-verify] store does not implement cleanupExpiredRecords'
         );
       }
 

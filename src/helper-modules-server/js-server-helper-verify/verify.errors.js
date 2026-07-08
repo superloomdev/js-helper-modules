@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Error catalog for js-server-helper-verify.
+ * Error catalog for helper-verify.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
