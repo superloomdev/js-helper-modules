@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-logger-store-dynamodb.
+// Info: Test loader for helper-logger-store-dynamodb.
 // Builds the Lib container so both Tier 1 (adapter unit tests, no
 // logger.js) and Tier 3 (full logger lifecycle via the store contract
 // suite) can share the same runtime objects.

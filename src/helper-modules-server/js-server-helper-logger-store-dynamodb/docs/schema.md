@@ -1,4 +1,4 @@
-# Schema — js-server-helper-logger-store-dynamodb
+# Schema - helper-logger-store-dynamodb
 
 ## Table Design
 

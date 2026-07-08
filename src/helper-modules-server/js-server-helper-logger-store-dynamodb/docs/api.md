@@ -1,11 +1,13 @@
-# API Reference — js-server-helper-logger-store-dynamodb
+# API Reference - helper-logger-store-dynamodb
 
-This adapter implements the 5-method store contract consumed by `js-server-helper-logger`. This document focuses on the DynamoDB-specific semantics.
+This adapter implements the 5-method store contract consumed by `helper-logger`. This document focuses on the DynamoDB-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-dynamodb')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-logger-store-dynamodb')(Lib, {
+  table_name: 'action_log'
+});
 ```
 
 ## Store Contract
@@ -103,4 +105,4 @@ Returns `deleted_count` equal to the number of items deleted. DynamoDB native TT
 
 ## Error Handling
 
-All methods return `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` on driver failure. The driver error is logged via `Lib.Debug.error`.
+All methods return `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` on driver failure. The underlying error is logged via `Lib.Debug.debug`.

@@ -1,4 +1,4 @@
-// Info: DynamoDB store adapter for js-server-helper-logger.
+// Info: DynamoDB store adapter for helper-logger.
 //
 // Uses a single-table design with composite keys:
 //   - pk: "{scope}#{entity_type}#{entity_id}" for entity lookups
@@ -9,8 +9,8 @@
 //   - listByEntity: Query on base table (pk prefix)
 //   - listByActor: Query on GSI (actor_pk prefix)
 //
-// The caller passes a ready-to-use DynamoDB helper via config.lib_dynamodb
-// (typically Lib.DynamoDB).
+// Standard factory shape: receives shared_libs, owns its own CONFIG, ERRORS,
+// and Validators. Returns a ready-to-use store object.
 //
 // TTL is handled via DynamoDB's native TTL feature on expires_at.
 // Enable TTL out-of-band via IaC or AWS Console.
@@ -29,32 +29,44 @@
 /////////////////////////// Module-Loader START //////////////////////////////
 
 /********************************************************************
-Thin loader. Builds own Lib and ERRORS, validates config via the
-Validators singleton, then delegates to createInterface. Each call
-returns an independent Store instance with its own table_name and
-lib_dynamodb reference.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config - { table_name, lib_dynamodb }
+@param {Object} shared_libs - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} config - Overrides merged over adapter config defaults
+                         ({ table_name } - plain data only)
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  // Build own Lib container from peer dependencies
-  const Lib = {};
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    DynamoDB: shared_libs.DynamoDB
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
 
   // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  Validators.validateConfig(config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -63,16 +75,17 @@ module.exports = function loader (config) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, config, and ERRORS.
+Builds the public Store interface for one instance. All functions
+close over the same Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} config - { table_name, lib_dynamodb }
-@param {Object} ERRORS - Adapter-owned error catalog
+@param {Object} Lib        - Dependency container (Utils, Debug, DynamoDB)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (5 methods: setupNewStore, addLog, getLogsByEntity, getLogsByActor, cleanupExpiredLogs)
 *********************************************************************/
-const createInterface = function (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -128,9 +141,9 @@ const createInterface = function (Lib, config, ERRORS) {
       });
 
       // Write the record via writeRecord (PutItem wrapper)
-      const result = await config.lib_dynamodb.writeRecord(
+      const result = await Lib.DynamoDB.writeRecord(
         instance,
-        config.table_name,
+        CONFIG.table_name,
         item
       );
 
@@ -212,7 +225,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Full scan - DynamoDB has no server-side filter on scan without
       // FilterExpression support in this helper, so filter client-side.
-      const scan = await config.lib_dynamodb.scan(instance, config.table_name);
+      const scan = await Lib.DynamoDB.scan(instance, CONFIG.table_name);
       if (scan.success === false) {
         Lib.Debug.debug('Logger dynamodb cleanupExpiredLogs scan failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
@@ -230,11 +243,11 @@ const createInterface = function (Lib, config, ERRORS) {
       }
 
       const keysByTable = {};
-      keysByTable[config.table_name] = expired.map(function (item) {
+      keysByTable[CONFIG.table_name] = expired.map(function (item) {
         return { pk: item.pk, sort_key: item.sort_key };
       });
 
-      const del = await config.lib_dynamodb.batchDeleteRecords(instance, keysByTable);
+      const del = await Lib.DynamoDB.batchDeleteRecords(instance, keysByTable);
       if (del.success === false) {
         Lib.Debug.debug('Logger dynamodb cleanupExpiredLogs delete failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
@@ -298,9 +311,9 @@ const createInterface = function (Lib, config, ERRORS) {
       };
 
       // Execute query via the unified query method (supports indexName for GSI)
-      const result = await config.lib_dynamodb.query(
+      const result = await Lib.DynamoDB.query(
         instance,
-        config.table_name,
+        CONFIG.table_name,
         queryParams
       );
 
@@ -365,4 +378,4 @@ const createInterface = function (Lib, config, ERRORS) {
 
   return Store;
 
-};///////////////////////////// createInterface END /////////////////////////////
+};/////////////////////////// createInterface END //////////////////////////////
