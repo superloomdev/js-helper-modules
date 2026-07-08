@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-auth-store-postgres-test",
-  "description": "Test suite for js-server-helper-auth-store-postgres",
+  "name": "helper-auth-store-postgres-test",
+  "description": "Test suite for helper-auth-store-postgres",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

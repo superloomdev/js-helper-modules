@@ -1,12 +1,11 @@
-// Info: Postgres store adapter for js-server-helper-auth. Fully self-contained -
-// every DDL statement, UPSERT template, CRUD query, value coercion,
-// and identifier-quoting rule in this file is specific to Postgres.
+// Info: Postgres store adapter for helper-auth. Every DDL statement,
+// UPSERT template, CRUD query, value coercion, and identifier-quoting
+// rule in this file is specific to Postgres.
 // No cross-dialect parameterisation, no shared SQL helper module.
 //
-// The application injects a ready-to-use Postgres helper via
-// config.lib_sql (typically Lib.Postgres). This adapter never
-// requires `pg` directly - projects not using this store never load
-// the driver.
+// The caller injects a ready-to-use Postgres helper as Lib.SQL
+// (typically Lib.Postgres aliased). This adapter never requires `pg`
+// directly - projects not using this store never load the driver.
 //
 // Postgres-specific quirks handled here:
 //   - Identifiers are double-quoted ("col").
@@ -39,38 +38,45 @@
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
-// Adapter-local Lib: built once, shared across all instances of this adapter.
-const Lib = {
-  Utils: require('helper-utils')(null, {}),
-  Debug: require('helper-debug')(null, { LOG_LEVEL: process.env.LOG_LEVEL || 'error' })
-};
-
-// Adapter-local ERRORS catalog (frozen). Auth.js forwards these transparently.
-const ERRORS = Object.freeze({
-  SERVICE_UNAVAILABLE: {
-    type: 'AUTH_STORE_POSTGRES_SERVICE_UNAVAILABLE',
-    message: 'Postgres backend unavailable'
-  }
-});
-
-
 /********************************************************************
-Factory loader. One call = one independent store instance with its
-own table_name and lib_sql driver reference. Validates config at
-construction so misconfiguration fails fast at startup.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config            - { table_name, lib_sql }
-@param {string} config.table_name - Postgres table to read/write sessions
-@param {Object} config.lib_sql    - Ready-to-use Postgres helper (Lib.Postgres)
+@param {Object} shared_libs - Dependency container (Utils, Debug, SQL)
+@param {Object} config - Overrides merged over adapter config defaults
+                         ({ table_name } - plain data only)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
+
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    SQL: shared_libs.SQL
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
+
+  // Own frozen error catalog
+  const ERRORS = require('./store.errors');
+
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  require('./store.validators').validateConfig(Lib, config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -79,19 +85,17 @@ module.exports = function loader (config) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, config, and
-ERRORS. _Store (private helpers) is defined after Store (public
-methods) and is referenced by the public methods via the closure -
-the same pattern used across all helper modules.
+Builds the public Store interface for one instance. All functions
+close over the same Lib, CONFIG, ERRORS, and Validators.
 
-@param {Object} Lib          - Dependency container (Utils, Debug)
-@param {Object} config - { table_name, lib_sql }
-@param {Object} ERRORS       - Error catalog forwarded from auth.js
+@param {Object} Lib        - Dependency container (Utils, Debug, SQL)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-const createInterface = function (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
   ////////////////////////////// Public Functions START ////////////////////////
   const Store = {
@@ -116,7 +120,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Create table
       const table_stmt = _Store.buildCreateTableSQL();
-      const table_result = await config.lib_sql.write(instance, table_stmt);
+      const table_result = await Lib.SQL.write(instance, table_stmt);
 
       // Return a service error if the table creation failed
       if (table_result.success === false) {
@@ -134,7 +138,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Create expires_at index
       const index_stmt = _Store.buildCreateIndexSQL();
-      const index_result = await config.lib_sql.write(instance, index_stmt);
+      const index_result = await Lib.SQL.write(instance, index_stmt);
 
       // Return a service error if the index creation failed
       if (index_result.success === false) {
@@ -165,16 +169,23 @@ const createInterface = function (Lib, config, ERRORS) {
     // single index reads even at large scale.
 
     /********************************************************************
-    Read a single session by (tenant_id, actor_id, token_key). Applies
-    the token_secret_hash check after the read so a wrong secret looks
-    identical to "record not found" (no timing leak).
+    Read a single session by (tenant_id, actor_id, token_key). Returns
+    null record on hash mismatch - identical to "not found" shape.
+
+    @param {Object} instance          - Request instance
+    @param {string} tenant_id         - Tenant identifier
+    @param {string} actor_id          - Actor identifier
+    @param {string} token_key         - Token key (partial key)
+    @param {string} token_secret_hash - Hash to verify after fetch
+
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
       // Fetch the session row by composite primary key
-      const result = await config.lib_sql.getRow(
+      const result = await Lib.SQL.getRow(
         instance,
-        'SELECT * FROM ' + _Store.Q(config.table_name) +
+        'SELECT * FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?' +
         '   AND ' + _Store.Q('token_key') + ' = ?',
@@ -227,15 +238,20 @@ const createInterface = function (Lib, config, ERRORS) {
 
 
     /********************************************************************
-    Return every session for a (tenant_id, actor_id) pair. The natural
-    PK is composite so this is a single index range read.
+    Return all sessions for a (tenant_id, actor_id) pair.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
       // Fetch all session rows for this actor under the given tenant
-      const result = await config.lib_sql.getRows(
+      const result = await Lib.SQL.getRows(
         instance,
-        'SELECT * FROM ' + _Store.Q(config.table_name) +
+        'SELECT * FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?',
         [tenant_id, actor_id]
@@ -275,16 +291,18 @@ const createInterface = function (Lib, config, ERRORS) {
     // refuses any identity column to keep PK integrity tamper-proof.
 
     /********************************************************************
-    Insert or upsert a session. Uses ON CONFLICT ... DO UPDATE so a
-    second call with the same primary key replaces the mutable
-    columns - supports re-use of the same (tenant, actor, token_key)
-    triple in a single round-trip.
+    Insert or upsert a session by composite primary key.
+
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical session record
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
       // Encode the canonical record and run the UPSERT
       const params = _Store.recordToRow(record);
-      const result = await config.lib_sql.write(instance, upsert_sql, params);
+      const result = await Lib.SQL.write(instance, upsert_sql, params);
 
       // Return a service error if the driver call failed
       if (result.success === false) {
@@ -309,14 +327,16 @@ const createInterface = function (Lib, config, ERRORS) {
 
 
     /********************************************************************
-    Partial UPDATE for the mutable per-session fields:
-      last_active_at, expires_at, push_provider, push_token,
-      client_*, custom_data, refresh_token_hash, refresh_family_id
+    Partial UPDATE for mutable per-session fields. Throws TypeError
+    if `updates` contains any identity or primary-key column.
 
-    Throws TypeError if `updates` contains any identity / primary-key
-    column - programmer error (only auth.js calls this and it never
-    passes those fields). The throw makes any regression visible
-    immediately rather than silently overwriting identity.
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+    @param {Object} updates   - Partial record (mutable fields only)
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -333,7 +353,7 @@ const createInterface = function (Lib, config, ERRORS) {
       for (const k of update_keys) {
         if (_Store.UPDATE_IDENTITY_BLOCKLIST.indexOf(k) !== -1) {
           throw new TypeError(
-            '[js-server-helper-auth-store-postgres] updateSessionActivity cannot modify identity field "' + k + '"'
+            '[helper-auth-store-postgres] updateSessionActivity cannot modify identity field "' + k + '"'
           );
         }
       }
@@ -348,7 +368,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Run the partial UPDATE against the target session row
       const stmt =
-        'UPDATE ' + _Store.Q(config.table_name) +
+        'UPDATE ' + _Store.Q(CONFIG.table_name) +
         ' SET ' + set_parts.join(', ') +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?' +
@@ -356,7 +376,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       const params = set_values.concat([tenant_id, actor_id, token_key]);
 
-      const result = await config.lib_sql.write(instance, stmt, params);
+      const result = await Lib.SQL.write(instance, stmt, params);
 
       // Return a service error if the driver call failed
       if (result.success === false) {
@@ -386,14 +406,21 @@ const createInterface = function (Lib, config, ERRORS) {
     // replacement stay constant-cost regardless of session count.
 
     /********************************************************************
-    Delete one session by composite key.
+    Delete one session by composite primary key.
+
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
       // Remove the session row by composite primary key
-      const result = await config.lib_sql.write(
+      const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.Q(config.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?' +
         '   AND ' + _Store.Q('token_key') + ' = ?',
@@ -423,9 +450,14 @@ const createInterface = function (Lib, config, ERRORS) {
 
 
     /********************************************************************
-    Bulk delete sessions for a tenant. One round-trip with a
-    (actor_id = ? AND token_key = ?) OR (...) clause. Skips the
-    round-trip if the keys list is empty (no-op success).
+    Bulk delete sessions for a tenant. Single round-trip with an
+    OR-joined clause. No-op success if keys array is empty.
+
+    @param {Object}   instance  - Request instance
+    @param {string}   tenant_id - Tenant identifier
+    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
+
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -453,9 +485,9 @@ const createInterface = function (Lib, config, ERRORS) {
       }
 
       // Delete all matched sessions in one round-trip
-      const result = await config.lib_sql.write(
+      const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.Q(config.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ? AND (' + clauses + ')',
         params
       );
@@ -489,17 +521,20 @@ const createInterface = function (Lib, config, ERRORS) {
     // range scan even as the table grows.
 
     /********************************************************************
-    Sweep expired sessions. Uses the expires_at index for efficient
-    range scan. Postgres has no native TTL, so this is the
-    garbage-collection path - run it on a cron.
+    Sweep all expired sessions. Postgres has no native TTL; this is
+    the garbage-collection path - run it on a cron.
+
+    @param {Object} instance - Request instance
+
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
       // Sweep all rows whose expires_at is in the past
       const now = instance.time;
-      const result = await config.lib_sql.write(
+      const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.Q(config.table_name) + ' WHERE ' + _Store.Q('expires_at') + ' < ?',
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) + ' WHERE ' + _Store.Q('expires_at') + ' < ?',
         [now]
       );
 
@@ -591,7 +626,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Reject identifiers that would break the double-quote escaping
       if (name.indexOf('"') !== -1) {
-        throw new Error('[js-server-helper-auth-store-postgres] identifier contains double-quote: ' + name);
+        throw new Error('[helper-auth-store-postgres] identifier contains double-quote: ' + name);
       }
 
       // Wrap in Postgres double-quote style
@@ -611,7 +646,7 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Build the quoted table identifier then emit the full DDL
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
           '  ' + Q('tenant_id')           + ' VARCHAR(64)  NOT NULL,' +
@@ -661,10 +696,10 @@ const createInterface = function (Lib, config, ERRORS) {
 
       // Build a deterministic index name and emit the CREATE INDEX DDL
       const Q = _Store.Q;
-      const idx_name = 'idx_' + config.table_name + '_expires_at';
+      const idx_name = 'idx_' + CONFIG.table_name + '_expires_at';
       return (
         'CREATE INDEX IF NOT EXISTS ' + Q(idx_name) +
-        ' ON ' + Q(config.table_name) +
+        ' ON ' + Q(CONFIG.table_name) +
         ' (' + Q('expires_at') + ')'
       );
 
@@ -686,7 +721,7 @@ const createInterface = function (Lib, config, ERRORS) {
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
       const UPSERT_IMMUTABLE_COLUMNS = _Store.UPSERT_IMMUTABLE_COLUMNS;
-      const tq = Q(config.table_name);
+      const tq = Q(CONFIG.table_name);
       const cols_quoted = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';

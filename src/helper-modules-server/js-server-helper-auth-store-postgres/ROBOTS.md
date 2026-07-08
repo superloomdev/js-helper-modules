@@ -1,13 +1,14 @@
-# js-server-helper-auth-store-postgres. AI Reference
+# helper-auth-store-postgres. AI Reference
 
-Class F storage adapter. PostgreSQL backend for `@superloomdev/js-server-helper-auth`. Fully independent — owns its own `Lib`, `Config`, and `ERRORS`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
+Class F storage adapter. PostgreSQL backend for `helper-auth`. Standard factory shape: receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
 
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-auth-store-postgres')({
-  table_name: 'sessions_user',
-  lib_sql:    Lib.Postgres
+Lib.SQL = Lib.Postgres;  // alias so the adapter picks Lib.SQL
+
+const Store = require('@superloomdev/js-server-helper-auth-store-postgres')(Lib, {
+  table_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -19,20 +20,18 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 | Config key | Type | Notes |
 |---|---|---|
 | `table_name` | String | Required. One table per actor_type |
-| `lib_sql` | Object | Required. Initialized `js-server-helper-sql-postgres` instance |
 
-The adapter builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally. Auth forwards error envelopes transparently.
+The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the injected container. Auth forwards error envelopes transparently.
 
 ## Config
 
 ```js
 {
-  table_name: 'sessions_user',  // required. one table per actor_type
-  lib_sql:    Lib.Postgres      // required. initialized js-server-helper-sql-postgres
+  table_name: 'sessions_user'  // required. one table per actor_type
 }
 ```
 
-Both keys are required. The loader throws an `Error` if either is missing, null, or empty.
+`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract. Eight Methods
 
@@ -51,7 +50,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter directly with its config to get a Store object, then pass that to the Auth parent.** Do not pass the factory function reference to Auth; pass the result of calling it.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-postgres')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`. Ensure `Lib.SQL` is set to `Lib.Postgres` before calling.
 
 2. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration.
 
@@ -74,16 +73,16 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ## Peer Dependencies
 
 ```
-@superloomdev/js-helper-utils                 (type checks)
-@superloomdev/js-helper-debug                 (structured logging)
-@superloomdev/js-server-helper-sql-postgres   (Postgres driver wrapper)
+Lib.Utils    (@superloomdev/js-helper-utils)              injected via shared_libs
+Lib.Debug    (@superloomdev/js-helper-debug)              injected via shared_libs
+Lib.SQL      (@superloomdev/js-server-helper-sql-postgres) injected via shared_libs as alias
 ```
 
-Utils and Debug are required directly by the adapter and built into its own internal `Lib`. The `sql-postgres` driver helper is passed in via `config.lib_sql` by the application.
+All three are injected by the caller. The adapter owns no runtime dependencies of its own.
 
 ## Error Catalog Used
 
-The adapter defines its own internal ERRORS catalog. Auth forwards error envelopes transparently; the adapter's `SERVICE_UNAVAILABLE` type is `AUTH_STORE_POSTGRES_SERVICE_UNAVAILABLE`.
+The adapter defines its own error catalog in `store.errors.js`. Auth forwards error envelopes transparently; the adapter's `SERVICE_UNAVAILABLE` type is `AUTH_STORE_POSTGRES_SERVICE_UNAVAILABLE`.
 
 | Error | When |
 |---|---|
