@@ -1,13 +1,12 @@
-# Configuration — js-server-helper-logger-store-postgres
+# Configuration - helper-logger-store-postgres
 
 ## Construction Pattern
 
-This adapter is fully independent — it owns its own Lib and ERRORS. Construct it before the Logger parent and pass it as `CONFIG.Store`.
+Construct this adapter before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-postgres')({
-  table_name: 'action_log',
-  lib_sql:    Lib.Postgres
+const Store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, {
+  table_name: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -21,19 +20,18 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
 | `table_name` | `String` | Yes | Name of the log table. Must not contain a double-quote. One table per Logger instance. |
-| `lib_sql` | `Object` | Yes | An initialized `Lib.Postgres` instance (`@superloomdev/js-server-helper-sql-postgres`). |
 
 ## Dependencies
 
-| Package | Scope | Purpose |
-|---------|-------|---------||
-| `@superloomdev/js-helper-utils` | Owned | Type checks (`getUnixTime`) |
-| `@superloomdev/js-helper-debug` | Owned | Structured debug logging |
-| `@superloomdev/js-server-helper-sql-postgres` | Peer (via `config.lib_sql`) | Postgres driver wrapper |
+| Package | Type | Purpose |
+|---------|------|----------|
+| `helper-utils` | Injected via `shared_libs.Utils` | Type checks |
+| `helper-debug` | Injected via `shared_libs.Debug` | Structured debug logging |
+| `helper-sql-postgres` | Injected via `shared_libs.SQL` | Postgres driver wrapper |
 
 ## Environment Variables
 
-Consumed only by `_test/loader.js` — never read by the adapter itself.
+Consumed only by `_test/loader.js` - never read by the adapter itself.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -50,7 +48,7 @@ Consumed only by `_test/loader.js` — never read by the adapter itself.
 | Contract + Integration | PostgreSQL via Docker Compose | `pretest`/`posttest` manage the Docker lifecycle |
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test
 ```
 
 The `pretest` script runs `docker compose down -v` then `docker compose up -d --wait`. Never start Docker manually before running tests.

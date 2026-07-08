@@ -1,4 +1,4 @@
-// Info: Test loader for js-server-helper-logger-store-postgres.
+// Info: Test loader for helper-logger-store-postgres.
 // Builds the Lib container so both Tier 1 (adapter unit tests, no
 // logger.js) and Tier 3 (full logger lifecycle via the store contract
 // suite) can share the same runtime objects.
@@ -47,6 +47,7 @@ module.exports = function loader () {
   Lib.Crypto = require('helper-crypto')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
   Lib.Postgres = require('helper-sql-postgres')(Lib, config_postgres);
+  Lib.SQL = Lib.Postgres;
 
 
   return { Lib: Lib };

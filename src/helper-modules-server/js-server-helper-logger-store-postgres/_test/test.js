@@ -1,4 +1,4 @@
-// Info: Three-tier test suite for js-server-helper-logger-store-postgres.
+// Info: Three-tier test suite for helper-logger-store-postgres.
 //
 // Tier 1 - Adapter unit tests (no logger.js dependency):
 //   - Store loader rejects bad config
@@ -48,9 +48,8 @@ const buildInstance = function (time_seconds) {
 
 const buildStore = function (table) {
 
-  return LoggerStorePostgresFactory({
-    table_name: table || TEST_TABLE,
-    lib_sql: Lib.Postgres
+  return LoggerStorePostgresFactory(Lib, {
+    table_name: table || TEST_TABLE
   });
 
 };
@@ -82,30 +81,29 @@ before(async function () {
 
 describe('Tier 1: store loader validation', function () {
 
-  it('throws when config is missing', function () {
+  it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory(); },
-      /config must be an object/
-    );
-
-  });
-
-  it('throws when table_name is missing', function () {
-
-    assert.throws(
-      function () { LoggerStorePostgresFactory({ lib_sql: Lib.Postgres }); },
+      function () { LoggerStorePostgresFactory(Lib, { table_name: '' }); },
       /table_name is required/
     );
 
   });
 
-  it('throws when lib_sql is missing', function () {
+  it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory({ table_name: 'x' }); },
-      /lib_sql is required/
+      function () { LoggerStorePostgresFactory(Lib, { table_name: null }); },
+      /table_name is required/
     );
+
+  });
+
+  it('returns a store object for valid config', function () {
+
+    const store = LoggerStorePostgresFactory(Lib, { table_name: 'x' });
+    assert.equal(typeof store.setupNewStore, 'function');
+    assert.equal(typeof store.addLog, 'function');
 
   });
 
@@ -331,9 +329,8 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 
 const buildLogger = function (overrides) {
 
-  const Store = LoggerStorePostgresFactory({
-    table_name: TEST_TABLE,
-    lib_sql: Lib.Postgres
+  const Store = LoggerStorePostgresFactory(Lib, {
+    table_name: TEST_TABLE
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));

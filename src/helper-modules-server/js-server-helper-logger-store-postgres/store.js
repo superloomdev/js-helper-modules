@@ -1,10 +1,9 @@
-// Info: Postgres store adapter for js-server-helper-logger. Fully self-contained -
-// every DDL statement, INSERT template, query builder, value coercion,
-// and identifier-quoting rule in this file is specific to Postgres.
+// Info: Postgres store adapter for helper-logger. Every DDL statement,
+// INSERT template, query builder, value coercion, and identifier-quoting
+// rule in this file is specific to Postgres.
 //
-// The caller passes a ready-to-use Postgres helper via config.lib_sql
-// (typically Lib.Postgres). This adapter never requires `pg` directly -
-// projects not using this store never load the driver.
+// Standard factory shape: receives shared_libs, picks SQL driver as
+// Lib.SQL (generic SQL key - hot-swappable across sql-* dialect helpers).
 //
 // Postgres-specific quirks handled here:
 //   - Identifiers are double-quoted ("col").
@@ -32,32 +31,43 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Thin loader. Builds own Lib and ERRORS, validates config via the
-Validators singleton, then delegates to createInterface. Each call
-returns an independent Store instance with its own table_name and
-lib_sql driver reference.
+Thin loader. Picks dependencies from the injected container, merges
+config over defaults, validates config via the Validators singleton,
+then delegates to createInterface. Each call returns an independent
+Store instance.
 
-@param {Object} config - { table_name, lib_sql }
+@param {Object} shared_libs - Dependency container (Utils, Debug, SQL)
+@param {Object} config      - Overrides merged over adapter config defaults
 
 @return {Object} - Store interface (5 methods)
 *********************************************************************/
-module.exports = function loader (config) {
+module.exports = function loader (shared_libs, config) {
 
-  // Build own Lib container from peer dependencies
-  const Lib = {};
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
+  // Dependencies for this instance - by reference from the shared container
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug,
+    SQL: shared_libs.SQL
+  };
+
+  // Merge overrides over adapter config defaults
+  const CONFIG = Object.assign(
+    {},
+    require('./store.config'),
+    config || {}
+  );
 
   // Own frozen error catalog
   const ERRORS = require('./store.errors');
 
-  // Load the validators singleton and inject Lib
-  const Validators = require('./store.validators')(Lib);
+  // Load the validators singleton and inject Lib + ERRORS
+  const Validators = require('./store.validators')(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
-  Validators.validateConfig(config);
+  Validators.validateConfig(CONFIG);
 
-  return createInterface(Lib, config, ERRORS);
+  // Build the public Store interface
+  return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
@@ -67,15 +77,16 @@ module.exports = function loader (config) {
 
 /********************************************************************
 Builds the public Store interface for one instance. Public and
-private functions all close over the same Lib, config, and ERRORS.
+private functions all close over the same Lib, CONFIG, and ERRORS.
 
-@param {Object} Lib    - Dependency container (Utils, Debug)
-@param {Object} config - { table_name, lib_sql }
-@param {Object} ERRORS - Adapter-owned error catalog
+@param {Object} Lib        - Dependency container (Utils, Debug, SQL)
+@param {Object} CONFIG     - Merged adapter configuration (validated)
+@param {Object} ERRORS     - Frozen error catalog
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
 @return {Object} - Store interface (5 methods)
 *********************************************************************/
-function createInterface (Lib, config, ERRORS) {
+const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
 
   ////////////////////////////// Public Functions START ////////////////////////
@@ -97,7 +108,7 @@ function createInterface (Lib, config, ERRORS) {
       const create_idx_actor_sql  = _Store.buildCreateIndexSQL('actor_sort',  ['scope', 'actor_type', 'actor_id', 'sort_key']);
       const create_idx_expires_sql = _Store.buildCreateIndexSQL('expires_at', ['expires_at']);
 
-      const r1 = await config.lib_sql.write(instance, create_table_sql, []);
+      const r1 = await Lib.SQL.write(instance, create_table_sql, []);
       if (r1.success === false) {
         Lib.Debug.error('logger-store-postgres setupNewStore: create table failed', {
           error: r1.error
@@ -105,7 +116,7 @@ function createInterface (Lib, config, ERRORS) {
         return { success: false, error: ERRORS.SERVICE_UNAVAILABLE };
       }
 
-      const r2 = await config.lib_sql.write(instance, create_idx_entity_sql, []);
+      const r2 = await Lib.SQL.write(instance, create_idx_entity_sql, []);
       if (r2.success === false) {
         Lib.Debug.error('logger-store-postgres setupNewStore: create entity index failed', {
           error: r2.error
@@ -113,7 +124,7 @@ function createInterface (Lib, config, ERRORS) {
         return { success: false, error: ERRORS.SERVICE_UNAVAILABLE };
       }
 
-      const r3 = await config.lib_sql.write(instance, create_idx_actor_sql, []);
+      const r3 = await Lib.SQL.write(instance, create_idx_actor_sql, []);
       if (r3.success === false) {
         Lib.Debug.error('logger-store-postgres setupNewStore: create actor index failed', {
           error: r3.error
@@ -121,7 +132,7 @@ function createInterface (Lib, config, ERRORS) {
         return { success: false, error: ERRORS.SERVICE_UNAVAILABLE };
       }
 
-      const r4 = await config.lib_sql.write(instance, create_idx_expires_sql, []);
+      const r4 = await Lib.SQL.write(instance, create_idx_expires_sql, []);
       if (r4.success === false) {
         Lib.Debug.error('logger-store-postgres setupNewStore: create expires index failed', {
           error: r4.error
@@ -148,7 +159,7 @@ function createInterface (Lib, config, ERRORS) {
       const sql = _Store.buildInsertSQL();
       const values = _Store.recordToRow(record);
 
-      const result = await config.lib_sql.write(instance, sql, values);
+      const result = await Lib.SQL.write(instance, sql, values);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-postgres addLog: write failed', {
@@ -175,7 +186,7 @@ function createInterface (Lib, config, ERRORS) {
 
       const { sql, values } = _Store.buildEntityQuery(query);
 
-      const result = await config.lib_sql.getRows(instance, sql, values);
+      const result = await Lib.SQL.getRows(instance, sql, values);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-postgres getLogsByEntity: read failed', {
@@ -217,7 +228,7 @@ function createInterface (Lib, config, ERRORS) {
 
       const { sql, values } = _Store.buildActorQuery(query);
 
-      const result = await config.lib_sql.getRows(instance, sql, values);
+      const result = await Lib.SQL.getRows(instance, sql, values);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-postgres getLogsByActor: read failed', {
@@ -260,12 +271,12 @@ function createInterface (Lib, config, ERRORS) {
       // ordering but cleanup must use the real clock so TTL rows expire on schedule.
       const now_sec = Lib.Utils.getUnixTime();
       const sql = (
-        'DELETE FROM ' + _Store.Q(config.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
         ' WHERE ' + _Store.Q('expires_at') + ' IS NOT NULL' +
         '   AND ' + _Store.Q('expires_at') + ' <= ?'
       );
 
-      const result = await config.lib_sql.write(instance, sql, [now_sec]);
+      const result = await Lib.SQL.write(instance, sql, [now_sec]);
 
       if (result.success === false) {
         Lib.Debug.error('logger-store-postgres cleanupExpiredLogs: delete failed', {
@@ -331,7 +342,7 @@ function createInterface (Lib, config, ERRORS) {
     Q: function (name) {
 
       if (name.indexOf('"') !== -1) {
-        throw new Error('[js-server-helper-logger-store-postgres] identifier contains double-quote: ' + name);
+        throw new Error('[helper-logger-store-postgres] identifier contains double-quote: ' + name);
       }
 
       return '"' + name + '"';
@@ -347,7 +358,7 @@ function createInterface (Lib, config, ERRORS) {
     buildCreateTableSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -382,12 +393,12 @@ function createInterface (Lib, config, ERRORS) {
     buildCreateIndexSQL: function (suffix, columns) {
 
       const Q = _Store.Q;
-      const idx_name = 'idx_' + config.table_name + '_' + suffix;
+      const idx_name = 'idx_' + CONFIG.table_name + '_' + suffix;
       const cols = columns.map(Q).join(', ');
 
       return (
         'CREATE INDEX IF NOT EXISTS ' + Q(idx_name) +
-        ' ON ' + Q(config.table_name) + ' (' + cols + ')'
+        ' ON ' + Q(CONFIG.table_name) + ' (' + cols + ')'
       );
 
     },
@@ -403,7 +414,7 @@ function createInterface (Lib, config, ERRORS) {
 
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const cols = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';
@@ -428,7 +439,7 @@ function createInterface (Lib, config, ERRORS) {
     buildEntityQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 
@@ -469,7 +480,7 @@ function createInterface (Lib, config, ERRORS) {
     buildActorQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(config.table_name);
+      const t = Q(CONFIG.table_name);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 
@@ -553,4 +564,4 @@ function createInterface (Lib, config, ERRORS) {
 
   return Store;
 
-}////////////////////////////// createInterface END ////////////////////////////
+};///////////////////////////// createInterface END ////////////////////////////

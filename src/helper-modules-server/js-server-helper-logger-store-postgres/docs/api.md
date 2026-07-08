@@ -1,11 +1,11 @@
-# API Reference — js-server-helper-logger-store-postgres
+# API Reference - helper-logger-store-postgres
 
-This adapter implements the 5-method store contract consumed by `js-server-helper-logger`. This document focuses on the PostgreSQL-specific semantics.
+This adapter implements the 5-method store contract consumed by `helper-logger`. This document focuses on the PostgreSQL-specific semantics.
 
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, CONFIG, ERRORS);
+const store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, { table_name: 'action_log' });
 ```
 
 ## Store Contract
@@ -14,10 +14,10 @@ const store = require('@superloomdev/js-server-helper-logger-store-postgres')(Li
 
 Executes four idempotent DDL statements:
 
-1. `CREATE TABLE IF NOT EXISTS "{table_name}" (...)` — log table with `sort_key` as sole primary key.
-2. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_entity_sort" ON ...` — entity query path.
-3. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_actor_sort" ON ...` — actor query path.
-4. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_expires_at" ON ...` — cleanup path.
+1. `CREATE TABLE IF NOT EXISTS "{table_name}" (...)` - log table with `sort_key` as sole primary key.
+2. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_entity_sort" ON ...` - entity query path.
+3. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_actor_sort" ON ...` - actor query path.
+4. `CREATE INDEX IF NOT EXISTS "idx_{table_name}_expires_at" ON ...` - cleanup path.
 
 **Return:** `{ success, error }`
 
