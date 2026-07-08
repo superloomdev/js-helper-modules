@@ -1,6 +1,6 @@
 {
-  "name": "js-server-helper-auth-store-sqlite-test",
-  "description": "Test suite for js-server-helper-auth-store-sqlite",
+  "name": "helper-auth-store-sqlite-test",
+  "description": "Test suite for helper-auth-store-sqlite",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,

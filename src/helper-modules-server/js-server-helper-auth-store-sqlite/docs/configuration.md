@@ -16,10 +16,10 @@ The SQLite store adapter is a fully independent module. Call it with its config 
 Lib.SQLite = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, {
   FILE: '/var/data/sessions.db'   // path to a SQLite file, or ':memory:'
 });
+Lib.SQL = Lib.SQLite;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')({
-  table_name: 'sessions_user',
-  lib_sql:    Lib.SQLite
+const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')(Lib, {
+  table_name: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -31,7 +31,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 await Lib.AuthUser.setupNewStore(Lib.Instance.initialize());
 ```
 
-The adapter is called directly with its config. It builds its own `Lib` (Utils + Debug) and defines its own `ERRORS` catalog internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
+The adapter receives the `Lib` container and picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference. It defines its own `CONFIG` and `ERRORS` internally, then returns a ready-to-use store object. The Auth parent receives that object via `CONFIG.Store` and uses it directly.
 
 The SQLite database handle lives inside `Lib.SQLite`. The `sql-sqlite` driver helper opens the database file (or the `:memory:` instance) on first access. The adapter does not open any handle of its own and inherits whatever WAL / journal-mode configuration the driver helper applies.
 
@@ -42,9 +42,8 @@ The SQLite database handle lives inside `Lib.SQLite`. The `sql-sqlite` driver he
 | Key | Type | Required | Description |
 |---|---|---|---|
 | `table_name` | String | Yes | Name of the sessions table. Use one table per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
-| `lib_sql` | Object | Yes | Initialized `Lib.SQLite` instance. The adapter delegates all SQL execution to this helper |
 
-The validator throws an `Error` at loader time if either key is missing, null, undefined, or (for `table_name`) the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `table_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
 `table_name` cannot contain a double-quote character. The check happens lazily on first SQL build, not at config-validation time. Use lowercase, underscored identifiers (`sessions_user`, not `"Sessions"`).
 
@@ -56,7 +55,7 @@ The adapter does not require these packages directly. It accesses them through `
 |---|---|
 | `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
 | `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
-| `@superloomdev/js-server-helper-sql-sqlite` | `Lib.SQLite` via `config.lib_sql` |
+| `@superloomdev/js-server-helper-sql-sqlite` | `Lib.SQL` (set by caller as `Lib.SQL = Lib.SQLite`) |
 
 The driver helper wraps Node's built-in `node:sqlite` module. There is no native add-on (no `better-sqlite3`, no `sqlite3`). Applications that never use this adapter never load the SQLite driver.
 
@@ -73,7 +72,7 @@ The adapter reads no environment variables at runtime. The variable below is con
 In-process. No Docker, no external service. The contract test suite runs against a `:memory:` SQLite database that is created from scratch for each test run.
 
 ```bash
-cd _test && npm install && npm test
+npm install && npm test
 ```
 
 No `pretest` or `posttest` script is needed; the test entry point initializes the in-memory database via `Lib.SQLite` and tears it down implicitly when the process exits. The single environment variable (`SQLITE_FILE`) can be overridden to point at a file path if you want to inspect the resulting database after a test run; the default in-memory mode is the supported configuration.
