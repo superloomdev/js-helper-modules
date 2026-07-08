@@ -25,6 +25,8 @@ This module is the browser-side member of a runtime pair. The shared functions (
 
 - **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom in order, use the section breaks as checkpoints to mark how far they have got, and finish without ever getting lost in dense logic. This matters most when an AI assistant is generating the change and a human still has to sign off on it. Open `crypto.js` to see the structure.
 
+- **Runtime-symmetric.** The same module loads unchanged in a browser bundle, a React Native app, a Node.js server, and an edge runtime. There is no separate browser build, no conditional entry point, and no bundler configuration required.
+
 ## Aligned with Superloom Philosophy
 
 If your project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without you needing to learn anything new.

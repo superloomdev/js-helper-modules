@@ -1,4 +1,4 @@
-# API Reference. `js-client-helper-crypto`
+# API Reference. `helper-crypto`
 
 Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-client/js-client-helper-crypto/docs/configuration.md).
 
