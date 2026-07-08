@@ -1,4 +1,4 @@
-// Info: Configuration file for js-client-helper-crypto
+// Info: Configuration file for helper-crypto
 'use strict';
 
 

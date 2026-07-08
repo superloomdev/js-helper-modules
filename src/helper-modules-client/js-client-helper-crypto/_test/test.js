@@ -51,7 +51,7 @@ describe('generateRandomString', function () {
     const charset = 'abc123';
     const result = Crypto.generateRandomString(charset, 64);
 
-    for (var i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
       assert.ok(charset.includes(result[i]));
     }
 

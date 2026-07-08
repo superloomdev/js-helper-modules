@@ -4,7 +4,7 @@
 Client module. Browser-safe crypto helpers using Web Crypto API (available in modern browsers, React Native, and Node.js 19+).
 
 ## Peer Dependencies
-- `@superloomdev/js-helper-utils` (injected as `Lib.Utils`)
+- `helper-utils` (injected as `Lib.Utils`)
 
 ## Direct Dependencies
 None. Uses browser/runtime-native Web Crypto API (`globalThis.crypto`).
@@ -12,7 +12,7 @@ None. Uses browser/runtime-native Web Crypto API (`globalThis.crypto`).
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Crypto = require('@superloomdev/js-client-helper-crypto')(Lib, { /* config overrides */ });
+Lib.Crypto = require('helper-crypto')(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent Crypto interface with its own `Lib` and `CONFIG`. Stateless - no per-instance resources.
@@ -52,4 +52,4 @@ urlDecodeBase64(str) → String | async:no
 - **Web Crypto first, polyfill fallback:** Uses `globalThis.crypto` when available; falls back to `Math.random` only when Web Crypto is missing entirely (the latter is NOT cryptographically secure)
 - **Runtime-symmetric base64:** `Buffer.from` in Node; `btoa`/`atob` + `TextEncoder`/`TextDecoder` in browsers. Throws when neither is available (rare)
 - **Uses Lib.Utils:** For input validation (`isEmpty`, `isFunction`)
-- **Server-side sibling:** `@superloomdev/js-server-helper-crypto` shares the same names and signatures for the seven functions above and adds hashing, HMAC, encryption, and base conversion on top
+- **Server-side sibling:** `helper-crypto` (server) shares the same names and signatures for the seven functions above and adds hashing, HMAC, encryption, and base conversion on top

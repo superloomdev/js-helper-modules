@@ -1,4 +1,4 @@
-# Configuration. `js-client-helper-crypto`
+# Configuration. `helper-crypto`
 
 Loader pattern, configuration keys, dependency notes, and testing tier. For the function reference see [API Reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-client/js-client-helper-crypto/docs/api.md).
 
@@ -18,7 +18,7 @@ Loader pattern, configuration keys, dependency notes, and testing tier. For the 
 The module is a factory. Each loader call returns an independent public interface with its own merged configuration captured in a closure.
 
 ```javascript
-Lib.Crypto = require('@superloomdev/js-client-helper-crypto')(Lib, {});
+Lib.Crypto = require('helper-crypto')(Lib, {});
 ```
 
 Loader call semantics:
@@ -53,7 +53,7 @@ None. The module never reads `process.env`. Browsers do not expose `process.env`
 
 | Peer | Why |
 |---|---|
-| `@superloomdev/js-helper-utils` | Used for input validation (`isEmpty`, `isFunction`) |
+| `helper-utils` | Used for input validation (`isEmpty`, `isFunction`) |
 
 The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not `require()` the peer directly.
 
