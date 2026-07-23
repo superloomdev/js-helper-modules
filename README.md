@@ -13,9 +13,9 @@
 
 </div>
 
-## What this is    
+## What this is
 
-This repository contains all JavaScript helper modules in the Superloom framework. Modules cover databases, storage, queues, auth, verification, logging, and utilities. Each module is versioned and tested on its own.
+This repository contains all JavaScript helper modules in the Superloom framework, built to the specifications in the [framework documentation](https://superloom.dev/docs/languages/js/index). Modules cover databases, storage, queues, auth, verification, logging, and utilities. Each module is versioned and tested on its own.
 
 ## Why use these modules
 
@@ -41,14 +41,15 @@ Modules are organized into three categories:
 
 ## Aligned with Superloom Philosophy
 
-These modules follow Superloom conventions. If your project already uses Superloom, these modules slot in without new patterns to learn.
+These modules implement the patterns documented in the [Superloom framework](https://superloom.dev/docs/principles/engineering-philosophy): one loader shape, one response envelope, one testing contract. If your project already uses Superloom, these modules slot in without new patterns to learn. The documentation is the source of truth; this repository is the reference implementation built from it.
 
 ## Extended Documentation
 
-- [Framework docs](https://superloom.dev/docs/) — architecture, patterns, standards
-- [Getting started](https://superloom.dev/docs/guide/getting-started) — how to add modules to your project
-- [Module structure](https://superloom.dev/docs/languages/js/module-structure) — how modules are organized
-- [Testing guide](https://superloom.dev/docs/dev/testing-local-modules) — how to run module tests
+- [Framework docs](https://superloom.dev/docs/) - architecture, patterns, standards
+- [Getting started](https://superloom.dev/docs/guide/getting-started) - how to add modules to your project
+- [Module structure](https://superloom.dev/docs/languages/js/module-structure) - how modules are organized
+- [Module catalogs](https://superloom.dev/docs/languages/js/catalog-core) - [core](https://superloom.dev/docs/languages/js/catalog-core), [server](https://superloom.dev/docs/languages/js/catalog-server), and [client](https://superloom.dev/docs/languages/js/catalog-client) module tiers
+- [Testing guide](https://superloom.dev/docs/dev/testing-local-modules) - how to run module tests
 
 ## Adding to Your Project
 
@@ -56,4 +57,4 @@ Modules install as peer dependencies through the Superloom loader pattern. See [
 
 ## License
 
-MIT — free for commercial use.
+MIT - free for commercial use.

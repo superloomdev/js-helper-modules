@@ -2,12 +2,12 @@
 description: Full lifecycle for JS helper modules - create, review (report only), fix (review + apply + converge), publish
 ---
 
-# Module Workflow
+# JS Helper Module Workflow
 
 The one workflow for the lifecycle of a JavaScript helper module. It operates on exactly ONE module per run, named in the invocation.
 
-Invoke as: `/module [verb] [module-path]`
-Example: `/module review src/helper-modules-core/js-helper-money`
+Invoke as: `/js-helper-module [verb] [module-path]`
+Example: `/js-helper-module review src/helper-modules-core/js-helper-money`
 
 | Verb | What it does | Mutates files? |
 |---|---|---|
@@ -17,6 +17,8 @@ Example: `/module review src/helper-modules-core/js-helper-money`
 | `publish` | Pre-publish gate, CI registration check, version, release | Commit + push only |
 
 Ambiguous verb or missing module path: ask, never guess.
+
+`fix` is also the **retrofit verb**: when `codebase-superloom/docs/` changes a standard, running `fix` on an existing module re-audits it against the recompiled embedded Standard below and brings it up to spec. No separate procedure exists or is needed.
 
 ## Operating Principle
 
@@ -266,7 +268,7 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
 
 ## Self-Improvement (every run, last step)
 
-If this run exposed a failure mode or a gap in the standard or in this workflow: journal it (`/learn` into the correct pitfall file) BEFORE moving on, run `/compile-agents-md`, and amend this file's embedded Standard or checks so the next run benefits. Then update the active plan in `__dev__/plans/` and STOP - never auto-continue to another module.
+If this run exposed a failure mode or a gap in the standard or in this workflow: journal it (`/learn` into the correct pitfall file) BEFORE moving on, run `/finalize-docs` in `codebase-superloom`, and amend this file's embedded Standard or checks so the next run benefits. Then update the active plan in `__dev__/plans/` and STOP - never auto-continue to another module.
 
 ## Per-run Verification Checklist
 
