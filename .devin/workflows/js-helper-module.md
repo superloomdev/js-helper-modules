@@ -1,5 +1,5 @@
 ---
-description: Full lifecycle for JS helper modules - create, review (report only), fix (review + apply + converge), publish
+description: Full lifecycle for JS helper modules - create, fix (audit + apply + converge)
 ---
 
 # JS Helper Module Workflow
@@ -7,16 +7,18 @@ description: Full lifecycle for JS helper modules - create, review (report only)
 The one workflow for the lifecycle of a JavaScript helper module. It operates on exactly ONE module per run, named in the invocation.
 
 Invoke as: `/js-helper-module [verb] [module-path]`
-Example: `/js-helper-module review src/helper-modules-core/js-helper-money`
+Example: `/js-helper-module fix src/helper-modules-core/js-helper-money`
 
 | Verb | What it does | Mutates files? |
 |---|---|---|
-| `create` | Build a new module from the archetype skeletons | Yes (new module only) |
-| `review` | Audit against the embedded standard; produce a cited findings report | **No** |
-| `fix` | `review`, then apply every finding by hand, then re-verify to convergence | Yes (this module only) |
-| `publish` | Pre-publish gate, CI registration check, version, release | Commit + push only |
+| `create` | Build a new module from the archetype skeletons, then audit and fix | Yes (new module only) |
+| `fix` | Audit against the embedded standard, apply every finding by hand, re-verify to convergence | Yes (this module only) |
 
 Ambiguous verb or missing module path: ask, never guess.
+
+**Standalone audit:** for a read-only audit without applying changes, use `/js-helper-module-audit [module-path]` (separate workflow). Its report can be fed into `fix` to skip the audit phase and go straight to applying findings.
+
+**Publishing:** use `/js-helper-module-publish [module-path]` (separate workflow).
 
 `fix` is also the **retrofit verb**: when `codebase-superloom/docs/` changes a standard, running `fix` on an existing module re-audits it against the recompiled embedded Standard below and brings it up to spec. No separate procedure exists or is needed.
 
@@ -86,11 +88,11 @@ Ambiguous verb or missing module path: ask, never guess.
 3. **Generate from the skeleton.** Open the class skeleton in `docs/languages/js/module-structure.md` and build every file from it: entry, three companions, `package.json`, `eslint.config.js` and `.npmignore` (copy from `js-helper-utils`), `_test/` set, docs set per class. Never generate from memory or by copying a sibling.
 4. **Adapter-backed and extension lifecycles.** Feature module first with an in-memory store (`_test/memory-store.js`), published before adapters; adapters one at a time against the shared contract suite. Extensions after the parent, importing the parent, entry file `extension.js`.
 5. **Register environment variables** (if any) in `docs/dev/.env.dev.example`, `.env.integration.example`, and the workspace `__dev__/.env.*` files.
-6. **Run the `fix` verb Phases B-D** on the new module (a new module gets the same audit as an old one), then STOP and present before any publish.
+6. **Run the `fix` verb Phases A-E** on the new module (a new module gets the same audit as an old one), then STOP and present. Publishing is a separate workflow: `/js-helper-module-publish`.
 
-## Verb: review / fix
+## Verb: fix
 
-`review` runs Phases A, B and reports. `fix` runs Phases A, B, C, D, E. The difference is only whether findings are applied.
+`fix` runs Phases A through E. If an audit report from `/js-helper-module-audit` is available in the conversation, Phase A and B may be skipped (the report provides the re-grounding and gap list); start at Phase C with the report's findings.
 
 ### Phase A - Re-ground
 
@@ -112,9 +114,9 @@ Ambiguous verb or missing module path: ask, never guess.
    **Read-evidence table (hard gate):** output `file | lines | pass 1 | pass 2 | one pass-2-only observation` per file. The observation must be something a grep cannot find. No table, no Phase C.
 3. **Skeleton conformance diff:** compare the entry file element by element against the class skeleton - info banner, loader statement groups AND their step comments, companion wiring, validators loader signature `(Lib, ERRORS)`, `createInterface` slots, section banners. Record every mismatch.
 4. Assemble the gap list as `file:line -> rule (citation) -> action`, grouped: S1 correctness -> S2 consistency -> S3 cosmetic -> mechanical sweeps -> docs -> naming. Mark anything uncitable as `VERIFY` and read the source before acting.
-5. **`review` stops here.** Output the report: binding rules, read-evidence table, gap list with citations, and the verdict line `Review verdict: [clean | N findings]`. Changes: none.
+5. **Audit report output.** Output the report: binding rules, read-evidence table, gap list with citations, and the verdict line `Audit verdict: [clean | N findings]`. A report in this shape (whether produced here or by `/js-helper-module-audit`) is what allows a subsequent `fix` run to skip Phases A-B.
 
-### Phase C - Apply (fix only; order is binding)
+### Phase C - Apply (order is binding)
 
 1. S1 correctness, then S2 consistency, then S3 cosmetic - code first.
 2. Mechanical sweeps: em-dashes to ` - `; `.js` Unicode arrows to `->`; British to American spelling; banned vocabulary out; `void identifier;` and `_param` patterns out (eslint-disable-line on the signature instead); `docs/` paths out of code comments.
@@ -128,7 +130,7 @@ Ambiguous verb or missing module path: ask, never guess.
    git grep -n "[old-token]" -- 'src/**' '*.md' '*.yml'
    ```
 
-### Phase D - Verify to Convergence (fix only)
+### Phase D - Verify to Convergence
 
 Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. Exit only after **two consecutive full passes with zero new findings**.
 
@@ -155,7 +157,7 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    ```
    // turbo
    ```bash
-   git grep -niE "behaviour|colour|favour|licence|optimis|organis|initialis|standardis|serialis|authoris|analyse|centralis|normalis|recognis|synchronis|customis" -- '[module-path]' ':!*/node_modules/*'
+   git grep -niE "behaviour|colour|favour|licence|optimis|organis|initialis|standardis|serialis|authoris|analyse|centralis|normalis|recognis|synchronis|customis|specialis|catalogu" -- '[module-path]' ':!*/node_modules/*'
    ```
    // turbo
    ```bash
@@ -220,7 +222,7 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
 9. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
 10. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
 
-### Phase E - Present (fix only; approval gate, never skip)
+### Phase E - Present (approval gate, never skip)
 
 1. Open with the **Per-run Verification Checklist** (bottom of this file), every line ticked or marked `SKIPPED: [reason]`, each tick pointing at its evidence in this conversation.
 2. Overview:
@@ -232,38 +234,10 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
 3. Grouped change report in the reply: `file -> what changed -> why (citation)`, grouped S1 -> S2 -> S3 -> sweeps -> docs -> naming. Note anything intentionally NOT changed and why.
 4. **STOP.** Ask: "These are all changes for [name]. Approve to proceed?" On requested changes: apply by hand, re-run ALL of Phase D, re-present.
 
-## Verb: publish
-
-> Mutation steps. None auto-run. Publishing is CI-only; no human runs `npm publish`.
-
-1. **Pre-publish gate:** lint exit 0 from `[module_root]`; clean-install tests green from `[module_root]/_test`. Both in this run.
-2. **Package identity:** name `@superloomdev/js-[server-|client-]helper-[name]`; `private: false`; `license: MIT`; `engines.node >= 24`; `publishConfig.registry` exactly `https://npm.pkg.github.com`; version bumped per SemVer (new modules start at `1.0.0`).
-3. **Ship check:**
-   // turbo
-   ```bash
-   # Cwd = [module_root]
-   npm pack --dry-run 2>&1 | tail -30
-   ```
-   Only source, `README.md`, `ROBOTS.md`, `docs/`, `package.json` ship. No `.npmrc` in the module, `_test/`, or repo root.
-4. **CI registration (first publish only):** add the `test-*`/`publish-*` job pair to `.github/workflows/ci-publish-helper-modules.yml`, positioned after the last dependency's publish job. Both `if:` conditions use `contains(fromJSON(...))` with the full `src/` path; the test job includes `always() && !cancelled()`; the publish job includes `!cancelled()` plus explicit `needs['test-*'].result == 'success'`. Update the execution-order header comment and re-chain the next module's `needs:`.
-5. **Same-version republish** (only when replacing an existing release deliberately): delete all registry versions first via `gh api` (org endpoint `/orgs/superloomdev/packages/npm/[PACKAGE_NAME]/versions`), verify `404`, then push.
-6. **Commit only this module** (single-line message, never `git add .`):
-   ```bash
-   git add [module-path]/
-   git commit -m "feat([name]): [one-line summary]"
-   git push
-   ```
-7. **Verify CI published:** watch the workflow green, then confirm the version is live:
-   ```bash
-   gh api "/orgs/superloomdev/packages/npm/[PACKAGE_NAME]/versions" --jq '.[] | {id, name}'
-   ```
-   On CI failure: back to Phase C of `fix`, re-verify, re-present, re-publish.
-
 ## Loop-backs
 
 - Any Phase D check fails -> Phase C, then ALL of Phase D again (convergence resets).
 - User requests changes at Phase E -> apply by hand, all of Phase D, Phase E again.
-- CI fails in publish -> Phase C -> D -> E -> publish.
 - A genuinely undecided convention -> STOP and ask; once resolved, record it in `docs/` and update this file's embedded Standard in the same session.
 
 ## Self-Improvement (every run, last step)
@@ -275,9 +249,9 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] Verb + target module + class declared; assumptions dropped
 - [ ] Re-ground set re-read with verbatim proof-of-read quotes; fingerprint from skeleton + clean sibling
 - [ ] Every file enumerated and read in full twice; read-evidence table output
-- [ ] Gap list built, every line cited (review verdict line output)
-- [ ] All edits by hand - zero scripts, zero bulk rewrites (fix only)
-- [ ] Fixes applied S1 -> S2 -> S3 -> sweeps -> docs (ROBOTS last) -> naming; renames swept repo-wide (fix only)
+- [ ] Gap list built, every line cited (audit verdict line output)
+- [ ] All edits by hand - zero scripts, zero bulk rewrites
+- [ ] Fixes applied S1 -> S2 -> S3 -> sweeps -> docs (ROBOTS last) -> naming; renames swept repo-wide
 - [ ] Lint exit 0; clean-install tests green
 - [ ] Sweep battery clean; JSDoc awk silent; performance-audit ownership judged
 - [ ] Companions exist; single-require holds; fixed interface slots kept
@@ -285,5 +259,4 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] `file:` rule holds
 - [ ] Converged: two consecutive clean passes, stated with evidence
 - [ ] Phase E report presented; explicit user approval before any mutation
-- [ ] Publish: gate passed, identity verified, module-only commit, CI-published version verified live
 - [ ] New failure modes journaled; embedded Standard amended if needed; plan updated; STOPPED
