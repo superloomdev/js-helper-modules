@@ -1,5 +1,5 @@
 #!/bin/sh
-# Initialise the development environment for this project.
+# Initialize the development environment for this project.
 # Must be sourced so variables are set in the current shell:
 #
 #   source init-env.sh
@@ -8,8 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo ""
 echo "Select environment:"
-echo "  1) dev         — local machine, Docker emulators"
-echo "  2) integration — real cloud services (sandbox account), test data"
+echo "  1) dev         - local machine, Docker emulators"
+echo "  2) integration - real cloud services (sandbox account), test data"
 echo ""
 printf "Enter choice [1/2]: "
 read ENV_CHOICE
