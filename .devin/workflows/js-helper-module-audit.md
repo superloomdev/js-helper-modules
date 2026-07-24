@@ -1,10 +1,10 @@
 ---
-description: Read-only audit of a JS helper module against the constitution - re-read docs, re-survey reference modules, audit line by line, report deviations
+description: Read-only deep audit of a JS helper module against the constitution - re-read docs, re-survey reference modules, audit line by line, creator-diff with three-bucket drift classification, report deviations
 ---
 
-# Module Audit Workflow
+# JS Helper Module Audit Workflow
 
-A read-only audit. Run this when an agent has **drifted** from the framework's conventions while working in this repo. It does not fix code. It **rebuilds context** by re-reading the source of truth, re-deriving the conventions from real modules, and auditing the target module line by line - then reports every deviation and hands corrections to `/js-helper-module review`.
+A read-only, always-deep audit. Run this when a module needs to be checked against the framework's conventions. It does not fix code. It **rebuilds context** by re-reading the source of truth, re-deriving the conventions from real modules, auditing the target module line by line, classifying every deviation into one of three drift buckets, and reporting findings with citations. Corrections are handed to `/js-helper-module fix`.
 
 It exists because conventions drift when an agent trusts its working memory instead of the files. Every convention this repo enforces is **already written down** - in `codebase-superloom/docs/` and demonstrated by the modules already in `src/`. Auditing means reading those sources again and re-deriving the rules from them, never recalling or restating them.
 
@@ -17,14 +17,15 @@ It exists because conventions drift when an agent trusts its working memory inst
 
 **Evidence rule (hard gate).** Every convention you assert anywhere in this run must cite where it comes from - a document path and section, or a reference-module `file:line`. A rule stated without a citation is treated as unverified: it does not count, and you must read the source before relying on it. If the final report contains any uncited claim, the run is incomplete.
 
-This workflow is **read-only and idempotent**. Phases 1-4 mutate nothing, so it is always safe to re-run. The only output is a report (Phase 5). Fixes are a separate, user-confirmed step.
+This workflow is **read-only and idempotent**. Phases 0 through 4.5 mutate nothing, so it is always safe to re-run. The only output is a report (Phase 5). Fixes are a separate, user-confirmed step via `/js-helper-module fix`.
 
 ## When To Run
 
 - An agent has lost the thread, or the user says so.
 - After context compaction / a long conversation that touched many files.
 - Resuming helper-module work after a gap.
-- Before a `review` or `publish` when you are unsure the work matches conventions.
+- Before a `fix` or `publish` when you are unsure the work matches conventions.
+- Periodic health check on a historical module that has not been touched in a while.
 
 ## Command Execution Rules
 
@@ -61,7 +62,7 @@ Read the source of truth in authority order. Do not skim summaries - the nuance 
 
 3. **Read every file the enumeration returns - all of them, in full.** Do not cherry-pick and do not skim. Whatever a document states is the rule. The `principles/`, `languages/js/`, `ai/`, and `dev/` subtrees carry the rules for code style, module structure, process, and tests - give those the closest reading, but read the whole set so nothing is missed.
 
-4. **Re-read the sibling workflow** in this repo: `.devin/workflows/js-helper-module.md` (including its embedded Standard block).
+4. **Re-read the sibling workflows** in this repo: `.devin/workflows/js-helper-module.md` (including its embedded Standard block) and `.devin/workflows/js-helper-module-publish.md`.
 
 5. **Output a binding-rules checklist** - a short list that *links back* to the doc each rule comes from. Do not restate the rules in detail; the doc is the authority.
 
@@ -129,7 +130,7 @@ This table is a starting set, not a closed list. If the target needs a dimension
 
 Do not proceed to the report after a single pass. Re-run this phase until **two consecutive passes surface zero new deviations**. A run whose most recent pass still found issues has not converged - audit again. Convergence, not effort, is the exit condition.
 
-## Phase 4: Diagnose, Re-anchor, and Self-improve
+## Phase 4: Diagnose Drift Root Cause
 
 1. **Diagnose the drift.** Before re-anchoring, answer briefly and honestly: Did I start from a scratch, demo, or experimental area whose conventions differ? Did I carry a pattern in from another codebase? Which governing document did I act without reading? Did I rely on a summary, plan, or memory instead of source? Did a rename leave stale tokens behind? The answers are the root cause - carry them into the self-improve step.
 
@@ -142,19 +143,71 @@ Do not proceed to the report after a single pass. Re-run this phase until **two 
 
 3. **Self-improve hook.** Feed the drift diagnosis from step 1 back into the framework: if it exposed a rule or failure mode **not yet in `docs/`**, capture it via `/learn` into the correct pitfall file **before** any fix, then run `/finalize-docs` in `codebase-superloom`. This honors the Golden Rule and teaches the framework so the lesson is not re-learned.
 
+## Phase 4.5: Creator-Diff (three-bucket drift classification)
+
+For every deviation found in Phase 3, classify it into exactly one of three buckets. The classification determines the corrective action and whether the deviation is a bug or an intentional choice.
+
+### Bucket 1: Docs Drift (docs evolved, code is stale)
+
+The module's code matched the docs at the time it was written, but the docs have since changed. The code is not wrong relative to its original spec; it is simply out of date.
+
+**How to detect:** Use git history to check whether the governing doc was modified after the module's last significant change:
+// turbo
+```bash
+# Cwd = codebase-superloom - check if the governing doc changed after the module's last commit
+git log --oneline --since="[module-last-commit-date]" -- docs/languages/js/[governing-doc].md
+```
+// turbo
+```bash
+# Cwd = codebase-js-helper-modules - find the module's last commit date
+git log -1 --format="%ci" -- [module-path]
+```
+
+If the doc changed after the module, and the deviation matches what the doc used to say, this is Bucket 1.
+
+**Action:** Update the module to match the current docs. This is a retrofit, not a bug fix. The `/js-helper-module fix` verb handles this case.
+
+### Bucket 2: Code Drift (code diverged, docs are correct)
+
+The module's code does not match what the docs say, and the code was never correct relative to the current (or past) docs. This is a genuine bug or convention violation introduced during development.
+
+**How to detect:** The deviation does not match any prior version of the governing doc, or the doc has not changed since the module was written. The code was wrong from the start or was modified incorrectly.
+
+**Action:** Fix the code. The `/js-helper-module fix` verb applies the correction.
+
+### Bucket 3: Intentional Deviation (code deliberately diverges)
+
+The module deliberately diverges from the docs for a documented, valid reason. The deviation is a design decision, not an error.
+
+**How to detect:** The module's `THOUGHTS.md`, a code comment, or a doc section explicitly justifies the deviation. The reason must be specific and current - not a stale comment referencing a doc that has since been updated.
+
+**Action:** Verify the reason is still valid against current docs. If the reason is stale (the docs have evolved to handle the case the deviation was working around), reclassify as Bucket 1. If the reason is still valid, document the deviation in the module's `THOUGHTS.md` if not already there, and mark it as acknowledged in the audit report. No code change needed.
+
+### Classification Table
+
+For each deviation, output:
+
+| Deviation | Bucket | Evidence | Action |
+|---|---|---|---|
+| `file:line -> rule (citation)` | 1 / 2 / 3 | git log or comment proving the classification | retrofit / fix / acknowledge |
+
+If a deviation cannot be classified confidently, mark it `UNCLASSIFIED` and investigate further before proceeding.
+
 ## Phase 5: Report and Hand Off (gated)
 
 1. **Present the audit report in chat** (do not persist a file). Every convention named must carry its citation (the evidence rule). Structure:
    - **Conventions re-derived** - the binding-rules checklist from Phase 1, each line citing its doc.
    - **Drift diagnosis** - the root cause from Phase 4.
    - **Deviations found** - a table of `file:line -> rule violated (with citation) -> corrective action`, grouped by audit dimension.
+   - **Creator-diff classification** - the three-bucket table from Phase 4.5, with bucket counts: `Bucket 1 (docs drift): N | Bucket 2 (code drift): N | Bucket 3 (intentional): N | Unclassified: N`.
    - **Gate results** - lint and test status, and confirmation the audit converged (two clean consecutive passes).
    - **Plan state** - active plan + in-progress step.
 
 2. **Do not auto-fix.** Hand the corrective actions to the module workflow:
    ```
-   /js-helper-module review [module-path]
+   /js-helper-module fix [module-path]
    ```
+   The audit report (including the creator-diff classification) serves as input to `fix`, allowing it to skip Phases A-B and go straight to applying findings.
 
 3. **STOP and ask.** Wait for explicit user confirmation before any source change.
 
@@ -165,7 +218,7 @@ Do not proceed to the report after a single pass. Re-run this phase until **two 
 - [ ] Target module(s) declared; edits suspended
 - [ ] `AGENTS.md` (both repos) read; treated as derived index
 - [ ] Every `docs/*.md` enumerated and read in full
-- [ ] Sibling workflows re-read
+- [ ] Sibling workflows re-read (js-helper-module.md + js-helper-module-publish.md)
 - [ ] Every module enumerated and categorized; one reference per category read in full
 - [ ] Fingerprint recorded
 - [ ] Each target file read at least twice; audited line by line against the audit map (rules derived from docs + reference modules)
@@ -174,4 +227,6 @@ Do not proceed to the report after a single pass. Re-run this phase until **two 
 - [ ] Lint run; tests run via clean install
 - [ ] Stale-name / cross-reference scrub run
 - [ ] Drift root cause diagnosed; plan re-anchored; new failure modes captured via `/learn` if any
-- [ ] Report presented in chat; fixes handed to `/js-helper-module review`; stopped for user confirmation
+- [ ] Creator-diff: every deviation classified into Bucket 1, 2, or 3 (or UNCLASSIFIED with reason)
+- [ ] Bucket counts stated; evidence for each classification recorded
+- [ ] Report presented in chat; fixes handed to `/js-helper-module fix`; stopped for user confirmation
