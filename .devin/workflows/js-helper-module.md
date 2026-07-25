@@ -71,11 +71,11 @@ Ambiguous verb or missing module path: ask, never guess.
 - Config carries plain data only - no live objects, no `lib_*` keys, no `LOG_LEVEL`; drivers arrive via the container (`Lib.SQL`, `Lib.MongoDB`, `Lib.DynamoDB`) (`module-structure.md` - Driver injection)
 - Return envelope: all keys on every path, data fields null on failure; errors from the frozen catalog; error prefixes use the alias form `[helper-name]` (`error-handling.md`)
 - `performanceAuditLog`: each interval logged once by the layer that owns the work; drivers instrument their own roundtrips; non-drivers never re-log delegated I/O; every call passes a local `start_ms` captured at operation entry, never `instance['time_ms']` (`code-formatting.md` - Performance Logging; `pitfalls-migration.md`)
-- Formatting: 3/2/1 vertical spacing; step comment above every logical block; JSDoc indentation matches the declaration it documents; standard banner widths; `};` combined with END banners (`code-formatting.md`)
+- Formatting: 3/2/1 vertical spacing; step comment above every logical block; every public I/O function carries the Mandatory Step-Comment Set - validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch (`code-formatting.md` - Comment Style); JSDoc indentation matches the declaration it documents; standard banner widths; `};` combined with END banners (`code-formatting.md`)
 - Naming: scope form (`@superloomdev/...`) and bare form (`js-...helper-...`) only in `package.json` and real repo-path URLs; alias form everywhere else including H1s, banners, error messages (`languages/js/index.md` - Two-Form Rule)
 - `package.json`: peer deps as caret ranges; no `helper-utils`/`helper-debug` in a Class F module's own peerDependencies (container supplies them); `engines.node >= 24`; `publishConfig.registry` exactly `https://npm.pkg.github.com` (`dependencies.md`, `publishing.md`)
 - `_test/package.json`: `"private": true`; the ONLY `file:` dependency is this module (`file:../`); shared helpers use registry semver ranges pinned to the version the code calls (`docs/dev/pitfalls.md` entries 8, 11)
-- `_test/loader.js` is the only file reading `process.env`; tests named `should [behavior] when [condition]`; one `describe` per function (`unit-test-authoring.md`)
+- `_test/loader.js` is the only file reading `process.env`; tests named `should [behavior] when [condition]`; one `describe` per function (`unit-test-authoring.md`); assertions pin exact values - never a range or disjunction multiple behaviors could satisfy; fix nondeterministic setup, not the assertion (`principles/testing.md` - Test Structure and Naming)
 - Docs set per class from `module-docs-complex.md`; README carries no signatures, config tables, or install commands; `ROBOTS.md` compiled LAST and matching `docs/api.md` signatures exactly (`module-docs.md`)
 - Root Markdown = `README.md` + `ROBOTS.md` (+ unpublished `THOUGHTS.md`) only (`module-docs.md`)
 
@@ -112,7 +112,7 @@ Ambiguous verb or missing module path: ask, never guess.
    ```
 2. **Read every file in full, twice.** Formatting and structural issues hide on pass 1. Never rely on offsets, summaries, or search hits as a substitute.
    **Read-evidence table (hard gate):** output `file | lines | pass 1 | pass 2 | one pass-2-only observation` per file. The observation must be something a grep cannot find. No table, no Phase C.
-3. **Skeleton conformance diff:** compare the entry file element by element against the class skeleton - info banner, loader statement groups AND their step comments, companion wiring, validators loader signature `(Lib, ERRORS)`, `createInterface` slots, section banners. Record every mismatch.
+3. **Skeleton conformance diff:** compare the entry file element by element against the class skeleton - info banner, loader statement groups AND their step comments, companion wiring, validators loader signature `(Lib, ERRORS)`, `createInterface` slots, section banners, and function bodies (the skeleton's worked body is normative for comment density). Record every mismatch.
 4. Assemble the gap list as `file:line -> rule (citation) -> action`, grouped: S1 correctness -> S2 consistency -> S3 cosmetic -> mechanical sweeps -> docs -> naming. Mark anything uncitable as `VERIFY` and read the source before acting.
 5. **Audit report output.** Output the report: binding rules, read-evidence table, gap list with citations, and the verdict line `Audit verdict: [clean | N findings]`. A report in this shape (whether produced here or by `/js-helper-module-audit`) is what allows a subsequent `fix` run to skip Phases A-B.
 
@@ -218,9 +218,10 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    # Cwd = [module_root]/_test
    grep -n "file:" package.json
    ```
-8. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
-9. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
-10. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
+8. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file against the Mandatory Step-Comment Set (Standard above): validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch - each preceded by a step comment. Lint, tests, and sweeps cannot see comments; this check is manual. The reply MUST contain `Step-comment conformance: [clean | N gaps -> fixed]`.
+9. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element, including function bodies against the skeleton's worked body. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
+10. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
+11. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
 
 ### Phase E - Present (approval gate, never skip)
 
@@ -256,6 +257,7 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] Sweep battery clean; JSDoc awk silent; performance-audit ownership judged
 - [ ] Companions exist; single-require holds; fixed interface slots kept
 - [ ] Skeleton conformance verdict line output
+- [ ] Step-comment conformance verdict line output
 - [ ] `file:` rule holds
 - [ ] Converged: two consecutive clean passes, stated with evidence
 - [ ] Phase E report presented; explicit user approval before any mutation
