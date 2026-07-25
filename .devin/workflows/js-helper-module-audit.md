@@ -101,6 +101,8 @@ npm run lint 2>&1 | tail -20
 rm -rf node_modules package-lock.json && npm install && npm test 2>&1 | tail -40
 ```
 
+Step-comment conformance (manual gate - lint, tests, and greps cannot see comments): read every function body in every source `.js` file against the Mandatory Step-Comment Set in `languages/js/code-formatting.md` - Comment Style (validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch). A missing step comment is an S2 consistency finding, escalated to S1 when the uncommentable block hides a correctness issue. Output the verdict line `Step-comment conformance: [clean | N gaps]`.
+
 Stale-name and cross-reference scrub. Renamed symbols and leftover legacy or branding tokens are a classic drift signature; hunt them across code, tests, and docs:
 
 // turbo
@@ -225,6 +227,7 @@ If a deviation cannot be classified confidently, mark it `UNCLASSIFIED` and inve
 - [ ] Audit converged: two consecutive passes with zero new deviations
 - [ ] Every asserted convention carries a citation (doc path/section or reference-module `file:line`)
 - [ ] Lint run; tests run via clean install
+- [ ] Step-comment conformance verdict line output
 - [ ] Stale-name / cross-reference scrub run
 - [ ] Drift root cause diagnosed; plan re-anchored; new failure modes captured via `/learn` if any
 - [ ] Creator-diff: every deviation classified into Bucket 1, 2, or 3 (or UNCLASSIFIED with reason)
