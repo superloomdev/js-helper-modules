@@ -43,6 +43,11 @@ const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adap
 
 The adapter receives `Utils` and `Debug` from the shared `Lib` container (injected by the application). No third-party npm packages installed.
 
+| Package | Purpose |
+|---|---|
+| `helper-utils` | Type checks (injected via `shared_libs.Utils`) |
+| `helper-debug` | Structured debug logging (injected via `shared_libs.Debug`) |
+
 The application is expected to install and wire:
 
 | Package | Purpose | Required? |
