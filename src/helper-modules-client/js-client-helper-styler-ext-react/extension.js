@@ -12,7 +12,7 @@
 //
 // Compatibility: React 18+, React Native, React Native Web.
 //
-// Dependency direction: Extension → Core (extension is boss, core is library)
+// Dependency direction: Extension -> Core (extension is boss, core is library)
 //
 // Singleton loader pattern: Context created once per process via Node require cache.
 //
@@ -47,7 +47,7 @@ module.exports = function loader (shared_libs, config) {
   Lib = shared_libs || {};
   CONFIG = Object.assign({}, config || {});
 
-  // React is required — injected via Lib to maintain centralized dependency pattern
+  // React is required - injected via Lib to maintain centralized dependency pattern
   React = Lib.React;
   if (!React) {
     throw new Error('styler-ext-react: shared_libs.React is required (inject React via the loader).');
@@ -76,7 +76,7 @@ const Extension = { // Public React bindings accessible by the host
   // ~~~~~~~~~~~~~~~~~~~~ Provider ~~~~~~~~~~~~~~~~~~~~
 
   /********************************************************************
-  ThemeProvider — assembles a theme from base + variant using the core
+  ThemeProvider - assembles a theme from base + variant using the core
   styler engine, generates utility styles, and provides them via React context.
   Calling updateTheme(nextVariant) re-derives everything live (theme swap).
 
@@ -93,13 +93,13 @@ const Extension = { // Public React bindings accessible by the host
     // Template: prop wins, else fall back to core's default template
     const template = props.template || Lib.Styler.defaultTemplate;
 
-    // Base is required — empty object default for safety
+    // Base is required - empty object default for safety
     const base = props.base || {};
 
     // Variant is optional state
     const [variant, setVariant] = React.useState(props.variant || {});
 
-    // Memoized assembly — only recompute when inputs change
+    // Memoized assembly - only recompute when inputs change
     const value = React.useMemo(function () {
       const theme = Lib.Styler.assemble(template, base, variant);
       const styles = Lib.Styler.generateUtilities(theme);
@@ -118,7 +118,7 @@ const Extension = { // Public React bindings accessible by the host
   // ~~~~~~~~~~~~~~~~~~~~ Hooks ~~~~~~~~~~~~~~~~~~~~
 
   /********************************************************************
-  Hook: the full controller — { theme, styles, template, base, updateTheme }.
+  Hook: the full controller - { theme, styles, template, base, updateTheme }.
 
   @return {Object|null} - context value, or null when outside a provider
   *********************************************************************/
@@ -128,7 +128,7 @@ const Extension = { // Public React bindings accessible by the host
 
 
   /********************************************************************
-  Hook: the assembled theme — { Color, Dimension, Font }.
+  Hook: the assembled theme - { Color, Dimension, Font }.
 
   @return {Object|null} - the theme, or null when outside a provider
   *********************************************************************/

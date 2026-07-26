@@ -5,7 +5,7 @@
 ## File Naming Convention
 
 **Extension modules** follow the same pattern as adapters and stores:
-- `extension.js` — Main entry point (like `adapter.js`, `store.js`)
+- `extension.js` - Main entry point (like `adapter.js`, `store.js`)
 - Consistent with: `styler.js` (core), `extension.js` (React bindings)
 
 ## Module Identity
@@ -39,11 +39,11 @@ const Extension = require('@superloomdev/js-client-helper-styler-ext-react')({
 
 ## Critical Behaviors
 
-1. **ThemeProvider creates context once** — singleton pattern ensures one theme context per app
-2. **useStyles memoizes** — returns stable style objects, safe for React props
-3. **updateTheme triggers re-render** — all useTheme/useStyles consumers update
-4. **Base + variant supported** — ThemeProvider accepts both, merges them via Styler.extend()
-5. **No runtime CSS** — Returns plain JS objects (React Native StyleSheet compatible)
+1. **ThemeProvider creates context once** - singleton pattern ensures one theme context per app
+2. **useStyles memoizes** - returns stable style objects, safe for React props
+3. **updateTheme triggers re-render** - all useTheme/useStyles consumers update
+4. **Base + variant supported** - ThemeProvider accepts both, merges them via Styler.extend()
+5. **No runtime CSS** - Returns plain JS objects (React Native StyleSheet compatible)
 
 ## Example (Canonical)
 
@@ -72,10 +72,10 @@ function MyComponent() {
 ## Extension vs Core
 
 - **Core (js-client-helper-styler)**: Pure JS, no React, works anywhere
-- **This extension**: React bindings, hooks, context — bridges core to React world
+- **This extension**: React bindings, hooks, context - bridges core to React world
 
 ## Error Handling
 
 - Throws if React not provided at loader time
 - Graceful fallback if Styler not provided (uses default template)
-- No runtime errors on theme updates — always valid output
+- No runtime errors on theme updates - always valid output

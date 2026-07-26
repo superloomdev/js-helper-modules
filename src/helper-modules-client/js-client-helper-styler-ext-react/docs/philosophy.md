@@ -57,9 +57,9 @@ Do not use extension when:
 ## This Module
 
 This module wraps the styler core in React. It provides:
-- ThemeProvider — puts theme in React context
-- useTheme — hook to read theme
-- useStyles — hook to read utility styles
-- useThemeController — hook to get theme + update function
+- ThemeProvider - puts theme in React context
+- useTheme - hook to read theme
+- useStyles - hook to read utility styles
+- useThemeController - hook to get theme + update function
 
 Core provides the engine. Extension provides the React integration.
