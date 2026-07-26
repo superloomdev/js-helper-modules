@@ -16,7 +16,7 @@ Loader pattern, every configuration key, the adapter integration pattern, peer d
 
 Every Superloom server-side module is a factory function that takes the `Lib` container and a `CONFIG` object and returns the public interface. The logger module follows that shape exactly.
 
-Each store adapter is a **fully independent module** — it owns its own Lib, Config, and ERRORS. Construct the adapter first with its own config, then pass the ready-to-use store object as `CONFIG.Store`.
+Each store adapter is a **fully independent module** - it owns its own Lib, Config, and ERRORS. Construct the adapter first with its own config, then pass the ready-to-use store object as `CONFIG.Store`.
 
 ```js
 const Store = require('helper-logger-store-postgres')({

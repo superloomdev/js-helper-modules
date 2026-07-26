@@ -15,7 +15,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 ## Conventions
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` and `instance.time_ms` for timestamps. For background writes it registers a `Lib.Instance.backgroundRoutine`. When `Lib.HttpHandler` is in the `Lib` container, it also reads `instance.http_request` to auto-capture `ip` and `user_agent` |
 | **Programmer errors throw `TypeError` synchronously** | Missing required option, wrong type, or invalid `retention` shape throw `TypeError` at the call-site. These are mistakes that should be caught in development, never at runtime |
@@ -128,7 +128,7 @@ List events performed by one actor, most-recent first. Same shape, same paginati
 
 ### `setupNewStore(instance)` *(async)*
 
-Idempotent backend setup. The actual work depends on the chosen storage adapter. SQL adapters typically run `CREATE TABLE IF NOT EXISTS` plus index DDL. The memory adapter is a no-op. NoSQL adapters may provision indexes or rely on out-of-band IaC. See the chosen adapter's README for the exact behaviour.
+Idempotent backend setup. The actual work depends on the chosen storage adapter. SQL adapters typically run `CREATE TABLE IF NOT EXISTS` plus index DDL. The memory adapter is a no-op. NoSQL adapters may provision indexes or rely on out-of-band IaC. See the chosen adapter's README for the exact behavior.
 
 **Return shape.** `{ success, error }`.
 
@@ -142,7 +142,7 @@ Bulk-delete rows whose `expires_at` is in the past. Rows with `expires_at = null
 
 ## Error Catalog
 
-The logger module exports exactly one operational error type. Programmer errors (missing required option, wrong type, invalid `retention`) throw `TypeError` synchronously and are not catalogued.
+The logger module exports exactly one operational error type. Programmer errors (missing required option, wrong type, invalid `retention`) throw `TypeError` synchronously and are not cataloged.
 
 | `error.type` | When returned | Surfaces in |
 |---|---|---|
