@@ -21,15 +21,14 @@
 //
 // The caller injects a ready-to-use DynamoDB helper as Lib.DynamoDB.
 //
-// Schema management (table creation, TTL configuration) is out of scope
-// for this adapter. The table must be provisioned out-of-band via IaC,
-// the AWS Console, or a one-shot script before the auth module is used.
-// setupNewStore() exists in the interface contract but is not implemented
-// and will return NOT_IMPLEMENTED until the DynamoDB helper exposes a
-// table-management API.
+// Schema management (table creation, TTL configuration) is delegated to
+// the DynamoDB admin module (js-server-helper-nosql-aws-dynamodb-admin)
+// when an Admin instance is injected via shared_libs.DynamoDBAdmin. If no
+// Admin is injected, setupNewStore() returns NOT_IMPLEMENTED and the
+// operator must provision out-of-band via IaC, AWS Console, or a script.
 //
 // Store contract (identical shape across all adapters):
-//   - setupNewStore(instance)            -> { success, error }  (NOT_IMPLEMENTED for DynamoDB)
+//   - setupNewStore(instance)            -> { success, error }  (delegates to DynamoDBAdmin or NOT_IMPLEMENTED)
 //   - getSession(instance, t, a, k, h)  -> { success, record, error }
 //   - listSessionsByActor(instance, t, a) -> { success, records, error }
 //   - setSession(instance, record)      -> { success, error }
@@ -62,7 +61,8 @@ module.exports = function loader (shared_libs, config) {
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
-    DynamoDB: shared_libs.DynamoDB
+    DynamoDB: shared_libs.DynamoDB,
+    DynamoDBAdmin: shared_libs.DynamoDBAdmin || null
   };
 
   // Merge overrides over adapter config defaults
@@ -108,25 +108,111 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
-    // DynamoDB table creation and TTL configuration must be provisioned
-    // out-of-band (IaC, AWS Console, or the DynamoDB helper module
-    // once it gains a table-management API). setupNewStore is part of
-    // the store contract but is not yet implemented for this backend.
+    // Delegates to the DynamoDB admin module when Lib.DynamoDBAdmin is
+    // injected. Provisions the table with the correct PK/SK schema and
+    // enables native TTL on the expires_at attribute. When no admin is
+    // injected, returns NOT_IMPLEMENTED so the operator must provision
+    // out-of-band.
 
     /********************************************************************
-    Not implemented for DynamoDB. Table provisioning and TTL
-    configuration must be done out-of-band until the DynamoDB helper
-    exposes a table-management API.
+    Provision the DynamoDB table and enable TTL for this store.
+    Delegates to Lib.DynamoDBAdmin when injected. Idempotent: safe to
+    call on every boot. When no admin is injected, returns
+    NOT_IMPLEMENTED.
 
-    @param {Object} instance - Request instance (unused)
+    @param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }  (always NOT_IMPLEMENTED)
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    setupNewStore: async function (instance) { // eslint-disable-line no-unused-vars
+    setupNewStore: async function (instance) {
 
+      // No admin module injected - return NOT_IMPLEMENTED so the caller
+      // knows to provision out-of-band
+      if (Lib.Utils.isNullOrUndefined(Lib.DynamoDBAdmin)) {
+
+        return {
+          success: false,
+          error: ERRORS.NOT_IMPLEMENTED
+        };
+
+      }
+
+      // Step 1: Create the table with PK=tenant_id, SK=session_key
+      const create_result = await Lib.DynamoDBAdmin.createTable(instance, {
+        table_name: CONFIG.table_name,
+        attribute_definitions: [
+          { name: 'tenant_id', type: 'S' },
+          { name: 'session_key', type: 'S' }
+        ],
+        key_schema: [
+          { name: 'tenant_id', type: 'HASH' },
+          { name: 'session_key', type: 'RANGE' }
+        ]
+      });
+
+      // Return error if table creation failed
+      if (create_result.success === false) {
+
+        Lib.Debug.debug('Auth dynamodb setupNewStore createTable failed', {
+          type: ERRORS.SERVICE_UNAVAILABLE.type,
+          table: CONFIG.table_name,
+          admin_error: create_result.error && create_result.error.type
+        });
+
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+
+      }
+
+      // Step 2: Wait for the table to reach ACTIVE state
+      const wait_result = await Lib.DynamoDBAdmin.waitForTableActive(instance, {
+        table_name: CONFIG.table_name
+      });
+
+      // Return error if wait failed
+      if (wait_result.success === false) {
+
+        Lib.Debug.debug('Auth dynamodb setupNewStore waitForTableActive failed', {
+          type: ERRORS.SERVICE_UNAVAILABLE.type,
+          table: CONFIG.table_name,
+          admin_error: wait_result.error && wait_result.error.type
+        });
+
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+
+      }
+
+      // Step 3: Enable native TTL on the expires_at attribute
+      const ttl_result = await Lib.DynamoDBAdmin.enableTtl(instance, {
+        table_name: CONFIG.table_name,
+        attribute_name: 'expires_at'
+      });
+
+      // Return error if TTL enablement failed
+      if (ttl_result.success === false) {
+
+        Lib.Debug.debug('Auth dynamodb setupNewStore enableTtl failed', {
+          type: ERRORS.SERVICE_UNAVAILABLE.type,
+          table: CONFIG.table_name,
+          admin_error: ttl_result.error && ttl_result.error.type
+        });
+
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+
+      }
+
+      // All steps succeeded - report success
       return {
-        success: false,
-        error: ERRORS.NOT_IMPLEMENTED
+        success: true,
+        error: null
       };
 
     },
@@ -182,7 +268,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
-      // Constant-behaviour hash compare - mismatch returns "not found"
+      // Constant-behavior hash compare - mismatch returns "not found"
       if (result.item.token_secret_hash !== token_secret_hash) {
         return {
           success: true,

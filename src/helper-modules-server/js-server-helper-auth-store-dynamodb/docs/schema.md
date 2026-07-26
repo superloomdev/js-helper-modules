@@ -1,6 +1,6 @@
 # Schema
 
-DynamoDB is schema-on-read. The adapter does not issue DDL; the table must be provisioned out-of-band via IaC, AWS Console, or a one-shot script before the auth module is used.
+DynamoDB is schema-on-read. The adapter delegates table creation and TTL configuration to the DynamoDB admin module (`js-server-helper-nosql-aws-dynamodb-admin`) when `Lib.DynamoDBAdmin` is injected via `shared_libs.DynamoDBAdmin`. When no admin is injected, `setupNewStore` returns `NOT_IMPLEMENTED` and the table must be provisioned out-of-band via IaC, AWS Console, or a one-shot script.
 
 This page documents the single-table design, the composite key strategy, attribute type mapping, and the IaC example (CloudFormation/CDK) with the correct Sort Key attribute name.
 
@@ -207,7 +207,7 @@ DynamoDB supports table-level TTL. When enabled on the `expires_at` attribute:
 
 1. Set `TimeToLiveSpecification.AttributeName` to `expires_at` during table creation (or via `UpdateTable`)
 2. DynamoDB automatically deletes items whose `expires_at` value is in the past
-3. Deletion is **eventually consistent** — items may remain visible for up to 48 hours after expiry
+3. Deletion is **eventually consistent** - items may remain visible for up to 48 hours after expiry
 4. No application code or cron job is required for garbage collection
 
 The adapter's `cleanupExpiredSessions` method remains available for immediate hard-delete when needed (e.g., to purge sessions immediately upon security revocation). When native TTL is enabled, calling `cleanupExpiredSessions` is optional but safe.

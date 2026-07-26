@@ -15,9 +15,9 @@ DynamoDB offers two paths for expired session cleanup: native table-level TTL (r
 
 | Aspect | DynamoDB (this adapter) |
 |---|---|
-| Native row/item-level TTL | Yes — table-level configuration on `expires_at` |
+| Native row/item-level TTL | Yes - table-level configuration on `expires_at` |
 | `expires_at` format | Number (Unix epoch seconds). ISO strings will not work |
-| TTL deletion timing | Eventually consistent — up to 48 hours after expiry |
+| TTL deletion timing | Eventually consistent - up to 48 hours after expiry |
 | Application-managed cleanup | Available via `cleanupExpiredSessions` for immediate hard-delete |
 | Effect of skipping both | Expired items remain visible (up to 48h with TTL, indefinitely without). The Auth parent's runtime guards still reject expired items, so there is no security exposure, but storage costs continue |
 
