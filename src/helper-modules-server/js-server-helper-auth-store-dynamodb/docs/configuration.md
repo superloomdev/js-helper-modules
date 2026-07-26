@@ -42,7 +42,7 @@ The AWS SDK client is **not** created at loader time. `Lib.DynamoDB` lazy-initia
 
 The validator throws an `Error` at loader time if `table_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
-The table must exist before the adapter is used. `setupNewStore` is not implemented for DynamoDB; table provisioning is out-of-band via IaC, AWS Console, or the driver helper's table-management API (if it gains one).
+The table must exist before the adapter is used. When `Lib.DynamoDBAdmin` is injected (from `js-server-helper-nosql-aws-dynamodb-admin`), `setupNewStore` creates the table with the correct PK/SK schema, waits for ACTIVE, and enables native TTL on `expires_at` - all idempotently. When no admin is injected, `setupNewStore` returns `NOT_IMPLEMENTED` and the table must be provisioned out-of-band via IaC or AWS Console. See [schema.md](schema.md) for the exact table definition.
 
 ## IAM Permissions
 
@@ -50,7 +50,7 @@ The adapter uses specific DynamoDB actions. The application's IAM policy (or the
 
 | Adapter Method | DynamoDB Action | Resource |
 |---|---|---|
-| `setupNewStore` | (none — returns NOT_IMPLEMENTED) | — |
+| `setupNewStore` | `dynamodb:CreateTable` + `dynamodb:DescribeTable` + `dynamodb:UpdateTimeToLive` + `dynamodb:DescribeTimeToLive` + `dynamodb:ListTables` (when `Lib.DynamoDBAdmin` is injected) | `arn:aws:dynamodb:<region>:<account>:table/<table_name>` |
 | `getSession` | `dynamodb:GetItem` | `arn:aws:dynamodb:<region>:<account>:table/<table_name>` |
 | `listSessionsByActor` | `dynamodb:Query` | `arn:aws:dynamodb:<region>:<account>:table/<table_name>` |
 | `setSession` | `dynamodb:PutItem` | `arn:aws:dynamodb:<region>:<account>:table/<table_name>` |
@@ -95,6 +95,7 @@ The adapter does not require these packages directly. It accesses them through `
 | `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
 | `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
 | `@superloomdev/js-server-helper-nosql-aws-dynamodb` | `Lib.DynamoDB` injected by the caller |
+| `@superloomdev/js-server-helper-nosql-aws-dynamodb-admin` | `Lib.DynamoDBAdmin` optional, injected for `setupNewStore` delegation |
 
 The driver helper carries its own dependency on the AWS SDK for JavaScript v3. The adapter never `require`s the AWS SDK directly; applications that never use this store never load the DynamoDB client.
 

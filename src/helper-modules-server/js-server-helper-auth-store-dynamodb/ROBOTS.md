@@ -37,7 +37,7 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.DynamoDB` by reference from
 
 | Method | Signature | Returns |
 |---|---|---|
-| `setupNewStore` | `(instance)` | `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` |
+| `setupNewStore` | `(instance)` | `{ success, error }` - delegates to `Lib.DynamoDBAdmin` when injected, otherwise `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` |
 | `getSession` | `(instance, tenant_id, actor_id, token_key, token_secret_hash)` | `{ success, record, error }` |
 | `listSessionsByActor` | `(instance, tenant_id, actor_id)` | `{ success, records, error }` |
 | `setSession` | `(instance, record)` | `{ success, error }` |
@@ -46,13 +46,13 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.DynamoDB` by reference from
 | `deleteSessions` | `(instance, tenant_id, keys)` | `{ success, error }` |
 | `cleanupExpiredSessions` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` (or `ERRORS.NOT_IMPLEMENTED` for `setupNewStore`) and any data field set to a typed empty value (`null` / `[]` / `0`).
+All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` (or `ERRORS.NOT_IMPLEMENTED` for `setupNewStore` when no admin is injected) and any data field set to a typed empty value (`null` / `[]` / `0`).
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
 1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-dynamodb')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
-2. **`setupNewStore` is not implemented.** Returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`. The DynamoDB table must be provisioned out-of-band via IaC, AWS Console, or the driver helper's table-management API (if and when it gains one). Do not attempt to implement table creation in application code.
+2. **`setupNewStore` delegates to `Lib.DynamoDBAdmin` when injected.** When `shared_libs.DynamoDBAdmin` is present, `setupNewStore` creates the table with PK=`tenant_id`, SK=`session_key`, waits for ACTIVE, and enables native TTL on `expires_at` - all with idempotent semantics. When no admin is injected, it returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` and the operator must provision out-of-band via IaC or AWS Console.
 
 3. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration. The compare runs after the `GetItem` call.
 
@@ -77,7 +77,8 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 ```
 Lib.Utils    (@superloomdev/js-helper-utils)                    injected via shared_libs
 Lib.Debug    (@superloomdev/js-helper-debug)                    injected via shared_libs
-Lib.DynamoDB (@superloomdev/js-server-helper-nosql-aws-dynamodb) injected via shared_libs
+Lib.DynamoDB       (@superloomdev/js-server-helper-nosql-aws-dynamodb)           injected via shared_libs
+Lib.DynamoDBAdmin  (@superloomdev/js-server-helper-nosql-aws-dynamodb-admin)     optional, injected via shared_libs
 ```
 
 All three are injected by the caller. The adapter owns no runtime dependencies of its own.
@@ -89,7 +90,7 @@ The adapter defines its own error catalog in `store.errors.js`. Auth forwards er
 | Error | Type | When |
 |---|---|---|
 | `SERVICE_UNAVAILABLE` | `AUTH_STORE_DYNAMODB_SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, never surfaced |
-| `NOT_IMPLEMENTED` | `AUTH_STORE_DYNAMODB_NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
+| `NOT_IMPLEMENTED` | `AUTH_STORE_DYNAMODB_NOT_IMPLEMENTED` | Returned from `setupNewStore` when no `Lib.DynamoDBAdmin` is injected |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
