@@ -1,0 +1,23 @@
+# DynamoDB Local for admin module testing
+# Lifecycle managed by npm scripts: npm test starts -> tests -> stops and removes
+# Ephemeral - data lost on container stop
+#
+# Port 8001 (offset from the standard 8000) so parallel local runs with
+# the data-plane dynamodb module never collide.
+
+name: superloom-test-dynamodb-admin
+
+services:
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: superloom-test-dynamodb-admin
+    ports:
+      - "127.0.0.1:8001:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8000 2>/dev/null; [ $? -ne 7 ]"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
