@@ -32,11 +32,11 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 1. **Construct the adapter before the Logger.** The adapter is fully independent. Pass the returned store object as `CONFIG.Store` to the Logger parent.
 
-2. **`_id` is set to `sort_key`.** MongoDB document ID equals `sort_key` — no auto-generated ObjectId. This is the primary deduplication key for `addLog`.
+2. **`_id` is set to `sort_key`.** MongoDB document ID equals `sort_key` - no auto-generated ObjectId. This is the primary deduplication key for `addLog`.
 
 3. **`addLog` is idempotent.** Uses `replaceOne` with `upsert: true` on `{ _id: sort_key }`. Re-inserting the same `sort_key` silently replaces the document with identical content.
 
-4. **No denormalized compound keys.** Documents store the canonical fields only (`scope`, `entity_type`, `entity_id`, `actor_type`, `actor_id`, etc.). The two query paths use compound indexes on the individual fields — no `entity_pk`/`actor_pk` strings are computed or stored.
+4. **No denormalized compound keys.** Documents store the canonical fields only (`scope`, `entity_type`, `entity_id`, `actor_type`, `actor_id`, etc.). The two query paths use compound indexes on the individual fields - no `entity_pk`/`actor_pk` strings are computed or stored.
 
 5. **`_ttl` is a `Date` field derived from `expires_at * 1000`.** Drives the sparse TTL index. Absent for persistent (never-expiring) log records (where `expires_at` is null).
 
@@ -68,4 +68,4 @@ shared_libs.MongoDB  - helper-nosql-mongodb (MongoDB driver wrapper)
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. `_id = sort_key`. No denormalized compound keys — indexes are compound on the canonical fields. TTL field: `_ttl` (sparse index, only set when `expires_at` is non-null).
+The store's source file is `store.js`; the config validator is `store.validators.js`; the error catalog is `store.errors.js`. `_id = sort_key`. No denormalized compound keys - indexes are compound on the canonical fields. TTL field: `_ttl` (sparse index, only set when `expires_at` is non-null).

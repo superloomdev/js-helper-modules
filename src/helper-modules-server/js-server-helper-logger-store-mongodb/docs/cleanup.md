@@ -4,7 +4,7 @@
 
 MongoDB automatically deletes log documents whose `_ttl` Date field has passed. The background TTL sweeper runs approximately every 60 seconds. No application-side scheduling is needed for TTL-bearing logs.
 
-The TTL index is sparse — documents without a `_ttl` field (persistent records where `expires_at` is null) are never touched.
+The TTL index is sparse - documents without a `_ttl` field (persistent records where `expires_at` is null) are never touched.
 
 ## `cleanupExpiredLogs` (Explicit Sweep)
 
