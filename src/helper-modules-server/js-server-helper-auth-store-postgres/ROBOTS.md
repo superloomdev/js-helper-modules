@@ -1,6 +1,22 @@
-# helper-auth-store-postgres. AI Reference
+# @superloomdev/js-server-helper-auth-store-postgres
 
-Class F storage adapter. PostgreSQL backend for `helper-auth`. Standard factory shape: receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`.
+Class F storage adapter for `helper-auth`. PostgreSQL backend. Standard factory shape: receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object that is passed to the Auth parent via `CONFIG.Store`. Implements the 8-method session store contract.
+
+## Type
+Class F. Storage adapter for `helper-auth`. Service-dependent (PostgreSQL via Docker for emulated, real PostgreSQL for integration).
+
+## Peer Dependencies
+- `@superloomdev/js-helper-utils` - injected as `Lib.Utils`
+- `@superloomdev/js-helper-debug` - injected as `Lib.Debug`
+- `@superloomdev/js-server-helper-sql-postgres` - injected as `Lib.SQL` (alias for `Lib.Postgres`)
+
+## Direct Dependencies
+None. The adapter owns no runtime dependencies of its own.
+
+## Companion Files
+- `store.config.js` - default config (table_name)
+- `store.errors.js` - frozen error catalog (AUTH_STORE_POSTGRES_SERVICE_UNAVAILABLE)
+- `store.validators.js` - config validators singleton
 
 ## Loader Pattern
 
@@ -17,36 +33,11 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 });
 ```
 
-| Config key | Type | Notes |
-|---|---|---|
-| `table_name` | String | Required. One table per actor_type |
-
 The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the injected container. Auth forwards error envelopes transparently.
 
-## Config
+## Store Contract
 
-```js
-{
-  table_name: 'sessions_user'  // required. one table per actor_type
-}
-```
-
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
-
-## Store Contract. Eight Methods
-
-| Method | Signature | Returns |
-|---|---|---|
-| `setupNewStore` | `(instance)` | `{ success, error }` |
-| `getSession` | `(instance, tenant_id, actor_id, token_key, token_secret_hash)` | `{ success, record, error }` |
-| `listSessionsByActor` | `(instance, tenant_id, actor_id)` | `{ success, records, error }` |
-| `setSession` | `(instance, record)` | `{ success, error }` |
-| `updateSessionActivity` | `(instance, tenant_id, actor_id, token_key, updates)` | `{ success, error }` |
-| `deleteSession` | `(instance, tenant_id, actor_id, token_key)` | `{ success, error }` |
-| `deleteSessions` | `(instance, tenant_id, keys)` | `{ success, error }` |
-| `cleanupExpiredSessions` | `(instance)` | `{ success, deleted_count, error }` |
-
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` and any data field set to a typed empty value (`null` / `[]` / `0`).
+The adapter implements the 8-method session store contract defined by the Auth parent. All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` and any data field set to a typed empty value (`null` / `[]` / `0`).
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
@@ -70,17 +61,41 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 10. **PostgreSQL has no native TTL.** `cleanupExpiredSessions` is the only deletion path for expired rows. Application code must schedule it (cron, scheduled function invocation, or `pg_cron`).
 
-## Peer Dependencies
+## Config Keys
 
-```
-Lib.Utils    (@superloomdev/js-helper-utils)              injected via shared_libs
-Lib.Debug    (@superloomdev/js-helper-debug)              injected via shared_libs
-Lib.SQL      (@superloomdev/js-server-helper-sql-postgres) injected via shared_libs as alias
-```
+| Key | Type | Default | Required |
+|---|---|---|---|
+| table_name | String | - | yes |
 
-All three are injected by the caller. The adapter owns no runtime dependencies of its own.
+`table_name` is the only config key. One table per actor_type. The loader throws an `Error` if it is missing, null, or empty.
 
-## Error Catalog Used
+## Exported Functions (8 total)
+
+setupNewStore(instance) → { success, error } | async:yes
+  Idempotent SQL schema setup. CREATE TABLE IF NOT EXISTS + CREATE INDEX IF NOT EXISTS on expires_at. Safe on every boot.
+
+getSession(instance, tenant_id, actor_id, token_key, token_secret_hash) → { success, record, error } | async:yes
+  Fetch one session by composite key. Returns record: null on hash mismatch (identical to missing row - timing safety).
+
+listSessionsByActor(instance, tenant_id, actor_id) → { success, records, error } | async:yes
+  All active sessions for the actor. Expired sessions filtered out.
+
+setSession(instance, record) → { success, error } | async:yes
+  UPSERT a session record. Re-inserts the same composite primary key without complaint.
+
+updateSessionActivity(instance, tenant_id, actor_id, token_key, updates) → { success, error } | async:yes
+  Partial update of mutable fields. Throws TypeError on identity fields (programmer-error guard).
+
+deleteSession(instance, tenant_id, actor_id, token_key) → { success, error } | async:yes
+  Delete one session. Idempotent.
+
+deleteSessions(instance, tenant_id, keys) → { success, error } | async:yes
+  Batch delete. No-op success when keys.length === 0 (no database round-trip).
+
+cleanupExpiredSessions(instance) → { success, deleted_count, error } | async:yes
+  Sweep expired rows. Required on PostgreSQL (no native TTL). Run via cron or scheduled function.
+
+## Error Catalog
 
 The adapter defines its own error catalog in `store.errors.js`. Auth forwards error envelopes transparently; the adapter's `SERVICE_UNAVAILABLE` type is `AUTH_STORE_POSTGRES_SERVICE_UNAVAILABLE`.
 
@@ -90,6 +105,13 @@ The adapter defines its own error catalog in `store.errors.js`. Auth forwards er
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 
-## Single Source of Truth
-
-The store's source file is `store.js`; the config validator is `store.validators.js`. Schema definitions, UPSERT template, column lists, and identity blocklists live in `_Store` private functions inside `store.js`. The column ordering aligns with the Auth parent's `parts/record-shape.js` `getFieldNames()`.
+## Patterns
+- **Factory shape:** receives `shared_libs`, owns its own `CONFIG`, `ERRORS`, and `Validators`. Returns a ready-to-use store object
+- **Lib.SQL alias:** caller sets `Lib.SQL = Lib.Postgres` before calling the adapter so it picks up the Postgres driver
+- **Idempotent setupNewStore:** CREATE TABLE IF NOT EXISTS + CREATE INDEX IF NOT EXISTS. Safe on every boot
+- **UPSERT semantics:** setSession re-inserts the same composite primary key without complaint
+- **BIGINT coercion:** pg driver returns BIGINT as strings; adapter coerces to Numbers on read
+- **JSON encoding:** custom_data is JSON-encoded into a TEXT column; parsed back on read. Corrupt values surface as null
+- **Hash mismatch safety:** getSession returns record: null on wrong secret (identical to missing row - no timing oracle)
+- **Identity field guard:** updateSessionActivity throws TypeError on identity fields (programmer error)
+- **Source of truth:** store.js is the source file; store.validators.js is the config validator. Schema definitions, UPSERT template, column lists, and identity blocklists live in `_Store` private functions inside store.js. Column ordering aligns with the Auth parent's `parts/record-shape.js` `getFieldNames()`

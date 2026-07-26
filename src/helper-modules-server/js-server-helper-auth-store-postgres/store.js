@@ -1,7 +1,7 @@
 // Info: Postgres store adapter for helper-auth. Every DDL statement,
 // UPSERT template, CRUD query, value coercion, and identifier-quoting
 // rule in this file is specific to Postgres.
-// No cross-dialect parameterisation, no shared SQL helper module.
+// No cross-dialect parameterization, no shared SQL helper module.
 //
 // The caller injects a ready-to-use Postgres helper as Lib.SQL
 // (typically Lib.Postgres aliased). This adapter never requires `pg`
@@ -218,7 +218,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Decode the raw row and verify the secret hash
       const record = _Store.rowToRecord(result.row);
 
-      // Constant-behaviour hash compare - mismatch returns "not found"
+      // Constant-behavior hash compare - mismatch returns "not found"
       if (record.token_secret_hash !== token_secret_hash) {
         return {
           success: true,
