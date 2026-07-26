@@ -1,9 +1,9 @@
-# helper-auth-store-postgres
+# @superloomdev/js-server-helper-auth-store-postgres
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org) 
+[![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
-A PostgreSQL-backed implementation of the [helper-auth](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-auth) module's storage contract. Call it with a `Lib` container and config to get a ready-to-use store object, then pass that as `Store` to the Auth parent. The Auth module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+Postgres store adapter for helper-auth. Implements the 8-method session store contract backed by Postgres via helper-sql-postgres. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
