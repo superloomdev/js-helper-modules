@@ -3,7 +3,7 @@
 // `_id` of `{ scope, id }` so reads/writes hit the implicit `_id` index
 // without any secondary index. Native TTL is implemented via a `_ttl`
 // Date field + a TTL index (`{ _ttl: 1 }, expireAfterSeconds: 0`); the
-// Date mirror is the only field MongoDB's TTL sweeper recognises.
+// Date mirror is the only field MongoDB's TTL sweeper recognizes.
 //
 // `expires_at` (epoch seconds) is stored alongside `_ttl` because the
 // verify module reads it directly during the consume-time expiry check.
