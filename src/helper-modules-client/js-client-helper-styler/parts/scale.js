@@ -1,4 +1,4 @@
-// Info: Scale builders for js-client-helper-styler — turn a small numeric seed into a
+// Info: Scale builders for js-client-helper-styler - turn a small numeric seed into a
 // full named scale. Modular (geometric) scales drive typography; linear
 // (arithmetic) scales drive spacing and radius. Singleton part; no state.
 'use strict';
@@ -15,7 +15,7 @@ let ERRORS;  // eslint-disable-line no-unused-vars -- accepted for signature uni
 /********************************************************************
 Singleton loader. Injects Lib, CONFIG, and ERRORS and returns the
 module-scope Scale object directly. All three are accepted for
-signature uniformity with other parts — none are consumed today.
+signature uniformity with other parts - none are consumed today.
 
 @param {Object} shared_libs - Lib container (unused; pure scale math)
 @param {Object} config      - Merged module configuration (unused)

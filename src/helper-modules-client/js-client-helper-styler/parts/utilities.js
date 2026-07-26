@@ -33,7 +33,7 @@ const SPACING_SIDES = ['a', 'h', 'v', 't', 'b', 's', 'e'];
 /********************************************************************
 Singleton loader. Injects Lib, CONFIG, and ERRORS and returns the
 module-scope Utilities object directly. All three are accepted for
-signature uniformity with other parts — none are consumed today.
+signature uniformity with other parts - none are consumed today.
 
 @param {Object} shared_libs - Lib container (unused; pure transform)
 @param {Object} config      - Merged module configuration (unused)
@@ -85,7 +85,7 @@ const Utilities = { // Utility-style generator accessible by the orchestrator
       };
     });
 
-    // Font colors — one `font_<token>` per known text color present
+    // Font colors - one `font_<token>` per known text color present
     FONT_COLOR_TOKENS.forEach(function (token) {
       if (Color[token] !== undefined) {
         styles['font_' + token.toLowerCase()] = { color: Color[token] };
@@ -105,7 +105,7 @@ const Utilities = { // Utility-style generator accessible by the orchestrator
       styles['font_family_secondary'] = { fontFamily: Font.family.secondary };
     }
 
-    // Backgrounds — one `background_<token>` per known surface color present
+    // Backgrounds - one `background_<token>` per known surface color present
     BACKGROUND_TOKENS.forEach(function (token) {
       if (Color[token] !== undefined) {
         styles['background_' + token.toLowerCase()] = { backgroundColor: Color[token] };
@@ -117,12 +117,12 @@ const Utilities = { // Utility-style generator accessible by the orchestrator
     styles['border_top'] = { borderTopWidth: 1, borderColor: Color.BORDER };
     styles['border_primary'] = { borderWidth: 1, borderColor: Color.APP_PRIMARY };
 
-    // Radii — one `br_<step>` per radius step
+    // Radii - one `br_<step>` per radius step
     Object.keys(Dimension.radius).forEach(function (radius_step) {
       styles['br_' + radius_step] = { borderRadius: Dimension.radius[radius_step] };
     });
 
-    // Spacing — one padding + margin utility per token per logical side
+    // Spacing - one padding + margin utility per token per logical side
     Object.keys(Dimension.space).forEach(function (space_step) {
       const value = Dimension.space[space_step];
       SPACING_SIDES.forEach(function (side) {

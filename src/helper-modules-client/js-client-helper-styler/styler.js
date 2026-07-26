@@ -1,4 +1,4 @@
-// Info: Styler — the label-agnostic core of the js-client-helper-styler package. Pure
+// Info: Styler - the label-agnostic core of the js-client-helper-styler package. Pure
 // derivation logic with zero external dependencies. It knows nothing about
 // "primary" or "xs"; it orchestrates three pure PARTS:
 //   - parts/color-ops : mix / lighten / darken / contrast / pseudo-states
@@ -14,7 +14,7 @@
 // live at module scope; the loader injects Lib + config, initializes ERRORS +
 // Validators, and builds the pure parts (color-ops, scale, utilities), attaching
 // their interfaces to the public object. Node's require cache guarantees one
-// Styler per process. Only Lib.Debug is used — for assembly logging at DEBUG
+// Styler per process. Only Lib.Debug is used - for assembly logging at DEBUG
 // level (verbosity is the logger's own level threshold, not a flag).
 'use strict';
 
@@ -26,7 +26,7 @@ let ERRORS;     // frozen error catalog
 let Validators; // validators module, initialized with Lib
 
 // Pure stateless parts, built by the loader (module-scope).
-const Parts = {};  // { colorOps, scale, utilities } — populated in loader
+const Parts = {};  // { colorOps, scale, utilities } - populated in loader
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////

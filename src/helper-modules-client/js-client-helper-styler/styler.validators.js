@@ -7,8 +7,8 @@
 //
 // Compatibility: Node.js 18+ and React Native (Hermes).
 //
-// Loader pattern: SINGLETON. Validators are pure — no Lib, no CONFIG, no
-// per-instance state — and run at authoring/startup time, so the loader simply
+// Loader pattern: SINGLETON. Validators are pure - no Lib, no CONFIG, no
+// per-instance state - and run at authoring/startup time, so the loader simply
 // returns the shared module-scope Validators object. The shared_libs param is
 // accepted for loader-signature uniformity but unused.
 'use strict';
@@ -20,7 +20,7 @@ const ERRORS = require('./styler.errors');
 
 /********************************************************************
 Singleton loader. Returns the shared module-scope Validators object.
-Accepts shared_libs only for loader-signature uniformity — validators
+Accepts shared_libs only for loader-signature uniformity - validators
 are pure and use no injected dependencies or config.
 
 @param {Object} shared_libs - Lib container (unused)

@@ -1,4 +1,4 @@
-// Info: Default configuration for the js-client-helper-styler package — the knobs a host may
+// Info: Default configuration for the js-client-helper-styler package - the knobs a host may
 // override when calling a module loader. Pure data (key-value map), following
 // the JS helper module convention.
 //

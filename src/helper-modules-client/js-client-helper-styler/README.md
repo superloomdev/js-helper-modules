@@ -4,7 +4,7 @@ A simple way to turn JSON values into complete design themes.
 
 Think of it like this: you give it a **template** (what tokens exist and how to make them) and a **set of values** (your colors, sizes, fonts), and it gives you back a full theme with design tokens ready to use.
 
-The neat part? You can layer themes. Define a complete `base` theme, then send just the changes as a `variant` — perfect for server-driven theming or brand customization.
+The neat part? You can layer themes. Define a complete `base` theme, then send just the changes as a `variant` - perfect for server-driven theming or brand customization.
 
 > **Want React integration?** Check out the extension module: `js-client-helper-styler-ext-react`.
 
@@ -14,11 +14,11 @@ The neat part? You can layer themes. Define a complete `base` theme, then send j
 
 Styler takes three things:
 
-1. **The Engine** (`styler.js`) — Pure JavaScript functions that do the math. Mix colors, build scales, generate utility styles. No dependencies. No React. Just logic.
+1. **The Engine** (`styler.js`) - Pure JavaScript functions that do the math. Mix colors, build scales, generate utility styles. No dependencies. No React. Just logic.
 
-2. **The Template** (`styler.template.js`) — A JSON structure that says "these are my color tokens, these are my font sizes, and here's how to derive each one."
+2. **The Template** (`styler.template.js`) - A JSON structure that says "these are my color tokens, these are my font sizes, and here's how to derive each one."
 
-3. **Your Values** (`base + variant`) — Your actual colors (`#0D9488`), sizes (`16px`), font names (`Inter`).
+3. **Your Values** (`base + variant`) - Your actual colors (`#0D9488`), sizes (`16px`), font names (`Inter`).
 
 ```
 Template + Values → Styler → { Color, Dimension, Font }
@@ -105,7 +105,7 @@ You can even update the theme live: `useThemeController().updateTheme(newVariant
 This is the **first extension-based module** in the system. Here's how it works:
 
 - **This core module** (`js-client-helper-styler`) is pure JavaScript. No React, no framework-specific code.
-- **Extension modules** add framework bindings — React hooks, Vue composables, Angular services.
+- **Extension modules** add framework bindings - React hooks, Vue composables, Angular services.
 - The extension **imports** Styler. Styler never knows about React.
 
 This pattern keeps the core tiny and universal while letting each framework have its own idiomatic wrapper.
@@ -114,7 +114,7 @@ This pattern keeps the core tiny and universal while letting each framework have
 
 ## Fonts: A Quick Note
 
-Styler only deals with font **names** and **weights** — it says "use Inter at weight 600". 
+Styler only deals with font **names** and **weights** - it says "use Inter at weight 600". 
 
 Actually **loading** the font files (via `expo-font`, Google Fonts, or your bundler) is up to your app. If your theme says "Inter", you need to make sure "Inter" is actually loaded.
 
@@ -124,9 +124,9 @@ There's a helper for this: `validators.findUnregisteredFamilies(theme, registere
 
 ## Want More?
 
-- **[API Reference](./docs/api.md)** — Every function explained with examples
-- **[Template Guide](./docs/template.md)** — How templates work and how to customize them
-- **[Philosophy](./docs/philosophy.md)** — Why it's built this way
+- **[API Reference](./docs/api.md)** - Every function explained with examples
+- **[Template Guide](./docs/template.md)** - How templates work and how to customize them
+- **[Philosophy](./docs/philosophy.md)** - Why it's built this way
 
 ---
 
