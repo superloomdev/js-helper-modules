@@ -12,10 +12,10 @@ This module brings the Styler theme engine into React. It gives you hooks and a 
 
 Three hooks and a provider:
 
-- **`ThemeProvider`** — Wraps your app and holds the current theme
-- **`useTheme()`** — Reads the theme in any component
-- **`useStyles()`** — Gets atomic style objects (font sizes, colors, spacing)
-- **`useThemeController()`** — Full control: read theme + change it at runtime
+- **`ThemeProvider`** - Wraps your app and holds the current theme
+- **`useTheme()`** - Reads the theme in any component
+- **`useStyles()`** - Gets atomic style objects (font sizes, colors, spacing)
+- **`useThemeController()`** - Full control: read theme + change it at runtime
 
 The core Styler handles the heavy lifting: merging base and variant themes, deriving colors, building scales. This extension just bridges that to React.
 
@@ -93,7 +93,7 @@ function Screen() {
 | **Exports** | Functions (derive, assemble, etc.) | Hooks and components |
 | **Where to use** | Anywhere (Node, browser, RN) | React apps only |
 
-The extension is "boss" — it decides when to call the core, how to cache results, and when to trigger React re-renders. The core is just a library of pure functions.
+The extension is "boss" - it decides when to call the core, how to cache results, and when to trigger React re-renders. The core is just a library of pure functions.
 
 ---
 
@@ -105,7 +105,7 @@ npm install
 npm test
 ```
 
-Tests use React's test renderer to verify hooks work correctly. All tests run in Node.js — no browser needed.
+Tests use React's test renderer to verify hooks work correctly. All tests run in Node.js - no browser needed.
 
 ---
 
@@ -113,7 +113,7 @@ Tests use React's test renderer to verify hooks work correctly. All tests run in
 
 | File | Purpose |
 |------|---------|
-| `extension.js` | Extension loader — creates hooks with injected React |
+| `extension.js` | Extension loader - creates hooks with injected React |
 | `docs/api.md` | Full API reference |
 | `docs/philosophy.md` | Extension pattern explained |
 | `_test/` | Unit tests using React test renderer |
@@ -122,4 +122,4 @@ Tests use React's test renderer to verify hooks work correctly. All tests run in
 
 ## Related
 
-- [js-client-helper-styler](../js-client-helper-styler/) — The pure core engine
+- [js-client-helper-styler](../js-client-helper-styler/) - The pure core engine

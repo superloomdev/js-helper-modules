@@ -1,4 +1,4 @@
-// loader.js — Dependency injection for js-client-helper-styler-ext-react tests
+// loader.js - Dependency injection for js-client-helper-styler-ext-react tests
 // Uses npm aliases: helper-styler, helper-utils, helper-debug, helper-styler-ext
 
 'use strict';
