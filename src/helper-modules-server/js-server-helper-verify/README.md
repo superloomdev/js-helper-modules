@@ -53,7 +53,7 @@ Five storage adapters are available, each a separate package. A project installs
 
 A legitimate deviation is using a NoSQL adapter in a SQL-backed application when the verification table has different scaling characteristics from the rest of the app (very high write volume during user-onboarding bursts, short TTLs that benefit from native sweepers). Mixing SQL families (Postgres app with MySQL or SQLite verify) is not a useful pattern.
 
-Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and configuration shape. The verify module itself owns no per-backend documentation: every Class F adapter is the authoritative source for its own backend.
+Each adapter package ships its own README with the backend-specific schema, indexes, TTL behavior, IaC provisioning notes, and configuration shape. The verify module itself owns no per-backend documentation: every Class F adapter is the authoritative source for its own backend.
 
 ## Aligned with Superloom Philosophy
 
