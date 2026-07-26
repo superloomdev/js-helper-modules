@@ -382,7 +382,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // for a transaction batch.
 
     /********************************************************************
-    Build a parameterised SQL statement into a fully-escaped string.
+    Build a parameterized SQL statement into a fully-escaped string.
     Supports ? (value) and ?? (identifier) placeholders, plus the MySQL-
     style `SET ?` / `WHERE ?` object expansion.
 
