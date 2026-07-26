@@ -76,7 +76,7 @@ Bulk-deletes rows whose `expires_at` is in the past. Persistent rows (`expires_a
 
 ### `setupNewStore(instance)` *(async)*
 
-Idempotent backend setup. Behaviour varies by adapter: SQL creates table + indexes; the memory adapter is a no-op; NoSQL adapters may provision indexes or rely on out-of-band IaC.
+Idempotent backend setup. Behavior varies by adapter: SQL creates table + indexes; the memory adapter is a no-op; NoSQL adapters may provision indexes or rely on out-of-band IaC.
 
 - **Returns**: `{ success, error }`.
 
@@ -107,7 +107,7 @@ Error shape is frozen at module load: `{ type: 'LOGGER_SERVICE_UNAVAILABLE', mes
 3. If `options.await === true`: `await store.addLog(...)`. Map adapter failure to `LOGGER_SERVICE_UNAVAILABLE`.
 4. Otherwise: register `Lib.Instance.backgroundRoutine(instance)` to get a completion callback, then chain `store.addLog(...)` with `.then()/.catch()/.finally()`. Return `{ success: true }` immediately. Adapter failures during background writes are logged via `Lib.Debug.debug` and never surface to the caller.
 
-## Critical Behaviour for Code-Generating Tools
+## Critical Behavior for Code-Generating Tools
 
 - **`instance` is always the first argument.** Every function reads `instance.time` and `instance.time_ms` for timestamps.
 - **`Store` is a ready-to-use object, not a factory.** The adapter is constructed before passing it in. The loader throws on missing or non-object.

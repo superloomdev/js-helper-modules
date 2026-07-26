@@ -220,10 +220,10 @@ describe('log option validation', function () {
 
 
 // ============================================================================
-// 3. log() WRITE BEHAVIOUR
+// 3. log() WRITE BEHAVIOR
 // ============================================================================
 
-describe('log() write behaviour', function () {
+describe('log() write behavior', function () {
 
   it('await:true returns success and the record is immediately readable', async function () {
 
@@ -676,7 +676,7 @@ describe('config absorption contract', function () {
   });
 
   // OVERRIDE WINS: IP_ENCRYPT_KEY defaults to null (no encryption); setting a
-  // non-null key overrides that — the IP stored in the record must be ciphertext,
+  // non-null key overrides that - the IP stored in the record must be ciphertext,
   // not the original value, proving the override reached CONFIG.
   it('absorbs an IP_ENCRYPT_KEY override that changes stored IP to ciphertext', async function () {
     const captured = [];
@@ -698,7 +698,7 @@ describe('config absorption contract', function () {
     assert.notEqual(captured[0].ip, '198.51.100.1');
   });
 
-  // OMISSION KEEPS DEFAULT (null): omitting IP_ENCRYPT_KEY leaves it null —
+  // OMISSION KEEPS DEFAULT (null): omitting IP_ENCRYPT_KEY leaves it null -
   // IP is stored as plaintext.
   it('retains null IP_ENCRYPT_KEY default when the key is omitted (ip stored as plaintext)', async function () {
     const captured = [];
@@ -718,7 +718,7 @@ describe('config absorption contract', function () {
     assert.equal(captured[0].ip, '198.51.100.2');
   });
 
-  // NULL HONORED: not applicable at unit tier — both CONFIG defaults are null
+  // NULL HONORED: not applicable at unit tier - both CONFIG defaults are null
   // (Store, IP_ENCRYPT_KEY). There is no key with a non-null default
   // whose null-override would produce a distinct observable outcome at this tier.
 

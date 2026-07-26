@@ -50,7 +50,7 @@ Five storage adapters are available, each a separate package. A project installs
 
 A legitimate deviation is using a NoSQL adapter in a SQL-backed application when the audit log has different scaling characteristics from the rest of the app (very high write volume, append-only access pattern, separate retention policies). Mixing SQL families (Postgres app with MySQL or SQLite logger) is not a useful pattern.
 
-Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and config key shape. The logger module itself owns no per-backend documentation: every adapter is the authoritative source for its own backend.
+Each adapter package ships its own README with the backend-specific schema, indexes, TTL behavior, IaC provisioning notes, and config key shape. The logger module itself owns no per-backend documentation: every adapter is the authoritative source for its own backend.
 
 ## Aligned with Superloom Philosophy
 
