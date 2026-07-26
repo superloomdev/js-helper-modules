@@ -16,7 +16,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **synchronous, side-effect-free, and runtime-agnostic**. There is no async function, no `instance` argument, no `success / data / error` envelope. Each function returns a string.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Web Crypto first.** | When the runtime exposes `globalThis.crypto`, it is used for entropy and (where available) for `randomUUID`. The fallback path is reached only on older targets that lack Web Crypto |
 | **Empty-input guard.** | `generateRandomString` returns `''` on null, undefined, empty, or non-positive `length`. The base64 helpers return their input unchanged on empty values where the operation is a no-op |
