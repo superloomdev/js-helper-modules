@@ -377,7 +377,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // for a transaction batch.
 
     /********************************************************************
-    Compile a parameterised SQL template into a fully-escaped string.
+    Compile a parameterized SQL template into a fully-escaped string.
     Uses ? for values and ?? for identifiers. Pair with buildRawText()
     for fragments that must not be escaped.
 
