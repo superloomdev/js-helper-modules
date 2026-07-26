@@ -1,7 +1,7 @@
 // Info: SQLite store adapter for helper-auth. Fully self-contained -
 // every DDL statement, UPSERT template, CRUD query, value coercion,
 // and identifier-quoting rule in this file is specific to SQLite.
-// No cross-dialect parameterisation, no shared SQL helper module.
+// No cross-dialect parameterization, no shared SQL helper module.
 //
 // Standard factory shape: receives shared_libs, owns its own CONFIG, ERRORS,
 // and Validators. The SQL driver is taken from shared_libs.SQL (Lib.SQLite).
@@ -220,7 +220,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Decode the raw row and verify the secret hash
       const record = _Store.rowToRecord(result.row);
 
-      // Constant-behaviour hash compare - mismatch returns "not found"
+      // Constant-behavior hash compare - mismatch returns "not found"
       if (record.token_secret_hash !== token_secret_hash) {
         return {
           success: true,

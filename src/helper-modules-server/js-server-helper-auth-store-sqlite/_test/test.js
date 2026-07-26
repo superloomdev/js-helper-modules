@@ -50,7 +50,7 @@ const buildStore = function (table) {
 
 
 // ============================================================================
-// TIER 1 — ADAPTER UNIT TESTS
+// TIER 1 - ADAPTER UNIT TESTS
 // ============================================================================
 
 describe('Tier 1: store loader validation', function () {
@@ -601,7 +601,7 @@ describe('Tier 1: large multi-actor list isolation', function () {
 
 
 // ============================================================================
-// TIER 3 — AUTH + ADAPTER INTEGRATION
+// TIER 3 - AUTH + ADAPTER INTEGRATION
 // ============================================================================
 
 const buildAuth = function (overrides) {
