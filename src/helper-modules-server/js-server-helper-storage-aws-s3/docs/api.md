@@ -41,7 +41,7 @@ Every function returns a consistent response envelope:
 
 Operational failures (network error, access denied, missing object) never throw. They come back through `error` so the caller can branch without a try/catch. Programming errors (bad arguments, missing peers) still throw.
 
-**`NoSuchKey` is normalised.** When an object does not exist, the response is `{ success: false, error: { type: 'NOT_FOUND', message: ... } }` regardless of the AWS-specific error code. The error log entry is suppressed for `NOT_FOUND` to avoid noise on cache-miss-style code paths.
+**`NoSuchKey` is normalized.** When an object does not exist, the response is `{ success: false, error: { type: 'NOT_FOUND', message: ... } }` regardless of the AWS-specific error code. The error log entry is suppressed for `NOT_FOUND` to avoid noise on cache-miss-style code paths.
 
 ---
 

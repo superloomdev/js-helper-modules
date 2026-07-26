@@ -15,7 +15,7 @@ Every operation returns the same envelope:
 success / data / error
 ```
 
-Error handling, result reading, and exception expectations are the same in every place you touch the storage layer. There are no surprises between functions, and operational failures never throw. `NoSuchKey` is normalised to `error.type: 'NOT_FOUND'` so callers can branch on missing objects without parsing AWS-specific error codes.
+Error handling, result reading, and exception expectations are the same in every place you touch the storage layer. There are no surprises between functions, and operational failures never throw. `NoSuchKey` is normalized to `error.type: 'NOT_FOUND'` so callers can branch on missing objects without parsing AWS-specific error codes.
 
 ## Why Use This Module
 
