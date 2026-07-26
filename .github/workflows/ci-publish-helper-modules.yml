@@ -34,6 +34,8 @@
 #   15. test-storage-aws-s3 → publish-storage-aws-s3
 #   16. test-nosql-aws-dynamodb → publish-nosql-aws-dynamodb
 #   17. test-nosql-mongodb → publish-nosql-mongodb
+#   17a. test-nosql-aws-dynamodb-admin → publish-nosql-aws-dynamodb-admin
+#   17b. test-nosql-mongodb-admin → publish-nosql-mongodb-admin
 #   18. test-queue-aws-sqs → publish-queue-aws-sqs
 #   19. test-sql-mysql → publish-sql-mysql
 #   20. test-sql-postgres → publish-sql-postgres
@@ -1241,11 +1243,145 @@ jobs:
 
 
   # ###########################################################################
+  #   MODULE 16a: js-server-helper-nosql-aws-dynamodb-admin (needs utils, debug, instance)
+  # ###########################################################################
+
+  test-nosql-aws-dynamodb-admin:
+    needs: [detect, publish-nosql-mongodb]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-nosql-aws-dynamodb-admin')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      AWS_REGION: us-east-1
+      DYNAMODB_ADMIN_ENDPOINT: http://127.0.0.1:8001
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-nosql-aws-dynamodb-admin
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-nosql-aws-dynamodb-admin:
+    needs: [detect, test-nosql-aws-dynamodb-admin]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-nosql-aws-dynamodb-admin'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-nosql-aws-dynamodb-admin')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-nosql-aws-dynamodb-admin
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 16b: js-server-helper-nosql-mongodb-admin (needs utils, debug, instance)
+  # ###########################################################################
+
+  test-nosql-mongodb-admin:
+    needs: [detect, publish-nosql-aws-dynamodb-admin]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-nosql-mongodb-admin')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MONGODB_ADMIN_CONNECTION_STRING: mongodb://127.0.0.1:27018/?directConnection=true
+      MONGODB_ADMIN_DATABASE: test_admin
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-nosql-mongodb-admin
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-nosql-mongodb-admin:
+    needs: [detect, test-nosql-mongodb-admin]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-nosql-mongodb-admin'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-nosql-mongodb-admin')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-nosql-mongodb-admin
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
   #   MODULE 17: js-server-helper-queue-aws-sqs (needs utils, debug, instance)
   # ###########################################################################
 
   test-queue-aws-sqs:
-    needs: [detect, publish-nosql-mongodb]
+    needs: [detect, publish-nosql-mongodb-admin]
     if: |
       always() &&
       !cancelled() &&
