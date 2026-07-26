@@ -19,7 +19,7 @@ It is always used together with the Logger parent and the [`js-server-helper-nos
 
 - **Native TTL.** Expired log records are automatically deleted by MongoDB's TTL sweeper (~60s lag). `cleanupExpiredLogs` is also available for deterministic explicit cleanup.
 
-- **`data` stored as embedded document.** Unlike SQL adapters that JSON-serialize `data` to a string, this adapter stores it as a native MongoDB embedded document — enabling sub-field queries, projections, and indexing without string parsing.
+- **`data` stored as embedded document.** Unlike SQL adapters that JSON-serialize `data` to a string, this adapter stores it as a native MongoDB embedded document - enabling sub-field queries, projections, and indexing without string parsing.
 
 ## Hot-Swappable with Other Backends
 
@@ -37,7 +37,7 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/api.md). The store contract this adapter implements and MongoDB-specific semantics
 - [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/configuration.md). Config keys, dependencies, environment variables, testing tier
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/schema.md). Document shape, compound indexes, sparse TTL index, `data` as embedded document
-- [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/cleanup.md). Native TTL and explicit `cleanupExpiredLogs` — when to use each
+- [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/cleanup.md). Native TTL and explicit `cleanupExpiredLogs` - when to use each
 - [Logger parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger). The data model, error catalog, and Logger-side configuration this adapter plugs into
 
 ## Adding to Your Project

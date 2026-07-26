@@ -8,7 +8,7 @@ MongoDB does not use DDL. `setupNewStore` creates three indexes; the document sh
 
 ```js
 {
-  _id:          "1715180412345-xqp",          // sort_key — primary deduplication key
+  _id:          "1715180412345-xqp",          // sort_key - primary deduplication key
   scope:        "myapp",
   entity_type:  "user",
   entity_id:    "usr_123",
@@ -71,15 +71,15 @@ options: { expireAfterSeconds: 0, sparse: true }
 
 ### `_id` as `sort_key`
 
-Setting `_id = sort_key` gives every log document a stable, predictable identity string. This makes `addLog` idempotent — `replaceOne` on `{ _id: sort_key }` with `upsert: true` either inserts (first write) or replaces with identical content (retry).
+Setting `_id = sort_key` gives every log document a stable, predictable identity string. This makes `addLog` idempotent - `replaceOne` on `{ _id: sort_key }` with `upsert: true` either inserts (first write) or replaces with identical content (retry).
 
 ### `data` as Embedded Document
 
-Unlike SQL adapters that serialize `data` to JSON text, this adapter stores `data` as a native MongoDB embedded document. Querying, projecting, or indexing sub-fields of `data` is possible without string parsing — a MongoDB-native advantage.
+Unlike SQL adapters that serialize `data` to JSON text, this adapter stores `data` as a native MongoDB embedded document. Querying, projecting, or indexing sub-fields of `data` is possible without string parsing - a MongoDB-native advantage.
 
 ### Compound Indexes on Canonical Fields
 
-The two query paths use compound indexes directly on `(scope, entity_type, entity_id, sort_key)` and `(scope, actor_type, actor_id, sort_key)`. No denormalized compound key strings are stored on documents — MongoDB's compound-index implementation handles equality matches across multiple fields efficiently.
+The two query paths use compound indexes directly on `(scope, entity_type, entity_id, sort_key)` and `(scope, actor_type, actor_id, sort_key)`. No denormalized compound key strings are stored on documents - MongoDB's compound-index implementation handles equality matches across multiple fields efficiently.
 
 ### Sparse TTL Index
 

@@ -36,7 +36,7 @@ createIndex(
 );
 ```
 
-`createIndex` is idempotent — calling it on an already-existing index with identical options is a no-op.
+`createIndex` is idempotent - calling it on an already-existing index with identical options is a no-op.
 
 **Return:** `{ success, error }`
 
@@ -54,8 +54,8 @@ replacement: { _id: sort_key, scope, entity_type, entity_id,
 options:     { upsert: true }
 ```
 
-- `_id` is set to `record.sort_key` — deterministic identity, makes the call idempotent on retries.
-- `_ttl` = `new Date(record.expires_at * 1000)` — added **only** when `expires_at` is non-null. Persistent records omit the field entirely so the sparse TTL index skips them.
+- `_id` is set to `record.sort_key` - deterministic identity, makes the call idempotent on retries.
+- `_ttl` = `new Date(record.expires_at * 1000)` - added **only** when `expires_at` is non-null. Persistent records omit the field entirely so the sparse TTL index skips them.
 - `data` is stored as a native MongoDB embedded document (not JSON text).
 
 **Return:** `{ success, error }`
