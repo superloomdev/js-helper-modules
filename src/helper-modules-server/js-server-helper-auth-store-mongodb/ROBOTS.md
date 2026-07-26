@@ -35,7 +35,7 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.MongoDB` by reference from 
 
 | Method | Signature | Returns |
 |---|---|---|
-| `setupNewStore` | `(instance)` | `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` always |
+| `setupNewStore` | `(instance)` | `{ success, error }` - delegates to `Lib.MongoDBAdmin` when injected, otherwise `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` |
 | `getSession` | `(instance, tenant_id, actor_id, token_key, token_secret_hash)` | `{ success, record, error }` |
 | `listSessionsByActor` | `(instance, tenant_id, actor_id)` | `{ success, records, error }` |
 | `setSession` | `(instance, record)` | `{ success, error }` |
@@ -44,7 +44,7 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.MongoDB` by reference from 
 | `deleteSessions` | `(instance, tenant_id, keys)` | `{ success, error }` |
 | `cleanupExpiredSessions` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods except `setupNewStore` are async and use the standard envelope. `setupNewStore` is the only contract method that returns a typed error (`ERRORS.NOT_IMPLEMENTED`) on every call.
+All methods are async and use the standard envelope. `setupNewStore` delegates to `Lib.MongoDBAdmin` (injected via `shared_libs.MongoDBAdmin`) when available: it creates the collection and the `prefix` + `expires_at` indexes with idempotent semantics. When no admin is injected, it returns `ERRORS.NOT_IMPLEMENTED`.
 
 ## Document Shape
 
@@ -67,7 +67,7 @@ Each session is a single document. The shape is the canonical record plus two ad
 
 1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-mongodb')(Lib, { collection_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
-2. **`setupNewStore` is not implemented.** Always returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`. Indexes and the collection are provisioned out-of-band. Generated code that calls `setupNewStore` on this backend must handle the `NOT_IMPLEMENTED` error envelope; do not assume it succeeds.
+2. **`setupNewStore` delegates to `Lib.MongoDBAdmin` when injected.** When `shared_libs.MongoDBAdmin` is present, `setupNewStore` creates the collection and the `prefix` + `expires_at` secondary indexes with idempotent semantics. When no admin is injected, it returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` and the operator must provision out-of-band. Generated code that calls `setupNewStore` must handle both the success and `NOT_IMPLEMENTED` paths.
 
 3. **`getSession` returns `record: null` on hash mismatch.** The token-secret hash is part of `_id`; a wrong hash means the constructed `_id` does not match any document and MongoDB returns null. Identical to a missing session. Do not surface the wrong-secret case as a distinct error or envelope; it must look identical to a missing document to prevent timing-based enumeration.
 
@@ -92,7 +92,8 @@ Each session is a single document. The shape is the canonical record plus two ad
 ```
 Lib.Utils    (@superloomdev/js-helper-utils)               injected via shared_libs
 Lib.Debug    (@superloomdev/js-helper-debug)               injected via shared_libs
-Lib.MongoDB  (@superloomdev/js-server-helper-nosql-mongodb) injected via shared_libs
+Lib.MongoDB       (@superloomdev/js-server-helper-nosql-mongodb)          injected via shared_libs
+Lib.MongoDBAdmin  (@superloomdev/js-server-helper-nosql-mongodb-admin)    optional, injected via shared_libs
 ```
 
 All three are injected by the caller. The adapter owns no runtime dependencies of its own.
@@ -104,7 +105,7 @@ The adapter defines its own error catalog in `store.errors.js`. Auth forwards er
 | Error | Type | When |
 |---|---|---|
 | `SERVICE_UNAVAILABLE` | `AUTH_STORE_MONGODB_SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, never surfaced |
-| `NOT_IMPLEMENTED` | `AUTH_STORE_MONGODB_NOT_IMPLEMENTED` | Returned unconditionally from `setupNewStore` |
+| `NOT_IMPLEMENTED` | `AUTH_STORE_MONGODB_NOT_IMPLEMENTED` | Returned from `setupNewStore` when no `Lib.MongoDBAdmin` is injected |
 
 `getSession` with a hash mismatch is **not** an error. It is success with `record: null`.
 

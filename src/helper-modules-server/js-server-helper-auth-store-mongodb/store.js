@@ -12,15 +12,14 @@
 // This adapter never requires `mongodb` directly - projects not using
 // this store never load the native driver.
 //
-// Schema management (collection creation, secondary indexes, TTL) is
-// out of scope for this adapter. MongoDB auto-creates the collection on
-// first write. Secondary indexes on `prefix` and a Date-typed TTL field
-// must be provisioned out-of-band until the MongoDB helper exposes a
-// schema-management API. setupNewStore() exists in the interface contract
-// but is not yet implemented and returns NOT_IMPLEMENTED.
+// Schema management (collection creation, secondary indexes) is delegated
+// to the MongoDB admin module (js-server-helper-nosql-mongodb-admin) when
+// an Admin instance is injected via CONFIG.Admin. If no Admin is injected,
+// setupNewStore() returns NOT_IMPLEMENTED and the operator must provision
+// out-of-band. MongoDB auto-creates the collection on first write regardless.
 //
 // Store contract (identical shape across all adapters):
-//   - setupNewStore(instance)            -> { success, error }  (NOT_IMPLEMENTED)
+//   - setupNewStore(instance)            -> { success, error }  (delegates to MongoDBAdmin or NOT_IMPLEMENTED)
 //   - getSession(instance, t, a, k, h)  -> { success, record, error }
 //   - listSessionsByActor(instance, t, a) -> { success, records, error }
 //   - setSession(instance, record)      -> { success, error }
@@ -53,7 +52,8 @@ module.exports = function loader (shared_libs, config) {
   const Lib = {
     Utils: shared_libs.Utils,
     Debug: shared_libs.Debug,
-    MongoDB: shared_libs.MongoDB
+    MongoDB: shared_libs.MongoDB,
+    MongoDBAdmin: shared_libs.MongoDBAdmin || null
   };
 
   // Merge overrides over adapter config defaults
@@ -99,24 +99,86 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
-    // MongoDB auto-creates collections on first write. Secondary indexes
-    // and TTL must be provisioned out-of-band. setupNewStore is part of
-    // the store contract but is not yet implemented for this backend.
+    // Delegates to the MongoDB admin module when Lib.MongoDBAdmin is injected.
+    // Provisions the collection and the two required/recommended indexes
+    // (prefix, expires_at) with idempotent semantics. When no admin is
+    // injected, returns NOT_IMPLEMENTED so the operator must provision
+    // out-of-band.
 
     /********************************************************************
-    Not implemented for MongoDB. Collection and index provisioning
-    must be done out-of-band until the MongoDB helper exposes a
-    schema-management API.
+    Provision the collection and secondary indexes for this store.
+    Delegates to Lib.MongoDBAdmin when injected. Idempotent: safe to
+    call on every boot. When no admin is injected, returns
+    NOT_IMPLEMENTED with a message naming the admin module.
 
-    @param {Object} instance - Request instance (unused)
+    @param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }  (always NOT_IMPLEMENTED)
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    setupNewStore: async function (instance) { // eslint-disable-line no-unused-vars
+    setupNewStore: async function (instance) {
 
+      // No admin module injected - return NOT_IMPLEMENTED so the caller
+      // knows to provision out-of-band
+      if (Lib.Utils.isNullOrUndefined(Lib.MongoDBAdmin)) {
+
+        return {
+          success: false,
+          error: ERRORS.NOT_IMPLEMENTED
+        };
+
+      }
+
+      // Step 1: Create the collection (idempotent - already-exists is success)
+      const create_result = await Lib.MongoDBAdmin.createCollection(instance, {
+        collection_name: CONFIG.collection_name
+      });
+
+      // Return error if collection creation failed
+      if (create_result.success === false) {
+
+        Lib.Debug.debug('Auth mongodb setupNewStore createCollection failed', {
+          type: ERRORS.SERVICE_UNAVAILABLE.type,
+          collection: CONFIG.collection_name,
+          admin_error: create_result.error && create_result.error.type
+        });
+
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+
+      }
+
+      // Step 2: Create the prefix index (required for listSessionsByActor)
+      // and the expires_at index (recommended for cleanupExpiredSessions)
+      const indexes_result = await Lib.MongoDBAdmin.createIndexes(instance, {
+        collection_name: CONFIG.collection_name,
+        indexes: [
+          { keys: { prefix: 1 }, index_options: { name: 'idx_prefix' } },
+          { keys: { expires_at: 1 }, index_options: { name: 'idx_expires_at' } }
+        ]
+      });
+
+      // Return error if index creation failed
+      if (indexes_result.success === false) {
+
+        Lib.Debug.debug('Auth mongodb setupNewStore createIndexes failed', {
+          type: ERRORS.SERVICE_UNAVAILABLE.type,
+          collection: CONFIG.collection_name,
+          admin_error: indexes_result.error && indexes_result.error.type
+        });
+
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+
+      }
+
+      // Both steps succeeded - report success
       return {
-        success: false,
-        error: ERRORS.NOT_IMPLEMENTED
+        success: true,
+        error: null
       };
 
     },

@@ -1,6 +1,6 @@
 # Schema
 
-Unlike the SQL-backed sibling adapters, this adapter does **not** manage its own schema. `setupNewStore` returns `NOT_IMPLEMENTED`. MongoDB auto-creates the collection on the first write, and the operator provisions secondary indexes out-of-band.
+Unlike the SQL-backed sibling adapters, this adapter delegates schema provisioning to the MongoDB admin module (`js-server-helper-nosql-mongodb-admin`) when `Lib.MongoDBAdmin` is injected. When no admin is injected, `setupNewStore` returns `NOT_IMPLEMENTED` and the operator provisions out-of-band. MongoDB auto-creates the collection on the first write regardless.
 
 The canonical data model lives in the Auth parent. This page documents only what is specific to the MongoDB implementation: document shape, the two adapter-managed fields (`_id` and `prefix`), the BSON type mapping, the required and recommended indexes, and the optional native-TTL setup.
 
@@ -10,7 +10,7 @@ The canonical data model lives in the Auth parent. This page documents only what
 - [`_id` Composition](#_id-composition)
 - [The `prefix` Field](#the-prefix-field)
 - [BSON Type Mapping](#bson-type-mapping)
-- [Why No `setupNewStore`](#why-no-setupnewstore)
+- [`setupNewStore` Delegation](#setupnewstore-delegation)
 - [Index Strategy](#index-strategy)
 - [Native TTL](#native-ttl)
 
@@ -91,15 +91,20 @@ The `prefix` field is regenerated on every `setSession`, so it cannot drift from
 
 The native-object handling of `custom_data` is a deliberate divergence from the SQL adapters (which JSON-encode it into a TEXT column). For MongoDB the natural representation is a sub-document; cross-adapter portability stays intact because the caller-visible value is the same object either way.
 
-## Why No `setupNewStore`
+## `setupNewStore` Delegation
 
-`setupNewStore` returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` unconditionally for this backend. Two reasons:
+`setupNewStore` delegates to `Lib.MongoDBAdmin` (from `js-server-helper-nosql-mongodb-admin`) when it is injected via `shared_libs.MongoDBAdmin`. When no admin is injected, it returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }`.
 
-1. **MongoDB does not need explicit collection creation.** The first `setSession` write creates the collection. Calling `createCollection` ahead of time is purely cosmetic.
+**With admin injected**, `setupNewStore` performs two idempotent steps:
 
-2. **Index provisioning is a database-administrative concern**, not part of the application code path. The decision of whether to add the `expires_at` secondary index, whether to add a Date-typed TTL field, and the index-build strategy (background vs foreground, on a primary vs a replica) is the operator's call. The adapter does not try to make those decisions.
+1. **Create the collection** via `MongoDBAdmin.createCollection`. Already-exists is a success.
+2. **Create secondary indexes** via `MongoDBAdmin.createIndexes`:
+   - `{ prefix: 1 }` (named `idx_prefix`) - required for `listSessionsByActor`
+   - `{ expires_at: 1 }` (named `idx_expires_at`) - recommended for `cleanupExpiredSessions`
 
-Application code that runs against multiple `auth-store-*` backends must handle the `NOT_IMPLEMENTED` envelope on this backend. The Auth parent treats it as a soft failure (logs and continues) on the assumption that the operator has provisioned the required indexes.
+Both steps are idempotent. Calling `setupNewStore` on every boot is safe.
+
+**Without admin injected**, the operator must provision the collection and indexes out-of-band. MongoDB auto-creates the collection on the first write, but the secondary indexes must be created manually. The decision of whether to add a Date-typed TTL field and TTL index remains the operator's call; `setupNewStore` does not create TTL indexes because the canonical `expires_at` is a Number, not a BSON Date.
 
 ## Index Strategy
 
