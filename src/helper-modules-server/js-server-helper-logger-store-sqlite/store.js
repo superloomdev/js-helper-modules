@@ -1,7 +1,7 @@
 // Info: SQLite store adapter for helper-logger. Every DDL statement,
 // INSERT template, query, value coercion, and identifier-quoting rule
 // in this file is specific to SQLite.
-// No cross-dialect parameterisation, no shared SQL helper module.
+// No cross-dialect parameterization, no shared SQL helper module.
 //
 // Standard factory shape: receives shared_libs, picks SQL driver as
 // Lib.SQL (generic SQL key - hot-swappable across sql-* dialect helpers).
