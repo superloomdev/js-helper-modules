@@ -196,11 +196,11 @@ write(instance, sql, params?) -> Promise<{ success, affected_rows, insert_id, er
 
 **Forms:**
 
-| `sql` value | Behaviour |
+| `sql` value | Behavior |
 |---|---|
 | `String` | Single statement, optional `params` array |
 | `Array<String>` | Multiple pre-built statements, run inside `BEGIN/COMMIT` |
-| `Array<{ sql, params }>` | Multiple parameterised statements, run inside `BEGIN/COMMIT` |
+| `Array<{ sql, params }>` | Multiple parameterized statements, run inside `BEGIN/COMMIT` |
 | Mixed array | Both forms in the same array are supported |
 
 **Success return:**
@@ -379,7 +379,7 @@ Gracefully drain and close the connection pool. Call on `SIGTERM` to ensure in-f
 close() -> Promise<void>
 ```
 
-Behaviour:
+Behavior:
 
 1. Waits up to `CONFIG.CLOSE_TIMEOUT_MS` (default 5000 ms) for active queries to finish.
 2. Force-destroys any remaining connections after the timeout.

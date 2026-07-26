@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
-A PostgreSQL helper for Node.js that insulates your application from driver changes and ships pre-tested, so your project never has to re-verify SQL connectivity. Part of [Superloom](https://superloom.dev).
+PostgreSQL client with connection pooling (Postgres 15+). Async/await API, multi-DB capable, MySQL-compatible placeholder syntax. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 

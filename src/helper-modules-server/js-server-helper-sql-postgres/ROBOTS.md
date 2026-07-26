@@ -5,7 +5,7 @@ Async/await. Multi-DB capable. **API-compatible with `js-server-helper-mysql`** 
 same placeholders, same function signatures, same return shapes.
 
 ## Type
-Server helper. Service-dependent (needs Docker for emulated, real PostgreSQL-compatible database for integration).
+Class C. Server helper. Service-dependent (needs Docker for emulated, real PostgreSQL-compatible database for integration).
 
 ## Peer Dependencies
 - `@superloomdev/js-helper-utils` - injected as `Lib.Utils`
