@@ -1,9 +1,9 @@
-# helper-auth
+# @superloomdev/js-server-helper-auth
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
-A session-lifecycle and authentication module for Node.js servers that ships pre-tested, runs on any of five storage backends, and offers an optional stateless-JWT mode. Part of [Superloom](https://superloom.dev). 
+Session lifecycle and authentication: create, verify, list, remove. Multi-instance per actor_type. Store adapters are separate packages. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
@@ -60,7 +60,7 @@ Five storage adapters are available, each a separate package. A project installs
 
 A legitimate deviation is using a NoSQL adapter for auth in a SQL-backed application when sessions need different scaling characteristics from the rest of the app (burstiness, serverless cold-start, compliance segregation). Mixing SQL families (Postgres app with MySQL or SQLite auth) is not a useful pattern.
 
-Each adapter package ships its own README with the backend-specific schema, indexes, TTL behaviour, IaC provisioning notes, and its own config shape. The auth module itself owns no per-backend documentation: every adapter is the authoritative source for its own backend.
+Each adapter package ships its own README with the backend-specific schema, indexes, TTL behavior, IaC provisioning notes, and its own config shape. The auth module itself owns no per-backend documentation: every adapter is the authoritative source for its own backend.
 
 ## Aligned with Superloom Philosophy
 

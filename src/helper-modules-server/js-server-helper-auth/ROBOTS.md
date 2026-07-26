@@ -1,9 +1,9 @@
-# helper-auth
+# @superloomdev/js-server-helper-auth
 
 Session lifecycle and authentication feature module. Multi-instance per `actor_type`. Five storage adapters (sqlite, postgres, mysql, mongodb, dynamodb). Two operating modes: DB-mode (default) and JWT-mode (`ENABLE_JWT: true`, HS256 + rotating refresh tokens, RFC 6819). List-then-filter session-limit policy enforced uniformly across all backends. Cookie handling delegated to `Lib.HttpGateway` - auth builds a descriptor object, the gateway serializes it. Never throws on operational failures; `TypeError` on programmer errors only.
 
 ## Type
-Server helper. Class E (feature module with adapters). Offline test tier (in-process memory store fixture).
+Class E. Feature module with adapters. Offline test tier (in-process memory store fixture).
 
 ## Peer Dependencies
 - `helper-utils` - injected as `Lib.Utils`
@@ -16,6 +16,11 @@ The chosen storage adapter brings its own peer requirement on the driver helper 
 
 ## Direct Dependencies
 None. JWT signing uses Node's built-in `crypto` (via `Lib.Crypto`).
+
+## Companion Files
+- `auth.config.js` - default config (Store, ACTOR_TYPE, TTL_SECONDS, LAST_ACTIVE_UPDATE_INTERVAL_SECONDS, LIMITS, ENABLE_JWT, JWT, COOKIE_PREFIX)
+- `auth.errors.js` - frozen error catalog (AUTH_SERVICE_UNAVAILABLE, AUTH_LIMIT_REACHED, AUTH_INVALID_TOKEN, AUTH_SESSION_EXPIRED, AUTH_ACTOR_TYPE_MISMATCH, AUTH_NOT_IMPLEMENTED)
+- `auth.validators.js` - config validators singleton
 
 ## Loader Pattern (Factory)
 
@@ -38,27 +43,6 @@ Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-
 ```
 
 **Store must be a ready-to-use store object returned by calling the adapter with its config.** Passing a function or string is rejected at loader time.
-
-## Config Keys
-
-| Key | Type | Default | Notes |
-|---|---|---|---|
-| `Store` | Object | `null` | **Required.** Pass a ready-to-use store object: `require('helper-auth-store-*')({...})` |
-| `ACTOR_TYPE` | String | `null` | **Required.** This instance owns one actor_type |
-| `TTL_SECONDS` | Number | `2592000` (30 days) | Session lifetime |
-| `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | Number | `600` | Throttle for last_active refresh |
-| `LIMITS.total_max` | Number | `20` | Required positive int |
-| `LIMITS.by_form_factor_max` | Object\|null | `null` | Partial map allowed: `{ mobile: 3 }` |
-| `LIMITS.by_platform_max` | Object\|null | `null` | Partial map allowed: `{ ios: 2 }` |
-| `LIMITS.evict_oldest_on_limit` | Boolean | `true` | `false` rejects with `AUTH_LIMIT_REACHED` |
-| `ENABLE_JWT` | Boolean | `false` | When `true`, `createSession` also returns `access_token` + `refresh_token` |
-| `JWT.signing_key` | String | `null` | HMAC secret, required >= 32 chars when `ENABLE_JWT` |
-| `JWT.algorithm` | String | `'HS256'` | Only HS256 currently supported (Node native crypto) |
-| `JWT.issuer` / `audience` | String | `null` | Required when `ENABLE_JWT` |
-| `JWT.access_token_ttl_seconds` | Number | `900` | 15 minutes |
-| `JWT.refresh_token_ttl_seconds` | Number | `2592000` | 30 days |
-| `JWT.rotate_refresh_token` | Boolean | `true` | RFC 6819 single-use rotation |
-| `COOKIE_PREFIX` | String | `null` | Full cookie name = `${COOKIE_PREFIX}${tenant_id}`. Cookie attributes (httpOnly, secure, sameSite, path) are applied by `Lib.HttpGateway.buildCookie` defaults |
 
 ## Store Config by Backend
 
@@ -88,7 +72,28 @@ Pass the descriptor directly to `Lib.HttpGateway.returnHttpResponse` as the `coo
 
 Inbound cookies are read from `instance.http_request.cookies` (already parsed by the HTTP gateway adapter before auth is called). No raw `Cookie` header parsing occurs inside this module.
 
-## Public Functions
+## Config Keys
+
+| Key | Type | Default | Notes |
+|---|---|---|---|
+| `Store` | Object | `null` | **Required.** Pass a ready-to-use store object: `require('helper-auth-store-*')({...})` |
+| `ACTOR_TYPE` | String | `null` | **Required.** This instance owns one actor_type |
+| `TTL_SECONDS` | Number | `2592000` (30 days) | Session lifetime |
+| `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | Number | `600` | Throttle for last_active refresh |
+| `LIMITS.total_max` | Number | `20` | Required positive int |
+| `LIMITS.by_form_factor_max` | Object\|null | `null` | Partial map allowed: `{ mobile: 3 }` |
+| `LIMITS.by_platform_max` | Object\|null | `null` | Partial map allowed: `{ ios: 2 }` |
+| `LIMITS.evict_oldest_on_limit` | Boolean | `true` | `false` rejects with `AUTH_LIMIT_REACHED` |
+| `ENABLE_JWT` | Boolean | `false` | When `true`, `createSession` also returns `access_token` + `refresh_token` |
+| `JWT.signing_key` | String | `null` | HMAC secret, required >= 32 chars when `ENABLE_JWT` |
+| `JWT.algorithm` | String | `'HS256'` | Only HS256 currently supported (Node native crypto) |
+| `JWT.issuer` / `audience` | String | `null` | Required when `ENABLE_JWT` |
+| `JWT.access_token_ttl_seconds` | Number | `900` | 15 minutes |
+| `JWT.refresh_token_ttl_seconds` | Number | `2592000` | 30 days |
+| `JWT.rotate_refresh_token` | Boolean | `true` | RFC 6819 single-use rotation |
+| `COOKIE_PREFIX` | String | `null` | Full cookie name = `${COOKIE_PREFIX}${tenant_id}`. Cookie attributes (httpOnly, secure, sameSite, path) are applied by `Lib.HttpGateway.buildCookie` defaults |
+
+## Exported Functions (17 total)
 
 ### Session lifecycle
 
@@ -229,7 +234,7 @@ Reserved characters: `-` (segment separator) and `#` (composite-key separator in
 
 Access patterns:
 - **DynamoDB.** Composite primary key serves every hot path. `verifySession` is GetItem, `listSessions` is Query `begins_with(SK, "actor_id#")`, removes are DeleteItem / BatchWriteItem. No GSI required. `cleanupExpiredSessions` is a filtered scan when native TTL is off.
-- **MongoDB.** `_id` lookup is O(1) for `verifySession`. `listSessions` is equality match on the denormalised `prefix` sidecar field - the operator MUST provision both `prefix` and `expires_at` indexes out-of-band.
+- **MongoDB.** `_id` lookup is O(1) for `verifySession`. `listSessions` is equality match on the denormalized `prefix` sidecar field - the operator MUST provision both `prefix` and `expires_at` indexes out-of-band.
 - **SQL.** Composite primary key serves every hot path. `setupNewStore(instance)` creates the table + `expires_at` index.
 
 ## Patterns
