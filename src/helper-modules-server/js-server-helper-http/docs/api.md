@@ -19,7 +19,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 Every function in this module is **asynchronous, side-effect-free with respect to module state, and never throws**. The only mutation is the optional performance-audit log line emitted to `Lib.Debug`. Every call returns the same envelope on success and on every failure mode.
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **Never throws.** | Every failure (HTTP 4xx/5xx, timeout, DNS failure, TLS error, malformed JSON) is converted into a structured result with `success: false`. Calling code does not need `try`/`catch` around the call |
 | **Result is always the same shape.** | `{ success, status, headers, data, error }` for every outcome. Two requests with different outcomes can be compared field by field; no branch shapes |
