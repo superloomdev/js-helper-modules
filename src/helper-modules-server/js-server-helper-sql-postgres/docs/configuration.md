@@ -135,7 +135,7 @@ Each instance maintains its own pool and lifecycle. Call `close()` on each at pr
 
 ## SSL Configuration
 
-| Value | Behaviour | When to use |
+| Value | Behavior | When to use |
 |---|---|---|
 | `false` | TLS disabled | Local development, Docker |
 | `true` | TLS enabled with `{ rejectUnauthorized: true }` (default) | Most managed services with a trusted CA chain |
