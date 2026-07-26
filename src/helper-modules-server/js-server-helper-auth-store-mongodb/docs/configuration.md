@@ -35,7 +35,7 @@ The adapter receives the `Lib` container and picks `Lib.Utils`, `Lib.Debug`, and
 
 The MongoDB client is **not** created at loader time. `Lib.MongoDB` lazy-initializes on the first query. The adapter does not open any connection during construction either; the first round-trip happens on the first `getSession`, `setSession`, or `cleanupExpiredSessions` call.
 
-**No `setupNewStore` call needed.** Unlike SQL-backed siblings, this adapter's `setupNewStore` returns `NOT_IMPLEMENTED`. MongoDB auto-creates the collection on the first write. The operator-provisioned indexes (`prefix` required, `expires_at` recommended) are documented in [schema.md](schema.md).
+**`setupNewStore` delegation.** When `Lib.MongoDBAdmin` is injected (from `js-server-helper-nosql-mongodb-admin`), `setupNewStore` creates the collection and the `prefix` + `expires_at` indexes with idempotent semantics. When no admin is injected, it returns `NOT_IMPLEMENTED` and the operator provisions out-of-band. See [schema.md](schema.md) for the index specs and required MongoDB roles.
 
 ## Config Keys
 
@@ -54,6 +54,7 @@ The adapter does not require these packages directly. It accesses them through `
 | `@superloomdev/js-helper-utils` | `Lib.Utils` for type checks in `store.validators.js` |
 | `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
 | `@superloomdev/js-server-helper-nosql-mongodb` | `Lib.MongoDB` injected by the caller |
+| `@superloomdev/js-server-helper-nosql-mongodb-admin` | `Lib.MongoDBAdmin` optional, injected for `setupNewStore` delegation |
 
 The driver helper (`Lib.MongoDB`) carries its own peer dependency on the native `mongodb` driver. The adapter never `require`s `mongodb` directly; applications that never use this store never load the driver.
 
