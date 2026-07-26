@@ -21,10 +21,10 @@
     "tldts": "5.x"
   },
   "peerDependencies": {
-    "helper-utils": "npm:@superloomdev/js-helper-utils@>=1.0.0",
-    "helper-debug": "npm:@superloomdev/js-helper-debug@>=1.0.0",
-    "helper-time": "npm:@superloomdev/js-helper-time@>=1.0.0",
-    "helper-instance": "npm:@superloomdev/js-server-helper-instance@>=1.0.0"
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-time": "npm:@superloomdev/js-helper-time@^1.0.0",
+    "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0"
   },
   "optionalPeerDependencies": {
     "helper-http-gateway-adapter-aws-apigateway": "npm:@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway@^1.0.0",
