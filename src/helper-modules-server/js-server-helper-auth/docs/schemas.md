@@ -22,7 +22,7 @@ The module sorts every failure into one of two categories, and the category deci
 | **Programmer error** | A missing required option, a wrong type, a reserved character (`-` or `#`) in `actor_id`, a `#` in `tenant_id`, a malformed `CONFIG`, a store missing a required method | Throws synchronously (`TypeError` for call options, `Error` for config and store-contract setup) | At the call site, or at construction for config and store errors |
 | **Operational error** | Session-cap reached, token not found, expired, actor-type mismatch, store driver failure, replayed refresh token | Returns `{ success: false, error }` through the response envelope | At runtime, on the awaited result |
 
-A programmer error is a bug in the calling code and surfaces loudly and immediately. An operational error is an expected runtime outcome and is meant to be handled. Setup and shape problems throw at boot or at the call site; everything that can happen during normal operation returns through the envelope. The operational `error.type` values are catalogued in the [API Reference](api.md#error-catalog).
+A programmer error is a bug in the calling code and surfaces loudly and immediately. An operational error is an expected runtime outcome and is meant to be handled. Setup and shape problems throw at boot or at the call site; everything that can happen during normal operation returns through the envelope. The operational `error.type` values are cataloged in the [API Reference](api.md#error-catalog).
 
 ---
 

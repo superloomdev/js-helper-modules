@@ -340,7 +340,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     *********************************************************************/
     verifySession: async function (instance, options) {
 
-      // Validate inputs and normalise to a safe options object
+      // Validate inputs and normalize to a safe options object
       Validators.validateVerifySessionOptions(options);
       const safe_options = options || {};
 

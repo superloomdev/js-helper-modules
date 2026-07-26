@@ -18,7 +18,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 ## Conventions
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` for timestamps, logs store failures through `Lib.Debug.debug`, and (for cookie-driven flows) reads `instance.http_request.cookies` (already parsed by the HTTP gateway) |
 | **Never throws on operational failures** | HTTP errors, store driver failures, expired tokens, malformed tokens, cap rejections, and mismatched actor types all return `{ success: false, error }`. The only thrown errors are `TypeError`s on **programmer** mistakes (missing required option, reserved characters in `actor_id`, identity-field mutation) which surface in development |

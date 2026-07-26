@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-auth",
-  "description": "Session lifecycle and authentication: create, verify, list, remove. Multi-instance per actor_type. Store adapters are separate packages.",
+  "description": "Session lifecycle and authentication: create, verify, list, remove. Multi-instance per actor_type. Store adapters are separate packages. Part of Superloom.",
   "version": "1.0.0",
   "main": "auth.js",
   "private": false,
@@ -17,10 +17,10 @@
     "node": ">=24"
   },
   "peerDependencies": {
-    "helper-utils": "npm:@superloomdev/js-helper-utils@>=1.0.0",
-    "helper-debug": "npm:@superloomdev/js-helper-debug@>=1.0.0",
-    "helper-crypto": "npm:@superloomdev/js-server-helper-crypto@>=1.0.0",
-    "helper-instance": "npm:@superloomdev/js-server-helper-instance@>=1.0.0"
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-crypto": "npm:@superloomdev/js-server-helper-crypto@^1.0.0",
+    "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0"
   },
   "optionalPeerDependencies": {
     "helper-auth-store-sqlite": "npm:@superloomdev/js-server-helper-auth-store-sqlite@^1.0.0",
