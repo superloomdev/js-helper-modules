@@ -39,6 +39,11 @@ const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-
 
 The adapter receives `Utils` and `Debug` from the shared `Lib` container (injected by the application). No AWS SDK is required - the adapter reads from the Lambda event object directly and writes through the Lambda callback. No third-party npm packages are installed.
 
+| Package | Purpose |
+|---|---|
+| `helper-utils` | Type checks (injected via `shared_libs.Utils`) |
+| `helper-debug` | Structured debug logging (injected via `shared_libs.Debug`) |
+
 ---
 
 ## Lambda Handler Pattern
