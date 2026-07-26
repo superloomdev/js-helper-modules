@@ -78,7 +78,10 @@ If this module has never been published before:
 2. Both `if:` conditions use `contains(fromJSON(...))` with the full `src/` path.
 3. The test job includes `always() && !cancelled()`.
 4. The publish job includes `!cancelled()` plus explicit `needs['test-*'].result == 'success'`.
-5. Update the execution-order header comment and re-chain the next module's `needs:`.
+5. **If this module's `_test/package.json` installs another in-repo package from the registry** (extension modules, store adapters): its test job must `needs` that package's `publish-*` job, never its `test-*` job - wrong chaining only fails during bootstrap or a registry re-baseline (pitfalls entry 23 in `codebase-superloom/docs/dev/pitfalls.md`).
+6. Update the execution-order header comment and re-chain the next module's `needs:`.
+
+**Bootstrap window (main module + adapters both unpublished):** test adapters locally against a temporary `file:` reference to the main module, publish the main module first, swap the `file:` back to a registry pin, re-test against the live registry, then publish the adapters. The full sequence and the reasoning for the step-3 re-test is pitfalls entry 12 in `codebase-superloom/docs/dev/pitfalls.md`.
 
 If the module is already registered, skip this phase.
 
