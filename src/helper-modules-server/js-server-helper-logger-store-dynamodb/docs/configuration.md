@@ -73,7 +73,7 @@ The `pretest` script runs `docker compose down -v` then `docker compose up -d --
 
 ## Provisioning and Post-Deployment
 
-The adapter does **not** provision the table — `setupNewStore` is a no-op. Provision the table out-of-band (CloudFormation, CDK, Terraform, AWS Console). See [`docs/schema.md`](./schema.md) for the CloudFormation template.
+The adapter does **not** provision the table - `setupNewStore` is a no-op. Provision the table out-of-band (CloudFormation, CDK, Terraform, AWS Console). See [`docs/schema.md`](./schema.md) for the CloudFormation template.
 
 After the table is provisioned, enable TTL on `expires_at` (skip this if your IaC template already includes `TimeToLiveSpecification`):
 
