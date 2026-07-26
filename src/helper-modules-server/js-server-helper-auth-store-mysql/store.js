@@ -1,7 +1,7 @@
 // Info: MySQL store adapter for helper-auth. Every DDL statement,
 // UPSERT template, CRUD query, value coercion, and identifier-quoting
 // rule in this file is specific to MySQL.
-// No cross-dialect parameterisation, no shared SQL helper module.
+// No cross-dialect parameterization, no shared SQL helper module.
 //
 // The caller injects a ready-to-use MySQL helper as Lib.SQL
 // (typically Lib.MySQL aliased). This adapter never requires `mysql2`
@@ -204,7 +204,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Decode the raw row and verify the secret hash
       const record = _Store.rowToRecord(result.row);
 
-      // Constant-behaviour hash compare - mismatch returns "not found"
+      // Constant-behavior hash compare - mismatch returns "not found"
       if (record.token_secret_hash !== token_secret_hash) {
         return {
           success: true,
@@ -854,7 +854,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   // Precompute the quoted table name and UPSERT template once per
   // instance. Both depend only on table_name (not per-request input)
   // and appear in every write - computing them once at load time is a
-  // free runtime optimisation for the common path.
+  // free runtime optimization for the common path.
   _Store.t = _Store.Q(CONFIG.table_name);
   _Store.upsert_sql = _Store.buildUpsertSQL();
 
