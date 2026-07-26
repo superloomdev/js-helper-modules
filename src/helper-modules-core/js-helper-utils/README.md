@@ -1,9 +1,9 @@
-# helper-utils
+# @superloomdev/js-helper-utils
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
-A foundation utility helper for Node.js and the browser that ships pre-tested and has zero runtime dependencies. Part of [Superloom](https://superloom.dev).
+Utility functions for type checks, validation, sanitization, and data manipulation. Zero runtime dependencies. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
@@ -19,12 +19,6 @@ A flat collection of small, pure JavaScript functions covering type checks, vali
 
 - **Designed for human review.** The code is laid out as clearly-marked visual sections (section banners, short functions, scoped comments) so a reviewer can read it top to bottom in order, use the section breaks as checkpoints to mark how far they have got, and finish without ever getting lost in dense logic. This matters most when an AI assistant is generating the change and a human still has to sign off on it. Open `utils.js` to see the structure.
 
-## Gotchas Worth Knowing
-
-A few functions have deliberate semantics that are easy to misuse if a caller assumes they behave like their standard-library lookalikes. Read the [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/api.md) before reaching for these.
-
-- **`overrideObject` is not `Object.assign`.** It is a shallow merge that **skips strictly-`null` values** (a `null` override keeps the base value) but does **not** skip `undefined`, and it never deep-merges nested objects. Use it only for "layer non-null overrides onto defaults" patterns. When a caller must be able to set a key to `null` to override a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead - `overrideObject` would silently retain the default and change behavior.
-
 ## Aligned with Superloom Philosophy
 
 If a project is built on Superloom conventions (the same loader pattern, the same testing model), this module slots in without requiring anything new. It is the foundation that every other Superloom helper module rests on, so adopting it does not introduce inconsistency into the codebase.
@@ -38,7 +32,7 @@ Extended documentation lives alongside the source on GitHub:
 - [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-utils/docs/configuration.md) - loader pattern, dependency notes, testing tier
 - [Superloom](https://superloom.dev) - the framework
 
-## Integration
+## Adding to Your Project
 
 Install this module as a peer dependency in the project's `package.json` and load it through the standard Superloom loader. Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
 
