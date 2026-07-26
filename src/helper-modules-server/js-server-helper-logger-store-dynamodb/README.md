@@ -37,7 +37,7 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 - [API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/api.md). The store contract this adapter implements and DynamoDB-specific semantics
 - [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/configuration.md). Config keys, IAM permissions, environment variables, testing tier, post-deployment TTL step
 - [Schema](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/schema.md). Table design, GSI, CloudFormation snippet, access patterns. **Provisioning is out-of-band; `setupNewStore` is a no-op.**
-- [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/cleanup.md). Native TTL vs explicit `cleanupExpiredLogs` — cost and latency tradeoffs
+- [Cleanup](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-dynamodb/docs/cleanup.md). Native TTL vs explicit `cleanupExpiredLogs` - cost and latency tradeoffs
 - [Logger parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-logger). The data model, error catalog, and Logger-side configuration this adapter plugs into
 
 ## Adding to Your Project

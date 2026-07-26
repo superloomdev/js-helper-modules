@@ -16,16 +16,16 @@ const store = require('@superloomdev/js-server-helper-logger-store-dynamodb')(Li
 
 **No-op.** Returns `{ success: true, error: null }` without calling DynamoDB.
 
-DynamoDB tables are typically provisioned via IaC (CloudFormation, CDK, Terraform) or the AWS Console, not by the application at runtime. The adapter assumes the table and GSI already exist. The method exists to satisfy the Logger module's idempotent setup contract — calling it on every boot is safe and free.
+DynamoDB tables are typically provisioned via IaC (CloudFormation, CDK, Terraform) or the AWS Console, not by the application at runtime. The adapter assumes the table and GSI already exist. The method exists to satisfy the Logger module's idempotent setup contract - calling it on every boot is safe and free.
 
 The expected layout (provision out-of-band):
 ```
 Base table:
-  PK:  pk        (String) — written as "{scope}#{entity_type}#{entity_id}"
+  PK:  pk        (String) - written as "{scope}#{entity_type}#{entity_id}"
   SK:  sort_key  (String)
 
 GSI (actor_pk-sort_key-index):
-  PK:  actor_pk  (String) — written as "{scope}#{actor_type}#{actor_id}"
+  PK:  actor_pk  (String) - written as "{scope}#{actor_type}#{actor_id}"
   SK:  sort_key  (String)
   Projection: ALL
 
@@ -41,7 +41,7 @@ Enable TTL on `expires_at` out-of-band; the adapter does not call `UpdateTimeToL
 
 ### `addLog(instance, record)`
 
-`PutItem` of the canonical record with two extra computed key attributes injected. The `sort_key` carries a random suffix making collisions effectively impossible — no UPSERT logic is needed.
+`PutItem` of the canonical record with two extra computed key attributes injected. The `sort_key` carries a random suffix making collisions effectively impossible - no UPSERT logic is needed.
 
 Item written:
 ```js
@@ -51,7 +51,7 @@ Object.assign({}, record, {
 });
 ```
 
-`data`, `ip`, `user_agent`, `created_at`, `created_at_ms`, `sort_key`, and `expires_at` come straight off the canonical record. The DynamoDB driver marshals nested values natively — `data` is **not** JSON-stringified.
+`data`, `ip`, `user_agent`, `created_at`, `created_at_ms`, `sort_key`, and `expires_at` come straight off the canonical record. The DynamoDB driver marshals nested values natively - `data` is **not** JSON-stringified.
 
 **Return:** `{ success, error }`
 
@@ -95,7 +95,7 @@ Object.assign({}, record, {
 
 ### `cleanupExpiredLogs(instance)`
 
-Full table `Scan` (no `FilterExpression` — the driver does not currently expose one), client-side filter for `typeof item.expires_at === 'number' && item.expires_at > 0 && item.expires_at <= Lib.Utils.getUnixTime()`, then `BatchWriteItem` deletes by `{ pk, sort_key }`.
+Full table `Scan` (no `FilterExpression` - the driver does not currently expose one), client-side filter for `typeof item.expires_at === 'number' && item.expires_at > 0 && item.expires_at <= Lib.Utils.getUnixTime()`, then `BatchWriteItem` deletes by `{ pk, sort_key }`.
 
 Returns `deleted_count` equal to the number of items deleted. DynamoDB native TTL handles automatic expiry asynchronously (~48h lag); this method provides explicit, deterministic cleanup at the cost of a full-table scan.
 

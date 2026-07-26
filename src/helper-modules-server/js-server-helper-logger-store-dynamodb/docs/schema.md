@@ -7,13 +7,13 @@ Single-table design with a GSI for the second query pattern. The adapter does **
 **Base table:**
 | Attribute | DynamoDB Type | Role |
 |-----------|---------------|------|
-| `pk` | String (S) | Partition key (PK) — written by `addLog` as `"{scope}#{entity_type}#{entity_id}"` |
-| `sort_key` | String (S) | Sort key (SK) — timestamp-based unique string |
+| `pk` | String (S) | Partition key (PK) - written by `addLog` as `"{scope}#{entity_type}#{entity_id}"` |
+| `sort_key` | String (S) | Sort key (SK) - timestamp-based unique string |
 
 **GSI (`actor_pk-sort_key-index`):**
 | Attribute | DynamoDB Type | Role |
 |-----------|---------------|------|
-| `actor_pk` | String (S) | GSI Partition key — written by `addLog` as `"{scope}#{actor_type}#{actor_id}"` |
+| `actor_pk` | String (S) | GSI Partition key - written by `addLog` as `"{scope}#{actor_type}#{actor_id}"` |
 | `sort_key` | String (S) | GSI Sort key |
 
 ## Item Attributes
