@@ -1,15 +1,22 @@
-# helper-utils - AI Agent Reference
+# @superloomdev/js-helper-utils
 
-## Module Type
-Foundation module. Zero runtime dependencies. All other modules may depend on this; this module NEVER imports any other.
+Foundation utility module. 54 exported functions covering type checks, validation, sanitization, data manipulation, and string/number/CSV/URL utilities. Pure JavaScript, synchronous, side-effect-free, zero runtime dependencies.
+
+## Type
+Class A. Foundation utility. No service dependency (no Docker, no external service).
 
 ## Peer Dependencies
-None (foundation).
+None (foundation module).
 
 ## Direct Dependencies
 None.
 
-## Loader Pattern (Singleton)
+## Companion Files
+- `utils.config.js` - empty defaults (no config keys)
+- `utils.errors.js` - empty frozen error catalog
+- `utils.validators.js` - no-op `validateConfig`
+
+## Loader Pattern
 
 ```javascript
 Lib.Utils = require('helper-utils')(Lib, {});
@@ -17,7 +24,9 @@ Lib.Utils = require('helper-utils')(Lib, {});
 
 `shared_libs` accepted for interface uniformity but unused - Utils has no external lib dependencies.
 `config` accepted for interface uniformity, merged over defaults from `utils.config.js`. No config keys exist yet.
-Companion files: `utils.config.js` (empty defaults), `utils.errors.js` (empty frozen catalog), `utils.validators.js` (no-op `validateConfig`).
+
+## Gotchas
+- **`overrideObject` ≠ `Object.assign`.** It is a shallow merge that SKIPS strictly-`null` values (a `null` override keeps the base value), does NOT skip `undefined` (undefined overwrites), and never deep-merges nested objects (nested objects are replaced wholesale). Use it only for "layer non-null overrides onto defaults". When a caller must set a key to `null` to clear a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead - `overrideObject` would silently retain the default and change behavior. Do NOT blanket-replace `Object.assign` with `overrideObject` during audits.
 
 ## Config Keys
 None.
@@ -98,11 +107,3 @@ convertDataToCsv2(fields, records) → String | async:no - headers explicitly sp
 generateRandomString(length) → String | async:no
 
 ## Patterns
-- **Foundation:** This module has zero dependencies. All other modules may import it freely
-- **Singleton with loader:** One shared object for all callers. Loader initializes Validators and returns the module-scope Utils object. `shared_libs` and `config` accepted for interface uniformity
-- **Exception to DRY rule:** Foundation modules cannot use `Lib.Utils` (they ARE it). Raw type checks are allowed INSIDE this module only. All other modules MUST use this module's functions instead of inline checks
-- **Pure functions:** No side effects, no I/O, no async
-- **Self-contained:** Implements all type checks and data helpers needed across the framework
-
-## Gotchas
-- **`overrideObject` ≠ `Object.assign`.** It is a shallow merge that SKIPS strictly-`null` values (a `null` override keeps the base value), does NOT skip `undefined` (undefined overwrites), and never deep-merges nested objects (nested objects are replaced wholesale). Use it only for "layer non-null overrides onto defaults". When a caller must set a key to `null` to clear a non-null default (e.g. config merging like `{ JWT: null }`), use `Object.assign` instead - `overrideObject` would silently retain the default and change behavior. Do NOT blanket-replace `Object.assign` with `overrideObject` during audits.

@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-helper-utils",
-  "description": "Utility functions for type checks, validation, sanitization, and data manipulation. Zero runtime dependencies.",
+  "description": "Utility functions for type checks, validation, sanitization, and data manipulation. Zero runtime dependencies. Part of Superloom.",
   "version": "1.0.0",
   "main": "utils.js",
   "private": false,
