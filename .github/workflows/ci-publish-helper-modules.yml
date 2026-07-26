@@ -3033,7 +3033,7 @@ jobs:
   # ###########################################################################
 
   test-client-styler-ext-react:
-    needs: [detect, test-client-styler]
+    needs: [detect, publish-client-styler]
     if: |
       always() &&
       !cancelled() &&
