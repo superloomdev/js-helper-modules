@@ -1,0 +1,24 @@
+# MongoDB for admin module testing (single-node replica set for transaction support)
+# Lifecycle managed by npm scripts: npm test starts -> tests -> stops and removes
+# Ephemeral - data lost on container stop
+#
+# Port 27018 (offset from the standard 27017) so parallel local runs with
+# the data-plane mongodb module never collide.
+
+name: superloom-test-mongodb-admin
+
+services:
+
+  mongodb:
+    image: mongo:8
+    container_name: superloom-test-mongodb-admin
+    command: ["--replSet", "rs0"]
+    ports:
+      - "127.0.0.1:27018:27017"
+    healthcheck:
+      # Healthy ONLY when the node has finished primary election.
+      test: ["CMD", "mongosh", "--quiet", "--eval", "try { rs.status() } catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }) }; if (!db.hello().isWritablePrimary) quit(1)"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
