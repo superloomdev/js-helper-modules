@@ -1,4 +1,4 @@
-// Info: The DEFAULT template — the opinionated layer built on the engine.
+// Info: The DEFAULT template - the opinionated layer built on the engine.
 // It declares WHICH tokens exist and HOW each is derived, as pure data. The
 // engine (styler.js) interprets this against a scheme's values. Authoring a new
 // template = copying this shape and changing the labels / rules; the engine
@@ -104,7 +104,7 @@ module.exports = {
   font: {
 
     // Only family NAMES live here (data). Loading the actual font files is a
-    // host concern (a font manifest) — see docs/philosophy.md.
+    // host concern (a font manifest) - see docs/philosophy.md.
     defaults: {
       primaryFamily: 'System',
       secondaryFamily: null

@@ -12,7 +12,7 @@ First, load the module:
 const Styler = require('@superloomdev/js-client-helper-styler')({});
 ```
 
-The `{}` is the `Lib` container — you can pass `Lib.Debug` if you want logging, but it's optional.
+The `{}` is the `Lib` container - you can pass `Lib.Debug` if you want logging, but it's optional.
 
 ---
 
@@ -63,7 +63,7 @@ const merged = Styler.extend(base, variant);
 
 ### `Styler.derive(template, values)`
 
-Turns a template + values into a complete theme. Doesn't do any merging — you give it one set of values.
+Turns a template + values into a complete theme. Doesn't do any merging - you give it one set of values.
 
 ```js
 const values = {
@@ -97,12 +97,12 @@ styles.br_pill;              // { borderRadius: 9999 }
 ```
 
 **The naming pattern:**
-- `font_size_<step>` — Font size utilities
-- `font_<token>` — Text color utilities
-- `background_<token>` — Background color utilities
-- `p_<side>_<step>` — Padding (sides: a=all, h=horizontal, v=vertical, t=top, b=bottom, s=start, e=end)
-- `m_<side>_<step>` — Margin (same side codes)
-- `br_<step>` — Border radius
+- `font_size_<step>` - Font size utilities
+- `font_<token>` - Text color utilities
+- `background_<token>` - Background color utilities
+- `p_<side>_<step>` - Padding (sides: a=all, h=horizontal, v=vertical, t=top, b=bottom, s=start, e=end)
+- `m_<side>_<step>` - Margin (same side codes)
+- `br_<step>` - Border radius
 
 ---
 
@@ -147,8 +147,8 @@ const dims = Styler.deriveDimension(dimTemplate, {});
 ```
 
 **Scale types:**
-- `modular` — Multiplies by a ratio (good for font sizes)
-- `linear` — Adds a unit repeatedly (good for spacing)
+- `modular` - Multiplies by a ratio (good for font sizes)
+- `linear` - Adds a unit repeatedly (good for spacing)
 
 ---
 
@@ -201,10 +201,10 @@ const styles = Ext.useStyles();    // Same as Styler.generateUtilities() output
 ```
 
 The extension gives you:
-- `ThemeProvider` — Wraps your app, provides theme via context
-- `useTheme()` — Hook to get the current theme
-- `useStyles()` — Hook to get utility styles
-- `useThemeController()` — Get the theme + a function to update it
+- `ThemeProvider` - Wraps your app, provides theme via context
+- `useTheme()` - Hook to get the current theme
+- `useStyles()` - Hook to get utility styles
+- `useThemeController()` - Get the theme + a function to update it
 
 See the extension module's docs for full details.
 

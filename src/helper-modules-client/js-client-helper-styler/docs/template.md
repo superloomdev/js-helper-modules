@@ -31,9 +31,9 @@ sections and never change, no matter how you label things:
 
 | Section | Styler function | Produces |
 |---|---|---|
-| `color` | `deriveColor(template.color, themeColorValues)` | `Color` — a flat map of named colors |
-| `dimension` | `deriveDimension(template.dimension, themeDimValues)` | `Dimension` — named scales + scalars |
-| `font` | `deriveFont(template.font, themeFontValues)` | `Font` — `{ family, weight }` |
+| `color` | `deriveColor(template.color, themeColorValues)` | `Color` - a flat map of named colors |
+| `dimension` | `deriveDimension(template.dimension, themeDimValues)` | `Dimension` - named scales + scalars |
+| `font` | `deriveFont(template.font, themeFontValues)` | `Font` - `{ family, weight }` |
 
 `assemble(template, base, variant)` runs all three after merging `base + variant`.
 A template is therefore a *recipe*; the theme supplies the *ingredients*.
@@ -48,7 +48,7 @@ module.exports = {
 };
 ```
 
-Every section has a **`defaults`** block — the complete fallback values a theme
+Every section has a **`defaults`** block - the complete fallback values a theme
 overrides. The rest of each section is the *derivation spec*, named in that
 section's own vocabulary: color **`swatches`**, dimension **`scales`**, font
 **`roles`**.
@@ -77,9 +77,9 @@ color: {
 }
 ```
 
-- **`defaults`** — a flat map of input color values. Keys are arbitrary names you
+- **`defaults`** - a flat map of input color values. Keys are arbitrary names you
   choose (e.g. `primary`, `success`); values are hex strings (`#rgb` or `#rrggbb`).
-- **`swatches`** — a map of **output name → rule**. The output name is copied
+- **`swatches`** - a map of **output name → rule**. The output name is copied
   verbatim into `Color` (convention: `UPPER_SNAKE`). A rule is exactly one of:
 
 | Rule form | Meaning |
@@ -114,7 +114,7 @@ Each entry in `args` is resolved before the operation runs:
 
 - A **number** is used literally (it is the weight/amount, `0–100`).
 - A **string** is looked up as a key in the resolved values (`defaults` merged
-  with the theme). If no such key exists, the string is used **literally** — so
+  with the theme). If no such key exists, the string is used **literally** - so
   an inline hex like `'#FFFFFF'` works without being a declared value.
 
 Example: `{ operation: 'mix', args: ['primary', '#FFFFFF', 12] }` → 12% of the
@@ -145,8 +145,8 @@ dimension: {
 }
 ```
 
-- **`defaults`** — scalar seed numbers. Keys are arbitrary; values are numbers.
-- **`scales`** — a map of **scale name → scale spec**. Each scale produces an
+- **`defaults`** - scalar seed numbers. Keys are arbitrary; values are numbers.
+- **`scales`** - a map of **scale name → scale spec**. Each scale produces an
   object `Dimension.<scaleName>.<step>`. A scale has a `type`, which decides the
   rest of its keys:
 
@@ -156,12 +156,12 @@ dimension: {
 | `linear` | `unit`, `steps` | `unit * multiplier` | the **multiplier** |
 
   - `base`, `ratio`, `unit` are **names of keys** in the resolved values (not
-    literal numbers) — so a theme can retune the whole scale by overriding one seed.
-  - **`presets`** *(optional)* — a map of non-derived entries merged into the
+    literal numbers) - so a theme can retune the whole scale by overriding one seed.
+  - **`presets`** *(optional)* - a map of non-derived entries merged into the
     scale as-is (e.g. `pill: 999`). Useful for fixed values that don't fit the formula.
   - A theme may override individual steps via `dimension.<scaleName>`, e.g.
     `{ dimension: { space: { md: 20 } } }`.
-- **`constants`** — an array of `defaults` key names copied straight through to
+- **`constants`** - an array of `defaults` key names copied straight through to
   `Dimension.<key>` (not a scale), e.g. `lineHeightRatio`.
 
 Override precedence within a scale (last wins): derived steps → `presets` →
@@ -178,17 +178,17 @@ font: {
 }
 ```
 
-- **`defaults`** — for each role `X` in `roles`, a `<X>Family` key naming the
+- **`defaults`** - for each role `X` in `roles`, a `<X>Family` key naming the
   font family (a string, or `null`/empty to fall back). May also include a
   `weight` map (see below).
-- **`roles`** — an **ordered** array of role names. For each role, Styler
+- **`roles`** - an **ordered** array of role names. For each role, Styler
   reads `<role>Family`; if empty it falls back to the **previous** resolved
   role's family, and ultimately to `'System'`. Order therefore matters.
-- **Weights** — resolved from an optional `weight` map with a fallback chain:
+- **Weights** - resolved from an optional `weight` map with a fallback chain:
   `regular` (default `'400'`) → `medium` (→ `regular`) → `semibold` (default
   `'600'`) → `bold` (default `'700'`). A theme may supply `font.weight` to override.
 
-> Only family **names** live here — pure data. Loading the actual font **files**
+> Only family **names** live here - pure data. Loading the actual font **files**
 > (`.ttf`, web `<link>`) is a host concern. See `docs/philosophy.md`.
 
 ---
@@ -220,7 +220,7 @@ Given the default template, `assemble(...)` returns:
 
 > **If you use `styler.generateUtilities(theme)`**, note it looks for a set of
 > conventional `Color` names (`APP_PRIMARY`, `TEXT_PRIMARY`, `STATUS_*`, …) when
-> emitting color utilities. Keep those names if you rely on it — see
+> emitting color utilities. Keep those names if you rely on it - see
 > `docs/api.md`. Scales/radii/spacing utilities are generated dynamically from
 > whatever steps you declare.
 
@@ -231,26 +231,26 @@ Given the default template, `assemble(...)` returns:
 A new template is just a new data file shaped like the above. Styler never
 changes. Steps:
 
-1. **Color** — list your input colors in `color.defaults`, then declare each
+1. **Color** - list your input colors in `color.defaults`, then declare each
    output in `color.swatches` as a `ref` or an `operation` rule.
-2. **Dimension** — set seed numbers in `dimension.defaults`, define `scales`
+2. **Dimension** - set seed numbers in `dimension.defaults`, define `scales`
    (`modular`/`linear`), add any `presets`, and list scalar `constants`.
-3. **Font** — set `<role>Family` defaults and the ordered `roles` array.
-4. **Validate** — `require('@superloomdev/js-client-helper-styler').validators(Lib).validateTemplate(myTemplate)`
+3. **Font** - set `<role>Family` defaults and the ordered `roles` array.
+4. **Validate** - `require('@superloomdev/js-client-helper-styler').validators(Lib).validateTemplate(myTemplate)`
    throws (with a `.code`) on the first structural problem.
-5. **Use it** — pass your template wherever the default is used:
+5. **Use it** - pass your template wherever the default is used:
    `styler.assemble(myTemplate, base, variant)`.
 
 **Additive changes** (all data-only):
 
-- *Add a color* — add an input to `defaults` and an output rule to `swatches`:
+- *Add a color* - add an input to `defaults` and an output rule to `swatches`:
   ```js
   color.defaults.tertiary = '#DB2777';
   color.swatches.APP_TERTIARY = { ref: 'tertiary' };
   color.swatches.APP_TERTIARY_SUBTLE = { operation: 'mix', args: ['tertiary', 'backgroundPrimary', 12] };
   ```
-- *Add a scale step* — add an entry to a scale's `steps` (e.g. `xxs`, `xxxl`).
-- *Add a font role* — append to `font.roles` and add `<role>Family` to `defaults`
+- *Add a scale step* - add an entry to a scale's `steps` (e.g. `xxs`, `xxxl`).
+- *Add a font role* - append to `font.roles` and add `<role>Family` to `defaults`
   (or let it fall back).
 
 ---

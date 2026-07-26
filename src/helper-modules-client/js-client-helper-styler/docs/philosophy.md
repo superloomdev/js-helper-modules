@@ -6,7 +6,7 @@ Styler is built on three simple ideas that make theming flexible and portable:
 
 ## 1. Data Over Code
 
-Your theme is just **JSON**. Colors, sizes, fonts — all data. No CSS variables, no SASS, no build-time magic.
+Your theme is just **JSON**. Colors, sizes, fonts - all data. No CSS variables, no SASS, no build-time magic.
 
 This means:
 - You can store themes in a database
@@ -36,7 +36,7 @@ Instead of one giant theme file, use **base + variant**:
 // Base has everything
 const base = { color: { primary: '#0D9488', secondary: '#64748B', ... } };
 
-// Variant is tiny — just what's different
+// Variant is tiny - just what's different
 const variant = { color: { primary: '#FF0000' } };
 
 // Result: secondary stays '#64748B', primary becomes '#FF0000'
@@ -65,7 +65,7 @@ Why?
 - **Testable**: Pure functions are easy to test
 - **Stable**: Core never changes when frameworks update
 
-This is the **first extension-based module** in the system — the pattern that other modules will follow.
+This is the **first extension-based module** in the system - the pattern that other modules will follow.
 
 ---
 

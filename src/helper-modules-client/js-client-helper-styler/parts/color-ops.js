@@ -1,4 +1,4 @@
-// Info: Color operations for js-client-helper-styler — the named color primitives a
+// Info: Color operations for js-client-helper-styler - the named color primitives a
 // template may reference by `operation`. Pure hex math: blending, luminance,
 // contrast, and interaction states. Singleton part; no per-caller state.
 'use strict';
@@ -15,7 +15,7 @@ let ERRORS;  // eslint-disable-line no-unused-vars -- accepted for signature uni
 /********************************************************************
 Singleton loader. Injects Lib, CONFIG, and ERRORS and returns the
 module-scope ColorOps object directly. All three are accepted for
-signature uniformity with other parts — none are consumed today.
+signature uniformity with other parts - none are consumed today.
 
 @param {Object} shared_libs - Lib container (unused; pure color math)
 @param {Object} config      - Merged module configuration (unused)
