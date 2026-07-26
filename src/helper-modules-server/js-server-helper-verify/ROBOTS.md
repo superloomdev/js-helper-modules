@@ -66,7 +66,7 @@ On match, schedules `deleteRecord` via `Lib.Instance.backgroundRoutine`. The bac
 
 ### `setupNewStore(instance)` *(async)*
 
-Idempotent backend setup. Behaviour varies by adapter: SQL creates table plus index; NoSQL adapters may provision indexes or rely on out-of-band IaC.
+Idempotent backend setup. Behavior varies by adapter: SQL creates table plus index; NoSQL adapters may provision indexes or rely on out-of-band IaC.
 
 - **Returns**: `{ success, error }`.
 
@@ -108,7 +108,7 @@ Error shape is frozen at module load: `{ type: 'VERIFY_NOT_FOUND', message: 'Ver
 6. `record.code !== value` calls `incrementFailCount` (best-effort) and returns `VERIFY_WRONG_VALUE`.
 7. On match, schedules `deleteRecord` via `Lib.Instance.backgroundRoutine` and returns `{ success: true, error: null }`.
 
-## Critical Behaviour for Code-Generating Tools
+## Critical Behavior for Code-Generating Tools
 
 - **`instance` is always the first argument.** Every function reads `instance.time` for timestamps.
 - **`Store` is a ready-to-use object, not a factory function.** The loader throws on factory function, string, or missing.

@@ -15,7 +15,7 @@ Every exported function on the public interface, with parameters, return shape, 
 
 ## Conventions
 
-| Pattern | Behaviour |
+| Pattern | Behavior |
 |---|---|
 | **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()`. The module reads `instance.time` for timestamps and uses `instance.backgroundRoutine` for the post-verify record delete |
 | **Programmer errors throw `TypeError` synchronously** | Missing required option, wrong type, non-positive length / TTL throw `TypeError` at the call-site |
@@ -125,7 +125,7 @@ The background delete is what enforces the one-time guarantee. In a serverless r
 
 ### `setupNewStore(instance)` *(async)*
 
-Idempotent backend setup. The actual work depends on the chosen storage adapter. SQL adapters run `CREATE TABLE IF NOT EXISTS` plus index DDL. NoSQL adapters may provision indexes or rely on out-of-band IaC. A store that does not implement `setupNewStore` makes this call a no-op that returns `{ success: true }`. The chosen adapter's README documents the exact behaviour.
+Idempotent backend setup. The actual work depends on the chosen storage adapter. SQL adapters run `CREATE TABLE IF NOT EXISTS` plus index DDL. NoSQL adapters may provision indexes or rely on out-of-band IaC. A store that does not implement `setupNewStore` makes this call a no-op that returns `{ success: true }`. The chosen adapter's README documents the exact behavior.
 
 **Return shape.** `{ success, error }`.
 
