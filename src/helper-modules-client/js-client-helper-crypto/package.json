@@ -3,17 +3,11 @@
   "description": "Client-side crypto utilities. UUID generation, random strings, base64 helpers. Browser-optimized.",
   "version": "1.0.0",
   "main": "crypto.js",
-  "private": false,
   "license": "MIT",
-  "author": {
-    "name": "sj00"
-  },
-  "contributors": [],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
-  "bundleDependencies": false,
   "engines": {
     "node": ">=24"
   },

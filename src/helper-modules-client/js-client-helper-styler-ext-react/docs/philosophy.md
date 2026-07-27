@@ -21,7 +21,7 @@ Example with this module:
 **Core (pure JavaScript)**
 ```js
 const Styler = require('@superloomdev/js-client-helper-styler')({});
-const theme = Styler.assemble(Styler.template, base, variant);
+const theme = Styler.assemble(Styler.defaultTemplate, base, variant);
 ```
 
 **Extension (React)**

@@ -101,6 +101,7 @@ and/or a numeric weight (0–100) and returns a hex string (except `luminance`/
 | `contrast` | `(hex)` | A readable foreground for `hex`: `#FFFFFF` on dark, `#111827` on light. |
 | `pseudoHover` | `(hex)` | Hover state (lightens dark colors, darkens light ones). |
 | `pseudoPress` | `(hex)` | Pressed state (stronger than hover). |
+| `pseudoFocus` | `(hex)` | Focus state (moderate shift between hover and pressed). |
 | `disabled` | `(hex)` | Muted state: 45% `hex` + 55% white. |
 | `luminance` | `(hex)` | Perceived brightness 0–255 (rarely referenced directly). |
 | `isDark` | `(hex)` | `true` when `luminance < 128`. |

@@ -80,18 +80,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     generateRandomString: function (charset, length) {
 
+      // Validate inputs - return empty string for empty or non-positive length
       if (Lib.Utils.isEmpty(charset) || Lib.Utils.isEmpty(length) || length <= 0) {
         return '';
       }
 
+      // Generate cryptographically secure random values for each position
       const charset_length = charset.length;
       const output = new Array(length);
       const random_values = _Crypto.getRandomValues(length);
 
+      // Map each random value to a character in the charset
       for (let i = 0; i < length; i++) {
         output[i] = charset[random_values[i] % charset_length];
       }
 
+      // Return the assembled string
       return output.join('');
 
     },
@@ -104,12 +108,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     generateUUID: function () {
 
+      // Check for native Web Crypto randomUUID support
       const web_crypto = _Crypto.webCrypto();
 
+      // Use native when available, otherwise fall back to polyfill
       if (web_crypto && Lib.Utils.isFunction(web_crypto.randomUUID)) {
         return web_crypto.randomUUID();
       }
 
+      // Return polyfill-generated UUIDv4
       return _Crypto.uuidV4Polyfill();
 
     },
@@ -123,8 +130,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     generateCompactUUID: function () {
 
+      // Generate a standard UUID and strip hyphens to get raw hex
       const uuid_hex = Crypto.generateUUID().replace(/-/g, '');
 
+      // Convert to base36 and pad to 25 characters
       return _Crypto.hexToBase36(uuid_hex).padEnd(25, '0');
 
     },
@@ -142,6 +151,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     stringToBase64: function (str) {
 
+      // Delegate to the environment-aware private encoder
       return _Crypto.utf8ToBase64(str);
 
     },
@@ -156,6 +166,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     base64ToString: function (str) {
 
+      // Delegate to the environment-aware private decoder
       return _Crypto.base64ToUtf8(str);
 
     },
@@ -175,6 +186,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     urlEncodeBase64: function (str) {
 
+      // Strip padding, then swap URL-unsafe characters for safe ones
       return str
         .replace(/=/g, '')
         .replace(/\//g, '_')
@@ -193,6 +205,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     urlDecodeBase64: function (str) {
 
+      // Return empty input unchanged
       if (Lib.Utils.isEmpty(str)) {
         return str;
       }
@@ -201,6 +214,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const pad_count = (4 - (str.length % 4)) % 4;
       str += '='.repeat(pad_count);
 
+      // Swap URL-safe characters back to standard base64
       return str
         .replace(/_/g, '/')
         .replace(/-/g, '+');

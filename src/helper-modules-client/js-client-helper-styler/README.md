@@ -127,13 +127,15 @@ There's a helper for this: `validators.findUnregisteredFamilies(theme, registere
 - **[API Reference](./docs/api.md)** - Every function explained with examples
 - **[Template Guide](./docs/template.md)** - How templates work and how to customize them
 - **[Philosophy](./docs/philosophy.md)** - Why it's built this way
+- **[Client Theming Architecture](https://github.com/superloomdev/superloom/blob/main/docs/languages/js/client/theming.md)** - How Styler fits into the Superloom client theming pipeline
 
 ---
 
 ## Running the Tests
 
 ```bash
-cd _test
+# From the _test/ directory:
+npm install
 npm test
 ```
 

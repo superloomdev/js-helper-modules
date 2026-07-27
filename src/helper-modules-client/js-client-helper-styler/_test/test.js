@@ -50,6 +50,16 @@ describe('deriveColor', function () {
     assert.strictEqual(result.APP_PRIMARY, '#00FF00');
   });
 
+  it('should derive APP_PRIMARY_FOCUSED via pseudoFocus operation', function () {
+    const template = Styler.defaultTemplate;
+    const result = Styler.deriveColor(template.color, { primary: '#4F46E5' });
+    assert.ok(result.APP_PRIMARY_FOCUSED, 'FOCUSED swatch is derived');
+    assert.ok(result.APP_PRIMARY_FOCUSED.startsWith('#'), 'FOCUSED is a hex color');
+    assert.notStrictEqual(result.APP_PRIMARY_FOCUSED, result.APP_PRIMARY, 'FOCUSED differs from base');
+    assert.notStrictEqual(result.APP_PRIMARY_FOCUSED, result.APP_PRIMARY_HOVERED, 'FOCUSED differs from HOVERED');
+    assert.notStrictEqual(result.APP_PRIMARY_FOCUSED, result.APP_PRIMARY_PRESSED, 'FOCUSED differs from PRESSED');
+  });
+
 });
 
 

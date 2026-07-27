@@ -38,6 +38,7 @@ module.exports = {
       APP_PRIMARY: { ref: 'primary' },
       APP_PRIMARY_HOVERED: { operation: 'pseudoHover', args: ['primary'] },
       APP_PRIMARY_PRESSED: { operation: 'pseudoPress', args: ['primary'] },
+      APP_PRIMARY_FOCUSED: { operation: 'pseudoFocus', args: ['primary'] },
       APP_PRIMARY_DISABLED: { operation: 'disabled', args: ['primary'] },
       APP_PRIMARY_SUBTLE: { operation: 'mix', args: ['primary', 'backgroundPrimary', 12] },
 

@@ -1,10 +1,11 @@
-# js-client-helper-crypto - AI Agent Reference
+# ROBOTS.md - AI Agent Reference
 
 ## Module Type
 Client module. Browser-safe crypto helpers using Web Crypto API (available in modern browsers, React Native, and Node.js 19+).
 
 ## Peer Dependencies
 - `helper-utils` (injected as `Lib.Utils`)
+- `helper-debug` (injected as `Lib.Debug`)
 
 ## Direct Dependencies
 None. Uses browser/runtime-native Web Crypto API (`globalThis.crypto`).

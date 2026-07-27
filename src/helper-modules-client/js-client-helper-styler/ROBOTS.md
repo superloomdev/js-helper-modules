@@ -5,10 +5,10 @@
 ## Module Identity
 
 - **Name**: `@superloomdev/js-client-helper-styler`
-- **Class**: A (Foundation Utility) - Client variant
+- **Class**: G (Feature Module with Extensions)
 - **Pattern**: Stateless singleton
 - **Runtime**: Universal (Node, browser, React Native)
-- **Dependencies**: Peer deps `@superloomdev/js-helper-utils`, `@superloomdev/js-helper-debug`
+- **Dependencies**: Peer deps `helper-utils` (`npm:@superloomdev/js-helper-utils`), `helper-debug` (`npm:@superloomdev/js-helper-debug`)
 
 ## Loader
 
@@ -36,7 +36,7 @@ const Styler = require('@superloomdev/js-client-helper-styler')({
 
 1. **Merge semantics**: `extend(base, variant)` does shallow merge per group. `variant` wins.
 2. **Scale types**: `modular` (geometric, good for fonts) vs `linear` (arithmetic, good for spacing).
-3. **Color operations**: mix, lighten, darken, contrast, accessible via swatch rules.
+3. **Color operations**: mix, lighten, darken, contrast, pseudoHover, pseudoPress, pseudoFocus, disabled, accessible via swatch rules.
 4. **Font fallback**: Each role falls back to previous role's family, ultimately 'System'.
 5. **Utilities naming**: `font_size_md`, `p_a_md` (a=all, h=horizontal, v=vertical, t=top, b=bottom, s=start, e=end), `br_pill`.
 6. **No React**: This is pure JS. React bindings live in extension module `js-client-helper-styler-ext-react`.
