@@ -201,6 +201,23 @@ const ColorOps = { // Named color primitives accessible by the orchestrator
     // Apply a larger shift than hover, in the same direction
     return ColorOps.isDark(hex) ? ColorOps.lighten(hex, 18) : ColorOps.darken(hex, 16);
 
+  },
+
+
+  /********************************************************************
+  Focus interaction state derived from a base color. A subtle shift
+  between hover and pressed, used for keyboard focus rings and outlines.
+  Direction chosen by the base's lightness.
+
+  @param {String} hex - base color (hex)
+
+  @return {String} - the focus-state '#rrggbb' color
+  *********************************************************************/
+  pseudoFocus: function (hex) {
+
+    // Apply a moderate shift between hover and pressed
+    return ColorOps.isDark(hex) ? ColorOps.lighten(hex, 14) : ColorOps.darken(hex, 12);
+
   }
 
 

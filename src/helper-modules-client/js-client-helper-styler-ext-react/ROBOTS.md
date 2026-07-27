@@ -14,14 +14,14 @@
 - **Class**: Extension (consumes core styler)
 - **Pattern**: Stateless singleton
 - **Runtime**: React 18+, React Native, React Native Web
-- **Peer Dependencies**: `react`, `js-client-helper-styler`, `js-helper-utils`, `js-helper-debug`
+- **Peer Dependencies**: `react`, `helper-styler` (`npm:@superloomdev/js-client-helper-styler`), `helper-utils` (`npm:@superloomdev/js-helper-utils`), `helper-debug` (`npm:@superloomdev/js-helper-debug`)
 
 ## Loader
 
 ```javascript
 const Extension = require('@superloomdev/js-client-helper-styler-ext-react')({
   React: required,      // React 18+ (createContext, useState, useContext)
-  Styler: optional,     // Core styler engine (if not provided, loads default)
+  Styler: required,     // Core styler engine (used for defaultTemplate + assemble)
   Utils: optional,      // Type checks, validation
   Debug: optional       // Logging
 });
@@ -65,7 +65,7 @@ function App() {
 // Component.js
 function MyComponent() {
   const styles = useStyles();
-  return <View style={styles.bg_primary} />;  // bg_primary is derived from theme
+  return <View style={styles.background_app_primary} />;  // background_app_primary is derived from theme
 }
 ```
 

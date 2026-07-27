@@ -123,3 +123,4 @@ Tests use React's test renderer to verify hooks work correctly. All tests run in
 ## Related
 
 - [js-client-helper-styler](../js-client-helper-styler/) - The pure core engine
+- [Client Theming Architecture](https://github.com/superloomdev/superloom/blob/main/docs/languages/js/client/theming.md) - How Styler fits into the Superloom client theming pipeline

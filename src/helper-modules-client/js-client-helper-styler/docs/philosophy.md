@@ -91,3 +91,10 @@ We don't: Load the `.ttf` file, register it with expo-font, or inject a Google F
 That's the **host's job**. Your app knows how it loads fonts. Styler just uses the names.
 
 (There is a helper `findUnregisteredFamilies()` to catch missing fonts before they break your UI.)
+
+---
+
+## See Also
+
+- [Client Theming Architecture](https://github.com/superloomdev/superloom/blob/main/docs/languages/js/client/theming.md) - How Styler fits into the Superloom client theming pipeline
+- [Client Module Taxonomy](https://github.com/superloomdev/superloom/blob/main/docs/languages/js/client/client-modules.md) - Naming conventions and module classes for client modules
