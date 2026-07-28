@@ -17,7 +17,7 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars 
 
       // idle_ms must be a positive number
       if (!Lib.Utils.isNullOrUndefined(CONFIG.idle_ms)) {
-        if (typeof CONFIG.idle_ms !== 'number' || CONFIG.idle_ms <= 0) {
+        if (!Lib.Utils.isNumber(CONFIG.idle_ms) || CONFIG.idle_ms <= 0) {
           throw new TypeError('helper-idle: idle_ms must be a positive number');
         }
       }
@@ -49,10 +49,10 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars 
         // Each threshold must be { ms: positive number, callback: function }
         for (let i = 0; i < options.thresholds.length; i++) {
           const t = options.thresholds[i];
-          if (!t || typeof t.ms !== 'number' || t.ms <= 0) {
+          if (!t || !Lib.Utils.isNumber(t.ms) || t.ms <= 0) {
             throw new TypeError('helper-idle: options.thresholds[' + i + '].ms must be a positive number');
           }
-          if (typeof t.callback !== 'function') {
+          if (!Lib.Utils.isFunction(t.callback)) {
             throw new TypeError('helper-idle: options.thresholds[' + i + '].callback must be a function');
           }
         }
