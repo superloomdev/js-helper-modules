@@ -1,0 +1,16 @@
+{
+  "name": "@superloomdev/js-react-helper-idle-test",
+  "description": "Unit tests for js-react-helper-idle",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.js"
+  },
+  "dependencies": {
+    "helper-idle": "file:../",
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "react": "npm:react@^18.0.0",
+    "react-test-renderer": "npm:react-test-renderer@^18.0.0"
+  }
+}
