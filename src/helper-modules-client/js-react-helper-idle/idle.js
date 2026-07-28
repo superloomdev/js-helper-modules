@@ -315,7 +315,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     registerIdleHandler: function (ms, callback) {
 
       // Validate ms is a positive number
-      if (typeof ms !== 'number' || ms <= 0) {
+      if (!Lib.Utils.isNumber(ms) || ms <= 0) {
 
         // Return error for invalid threshold
         return {
@@ -327,7 +327,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Validate callback is a function
-      if (typeof callback !== 'function') {
+      if (!Lib.Utils.isFunction(callback)) {
 
         // Return error for invalid callback
         return {
@@ -408,12 +408,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Count and remove all handlers
       let count = 0;
       const ids = Object.keys(state.handlers);
+
       for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
+
+        // Clear any pending timer for this handler
         if (state.handlers[id].timeout_id) {
           clearTimeout(state.handlers[id].timeout_id);
         }
+
+        // Remove the handler from the registry
         delete state.handlers[id];
+
+        // Count the removal
         count += 1;
       }
 
