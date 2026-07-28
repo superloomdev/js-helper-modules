@@ -67,6 +67,13 @@
 #   ╚══════════════════════════════════════════════════════════════════════╝
 #   42. test-client-styler → publish-client-styler
 #   43. test-client-styler-ext-react → publish-client-styler-ext-react
+#   44. test-react-idle → publish-react-idle
+#   45. test-react-timer → publish-react-timer
+#   46. test-client-storage → publish-client-storage
+#   47. test-client-storage-adapter-web → publish-client-storage-adapter-web
+#   48. test-client-storage-adapter-rn → publish-client-storage-adapter-rn
+#   49. test-rnw-font → publish-rnw-font
+#   50. test-rnw-device → publish-rnw-device
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -3091,3 +3098,463 @@ jobs:
             npm publish
           fi
 
+
+
+  # ╔═══════════════════════════════════════════════════════════════════════════╗
+  # ║  GROUP 3 (continued): NEW CLIENT MODULES                                 ║
+  # ║  Class I framework modules + Class E/F storage                            ║
+  # ╚═══════════════════════════════════════════════════════════════════════════╝
+
+  # ###########################################################################
+  #   MODULE 44: js-react-helper-idle (needs utils, debug)
+  #   Class I framework module - React injected via shared_libs
+  # ###########################################################################
+
+  test-react-idle:
+    needs: [detect, publish-client-styler-ext-react]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-react-helper-idle')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-react-helper-idle
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-react-idle:
+    needs: [detect, test-react-idle]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-react-idle'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-react-helper-idle')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-react-helper-idle
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 45: js-react-helper-timer (needs utils, debug, time)
+  #   Class I framework module - React injected via shared_libs
+  # ###########################################################################
+
+  test-react-timer:
+    needs: [detect, publish-react-idle]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-react-helper-timer')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-react-helper-timer
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-react-timer:
+    needs: [detect, test-react-timer]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-react-timer'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-react-helper-timer')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-react-helper-timer
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 46: js-client-helper-storage (needs utils, debug)
+  #   Class E - owns adapter contract; adapters chain after this
+  # ###########################################################################
+
+  test-client-storage:
+    needs: [detect, publish-react-timer]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-storage')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-storage
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-storage:
+    needs: [detect, test-client-storage]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-storage'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-storage')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-storage
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 47: js-client-helper-storage-adapter-web
+  #   (needs storage; no Docker required)
+  # ###########################################################################
+
+  test-client-storage-adapter-web:
+    needs: [detect, publish-client-storage]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-web')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-web
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-storage-adapter-web:
+    needs: [detect, test-client-storage-adapter-web]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-storage-adapter-web'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-web')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-web
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 48: js-client-helper-storage-adapter-rn
+  #   (needs storage; no Docker required)
+  # ###########################################################################
+
+  test-client-storage-adapter-rn:
+    needs: [detect, publish-client-storage-adapter-web]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-rn')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-rn
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-storage-adapter-rn:
+    needs: [detect, test-client-storage-adapter-rn]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-storage-adapter-rn'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-rn')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-rn
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 49: js-rnw-helper-font (needs utils, debug)
+  #   Class I framework module - React + ExpoFont injected via shared_libs
+  # ###########################################################################
+
+  test-rnw-font:
+    needs: [detect, publish-client-storage-adapter-rn]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-rnw-helper-font')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-rnw-helper-font
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-rnw-font:
+    needs: [detect, test-rnw-font]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-rnw-font'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-rnw-helper-font')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-rnw-helper-font
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 50: js-rnw-helper-device (needs utils, debug)
+  #   Class I framework module - React + platform APIs injected via shared_libs
+  # ###########################################################################
+
+  test-rnw-device:
+    needs: [detect, publish-rnw-font]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-rnw-helper-device')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-rnw-helper-device
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-rnw-device:
+    needs: [detect, test-rnw-device]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-rnw-device'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-rnw-helper-device')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-rnw-helper-device
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
