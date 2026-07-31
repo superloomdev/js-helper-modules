@@ -58,8 +58,9 @@ Ambiguous verb or missing module path: ask, never guess.
 4. `docs/languages/js/module-docs.md` + `module-docs-complex.md` - README/ROBOTS/docs structure
 5. `docs/languages/js/error-handling.md` + `validation.md` - envelopes, catalogs, validators
 6. `docs/dev/testing-local-modules.md` + `docs/dev/pitfalls.md` - test contract, terminal safety
-7. `docs/languages/js/module-classes.md` - this module's class
-8. `docs/languages/js/index.md` - the two-form naming rule
+7. `docs/languages/js/unit-test-authoring.md` + `docs/languages/js/module-testing.md` - test double patterns, testing tiers, framework module testing
+8. `docs/languages/js/module-classes.md` - this module's class
+9. `docs/languages/js/index.md` - the two-form naming rule
 
 **Structural invariants** (each verifiable; source in parentheses):
 
@@ -77,7 +78,7 @@ Ambiguous verb or missing module path: ask, never guess.
 - Naming: scope form (`@superloomdev/...`) and bare form (`js-...helper-...`) only in `package.json` and real repo-path URLs; alias form everywhere else including H1s, banners, error messages (`languages/js/index.md` - Two-Form Rule)
 - `package.json`: peer deps as caret ranges; no `helper-utils`/`helper-debug` in a Class F module's own peerDependencies (container supplies them); `engines.node >= 24`; `publishConfig.registry` exactly `https://npm.pkg.github.com` (`dependencies.md`, `publishing.md`)
 - `_test/package.json`: `"private": true`; the ONLY `file:` dependency is this module (`file:../`); shared helpers use registry semver ranges pinned to the version the code calls (`docs/dev/pitfalls.md` entries 8, 11)
-- `_test/loader.js` is the only file reading `process.env`; tests named `should [behavior] when [condition]`; one `describe` per function (`unit-test-authoring.md`); assertions pin exact values - never a range or disjunction multiple behaviors could satisfy; fix nondeterministic setup, not the assertion (`principles/testing.md` - Test Structure and Naming)
+- `_test/loader.js` is the only file reading `process.env`; tests named `should [behavior] when [condition]`; one `describe` per function (`unit-test-authoring.md`); assertions pin exact values - never a range or disjunction multiple behaviors could satisfy; fix nondeterministic setup, not the assertion (`principles/testing.md` - Test Structure and Naming); three test double patterns - `memory-store` (Fake: full working storage contract backed by RAM), `stub-adapter` (Stub: minimal stateless adapter contract), `engine-stub` (Engine Fake: minimal in-process implementation of a platform engine's native interface, e.g. Web Storage or MMKV) - not mutually exclusive, a module may use several (`unit-test-authoring.md` - Test Double Patterns)
 - Docs set per class from `module-docs-complex.md`; README carries no signatures, config tables, or install commands; `ROBOTS.md` compiled LAST and matching `docs/api.md` signatures exactly (`module-docs.md`)
 - Root Markdown = `README.md` + `ROBOTS.md` (+ unpublished `THOUGHTS.md`) only (`module-docs.md`)
 
@@ -88,7 +89,7 @@ Ambiguous verb or missing module path: ask, never guess.
 1. **Class first.** Determine the module's class from `docs/languages/js/module-classes.md` and its directory from the tier (`helper-modules-core|server|client`). State both. If the class is ambiguous, STOP and ask.
 2. **Re-ground** (Phase A below) scoped to the class.
 3. **Generate from the skeleton.** Open the class skeleton in `docs/languages/js/module-structure.md` and build every file from it: entry, three companions, `package.json`, `eslint.config.js` and `.npmignore` (copy from `js-helper-utils`), `_test/` set, docs set per class. Never generate from memory or by copying a sibling.
-4. **Adapter-backed and extension lifecycles.** Feature module first with an in-memory store (`_test/memory-store.js`), published before adapters; adapters one at a time against the shared contract suite. Extensions after the parent, importing the parent, entry file `extension.js`.
+4. **Adapter-backed, extension, and driver-wrapper lifecycles.** Feature module first with an in-memory store (`_test/memory-store.js`), published before adapters; adapters one at a time against the shared contract suite. Extensions after the parent, importing the parent, entry file `extension.js`. Class C driver wrappers (client-side or RN-tier modules wrapping a platform engine) ship with an engine stub in `_test/` implementing the engine's native interface (e.g. `_test/web-storage-stub.js`, `_test/mmkv-stub.js`); the engine is injected through `shared_libs` in the test loader, never imported directly in the module (`module-testing.md` - Framework Module Testing)
 5. **Register environment variables** (if any) in `docs/dev/.env.dev.example`, `.env.integration.example`, and the workspace `__dev__/.env.*` files.
 6. **Run the `fix` verb Phases A-E** on the new module (a new module gets the same audit as an old one), then STOP and present. Publishing is a separate workflow: `/js-helper-module-publish`.
 
