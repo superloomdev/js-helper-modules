@@ -69,11 +69,10 @@
 #   43. test-client-styler-ext-react → publish-client-styler-ext-react
 #   44. test-react-idle → publish-react-idle
 #   45. test-react-timer → publish-react-timer
-#   46. test-client-storage → publish-client-storage
-#   47. test-client-storage-adapter-web → publish-client-storage-adapter-web
-#   48. test-client-storage-adapter-rn → publish-client-storage-adapter-rn
-#   49. test-rnw-font → publish-rnw-font
-#   50. test-rnw-device → publish-rnw-device
+#   46. test-client-kv-localstorage → publish-client-kv-localstorage
+#   47. test-rn-kv-mmkv → publish-rn-kv-mmkv
+#   48. test-rnw-font → publish-rnw-font
+#   49. test-rnw-device → publish-rnw-device
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -3236,17 +3235,17 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 46: js-client-helper-storage (needs utils, debug)
-  #   Class E - owns adapter contract; adapters chain after this
+  #   MODULE 46: js-client-helper-kv-localstorage (needs utils, debug)
+  #   Class C driver wrapper - browser Web Storage (localStorage/sessionStorage)
   # ###########################################################################
 
-  test-client-storage:
+  test-client-kv-localstorage:
     needs: [detect, publish-react-timer]
     if: |
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-storage')
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-kv-localstorage')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -3257,21 +3256,21 @@ jobs:
           node-version: '24'
           registry-url: 'https://npm.pkg.github.com'
       - name: Install and test
-        working-directory: src/helper-modules-client/js-client-helper-storage
+        working-directory: src/helper-modules-client/js-client-helper-kv-localstorage
         run: |
           npm install
           npm run lint --if-present
           cd _test && npm install && npm test
 
-  publish-client-storage:
-    needs: [detect, test-client-storage]
+  publish-client-kv-localstorage:
+    needs: [detect, test-client-kv-localstorage]
     if: |
       !cancelled() &&
       needs.detect.result == 'success' &&
-      needs['test-client-storage'].result == 'success' &&
+      needs['test-client-kv-localstorage'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-storage')
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-kv-localstorage')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -3287,7 +3286,7 @@ jobs:
       - name: Pin npm to v10
         run: npm install -g npm@10
       - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-storage
+        working-directory: src/helper-modules-client/js-client-helper-kv-localstorage
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
@@ -3301,17 +3300,17 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 47: js-client-helper-storage-adapter-web
-  #   (needs storage; no Docker required)
+  #   MODULE 47: js-rn-helper-kv-mmkv (needs utils, debug)
+  #   Class C driver wrapper - react-native-mmkv (JSI, mmap-backed)
   # ###########################################################################
 
-  test-client-storage-adapter-web:
-    needs: [detect, publish-client-storage]
+  test-rn-kv-mmkv:
+    needs: [detect, publish-client-kv-localstorage]
     if: |
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-web')
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-rn-helper-kv-mmkv')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -3322,21 +3321,21 @@ jobs:
           node-version: '24'
           registry-url: 'https://npm.pkg.github.com'
       - name: Install and test
-        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-web
+        working-directory: src/helper-modules-client/js-rn-helper-kv-mmkv
         run: |
           npm install
           npm run lint --if-present
           cd _test && npm install && npm test
 
-  publish-client-storage-adapter-web:
-    needs: [detect, test-client-storage-adapter-web]
+  publish-rn-kv-mmkv:
+    needs: [detect, test-rn-kv-mmkv]
     if: |
       !cancelled() &&
       needs.detect.result == 'success' &&
-      needs['test-client-storage-adapter-web'].result == 'success' &&
+      needs['test-rn-kv-mmkv'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-web')
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-rn-helper-kv-mmkv')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -3352,7 +3351,7 @@ jobs:
       - name: Pin npm to v10
         run: npm install -g npm@10
       - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-web
+        working-directory: src/helper-modules-client/js-rn-helper-kv-mmkv
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
@@ -3366,77 +3365,12 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 48: js-client-helper-storage-adapter-rn
-  #   (needs storage; no Docker required)
-  # ###########################################################################
-
-  test-client-storage-adapter-rn:
-    needs: [detect, publish-client-storage-adapter-web]
-    if: |
-      always() &&
-      !cancelled() &&
-      needs.detect.result == 'success' &&
-      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-rn')
-    runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          registry-url: 'https://npm.pkg.github.com'
-      - name: Install and test
-        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-rn
-        run: |
-          npm install
-          npm run lint --if-present
-          cd _test && npm install && npm test
-
-  publish-client-storage-adapter-rn:
-    needs: [detect, test-client-storage-adapter-rn]
-    if: |
-      !cancelled() &&
-      needs.detect.result == 'success' &&
-      needs['test-client-storage-adapter-rn'].result == 'success' &&
-      needs.detect.outputs.publish_modules != '[]' &&
-      needs.detect.outputs.publish_modules != '' &&
-      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-storage-adapter-rn')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          registry-url: 'https://npm.pkg.github.com'
-      - name: Pin npm to v10
-        run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-storage-adapter-rn
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
-  # ###########################################################################
-  #   MODULE 49: js-rnw-helper-font (needs utils, debug)
+  #   MODULE 48: js-rnw-helper-font (needs utils, debug)
   #   Class I framework module - React + ExpoFont injected via shared_libs
   # ###########################################################################
 
   test-rnw-font:
-    needs: [detect, publish-client-storage-adapter-rn]
+    needs: [detect, publish-rn-kv-mmkv]
     if: |
       always() &&
       !cancelled() &&
@@ -3496,7 +3430,7 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 50: js-rnw-helper-device (needs utils, debug)
+  #   MODULE 49: js-rnw-helper-device (needs utils, debug)
   #   Class I framework module - React + platform APIs injected via shared_libs
   # ###########################################################################
 
