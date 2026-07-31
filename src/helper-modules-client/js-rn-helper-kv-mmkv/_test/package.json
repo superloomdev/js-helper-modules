@@ -1,0 +1,14 @@
+{
+  "name": "@superloomdev/js-rn-helper-kv-mmkv-test",
+  "description": "Unit tests for js-rn-helper-kv-mmkv",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.js"
+  },
+  "dependencies": {
+    "helper-kv-mmkv": "file:../",
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0"
+  }
+}
