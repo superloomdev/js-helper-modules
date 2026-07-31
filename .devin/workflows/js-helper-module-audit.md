@@ -77,7 +77,7 @@ Convention is whatever the real, passing modules do. Re-derive it; do not recall
    find src/helper-modules-core src/helper-modules-server src/helper-modules-client -maxdepth 1 -type d | sort
    ```
 
-2. **Categorize each** using `docs/languages/js/module-classes.md` (stateless singleton, stateful factory, adapter-backed factory, store adapter, vendor wrapper).
+2. **Categorize each using `docs/languages/js/module-classes.md` (stateless singleton, stateful factory, adapter-backed factory, store adapter, vendor wrapper, client-side driver wrapper).
 
 3. **Read one reference module per category in full** - every file: `[name].js`, `[name].config.js`, `[name].errors.js`, `[name].validators.js`, `package.json`, `_test/loader.js`, `_test/package.json`, `_test/test.js`, `README.md`, `ROBOTS.md`, and `docs/`.
 
@@ -120,7 +120,7 @@ These are the *dimensions* to audit, each paired with where its rules actually l
 | Code formatting, comments, spacing | `languages/js/code-formatting.md` |
 | Module structure, loader, public/private surface, exports | `languages/js/module-structure.md`, `languages/js/factory-vs-singleton.md` |
 | Dependency and peer-dependency wiring | `languages/js/dependencies.md` |
-| Test layout, loader, and dependency wiring | `dev/testing-local-modules.md` |
+| Test layout, loader, and dependency wiring | `dev/testing-local-modules.md`, `languages/js/unit-test-authoring.md`, `languages/js/module-testing.md` |
 | Error handling and catalogs | `languages/js/error-handling.md` |
 | Validation | `languages/js/validation.md` |
 | Documentation files and their content | `principles/documentation-authoring.md`, `languages/js/module-docs.md` |
