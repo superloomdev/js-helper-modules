@@ -1,0 +1,151 @@
+'use strict';
+
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+
+const {
+  WebFontAdapter,
+  Font,
+  Utils,
+  Debug,
+  docStub,
+  createDocumentStub
+} = require('./loader');
+
+
+// ~~~~~~~~~~~~~~~~~~~~ loadManifest ~~~~~~~~~~~~~~~~~~~~
+
+test('loadManifest injects @font-face CSS into the DOM', async function () {
+
+  const manifest = Font.getManifest().manifest;
+
+  const result = await WebFontAdapter.loadManifest(manifest);
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.error, null);
+
+  // Verify a style node was appended to head
+  assert.strictEqual(docStub._head.children.length, 1);
+
+  const styleNode = docStub._head.children[0];
+  assert.strictEqual(styleNode.tagName, 'style');
+  assert.strictEqual(styleNode.attributes['data-font-loader'], 'helper-font-ext-web');
+
+  // Verify the CSS contains @font-face for Poppins and Lora
+  assert.ok(styleNode.textContent.indexOf('@font-face') !== -1);
+  assert.ok(styleNode.textContent.indexOf('font-family: \'Poppins\'') !== -1);
+  assert.ok(styleNode.textContent.indexOf('font-family: \'Lora\'') !== -1);
+
+  // Cleanup
+  WebFontAdapter.unload();
+
+});
+
+test('loadManifest rejects invalid manifest', async function () {
+
+  const result = await WebFontAdapter.loadManifest('not an object');
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.error.type, 'helper-font-ext-web/invalid-manifest');
+
+});
+
+test('loadManifest returns error when document is unavailable', async function () {
+
+  // Build an adapter with no document and no global document
+  const AdapterNoDoc = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const result = await AdapterNoDoc.loadManifest({});
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.error.type, 'helper-font-ext-web/document-unavailable');
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ isReady ~~~~~~~~~~~~~~~~~~~~
+
+test('isReady returns false before loadManifest', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  const result = FreshAdapter.isReady();
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.ready, false);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('isReady returns true after loadManifest', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  await FreshAdapter.loadManifest(Font.getManifest().manifest);
+
+  const result = FreshAdapter.isReady();
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.ready, true);
+
+  FreshAdapter.unload();
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ unload ~~~~~~~~~~~~~~~~~~~~
+
+test('unload removes the style node from the DOM', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  await FreshAdapter.loadManifest(Font.getManifest().manifest);
+
+  assert.strictEqual(freshDoc._head.children.length, 1);
+
+  FreshAdapter.unload();
+
+  assert.strictEqual(freshDoc._head.children.length, 0);
+
+  const readyResult = FreshAdapter.isReady();
+  assert.strictEqual(readyResult.ready, false);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Constructor validation ~~~~~~~~~~~~~~~~~~~~
+
+test('constructor throws when Font core is not injected', function () {
+
+  assert.throws(function () {
+
+    require('helper-font-ext-web')({
+      Utils: Utils,
+      Debug: Debug
+    });
+
+  }, /Font is required/);
+
+});
