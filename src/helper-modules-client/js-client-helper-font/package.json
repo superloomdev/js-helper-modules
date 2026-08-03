@@ -1,0 +1,25 @@
+{
+  "name": "@superloomdev/js-client-helper-font",
+  "description": "Pure font family registry and @font-face CSS construction. Zero platform dependencies, framework-agnostic. Adapter contract for -ext-web, -ext-rn, -ext-expo extensions",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "font.js",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
