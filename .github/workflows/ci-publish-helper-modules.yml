@@ -71,8 +71,10 @@
 #   45. test-react-timer → publish-react-timer
 #   46. test-client-kv-localstorage → publish-client-kv-localstorage
 #   47. test-rn-kv-mmkv → publish-rn-kv-mmkv
-#   48. test-rnw-font → publish-rnw-font
-#   49. test-rnw-device → publish-rnw-device
+#   48. test-client-font → publish-client-font
+#   49. test-client-font-ext-web → publish-client-font-ext-web
+#   50. test-client-font-ext-rn → publish-client-font-ext-rn
+#   51. test-rnw-device → publish-rnw-device
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -3365,17 +3367,17 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 48: js-rnw-helper-font (needs utils, debug)
-  #   Class I framework module - React + ExpoFont injected via shared_libs
+  #   MODULE 48: js-client-helper-font (needs utils, debug)
+  #   Class G pure core - font registry and @font-face construction, no platform
   # ###########################################################################
 
-  test-rnw-font:
+  test-client-font:
     needs: [detect, publish-rn-kv-mmkv]
     if: |
       always() &&
       !cancelled() &&
       needs.detect.result == 'success' &&
-      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-rnw-helper-font')
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-font')
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -3386,21 +3388,21 @@ jobs:
           node-version: '24'
           registry-url: 'https://npm.pkg.github.com'
       - name: Install and test
-        working-directory: src/helper-modules-client/js-rnw-helper-font
+        working-directory: src/helper-modules-client/js-client-helper-font
         run: |
           npm install
           npm run lint --if-present
           cd _test && npm install && npm test
 
-  publish-rnw-font:
-    needs: [detect, test-rnw-font]
+  publish-client-font:
+    needs: [detect, test-client-font]
     if: |
       !cancelled() &&
       needs.detect.result == 'success' &&
-      needs['test-rnw-font'].result == 'success' &&
+      needs['test-client-font'].result == 'success' &&
       needs.detect.outputs.publish_modules != '[]' &&
       needs.detect.outputs.publish_modules != '' &&
-      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-rnw-helper-font')
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-font')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -3416,7 +3418,7 @@ jobs:
       - name: Pin npm to v10
         run: npm install -g npm@10
       - name: Publish
-        working-directory: src/helper-modules-client/js-rnw-helper-font
+        working-directory: src/helper-modules-client/js-client-helper-font
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
@@ -3430,12 +3432,144 @@ jobs:
 
 
   # ###########################################################################
-  #   MODULE 49: js-rnw-helper-device (needs utils, debug)
-  #   Class I framework module - React + platform APIs injected via shared_libs
+  #   MODULE 49: js-client-helper-font-ext-web (needs utils, debug, font)
+  #   Class H extension - injects @font-face CSS into the DOM
+  #   Must wait for publish-client-font (extension-chaining rule)
+  # ###########################################################################
+
+  test-client-font-ext-web:
+    needs: [detect, publish-client-font]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-font-ext-web')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-font-ext-web
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-font-ext-web:
+    needs: [detect, test-client-font-ext-web]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-font-ext-web'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-font-ext-web')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-font-ext-web
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 50: js-client-helper-font-ext-rn (needs utils, debug, font)
+  #   Class H extension - native font registration via injected loader
+  #   Must wait for publish-client-font (extension-chaining rule)
+  # ###########################################################################
+
+  test-client-font-ext-rn:
+    needs: [detect, publish-client-font-ext-web]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-font-ext-rn')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-font-ext-rn
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-font-ext-rn:
+    needs: [detect, test-client-font-ext-rn]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-font-ext-rn'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-font-ext-rn')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-font-ext-rn
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 51: js-rnw-helper-device (needs utils, debug)
+  #   Class I framework module - RN platform APIs injected via shared_libs
   # ###########################################################################
 
   test-rnw-device:
-    needs: [detect, publish-rnw-font]
+    needs: [detect, publish-client-font-ext-rn]
     if: |
       always() &&
       !cancelled() &&
