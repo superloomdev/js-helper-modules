@@ -4,53 +4,29 @@ const Utils = require('helper-utils')();
 const Debug = require('helper-debug')({ Utils: Utils });
 const Font = require('helper-font')({ Utils: Utils, Debug: Debug });
 
-// Register example families (settled trio: System, Poppins, Lora)
+// Register example families with path (native extensions require local files)
 Font.registerFamilies({
   Poppins: {
     styles: {
-      '400': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecm0.woff2' },
-      '600': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2' }
+      '400': { path: '/app/fonts/poppins-400.ttf' },
+      '600': { path: '/app/fonts/poppins-600.ttf' }
     }
   },
   Lora: {
-    url: 'https://example.com/lora-regular.ttf',
+    path: '/app/fonts/lora-regular.ttf',
     weight: '400'
   }
 });
 
+// The native loader stub is aliased via _test/package.json and the parent
+// package.json devDependencies. The extension requires it directly at module
+// scope — no injection needed.
 
-// --- Minimal native font loader stub ---
-
-// Tracks loaded fonts: { familyName: url }
-const loadedFonts = {};
-
-function createNativeLoaderStub (shouldFail) {
-
-  return {
-    loadFont: function (name, url) {
-
-      if (shouldFail) {
-        return Promise.reject(new Error('stub: font load failed for ' + name));
-      }
-
-      loadedFonts[name] = url;
-      return Promise.resolve();
-
-    }
-  };
-
-}
-
-
-// --- Build the adapter with a stubbed native loader ---
-
-const nativeLoaderStub = createNativeLoaderStub(false);
-
+// Build the adapter — no NativeFontLoader injection needed
 const RNFontAdapter = require('helper-font-ext-rn')({
   Utils: Utils,
   Debug: Debug,
-  Font: Font,
-  NativeFontLoader: nativeLoaderStub
+  Font: Font
 });
 
 
@@ -58,8 +34,6 @@ module.exports = {
   RNFontAdapter: RNFontAdapter,
   Font: Font,
   Utils: Utils,
-  Debug: Debug,
-  nativeLoaderStub: nativeLoaderStub,
-  loadedFonts: loadedFonts,
-  createNativeLoaderStub: createNativeLoaderStub
+  Debug: Debug
 };
+

@@ -1,16 +1,16 @@
 {
-  "name": "@superloomdev/js-client-helper-font-ext-rn-test",
-  "description": "Unit tests for js-client-helper-font-ext-rn",
+  "name": "@superloomdev/js-client-helper-font-ext-expo-test",
+  "description": "Unit tests for js-client-helper-font-ext-expo",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "test": "node --test test.js"
   },
   "dependencies": {
-    "helper-font-ext-rn": "file:../",
+    "helper-font-ext-expo": "file:../",
     "helper-font": "file:../../js-client-helper-font",
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
-    "@vitrion/react-native-load-fonts": "file:./stubs/native-loader.js"
+    "expo-font": "file:./stubs/expo-font.js"
   }
 }

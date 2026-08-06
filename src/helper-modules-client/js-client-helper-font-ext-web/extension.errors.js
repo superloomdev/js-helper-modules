@@ -18,6 +18,11 @@ module.exports = Object.freeze({
   FONT_CORE_UNAVAILABLE: {
     type: 'helper-font-ext-web/font-core-unavailable',
     message: 'Font core module is not injected. Provide shared_libs.Font (the js-client-helper-font instance)'
+  },
+
+  MISSING_URL: {
+    type: 'helper-font-ext-web/missing-url',
+    message: 'Web extension requires a url field. Entries with only path or asset are skipped on web.'
   }
 
 });

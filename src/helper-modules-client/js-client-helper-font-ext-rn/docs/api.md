@@ -11,7 +11,6 @@ const RNFontAdapter = require('@superloomdev/js-client-helper-font-ext-rn')(shar
 | Injection | Source | Description |
 |---|---|---|
 | `Font` | `@superloomdev/js-client-helper-font` | The core font instance |
-| `NativeFontLoader` | `@vitrion/react-native-load-fonts` | The native font loader module |
 | `Utils` | `@superloomdev/js-helper-utils` | Type-check primitives |
 
 ### Optional Injections
@@ -20,11 +19,15 @@ const RNFontAdapter = require('@superloomdev/js-client-helper-font-ext-rn')(shar
 |---|---|---|
 | `Debug` | `@superloomdev/js-helper-debug` | Logging |
 
+### Direct Dependencies
+
+The extension requires `@vitrion/react-native-load-fonts` directly at module scope. It is not injected by the app. The extension calls `loadFontFromFile(name, filePath)` for each font entry that has a `path` field.
+
 ## Functions
 
 ### loadManifest(manifest)
 
-Async. Iterates the manifest, calls the native loader for each font file, and tracks success/failure counts.
+Async. Iterates the manifest, validates each style entry has a `path` (local file path), calls `loadFontFromFile` via the native loader, and tracks success/failure counts.
 
 ```javascript
 const { success, error } = await RNFontAdapter.loadManifest(Font.getManifest().manifest);
@@ -60,5 +63,5 @@ const { success, count, error } = RNFontAdapter.getFailedCount();
 |---|---|---|
 | `INVALID_MANIFEST` | `helper-font-ext-rn/invalid-manifest` | Manifest is not a plain object |
 | `FONT_CORE_UNAVAILABLE` | `helper-font-ext-rn/font-core-unavailable` | Font core not injected |
-| `NATIVE_LOADER_UNAVAILABLE` | `helper-font-ext-rn/native-loader-unavailable` | Native loader not injected |
+| `MISSING_PATH` | `helper-font-ext-rn/missing-path` | Style entry has no `path` field (native extensions require local files) |
 | `LOAD_FAILED` | `helper-font-ext-rn/load-failed` | One or more fonts failed (when `FAIL_ON_ERROR` is true) |

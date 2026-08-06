@@ -1,4 +1,4 @@
-// Info: Validators for helper-font-ext-web.
+// Info: Validators for helper-font-ext-expo.
 //
 // Receives Lib and ERRORS by injection from the loader.
 'use strict';
@@ -16,9 +16,9 @@ module.exports = function (Lib, ERRORS) {
     *********************************************************************/
     validateConfig: function (CONFIG) {
 
-      // PARENT_SELECTOR must be a non-empty string
-      if (!Lib.Utils.isString(CONFIG.PARENT_SELECTOR) || CONFIG.PARENT_SELECTOR.length === 0) {
-        throw new TypeError('helper-font-ext-web: PARENT_SELECTOR must be a non-empty string');
+      // FAIL_ON_ERROR must be a boolean
+      if (!Lib.Utils.isBoolean(CONFIG.FAIL_ON_ERROR)) {
+        throw new TypeError('helper-font-ext-expo: FAIL_ON_ERROR must be a boolean');
       }
 
     },
@@ -45,8 +45,8 @@ module.exports = function (Lib, ERRORS) {
 
     /********************************************************************
     Validate a style entry from the manifest. Ensures the entry has
-    a `url` field (web extensions require URLs for @font-face). Returns
-    the error object when invalid, null when valid.
+    at least one of: asset (Expo requireable), path (local file),
+    or url (web). Returns the error object when invalid, null when valid.
 
     @param {*} entry - Style entry to validate
 
@@ -55,11 +55,15 @@ module.exports = function (Lib, ERRORS) {
     validateStyleEntry: function (entry) {
 
       if (!Lib.Utils.isObject(entry)) {
-        return ERRORS.MISSING_URL;
+        return ERRORS.MISSING_SOURCE;
       }
 
-      if (!Lib.Utils.isString(entry.url) || entry.url.length === 0) {
-        return ERRORS.MISSING_URL;
+      var hasAsset = !Lib.Utils.isNullOrUndefined(entry.asset);
+      var hasPath = Lib.Utils.isString(entry.path) && entry.path.length > 0;
+      var hasUrl = Lib.Utils.isString(entry.url) && entry.url.length > 0;
+
+      if (!hasAsset && !hasPath && !hasUrl) {
+        return ERRORS.MISSING_SOURCE;
       }
 
       return null;

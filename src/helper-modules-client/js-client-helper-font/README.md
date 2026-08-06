@@ -15,7 +15,8 @@ The core is testable in pure Node with zero stubs. No DOM, no React, no react-na
 // Core: register families and resolve tokens
 const Font = require('@superloomdev/js-client-helper-font')(Lib);
 Font.registerFamilies(manifest);
-const { family } = Font.resolveFamily('primaryFamily');
+Font.registerRoles({ primary: 'Poppins_400Regular' });
+const { family } = Font.resolveFamily('primary');
 
 // Web extension: inject @font-face into the DOM
 const WebFontAdapter = require('@superloomdev/js-client-helper-font-ext-web')(Lib);
@@ -26,11 +27,15 @@ await WebFontAdapter.loadManifest(Font.getManifest().manifest);
 
 1. **Pure computation.** No platform dependencies. The core builds strings; extensions inject them.
 
-2. **Adapter contract.** Extensions implement a documented function set. Swap adapters at the loader level without touching app code.
+2. **Multi-source manifest.** Each style entry can have `url` (web), `path` (native), or `asset` (Expo). Register once, load on any platform.
 
-3. **Pre-tested at every release.** A full test suite runs in CI on every push in pure Node. No device or emulator required.
+3. **Role mapping.** Map theme tokens like `'primary'` to concrete families like `'Poppins_400Regular'` via `registerRoles()`.
 
-4. **Designed for human review.** The code is laid out as clearly-marked visual sections so a reviewer can read it top to bottom in order.
+4. **Adapter contract.** Extensions implement a documented function set. Swap adapters at the loader level without touching app code.
+
+5. **Pre-tested at every release.** A full test suite runs in CI on every push in pure Node. No device or emulator required.
+
+6. **Designed for human review.** The code is laid out as clearly-marked visual sections so a reviewer can read it top to bottom in order.
 
 ## Aligned with Superloom Philosophy
 

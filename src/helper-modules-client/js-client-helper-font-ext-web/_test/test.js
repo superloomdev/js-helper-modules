@@ -149,3 +149,44 @@ test('constructor throws when Font core is not injected', function () {
   }, /Font is required/);
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Multi-source manifest ~~~~~~~~~~~~~~~~~~~~
+
+test('loadManifest skips entries without url (native/Expo-only)', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  // Manifest with a path-only entry (no url) — should be skipped
+  const manifest = {
+    NativeOnlyFont: {
+      styles: {
+        '400': { path: '/app/fonts/native-only.ttf', url: null, asset: null, weight: null, style: 'normal' }
+      }
+    },
+    WebFont: {
+      styles: {
+        '400': { url: 'https://example.com/web.woff2', path: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  const result = await FreshAdapter.loadManifest(manifest);
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.error, null);
+
+  // Verify only the WebFont @font-face was injected
+  const styleNode = freshDoc._head.children[0];
+  assert.ok(styleNode.textContent.indexOf('font-family: \'WebFont\'') !== -1);
+  assert.ok(styleNode.textContent.indexOf('NativeOnlyFont') === -1);
+
+  FreshAdapter.unload();
+
+});

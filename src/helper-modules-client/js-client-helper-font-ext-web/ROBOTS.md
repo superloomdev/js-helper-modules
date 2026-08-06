@@ -21,8 +21,8 @@ None. All dependencies are peer dependencies.
 ## Companion Files
 
 - `extension.config.js` - keys: `PARENT_SELECTOR` (default `'head'`)
-- `extension.errors.js` - constants: `DOCUMENT_UNAVAILABLE`, `INVALID_MANIFEST`, `FONT_CORE_UNAVAILABLE`
-- `extension.validators.js` - functions: `validateConfig(CONFIG)`, `validateManifest(manifest)`
+- `extension.errors.js` - constants: `DOCUMENT_UNAVAILABLE`, `INVALID_MANIFEST`, `FONT_CORE_UNAVAILABLE`, `MISSING_URL`
+- `extension.validators.js` - functions: `validateConfig(CONFIG)`, `validateManifest(manifest)`, `validateStyleEntry(entry)`
 
 ## Loader Pattern
 
@@ -47,8 +47,10 @@ Missing `shared_libs.Font` throws at construction time.
 
 ```
 loadManifest(manifest) -> Promise<{ success, error }> | async:yes
-  Builds @font-face CSS strings via Font.buildFontFaceString, creates a <style>
-  node, and appends it to the DOM. manifest is the output of Font.getManifest().
+  Builds @font-face CSS strings via Font.buildFontFaceString for entries
+  with a url field, creates a <style> node, and appends it to the DOM.
+  Entries with only path or asset (native/Expo-only) are silently skipped.
+  manifest is the output of Font.getManifest().
 
 isReady() -> { success, ready, error } | async:no
   Returns whether all fonts have been loaded (style node injected).
@@ -61,6 +63,7 @@ unload() -> { success, error } | async:no
 
 - **Factory-per-loader**: each loader call returns an independent instance
 - **Core builds, extension injects**: `@font-face` strings come from `Font.buildFontFaceString`, never rebuilt locally
+- **URL-only filtering**: entries without `url` (native/Expo-only) are silently skipped
 - **Document injection**: `shared_libs.Document` for testing; falls back to global `document`
 - **No React, no react-native**: pure DOM manipulation
 
@@ -71,3 +74,4 @@ unload() -> { success, error } | async:no
 | `DOCUMENT_UNAVAILABLE` | `helper-font-ext-web/document-unavailable` | No document object available |
 | `INVALID_MANIFEST` | `helper-font-ext-web/invalid-manifest` | Manifest is not a plain object |
 | `FONT_CORE_UNAVAILABLE` | `helper-font-ext-web/font-core-unavailable` | Font core not injected |
+| `MISSING_URL` | `helper-font-ext-web/missing-url` | Style entry has no `url` field (entries skipped, not errored) |

@@ -18,11 +18,11 @@
 
 | Package | Usage |
 |---|---|
-| `@vitrion/react-native-load-fonts` | Required at module scope; calls `loadFontFromFile(name, filePath)` |
+| `expo-font` | Required at module scope; calls `loadAsync(fontDescriptor, source)` |
 
 ## Testing Tiers
 
 | Tier | Runtime | Setup |
 |---|---|---|
-| Emulated | Node.js | Stub `@vitrion/react-native-load-fonts` via `_test/package.json` alias |
-| Integration | React Native | Real native loader; requires RN runtime |
+| Emulated | Node.js | Stub `expo-font` via `_test/package.json` alias |
+| Integration | Expo | Real expo-font; requires Expo runtime |

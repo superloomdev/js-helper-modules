@@ -40,6 +40,30 @@ module.exports = function (Lib, ERRORS) {
 
       return null;
 
+    },
+
+
+    /********************************************************************
+    Validate a style entry from the manifest. Ensures the entry has
+    a `path` field (local file path required by native extensions).
+    Returns the error object when invalid, null when valid.
+
+    @param {*} entry - Style entry to validate
+
+    @return {Object|null} - Error object or null
+    *********************************************************************/
+    validateStyleEntry: function (entry) {
+
+      if (!Lib.Utils.isObject(entry)) {
+        return ERRORS.MISSING_PATH;
+      }
+
+      if (!Lib.Utils.isString(entry.path) || entry.path.length === 0) {
+        return ERRORS.MISSING_PATH;
+      }
+
+      return null;
+
     }
 
   };

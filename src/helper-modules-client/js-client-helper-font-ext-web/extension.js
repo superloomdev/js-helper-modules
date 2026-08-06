@@ -142,6 +142,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
             const styleKey = styleKeys[j];
             const entry = family.styles[styleKey];
 
+            // Skip entries without a url (native/Expo-only entries)
+            const entryError = Validators.validateStyleEntry(entry);
+            if (entryError) {
+              continue;
+            }
+
             // Build the @font-face string from the core
             const result = Lib.Font.buildFontFaceString(
               familyName,
