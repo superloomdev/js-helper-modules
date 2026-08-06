@@ -67,6 +67,7 @@
 #   ╚══════════════════════════════════════════════════════════════════════╝
 #   42. test-client-styler → publish-client-styler
 #   43. test-client-styler-ext-react → publish-client-styler-ext-react
+#   43a. test-client-themer → publish-client-themer
 #   44. test-react-idle → publish-react-idle
 #   45. test-react-timer → publish-react-timer
 #   46. test-client-kv-localstorage → publish-client-kv-localstorage
@@ -3101,6 +3102,70 @@ jobs:
 
 
 
+  # ###########################################################################
+  #   MODULE 43a: js-client-helper-themer (needs utils, debug)
+  #   Pure JS token engine - zero runtime dependencies
+  # ###########################################################################
+
+  test-client-themer:
+    needs: [detect, publish-client-styler-ext-react]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-themer')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-themer
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-themer:
+    needs: [detect, test-client-themer]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-themer'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-themer')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-themer
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
   # ╔═══════════════════════════════════════════════════════════════════════════╗
   # ║  GROUP 3 (continued): NEW CLIENT MODULES                                 ║
   # ║  Class I framework modules + Class E/F storage                            ║
@@ -3112,7 +3177,7 @@ jobs:
   # ###########################################################################
 
   test-react-idle:
-    needs: [detect, publish-client-styler-ext-react]
+    needs: [detect, publish-client-themer]
     if: |
       always() &&
       !cancelled() &&
