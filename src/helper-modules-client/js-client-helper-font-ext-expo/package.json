@@ -1,6 +1,6 @@
 {
-  "name": "@superloomdev/js-client-helper-font-ext-rn",
-  "description": "React Native font loader adapter. Loads font files via @vitrion/react-native-load-fonts. No React imports, no hooks, no components",
+  "name": "@superloomdev/js-client-helper-font-ext-expo",
+  "description": "Expo font loader adapter. Loads fonts via expo-font. No React imports, no hooks, no components",
   "version": "1.0.0",
   "license": "MIT",
   "main": "extension.js",
@@ -17,12 +17,12 @@
     "helper-font": "npm:@superloomdev/js-client-helper-font@^1.0.0"
   },
   "dependencies": {
-    "@vitrion/react-native-load-fonts": "^0.3.1"
+    "expo-font": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
-    "@vitrion/react-native-load-fonts": "file:./_test/stubs/native-loader.js"
+    "expo-font": "file:./_test/stubs/expo-font.js"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

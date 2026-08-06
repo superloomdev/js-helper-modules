@@ -1,25 +1,25 @@
-// Info: React Native font loader adapter for the font family system.
+// Info: Expo font loader adapter for the font family system.
 //
 // Class H extension of js-client-helper-font. Implements the adapter
-// contract: loadManifest and isReady. Uses @vitrion/react-native-load-fonts
-// to load font files natively on iOS and Android via loadFontFromFile.
+// contract: loadManifest and isReady. Uses expo-font's loadAsync to
+// load fonts on native (asset/path) and web (url).
 //
-// The native loader is a direct dependency (not injected by the app).
+// The expo-font package is a direct dependency (not injected by the app).
 // Tests stub it via _test/package.json alias.
 //
 // No React import, no hooks, no components.
 //
-// Compatibility: React Native (iOS, Android). Node.js for testing with
-// a stubbed native loader.
+// Compatibility: Expo (iOS, Android, Web). Node.js for testing with
+// a stubbed expo-font module.
 //
 // Factory pattern: each loader call returns an independent instance with
 // its own loaded state.
 'use strict';
 
 
-// Direct dependency — the native font loader. Required at module scope.
+// Direct dependency — expo-font. Required at module scope.
 // In tests, _test/package.json aliases this to a stub.
-var NativeFonts = require('@vitrion/react-native-load-fonts');
+var ExpoFont = require('expo-font');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -61,7 +61,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Validate Font core injection
   if (Lib.Utils.isNullOrUndefined(Lib.Font)) {
-    throw new TypeError('helper-font-ext-rn: shared_libs.Font is required (the js-client-helper-font instance)');
+    throw new TypeError('helper-font-ext-expo: shared_libs.Font is required (the js-client-helper-font instance)');
   }
 
   // Mutable per-instance state
@@ -92,15 +92,16 @@ Builds the public interface for one instance.
 const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
   ///////////////////////////Public Functions START//////////////////////////////
-  const RNFontAdapter = {
+  const ExpoFontAdapter = {
 
 
     // ~~~~~~~~~~~~~~~~~~~~ Adapter Contract ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
     Load all font families from the core's manifest. Iterates the
-    manifest, calls the native loader for each font file, and tracks
-    success/failure counts.
+    manifest, resolves the best source for each entry (asset on native,
+    url on web, path as fallback), calls expo-font's loadAsync, and
+    tracks success/failure counts.
 
     @param {Object} manifest - The manifest from Font.getManifest()
 
@@ -138,10 +139,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           const styleKey = styleKeys[j];
           const entry = family.styles[styleKey];
 
-          // Build the load promise for this font file
-          const loadPromise = _RN.loadFontFile(
+          // Build the load promise for this font
+          const loadPromise = _Expo.loadFont(
             Lib, CONFIG, ERRORS, Validators, state,
-            familyName, entry
+            familyName, styleKey, entry
           );
 
           loadPromises.push(loadPromise);
@@ -235,43 +236,91 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
   };///////////////////////////Public Functions END//////////////////////////////
 
-  return RNFontAdapter;
+  return ExpoFontAdapter;
 
 };/////////////////////////// createInterface END //////////////////////////////
 
 
 /////////////////////////// Private Functions START ////////////////////////////
-const _RN = {
+const _Expo = {
 
 
   /********************************************************************
-    Load a single font file via the native loader. The native loader
-    expects (name, url) or (name, file path). We pass the family name
-    and the URL from the manifest entry.
+    Load a single font via expo-font's loadAsync. Resolves the best
+    source based on what's available in the entry:
+    1. asset (Expo requireable module ID) — native
+    2. url (remote URL) — web
+    3. path (local file path) — native fallback
+
+    expo-font's loadAsync accepts (familyName, source) where source
+    can be a requireable module, a URI string, or an object with
+    { uri, displayNames, ... }.
 
     @param {Object} Lib       - Dependency container
     @param {Object} CONFIG    - Merged configuration
     @param {Object} ERRORS    - Error catalog
     @param {Object} Validators - Validators singleton
     @param {Object} state     - Mutable state holder
-    @param {String} familyName - Font family name
-    @param {Object} entry      - Manifest style entry { url, weight, style }
+    @param {String} familyName - Font family name (with style suffix)
+    @param {String} styleKey   - Weight/style key
+    @param {Object} entry      - Manifest style entry
 
     @return {Promise<void>}
     *********************************************************************/
-  loadFontFile: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, entry) {
+  loadFont: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, styleKey, entry) {
 
-    // Validate that the entry has a path (native extensions require local files)
-    var pathError = Validators.validateStyleEntry(entry);
-    if (pathError) {
-      throw new Error(pathError.message);
+    // Validate that the entry has at least one source
+    var sourceError = Validators.validateStyleEntry(entry);
+    if (sourceError) {
+      throw new Error(sourceError.message);
     }
 
-    // Call the native loader with the family name and local file path
-    // @vitrion/react-native-load-fonts exposes loadFontFromFile(name, filePath)
-    await NativeFonts.loadFontFromFile(familyName, entry.path);
+    // Resolve the source for expo-font
+    var source = _Expo.resolveSource(entry);
+
+    // expo-font uses the family name as the key. For multiple weights,
+    // we append the style key to create a unique font descriptor.
+    var fontDescriptor = familyName + '_' + styleKey;
+
+    await ExpoFont.loadAsync(fontDescriptor, source);
+
+  },
+
+
+  /********************************************************************
+    Resolve the best source from a manifest entry.
+
+    Priority: asset > url > path
+
+    @param {Object} entry - Manifest style entry
+
+    @return {*} - Source value for expo-font's loadAsync
+    *********************************************************************/
+  resolveSource: function (entry) {
+
+    // Asset (requireable module ID) — highest priority on native
+    if (!Lib_Utils_isNullOrUndefined(entry.asset)) {
+      return entry.asset;
+    }
+
+    // URL — used on web, also works on native with remote fonts
+    if (entry.url && typeof entry.url === 'string' && entry.url.length > 0) {
+      return entry.url;
+    }
+
+    // Path (local file) — fallback on native
+    if (entry.path && typeof entry.path === 'string' && entry.path.length > 0) {
+      return entry.path;
+    }
+
+    return null;
 
   }
 
 
 };////////////////////////// Private Functions END ////////////////////////////
+
+// Minimal helper to avoid passing Lib into resolveSource
+function Lib_Utils_isNullOrUndefined (value) {
+  return value === null || value === undefined;
+}

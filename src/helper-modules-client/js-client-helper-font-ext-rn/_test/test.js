@@ -7,18 +7,13 @@ const {
   RNFontAdapter,
   Font,
   Utils,
-  Debug,
-  loadedFonts,
-  createNativeLoaderStub
+  Debug
 } = require('./loader');
 
 
 // ~~~~~~~~~~~~~~~~~~~~ loadManifest ~~~~~~~~~~~~~~~~~~~~
 
 test('loadManifest loads all fonts via the native loader', async function () {
-
-  // Clear any previously loaded fonts
-  Object.keys(loadedFonts).forEach(function (key) { delete loadedFonts[key]; });
 
   const manifest = Font.getManifest().manifest;
 
@@ -47,13 +42,19 @@ test('loadManifest rejects invalid manifest', async function () {
 
 test('loadManifest with FAIL_ON_ERROR returns error on failure', async function () {
 
-  const failingLoader = createNativeLoaderStub(true);
+  // Register a family with no path to trigger loadFontFile failure
+  Font.registerFamilies({
+    BadFont: {
+      styles: {
+        '400': { url: 'https://example.com/bad.woff2' }
+      }
+    }
+  });
 
   const FailingAdapter = require('helper-font-ext-rn')({
     Utils: Utils,
     Debug: Debug,
-    Font: Font,
-    NativeFontLoader: failingLoader
+    Font: Font
   }, {
     FAIL_ON_ERROR: true
   });
@@ -67,13 +68,11 @@ test('loadManifest with FAIL_ON_ERROR returns error on failure', async function 
 
 test('loadManifest without FAIL_ON_ERROR continues on failure', async function () {
 
-  const failingLoader = createNativeLoaderStub(true);
-
+  // The BadFont entry (url only, no path) will fail validation in loadFontFile
   const LenientAdapter = require('helper-font-ext-rn')({
     Utils: Utils,
     Debug: Debug,
-    Font: Font,
-    NativeFontLoader: failingLoader
+    Font: Font
   });
 
   const result = await LenientAdapter.loadManifest(Font.getManifest().manifest);
@@ -81,12 +80,63 @@ test('loadManifest without FAIL_ON_ERROR continues on failure', async function (
   assert.strictEqual(result.success, true);
   assert.strictEqual(result.error, null);
 
-  // All should have failed
+  // At least the BadFont entry should have failed
   const failedResult = LenientAdapter.getFailedCount();
-  assert.strictEqual(failedResult.count, 3);
+  assert.ok(failedResult.count > 0);
 
-  const loadedResult = LenientAdapter.getLoadedCount();
-  assert.strictEqual(loadedResult.count, 0);
+});
+
+test('loadManifest rejects entry with url but no path', async function () {
+
+  // Build a manifest with a url-only entry
+  const manifest = {
+    UrlOnlyFont: {
+      styles: {
+        '400': { url: 'https://example.com/font.woff2', path: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  const StrictAdapter = require('helper-font-ext-rn')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  }, {
+    FAIL_ON_ERROR: true
+  });
+
+  const result = await StrictAdapter.loadManifest(manifest);
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.error.type, 'helper-font-ext-rn/load-failed');
+
+  // The UrlOnlyFont entry should have failed
+  const failedResult = StrictAdapter.getFailedCount();
+  assert.strictEqual(failedResult.count, 1);
+
+});
+
+test('loadManifest accepts entry with path', async function () {
+
+  // Build a manifest with a path-only entry
+  const manifest = {
+    PathOnlyFont: {
+      styles: {
+        '400': { path: '/app/fonts/path-only.ttf', url: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  const result = await RNFontAdapter.loadManifest(manifest);
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.error, null);
+
+  const loadedResult = RNFontAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 1);
+
+  const failedResult = RNFontAdapter.getFailedCount();
+  assert.strictEqual(failedResult.count, 0);
 
 });
 
@@ -98,8 +148,7 @@ test('isReady returns false before loadManifest', function () {
   const FreshAdapter = require('helper-font-ext-rn')({
     Utils: Utils,
     Debug: Debug,
-    Font: Font,
-    NativeFontLoader: createNativeLoaderStub(false)
+    Font: Font
   });
 
   const result = FreshAdapter.isReady();
@@ -115,11 +164,18 @@ test('isReady returns true after successful loadManifest', async function () {
   const FreshAdapter = require('helper-font-ext-rn')({
     Utils: Utils,
     Debug: Debug,
-    Font: Font,
-    NativeFontLoader: createNativeLoaderStub(false)
+    Font: Font
   });
 
-  await FreshAdapter.loadManifest(Font.getManifest().manifest);
+  const manifest = {
+    TestFont: {
+      styles: {
+        '400': { path: '/app/fonts/test.ttf', url: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  await FreshAdapter.loadManifest(manifest);
 
   const result = FreshAdapter.isReady();
 
@@ -137,24 +193,24 @@ test('constructor throws when Font core is not injected', function () {
 
     require('helper-font-ext-rn')({
       Utils: Utils,
-      Debug: Debug,
-      NativeFontLoader: createNativeLoaderStub(false)
+      Debug: Debug
     });
 
   }, /Font is required/);
 
 });
 
-test('constructor throws when NativeFontLoader is not injected', function () {
+test('constructor does not require NativeFontLoader injection', function () {
 
-  assert.throws(function () {
+  // The extension now requires @vitrion/react-native-load-fonts directly.
+  // No NativeFontLoader in shared_libs — should NOT throw.
+  const Adapter = require('helper-font-ext-rn')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
 
-    require('helper-font-ext-rn')({
-      Utils: Utils,
-      Debug: Debug,
-      Font: Font
-    });
-
-  }, /NativeFontLoader is required/);
+  assert.ok(Adapter);
+  assert.strictEqual(typeof Adapter.loadManifest, 'function');
 
 });

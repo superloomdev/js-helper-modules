@@ -5,6 +5,7 @@
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `DEFAULT_FAMILY` | string | `'System'` | Fallback family when `resolveFamily` cannot find a token |
+| `roles` | object | `{}` | Role-to-family mapping seeded at construction. Can be extended at runtime via `registerRoles()` |
 
 ## Peer Dependencies
 

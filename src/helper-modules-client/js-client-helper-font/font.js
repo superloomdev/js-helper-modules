@@ -29,11 +29,13 @@ let Validators; // validators module, initialized with Lib
 
 
 // Mutable registry state (module-scope).
-// families: { [familyName]: { styles: { [styleKey]: { url, weight, style } } } }
-// tokenMap: { [token]: familyName }
+// families: { [familyName]: { styles: { [styleKey]: { url, path, asset, weight, style } } } }
+// tokenMap: { [token]: familyName }  (direct family-name lookups)
+// roles: { [role]: familyName }     (role-to-family mapping for resolveFamily)
 const registry = {
   families: {},
-  tokenMap: {}
+  tokenMap: {},
+  roles: {}
 };
 
 
@@ -66,6 +68,14 @@ module.exports = function loader (shared_libs, config) {
   registry.families['System'] = { styles: {} };
   registry.tokenMap['System'] = 'System';
 
+  // Seed role mappings from config (if provided)
+  if (CONFIG.roles && Lib.Utils.isObject(CONFIG.roles)) {
+    var roleKeys = Object.keys(CONFIG.roles);
+    for (var r = 0; r < roleKeys.length; r++) {
+      registry.roles[roleKeys[r]] = CONFIG.roles[roleKeys[r]];
+    }
+  }
+
   return Font;
 
 };/////////////////////////// Module-Loader END ///////////////////////////////
@@ -80,18 +90,24 @@ const Font = {
   /********************************************************************
   Register font families from a manifest object. Each key in the
   manifest is a family name; each value is an object with a `styles`
-  map or a flat `url`/`weight`/`style` for a single weight.
+  map or a flat entry for a single weight.
+
+  Each style entry must have at least one source field:
+    - url:   remote URL (used by web extension for @font-face)
+    - path:  local file path (used by native extensions)
+    - asset: requireable module ID (used by Expo extension)
 
   Example manifest:
   {
     Poppins: {
       styles: {
-        '400': { url: 'https://fonts.gstatic.com/.../poppins-400.woff2' },
-        '600': { url: 'https://fonts.gstatic.com/.../poppins-600.woff2' }
+        '400': { url: 'https://fonts.gstatic.com/.../poppins-400.woff2', path: '/app/fonts/poppins-400.ttf' },
+        '600': { url: 'https://fonts.gstatic.com/.../poppins-600.woff2', path: '/app/fonts/poppins-600.ttf' }
       }
     },
     Lora: {
       url: 'https://example.com/lora-regular.ttf',
+      path: '/app/fonts/lora-regular.ttf',
       weight: '400'
     }
   }
@@ -147,10 +163,53 @@ const Font = {
 
 
   /********************************************************************
+  Register role-to-family mappings. Merges into the existing role
+  map, overwriting any existing role mappings. Roles allow
+  resolveFamily to accept theme tokens like 'primary' and resolve
+  them to concrete family names like 'Poppins_400Regular'.
+
+  Example:
+  Font.registerRoles({ primary: 'Poppins_400Regular', secondary: 'Poppins_600SemiBold' });
+
+  @param {Object} roles - Mapping of role names to family names
+
+  @return {Object} - { success, error }
+  *********************************************************************/
+  registerRoles: function (roles) {
+
+    const rolesError = Validators.validateRoles(roles);
+    if (rolesError) {
+
+      return {
+        success: false,
+        error: rolesError
+      };
+
+    }
+
+    var roleKeys = Object.keys(roles);
+    for (var i = 0; i < roleKeys.length; i++) {
+      registry.roles[roleKeys[i]] = roles[roleKeys[i]];
+    }
+
+    return {
+      success: true,
+      error: null
+    };
+
+  },
+
+
+  /********************************************************************
   Resolve a theme token to a concrete font-family string. Returns
   the DEFAULT_FAMILY when the token is not registered.
 
-  @param {String} token - Theme token (family name)
+  Lookup order:
+  1. Role mapping (e.g. 'primary' -> 'Poppins_400Regular')
+  2. Direct family name (e.g. 'Poppins' -> 'Poppins')
+  3. DEFAULT_FAMILY fallback (e.g. 'System')
+
+  @param {String} token - Theme token (role name or family name)
 
   @return {Object} - { success, family, error }
   *********************************************************************/
@@ -168,7 +227,18 @@ const Font = {
 
     }
 
-    // Look up the token in the registry
+    // 1. Check role mapping first (e.g. 'primary' -> 'Poppins_400Regular')
+    if (registry.roles[token]) {
+
+      return {
+        success: true,
+        family: registry.roles[token],
+        error: null
+      };
+
+    }
+
+    // 2. Check direct family-name lookup (e.g. 'Poppins' -> 'Poppins')
     const family = registry.tokenMap[token];
 
     if (family) {
@@ -181,7 +251,7 @@ const Font = {
 
     }
 
-    // Fall back to the default family
+    // 3. Fall back to the default family
     return {
       success: true,
       family: CONFIG.DEFAULT_FAMILY,
@@ -298,7 +368,9 @@ const Font = {
           const entry = family.styles[styleKey];
 
           manifest[familyName].styles[styleKey] = {
-            url: entry.url,
+            url: entry.url || null,
+            path: entry.path || null,
+            asset: entry.asset !== undefined ? entry.asset : null,
             weight: entry.weight || null,
             style: entry.style || 'normal'
           };
@@ -378,6 +450,8 @@ const _Font = {
 
       _Font.registerStyle(familyName, styleKey, {
         url: entry.url,
+        path: entry.path,
+        asset: entry.asset,
         weight: weight,
         style: entry.style || 'normal'
       });
@@ -398,8 +472,16 @@ const _Font = {
   *********************************************************************/
   registerStyle: function (familyName, styleKey, styleEntry) {
 
+    // Validate that at least one source is present
+    var sourceError = Validators.validateStyleEntry(styleEntry);
+    if (sourceError) {
+      throw new TypeError(sourceError.message);
+    }
+
     registry.families[familyName].styles[styleKey] = {
-      url: styleEntry.url,
+      url: styleEntry.url || null,
+      path: styleEntry.path || null,
+      asset: styleEntry.asset !== undefined ? styleEntry.asset : null,
       weight: styleEntry.weight || null,
       style: styleEntry.style || 'normal'
     };

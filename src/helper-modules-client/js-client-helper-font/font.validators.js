@@ -22,6 +22,11 @@ module.exports = function (Lib, ERRORS) {
         throw new TypeError('helper-font: DEFAULT_FAMILY must be a non-empty string');
       }
 
+      // roles must be a plain object (or absent)
+      if (CONFIG.roles !== undefined && (!Lib.Utils.isObject(CONFIG.roles) || Array.isArray(CONFIG.roles))) {
+        throw new TypeError('helper-font: roles must be a plain object');
+      }
+
     },
 
 
@@ -140,6 +145,53 @@ module.exports = function (Lib, ERRORS) {
 
       if (!Lib.Utils.isString(style) || (style !== 'normal' && style !== 'italic')) {
         return ERRORS.INVALID_STYLE;
+      }
+
+      return null;
+
+    },
+
+
+    /********************************************************************
+    Validate a style entry from the manifest. Ensures at least one
+    source field (url, path, or asset) is present. Returns the error
+    object when invalid, null when valid.
+
+    @param {*} entry - Style entry to validate
+
+    @return {Object|null} - Error object or null
+    *********************************************************************/
+    validateStyleEntry: function (entry) {
+
+      if (!Lib.Utils.isObject(entry)) {
+        return ERRORS.MISSING_SOURCE;
+      }
+
+      var hasUrl = Lib.Utils.isString(entry.url) && entry.url.length > 0;
+      var hasPath = Lib.Utils.isString(entry.path) && entry.path.length > 0;
+      var hasAsset = entry.asset !== undefined && entry.asset !== null;
+
+      if (!hasUrl && !hasPath && !hasAsset) {
+        return ERRORS.MISSING_SOURCE;
+      }
+
+      return null;
+
+    },
+
+
+    /********************************************************************
+    Validate a roles mapping object. Returns the error object when
+    invalid, null when valid.
+
+    @param {*} roles - Value to validate as a roles mapping
+
+    @return {Object|null} - Error object or null
+    *********************************************************************/
+    validateRoles: function (roles) {
+
+      if (!Lib.Utils.isObject(roles) || Array.isArray(roles)) {
+        return ERRORS.INVALID_ROLES;
       }
 
       return null;

@@ -4,16 +4,17 @@ const Utils = require('helper-utils')();
 const Debug = require('helper-debug')({ Utils: Utils });
 const Font = require('helper-font')({ Utils: Utils, Debug: Debug });
 
-// Register example families (settled trio: System, Poppins, Lora)
+// Register example families with url (web) and path (native)
 Font.registerFamilies({
   Poppins: {
     styles: {
-      '400': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecm0.woff2' },
-      '600': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2' }
+      '400': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecm0.woff2', path: '/app/fonts/poppins-400.ttf' },
+      '600': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2', path: '/app/fonts/poppins-600.ttf' }
     }
   },
   Lora: {
     url: 'https://example.com/lora-regular.ttf',
+    path: '/app/fonts/lora-regular.ttf',
     weight: '400'
   }
 });

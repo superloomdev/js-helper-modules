@@ -15,9 +15,9 @@ module.exports = Object.freeze({
     message: 'Font core module is not injected. Provide shared_libs.Font (the js-client-helper-font instance)'
   },
 
-  NATIVE_LOADER_UNAVAILABLE: {
-    type: 'helper-font-ext-rn/native-loader-unavailable',
-    message: 'Native font loader is not injected. Provide shared_libs.NativeFontLoader (the @vitrion/react-native-load-fonts module)'
+  MISSING_PATH: {
+    type: 'helper-font-ext-rn/missing-path',
+    message: 'Native extensions require a local file path. Register fonts with path field, not url.'
   },
 
   LOAD_FAILED: {

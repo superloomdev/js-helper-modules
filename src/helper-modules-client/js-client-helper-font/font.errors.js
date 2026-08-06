@@ -38,6 +38,16 @@ module.exports = Object.freeze({
   UNREGISTERED_FAMILY: {
     type: 'helper-font/unregistered-family',
     message: 'Token resolves to a family not in the registry'
+  },
+
+  MISSING_SOURCE: {
+    type: 'helper-font/missing-source',
+    message: 'Style entry must have at least one of: url, path, asset'
+  },
+
+  INVALID_ROLES: {
+    type: 'helper-font/invalid-roles',
+    message: 'Roles must be a plain object mapping role names to family names'
   }
 
 });
