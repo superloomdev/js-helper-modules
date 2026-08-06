@@ -1,0 +1,14 @@
+{
+  "name": "js-client-helper-themer-test",
+  "description": "Test cases for js-client-helper-themer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.js test-failures.js test-integration.js test-typesets.js test-unified.js test-carbon.js"
+  },
+  "dependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-themer": "file:../"
+  }
+}
