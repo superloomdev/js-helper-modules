@@ -425,7 +425,7 @@ test('registerFamilies rejects entry with no source', function () {
       }
     });
 
-  }, /Style entry must have at least one of: url, path, asset/);
+  }, /\[helper-font\] registerStyle: styleEntry must have at least one source field/);
 
 });
 

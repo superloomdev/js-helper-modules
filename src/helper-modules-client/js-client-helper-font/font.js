@@ -177,6 +177,7 @@ const Font = {
   *********************************************************************/
   registerRoles: function (roles) {
 
+    // Validate the roles mapping
     const rolesError = Validators.validateRoles(roles);
     if (rolesError) {
 
@@ -187,6 +188,7 @@ const Font = {
 
     }
 
+    // Merge role mappings into the registry
     const roleKeys = Object.keys(roles);
     for (let i = 0; i < roleKeys.length; i++) {
       registry.roles[roleKeys[i]] = roles[roleKeys[i]];
@@ -362,6 +364,7 @@ const Font = {
 
         manifest[familyName] = { styles: {} };
 
+        // Copy each style entry into the manifest
         for (let j = 0; j < styleKeys.length; j++) {
 
           const styleKey = styleKeys[j];
@@ -461,7 +464,7 @@ const _Font = {
       registry.families[familyName] = { styles: {} };
     }
 
-    // If entry has a `styles` map, register each style
+    // Check for a styles map and register each style entry
     if (entry.styles && Lib.Utils.isObject(entry.styles)) {
 
       const styleKeys = Object.keys(entry.styles);
@@ -477,7 +480,7 @@ const _Font = {
 
     } else {
 
-      // Flat entry: single style with optional weight and style
+      // Handle flat entry as a single style with optional weight
       const weight = entry.weight || '400';
       const styleKey = weight;
 
@@ -508,7 +511,7 @@ const _Font = {
     // Validate that at least one source is present
     const sourceError = Validators.validateStyleEntry(styleEntry);
     if (sourceError) {
-      throw new TypeError(sourceError.message);
+      throw new TypeError('[helper-font] registerStyle: styleEntry must have at least one source field');
     }
 
     registry.families[familyName].styles[styleKey] = {
@@ -534,7 +537,7 @@ const _Font = {
   *********************************************************************/
   constructFontFace: function (name, url, weight, style) {
 
-    // Build the declarations array
+    // Build the font-family and src declarations
     const declarations = [
       'font-family: \'' + name + '\';',
       'src: url(\'' + url + '\');'
