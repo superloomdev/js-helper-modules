@@ -61,7 +61,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Validate Font core injection
   if (Lib.Utils.isNullOrUndefined(Lib.Font)) {
-    throw new TypeError('helper-font-ext-expo: shared_libs.Font is required (the js-client-helper-font instance)');
+    throw new TypeError('[helper-font-ext-expo] shared_libs.Font is required (the js-client-helper-font instance)');
   }
 
   // Mutable per-instance state
@@ -299,16 +299,17 @@ const _Expo = {
     // Validate that the entry has at least one source
     const sourceError = Validators.validateStyleEntry(entry);
     if (sourceError) {
-      throw new Error(sourceError.message);
+      throw new TypeError('[helper-font-ext-expo] loadFont: styleEntry must have at least one source field');
     }
 
     // Resolve the source for expo-font
-    const source = _Expo.resolveSource(entry);
+    const source = _Expo.resolveSource(Lib, entry);
 
     // expo-font uses the family name as the key. For multiple weights,
     // we append the style key to create a unique font descriptor.
     const fontDescriptor = familyName + '_' + styleKey;
 
+    // Load the font via expo-font's loadAsync
     await ExpoFont.loadAsync(fontDescriptor, source);
 
   },
@@ -319,24 +320,25 @@ const _Expo = {
 
     Priority: asset > url > path
 
+    @param {Object} Lib   - Dependency container (uses Lib.Utils)
     @param {Object} entry - Manifest style entry
 
     @return {*} - Source value for expo-font's loadAsync
     *********************************************************************/
-  resolveSource: function (entry) {
+  resolveSource: function (Lib, entry) {
 
-    // Asset (requireable module ID) — highest priority on native
-    if (!Lib_Utils_isNullOrUndefined(entry.asset)) {
+    // Check for asset source (highest priority on native)
+    if (!Lib.Utils.isNullOrUndefined(entry.asset)) {
       return entry.asset;
     }
 
-    // URL — used on web, also works on native with remote fonts
-    if (entry.url && typeof entry.url === 'string' && entry.url.length > 0) {
+    // Check for URL source (web, also works on native with remote fonts)
+    if (Lib.Utils.isString(entry.url) && entry.url.length > 0) {
       return entry.url;
     }
 
-    // Path (local file) — fallback on native
-    if (entry.path && typeof entry.path === 'string' && entry.path.length > 0) {
+    // Check for path source (local file, fallback on native)
+    if (Lib.Utils.isString(entry.path) && entry.path.length > 0) {
       return entry.path;
     }
 
@@ -346,8 +348,3 @@ const _Expo = {
 
 
 };////////////////////////// Private Functions END ////////////////////////////
-
-// Minimal helper to avoid passing Lib into resolveSource
-function Lib_Utils_isNullOrUndefined (value) {
-  return value === null || value === undefined;
-}
