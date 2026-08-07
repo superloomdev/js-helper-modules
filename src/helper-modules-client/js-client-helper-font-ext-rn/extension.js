@@ -61,7 +61,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Validate Font core injection
   if (Lib.Utils.isNullOrUndefined(Lib.Font)) {
-    throw new TypeError('helper-font-ext-rn: shared_libs.Font is required (the js-client-helper-font instance)');
+    throw new TypeError('[helper-font-ext-rn] shared_libs.Font is required (the js-client-helper-font instance)');
   }
 
   // Mutable per-instance state
