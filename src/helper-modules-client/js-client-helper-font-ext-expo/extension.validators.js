@@ -58,9 +58,9 @@ module.exports = function (Lib, ERRORS) {
         return ERRORS.MISSING_SOURCE;
       }
 
-      var hasAsset = !Lib.Utils.isNullOrUndefined(entry.asset);
-      var hasPath = Lib.Utils.isString(entry.path) && entry.path.length > 0;
-      var hasUrl = Lib.Utils.isString(entry.url) && entry.url.length > 0;
+      const hasAsset = !Lib.Utils.isNullOrUndefined(entry.asset);
+      const hasPath = Lib.Utils.isString(entry.path) && entry.path.length > 0;
+      const hasUrl = Lib.Utils.isString(entry.url) && entry.url.length > 0;
 
       if (!hasAsset && !hasPath && !hasUrl) {
         return ERRORS.MISSING_SOURCE;

@@ -19,7 +19,7 @@
 
 // Direct dependency — the native font loader. Required at module scope.
 // In tests, _test/package.json aliases this to a stub.
-var NativeFonts = require('@vitrion/react-native-load-fonts');
+const NativeFonts = require('@vitrion/react-native-load-fonts');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -262,7 +262,7 @@ const _RN = {
   loadFontFile: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, entry) {
 
     // Validate that the entry has a path (native extensions require local files)
-    var pathError = Validators.validateStyleEntry(entry);
+    const pathError = Validators.validateStyleEntry(entry);
     if (pathError) {
       throw new Error(pathError.message);
     }

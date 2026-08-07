@@ -3,25 +3,25 @@
 // Stub for expo-font in Node tests.
 // Exposes loadAsync(fontDescriptor, source) matching the real API.
 
-var loadedFonts = {};
-var shouldFail = false;
+const loadedFonts = {};
+let shouldFail = false;
 
 function setShouldFail (flag) {
   shouldFail = flag;
 }
 
 function getLoadedFonts () {
-  var copy = {};
-  var keys = Object.keys(loadedFonts);
-  for (var i = 0; i < keys.length; i++) {
+  const copy = {};
+  const keys = Object.keys(loadedFonts);
+  for (let i = 0; i < keys.length; i++) {
     copy[keys[i]] = loadedFonts[keys[i]];
   }
   return copy;
 }
 
 function clearLoadedFonts () {
-  var keys = Object.keys(loadedFonts);
-  for (var i = 0; i < keys.length; i++) {
+  const keys = Object.keys(loadedFonts);
+  for (let i = 0; i < keys.length; i++) {
     delete loadedFonts[keys[i]];
   }
 }
