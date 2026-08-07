@@ -18,7 +18,7 @@ module.exports = function (Lib, ERRORS) {
 
       // FAIL_ON_ERROR must be a boolean
       if (!Lib.Utils.isBoolean(CONFIG.FAIL_ON_ERROR)) {
-        throw new TypeError('helper-font-ext-expo: FAIL_ON_ERROR must be a boolean');
+        throw new TypeError('[helper-font-ext-expo] FAIL_ON_ERROR must be a boolean');
       }
 
     },
