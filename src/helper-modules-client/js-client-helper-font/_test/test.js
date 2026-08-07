@@ -284,6 +284,75 @@ test('constructor throws on invalid roles type', function () {
 });
 
 
+// ~~~~~~~~~~~~~~~~~~~~ isRegistered ~~~~~~~~~~~~~~~~~~~~
+
+test('isRegistered returns true for System (seeded at construction)', function () {
+
+  const result = Font.isRegistered('System');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.registered, true);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('isRegistered returns true for a registered family', function () {
+
+  Font.registerFamilies({
+    IsRegTestFont: {
+      styles: { '400': { url: 'https://example.com/isreg.woff2' } }
+    }
+  });
+
+  const result = Font.isRegistered('IsRegTestFont');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.registered, true);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('isRegistered returns false for an unregistered family', function () {
+
+  const result = Font.isRegistered('NonExistentFont');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.registered, false);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('isRegistered rejects empty string', function () {
+
+  const result = Font.isRegistered('');
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.registered, false);
+  assert.strictEqual(result.error.type, 'helper-font/invalid-family-name');
+
+});
+
+test('isRegistered rejects non-string input', function () {
+
+  const result = Font.isRegistered(123);
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.registered, false);
+  assert.strictEqual(result.error.type, 'helper-font/invalid-family-name');
+
+});
+
+test('isRegistered rejects null input', function () {
+
+  const result = Font.isRegistered(null);
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.registered, false);
+  assert.strictEqual(result.error.type, 'helper-font/invalid-family-name');
+
+});
+
+
 // ~~~~~~~~~~~~~~~~~~~~ Multi-source manifest ~~~~~~~~~~~~~~~~~~~~
 
 test('registerFamilies with path only (native-only)', function () {

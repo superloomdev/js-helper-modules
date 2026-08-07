@@ -9,7 +9,7 @@
 // extensions inject them into the platform (DOM, native, Expo).
 //
 // Provides: registerFamilies, resolveFamily, buildFontFaceString,
-//           getManifest, getRegisteredFamilies.
+//           getManifest, getRegisteredFamilies, isRegistered.
 //
 // Compatibility: Node.js 18+ and any JavaScript runtime. No platform
 // dependencies.
@@ -400,6 +400,39 @@ const Font = {
     return {
       success: true,
       families: Object.keys(registry.families),
+      error: null
+    };
+
+  },
+
+
+  /********************************************************************
+  Check whether a family name is registered in the font registry.
+  Returns true for any family added via registerFamilies plus the
+  seeded 'System' family.
+
+  @param {String} familyName - The family name to check
+
+  @return {Object} - { success, registered, error }
+  *********************************************************************/
+  isRegistered: function (familyName) {
+
+    // Validate the family name
+    const nameError = Validators.validateFamilyName(familyName);
+    if (nameError) {
+
+      return {
+        success: false,
+        registered: false,
+        error: nameError
+      };
+
+    }
+
+    // Check the registry for the family name
+    return {
+      success: true,
+      registered: Object.prototype.hasOwnProperty.call(registry.families, familyName),
       error: null
     };
 

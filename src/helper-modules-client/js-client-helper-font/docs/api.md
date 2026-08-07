@@ -131,6 +131,18 @@ Font.getRegisteredFamilies();
 // { success: true, families: ['System', 'Poppins', 'Lora'], error: null }
 ```
 
+### isRegistered(familyName)
+
+Checks whether a family name is in the registry. Returns `true` for any family added via `registerFamilies` plus the seeded 'System' family.
+
+```javascript
+Font.isRegistered('Poppins');
+// { success: true, registered: true, error: null }
+
+Font.isRegistered('Unknown');
+// { success: true, registered: false, error: null }
+```
+
 ## Adapter Contract
 
 Extensions (`-ext-web`, `-ext-rn`, `-ext-expo`) must export a loader function
