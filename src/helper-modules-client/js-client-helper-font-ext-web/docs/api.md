@@ -38,6 +38,14 @@ Returns whether all fonts have been loaded.
 const { success, ready, error } = WebFontAdapter.isReady();
 ```
 
+### isFamilyLoaded(familyName)
+
+Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
+
+```javascript
+const { success, loaded, error } = WebFontAdapter.isFamilyLoaded('Poppins');
+```
+
 ### unload()
 
 Removes the injected `<style>` node from the DOM.

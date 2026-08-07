@@ -151,6 +151,120 @@ test('constructor throws when Font core is not injected', function () {
 });
 
 
+// ~~~~~~~~~~~~~~~~~~~~ isFamilyLoaded ~~~~~~~~~~~~~~~~~~~~
+
+test('isFamilyLoaded returns false before loadManifest', function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  const result = FreshAdapter.isFamilyLoaded('Poppins');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.loaded, false);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('isFamilyLoaded returns true after loadManifest', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  await FreshAdapter.loadManifest(Font.getManifest().manifest);
+
+  const result = FreshAdapter.isFamilyLoaded('Poppins');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.loaded, true);
+
+  FreshAdapter.unload();
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Incremental loading ~~~~~~~~~~~~~~~~~~~~
+
+test('loadManifest skips already-loaded families on second call', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  // First load with Poppins + Lora
+  await FreshAdapter.loadManifest(Font.getManifest().manifest);
+
+  assert.strictEqual(freshDoc._head.children.length, 1);
+
+  // Second load with same manifest - should skip all families
+  await FreshAdapter.loadManifest(Font.getManifest().manifest);
+
+  // No new style node should be appended
+  assert.strictEqual(freshDoc._head.children.length, 1);
+
+  // isReady should still be true
+  const readyResult = FreshAdapter.isReady();
+  assert.strictEqual(readyResult.ready, true);
+
+  FreshAdapter.unload();
+
+});
+
+test('loadManifest with partial manifest loads only new families', async function () {
+
+  const freshDoc = createDocumentStub();
+  const FreshAdapter = require('helper-font-ext-web')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font,
+    Document: freshDoc
+  });
+
+  // First load with Poppins only
+  await FreshAdapter.loadManifest({
+    Poppins: {
+      styles: {
+        '400': { url: 'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecm0.woff2', path: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  });
+
+  assert.strictEqual(freshDoc._head.children.length, 1);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('Poppins').loaded, true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('Lora').loaded, false);
+
+  // Second load with Lora only (new family)
+  await FreshAdapter.loadManifest({
+    Lora: {
+      styles: {
+        '400': { url: 'https://example.com/lora-regular.ttf', path: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  });
+
+  // A new style node should be appended for the new family
+  assert.strictEqual(freshDoc._head.children.length, 2);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('Lora').loaded, true);
+
+  FreshAdapter.unload();
+
+});
+
+
 // ~~~~~~~~~~~~~~~~~~~~ Multi-source manifest ~~~~~~~~~~~~~~~~~~~~
 
 test('loadManifest skips entries without url (native/Expo-only)', async function () {
