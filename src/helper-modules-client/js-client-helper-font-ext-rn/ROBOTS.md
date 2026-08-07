@@ -44,7 +44,7 @@ Missing `shared_libs.Font` throws at construction time. The native loader (`@vit
 |---|---|---|---|
 | `FAIL_ON_ERROR` | boolean | `false` | No |
 
-## Exported Functions (4 total)
+## Exported Functions (5 total)
 
 ```
 loadManifest(manifest) -> Promise<{ success, error }> | async:yes
@@ -54,6 +54,10 @@ loadManifest(manifest) -> Promise<{ success, error }> | async:yes
 
 isReady() -> { success, ready, error } | async:no
   Returns whether all fonts have been loaded.
+
+isFamilyLoaded(familyName) -> { success, loaded, error } | async:no
+  Checks whether a specific font family has been loaded by this adapter.
+  Used for incremental loading to skip already-loaded families.
 
 getLoadedCount() -> { success, count, error } | async:no
   Returns the count of successfully loaded fonts.

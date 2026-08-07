@@ -41,6 +41,14 @@ Returns whether all fonts have been loaded.
 const { success, ready, error } = RNFontAdapter.isReady();
 ```
 
+### isFamilyLoaded(familyName)
+
+Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
+
+```javascript
+const { success, loaded, error } = RNFontAdapter.isFamilyLoaded('Poppins');
+```
+
 ### getLoadedCount()
 
 Returns the count of successfully loaded fonts.
