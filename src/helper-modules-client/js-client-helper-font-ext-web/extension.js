@@ -56,7 +56,7 @@ module.exports = function loader (shared_libs, config) {
 
   // Validate Font core injection
   if (Lib.Utils.isNullOrUndefined(Lib.Font)) {
-    throw new TypeError('helper-font-ext-web: shared_libs.Font is required (the js-client-helper-font instance)');
+    throw new TypeError('[helper-font-ext-web] shared_libs.Font is required (the js-client-helper-font instance)');
   }
 
   // Mutable per-instance state
@@ -202,6 +202,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       } catch (domError) {
 
+        // Log the DOM error and return a document-unavailable envelope
         if (Lib.Debug) {
           Lib.Debug.debug('helper-font-ext-web loadManifest failed', {
             message: domError.message
@@ -262,10 +263,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     unload: function () {
 
+      // Remove the style node from the DOM if present
       if (state.styleNode && state.styleNode.parentNode) {
         state.styleNode.parentNode.removeChild(state.styleNode);
       }
 
+      // Reset all loaded state
       state.styleNode = null;
       state.loaded = false;
       state.loadedFamilies.clear();

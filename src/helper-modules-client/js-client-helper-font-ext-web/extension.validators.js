@@ -18,7 +18,7 @@ module.exports = function (Lib, ERRORS) {
 
       // PARENT_SELECTOR must be a non-empty string
       if (!Lib.Utils.isString(CONFIG.PARENT_SELECTOR) || CONFIG.PARENT_SELECTOR.length === 0) {
-        throw new TypeError('helper-font-ext-web: PARENT_SELECTOR must be a non-empty string');
+        throw new TypeError('[helper-font-ext-web] PARENT_SELECTOR must be a non-empty string');
       }
 
     },
