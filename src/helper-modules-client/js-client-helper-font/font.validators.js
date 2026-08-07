@@ -19,12 +19,12 @@ module.exports = function (Lib, ERRORS) {
 
       // DEFAULT_FAMILY must be a non-empty string
       if (!Lib.Utils.isString(CONFIG.DEFAULT_FAMILY) || CONFIG.DEFAULT_FAMILY.length === 0) {
-        throw new TypeError('helper-font: DEFAULT_FAMILY must be a non-empty string');
+        throw new TypeError('[helper-font] DEFAULT_FAMILY must be a non-empty string');
       }
 
       // roles must be a plain object (or absent)
       if (CONFIG.roles !== undefined && (!Lib.Utils.isObject(CONFIG.roles) || Array.isArray(CONFIG.roles))) {
-        throw new TypeError('helper-font: roles must be a plain object');
+        throw new TypeError('[helper-font] roles must be a plain object');
       }
 
     },
