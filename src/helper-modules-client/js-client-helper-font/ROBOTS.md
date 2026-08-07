@@ -42,7 +42,7 @@ const Font = require('@superloomdev/js-client-helper-font')({
 | `DEFAULT_FAMILY` | string | `'System'` | No |
 | `roles` | object | `{}` | No |
 
-## Exported Functions (6 total)
+## Exported Functions (7 total)
 
 ```
 registerFamilies(manifest) -> { success, error } | async:no
@@ -70,6 +70,10 @@ getManifest() -> { success, manifest, error } | async:no
 
 getRegisteredFamilies() -> { success, families, error } | async:no
   Returns the list of registered family names, including 'System'.
+
+isRegistered(familyName) -> { success, registered, error } | async:no
+  Checks whether a family name is in the registry. Returns true for any
+  family added via registerFamilies plus the seeded 'System' family.
 ```
 
 ## Adapter Contract
