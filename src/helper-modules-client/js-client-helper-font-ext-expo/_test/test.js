@@ -229,3 +229,121 @@ test('constructor does not require expo-font injection', function () {
   assert.strictEqual(typeof Adapter.loadManifest, 'function');
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ isFamilyLoaded ~~~~~~~~~~~~~~~~~~~~
+
+test('isFamilyLoaded returns false before loadManifest', function () {
+
+  const FreshAdapter = require('helper-font-ext-expo')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const result = FreshAdapter.isFamilyLoaded('TestFont');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.loaded, false);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('isFamilyLoaded returns true after loadManifest', async function () {
+
+  const FreshAdapter = require('helper-font-ext-expo')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest = {
+    TestFontIsFam: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  await FreshAdapter.loadManifest(manifest);
+
+  const result = FreshAdapter.isFamilyLoaded('TestFontIsFam');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.loaded, true);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Incremental loading ~~~~~~~~~~~~~~~~~~~~
+
+test('loadManifest skips already-loaded families on second call', async function () {
+
+  const FreshAdapter = require('helper-font-ext-expo')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest = {
+    IncFont1: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  // First load
+  await FreshAdapter.loadManifest(manifest);
+
+  assert.strictEqual(FreshAdapter.isReady().ready, true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('IncFont1').loaded, true);
+
+  // Second load with same manifest - should skip
+  await FreshAdapter.loadManifest(manifest);
+
+  // isReady should still be true
+  assert.strictEqual(FreshAdapter.isReady().ready, true);
+
+  // loadedCount should be 0 (nothing new loaded in second call)
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 0);
+
+});
+
+test('loadManifest with partial manifest loads only new families', async function () {
+
+  const FreshAdapter = require('helper-font-ext-expo')({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  // First load with one family
+  await FreshAdapter.loadManifest({
+    PartialFont1: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  });
+
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont1').loaded, true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont2').loaded, false);
+
+  // Second load with a new family
+  await FreshAdapter.loadManifest({
+    PartialFont2: {
+      styles: {
+        '400': { asset: 2, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  });
+
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont2').loaded, true);
+
+  // Only the new family should have been loaded
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 1);
+
+});
