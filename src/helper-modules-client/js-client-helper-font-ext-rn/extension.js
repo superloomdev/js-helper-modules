@@ -68,7 +68,8 @@ module.exports = function loader (shared_libs, config) {
   const state = {
     loaded: false,
     loadedCount: 0,
-    failedCount: 0
+    failedCount: 0,
+    loadedFamilies: new Set()
   };
 
   return createInterface(Lib, CONFIG, ERRORS, Validators, state);
@@ -119,8 +120,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       }
 
-      // Reset state for this load cycle
-      state.loaded = false;
+      // Reset counters for this load cycle (loaded state stays true for incremental loading)
       state.loadedCount = 0;
       state.failedCount = 0;
 
@@ -130,6 +130,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       for (let i = 0; i < familyNames.length; i++) {
 
         const familyName = familyNames[i];
+
+        // Skip families already loaded (incremental loading)
+        if (state.loadedFamilies.has(familyName)) {
+          continue;
+        }
+
         const family = manifest[familyName];
         const styleKeys = Object.keys(family.styles);
 
@@ -147,6 +153,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           loadPromises.push(loadPromise);
 
         }
+
+        // Track this family as loaded
+        state.loadedFamilies.add(familyName);
 
       }
 
@@ -194,6 +203,24 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       return {
         success: true,
         ready: state.loaded,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Check whether a specific font family has been loaded by this adapter.
+
+    @param {String} familyName - The family name to check
+
+    @return {Object} - { success, loaded, error }
+    *********************************************************************/
+    isFamilyLoaded: function (familyName) {
+
+      return {
+        success: true,
+        loaded: state.loadedFamilies.has(familyName),
         error: null
       };
 
