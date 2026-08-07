@@ -43,6 +43,14 @@ Returns whether all fonts have been loaded.
 const { success, ready, error } = ExpoFontAdapter.isReady();
 ```
 
+### isFamilyLoaded(familyName)
+
+Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
+
+```javascript
+const { success, loaded, error } = ExpoFontAdapter.isFamilyLoaded('Poppins');
+```
+
 ### getLoadedCount()
 
 Returns the count of successfully loaded fonts.
