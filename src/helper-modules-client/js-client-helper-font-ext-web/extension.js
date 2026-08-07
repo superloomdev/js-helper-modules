@@ -62,7 +62,8 @@ module.exports = function loader (shared_libs, config) {
   // Mutable per-instance state
   const state = {
     loaded: false,
-    styleNode: null
+    styleNode: null,
+    loadedFamilies: new Set()
   };
 
   return createInterface(Lib, CONFIG, ERRORS, Validators, state);
@@ -134,6 +135,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         for (let i = 0; i < familyNames.length; i++) {
 
           const familyName = familyNames[i];
+
+          // Skip families already loaded (incremental loading)
+          if (state.loadedFamilies.has(familyName)) {
+            continue;
+          }
+
           const family = manifest[familyName];
           const styleKeys = Object.keys(family.styles);
 
@@ -162,23 +169,31 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
           }
 
+          // Track this family as loaded
+          state.loadedFamilies.add(familyName);
+
         }
 
-        // Create a <style> element and inject the CSS
-        const styleNode = doc.createElement('style');
-        styleNode.setAttribute('data-font-loader', 'helper-font-ext-web');
-        styleNode.textContent = cssStrings.join('\n');
+        // Only inject when there are new CSS strings to add
+        if (cssStrings.length > 0) {
 
-        // Append to the configured parent element
-        const parent = doc.querySelector(CONFIG.PARENT_SELECTOR) || doc.head || doc.documentElement;
+          // Create a <style> element and inject the CSS
+          const styleNode = doc.createElement('style');
+          styleNode.setAttribute('data-font-loader', 'helper-font-ext-web');
+          styleNode.textContent = cssStrings.join('\n');
 
-        if (parent) {
-          parent.appendChild(styleNode);
+          // Append to the configured parent element
+          const parent = doc.querySelector(CONFIG.PARENT_SELECTOR) || doc.head || doc.documentElement;
+
+          if (parent) {
+            parent.appendChild(styleNode);
+          }
+
+          // Record the style node and mark as loaded
+          state.styleNode = styleNode;
+          state.loaded = true;
+
         }
-
-        // Record the style node and mark as loaded
-        state.styleNode = styleNode;
-        state.loaded = true;
 
         return {
           success: true,
@@ -219,6 +234,24 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     },
 
 
+    /********************************************************************
+    Check whether a specific font family has been loaded by this adapter.
+
+    @param {String} familyName - The family name to check
+
+    @return {Object} - { success, loaded, error }
+    *********************************************************************/
+    isFamilyLoaded: function (familyName) {
+
+      return {
+        success: true,
+        loaded: state.loadedFamilies.has(familyName),
+        error: null
+      };
+
+    },
+
+
     // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
@@ -235,6 +268,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       state.styleNode = null;
       state.loaded = false;
+      state.loadedFamilies.clear();
 
       return {
         success: true,

@@ -43,7 +43,7 @@ Missing `shared_libs.Font` throws at construction time.
 |---|---|---|---|
 | `PARENT_SELECTOR` | string | `'head'` | No |
 
-## Exported Functions (3 total)
+## Exported Functions (4 total)
 
 ```
 loadManifest(manifest) -> Promise<{ success, error }> | async:yes
@@ -54,6 +54,10 @@ loadManifest(manifest) -> Promise<{ success, error }> | async:yes
 
 isReady() -> { success, ready, error } | async:no
   Returns whether all fonts have been loaded (style node injected).
+
+isFamilyLoaded(familyName) -> { success, loaded, error } | async:no
+  Checks whether a specific font family has been loaded by this adapter.
+  Used for incremental loading to skip already-loaded families.
 
 unload() -> { success, error } | async:no
   Removes the injected <style> node from the DOM. Useful for hot reload or cleanup.
