@@ -19,7 +19,7 @@
 
 // Direct dependency — expo-font. Required at module scope.
 // In tests, _test/package.json aliases this to a stub.
-var ExpoFont = require('expo-font');
+const ExpoFont = require('expo-font');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -270,17 +270,17 @@ const _Expo = {
   loadFont: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, styleKey, entry) {
 
     // Validate that the entry has at least one source
-    var sourceError = Validators.validateStyleEntry(entry);
+    const sourceError = Validators.validateStyleEntry(entry);
     if (sourceError) {
       throw new Error(sourceError.message);
     }
 
     // Resolve the source for expo-font
-    var source = _Expo.resolveSource(entry);
+    const source = _Expo.resolveSource(entry);
 
     // expo-font uses the family name as the key. For multiple weights,
     // we append the style key to create a unique font descriptor.
-    var fontDescriptor = familyName + '_' + styleKey;
+    const fontDescriptor = familyName + '_' + styleKey;
 
     await ExpoFont.loadAsync(fontDescriptor, source);
 

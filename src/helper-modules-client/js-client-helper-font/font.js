@@ -70,8 +70,8 @@ module.exports = function loader (shared_libs, config) {
 
   // Seed role mappings from config (if provided)
   if (CONFIG.roles && Lib.Utils.isObject(CONFIG.roles)) {
-    var roleKeys = Object.keys(CONFIG.roles);
-    for (var r = 0; r < roleKeys.length; r++) {
+    const roleKeys = Object.keys(CONFIG.roles);
+    for (let r = 0; r < roleKeys.length; r++) {
       registry.roles[roleKeys[r]] = CONFIG.roles[roleKeys[r]];
     }
   }
@@ -187,8 +187,8 @@ const Font = {
 
     }
 
-    var roleKeys = Object.keys(roles);
-    for (var i = 0; i < roleKeys.length; i++) {
+    const roleKeys = Object.keys(roles);
+    for (let i = 0; i < roleKeys.length; i++) {
       registry.roles[roleKeys[i]] = roles[roleKeys[i]];
     }
 
@@ -473,7 +473,7 @@ const _Font = {
   registerStyle: function (familyName, styleKey, styleEntry) {
 
     // Validate that at least one source is present
-    var sourceError = Validators.validateStyleEntry(styleEntry);
+    const sourceError = Validators.validateStyleEntry(styleEntry);
     if (sourceError) {
       throw new TypeError(sourceError.message);
     }

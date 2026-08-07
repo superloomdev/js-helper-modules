@@ -349,7 +349,7 @@ test('registerFamilies rejects entry with no source', function () {
   assert.throws(function () {
 
     Font.registerFamilies({
-    BadFont: {
+      BadFont: {
         styles: {
           '400': { weight: '400', style: 'normal' }
         }
