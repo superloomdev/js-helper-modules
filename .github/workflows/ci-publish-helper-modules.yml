@@ -75,6 +75,7 @@
 #   48. test-client-font → publish-client-font
 #   49. test-client-font-ext-web → publish-client-font-ext-web
 #   50. test-client-font-ext-rn → publish-client-font-ext-rn
+#   50a. test-client-font-ext-expo → publish-client-font-ext-expo
 #   51. test-rnw-device → publish-rnw-device
 #
 # Workflow behavior:
@@ -3629,12 +3630,78 @@ jobs:
 
 
   # ###########################################################################
+  #   MODULE 50a: js-client-helper-font-ext-expo (needs utils, debug, font)
+  #   Class H extension - font registration via expo-font
+  #   Must wait for publish-client-font-ext-rn (extension-chaining rule)
+  # ###########################################################################
+
+  test-client-font-ext-expo:
+    needs: [detect, publish-client-font-ext-rn]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-font-ext-expo')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-client/js-client-helper-font-ext-expo
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-client-font-ext-expo:
+    needs: [detect, test-client-font-ext-expo]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-client-font-ext-expo'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-font-ext-expo')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-client/js-client-helper-font-ext-expo
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
   #   MODULE 51: js-rnw-helper-device (needs utils, debug)
   #   Class I framework module - RN platform APIs injected via shared_libs
   # ###########################################################################
 
   test-rnw-device:
-    needs: [detect, publish-client-font-ext-rn]
+    needs: [detect, publish-client-font-ext-expo]
     if: |
       always() &&
       !cancelled() &&
