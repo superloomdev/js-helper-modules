@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "node --test test.js"
+    "test": "node --test test.js test-concurrency.js"
   },
   "dependencies": {
     "helper-font-ext-rn": "file:../",

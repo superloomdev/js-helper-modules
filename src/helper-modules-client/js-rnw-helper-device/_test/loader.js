@@ -13,11 +13,13 @@ function createDimensionsStub (width, height) {
 
   const listeners = [];
 
+  let current = { width: width, height: height };
+
   return {
 
     get: function () {
 
-      return { width: width, height: height };
+      return { width: current.width, height: current.height };
 
     },
 
@@ -29,6 +31,10 @@ function createDimensionsStub (width, height) {
 
     // Test helper: simulate a dimension change event
     _emitChange: function (dims) {
+
+      const window = (dims && dims.window) || dims || {};
+
+      current = { width: window.width, height: window.height };
 
       for (let i = 0; i < listeners.length; i++) {
 
@@ -83,11 +89,20 @@ function createAppStateStub () {
 
 function createNetInfoStub (isConnected, type) {
 
+  let state = { isConnected: isConnected, type: type };
+
   return {
 
     fetch: async function () {
 
-      return { isConnected: isConnected, type: type };
+      return { isConnected: state.isConnected, type: state.type };
+
+    },
+
+    // Test helper: change the network state returned by fetch
+    _setState: function (next) {
+
+      state = { isConnected: next.isConnected, type: next.type };
 
     }
 
