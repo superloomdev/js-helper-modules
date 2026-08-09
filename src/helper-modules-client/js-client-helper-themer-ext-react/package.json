@@ -1,0 +1,27 @@
+{
+  "name": "@superloomdev/js-client-helper-themer-ext-react",
+  "description": "React extension for js-client-helper-themer. Provides ThemeProvider, useTheme, useTokens, useThemeController, and ThemeContext. Works with React DOM, React Native, and React Native Web.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "extension.js",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "helper-themer": "npm:@superloomdev/js-client-helper-themer@^1.0.0",
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
