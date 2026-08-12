@@ -68,7 +68,7 @@ resolved.stats.route;           // { literal: 4, alias: 1, rule: 3, ... }
 resolved.violations;            // contrast failures that were found
 ```
 
-Resolution is cached per instance. Calling again with equal layer content returns the same object, which is what makes a React provider's freshly built array cheap.
+Resolution is cached per instance. Calling again with equal layer content returns the same object, which is what makes a framework provider's freshly built array cheap.
 
 ### `emit(resolved, template, platform)`
 

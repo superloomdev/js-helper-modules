@@ -829,4 +829,22 @@ describe('clearCache', () => {
 
   });
 
+  it('should make a previous hit into a miss after clearing', () => {
+
+    const instance = require('helper-themer')(Lib, {});
+
+    instance.resolve(TEMPLATE, BASE_LAYER);
+    instance.resolve(TEMPLATE, BASE_LAYER);
+
+    assert.equal(instance.cacheStats().hits, 1);
+
+    instance.clearCache();
+
+    instance.resolve(TEMPLATE, BASE_LAYER);
+
+    assert.equal(instance.cacheStats().hits, 0);
+    assert.equal(instance.cacheStats().misses, 1);
+
+  });
+
 });
