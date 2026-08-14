@@ -1,0 +1,34 @@
+{
+  "name": "@superloomdev/js-helper-eslint-config",
+  "description": "Shared ESLint flat configuration presets for Superloom modules and applications. Zero runtime dependencies. Part of Superloom.",
+  "version": "1.0.0",
+  "main": "eslint-config.js",
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "bundleDependencies": false,
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test _test/test.js"
+  }
+}
