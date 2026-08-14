@@ -71,6 +71,23 @@ test('browser has length exactly 4 and its last element globals.document is read
 });
 
 
+test('app has length exactly 5 and its last element enables JSX parsing', () => {
+  assert.equal(Array.isArray(config.app), true);
+  assert.equal(config.app.length, 5);
+  assert.equal(config.app[4].languageOptions.parserOptions.ecmaFeatures.jsx, true);
+});
+
+
+test('app[4].languageOptions.sourceType is exactly module', () => {
+  assert.equal(config.app[4].languageOptions.sourceType, 'module');
+});
+
+
+test('app[4].rules no-unused-vars includes varsIgnorePattern for React', () => {
+  assert.deepEqual(config.app[4].rules['no-unused-vars'], ['error', { args: 'after-used', varsIgnorePattern: '^React$' }]);
+});
+
+
 test('all 11 safety rules are present in base[2].rules and set to error', () => {
   const safetyRules = [
     'no-eval',
