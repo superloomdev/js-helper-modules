@@ -22,7 +22,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
-    "@vitrion/react-native-load-fonts": "file:./_test/stubs/native-loader.js"
+    "@vitrion/react-native-load-fonts": "file:./_test/stubs/native-loader.js",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

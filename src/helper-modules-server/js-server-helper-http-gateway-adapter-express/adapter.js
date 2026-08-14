@@ -225,7 +225,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {null}
     *********************************************************************/
-    getCountryCode: function (_headers) {
+    getCountryCode: function (_headers) { // eslint-disable-line no-unused-vars
       return null;
     }
 
