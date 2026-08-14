@@ -25,7 +25,8 @@ const BROWSER_GLOBALS = {
   localStorage: 'readonly',
   sessionStorage: 'readonly',
   navigator: 'readonly',
-  location: 'readonly'
+  location: 'readonly',
+  PopStateEvent: 'readonly'
 };
 
 //////////////////////////// Browser Globals END ///////////////////////////////
@@ -44,7 +45,7 @@ module.exports = [
   // This ensures the rule set stays identical to base; the only difference
   // is which global variables are recognized.
   {
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.jsx'],
     languageOptions: {
       globals: BROWSER_GLOBALS
     }
