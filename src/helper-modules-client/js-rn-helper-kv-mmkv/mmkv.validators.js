@@ -4,7 +4,7 @@
 // Never self-requires the error catalog or data files.
 'use strict';
 
-module.exports = function (Lib, ERRORS) {
+module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars
 
   const Validators = {
 

@@ -1,3 +1,13 @@
+// Info: Unit tests for js-helper-eslint-config. Verifies the exported shape
+// of the config package: preset keys, array lengths, ignore patterns, rule
+// values, globals, and the presence of all safety rules.
+//
+// These are structural assertions, not behavioral tests. They guard against
+// accidental drift - if someone changes a rule value or removes a global,
+// the corresponding test fails. The test suite does not run ESLint itself;
+// that is the job of `npm run lint` in the package root.
+//
+// Test runtime: Node.js `node --test`, no external services, no Docker.
 'use strict';
 
 const { test } = require('node:test');
@@ -5,6 +15,8 @@ const assert = require('node:assert/strict');
 
 const config = require('helper-eslint-config');
 
+
+////////////////////////////// Shape Tests START ///////////////////////////////
 
 test('exports exactly the keys base, browser, app', () => {
   assert.deepEqual(Object.keys(config).sort(), ['app', 'base', 'browser']);
@@ -78,3 +90,5 @@ test('all 11 safety rules are present in base[2].rules and set to error', () => 
     assert.equal(config.base[2].rules[rule], 'error', `rule ${rule} should be 'error'`);
   }
 });
+
+/////////////////////////////// Shape Tests END ////////////////////////////////
