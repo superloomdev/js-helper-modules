@@ -1,12 +1,30 @@
-// Info: The Node 24 CommonJS baseline. Every Superloom module lints against this.
-// Globals are the Node 24 global surface only - no browser globals - so a stray
-// `document` or `window` reference in a server module is caught as no-undef.
+// Info: The Node 24 CommonJS baseline. Every Superloom module lints against
+// this preset unless it needs browser globals (use `browser`) or ESM/JSX
+// (use `app`). Globals are the Node 24 global surface only - no browser
+// globals - so a stray `document` or `window` reference in a server module
+// is caught as no-undef.
+//
+// Compatibility: ESLint 9+ flat config format. Requires @eslint/js as a peer.
+//
+// Structure: Exports a flat-config array of 3 objects:
+//   [0] - Global ignores (test dirs, node_modules, .git, coverage)
+//   [1] - js.configs.recommended (baseline security and correctness rules)
+//   [2] - Language options (ecmaVersion, sourceType, Node 24 globals) plus
+//         the full rule set (code style, spacing, variables, safety)
+//
+// The rule set is split into named blocks so docs/api.md can describe each
+// block independently. NODE_GLOBALS and RULES are also attached as named
+// exports so the browser and app presets can layer on top without duplicating.
 'use strict';
 
 const js = require('@eslint/js');
 
 
+///////////////////////////// Node Globals START ///////////////////////////////
+
 // Node 24 global surface. Anything not listed here is an error when referenced.
+// This covers the full Node 24 runtime: core modules, timers, Web APIs that
+// Node 24 exposes globally (fetch, crypto, AbortController, etc.).
 const NODE_GLOBALS = {
   console: 'readonly',
   process: 'readonly',
@@ -42,8 +60,19 @@ const NODE_GLOBALS = {
   Response: 'readonly'
 };
 
+////////////////////////////// Node Globals END ////////////////////////////////
 
-// The rule set. Split into named blocks so docs/api.md can describe each block.
+
+/////////////////////////////// Rules START ///////////////////////////////////
+
+// The rule set. Organized into named blocks matching docs/api.md:
+//   - Code style (semicolons, quotes, indentation, trailing commas)
+//   - Spacing (blank lines, function/block padding, keyword/operator spacing)
+//   - Variables (no-unused-vars, no-var, prefer-const)
+//   - Safety (eval, implied-eval, throw-literal, etc.)
+//
+// Key decisions documented inline so future maintainers know WHY a value is
+// what it is, not just WHAT it is.
 const RULES = {
   // Code style
   'semi': ['error', 'always'],
@@ -103,8 +132,16 @@ const RULES = {
   'no-self-compare': 'error'
 };
 
+//////////////////////////////// Rules END //////////////////////////////////////
 
+
+/////////////////////////// Flat-Config Export START ///////////////////////////
+
+// The exported flat-config array. ESLint consumes this directly when a
+// consumer's `eslint.config.js` does `module.exports = base`.
 module.exports = [
+
+  // [0] Global ignores. Directories that ESLint should never lint.
   {
     ignores: [
       '_test/**',
@@ -114,8 +151,14 @@ module.exports = [
     ]
   },
 
+  // [1] Baseline recommended rules from @eslint/js. Provides security and
+  // correctness rules like no-undef, no-unused-vars (overridden below),
+  // no-cond-assign, etc.
   js.configs.recommended,
 
+  // [2] Project rules. Language options (Node 24 globals, CommonJS) plus
+  // the full rule set defined above. This is the block that consumers
+  // override if they need browser globals (see presets/browser.js).
   {
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     languageOptions: {
@@ -127,5 +170,10 @@ module.exports = [
   }
 ];
 
+// Named exports for preset layering. The browser preset spreads `base` and
+// adds its own globals overlay; it needs NODE_GLOBALS to avoid duplication.
+// RULES is exported for test assertions and documentation generation.
 module.exports.NODE_GLOBALS = NODE_GLOBALS;
 module.exports.RULES = RULES;
+
+//////////////////////////// Flat-Config Export END ////////////////////////////
