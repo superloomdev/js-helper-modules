@@ -1,0 +1,17 @@
+{
+  "name": "js-helper-eslint-config-test",
+  "description": "Test Cases for js-helper-eslint-config",
+  "version": "1.0.0",
+  "main": "test.js",
+  "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "dependencies": {
+    "helper-eslint-config": "file:../"
+  },
+  "scripts": {
+    "test": "node --test test.js"
+  }
+}
