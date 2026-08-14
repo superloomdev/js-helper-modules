@@ -71,6 +71,11 @@ test('browser has length exactly 4 and its last element globals.document is read
 });
 
 
+test('browser globals include PopStateEvent as readonly', () => {
+  assert.equal(config.browser[3].languageOptions.globals.PopStateEvent, 'readonly');
+});
+
+
 test('app has length exactly 5 and its last element enables JSX parsing', () => {
   assert.equal(Array.isArray(config.app), true);
   assert.equal(config.app.length, 5);

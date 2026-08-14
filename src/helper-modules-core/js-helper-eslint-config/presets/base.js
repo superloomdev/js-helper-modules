@@ -160,7 +160,7 @@ module.exports = [
   // the full rule set defined above. This is the block that consumers
   // override if they need browser globals (see presets/browser.js).
   {
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.jsx'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
