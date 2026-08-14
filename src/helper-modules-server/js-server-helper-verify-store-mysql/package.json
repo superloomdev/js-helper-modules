@@ -22,7 +22,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.2.0"
+    "eslint": "^10.2.0",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "scripts": {
     "lint": "eslint .",

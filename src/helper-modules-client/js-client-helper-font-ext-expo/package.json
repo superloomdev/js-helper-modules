@@ -22,7 +22,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
-    "expo-font": "file:./_test/stubs/expo-font.js"
+    "expo-font": "file:./_test/stubs/expo-font.js",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
