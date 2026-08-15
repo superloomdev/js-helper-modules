@@ -106,7 +106,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Object} - Normalized request fields plus response_handler
     *********************************************************************/
-    extractRequest: function (raw_request, _raw_context, response_callback) {
+    extractRequest: function (raw_request, rawContext, response_callback) {
 
       const req = raw_request || {};
 
@@ -221,11 +221,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Projects fronting Express with CloudFront can implement a custom
     adapter that reads the CloudFront-Viewer-Country forwarded header.
 
-    @param {Object} _headers - Request headers (unused)
+    @param {Object} headers - Request headers (unused)
 
     @return {null}
     *********************************************************************/
-    getCountryCode: function (_headers) { // eslint-disable-line no-unused-vars
+    getCountryCode: function (headers) { // eslint-disable-line no-unused-vars
       return null;
     }
 

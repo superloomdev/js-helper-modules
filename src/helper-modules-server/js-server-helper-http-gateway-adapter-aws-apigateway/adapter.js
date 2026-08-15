@@ -101,7 +101,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Object} - Normalized request fields plus response_handler
     *********************************************************************/
-    extractRequest: function (raw_request, _raw_context, response_callback) {
+    extractRequest: function (raw_request, rawContext, response_callback) {
 
       const event = raw_request || {};
 
