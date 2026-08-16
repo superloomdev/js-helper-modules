@@ -32,7 +32,7 @@ Engineering decision journal. Not published to npm.
 
 **Decision:** This adapter does not accept `ERRORS` or shared `Lib` from the parent module. It builds its own `Lib` from the injected `shared_libs`, defines its own `ERRORS`, and returns a ready-to-use store object.
 
-**Why:** Decouples adapter and parent. The only coupling point is the return contract shape: `{ success, error }` on all methods. This allows adapter versioning and replacement without touching parent module code. Adopted as part of Plan 0045.
+**Why:** Decouples adapter and parent. The only coupling point is the return contract shape: `{ success, error }` on all methods. This allows adapter versioning and replacement without touching parent module code.
 
 **Previous pattern (removed):** The adapter originally received `ERRORS` from the parent via loader arguments and depended on the parent's error catalog. This created tight coupling - changing the parent's error catalog forced adapter changes. Now each module owns its errors.
 

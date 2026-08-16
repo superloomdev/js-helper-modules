@@ -2,6 +2,11 @@
   "name": "@superloomdev/js-client-helper-font-ext-web",
   "description": "Web DOM font loader adapter. Injects @font-face CSS from the font core into document.head. Browser-only, no React",
   "version": "1.0.0",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "private": false,
   "license": "MIT",
   "main": "extension.js",
   "engines": {
@@ -22,6 +27,7 @@
     "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   }
 }

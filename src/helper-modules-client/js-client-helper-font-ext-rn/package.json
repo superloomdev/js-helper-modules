@@ -2,6 +2,11 @@
   "name": "@superloomdev/js-client-helper-font-ext-rn",
   "description": "React Native font loader adapter. Loads font files via @vitrion/react-native-load-fonts. No React imports, no hooks, no components",
   "version": "1.0.0",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "private": false,
   "license": "MIT",
   "main": "extension.js",
   "engines": {
@@ -26,6 +31,7 @@
     "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   }
 }
