@@ -8,8 +8,8 @@
 // Provides: getPlatform, getViewport, onViewportChange, getNetworkState,
 //           onAppStateChange, getSafeAreaInsets.
 //
-// The module reads React Native Platform, not Expo, so it is not affected
-// by the Expo pin (Plan 0073). It targets the RNW pipeline because
+// The module reads React Native Platform, not Expo. It targets the RNW
+// pipeline because
 // react-native Platform works across web, iOS, and Android via Metro.
 //
 // Compatibility: React Native Web (web, iOS, Android). Requires the RNW

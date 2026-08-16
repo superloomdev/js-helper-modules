@@ -37,7 +37,7 @@ No GSI, no secondary index, zero extra storage, automatic uniqueness on the full
 
 **Decision:** This adapter builds its own `Lib`, `CONFIG`, and `ERRORS`. It does not accept them from the parent module.
 
-**Why:** Decouples adapter and parent. The only coupling point is the return contract shape: `{ success, error }` on all methods and `{ success, records, error }` on query methods. This allows the adapter to be versioned, replaced, or used standalone without touching parent module code. Adopted as part of Plan 0045.
+**Why:** Decouples adapter and parent. The only coupling point is the return contract shape: `{ success, error }` on all methods and `{ success, records, error }` on query methods. This allows the adapter to be versioned, replaced, or used standalone without touching parent module code.
 
 **Previous pattern (removed):** The adapter originally received `ERRORS` from the parent via the third loader argument and depended on the parent's error catalog. This created tight coupling. Now each module owns its errors independently.
 

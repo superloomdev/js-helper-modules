@@ -2,6 +2,11 @@
   "name": "@superloomdev/js-client-helper-kv-localstorage",
   "description": "A key-value store over browser Web Storage that ships pre-tested and exposes a sync-plus-async API identical to helper-kv-mmkv for platform interchangeability. Part of Superloom.",
   "version": "1.0.0",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "private": false,
   "license": "MIT",
   "main": "localstorage.js",
   "engines": {
@@ -21,6 +26,7 @@
     "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   }
 }

@@ -8,6 +8,7 @@
   "author": {
     "name": "sj00"
   },
+  "contributors": [],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
