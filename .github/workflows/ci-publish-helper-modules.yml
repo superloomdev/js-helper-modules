@@ -18,12 +18,14 @@
 #   4. test-time → publish-time
 #   5. test-money → publish-money
 #   6. test-client-crypto → publish-client-crypto
+#   7. test-contact-phone → publish-contact-phone
+#   8. test-contact-phone-adapter-basic → publish-contact-phone-adapter-basic
 #
 #   ╔══════════════════════════════════════════════════════════════════════╗
 #   ║  GROUP 2: SERVER MODULES (helper-modules-server/)                    ║
 #   ║  Node.js runtime - crypto, HTTP, storage, databases, services      ║
 #   ╚══════════════════════════════════════════════════════════════════════╝
-#   7. test-server-crypto → publish-server-crypto
+#   9. test-server-crypto → publish-server-crypto
 #   8. test-instance → publish-instance
 #   9. test-http → publish-http
 #   10. test-http-gateway → publish-http-gateway
@@ -594,6 +596,134 @@ jobs:
           fi
 
 
+  # ###########################################################################
+  #   MODULE 7: js-helper-contact-phone (needs utils, debug)
+  # ###########################################################################
+
+  test-contact-phone:
+    needs: [detect, publish-client-crypto]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-core/js-helper-contact-phone')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-core/js-helper-contact-phone
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-contact-phone:
+    needs: [detect, test-contact-phone]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-contact-phone'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-core/js-helper-contact-phone')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-core/js-helper-contact-phone
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
+  # ###########################################################################
+  #   MODULE 8: js-helper-contact-phone-adapter-basic (needs contact-phone)
+  # ###########################################################################
+
+  test-contact-phone-adapter-basic:
+    needs: [detect, publish-contact-phone]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-core/js-helper-contact-phone-adapter-basic')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-core/js-helper-contact-phone-adapter-basic
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-contact-phone-adapter-basic:
+    needs: [detect, test-contact-phone-adapter-basic]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-contact-phone-adapter-basic'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-core/js-helper-contact-phone-adapter-basic')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-core/js-helper-contact-phone-adapter-basic
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+
   # ╔═══════════════════════════════════════════════════════════════════════════╗
   # ║  GROUP 2: SERVER MODULES (helper-modules-server/)                         ║
   # ║  Node.js runtime - crypto, HTTP, storage, databases, services             ║
@@ -604,7 +734,7 @@ jobs:
   # ###########################################################################
 
   test-server-crypto:
-    needs: [detect, publish-client-crypto]
+    needs: [detect, publish-contact-phone-adapter-basic]
     if: |
       always() &&
       !cancelled() &&
