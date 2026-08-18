@@ -70,6 +70,7 @@ Ambiguous verb or missing module path: ask, never guess.
 - `createInterface(Lib, CONFIG, ERRORS, Validators, [Parts,] [store|adapter|state])` - fixed slots, canonical names, unused slots KEPT with an eslint-disable line, never removed or underscore-prefixed (`module-structure.md`)
 - Loader calls `Validators.validateConfig(CONFIG)`; violations throw (programmer error) (`validation.md`, `error-handling.md`)
 - Type guards call `Lib.Utils` primitives, never raw `typeof`: `isNumber` (rejects `NaN`), `isFunction`, `isString`, `isBoolean`, `isObject` (rejects `null`), `isNullOrUndefined`; binds `[name].validators.js` and inline guards in `[name].js` equally, and mixed forms inside one module are a violation. Argument-shape dispatch (`typeof key === 'object'` overload normalization) and capability duck-typing (`typeof source.subscribe === 'function'`) stay raw `typeof` (`validation.md` - Use Utils Type-Check Primitives)
+- **Peer-dependency primitive utilization:** when a module declares a peer dependency (Utils, Debug, Time, Money, Crypto, etc.), every operation in the module that can be done by a function in that peer dep MUST use the peer dep function instead of reimplementing it inline. This binds equally to type guards (`typeof` -> `Lib.Utils.isX`), string operations (`.split('').reverse().join('')` -> `Lib.Utils.stringReverse`), empty checks (`.length === 0` on strings -> `Lib.Utils.isEmptyString`, on arrays -> `Lib.Utils.isEmptyArray`, `Object.keys(x).length === 0` -> `Lib.Utils.isEmptyObject`), array membership (`.indexOf(x) > -1` -> `Lib.Utils.inArray` or native `.includes()`), and any other reimplemented logic. The auditor reads the module's `package.json` peerDependencies, reads each peer dep's `ROBOTS.md` for its function signatures, and cross-references every operation in the source. Native ES2015+ methods (`.includes()` on arrays, `Array.isArray()`, `Object.keys()`) are permitted when the peer dep does not offer a wrapper for that specific operation (`validation.md` - Use Utils Type-Check Primitives; `dependencies.md` - Peer Dependency Contract)
 - A module whose public surface includes a React hook (`use*` calling `Lib.React.useState`, `useRef`, or `useEffect`) is a factory with `state`, never a singleton; hook-free pure computation modules stay eligible for the singleton pattern (`module-structure.md` - React Hook Modules Are Factories; `factory-vs-singleton.md`)
 - **ESM variant:** a module consumed via bundler (Vite, Metro, webpack) may use `import`/`export default` with `"type": "module"` in `package.json` instead of `require`/`module.exports`; omit `'use strict'` (implicit in ESM); include `.js` extensions in import paths. The factory skeleton, companions, banners, spacing, JSDoc, and step comments are unchanged. Choose ESM when tree-shaking matters or a peer requires it; CommonJS for Node.js-direct consumers. The choice is per-module (`module-structure.md` - ESM Variant; `code-formatting.md` - ESM Formatting; `factory-vs-singleton.md` - ESM Syntax Variant)
 - Config carries plain data only - no live objects, no `lib_*` keys, no `LOG_LEVEL`; drivers arrive via the container (`Lib.SQL`, `Lib.MongoDB`, `Lib.DynamoDB`) (`module-structure.md` - Driver injection)
@@ -233,13 +234,38 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    git grep -nE "typeof [^ ]+ (!==|===) '(number|function|string|boolean|object)'" -- '[module-path]/*.js' ':!*/node_modules/*'
    ```
    Each hit is either a violation to convert to the `Lib.Utils` primitive (`isNumber`, `isFunction`, `isString`, `isBoolean`, `isObject`), or one of the two permitted forms: argument-shape dispatch in an overload normalizer, or capability duck-typing on a host-supplied collaborator. Record the verdict per hit; a module mixing primitive calls and raw guards for the same kind of check is a violation even when each hit looks locally defensible. Do not add character classes with escaped brackets to this pattern - inside a POSIX bracket expression a backslash is literal, so `[A-Za-z_.\[\]']` terminates early and silently matches nothing.
-8. `file:` rule:
+8. Peer-dependency primitive utilization (each sweep judges every hit):
    // turbo
    ```bash
-   # Cwd = [module_root]/_test
-   grep -n "file:" package.json
+   # .split('').reverse().join('') should use Lib.Utils.stringReverse
+   git grep -n "\.split('').reverse().join('')" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*'
    ```
-9. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file and check ALL of the following:
+   // turbo
+   ```bash
+   # .length === 0 on strings -> Lib.Utils.isEmptyString; on arrays -> Lib.Utils.isEmptyArray
+   # Judge each hit by the variable type: string -> isEmptyString, array -> isEmptyArray
+   git grep -n "\.length === 0" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*' ':!*/_test/*'
+   ```
+   // turbo
+   ```bash
+   # Object.keys(x).length === 0 should use Lib.Utils.isEmptyObject
+   git grep -nE "Object\.keys\([^)]+\)\.length === 0" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*'
+   ```
+   // turbo
+   ```bash
+   # .indexOf(x) > -1 or .indexOf(x) !== -1 should use Lib.Utils.inArray or native .includes()
+   git grep -nE "\.indexOf\([^)]+\) (>|<)=? -1" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*' ':!*/_test/*'
+   ```
+   Each hit is either a violation to convert to the peer dep primitive, or a permitted form (e.g. `.includes()` on strings is `String.prototype.includes`, not array membership). Record the verdict per hit.
+9. **Peer-dependency utilization review (manual gate - not greppable):** Read the module's `package.json` peerDependencies. For each peer dep, read its `ROBOTS.md` to get the full function signature list. Then re-read the module's source code and check: is any operation reimplementing a function that's available in a peer dep? Record findings as `file:line -> peer dep function that should be used -> current inline implementation`. This catches gaps that pattern-matching cannot (e.g. a module reimplementing `Lib.Debug.performanceAuditLog` manually, or using raw `JSON.parse` with try/catch when `Lib.Utils.stringToJSON` exists). The reply MUST contain `Peer-dep utilization: [clean | N gaps -> fixed]`.
+10. `file:` rule:
+10. `file:` rule:
+    // turbo
+    ```bash
+    # Cwd = [module_root]/_test
+    grep -n "file:" package.json
+    ```
+11. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file and check ALL of the following:
 
    **a) Universal rule (every function, not just I/O):** The first logical block after the opening `{` has a step comment. Every subsequent logical block separated by a blank line also has a step comment. No exceptions for short functions - even a single-block function gets its opening step comment. (`code-formatting.md` - Inline Step Comments Inside Functions, lines 546-551)
 
@@ -250,9 +276,9 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    **d) Loop bodies:** A loop body carrying more than two operations gets a step comment per operation, separated by blank lines. The comment above the loop states what the iteration accomplishes; the comments inside cover each operation. (`code-formatting.md` - Inline Step Comments Inside Functions, line 553)
 
    The Mandatory Set is the audit floor, not the ceiling: blocks outside the set still follow the universal rule. Lint, tests, and sweeps cannot see comments; this check is manual. The reply MUST contain `Step-comment conformance: [clean | N gaps -> fixed]`.
-10. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element, including function bodies against the skeleton's worked body. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
-11. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
-12. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
+12. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element, including function bodies against the skeleton's worked body. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
+13. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
+14. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
 
 ### Phase E - Present (approval gate, never skip)
 
@@ -288,6 +314,8 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] Sweep battery clean (each sweep result reported explicitly: clean or hits with judgment); plan-reference sweep run; JSDoc awk silent; performance-audit ownership judged
 - [ ] Companions exist; single-require holds; fixed interface slots kept
 - [ ] Type-guard sweep run; every `typeof` hit judged as violation or permitted form
+- [ ] Peer-dep primitive utilization sweeps run (stringReverse, isEmptyString/Array, isEmptyObject, inArray); every hit judged
+- [ ] Peer-dep utilization review done (read peerDeps + ROBOTS.md, cross-reference source); verdict line output
 - [ ] Skeleton conformance verdict line output
 - [ ] Step-comment conformance verdict line output (all 4 sub-checks: universal rule, mandatory set, every return, loop bodies)
 - [ ] `file:` rule holds
