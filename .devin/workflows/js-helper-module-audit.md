@@ -113,6 +113,8 @@ Step-comment conformance (manual gate - lint, tests, and greps cannot see commen
 
 The Mandatory Set is the audit floor, not the ceiling: blocks outside the set still follow the universal rule. A missing step comment is an S2 consistency finding, escalated to S1 when the uncommented block hides a correctness issue. Output the verdict line `Step-comment conformance: [clean | N gaps]`.
 
+**Peer-dependency utilization review (manual gate - not greppable):** Read the module's `package.json` peerDependencies. For each peer dep, read its `ROBOTS.md` to get the full function signature list. Then re-read the module's source code and check: is any operation reimplementing a function that's available in a peer dep? This catches gaps that pattern-matching cannot (e.g. a module reimplementing `Lib.Debug.performanceAuditLog` manually, or using raw `JSON.parse` with try/catch when `Lib.Utils.stringToJSON` exists, or reimplementing string reversal when `Lib.Utils.stringReverse` exists). Record findings as `file:line -> peer dep function that should be used -> current inline implementation`. Output the verdict line `Peer-dep utilization: [clean | N gaps]`.
+
 Mechanical sweep battery (each must return nothing for this module; `Cwd = codebase-js-helper-modules`):
 
 // turbo
@@ -156,8 +158,28 @@ git grep -nE "js-(server-|client-)?helper-[a-z][a-z-]*" -- ':(glob)[module-path]
 ```bash
 git grep -nE "typeof [^ ]+ (!==|===) '(number|function|string|boolean|object)'" -- '[module-path]/*.js' ':!*/node_modules/*'
 ```
+// turbo
+```bash
+# .split('').reverse().join('') should use Lib.Utils.stringReverse
+git grep -n "\.split('').reverse().join('')" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*'
+```
+// turbo
+```bash
+# .length === 0 on strings -> Lib.Utils.isEmptyString; on arrays -> Lib.Utils.isEmptyArray
+git grep -n "\.length === 0" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*' ':!*/_test/*'
+```
+// turbo
+```bash
+# Object.keys(x).length === 0 should use Lib.Utils.isEmptyObject
+git grep -nE "Object\.keys\([^)]+\)\.length === 0" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*'
+```
+// turbo
+```bash
+# .indexOf(x) > -1 should use Lib.Utils.inArray or native .includes()
+git grep -nE "\.indexOf\([^)]+\) (>|<)=? -1" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_data/*' ':!*/_test/*'
+```
 
-The last three enforce the two-form rule and the type-guard primitive rule; sole permitted bare-name hits are URLs addressing a real repo path, and sole permitted `@superloomdev/` hits are real `require()` calls in `eslint.config.js` - judge each manually. Each `typeof` hit is either a violation to convert to a `Lib.Utils` primitive, or one of two permitted forms: argument-shape dispatch or capability duck-typing.
+The last three enforce the two-form rule and the type-guard primitive rule; sole permitted bare-name hits are URLs addressing a real repo path, and sole permitted `@superloomdev/` hits are real `require()` calls in `eslint.config.js` - judge each manually. Each `typeof` hit is either a violation to convert to a `Lib.Utils` primitive, or one of two permitted forms: argument-shape dispatch or capability duck-typing. The peer-dep utilization sweeps catch inline reimplementations of functions available in peer dependencies; judge each hit by the variable type (string -> `isEmptyString`, array -> `isEmptyArray`) and by whether the peer dep offers a wrapper for that operation.
 
 **Sweep result reporting (hard gate):** For each sweep, state one of:
 - `[sweep name]: clean` (zero hits)
@@ -296,6 +318,8 @@ If a deviation cannot be classified confidently, mark it `UNCLASSIFIED` and inve
 - [ ] Lint run; tests run via clean install
 - [ ] Step-comment conformance verdict line output (all 4 sub-checks: universal rule, mandatory set, every return, loop bodies)
 - [ ] Mechanical sweep battery run; each sweep result reported explicitly (clean or hits with judgment)
+- [ ] Peer-dep primitive utilization sweeps run (stringReverse, isEmptyString/Array, isEmptyObject, inArray); every hit judged
+- [ ] Peer-dep utilization review done (read peerDeps + ROBOTS.md, cross-reference source); verdict line output
 - [ ] Plan-reference sweep run (code comments must not reference plan numbers)
 - [ ] Stale-name / cross-reference scrub run
 - [ ] Drift root cause diagnosed; plan re-anchored; new failure modes captured via `/learn` if any
