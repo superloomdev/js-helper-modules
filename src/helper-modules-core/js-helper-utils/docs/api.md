@@ -44,13 +44,15 @@ Fourteen single-purpose checks. Every one returns `Boolean` and never throws.
 | `isNumber` | `isNumber(arg)` | `typeof arg === 'number'` **and** not `NaN`. `isNaN` is **not** a number |
 | `isString` | `isString(arg)` | `typeof arg === 'string'` |
 | `isInteger` | `isInteger(num)` | Whole number. `10.0` is integer, `10.7` is not. Assumes `num` is a number |
-| `isObject` | `isObject(arg)` | Any non-null object including arrays, `Date`, `RegExp`. Use `Array.isArray` to distinguish arrays |
+| `isObject` | `isObject(arg)` | Any non-null object including arrays, `Date`, `RegExp`. Use `isArray` to distinguish arrays |
+| `isArray` | `isArray(arg)` | `Array.isArray(arg)`. Use this for array type checks to keep all type checks going through Utils |
 | `isFunction` | `isFunction(arg)` | `typeof arg === 'function'` |
 | `isError` | `isError(arg)` | `arg instanceof Error`. Cross-realm `Error` instances will not be detected |
 | `isEmptyString` | `isEmptyString(str)` | `str.length === 0`. Assumes `str` is a string. Use `isEmpty` for safe variant |
 | `isEmptyObject` | `isEmptyObject(obj)` | `Object.keys(obj).length === 0`. Assumes `obj` is an object |
+| `isEmptyArray` | `isEmptyArray(arr)` | `Array.isArray(arr) && arr.length === 0`. Returns `false` for non-arrays. Use this instead of raw `.length === 0` on arrays |
 | `isEmpty` | `isEmpty(arg)` | `true` for `null`, `undefined`, `''`, `[]`, `{}`. The canonical "is this value uninteresting" check |
-| `inArray` | `inArray(arr, element)` | `arr.indexOf(element) > -1`. Assumes `arr` is an array |
+| `inArray` | `inArray(arr, element)` | `arr.includes(element)`. Assumes `arr` is an array. Uses SameValueZero algorithm |
 
 > **Why `isEmpty` is canonical.** Every Superloom helper module that needs an empty-check uses this function, not its own. Adopting `isEmpty` removes a class of subtle bugs where two parts of a codebase disagree about whether `0` or `false` count as empty. `isEmpty(0)` is `false`. `isEmpty(false)` is `false`. Numbers and booleans are never "empty"; only `null`, `undefined`, empty strings, empty arrays, and empty objects are.
 

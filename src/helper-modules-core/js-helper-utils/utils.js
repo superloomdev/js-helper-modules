@@ -169,6 +169,18 @@ const Utils = {
 
 
   /********************************************************************
+  Check if variable is an Array
+
+  @param {Object} arg - Item to be checked
+
+  @return {Boolean} - true if Array, false otherwise
+  *********************************************************************/
+  isArray: function (arg) {
+    return Array.isArray(arg);
+  },
+
+
+  /********************************************************************
   Check if variable is Function
 
   @param {Object} arg - Item to be checked
@@ -217,6 +229,18 @@ const Utils = {
 
 
   /********************************************************************
+  Check if an Array is empty with no elements []
+
+  @param {Array} arr - Array to be checked
+
+  @return {Boolean} - true if empty array, false otherwise
+  *********************************************************************/
+  isEmptyArray: function (arr) {
+    return Array.isArray(arr) && arr.length === 0;
+  },
+
+
+  /********************************************************************
   Whether value is null or undefined or '' or {} or []
 
   @param {*} arg - Item to be checked
@@ -241,7 +265,7 @@ const Utils = {
   @return {Boolean} - true if found, false otherwise
   *********************************************************************/
   inArray: function (arr, element) {
-    return arr.indexOf(element) > -1;
+    return arr.includes(element);
   },
 
 
