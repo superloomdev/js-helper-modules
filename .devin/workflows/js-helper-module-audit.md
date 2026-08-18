@@ -101,7 +101,69 @@ npm run lint 2>&1 | tail -20
 rm -rf node_modules package-lock.json && npm install && npm test 2>&1 | tail -40
 ```
 
-Step-comment conformance (manual gate - lint, tests, and greps cannot see comments): read every function body in every source `.js` file against the Mandatory Step-Comment Set in `languages/js/code-formatting.md` - Comment Style (validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch). A missing step comment is an S2 consistency finding, escalated to S1 when the uncommentable block hides a correctness issue. Output the verdict line `Step-comment conformance: [clean | N gaps]`.
+Step-comment conformance (manual gate - lint, tests, and greps cannot see comments): read every function body in every source `.js` file and check ALL of the following:
+
+**a) Universal rule (every function, not just I/O):** The first logical block after the opening `{` has a step comment. Every subsequent logical block separated by a blank line also has a step comment. No exceptions for short functions - even a single-block function gets its opening step comment. (`code-formatting.md` - Inline Step Comments Inside Functions, lines 546-551)
+
+**b) Mandatory Step-Comment Set (I/O functions additionally):** validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch - each preceded by a step comment. (`code-formatting.md` - Mandatory Step-Comment Set for I/O Functions, lines 606-613)
+
+**c) Every `return` statement:** Every `return` in the function has a preceding step comment - including bare returns (`return value;`), final returns (the last `return { success: true, ... }` in a function), and `return null;` at the end of a function. A return without a preceding comment is a gap regardless of whether it looks like a "success" or "error" return.
+
+**d) Loop bodies:** A loop body carrying more than two operations gets a step comment per operation, separated by blank lines. The comment above the loop states what the iteration accomplishes; the comments inside cover each operation. (`code-formatting.md` - Inline Step Comments Inside Functions, line 553)
+
+The Mandatory Set is the audit floor, not the ceiling: blocks outside the set still follow the universal rule. A missing step comment is an S2 consistency finding, escalated to S1 when the uncommented block hides a correctness issue. Output the verdict line `Step-comment conformance: [clean | N gaps]`.
+
+Mechanical sweep battery (each must return nothing for this module; `Cwd = codebase-js-helper-modules`):
+
+// turbo
+```bash
+git grep -n "—" -- '[module-path]' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -nE "→|–" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -niE "behaviour|colour|favour|licence|optimis|organis|initialis|standardis|serialis|authoris|analyse|centralis|normalis|recognis|synchronis|customis|specialis|catalogu" -- '[module-path]' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -niE "comprehensive|seamless|robust|powerful|blazing|effortless|leverage|battle-tested|cutting-edge|world-class|in order to|feel free to|please note|out of the box|a wide range of" -- '[module-path]' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -nE "\bvoid [a-zA-Z_]+;|\(_[a-zA-Z]" -- '[module-path]' ':!*/node_modules/*' ':!*/_data/*'
+```
+// turbo
+```bash
+git grep -n "docs/" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
+```
+// turbo
+```bash
+# Plan references in code comments - plans are ephemeral, code comments must be self-contained
+git grep -nE "Plan [0-9]|plan [0-9][0-9][0-9]" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -n "@superloomdev/" -- ':(glob)[module-path]/**/*.md' ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -nE "js-(server-|client-)?helper-[a-z][a-z-]*" -- ':(glob)[module-path]/**/*.md' ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
+```
+// turbo
+```bash
+git grep -nE "typeof [^ ]+ (!==|===) '(number|function|string|boolean|object)'" -- '[module-path]/*.js' ':!*/node_modules/*'
+```
+
+The last three enforce the two-form rule and the type-guard primitive rule; sole permitted bare-name hits are URLs addressing a real repo path, and sole permitted `@superloomdev/` hits are real `require()` calls in `eslint.config.js` - judge each manually. Each `typeof` hit is either a violation to convert to a `Lib.Utils` primitive, or one of two permitted forms: argument-shape dispatch or capability duck-typing.
+
+**Sweep result reporting (hard gate):** For each sweep, state one of:
+- `[sweep name]: clean` (zero hits)
+- `[sweep name]: N hits -> [file:line for each]` (with judgment per hit)
+
+A sweep that returned hits but is reported as "clean" is a convergence failure. Paste the raw grep output into the conversation, then classify each hit. Sweeps may not be silently skipped.
 
 Stale-name and cross-reference scrub. Renamed symbols and leftover legacy or branding tokens are a classic drift signature; hunt them across code, tests, and docs:
 
@@ -201,6 +263,11 @@ If a deviation cannot be classified confidently, mark it `UNCLASSIFIED` and inve
    - **Conventions re-derived** - the binding-rules checklist from Phase 1, each line citing its doc.
    - **Drift diagnosis** - the root cause from Phase 4.
    - **Deviations found** - a table of `file:line -> rule violated (with citation) -> corrective action`, grouped by audit dimension.
+   - **Sweep results** - each sweep from the mechanical sweep battery with its result: `clean` or `N hits -> [file:line for each]` with judgment per hit.
+   - **Workflow coverage classification** - for each deviation, classify how the workflow caught it:
+     - **workflow-caught:** The workflow's sweep battery or step-comment gate would have caught this finding.
+     - **workflow-missed:** The workflow's checks do not cover this class of finding. This is a workflow design gap to report to Plan 0111.
+     - **execution-missed:** The workflow's checks DO cover this finding, but the agent failed to report it. This is an execution error, not a workflow design gap.
    - **Creator-diff classification** - the three-bucket table from Phase 4.5, with bucket counts: `Bucket 1 (docs drift): N | Bucket 2 (code drift): N | Bucket 3 (intentional): N | Unclassified: N`.
    - **Gate results** - lint and test status, and confirmation the audit converged (two clean consecutive passes).
    - **Plan state** - active plan + in-progress step.
@@ -227,9 +294,12 @@ If a deviation cannot be classified confidently, mark it `UNCLASSIFIED` and inve
 - [ ] Audit converged: two consecutive passes with zero new deviations
 - [ ] Every asserted convention carries a citation (doc path/section or reference-module `file:line`)
 - [ ] Lint run; tests run via clean install
-- [ ] Step-comment conformance verdict line output
+- [ ] Step-comment conformance verdict line output (all 4 sub-checks: universal rule, mandatory set, every return, loop bodies)
+- [ ] Mechanical sweep battery run; each sweep result reported explicitly (clean or hits with judgment)
+- [ ] Plan-reference sweep run (code comments must not reference plan numbers)
 - [ ] Stale-name / cross-reference scrub run
 - [ ] Drift root cause diagnosed; plan re-anchored; new failure modes captured via `/learn` if any
 - [ ] Creator-diff: every deviation classified into Bucket 1, 2, or 3 (or UNCLASSIFIED with reason)
 - [ ] Bucket counts stated; evidence for each classification recorded
+- [ ] Workflow coverage classification stated for each deviation (workflow-caught / workflow-missed / execution-missed)
 - [ ] Report presented in chat; fixes handed to `/js-helper-module fix`; stopped for user confirmation

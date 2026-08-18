@@ -75,9 +75,9 @@ Ambiguous verb or missing module path: ask, never guess.
 - Config carries plain data only - no live objects, no `lib_*` keys, no `LOG_LEVEL`; drivers arrive via the container (`Lib.SQL`, `Lib.MongoDB`, `Lib.DynamoDB`) (`module-structure.md` - Driver injection)
 - Return envelope: all keys on every path, data fields null on failure; errors from the frozen catalog; error prefixes use the alias form `[helper-name]` (`error-handling.md`)
 - `performanceAuditLog`: each interval logged once by the layer that owns the work; drivers instrument their own roundtrips; non-drivers never re-log delegated I/O; every call passes a local `start_ms` captured at operation entry, never `instance['time_ms']` (`code-formatting.md` - Performance Logging; `pitfalls-migration.md`)
-- Formatting: 3/2/1 vertical spacing; step comment above every logical block; every public I/O function carries the Mandatory Step-Comment Set - validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch (`code-formatting.md` - Comment Style); a loop body is not one block - once it carries more than two operations, each gets its own step comment separated by a blank line; JSDoc indentation matches the declaration it documents; standard banner widths; `};` combined with END banners (`code-formatting.md`)
+- Formatting: 3/2/1 vertical spacing; step comment above every logical block; the first logical block after the opening `{` always gets a step comment, no exceptions for short functions; every `return` statement gets a preceding step comment (bare returns, envelope returns, `return null`, final returns - all included); every public I/O function carries the Mandatory Step-Comment Set - validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch (`code-formatting.md` - Comment Style); the Mandatory Set is the audit floor, not the ceiling - blocks outside the set still follow the universal every-logical-block rule; a loop body is not one block - once it carries more than two operations, each gets its own step comment separated by a blank line; JSDoc indentation matches the declaration it documents; standard banner widths; `};` combined with END banners (`code-formatting.md`)
 - Naming: scope form (`@superloomdev/...`) and bare form (`js-...helper-...`) only in `package.json` and real repo-path URLs; alias form everywhere else including H1s, banners, error messages (`languages/js/index.md` - Two-Form Rule)
-- `package.json`: peer deps as caret ranges; no `helper-utils`/`helper-debug` in a Class F module's own peerDependencies (container supplies them); `engines.node >= 24`; `publishConfig.registry` exactly `https://npm.pkg.github.com` (`dependencies.md`, `publishing.md`)
+- `package.json`: peer deps as caret ranges; every Superloom module consumed at runtime (including modules received only by injection through `shared_libs`) appears in `peerDependencies` with caret ranges; `engines.node >= 24`; `publishConfig.registry` exactly `https://npm.pkg.github.com` (`dependencies.md`, `publishing.md`)
 - `_test/package.json`: `"private": true`; the ONLY `file:` dependency is this module (`file:../`); shared helpers use registry semver ranges pinned to the version the code calls (`docs/dev/pitfalls.md` entries 8, 11)
 - `_test/loader.js` is the only file reading `process.env`; tests named `should [behavior] when [condition]`; one `describe` per function (`unit-test-authoring.md`); assertions pin exact values - never a range or disjunction multiple behaviors could satisfy; fix nondeterministic setup, not the assertion (`principles/testing.md` - Test Structure and Naming); three test double patterns - `memory-store` (Fake: full working storage contract backed by RAM), `stub-adapter` (Stub: minimal stateless adapter contract), `engine-stub` (Engine Fake: minimal in-process implementation of a platform engine's native interface, e.g. Web Storage or MMKV) - not mutually exclusive, a module may use several (`unit-test-authoring.md` - Test Double Patterns)
 - Docs set per class from `module-docs-complex.md`; README carries no signatures, config tables, or install commands; `ROBOTS.md` compiled LAST and matching `docs/api.md` signatures exactly (`module-docs.md`)
@@ -157,7 +157,7 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    ```
    // turbo
    ```bash
-   git grep -nE "→|–" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   git grep -nE "→|–" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
    ```
    // turbo
    ```bash
@@ -169,21 +169,31 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    ```
    // turbo
    ```bash
-   git grep -nE "\bvoid [a-zA-Z_]+;|\(_[a-zA-Z]" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   git grep -nE "\bvoid [a-zA-Z_]+;|\(_[a-zA-Z]" -- '[module-path]' ':!*/node_modules/*' ':!*/_data/*'
    ```
    // turbo
    ```bash
-   git grep -n "docs/" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   git grep -n "docs/" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
    ```
    // turbo
    ```bash
-   git grep -n "@superloomdev/" -- '[module-path]/**/*.md' '[module-path]/**/*.js' ':!*/node_modules/*'
+   # Plan references in code comments - plans are ephemeral, code comments must be self-contained
+   git grep -nE "Plan [0-9]|plan [0-9][0-9][0-9]" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
    ```
    // turbo
    ```bash
-   git grep -nE "\bjs-(server-|client-)?helper-[a-z][a-z-]*" -- '[module-path]/**/*.md' '[module-path]/**/*.js' ':!*/node_modules/*'
+   git grep -n "@superloomdev/" -- ':(glob)[module-path]/**/*.md' ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
+   ```
+   // turbo
+   ```bash
+   git grep -nE "js-(server-|client-)?helper-[a-z][a-z-]*" -- ':(glob)[module-path]/**/*.md' ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
    ```
    The last two enforce the two-form rule; sole permitted bare-name hits are URLs addressing a real repo path - judge each manually.
+   **Sweep result reporting (hard gate):** For each sweep, state one of:
+   - `[sweep name]: clean` (zero hits)
+   - `[sweep name]: N hits -> [file:line for each]` (with judgment per hit)
+
+   A sweep that returned hits but is reported as "clean" is a convergence failure. Paste the raw grep output into the conversation, then classify each hit. Sweeps may not be silently skipped.
 4. JSDoc indentation (must print nothing; `eslint --fix` does NOT fix comment indentation). Run per source `.js` file:
    // turbo
    ```bash
@@ -193,11 +203,11 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
 5. Performance-audit checks (must print nothing, then judge remaining calls per the Standard):
    // turbo
    ```bash
-   git grep -nE "performanceAuditLog\([^)]*instance\[|performanceAuditLog\('(Start|Init-Start)'" -- '[module-path]/**/*.js' ':!*/node_modules/*'
+   git grep -nE "performanceAuditLog\([^)]*instance\[|performanceAuditLog\('(Start|Init-Start)'" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*'
    ```
    // turbo
    ```bash
-   git grep -n "performanceAuditLog" -- '[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_test/*'
+   git grep -n "performanceAuditLog" -- ':(glob)[module-path]/**/*.js' ':!*/node_modules/*' ':!*/_test/*'
    ```
    Drivers: every I/O method and client init emits exactly one `'End'` call. Non-drivers: delete calls timing delegated helper calls; keep only calls timing the module's own substantial in-process work. Expected for store adapters and thin wrappers: zero calls.
 6. Companion and injection checks:
@@ -209,7 +219,7 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    // turbo
    ```bash
    # Must return NOTHING - validators/parts never self-require errors or data
-   git grep -nE "require\('\./[a-z-]+\.errors'\)|require\('\./data/" -- '[module-path]/**/*.validators.js' '[module-path]/parts/*.js' ':!*/node_modules/*'
+   git grep -nE "require\('\./[a-z-]+\.errors'\)|require\('\./data/" -- ':(glob)[module-path]/**/*.validators.js' '[module-path]/parts/*.js' ':!*/node_modules/*'
    ```
    // turbo
    ```bash
@@ -229,7 +239,17 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    # Cwd = [module_root]/_test
    grep -n "file:" package.json
    ```
-9. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file against the Mandatory Step-Comment Set (Standard above): validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch - each preceded by a step comment. Loop bodies carrying more than two operations get a step comment per operation, separated by blank lines. Lint, tests, and sweeps cannot see comments; this check is manual. The reply MUST contain `Step-comment conformance: [clean | N gaps -> fixed]`.
+9. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file and check ALL of the following:
+
+   **a) Universal rule (every function, not just I/O):** The first logical block after the opening `{` has a step comment. Every subsequent logical block separated by a blank line also has a step comment. No exceptions for short functions - even a single-block function gets its opening step comment. (`code-formatting.md` - Inline Step Comments Inside Functions, lines 546-551)
+
+   **b) Mandatory Step-Comment Set (I/O functions additionally):** validate step, init step, each driver or delegate call, every success return, every error return, every early-return branch - each preceded by a step comment. (`code-formatting.md` - Mandatory Step-Comment Set for I/O Functions, lines 606-613)
+
+   **c) Every `return` statement:** Every `return` in the function has a preceding step comment - including bare returns (`return value;`), final returns (the last `return { success: true, ... }` in a function), and `return null;` at the end of a function. A return without a preceding comment is a gap regardless of whether it looks like a "success" or "error" return.
+
+   **d) Loop bodies:** A loop body carrying more than two operations gets a step comment per operation, separated by blank lines. The comment above the loop states what the iteration accomplishes; the comments inside cover each operation. (`code-formatting.md` - Inline Step Comments Inside Functions, line 553)
+
+   The Mandatory Set is the audit floor, not the ceiling: blocks outside the set still follow the universal rule. Lint, tests, and sweeps cannot see comments; this check is manual. The reply MUST contain `Step-comment conformance: [clean | N gaps -> fixed]`.
 10. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element, including function bodies against the skeleton's worked body. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
 11. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
 12. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
@@ -265,11 +285,11 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] All edits by hand - zero scripts, zero bulk rewrites
 - [ ] Fixes applied S1 -> S2 -> S3 -> sweeps -> docs (ROBOTS last) -> naming; renames swept repo-wide
 - [ ] Lint exit 0; clean-install tests green
-- [ ] Sweep battery clean; JSDoc awk silent; performance-audit ownership judged
+- [ ] Sweep battery clean (each sweep result reported explicitly: clean or hits with judgment); plan-reference sweep run; JSDoc awk silent; performance-audit ownership judged
 - [ ] Companions exist; single-require holds; fixed interface slots kept
 - [ ] Type-guard sweep run; every `typeof` hit judged as violation or permitted form
 - [ ] Skeleton conformance verdict line output
-- [ ] Step-comment conformance verdict line output
+- [ ] Step-comment conformance verdict line output (all 4 sub-checks: universal rule, mandatory set, every return, loop bodies)
 - [ ] `file:` rule holds
 - [ ] Converged: two consecutive clean passes, stated with evidence
 - [ ] Phase E report presented; explicit user approval before any mutation
