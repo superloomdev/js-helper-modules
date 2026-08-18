@@ -1,6 +1,6 @@
 // Info: Error catalog for helper-contact-email.
 // Validation errors returned via validateSyntax and validateDisposable.
-// Key === type. Both use the full prefixed name per Plan 0097 D17.
+// Key === type. Both use the full prefixed name.
 // Frozen to prevent accidental mutation.
 'use strict';
 

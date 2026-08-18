@@ -1,4 +1,4 @@
-// Info: Data generation script for js-helper-contact-email-adapter-extended.
+// Info: Data generation script for helper-contact-email-adapter-extended.
 // Extracts the disposable email domain list from disposable-email-domains-js
 // and writes it as a frozen Set for fast lookups.
 //

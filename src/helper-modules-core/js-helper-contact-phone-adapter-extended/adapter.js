@@ -1,4 +1,4 @@
-// Info: Extended phone adapter for js-helper-contact-phone.
+// Info: Extended phone adapter for helper-contact-phone.
 // Wraps libphonenumber-js with max metadata for full validation depth:
 // digit pattern validation and number type classification.
 //
@@ -135,24 +135,41 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Extract possible lengths
       const possibleLengths = metadata.possibleLengths();
 
+      // Default length bounds (fallback if no metadata)
       let minLength = 4;
       let maxLength = 14;
 
+      // Check if possibleLengths has data
       if (possibleLengths && possibleLengths.length > 0) {
+
+        // Collect all valid lengths into an array
         const lengths = [];
+
+        // Expand each possibleLengths entry (ranges or single values)
         possibleLengths.forEach(function (item) {
+
+          // Expand array ranges into individual lengths
           if (Array.isArray(item)) {
+
             for (let i = item[0]; i <= item[1]; i++) {
               lengths.push(i);
             }
+
           } else {
+
+            // Add single value lengths
             lengths.push(item);
+
           }
+
         });
+
+        // Calculate min and max from collected lengths
         if (lengths.length > 0) {
           minLength = Math.min.apply(null, lengths);
           maxLength = Math.max.apply(null, lengths);
         }
+
       }
 
       // Cap max_length at E.164 maximum
@@ -161,6 +178,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         maxLength = e164Max;
       }
 
+      // Return the metadata envelope
       return {
         calling_code: callingCode,
         min_length: minLength,
@@ -238,24 +256,41 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       metadata.country(isoCode);
       const possibleLengths = metadata.possibleLengths();
 
+      // Default length bounds (fallback if no metadata)
       let minLength = 4;
       let maxLength = 14;
 
+      // Check if possibleLengths has data
       if (possibleLengths && possibleLengths.length > 0) {
+
+        // Collect all valid lengths into an array
         const lengths = [];
+
+        // Expand each possibleLengths entry (ranges or single values)
         possibleLengths.forEach(function (item) {
+
+          // Expand array ranges into individual lengths
           if (Array.isArray(item)) {
+
             for (let i = item[0]; i <= item[1]; i++) {
               lengths.push(i);
             }
+
           } else {
+
+            // Add single value lengths
             lengths.push(item);
+
           }
+
         });
+
+        // Calculate min and max from collected lengths
         if (lengths.length > 0) {
           minLength = Math.min.apply(null, lengths);
           maxLength = Math.max.apply(null, lengths);
         }
+
       }
 
       // Cap at E.164
@@ -264,6 +299,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         maxLength = e164Max;
       }
 
+      // Check if the number is too short
       if (national_number.length < minLength) {
         return {
           valid: false,
@@ -271,6 +307,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
+      // Check if the number is too long
       if (national_number.length > maxLength) {
         return {
           valid: false,
@@ -333,6 +370,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
 
+  // Return the public Adapter interface
   return Adapter;
 
 };///////////////////////////// createInterface END //////////////////////////////

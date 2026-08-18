@@ -1,4 +1,4 @@
-// Info: Data generation script for js-helper-contact-address-adapter-extended.
+// Info: Data generation script for helper-contact-address-adapter-extended.
 // Extracts postal code regex patterns and subdivision lists from
 // postal-code-checker, and country list from libphonenumber-js.
 //
@@ -76,7 +76,7 @@ countries.forEach(function (cc) {
 
 // Generate output
 const header = [
-  '// Info: Generated address data for js-helper-contact-address-adapter-extended.',
+  '// Info: Generated address data for helper-contact-address-adapter-extended.',
   '// Source: postal-code-checker (postal patterns + subdivisions),',
   '//         libphonenumber-js (country list)',
   '// License: MIT',

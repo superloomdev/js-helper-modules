@@ -1,4 +1,4 @@
-// Info: Basic phone adapter for js-helper-contact-phone.
+// Info: Basic phone adapter for helper-contact-phone.
 // Provides lean country data (calling codes, length bounds) and
 // charset validation. No pattern validation, no number type.
 //
@@ -205,6 +205,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
 
+  // Return the public Adapter interface
   return Adapter;
 
 };///////////////////////////// createInterface END //////////////////////////////

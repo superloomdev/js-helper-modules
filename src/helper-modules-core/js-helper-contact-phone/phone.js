@@ -134,6 +134,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         return '+' + cleaned.replace(/[^0-9]/g, '');
       }
 
+      // Return digits only (no + prefix)
       return cleaned.replace(/[^0-9]/g, '');
 
     },
@@ -173,6 +174,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // Ask the adapter for the full country list
       const countries = adapter.listCountries();
 
+      // Report success
       return {
         success: true,
         countries: countries,
@@ -206,6 +208,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         };
       }
 
+      // Report success
       return {
         success: true,
         metadata: metadata,
@@ -288,6 +291,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // Ask the adapter for the number type
       const type = adapter.getNumberType(country_code, national_number);
 
+      // Report success
       return {
         success: true,
         type: type,
@@ -332,6 +336,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         return null;
       }
 
+      // Return the formatted E.164 string
       return e164;
 
     },
@@ -399,8 +404,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       for (let i = 0; i < countries.length; i++) {
         const cc = countries[i];
+
+        // Fetch metadata for this country
         const metadata = adapter.getMetadata(cc);
+
+        // Check metadata is non-null
         if (metadata !== null) {
+
+          // Push as a candidate
           candidates.push({ country_code: cc, calling_code: metadata.calling_code });
         }
       }
@@ -413,9 +424,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // Find the first matching prefix
       for (let i = 0; i < candidates.length; i++) {
         const candidate = candidates[i];
+
+        // Check if digits start with this calling code
         if (digits.startsWith(candidate.calling_code)) {
+
+          // Extract the national number after the calling code
           const national_number = digits.slice(candidate.calling_code.length);
+
+          // Verify the national number is non-empty
           if (national_number.length > 0) {
+
+            // Return the parsed result
             return {
               country_code: candidate.country_code,
               national_number: national_number
@@ -424,6 +443,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         }
       }
 
+      // No matching calling code prefix found
       return null;
 
     },
@@ -456,7 +476,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     The encoding is: country_code + '.' + reversed(national_number).
     Returns null if the country is unknown.
 
-    This is a storage convention, not a display format. See docs/api.md.
+    This is a storage convention, not a display format.
 
     @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
     @param {String} national_number - National number digits
@@ -528,6 +548,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // Un-reverse the national number
       const national_number = reversed.split('').reverse().join('');
 
+      // Return the parsed components
       return {
         country_code: country_code,
         national_number: national_number

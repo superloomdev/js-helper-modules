@@ -1,4 +1,4 @@
-// Info: Extended address adapter for js-helper-contact-address.
+// Info: Extended address adapter for helper-contact-address.
 // Postal code regex patterns and ISO 3166-2 subdivision lists.
 // Zero runtime third-party dependencies (data is generated at build time).
 //
@@ -41,6 +41,7 @@ const compilePattern = function (patternStr) {
 
   let regex;
 
+  // Build RegExp from parsed pattern/flags or fall back to raw pattern
   if (match) {
     regex = new RegExp(match[1], match[2]);
   } else {
@@ -51,6 +52,7 @@ const compilePattern = function (patternStr) {
   // Cache for reuse
   REGEX_CACHE[patternStr] = regex;
 
+  // Return the compiled RegExp
   return regex;
 
 };
@@ -66,24 +68,30 @@ Used for getPostalRule's min_length/max_length fields.
 *********************************************************************/
 const extractLengthBounds = function (patterns) {
 
+  // Initialize bounds to sentinel values
   let minLength = 999;
   let maxLength = 0;
 
+  // Scan each pattern string for digit-length tokens
   patterns.forEach(function (patternStr) {
 
     // Find all \d{N} or \d{N,M} occurrences
     const regex = /\\d\{(\d+)(?:,(\d+))?\}/g;
     let match;
 
+    // Loop over all matches in this pattern string
     while ((match = regex.exec(patternStr)) !== null) {
 
+      // Parse the min and max digit counts from the match
       const min = parseInt(match[1], 10);
       const max = match[2] ? parseInt(match[2], 10) : min;
 
+      // Track the smallest min across all patterns
       if (min < minLength) {
         minLength = min;
       }
 
+      // Track the largest max across all patterns
       if (max > maxLength) {
         maxLength = max;
       }
@@ -92,10 +100,12 @@ const extractLengthBounds = function (patterns) {
 
   });
 
+  // Reset min to 0 if no digit tokens were found
   if (minLength === 999) {
     minLength = 0;
   }
 
+  // Return the length bounds envelope
   return {
     min_length: minLength,
     max_length: maxLength
@@ -107,20 +117,28 @@ const extractLengthBounds = function (patterns) {
 /////////////////////////// Module-Loader START ////////////////////////////////
 module.exports = function loader (shared_libs, config) {
 
+  // Dependencies for this instance - by reference from the shared container
   const Lib = {
     Utils: shared_libs.Utils
   };
 
+  // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
     require('./adapter.config'),
     config || {}
   );
 
+  // Own frozen error catalog
   const ERRORS = require('./adapter.errors');
+
+  // Load the validators singleton and inject Lib + ERRORS
   const Validators = require('./adapter.validators')(Lib, ERRORS);
+
+  // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
+  // Build the public Adapter interface
   return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
@@ -141,6 +159,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     listCountries: function () {
 
+      // Return all country codes from the address data
       return Object.keys(ADDRESS_DATA);
 
     },
@@ -156,8 +175,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     getPostalRule: function (country_code) {
 
+      // Look up the country's address data
       const data = ADDRESS_DATA[country_code];
 
+      // Unknown country - no rule
       if (!data) {
         return null;
       }
@@ -172,6 +193,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         ? compilePattern(data.patterns[0])
         : null;
 
+      // Return the postal rule envelope
       return {
         min_length: bounds.min_length,
         max_length: bounds.max_length,
@@ -192,12 +214,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     listSubdivisions: function (country_code) {
 
+      // Look up the country's address data
       const data = ADDRESS_DATA[country_code];
 
+      // Unknown country - no subdivisions
       if (!data) {
         return null;
       }
 
+      // Return the subdivisions array (may be null)
       return data.subdivisions;
 
     },
@@ -214,6 +239,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     validatePostalCode: function (country_code, postal_code) {
 
+      // Look up the country's address data
       const data = ADDRESS_DATA[country_code];
 
       // Unknown country
@@ -243,8 +269,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Try each pattern - any match is valid
       for (let i = 0; i < data.patterns.length; i++) {
 
+        // Compile the pattern for this iteration
         const regex = compilePattern(data.patterns[i]);
 
+        // Check if the postal code matches this pattern
         if (regex.test(postal_code)) {
           return {
             valid: true,
@@ -257,6 +285,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // No pattern matched - determine if it's a length issue
       const bounds = extractLengthBounds(data.patterns);
 
+      // Check if the postal code is too short
       if (postal_code.length < bounds.min_length) {
         return {
           valid: false,
@@ -264,6 +293,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
+      // Check if the postal code is too long
       if (postal_code.length > bounds.max_length) {
         return {
           valid: false,
@@ -292,6 +322,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     validateSubdivision: function (country_code, subdivision_code) {
 
+      // Look up the country's address data
       const data = ADDRESS_DATA[country_code];
 
       // Unknown country
@@ -317,6 +348,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         return sub.code.toUpperCase() === upperCode;
       });
 
+      // Subdivision code not found in the list
       if (!found) {
         return {
           valid: false,
@@ -324,6 +356,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
+      // Subdivision code is valid
       return {
         valid: true,
         reason: null
@@ -334,6 +367,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
   };///////////////////////////// Public Functions END //////////////////////////
 
+  // Return the public Adapter interface
   return Adapter;
 
 };///////////////////////////// createInterface END //////////////////////////////

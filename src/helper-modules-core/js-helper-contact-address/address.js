@@ -23,24 +23,30 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 module.exports = function loader (shared_libs, config) {
 
+  // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils
   };
 
+  // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
     require('./address.config'),
     config || {}
   );
 
+  // Error catalog and validators
   const ERRORS = require('./address.errors');
   const Validators = require('./address.validators')(Lib, ERRORS);
 
+  // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
+  // Adapter + contract validation
   const adapter = CONFIG.Adapter;
   Validators.validateAdapterContract(adapter);
 
+  // Create and return the public interface
   return createInterface(Lib, CONFIG, ERRORS, Validators, adapter);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
@@ -96,6 +102,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Unknown field
       if (policy === undefined) {
+
+        // Return invalid format error
         return {
           success: false,
           error: ERRORS.CONTACT_ADDRESS_INVALID_FORMAT
@@ -104,6 +112,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Check required fields
       if (policy === 'required') {
+
+        // Reject empty required fields
         if (value === null || value === undefined || value === '') {
           return {
             success: false,
@@ -114,6 +124,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Optional fields: skip if empty
       if (policy === 'optional' && (value === null || value === undefined || value === '')) {
+
+        // Return success for empty optional field
         return {
           success: true,
           error: null
@@ -126,6 +138,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       if (lengths && Lib.Utils.isString(value)) {
 
         if (value.length < lengths.min) {
+
+          // Return too-short error
           return {
             success: false,
             error: ERRORS.CONTACT_ADDRESS_TOO_SHORT
@@ -133,6 +147,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         }
 
         if (value.length > lengths.max) {
+
+          // Return too-long error
           return {
             success: false,
             error: ERRORS.CONTACT_ADDRESS_TOO_LONG
@@ -149,12 +165,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         const countries = adapter.listCountries();
 
         if (!countries.includes(value.toLowerCase())) {
+
+          // Return invalid country error
           return {
             success: false,
             error: ERRORS.CONTACT_ADDRESS_INVALID_COUNTRY
           };
         }
 
+        // Return success for valid country
         return {
           success: true,
           error: null
@@ -168,12 +187,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         Validators.assertString('value', value);
 
         if (!CONFIG.VALID_TAGS.includes(value)) {
+
+          // Return invalid tag error
           return {
             success: false,
             error: ERRORS.CONTACT_ADDRESS_INVALID_TAG
           };
         }
 
+        // Return success for valid tag
         return {
           success: true,
           error: null
@@ -185,25 +207,31 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       if (field_name === 'coordinates') {
 
         if (!Lib.Utils.isObject(value)) {
+
+          // Return invalid coordinates error
           return {
             success: false,
             error: ERRORS.CONTACT_ADDRESS_INVALID_COORDINATES
           };
         }
 
+        // Extract latitude and longitude
         const lat = value.latitude;
         const lng = value.longitude;
 
-        if (typeof lat !== 'number' || typeof lng !== 'number' ||
-            isNaN(lat) || isNaN(lng) ||
+        // Validate coordinate ranges
+        if (!Lib.Utils.isNumber(lat) || !Lib.Utils.isNumber(lng) ||
             lat < CONFIG.LATITUDE_MIN || lat > CONFIG.LATITUDE_MAX ||
             lng < CONFIG.LONGITUDE_MIN || lng > CONFIG.LONGITUDE_MAX) {
+
+          // Return invalid coordinates error
           return {
             success: false,
             error: ERRORS.CONTACT_ADDRESS_INVALID_COORDINATES
           };
         }
 
+        // Return success for valid coordinates
         return {
           success: true,
           error: null
@@ -221,12 +249,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         const result = adapter.validatePostalCode(country_code, value);
 
         if (!result.valid) {
+
+          // Map adapter reason to catalog entry
           return {
             success: false,
             error: ERRORS[result.reason] || ERRORS.CONTACT_ADDRESS_INVALID_FORMAT
           };
         }
 
+        // Return success for valid postal code
         return {
           success: true,
           error: null
@@ -244,12 +275,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         const result = adapter.validateSubdivision(country_code, value);
 
         if (!result.valid) {
+
+          // Map adapter reason to catalog entry
           return {
             success: false,
             error: ERRORS[result.reason] || ERRORS.CONTACT_ADDRESS_INVALID_FORMAT
           };
         }
 
+        // Return success for valid subdivision
         return {
           success: true,
           error: null
@@ -280,6 +314,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Validate input
       if (!Lib.Utils.isObject(data)) {
+
+        // Return invalid format error
         return {
           success: false,
           errors: [{ field: '_form', error: ERRORS.CONTACT_ADDRESS_INVALID_FORMAT }],
@@ -287,6 +323,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         };
       }
 
+      // Build error collection and context
       const errors = [];
       const context = {
         country_code: data.country ? data.country.toLowerCase() : ''
@@ -295,9 +332,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // Validate each field in the policy
       Object.keys(CONFIG.FIELD_POLICY).forEach(function (field_name) {
 
+        // Validate this field
         const value = data[field_name];
         const result = ContactAddress.validateSyntax(field_name, value, context);
 
+        // Collect errors for later reporting
         if (!result.success) {
           errors.push({
             field: field_name,
@@ -307,6 +346,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       });
 
+      // Report errors if any were found
       if (errors.length > 0) {
         return {
           success: false,
@@ -315,6 +355,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         };
       }
 
+      // Return success with no errors
       return {
         success: true,
         errors: [],
@@ -336,16 +377,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Validate input
       if (!Lib.Utils.isObject(data)) {
+
+        // Return empty object for invalid input
         return {};
       }
 
+      // Build the normalized result
       const result = {};
 
       // Copy and normalize each known field
       Object.keys(CONFIG.FIELD_POLICY).forEach(function (field_name) {
 
+        // Read the field value
         const value = data[field_name];
 
+        // Skip undefined and null fields
         if (value === undefined || value === null) {
           return;
         }
@@ -363,6 +409,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       });
 
+      // Return the normalized address
       return result;
 
     },
@@ -387,6 +434,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Null means no data (basic adapter) or unknown country
       if (subdivisions === null) {
+
+        // Return success with null subdivisions
         return {
           success: true,
           subdivisions: null,
@@ -394,6 +443,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         };
       }
 
+      // Return success with subdivisions
       return {
         success: true,
         subdivisions: subdivisions,

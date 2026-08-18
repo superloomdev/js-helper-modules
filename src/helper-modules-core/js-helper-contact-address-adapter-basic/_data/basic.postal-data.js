@@ -1,4 +1,4 @@
-// Info: Generated postal code data for js-helper-contact-address-adapter-basic.
+// Info: Generated postal code data for helper-contact-address-adapter-basic.
 // Source: libphonenumber-js (country list), postal-code-checker (postal lengths)
 // License: MIT
 // Generated: 2026-08-18

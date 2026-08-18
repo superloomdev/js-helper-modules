@@ -1,4 +1,4 @@
-// Info: Basic email adapter for js-helper-contact-email.
+// Info: Basic email adapter for helper-contact-email.
 // Own regex syntax validation. No disposable domain data.
 // Gmail-only canonicalization (dot/plus-tag folding).
 // Zero runtime third-party dependencies.
@@ -15,20 +15,28 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 module.exports = function loader (shared_libs, config) {
 
+  // Dependencies for this instance - by reference from the shared container
   const Lib = {
     Utils: shared_libs.Utils
   };
 
+  // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
     require('./adapter.config'),
     config || {}
   );
 
+  // Own frozen error catalog
   const ERRORS = require('./adapter.errors');
+
+  // Load the validators singleton and inject Lib + ERRORS
   const Validators = require('./adapter.validators')(Lib, ERRORS);
+
+  // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
+  // Build the public Adapter interface
   return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
@@ -101,6 +109,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
+      // Valid: all checks pass
       return {
         valid: true,
         reason: null
@@ -158,6 +167,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         if (plusIdx !== -1) {
           folded = folded.slice(0, plusIdx);
         }
+        // Return the folded Gmail address
         return folded + '@gmail.com';
       }
 
@@ -169,6 +179,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
   };///////////////////////////// Public Functions END //////////////////////////
 
+  // Return the public Adapter interface
   return Adapter;
 
 };///////////////////////////// createInterface END //////////////////////////////

@@ -1,4 +1,4 @@
-// Info: Extended email adapter for js-helper-contact-email.
+// Info: Extended email adapter for helper-contact-email.
 // Uses validator.isEmail() for syntax validation, a committed disposable
 // domain list (~5K domains) for disposable checking, and
 // validator.normalizeEmail() for all-provider canonicalization.
@@ -26,20 +26,28 @@ const DISPOSABLE_DOMAINS = require('./_data/disposable-domains.js');
 /////////////////////////// Module-Loader START ////////////////////////////////
 module.exports = function loader (shared_libs, config) {
 
+  // Dependencies for this instance - by reference from the shared container
   const Lib = {
     Utils: shared_libs.Utils
   };
 
+  // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
     require('./adapter.config'),
     config || {}
   );
 
+  // Own frozen error catalog
   const ERRORS = require('./adapter.errors');
+
+  // Load the validators singleton and inject Lib + ERRORS
   const Validators = require('./adapter.validators')(Lib, ERRORS);
+
+  // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);
 
+  // Build the public Adapter interface
   return createInterface(Lib, CONFIG, ERRORS, Validators);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
@@ -113,6 +121,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
+      // All checks passed - email is valid
       return {
         valid: true,
         reason: null
@@ -163,6 +172,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         return null;
       }
 
+      // Return the canonicalized email
       return normalized;
 
     }
@@ -170,6 +180,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
   };///////////////////////////// Public Functions END //////////////////////////
 
+  // Return the public Adapter interface
   return Adapter;
 
 };///////////////////////////// createInterface END //////////////////////////////

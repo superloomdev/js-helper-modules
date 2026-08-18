@@ -1,4 +1,4 @@
-// Info: Data generation script for js-helper-contact-address-adapter-basic.
+// Info: Data generation script for helper-contact-address-adapter-basic.
 // Extracts country list and postal code length bounds from libphonenumber-js
 // metadata (country list) and hard-coded postal code length data.
 //

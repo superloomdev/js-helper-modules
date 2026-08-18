@@ -58,6 +58,7 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
+    // Reject if Adapter is missing or not an object
     if (
       Lib.Utils.isNullOrUndefined(CONFIG.Adapter) ||
       !Lib.Utils.isObject(CONFIG.Adapter)
@@ -94,6 +95,7 @@ const Validators = {
   *********************************************************************/
   validateAdapterContract: function (adapter) {
 
+    // List the required adapter methods
     const required = [
       'listCountries',
       'getMetadata',
@@ -101,8 +103,10 @@ const Validators = {
       'getNumberType'
     ];
 
+    // Check each method is present and callable
     required.forEach(function (name) {
 
+      // Reject if method is missing or not a function
       if (Lib.Utils.isNullOrUndefined(adapter[name]) || !Lib.Utils.isFunction(adapter[name])) {
         throw new Error(
           '[helper-contact-phone] Invalid adapter contract: missing method `' + name + '`'
@@ -128,6 +132,7 @@ const Validators = {
   *********************************************************************/
   assertString: function (name, value) {
 
+    // Reject if value is not a string
     if (!Lib.Utils.isString(value)) {
       throw new TypeError(
         '[helper-contact-phone] ' + name + ' must be a string'
@@ -147,6 +152,7 @@ const Validators = {
   *********************************************************************/
   assertNonEmptyString: function (name, value) {
 
+    // Reject if value is not a string or is empty
     if (!Lib.Utils.isString(value) || value.length === 0) {
       throw new TypeError(
         '[helper-contact-phone] ' + name + ' must be a non-empty string'

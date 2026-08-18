@@ -1,4 +1,4 @@
-// Info: Generated country data for js-helper-contact-phone-adapter-basic.
+// Info: Generated country data for helper-contact-phone-adapter-basic.
 // Source: libphonenumber-js (Google PhoneNumberMetadata.xml, min metadata)
 // License: MIT
 // Generated: 2026-08-18
