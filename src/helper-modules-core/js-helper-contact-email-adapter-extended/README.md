@@ -7,7 +7,7 @@ Extended email adapter for `helper-contact-email`. `validator.isEmail()` syntax,
 
 ## What This Is
 
-The extended adapter for the contact-email family. Uses `validator.isEmail()` for robust syntax validation, a committed list of ~5K disposable domains for disposable checking, and `validator.normalizeEmail()` for all-provider canonicalization (Gmail, Outlook, iCloud, Yahoo, Fastmail).
+The extended adapter for the contact-email family. Uses `validator.isEmail()` for thorough syntax validation, a committed list of ~5K disposable domains for disposable checking, and `validator.normalizeEmail()` for all-provider canonicalization (Gmail, Outlook, iCloud, Yahoo, Fastmail).
 
 ## Extended Documentation
 

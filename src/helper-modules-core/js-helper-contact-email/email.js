@@ -142,6 +142,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         return null;
       }
 
+      // Return the extracted domain
       return domain;
 
     },
@@ -177,6 +178,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         return null;
       }
 
+      // Return the extracted local part
       return local;
 
     },
@@ -209,6 +211,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         };
       }
 
+      // Map reason string to catalog entry
       return {
         success: false,
         error: ERRORS[result.reason] || ERRORS.CONTACT_EMAIL_INVALID_SYNTAX
@@ -240,6 +243,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // No domain - syntax is wrong, but this function checks disposability
       // Return success=true with no error if we cannot extract a domain
       if (domain === null) {
+
+        // Return success (no disposable check possible)
         return {
           success: true,
           error: null
@@ -249,6 +254,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       // Ask the adapter if the domain is disposable
       const isDisposable = adapter.isDisposableDomain(domain);
 
+      // Disposable domain found
       if (isDisposable) {
         return {
           success: false,
@@ -256,6 +262,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
         };
       }
 
+      // Not disposable - return success
       return {
         success: true,
         error: null

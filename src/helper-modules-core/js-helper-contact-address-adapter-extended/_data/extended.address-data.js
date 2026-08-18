@@ -1,4 +1,4 @@
-// Info: Generated address data for js-helper-contact-address-adapter-extended.
+// Info: Generated address data for helper-contact-address-adapter-extended.
 // Source: postal-code-checker (postal patterns + subdivisions),
 //         libphonenumber-js (country list)
 // License: MIT

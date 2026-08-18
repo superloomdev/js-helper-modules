@@ -1,4 +1,4 @@
-// Info: ESLint flat config for js-helper-contact-address.
+// Info: ESLint flat config for helper-contact-address.
 const { base } = require('@superloomdev/js-helper-eslint-config');
 
 module.exports = base;

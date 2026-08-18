@@ -1,4 +1,4 @@
-// Info: Data generation script for js-helper-contact-phone-adapter-basic.
+// Info: Data generation script for helper-contact-phone-adapter-basic.
 // Reads libphonenumber-js metadata and extracts country calling codes
 // and national number length bounds. Outputs a frozen JavaScript object.
 //
@@ -85,7 +85,7 @@ Object.keys(metadataCountries).forEach(function (isoCode) {
   //          preferredInternationalPrefix, ...]
   //
   // possibleLengths and possibleLengthsLocal are at specific indices
-  // that vary by metadata version. Let's use a more robust approach.
+  // that vary by metadata version. Let's use a more reliable approach.
 
   // Use the libphonenumber-js API to get lengths
   // Actually, let's just use the metadata's possibleLengths directly

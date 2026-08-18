@@ -1,5 +1,5 @@
 // Info: Error catalog for helper-contact-address.
-// Key === type. Both use the full prefixed name per Plan 0097 D17.
+// Key === type. Both use the full prefixed name.
 // Frozen to prevent accidental mutation.
 'use strict';
 
