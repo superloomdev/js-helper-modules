@@ -1,0 +1,29 @@
+{
+  "name": "@superloomdev/js-helper-contact-address",
+  "description": "Postal address validation and field policy management. Port module requiring a swappable adapter for postal code and subdivision validation depth.",
+  "version": "1.0.0",
+  "main": "address.js",
+  "private": false,
+  "license": "MIT",
+  "author": { "name": "sj00" },
+  "contributors": [],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "bundleDependencies": [],
+  "engines": { "node": ">=24" },
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test _test/test.js"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "js-helper-contact-address-adapter-basic-test",
+  "description": "Test suite for js-helper-contact-address-adapter-basic",
+  "version": "1.0.0",
+  "main": "test.js",
+  "private": true,
+  "license": "MIT",
+  "author": { "name": "sj00" },
+  "dependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-contact-address": "file:../../js-helper-contact-address",
+    "helper-contact-address-adapter-basic": "file:../"
+  },
+  "scripts": { "test": "node --test test.js" }
+}

@@ -1,0 +1,14 @@
+# Note: README.md, ROBOTS.md, and docs/ are intentionally NOT excluded.
+THOUGHTS.md
+_test/
+_data/generate.js
+eslint.config.js
+.github/
+node_modules/
+package-lock.json
+.DS_Store
+._*
+Thumbs.db
+*.log
+npm-debug.log*
+.npm

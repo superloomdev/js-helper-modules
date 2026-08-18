@@ -1,0 +1,18 @@
+{
+  "name": "js-helper-contact-phone-test",
+  "description": "Test suite for js-helper-contact-phone",
+  "version": "1.0.0",
+  "main": "test.js",
+  "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "dependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-contact-phone": "file:../"
+  },
+  "scripts": {
+    "test": "node --test test.js"
+  }
+}
