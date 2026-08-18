@@ -153,7 +153,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List all country codes the adapter has data for.
+List all country codes the adapter has data for.
 
 @return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
     *********************************************************************/
@@ -166,8 +166,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get the postal code rule for a country.
-    Returns null for unknown countries.
+Get the postal code rule for a country.
+Returns null for unknown countries.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -205,8 +205,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List subdivisions for a country.
-    Returns null if no subdivision data is available.
+List subdivisions for a country.
+Returns null if no subdivision data is available.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -229,8 +229,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate a postal code for a country using regex patterns.
-    Falls back to length bounds if no patterns are available.
+Validate a postal code for a country using regex patterns.
+Falls back to length bounds if no patterns are available.
 
 @param {String} country_code  - ISO 3166-1 alpha-2, lowercase
 @param {String} postal_code   - Postal code to validate
@@ -311,9 +311,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate a subdivision code for a country.
-    Checks against the subdivision list if available.
-    Returns valid if no subdivision data is available (graceful fallback).
+Validate a subdivision code for a country.
+Checks against the subdivision list if available.
+Returns valid if no subdivision data is available (graceful fallback).
 
 @param {String} country_code       - ISO 3166-1 alpha-2, lowercase
 @param {String} subdivision_code   - Subdivision code to validate

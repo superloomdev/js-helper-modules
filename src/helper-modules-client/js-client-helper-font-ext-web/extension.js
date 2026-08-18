@@ -93,9 +93,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Adapter Contract ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Load all font families from the core's manifest. Builds @font-face
-    CSS strings via the core, creates a <style> node, and appends it
-    to the DOM.
+Load all font families from the core's manifest. Builds @font-face
+CSS strings via the core, creates a <style> node, and appends it
+to the DOM.
 
 @param {Object} manifest - The manifest from Font.getManifest()
 
@@ -220,7 +220,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Check whether all registered fonts have finished loading.
+Check whether all registered fonts have finished loading.
 
 @return {Object} - { success, ready, error }
     *********************************************************************/
@@ -236,7 +236,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Check whether a specific font family has been loaded by this adapter.
+Check whether a specific font family has been loaded by this adapter.
 
 @param {String} familyName - The family name to check
 
@@ -256,8 +256,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Remove the injected style node from the DOM. Useful for hot
-    reload or test cleanup.
+Remove the injected style node from the DOM. Useful for hot
+reload or test cleanup.
 
 @return {Object} - { success, error }
     *********************************************************************/

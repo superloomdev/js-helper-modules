@@ -8,8 +8,8 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars 
   return {
 
     /********************************************************************
-    Validate the merged config object. Throws TypeError on programmer
-    error.
+Validate the merged config object. Throws TypeError on programmer
+error.
 
 @param {Object} CONFIG - Merged configuration
     *********************************************************************/
@@ -26,8 +26,8 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars 
 
 
     /********************************************************************
-    Validate options passed to useIdle. Throws TypeError on programmer
-    error.
+Validate options passed to useIdle. Throws TypeError on programmer
+error.
 
 @param {Object} options - Hook options
     *********************************************************************/

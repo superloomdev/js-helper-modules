@@ -77,7 +77,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     // null for unknown codes.
 
     /********************************************************************
-    Check if a currency code is known to the module.
+Check if a currency code is known to the module.
 
 @param {String} code - Currency code (e.g., 'usd', 'INR')
 
@@ -108,8 +108,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Sanitize a currency code. Lowercase, strip non-letters.
-    Returns null if result has wrong length.
+Sanitize a currency code. Lowercase, strip non-letters.
+Returns null if result has wrong length.
 
 @param {*} code - Currency code to sanitize
 
@@ -124,8 +124,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Validate a currency code without throwing.
-    Returns false if valid, or an array of error objects on failure.
+Validate a currency code without throwing.
+Returns false if valid, or an array of error objects on failure.
 
 @param {*} code - Currency code to validate
 
@@ -140,7 +140,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the native currency symbol (e.g., '₹', '$', '€').
+Get the native currency symbol (e.g., '₹', '$', '€').
 
 @param {String} currency_code - Currency code
 
@@ -161,10 +161,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the locale-aware currency symbol. Returns the native symbol
-    when the country_code matches the first two characters of the
-    currency code (e.g., 'inr' in 'in'). Otherwise returns the
-    standard (ISO alpha) symbol.
+Get the locale-aware currency symbol. Returns the native symbol
+when the country_code matches the first two characters of the
+currency code (e.g., 'inr' in 'in'). Otherwise returns the
+standard (ISO alpha) symbol.
 
 @param {String} currency_code - Currency code
 @param {String} country_code  - ISO 3166-1 alpha-2 country code
@@ -196,7 +196,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the ISO 4217 alpha code (e.g., 'USD', 'INR').
+Get the ISO 4217 alpha code (e.g., 'USD', 'INR').
 
 @param {String} currency_code - Currency code
 
@@ -217,7 +217,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the ISO 4217 numeric code as a zero-padded string (e.g., '840', '036').
+Get the ISO 4217 numeric code as a zero-padded string (e.g., '840', '036').
 
 @param {String} currency_code - Currency code
 
@@ -238,7 +238,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the English name for a currency (ISO 4217 official name).
+Get the English name for a currency (ISO 4217 official name).
 
 @param {String} currency_code - Currency code
 
@@ -259,7 +259,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the native minor currency symbol (e.g., '¢' for USD).
+Get the native minor currency symbol (e.g., '¢' for USD).
 
 @param {String} currency_code - Currency code
 
@@ -281,11 +281,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the locale-aware minor currency symbol. Returns the native minor
-    symbol when the country_code matches the first two characters of the
-    currency code. Otherwise returns the standard (ISO alpha) symbol.
-    Returns null if the currency's native minor symbol is null (e.g., INR
-    has no minor symbol).
+Get the locale-aware minor currency symbol. Returns the native minor
+symbol when the country_code matches the first two characters of the
+currency code. Otherwise returns the standard (ISO alpha) symbol.
+Returns null if the currency's native minor symbol is null (e.g., INR
+has no minor symbol).
 
 @param {String} currency_code - Currency code
 @param {String} country_code  - ISO 3166-1 alpha-2 country code
@@ -326,7 +326,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the number of decimal places for a currency.
+Get the number of decimal places for a currency.
 
 @param {String} currency_code - Currency code
 
@@ -347,9 +347,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the minimum transactional unit for a currency.
-    This is the smallest amount that can be transacted (e.g., 0.01 for USD,
-    1 for INR).
+Get the minimum transactional unit for a currency.
+This is the smallest amount that can be transacted (e.g., 0.01 for USD,
+1 for INR).
 
 @param {String} currency_code - Currency code
 
@@ -370,7 +370,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Get the available denominations for a currency.
+Get the available denominations for a currency.
 
 @param {String} currency_code - Currency code
 
@@ -402,8 +402,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     // Float-safe rounding and string formatting for display.
 
     /********************************************************************
-    Round an amount to the correct number of decimal places for a currency.
-    Uses Lib.Utils.round internally.
+Round an amount to the correct number of decimal places for a currency.
+Uses Lib.Utils.round internally.
 
 @param {Number} amount - Amount to round
 @param {String} currency_code - Currency code
@@ -430,8 +430,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Format an amount as a string with correct decimal places.
-    Adds trailing zeros unless no_pad is true and the result is a whole number.
+Format an amount as a string with correct decimal places.
+Adds trailing zeros unless no_pad is true and the result is a whole number.
 
 @param {Number} amount - Amount to format
 @param {String} currency_code - Currency code
@@ -467,8 +467,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     // Conversions to/from fractional units and transactional rounding.
 
     /********************************************************************
-    Round an amount to the nearest minimum transactional unit.
-    When apply_min_unit is false, applies standard rounding.
+Round an amount to the nearest minimum transactional unit.
+When apply_min_unit is false, applies standard rounding.
 
 @param {Number} amount - Amount to round
 @param {String} currency_code - Currency code
@@ -509,8 +509,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Convert an amount to fractional units (e.g., $10.57 -> 1057 cents).
-    Applies transactional rounding first.
+Convert an amount to fractional units (e.g., $10.57 -> 1057 cents).
+Applies transactional rounding first.
 
 @param {Number} amount - Amount in large currency
 @param {String} currency_code - Currency code
@@ -539,7 +539,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Convert fractional units back to large currency (e.g., 1057 -> $10.57).
+Convert fractional units back to large currency (e.g., 1057 -> $10.57).
 
 @param {Number} amount - Amount in fractional units
 @param {String} currency_code - Currency code
@@ -569,8 +569,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     // Summing multiple amounts safely using integer arithmetic internally.
 
     /********************************************************************
-    Sum an array of amounts safely, avoiding floating-point errors.
-    (e.g., 0.1 + 0.2 = 0.3 exactly, not 0.30000000000000004)
+Sum an array of amounts safely, avoiding floating-point errors.
+(e.g., 0.1 + 0.2 = 0.3 exactly, not 0.30000000000000004)
 
 @param {Number[]} amounts - Array of amounts to sum
 @param {String} currency_code - Currency code
@@ -602,7 +602,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Calculate total amount from denomination counts.
+Calculate total amount from denomination counts.
 
 @param {Array} [majors] - Array of { value, count } for major denominations
 @param {Array} [minors] - Array of { value, count } for minor denominations (in fractional units)
@@ -668,8 +668,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
   const _Money = {
 
     /********************************************************************
-    Convert a large-currency amount to integer representation
-    by multiplying by 10^decimals.
+Convert a large-currency amount to integer representation
+by multiplying by 10^decimals.
 
 @param {Number} amount - Amount in large currency
 @param {String} code - Normalized currency code (already validated)
@@ -688,8 +688,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
 
 
     /********************************************************************
-    Convert an integer amount back to large-currency representation
-    by dividing by 10^decimals and rounding appropriately.
+Convert an integer amount back to large-currency representation
+by dividing by 10^decimals and rounding appropriately.
 
 @param {Number} integer_amount - Amount in integer units
 @param {String} code - Normalized currency code (already validated)

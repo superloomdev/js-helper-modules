@@ -105,9 +105,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // useIdle bridges the threshold registry into React re-renders.
 
     /********************************************************************
-    React hook that bridges idle state into re-renders. Subscribes to
-    host-supplied activity sources on mount, unsubscribes on unmount.
-    Registers thresholds on mount and unregisters them on unmount.
+React hook that bridges idle state into re-renders. Subscribes to
+host-supplied activity sources on mount, unsubscribes on unmount.
+Registers thresholds on mount and unregisters them on unmount.
 
 @param {Object} options             - Hook options
 @param {Array}  options.sources     - Activity source subscribe/unsubscribe pairs
@@ -189,8 +189,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Direct control of idle detection without React.
 
     /********************************************************************
-    Record user activity. Re-arms every registered threshold. Ignored
-    while paused, reported as touched: false.
+Record user activity. Re-arms every registered threshold. Ignored
+while paused, reported as touched: false.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -222,8 +222,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Pause idle detection. Closes the current analytics period, clears
-    all pending threshold timers, and freezes the elapsed clock.
+Pause idle detection. Closes the current analytics period, clears
+all pending threshold timers, and freezes the elapsed clock.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -262,8 +262,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Resume idle detection from a paused state. Reschedules thresholds
-    for their remaining delta. Idempotent.
+Resume idle detection from a paused state. Reschedules thresholds
+for their remaining delta. Idempotent.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -305,7 +305,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Register callbacks to fire after ms of continuous inactivity.
 
     /********************************************************************
-    Register a callback to fire after ms of continuous inactivity.
+Register a callback to fire after ms of continuous inactivity.
 
 @param {number} ms        - Threshold in milliseconds (must be positive)
 @param {Function} callback - Function called when threshold fires
@@ -362,7 +362,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Unregister one handler by the id returned from registerIdleHandler.
+Unregister one handler by the id returned from registerIdleHandler.
 
 @param {number} id - Handler id to remove
 
@@ -399,7 +399,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Unregister every handler.
+Unregister every handler.
 
 @return {Object} - { success, data: { removed_count }, error }
     *********************************************************************/
@@ -438,8 +438,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Read-only accessors for idle state and analytics.
 
     /********************************************************************
-    Get milliseconds elapsed since the last activity. Frozen while
-    paused.
+Get milliseconds elapsed since the last activity. Frozen while
+paused.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -465,7 +465,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Get the timestamp of the last recorded activity.
+Get the timestamp of the last recorded activity.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -482,8 +482,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Get total milliseconds spent in the idle state, including the
-    in-progress period.
+Get total milliseconds spent in the idle state, including the
+in-progress period.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -509,8 +509,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Get total milliseconds spent in the active state, including the
-    in-progress period.
+Get total milliseconds spent in the active state, including the
+in-progress period.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -546,8 +546,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Timer scheduling, analytics period tracking, and elapsed computation.
 
     /********************************************************************
-    Record activity and re-arm all thresholds. Closes the idle
-    analytics period and opens a fresh active period.
+Record activity and re-arm all thresholds. Closes the idle
+analytics period and opens a fresh active period.
     *********************************************************************/
     touch: function () {
 
@@ -580,8 +580,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Close the current analytics period into its total. Called on
-    pause and before rescheduling thresholds.
+Close the current analytics period into its total. Called on
+pause and before rescheduling thresholds.
     *********************************************************************/
     closePeriod: function () {
 
@@ -607,8 +607,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Schedule (or fire) a single threshold by id. If the threshold's
-    ms has already elapsed, fire immediately.
+Schedule (or fire) a single threshold by id. If the threshold's
+ms has already elapsed, fire immediately.
     *********************************************************************/
     scheduleThreshold: function (id) {
 
@@ -650,8 +650,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Reschedule all registered thresholds for their remaining delta.
-    Called on touch and on resume.
+Reschedule all registered thresholds for their remaining delta.
+Called on touch and on resume.
     *********************************************************************/
     rescheduleThresholds: function () {
 
@@ -675,7 +675,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Clear all pending threshold timers without removing handlers.
+Clear all pending threshold timers without removing handlers.
     *********************************************************************/
     clearAllTimers: function () {
 
@@ -692,7 +692,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Calculate milliseconds elapsed since last activity.
+Calculate milliseconds elapsed since last activity.
 
 @return {number} - Elapsed ms
     *********************************************************************/
@@ -710,9 +710,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Check if the idle classification has flipped and update the
-    analytics period accordingly. Called before threshold callbacks
-    fire.
+Check if the idle classification has flipped and update the
+analytics period accordingly. Called before threshold callbacks
+fire.
     *********************************************************************/
     checkIdleTransition: function () {
 

@@ -96,8 +96,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Create a one-time code and persist it for later verification.
 
     /********************************************************************
-    Generate, store, and return a numeric PIN (charset: 0-9).
-    Common use case: short numeric OTP delivered via SMS.
+Generate, store, and return a numeric PIN (charset: 0-9).
+Common use case: short numeric OTP delivered via SMS.
 
 @param {Object} instance - Request instance for time and lifecycle
 @param {Object} options - Per-call parameters
@@ -118,9 +118,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Generate, store, and return an alphanumeric code (Crockford Base32).
-    Common use case: 6-8 character login or 2FA code printed or read aloud.
-    Uppercase, no look-alikes (I, L, O, U excluded).
+Generate, store, and return an alphanumeric code (Crockford Base32).
+Common use case: 6-8 character login or 2FA code printed or read aloud.
+Uppercase, no look-alikes (I, L, O, U excluded).
 
 @param {Object} instance - Request instance for time and lifecycle
 @param {Object} options - Per-call parameters (see createPin)
@@ -136,9 +136,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Generate, store, and return a URL-safe token (charset: a-zA-Z0-9).
-    Common use case: magic link tail dropped into a query string.
-    Highest entropy per character.
+Generate, store, and return a URL-safe token (charset: a-zA-Z0-9).
+Common use case: magic link tail dropped into a query string.
+Highest entropy per character.
 
 @param {Object} instance - Request instance for time and lifecycle
 @param {Object} options - Per-call parameters (see createPin)
@@ -157,9 +157,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Consume a previously created code; one-time use.
 
     /********************************************************************
-    Validate a submitted value against the stored record for scope+key.
-    On match, the record is deleted in the background (one-time use).
-    On mismatch, the fail count is atomically incremented.
+Validate a submitted value against the stored record for scope+key.
+On match, the record is deleted in the background (one-time use).
+On mismatch, the fail count is atomically incremented.
 
 @param {Object} instance - Request instance for time and lifecycle
 @param {Object} options - Per-call parameters
@@ -169,7 +169,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 @param {Integer} options.max_fail_count - Reject after this many failed attempts
 
 @return {Promise<Object>} - { success, error }. On failure, error.type
-    is one of: VERIFY_NOT_FOUND, VERIFY_EXPIRED, VERIFY_MAX_FAILS, VERIFY_WRONG_VALUE, VERIFY_SERVICE_UNAVAILABLE.
+is one of: VERIFY_NOT_FOUND, VERIFY_EXPIRED, VERIFY_MAX_FAILS, VERIFY_WRONG_VALUE, VERIFY_SERVICE_UNAVAILABLE.
     *********************************************************************/
     verify: async function (instance, options) {
 
@@ -183,14 +183,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Scheduled cleanup and idempotent schema initialization.
 
     /********************************************************************
-    Delete expired records from the storage backend. Optional - only works
-    when the adapter provides a `cleanupExpiredRecords` method. SQL-based
-    backends (Postgres, MySQL, SQLite) need this because they have no
-    native TTL. NoSQL backends (DynamoDB, MongoDB) handle expiry natively
-    but still expose this method for explicit lifecycle control.
+Delete expired records from the storage backend. Optional - only works
+when the adapter provides a `cleanupExpiredRecords` method. SQL-based
+backends (Postgres, MySQL, SQLite) need this because they have no
+native TTL. NoSQL backends (DynamoDB, MongoDB) handle expiry natively
+but still expose this method for explicit lifecycle control.
 
-    Intended to be called from a scheduled job (cron, setInterval,
-    CloudWatch Events -> Lambda), not on every request.
+Intended to be called from a scheduled job (cron, setInterval,
+CloudWatch Events -> Lambda), not on every request.
 
 @param {Object} instance - Request instance for time reference
 
@@ -205,11 +205,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Idempotent backend setup. SQL: CREATE TABLE IF NOT EXISTS + index
-    on expires_at. MongoDB: createIndex with `expireAfterSeconds: 0`
-    for native TTL. DynamoDB: CreateTable with composite key (TTL on
-    `expires_at` is opt-in at the table level - enable via AWS console
-    or IaC, not by this module). Stores that need no setup are no-ops.
+Idempotent backend setup. SQL: CREATE TABLE IF NOT EXISTS + index
+on expires_at. MongoDB: createIndex with `expireAfterSeconds: 0`
+for native TTL. DynamoDB: CreateTable with composite key (TTL on
+`expires_at` is opt-in at the table level - enable via AWS console
+or IaC, not by this module). Stores that need no setup are no-ops.
 
 @param {Object} instance - Request instance
 
@@ -238,9 +238,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
   const _Verify = {
 
     /********************************************************************
-    Shared create-side flow: validate options, enforce cooldown, generate
-    a fresh code from the supplied charset, write the record. Used by
-    createPin, createCode, and createToken.
+Shared create-side flow: validate options, enforce cooldown, generate
+a fresh code from the supplied charset, write the record. Used by
+createPin, createCode, and createToken.
 
 @param {Object} instance - Request instance for time and lifecycle
 @param {Object} options - Caller-provided options
@@ -320,11 +320,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Verify-side flow: load the record, run lifecycle checks, compare the
-    submitted value, and either delete (on success) or increment the
-    fail counter (on mismatch). On success, deletion runs in the
-    background via Lib.Instance.backgroundRoutine so the caller is not
-    blocked waiting for cleanup.
+Verify-side flow: load the record, run lifecycle checks, compare the
+submitted value, and either delete (on success) or increment the
+fail counter (on mismatch). On success, deletion runs in the
+background via Lib.Instance.backgroundRoutine so the caller is not
+blocked waiting for cleanup.
 
 @param {Object} instance - Request instance for time and lifecycle
 @param {Object} options - Caller-provided options
@@ -394,10 +394,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Delete all records where expires_at < instance.time. Delegates to
-    the store's cleanupExpiredRecords method. Every shipped store
-    implements this; a missing implementation is a programmer error and
-    throws rather than returning an envelope.
+Delete all records where expires_at < instance.time. Delegates to
+the store's cleanupExpiredRecords method. Every shipped store
+implements this; a missing implementation is a programmer error and
+throws rather than returning an envelope.
 
 @param {Object} instance - Request instance for time reference
 
@@ -435,10 +435,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Schedule a fire-and-forget delete of the consumed record. Runs in
-    parallel with the request response so the caller is not blocked
-    waiting on the cleanup write. Lib and store are closed over from
-    createInterface.
+Schedule a fire-and-forget delete of the consumed record. Runs in
+parallel with the request response so the caller is not blocked
+waiting on the cleanup write. Lib and store are closed over from
+createInterface.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace

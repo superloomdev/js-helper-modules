@@ -110,9 +110,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // statements use IF NOT EXISTS so repeated calls are no-ops.
 
     /********************************************************************
-    Idempotent table + index setup. Creates the sessions table and
-    the expires_at index if they do not exist (SQLite supports
-    CREATE ... IF NOT EXISTS for both). Safe to call on every boot.
+Idempotent table + index setup. Creates the sessions table and
+the expires_at index if they do not exist (SQLite supports
+CREATE ... IF NOT EXISTS for both). Safe to call on every boot.
 
 @param {Object} instance - Request instance
 
@@ -171,8 +171,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // single index reads even at large scale.
 
     /********************************************************************
-    Read a single session by (tenant_id, actor_id, token_key). Returns
-    null record on hash mismatch - identical to "not found" shape.
+Read a single session by (tenant_id, actor_id, token_key). Returns
+null record on hash mismatch - identical to "not found" shape.
 
 @param {Object} instance          - Request instance
 @param {string} tenant_id         - Tenant identifier
@@ -240,7 +240,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return all sessions for a (tenant_id, actor_id) pair.
+Return all sessions for a (tenant_id, actor_id) pair.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -293,7 +293,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // refuses any identity column to keep PK integrity tamper-proof.
 
     /********************************************************************
-    Insert or upsert a session by composite primary key.
+Insert or upsert a session by composite primary key.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical session record
@@ -329,8 +329,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Partial UPDATE for mutable per-session fields. Throws TypeError
-    if `updates` contains any identity or primary-key column.
+Partial UPDATE for mutable per-session fields. Throws TypeError
+if `updates` contains any identity or primary-key column.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -408,7 +408,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // replacement stay constant-cost regardless of session count.
 
     /********************************************************************
-    Delete one session by composite primary key.
+Delete one session by composite primary key.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -452,8 +452,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Bulk delete sessions for a tenant. Single round-trip with an
-    OR-joined clause. No-op success if keys array is empty.
+Bulk delete sessions for a tenant. Single round-trip with an
+OR-joined clause. No-op success if keys array is empty.
 
 @param {Object}   instance  - Request instance
 @param {string}   tenant_id - Tenant identifier
@@ -523,9 +523,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // range scan even as the table grows.
 
     /********************************************************************
-    Sweep all expired sessions. SQLite has no native TTL; this is
-    the garbage-collection path - run it on a cron for file-backed
-    deployments.
+Sweep all expired sessions. SQLite has no native TTL; this is
+the garbage-collection path - run it on a cron for file-backed
+deployments.
 
 @param {Object} instance - Request instance
 
@@ -608,9 +608,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using SQLite's native double-quote style (same
-    as Postgres). Rejects any identifier containing a double-quote so
-    identifiers can never inject DDL through the table_name config.
+Quote an identifier using SQLite's native double-quote style (same
+as Postgres). Rejects any identifier containing a double-quote so
+identifiers can never inject DDL through the table_name config.
 
 @param {String} name - Identifier (table or column)
 
@@ -630,9 +630,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE statement for SQLite. Idempotent via
-    CREATE TABLE IF NOT EXISTS. Safe to call on every boot.
-    Closes over config from createInterface.
+Build the CREATE TABLE statement for SQLite. Idempotent via
+CREATE TABLE IF NOT EXISTS. Safe to call on every boot.
+Closes over config from createInterface.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -679,10 +679,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE INDEX statement for the expires_at index. Uses
-    CREATE INDEX IF NOT EXISTS for idempotency. The index powers the
-    cleanupExpiredSessions range scan.
-    Closes over config from createInterface.
+Build the CREATE INDEX statement for the expires_at index. Uses
+CREATE INDEX IF NOT EXISTS for idempotency. The index powers the
+cleanupExpiredSessions range scan.
+Closes over config from createInterface.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -701,11 +701,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the SQLite UPSERT statement. Uses
+Build the SQLite UPSERT statement. Uses
       INSERT ... ON CONFLICT (pk) DO UPDATE SET col = excluded.col
-    Supported since SQLite 3.24 (2018) and available everywhere
-    node:sqlite ships.
-    Closes over config from createInterface.
+Supported since SQLite 3.24 (2018) and available everywhere
+node:sqlite ships.
+Closes over config from createInterface.
 
 @return {String} - SQL template using `?` placeholders
     *********************************************************************/
@@ -745,8 +745,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Encode a canonical-record value for a parameterized INSERT / UPDATE.
-    SQLite needs 0/1 for booleans and a JSON envelope for custom_data.
+Encode a canonical-record value for a parameterized INSERT / UPDATE.
+SQLite needs 0/1 for booleans and a JSON envelope for custom_data.
 
 @param {String} col   - Column name
 @param {*}      value - Canonical record value
@@ -779,10 +779,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Decode a raw row value into its canonical-record shape. SQLite
-    returns all integer columns as native JS numbers (BIGINT does not
-    exist as a distinct type), booleans come back as 0/1, and
-    custom_data comes back as the TEXT string we wrote, which we parse.
+Decode a raw row value into its canonical-record shape. SQLite
+returns all integer columns as native JS numbers (BIGINT does not
+exist as a distinct type), booleans come back as 0/1, and
+custom_data comes back as the TEXT string we wrote, which we parse.
 
 @param {String} col   - Column name
 @param {*}      value - Raw DB value
@@ -831,7 +831,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Canonical record -> positional values array, aligned with COLUMNS.
+Canonical record -> positional values array, aligned with COLUMNS.
 
 @param {Object} record - Canonical session record
 
@@ -848,7 +848,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Raw row object -> canonical record.
+Raw row object -> canonical record.
 
 @param {Object} row - Raw row from SQLite driver
 

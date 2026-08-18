@@ -88,7 +88,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List all country codes the adapter has data for.
+List all country codes the adapter has data for.
 
 @return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
     *********************************************************************/
@@ -101,7 +101,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get metadata (calling code, length bounds) for a country.
+Get metadata (calling code, length bounds) for a country.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -128,10 +128,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate a national phone number's syntax (length + charset).
-    No pattern validation - the basic adapter does not carry pattern data.
-    Returns { valid, reason } where reason is a stable error type string
-    matching the core's error catalog.
+Validate a national phone number's syntax (length + charset).
+No pattern validation - the basic adapter does not carry pattern data.
+Returns { valid, reason } where reason is a stable error type string
+matching the core's error catalog.
 
 @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
 @param {String} national_number - National number digits
@@ -185,8 +185,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get the type of a phone number. The basic adapter has no type data
-    and always returns null.
+Get the type of a phone number. The basic adapter has no type data
+and always returns null.
 
 @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
 @param {String} national_number - National number digits

@@ -9,8 +9,8 @@ module.exports = function (Lib, ERRORS) {
   const Validators = {
 
     /********************************************************************
-    Validate the merged config object. Throws TypeError on any
-    misconfiguration so the module fails at startup, not at call time.
+Validate the merged config object. Throws TypeError on any
+misconfiguration so the module fails at startup, not at call time.
 
 @param {Object} CONFIG - Merged config for this instance
 @return {void}
@@ -28,8 +28,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a callback function. Returns the error object when
-    invalid, null when valid.
+Validate a callback function. Returns the error object when
+invalid, null when valid.
 
 @param {*} callback - Value to validate as a function
 

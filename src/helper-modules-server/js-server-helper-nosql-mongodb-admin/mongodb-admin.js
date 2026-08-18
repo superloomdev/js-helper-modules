@@ -87,8 +87,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Create and drop collections with idempotent semantics.
 
     /********************************************************************
-    Create a collection. Idempotent: if the collection already exists,
-    returns success with data.created set to false.
+Create a collection. Idempotent: if the collection already exists,
+returns success with data.created set to false.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -160,8 +160,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Drop a collection. Idempotent: if the collection does not exist,
-    returns success with data.dropped set to false.
+Drop a collection. Idempotent: if the collection does not exist,
+returns success with data.dropped set to false.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -235,8 +235,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Create indexes and TTL indexes with idempotent semantics.
 
     /********************************************************************
-    Create one or more indexes on a collection. Idempotent: indexes that
-    already exist with an identical spec are counted in data.skipped.
+Create one or more indexes on a collection. Idempotent: indexes that
+already exist with an identical spec are counted in data.skipped.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -336,10 +336,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Enable a TTL index on a Date field. Idempotent: if a TTL index
-    already exists on the same field, returns success with data.enabled
-    set to false. If a TTL index exists on a DIFFERENT field, returns
-    an ADMIN_TTL_CONFLICT error.
+Enable a TTL index on a Date field. Idempotent: if a TTL index
+already exists on the same field, returns success with data.enabled
+set to false. If a TTL index exists on a DIFFERENT field, returns
+an ADMIN_TTL_CONFLICT error.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -464,7 +464,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    List all indexes on a collection.
+List all indexes on a collection.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -522,8 +522,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Connection health check and graceful teardown.
 
     /********************************************************************
-    Ping the MongoDB server with admin credentials. Verifies the
-    connection is alive and the admin user can authenticate.
+Ping the MongoDB server with admin credentials. Verifies the
+connection is alive and the admin user can authenticate.
 
 @param {Object} instance - Request instance
 
@@ -573,7 +573,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Close the MongoDB admin connection for this instance.
+Close the MongoDB admin connection for this instance.
 
 @param {Object} instance - Request instance
 
@@ -631,9 +631,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _MongoDBAdmin = {
 
     /********************************************************************
-    Lazy-load the MongoDB native driver. Shared across every instance
-    because the driver module itself is stateless - only MongoClient
-    holds per-instance state.
+Lazy-load the MongoDB native driver. Shared across every instance
+because the driver module itself is stateless - only MongoClient
+holds per-instance state.
 
 @return {void}
     *********************************************************************/
@@ -648,9 +648,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's MongoClient on first use. Connects to the
-    database with admin credentials and caches both client and db
-    references in state.
+Create this instance's MongoClient on first use. Connects to the
+database with admin credentials and caches both client and db
+references in state.
 
 @return {Promise<void>}
     *********************************************************************/

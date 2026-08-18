@@ -94,8 +94,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Create the action_log table and supporting indexes if they do not
-    yet exist. Safe to call on every boot (CREATE ... IF NOT EXISTS).
+Create the action_log table and supporting indexes if they do not
+yet exist. Safe to call on every boot (CREATE ... IF NOT EXISTS).
 
 @param {Object} instance - Request instance
 
@@ -146,8 +146,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Append a single log record. Log entries are immutable - conflicts
-    (same sort_key) are silently ignored via ON CONFLICT DO NOTHING.
+Append a single log record. Log entries are immutable - conflicts
+(same sort_key) are silently ignored via ON CONFLICT DO NOTHING.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical log record from logger.js
@@ -174,8 +174,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a specific entity, most-recent first.
-    Supports optional action filter and cursor-based pagination.
+List log records for a specific entity, most-recent first.
+Supports optional action filter and cursor-based pagination.
 
 @param {Object} instance - Request instance
 @param {Object} query    - { scope, entity_type, entity_id, actions?, limit?, cursor? }
@@ -216,8 +216,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a specific actor, most-recent first.
-    Supports cursor-based pagination.
+List log records for a specific actor, most-recent first.
+Supports cursor-based pagination.
 
 @param {Object} instance - Request instance
 @param {Object} query    - { scope, actor_type, actor_id, limit?, cursor? }
@@ -258,8 +258,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Delete all rows whose expires_at is not NULL and <= now (seconds).
-    The expires_at index makes this a fast range scan.
+Delete all rows whose expires_at is not NULL and <= now (seconds).
+The expires_at index makes this a fast range scan.
 
 @param {Object} instance - Request instance
 
@@ -332,8 +332,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using Postgres double-quote style. Rejects any
-    identifier containing a double-quote.
+Quote an identifier using Postgres double-quote style. Rejects any
+identifier containing a double-quote.
 
 @param {String} name - Identifier (table or column)
 
@@ -351,7 +351,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE DDL.
+Build the CREATE TABLE DDL.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -383,7 +383,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build a CREATE INDEX IF NOT EXISTS statement.
+Build a CREATE INDEX IF NOT EXISTS statement.
 
 @param {String}   suffix  - Short suffix for the index name
 @param {String[]} columns - Columns to index (ordered)
@@ -405,8 +405,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the INSERT SQL. Conflicts on sort_key (PK) are silently
-    ignored - log entries are immutable.
+Build the INSERT SQL. Conflicts on sort_key (PK) are silently
+ignored - log entries are immutable.
 
 @return {String} - SQL template using ? placeholders
     *********************************************************************/
@@ -430,7 +430,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the SELECT SQL for entity-scoped log queries.
+Build the SELECT SQL for entity-scoped log queries.
 
 @param {Object} query - { scope, entity_type, entity_id, actions?, limit?, cursor? }
 
@@ -471,7 +471,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the SELECT SQL for actor-scoped log queries.
+Build the SELECT SQL for actor-scoped log queries.
 
 @param {Object} query - { scope, actor_type, actor_id, limit?, cursor? }
 
@@ -502,8 +502,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a canonical record to an ordered array of column values
-    ready for the INSERT template.
+Convert a canonical record to an ordered array of column values
+ready for the INSERT template.
 
 @param {Object} record - Canonical log record
 
@@ -531,8 +531,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a database row back to a canonical record object.
-    Coerces BIGINT columns from string to number (pg driver quirk).
+Convert a database row back to a canonical record object.
+Coerces BIGINT columns from string to number (pg driver quirk).
 
 @param {Object} row - Raw database row
 

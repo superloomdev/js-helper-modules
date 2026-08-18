@@ -50,7 +50,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const TokenSource = {
 
     /********************************************************************
-    Read the auth_id from the request instance using the priority chain.
+Read the auth_id from the request instance using the priority chain.
 
 @param {Object} instance - Request instance with http_request shape
 @param {Object} options
@@ -105,8 +105,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Read the Authorization header and extract the Bearer token.
-    Returns null if absent or wrong scheme.
+Read the Authorization header and extract the Bearer token.
+Returns null if absent or wrong scheme.
 
 @param {Object} headers - Lower-cased request headers map
 
@@ -151,8 +151,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Read a custom header. Header names are matched case-insensitively
-    (HTTP convention).
+Read a custom header. Header names are matched case-insensitively
+(HTTP convention).
 
 @param {Object} headers - Lower-cased request headers map
 @param {String} header_name - The header to look up
@@ -178,9 +178,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Read a cookie value from the pre-parsed cookies map on the request instance.
-    The HTTP gateway adapter populates instance.http_request.cookies before
-    any application code runs.
+Read a cookie value from the pre-parsed cookies map on the request instance.
+The HTTP gateway adapter populates instance.http_request.cookies before
+any application code runs.
 
 @param {Object} instance - Request instance with http_request.cookies
 @param {String} cookie_name - The cookie name to find
@@ -216,8 +216,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Get the request headers from the instance, normalizing the keys
-    to lower case for case-insensitive lookup.
+Get the request headers from the instance, normalizing the keys
+to lower case for case-insensitive lookup.
 
 @param {Object} instance - Request instance
 

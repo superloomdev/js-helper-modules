@@ -56,7 +56,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List all country codes the adapter has data for.
+List all country codes the adapter has data for.
 
 @return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
     *********************************************************************/
@@ -69,8 +69,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get the postal code rule for a country.
-    Returns null for unknown countries.
+Get the postal code rule for a country.
+Returns null for unknown countries.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -98,8 +98,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List subdivisions for a country.
-    The basic adapter has no subdivision data and always returns null.
+List subdivisions for a country.
+The basic adapter has no subdivision data and always returns null.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -114,8 +114,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate a postal code for a country using length bounds only.
-    No regex pattern validation.
+Validate a postal code for a country using length bounds only.
+No regex pattern validation.
 
 @param {String} country_code  - ISO 3166-1 alpha-2, lowercase
 @param {String} postal_code   - Postal code to validate
@@ -169,8 +169,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate a subdivision code for a country.
-    The basic adapter has no subdivision data and always returns valid.
+Validate a subdivision code for a country.
+The basic adapter has no subdivision data and always returns valid.
 
 @param {String} country_code       - ISO 3166-1 alpha-2, lowercase
 @param {String} subdivision_code   - Subdivision code to validate

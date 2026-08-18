@@ -70,8 +70,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Uses Web Crypto API when available, falls back to Math.random.
 
     /********************************************************************
-    Generate random string from a character set.
-    Uses Web Crypto when available, falls back to Math.random.
+Generate random string from a character set.
+Uses Web Crypto when available, falls back to Math.random.
 
 @param {String} charset - Superset of characters to pick from
 @param {Integer} length - Desired length of output string
@@ -102,7 +102,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate UUIDv4 string
+Generate UUIDv4 string
 
 @return {String} - Random UUIDv4 ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')
     *********************************************************************/
@@ -123,8 +123,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate compact UUID (25 characters, base36)
-    Standard UUID with hyphens removed, converted to base36
+Generate compact UUID (25 characters, base36)
+Standard UUID with hyphens removed, converted to base36
 
 @return {String} - Compact UUID in base36 (25 chars)
     *********************************************************************/
@@ -143,7 +143,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Standard base64 encode/decode for string data.
 
     /********************************************************************
-    Convert UTF-8 string to base64
+Convert UTF-8 string to base64
 
 @param {String} str - String to encode
 
@@ -158,7 +158,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert base64 string to UTF-8 string
+Convert base64 string to UTF-8 string
 
 @param {String} str - Base64 string to decode
 
@@ -177,8 +177,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // URL-safe replaces + with -, / with _, and removes padding.
 
     /********************************************************************
-    Convert standard base64 to URL-safe base64
-    Replaces '+' with '-', '/' with '_', removes trailing '='
+Convert standard base64 to URL-safe base64
+Replaces '+' with '-', '/' with '_', removes trailing '='
 
 @param {String} str - Standard base64 string
 
@@ -196,8 +196,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert URL-safe base64 back to standard base64
-    Replaces '-' with '+', '_' with '/', adds trailing '=' padding
+Convert URL-safe base64 back to standard base64
+Replaces '-' with '+', '_' with '/', adds trailing '=' padding
 
 @param {String} str - URL-safe base64 string
 
@@ -229,7 +229,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const _Crypto = {
 
     /********************************************************************
-    Return Web Crypto object if available
+Return Web Crypto object if available
 
 @return {Object|null}
     *********************************************************************/
@@ -245,7 +245,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate random byte-like values
+Generate random byte-like values
 
 @param {Integer} length
 
@@ -277,7 +277,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    UUIDv4 polyfill when randomUUID is unavailable
+UUIDv4 polyfill when randomUUID is unavailable
 
 @return {String}
     *********************************************************************/
@@ -305,7 +305,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert hexadecimal string to base36
+Convert hexadecimal string to base36
 
 @param {String} hex - Hexadecimal string
 
@@ -330,7 +330,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Encode UTF-8 string to base64 in browser/node compatible way
+Encode UTF-8 string to base64 in browser/node compatible way
 
 @param {String} str
 
@@ -359,7 +359,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Decode base64 to UTF-8 string in browser/node compatible way
+Decode base64 to UTF-8 string in browser/node compatible way
 
 @param {String} str
 

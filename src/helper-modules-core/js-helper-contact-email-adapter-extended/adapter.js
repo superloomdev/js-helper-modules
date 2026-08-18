@@ -62,9 +62,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate an email address's syntax using validator.isEmail().
-    Provides granular reason codes for common failure modes before
-    falling back to validator.isEmail() for the full check.
+Validate an email address's syntax using validator.isEmail().
+Provides granular reason codes for common failure modes before
+falling back to validator.isEmail() for the full check.
 
 @param {String} email - Email address to validate
 
@@ -131,8 +131,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Check if a domain is a known disposable email provider.
-    Checks against the committed list of ~5K disposable domains.
+Check if a domain is a known disposable email provider.
+Checks against the committed list of ~5K disposable domains.
 
 @param {String} domain - Domain part (e.g. 'mailinator.com')
 
@@ -147,11 +147,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Canonicalize an email address for duplicate detection.
-    Uses validator.normalizeEmail() which handles Gmail, Outlook, iCloud,
-    Yahoo, and Fastmail provider-specific folding rules.
+Canonicalize an email address for duplicate detection.
+Uses validator.normalizeEmail() which handles Gmail, Outlook, iCloud,
+Yahoo, and Fastmail provider-specific folding rules.
 
-    WARNING: Never use for storage or delivery. Duplicate detection only.
+WARNING: Never use for storage or delivery. Duplicate detection only.
 
 @param {String} email - Email address to canonicalize
 

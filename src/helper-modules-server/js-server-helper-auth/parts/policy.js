@@ -68,8 +68,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const Policy = {
 
     /********************************************************************
-    Decide whether a new session can be inserted, and which existing
-    sessions (if any) need to be deleted to make room.
+Decide whether a new session can be inserted, and which existing
+sessions (if any) need to be deleted to make room.
 
 @param {Object} options
 @param {Object[]} options.existing - All existing session records for this actor
@@ -225,8 +225,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Check the total-count cap. After same-install replacement, would
-    inserting one more session push us strictly over total_max?
+Check the total-count cap. After same-install replacement, would
+inserting one more session push us strictly over total_max?
 
 @param {Object[]} active - Active sessions after same-install replacement
 @param {Integer} total_max - The total cap
@@ -247,8 +247,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Pick the session with the smallest last_active_at (oldest LRU).
-    Returns null if the input is empty.
+Pick the session with the smallest last_active_at (oldest LRU).
+Returns null if the input is empty.
 
 @param {Object[]} candidates - Sessions to choose from
 
@@ -278,8 +278,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Remove a session from a list by matching on (actor_id, token_key).
-    Returns a new array; does not mutate the input.
+Remove a session from a list by matching on (actor_id, token_key).
+Returns a new array; does not mutate the input.
 
 @param {Object[]} list - The list to filter
 @param {Object} target - The session to remove

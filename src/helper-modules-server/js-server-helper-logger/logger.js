@@ -100,12 +100,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // compliance callers can opt into synchronous await.
 
     /********************************************************************
-    Record one action log entry.
+Record one action log entry.
 
-    By default the store write runs in the background and this function
-    returns immediately with `{ success: true }`. Pass `options.await = true`
-    to make the write synchronous - required for compliance scenarios that
-    must not return 200 OK until the audit row is durable.
+By default the store write runs in the background and this function
+returns immediately with `{ success: true }`. Pass `options.await = true`
+to make the write synchronous - required for compliance scenarios that
+must not return 200 OK until the audit row is durable.
 
 @param {Object} instance - Request instance (for time, lifecycle, and
                                http_request auto-capture).
@@ -207,7 +207,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // (what did Y do). Cursor pagination for large result sets.
 
     /********************************************************************
-    List actions recorded for one entity, most-recent first.
+List actions recorded for one entity, most-recent first.
 
 @param {Object} instance - Request instance.
 @param {Object} options - Query options.
@@ -252,10 +252,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    List actions performed by one actor, most-recent first.
+List actions performed by one actor, most-recent first.
 
-    Same return shape as listByEntity. See listByEntity for the options
-    contract - `actor_type` / `actor_id` replace entity_* on this side.
+Same return shape as listByEntity. See listByEntity for the options
+contract - `actor_type` / `actor_id` replace entity_* on this side.
 
 @param {Object} instance - Request instance
 @param {Object} options - Query options (see listByEntity)
@@ -292,13 +292,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // idempotently creates tables and indexes where needed.
 
     /********************************************************************
-    Delete records whose `expires_at` is in the past. Intended to run
-    from cron / EventBridge / `setInterval`. Native TTL on MongoDB and
-    DynamoDB already handles expiry in the background; this function is
-    the explicit fallback when a deployer wants deterministic cleanup.
+Delete records whose `expires_at` is in the past. Intended to run
+from cron / EventBridge / `setInterval`. Native TTL on MongoDB and
+DynamoDB already handles expiry in the background; this function is
+the explicit fallback when a deployer wants deterministic cleanup.
 
-    SQL backends (postgres, mysql, sqlite) have no native TTL - this is
-    the primary sweep mechanism for those.
+SQL backends (postgres, mysql, sqlite) have no native TTL - this is
+the primary sweep mechanism for those.
 
 @param {Object} instance - Request instance.
 
@@ -333,10 +333,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Idempotent backend setup. Memory store: no-op. SQL: CREATE TABLE
-    IF NOT EXISTS + indexes on (entity_pk) / (actor_pk) / (expires_at).
-    MongoDB: TTL index on `_ttl` + compound indexes on the two query
-    paths. DynamoDB: CreateTable with the GSI for actor queries.
+Idempotent backend setup. Memory store: no-op. SQL: CREATE TABLE
+IF NOT EXISTS + indexes on (entity_pk) / (actor_pk) / (expires_at).
+MongoDB: TTL index on `_ttl` + compound indexes on the two query
+paths. DynamoDB: CreateTable with the GSI for actor queries.
 
 @param {Object} instance - Request instance
 
@@ -365,10 +365,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Build the durable record that will be handed to the store. Pulls
-    created_at from instance.time_ms, auto-captures IP / user-agent from
-    the incoming HTTP request when possible, and encrypts the IP under
-    CONFIG.IP_ENCRYPT_KEY when one is configured.
+Build the durable record that will be handed to the store. Pulls
+created_at from instance.time_ms, auto-captures IP / user-agent from
+the incoming HTTP request when possible, and encrypts the IP under
+CONFIG.IP_ENCRYPT_KEY when one is configured.
     *********************************************************************/
     buildRecord: function (instance, options) {
 
@@ -441,8 +441,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Translate public list-options into the query object the stores
-    consume. Stores never see the caller's raw options directly.
+Translate public list-options into the query object the stores
+consume. Stores never see the caller's raw options directly.
     *********************************************************************/
     buildQuery: function (options) {
 
@@ -463,9 +463,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Decrypt IP for reads, if encryption is configured. Never throws on
-    bad ciphertext - an unparseable IP column just returns the ciphertext
-    so audit reviewers at least see the opaque blob rather than nothing.
+Decrypt IP for reads, if encryption is configured. Never throws on
+bad ciphertext - an unparseable IP column just returns the ciphertext
+so audit reviewers at least see the opaque blob rather than nothing.
     *********************************************************************/
     enrichRecordForRead: function (record) {
 

@@ -74,7 +74,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // dependencies on other helpers - pure calculations over Number inputs.
 
     /********************************************************************
-    Return week day name for a specific date.
+Return week day name for a specific date.
 
 @param {String|Integer} year - Year
 @param {String|Integer} month - Month (1-12)
@@ -99,7 +99,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return seconds past midnight 00:00:00 for a given wall-clock time.
+Return seconds past midnight 00:00:00 for a given wall-clock time.
 
 @param {Integer|String} [hours] - Hours past midnight (default 0)
 @param {Integer|String} [minutes] - Minutes past the hour (default 0)
@@ -120,8 +120,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert seconds past midnight to [hours, minutes, seconds] tuple.
-    Inverse of epochDay().
+Convert seconds past midnight to [hours, minutes, seconds] tuple.
+Inverse of epochDay().
 
 @param {Integer} day_in_seconds - Seconds in a day (0-86400)
 
@@ -140,8 +140,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert 24-hour format time string to seconds past midnight.
-    Composes epochDay() from the parsed components.
+Convert 24-hour format time string to seconds past midnight.
+Composes epochDay() from the parsed components.
 
 @param {String} time_24h - 24-hour time string ('0100' | '2330')
 
@@ -165,7 +165,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // All unixtime values in this module are in SECONDS, not milliseconds.
 
     /********************************************************************
-    Convert unixtime (seconds) to native Date object.
+Convert unixtime (seconds) to native Date object.
 
 @param {Integer} unixtime - Seconds since Unix epoch
 
@@ -180,7 +180,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert native Date object to unixtime (seconds).
+Convert native Date object to unixtime (seconds).
 
 @param {Date} date - Date object
 
@@ -194,7 +194,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert unixtime to ISO 8601 date string.
+Convert unixtime to ISO 8601 date string.
 
 @param {Integer} unixtime - Seconds since Unix epoch
 
@@ -208,7 +208,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert ISO 8601 date string to unixtime (seconds).
+Convert ISO 8601 date string to unixtime (seconds).
 
 @param {String} date_string - ISO 8601 date string
 
@@ -222,7 +222,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert unixtime to UTC date string (RFC 7231 / HTTP-date format).
+Convert unixtime to UTC date string (RFC 7231 / HTTP-date format).
 
 @param {Integer} unixtime - Seconds since Unix epoch
 
@@ -236,7 +236,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert UTC date string to unixtime (seconds).
+Convert UTC date string to unixtime (seconds).
 
 @param {String} date_string - UTC date string
 
@@ -250,8 +250,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return unixtime for the start of day (00:00:00 UTC) for a given
-    timestamp. Useful for bucketing events by calendar day.
+Return unixtime for the start of day (00:00:00 UTC) for a given
+timestamp. Useful for bucketing events by calendar day.
 
 @param {Integer} unixtime - Seconds since Unix epoch (UTC)
 
@@ -283,7 +283,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // minute, second) - this is the "parse" shape produced from ISO input.
 
     /********************************************************************
-    Build a date data set from individual components.
+Build a date data set from individual components.
 
 @param {String|Integer} year - Year
 @param {String|Integer} month - Month (1-12)
@@ -309,7 +309,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Split ISO 8601 date string into a data set with singular keys.
+Split ISO 8601 date string into a data set with singular keys.
 
 @param {String} date_string - ISO 8601 date string ('2020-09-16T07:31:13.000Z')
 
@@ -330,8 +330,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Split a native Date object into a data set with singular keys.
-    Delegates to dateStringToDataSet via ISO serialization.
+Split a native Date object into a data set with singular keys.
+Delegates to dateStringToDataSet via ISO serialization.
 
 @param {Date} date - Date object
 
@@ -345,8 +345,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a data set (plural-key build shape) to a native Date object
-    interpreted as UTC.
+Convert a data set (plural-key build shape) to a native Date object
+interpreted as UTC.
 
 @param {Object} date_data - { year, month, day, hours, minutes, seconds }
 
@@ -367,7 +367,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a data set to ISO 8601 date string.
+Convert a data set to ISO 8601 date string.
 
 @param {Object} date_data - { year, month, day, hours, minutes, seconds }
 
@@ -381,7 +381,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a data set to unixtime (seconds since epoch).
+Convert a data set to unixtime (seconds since epoch).
 
 @param {Object} date_data - { year, month, day, hours, minutes, seconds }
 
@@ -401,8 +401,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Date Data Set helpers above, so those sections must come first.
 
     /********************************************************************
-    Format hours (24h) and minutes to a 12-hour time string.
-    Single-digit minutes are zero-padded. Handles 0 and 24 as midnight.
+Format hours (24h) and minutes to a 12-hour time string.
+Single-digit minutes are zero-padded. Handles 0 and 24 as midnight.
 
 @param {Integer} hours - Hours past midnight (0-24)
 @param {Integer} minutes - Minutes past the hour (0-59)
@@ -428,9 +428,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert unixtime to a 12-hour time string. Returns an empty string
-    for null/undefined/empty input so callers can safely render the
-    result in a template without guarding for falsy values.
+Convert unixtime to a 12-hour time string. Returns an empty string
+for null/undefined/empty input so callers can safely render the
+result in a template without guarding for falsy values.
 
 @param {Integer} seconds - Seconds since Unix epoch
 
@@ -459,9 +459,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // versa. Offset varies across the year for zones that observe DST.
 
     /********************************************************************
-    Add a signed offset (in seconds) to a unixtime. Thin arithmetic
-    helper used by unixtimeToTimezoneTime and callers doing manual
-    offset math.
+Add a signed offset (in seconds) to a unixtime. Thin arithmetic
+helper used by unixtimeToTimezoneTime and callers doing manual
+offset math.
 
 @param {Integer} unixtime - Seconds since epoch
 @param {Number} offset - Offset in seconds (can be negative)
@@ -476,9 +476,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return the offset of a timezone at a particular instant, accounting
-    for DST. The offset is the value you would add to UTC unixtime to
-    produce the wall-clock time in that zone.
+Return the offset of a timezone at a particular instant, accounting
+for DST. The offset is the value you would add to UTC unixtime to
+produce the wall-clock time in that zone.
 
 @param {Integer} unixtime - Seconds since Unix epoch (UTC)
 @param {String} timezone - IANA Timezone ID (e.g., 'America/New_York')
@@ -523,10 +523,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert UTC unixtime to "wall-clock" unixtime in a specific timezone.
-    The returned value is NOT a real unixtime - it is the local wall
-    clock expressed as seconds since epoch, useful as an intermediate
-    before formatting.
+Convert UTC unixtime to "wall-clock" unixtime in a specific timezone.
+The returned value is NOT a real unixtime - it is the local wall
+clock expressed as seconds since epoch, useful as an intermediate
+before formatting.
 
 @param {Integer} unixtime - Seconds since Unix epoch (UTC)
 @param {String} timezone - IANA Timezone ID
@@ -544,8 +544,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert UTC unixtime to a Date object whose toISOString() reads as
-    the wall-clock time in the target timezone (not the real UTC time).
+Convert UTC unixtime to a Date object whose toISOString() reads as
+the wall-clock time in the target timezone (not the real UTC time).
 
 @param {Integer} unixtime - Seconds since Unix epoch (UTC)
 @param {String} timezone - IANA Timezone ID
@@ -565,9 +565,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Month and year-level helpers. Build on the Date Data Set section.
 
     /********************************************************************
-    Return the last day of a specific month as a two-character day
-    string. Handles leap years correctly via the underlying Date
-    arithmetic (day 0 of month N+1 == last day of month N).
+Return the last day of a specific month as a two-character day
+string. Handles leap years correctly via the underlying Date
+arithmetic (day 0 of month N+1 == last day of month N).
 
 @param {String|Integer} year - Year
 @param {String|Integer} month - Month (1-12)

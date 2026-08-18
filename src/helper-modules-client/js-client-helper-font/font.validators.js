@@ -9,8 +9,8 @@ module.exports = function (Lib, ERRORS) {
   const Validators = {
 
     /********************************************************************
-    Validate the merged config object. Throws TypeError on any
-    misconfiguration so the module fails at startup, not at call time.
+Validate the merged config object. Throws TypeError on any
+misconfiguration so the module fails at startup, not at call time.
 
 @param {Object} CONFIG - Merged config for this instance
 @return {void}
@@ -31,8 +31,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a manifest object. Returns the error object when invalid,
-    null when valid.
+Validate a manifest object. Returns the error object when invalid,
+null when valid.
 
 @param {*} manifest - Value to validate as a manifest
 
@@ -50,8 +50,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a family name. Returns the error object when invalid,
-    null when valid.
+Validate a family name. Returns the error object when invalid,
+null when valid.
 
 @param {*} name - Value to validate as a family name
 
@@ -69,8 +69,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a token. Returns the error object when invalid,
-    null when valid.
+Validate a token. Returns the error object when invalid,
+null when valid.
 
 @param {*} token - Value to validate as a token
 
@@ -88,8 +88,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a URL. Returns the error object when invalid,
-    null when valid.
+Validate a URL. Returns the error object when invalid,
+null when valid.
 
 @param {*} url - Value to validate as a URL
 
@@ -107,8 +107,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a font weight. Returns the error object when invalid,
-    null when valid.
+Validate a font weight. Returns the error object when invalid,
+null when valid.
 
 @param {*} weight - Value to validate as a weight
 
@@ -130,8 +130,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a font style. Returns the error object when invalid,
-    null when valid.
+Validate a font style. Returns the error object when invalid,
+null when valid.
 
 @param {*} style - Value to validate as a style
 
@@ -153,9 +153,9 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a style entry from the manifest. Ensures at least one
-    source field (url, path, or asset) is present. Returns the error
-    object when invalid, null when valid.
+Validate a style entry from the manifest. Ensures at least one
+source field (url, path, or asset) is present. Returns the error
+object when invalid, null when valid.
 
 @param {*} entry - Style entry to validate
 
@@ -181,8 +181,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a roles mapping object. Returns the error object when
-    invalid, null when valid.
+Validate a roles mapping object. Returns the error object when
+invalid, null when valid.
 
 @param {*} roles - Value to validate as a roles mapping
 

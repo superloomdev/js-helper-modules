@@ -96,8 +96,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Idempotent table + index setup. Creates the logs table and two
-    covering indexes if they do not exist. Safe to call on every boot.
+Idempotent table + index setup. Creates the logs table and two
+covering indexes if they do not exist. Safe to call on every boot.
 
 @param {Object} instance - Request instance
 
@@ -182,8 +182,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Write ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Insert one log record. Uses a simple INSERT (no UPSERT needed -
-    sort_key is unique per event).
+Insert one log record. Uses a simple INSERT (no UPSERT needed -
+sort_key is unique per event).
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical log record from logger.js
@@ -219,9 +219,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Read ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    List log records for a (scope, entity_type, entity_id) triple.
-    Results are ordered most-recent first by sort_key DESC.
-    Supports cursor pagination, action filter, and time range.
+List log records for a (scope, entity_type, entity_id) triple.
+Results are ordered most-recent first by sort_key DESC.
+Supports cursor pagination, action filter, and time range.
 
 @param {Object} instance - Request instance
 @param {Object} query    - Built by logger.js#buildQuery
@@ -268,8 +268,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a (scope, actor_type, actor_id) triple.
-    Same pagination contract as getLogsByEntity.
+List log records for a (scope, actor_type, actor_id) triple.
+Same pagination contract as getLogsByEntity.
 
 @param {Object} instance - Request instance
 @param {Object} query    - Built by logger.js#buildQuery
@@ -318,8 +318,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Delete all rows whose expires_at is not NULL and <= now (seconds).
-    The expires_at index makes this a fast range scan.
+Delete all rows whose expires_at is not NULL and <= now (seconds).
+The expires_at index makes this a fast range scan.
 
 @param {Object} instance - Request instance
 
@@ -372,8 +372,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    The ordered list of columns for INSERT statements. Must match the
-    CREATE TABLE column order.
+The ordered list of columns for INSERT statements. Must match the
+CREATE TABLE column order.
     *********************************************************************/
     COLUMNS: [
       'scope',
@@ -393,8 +393,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using SQLite double-quote style. Rejects any
-    identifier containing a double-quote to prevent DDL injection.
+Quote an identifier using SQLite double-quote style. Rejects any
+identifier containing a double-quote to prevent DDL injection.
 
 @param {String} name - Identifier (table or column)
 
@@ -414,7 +414,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE statement. Idempotent via IF NOT EXISTS.
+Build the CREATE TABLE statement. Idempotent via IF NOT EXISTS.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -446,8 +446,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the entity covering index for getLogsByEntity queries.
-    Columns: scope + entity_type + entity_id + sort_key DESC.
+Build the entity covering index for getLogsByEntity queries.
+Columns: scope + entity_type + entity_id + sort_key DESC.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -471,8 +471,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the actor covering index for getLogsByActor queries.
-    Columns: scope + actor_type + actor_id + sort_key DESC.
+Build the actor covering index for getLogsByActor queries.
+Columns: scope + actor_type + actor_id + sort_key DESC.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -496,7 +496,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the TTL index for cleanupExpiredLogs range scans.
+Build the TTL index for cleanupExpiredLogs range scans.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -515,7 +515,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the INSERT statement.
+Build the INSERT statement.
 
 @return {String} - SQL with positional ? placeholders
     *********************************************************************/
@@ -534,9 +534,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build a SELECT statement for getLogsByEntity or getLogsByActor.
-    Returns { sql, params } ready to pass to lib_sql.getRows.
-    Fetches limit+1 rows so the caller can detect the next page.
+Build a SELECT statement for getLogsByEntity or getLogsByActor.
+Returns { sql, params } ready to pass to lib_sql.getRows.
+Fetches limit+1 rows so the caller can detect the next page.
 
 @param {String} mode  - 'entity' | 'actor'
 @param {Object} query - Logger query object
@@ -613,7 +613,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Encode a canonical record value for a parameterized INSERT.
+Encode a canonical record value for a parameterized INSERT.
 
 @param {String} col   - Column name
 @param {*}      value - Canonical record value
@@ -641,7 +641,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Decode a raw row value into its canonical record shape.
+Decode a raw row value into its canonical record shape.
 
 @param {String} col   - Column name
 @param {*}      value - Raw DB value
@@ -673,7 +673,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Canonical record -> positional values array, aligned with COLUMNS.
+Canonical record -> positional values array, aligned with COLUMNS.
 
 @param {Object} record - Canonical log record
 
@@ -690,7 +690,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Raw row object -> canonical record.
+Raw row object -> canonical record.
 
 @param {Object} row - Raw row from SQLite driver
 

@@ -68,9 +68,9 @@ const Validators = {
   contract. Throws at startup when any method is missing.
 
   The email adapter contract (3 methods):
-    validateSyntax(email) -> { valid, reason }
-    isDisposableDomain(domain) -> Boolean
-    canonicalize(email) -> String | null
+validateSyntax(email) -> { valid, reason }
+isDisposableDomain(domain) -> Boolean
+canonicalize(email) -> String | null
 
 @param {Object} adapter - Instantiated adapter object
 

@@ -51,8 +51,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate an email address's syntax using a simple regex.
-    Provides granular reason codes for common failure modes.
+Validate an email address's syntax using a simple regex.
+Provides granular reason codes for common failure modes.
 
 @param {String} email - Email address to validate
 
@@ -119,8 +119,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Check if a domain is a known disposable email provider.
-    The basic adapter has no disposable data and always returns false.
+Check if a domain is a known disposable email provider.
+The basic adapter has no disposable data and always returns false.
 
 @param {String} domain - Domain part (e.g. 'gmail.com')
 
@@ -135,11 +135,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Canonicalize an email address for duplicate detection.
-    Gmail: remove dots, remove plus-tags.
-    Other domains: return as-is (lowercased).
+Canonicalize an email address for duplicate detection.
+Gmail: remove dots, remove plus-tags.
+Other domains: return as-is (lowercased).
 
-    WARNING: Never use for storage or delivery. Duplicate detection only.
+WARNING: Never use for storage or delivery. Duplicate detection only.
 
 @param {String} email - Email address to canonicalize
 

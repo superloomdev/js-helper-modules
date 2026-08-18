@@ -56,9 +56,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const RecordShape = {
 
     /********************************************************************
-    Build a canonical record from named fields. Missing optional fields
-    default to null (or false for booleans). Required fields trigger a
-    TypeError if absent - those are programmer errors, not envelope errors.
+Build a canonical record from named fields. Missing optional fields
+default to null (or false for booleans). Required fields trigger a
+TypeError if absent - those are programmer errors, not envelope errors.
 
 @param {Object} fields - Named field values
 
@@ -131,8 +131,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    The list of canonical field names. Stores use this to know which keys
-    must be serialized/deserialized. Order matches buildRecord.
+The list of canonical field names. Stores use this to know which keys
+must be serialized/deserialized. Order matches buildRecord.
 
 @return {String[]} - All canonical field names in order
     *********************************************************************/
@@ -161,8 +161,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Throw TypeError if the named field is not a non-empty string.
-    Used during record construction to catch programmer errors fast.
+Throw TypeError if the named field is not a non-empty string.
+Used during record construction to catch programmer errors fast.
 
 @param {Object} fields - Named field values
 @param {String} key - Field name to check
@@ -184,7 +184,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Throw TypeError if the named field is not an integer.
+Throw TypeError if the named field is not an integer.
 
 @param {Object} fields - Named field values
 @param {String} key - Field name to check
@@ -206,8 +206,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Map undefined/null/empty-string to null. Used for optional fields so
-    the record always has explicit nulls, not undefined keys.
+Map undefined/null/empty-string to null. Used for optional fields so
+the record always has explicit nulls, not undefined keys.
 
 @param {*} value - Field value
 
@@ -232,7 +232,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Map undefined to false; otherwise pass-through (already boolean).
+Map undefined to false; otherwise pass-through (already boolean).
 
 @param {*} value - Field value
 
@@ -252,9 +252,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Map undefined/null to null; otherwise expect an integer (not coerced
-    silently - throws TypeError on non-integer values, mirroring the
-    required-integer assertion).
+Map undefined/null to null; otherwise expect an integer (not coerced
+silently - throws TypeError on non-integer values, mirroring the
+required-integer assertion).
 
 @param {*} value - Field value
 

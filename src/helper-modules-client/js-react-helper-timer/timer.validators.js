@@ -17,7 +17,7 @@ module.exports = function loader (Lib, ERRORS) { // eslint-disable-line no-unuse
   const Validators = {
 
     /********************************************************************
-    Validate config. Throws TypeError on programmer error.
+Validate config. Throws TypeError on programmer error.
 
 @param {Object} CONFIG - Merged configuration
     *********************************************************************/
@@ -29,8 +29,8 @@ module.exports = function loader (Lib, ERRORS) { // eslint-disable-line no-unuse
 
 
     /********************************************************************
-    Validate options passed to start. Throws TypeError on programmer
-    error.
+Validate options passed to start. Throws TypeError on programmer
+error.
 
 @param {Object} options - Start options
     *********************************************************************/

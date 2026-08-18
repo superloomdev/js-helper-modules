@@ -71,7 +71,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const Debug = { // Public functions accessible by other modules
 
     /********************************************************************
-    Log a debug-level message. Use for verbose development diagnostics.
+Log a debug-level message. Use for verbose development diagnostics.
 
 @param {String} message - Log message
 @param {Object} [data] - (Optional) Additional data to log
@@ -86,7 +86,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Log an info-level message. Use for general operational information.
+Log an info-level message. Use for general operational information.
 
 @param {String} message - Log message
 @param {Object} [data] - (Optional) Additional data to log
@@ -101,7 +101,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Log a warn-level message. Use for recoverable issues or deprecations.
+Log a warn-level message. Use for recoverable issues or deprecations.
 
 @param {String} message - Log message
 @param {Object} [data] - (Optional) Additional data to log
@@ -116,7 +116,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Log an error-level message. Use for errors that need investigation.
+Log an error-level message. Use for errors that need investigation.
 
 @param {String} message - Log message
 @param {Error|Object} [error] - (Optional) Error object or additional data
@@ -147,8 +147,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Backward-compatible interface to console.log.
-    Logs at 'info' level. Use debug/info/warn/error for new code.
+Backward-compatible interface to console.log.
+Logs at 'info' level. Use debug/info/warn/error for new code.
 
 @param {...*} args - Forward all arguments as-is
 
@@ -164,8 +164,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Performance audit log. Measures elapsed time and heap memory usage.
-    Use to track connection times, query durations, and API response times.
+Performance audit log. Measures elapsed time and heap memory usage.
+Use to track connection times, query durations, and API response times.
 
 @param {String} action - Action identifier (e.g., 'End', 'Error')
 @param {String} routine - Process name being audited
@@ -224,7 +224,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Check if a message at the given level should be logged
+Check if a message at the given level should be logged
 
 @param {String} level - Log level to check ('debug'|'info'|'warn'|'error')
 
@@ -241,7 +241,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Write a log entry in the configured format
+Write a log entry in the configured format
 
 @param {String} level - Log level ('debug'|'info'|'warn'|'error')
 @param {String} message - Log message
@@ -267,7 +267,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Write a structured JSON log line (CloudWatch / log aggregator compatible)
+Write a structured JSON log line (CloudWatch / log aggregator compatible)
 
 @param {String} level - Log level
 @param {String} message - Log message
@@ -301,7 +301,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Write a human-readable text log line (local dev / Docker stdout)
+Write a human-readable text log line (local dev / Docker stdout)
 
 @param {String} level - Log level
 @param {String} message - Log message

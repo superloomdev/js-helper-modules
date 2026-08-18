@@ -61,8 +61,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Strip disallowed characters from a postal code.
-    Keeps letters, digits, spaces, and hyphens.
+Strip disallowed characters from a postal code.
+Keeps letters, digits, spaces, and hyphens.
 
 @param {String} postal_code - Raw postal code input
 
@@ -80,9 +80,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Validate a single address field's format.
-    Uses the field policy and length bounds from CONFIG, and delegates
-    country-dependent checks (postal code, subdivision) to the adapter.
+Validate a single address field's format.
+Uses the field policy and length bounds from CONFIG, and delegates
+country-dependent checks (postal code, subdivision) to the adapter.
 
 @param {String} field_name - One of: line_1, line_2, landmark, locality,
                                   subdivision, postal_code, country,
@@ -301,10 +301,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Validate a complete address object. Runs validateSyntax on every
-    field and returns all errors at once in an errors array.
-    This is the one shape departure - a form needs every field's failure,
-    not just the first.
+Validate a complete address object. Runs validateSyntax on every
+field and returns all errors at once in an errors array.
+This is the one shape departure - a form needs every field's failure,
+not just the first.
 
 @param {Object} data - Address data object
 
@@ -366,8 +366,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Create a normalized address data object from input.
-    Lowercases the country code, trims string fields.
+Create a normalized address data object from input.
+Lowercases the country code, trims string fields.
 
 @param {Object} data - Raw address data
 
@@ -416,9 +416,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    List subdivisions for a country. Delegates to the adapter.
-    The basic adapter returns null (no subdivision data).
-    The extended adapter returns [{ code, name }] from iso-3166-2 data.
+List subdivisions for a country. Delegates to the adapter.
+The basic adapter returns null (no subdivision data).
+The extended adapter returns [{ code, name }] from iso-3166-2 data.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -454,7 +454,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Get the configured field policy.
+Get the configured field policy.
 
 @return {Object} - { field_name: 'required'|'optional', ... }
     *********************************************************************/

@@ -43,7 +43,7 @@ module.exports = function createMemoryStore () {
   const Store = {
 
     /******************************************************************
-    No-op schema setup - nothing to provision for an in-memory store.
+No-op schema setup - nothing to provision for an in-memory store.
     ******************************************************************/
     setupNewStore: async function () {
       return {
@@ -54,7 +54,7 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
-    Read one record by composite key. Returns null when absent.
+Read one record by composite key. Returns null when absent.
     ******************************************************************/
     getRecord: async function (instance, scope, key) { // eslint-disable-line no-unused-vars
 
@@ -70,7 +70,7 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
-    Upsert - overwrites any existing record at the composite key.
+Upsert - overwrites any existing record at the composite key.
     ******************************************************************/
     setRecord: async function (instance, scope, key, record) { // eslint-disable-line no-unused-vars
 
@@ -85,8 +85,8 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
-    Atomic in-place increment of fail_count. Returns NOT_FOUND-shaped
-    error if the record is absent (mirrors real adapter behavior).
+Atomic in-place increment of fail_count. Returns NOT_FOUND-shaped
+error if the record is absent (mirrors real adapter behavior).
     ******************************************************************/
     incrementFailCount: async function (instance, scope, key) { // eslint-disable-line no-unused-vars
 
@@ -111,7 +111,7 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
-    Idempotent delete (missing key reports success).
+Idempotent delete (missing key reports success).
     ******************************************************************/
     deleteRecord: async function (instance, scope, key) { // eslint-disable-line no-unused-vars
 
@@ -126,7 +126,7 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
-    Sweep all records whose expires_at < instance.time.
+Sweep all records whose expires_at < instance.time.
     ******************************************************************/
     cleanupExpiredRecords: async function (instance) {
 
@@ -150,8 +150,8 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
-    Test helper - expose the raw Map for white-box assertions.
-    Not part of the public contract; never used in production code.
+Test helper - expose the raw Map for white-box assertions.
+Not part of the public contract; never used in production code.
     ******************************************************************/
     _records: _map
 

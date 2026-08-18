@@ -90,9 +90,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Idempotent setup. Creates the TTL index on `_ttl`. The compound
-    `_id` index is implicit so no second index is needed for the
-    primary access path.
+Idempotent setup. Creates the TTL index on `_ttl`. The compound
+`_id` index is implicit so no second index is needed for the
+primary access path.
 
 @param {Object} instance - Request instance
 
@@ -133,8 +133,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ CRUD ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Equality lookup on the compound `_id` - O(1) via the implicit index.
-    Returns null when absent.
+Equality lookup on the compound `_id` - O(1) via the implicit index.
+Returns null when absent.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -190,9 +190,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Upsert via replaceOne. The `_ttl` Date is computed from `expires_at`
-    so a single source of truth (epoch seconds) feeds both the TTL
-    sweeper and the verify-time expiry check.
+Upsert via replaceOne. The `_ttl` Date is computed from `expires_at`
+so a single source of truth (epoch seconds) feeds both the TTL
+sweeper and the verify-time expiry check.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -245,7 +245,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Atomic $inc - safe under concurrent verify attempts.
+Atomic $inc - safe under concurrent verify attempts.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -286,7 +286,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Idempotent delete (missing _id is treated as success).
+Idempotent delete (missing _id is treated as success).
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -328,8 +328,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Lifecycle ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Manual sweep mirroring the SQL stores. The native TTL index is the
-    primary mechanism, but this method supports explicit lifecycle control.
+Manual sweep mirroring the SQL stores. The native TTL index is the
+primary mechanism, but this method supports explicit lifecycle control.
 
 @param {Object} instance - Request instance
 

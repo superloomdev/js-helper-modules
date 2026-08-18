@@ -100,9 +100,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Provider ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    ThemeProvider - holds the layer stack as React state, derives a
-    theme through the pure themer engine, and provides it via context.
-    Calling update_layers with a new array re-derives and re-renders.
+ThemeProvider - holds the layer stack as React state, derives a
+theme through the pure themer engine, and provides it via context.
+Calling update_layers with a new array re-derives and re-renders.
 
 @param {Object}   props           - React props
 @param {Object}   props.template  - Themer template (required)
@@ -169,7 +169,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Hooks ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Hook: the full controller - { built, theme, update_layers, ...transformed }.
+Hook: the full controller - { built, theme, update_layers, ...transformed }.
 
 @return {Object|null} - context value, or null when outside a provider
     *********************************************************************/
@@ -181,8 +181,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Hook: the theme - the transform's theme field when a transform is
-    set, else the raw emitted tokens. Returns null outside a provider.
+Hook: the theme - the transform's theme field when a transform is
+set, else the raw emitted tokens. Returns null outside a provider.
 
 @return {Object|null} - the theme, or null when outside a provider
     *********************************************************************/
@@ -196,8 +196,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Hook: the raw emitted token map from the pure engine, before any
-    transform. Returns null outside a provider.
+Hook: the raw emitted token map from the pure engine, before any
+transform. Returns null outside a provider.
 
 @return {Object|null} - the token map, or null when outside a provider
     *********************************************************************/
