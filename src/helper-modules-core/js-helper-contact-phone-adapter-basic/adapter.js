@@ -21,7 +21,7 @@
 
 
 // Generated country data (committed, no build step required for consumers)
-const COUNTRY_DATA = require('./_data/basic.country-data.js');
+const COUNTRY_DATA = require('./data/basic.country-data.json');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////

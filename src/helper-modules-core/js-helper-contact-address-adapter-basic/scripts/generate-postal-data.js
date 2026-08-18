@@ -6,7 +6,7 @@
 // License: MIT
 //
 // Re-run: npm run generate
-// Output: _data/basic.postal-data.js
+// Output: data/basic.postal-data.json
 'use strict';
 
 
@@ -123,25 +123,8 @@ countries.forEach(function (cc) {
 });
 
 // Generate output
-const header = [
-  '// Info: Generated postal code data for helper-contact-address-adapter-basic.',
-  '// Source: libphonenumber-js (country list), postal-code-checker (postal lengths)',
-  '// License: MIT',
-  '// Generated: ' + new Date().toISOString().split('T')[0],
-  '// Re-run: npm run generate',
-  '//',
-  '// Contains: country list and postal code length bounds.',
-  '// Countries with required: false have no postal system.',
-  '// Do not edit by hand - regenerate with npm run generate.',
-  '\'use strict\';',
-  '',
-  ''
-].join('\n');
-
-const body = 'module.exports = ' + JSON.stringify(data, null, 2) + ';';
-
-const outputPath = path.join(__dirname, 'basic.postal-data.js');
-fs.writeFileSync(outputPath, header + body + '\n');
+const outputPath = path.join(__dirname, '..', 'data', 'basic.postal-data.json');
+fs.writeFileSync(outputPath, JSON.stringify(data, null, 2) + '\n');
 
 console.log('Generated ' + outputPath);
 console.log('Countries: ' + Object.keys(data).length);

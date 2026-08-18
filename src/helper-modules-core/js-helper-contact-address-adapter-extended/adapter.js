@@ -14,7 +14,7 @@
 
 
 // Generated address data (committed, no build step for consumers)
-const ADDRESS_DATA = require('./_data/extended.address-data.js');
+const ADDRESS_DATA = require('./data/extended.address-data.json');
 
 
 // Cache for compiled RegExp objects

@@ -14,7 +14,7 @@
 
 
 // Generated postal data (committed, no build step for consumers)
-const POSTAL_DATA = require('./_data/basic.postal-data.js');
+const POSTAL_DATA = require('./data/basic.postal-data.json');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////

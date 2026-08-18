@@ -1,12 +1,12 @@
 // Info: Data generation script for helper-contact-phone-adapter-basic.
 // Reads libphonenumber-js metadata and extracts country calling codes
-// and national number length bounds. Outputs a frozen JavaScript object.
+// and national number length bounds. Outputs a JSON file.
 //
 // Source: libphonenumber-js (Google PhoneNumberMetadata.xml)
 // License: MIT
 //
 // Re-run: npm run generate
-// Output: _data/basic.country-data.js
+// Output: data/basic.country-data.json
 'use strict';
 
 
@@ -165,26 +165,9 @@ Object.keys(metadataCountries).forEach(function (isoCode) {
 });
 
 
-// Generate the output file
-const header = [
-  '// Info: Generated country data for helper-contact-phone-adapter-basic.',
-  '// Source: libphonenumber-js (Google PhoneNumberMetadata.xml, min metadata)',
-  '// License: MIT',
-  '// Generated: ' + new Date().toISOString().split('T')[0],
-  '// Re-run: npm run generate',
-  '//',
-  '// Contains: country calling codes and national number length bounds',
-  '// for all ISO 3166-1 countries recognized by libphonenumber-js.',
-  '// Do not edit by hand - regenerate with npm run generate.',
-  '\'use strict\';',
-  '',
-  ''
-].join('\n');
-
-const body = 'module.exports = ' + JSON.stringify(countries, null, 2) + ';';
-
-const outputPath = path.join(__dirname, 'basic.country-data.js');
-fs.writeFileSync(outputPath, header + body + '\n');
+// Generate the output file (pure JSON, no code wrapper)
+const outputPath = path.join(__dirname, '..', 'data', 'basic.country-data.json');
+fs.writeFileSync(outputPath, JSON.stringify(countries, null, 2) + '\n');
 
 // Report
 const count = Object.keys(countries).length;

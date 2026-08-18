@@ -28,7 +28,7 @@ None. Country data is generated at build time and committed as a static JavaScri
 Country data is generated from `libphonenumber-js` min metadata, which is sourced from Google's PhoneNumberMetadata.xml.
 
 - **Build-time devDependency:** `libphonenumber-js`
-- **Generated file:** `_data/basic.country-data.js` (~20 KB, committed)
+- **Generated file:** `data/basic.country-data.json` (~20 KB, committed)
 - **Re-run:** `npm run generate`
 - **Countries:** 245 (all ISO 3166-1 countries in Google's metadata)
 - **Fields per country:** `calling_code`, `min_length`, `max_length`

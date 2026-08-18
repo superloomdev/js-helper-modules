@@ -19,8 +19,8 @@
 // Runtime dependency: validator
 const validator = require('validator');
 
-// Generated disposable domain list (committed, no build step for consumers)
-const DISPOSABLE_DOMAINS = require('./_data/disposable-domains.js');
+// Generated disposable domain list (committed JSON, Set constructed at runtime)
+const DISPOSABLE_DOMAINS = new Set(require('./data/disposable-domains.json'));
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
