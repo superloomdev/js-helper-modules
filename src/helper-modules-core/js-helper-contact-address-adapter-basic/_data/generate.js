@@ -141,7 +141,7 @@ const header = [
 const body = 'module.exports = ' + JSON.stringify(data, null, 2) + ';';
 
 const outputPath = path.join(__dirname, 'basic.postal-data.js');
-fs.writeFileSync(outputPath, header + body);
+fs.writeFileSync(outputPath, header + body + '\n');
 
 console.log('Generated ' + outputPath);
 console.log('Countries: ' + Object.keys(data).length);

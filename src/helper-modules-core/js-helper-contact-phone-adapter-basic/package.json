@@ -29,7 +29,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "generate": "node _data/generate.js",
+    "generate": "node _data/generate.js && eslint --fix _data/*.js",
     "test": "node --test _test/test.js"
   }
 }

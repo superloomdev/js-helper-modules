@@ -184,7 +184,7 @@ const header = [
 const body = 'module.exports = ' + JSON.stringify(countries, null, 2) + ';';
 
 const outputPath = path.join(__dirname, 'basic.country-data.js');
-fs.writeFileSync(outputPath, header + body);
+fs.writeFileSync(outputPath, header + body + '\n');
 
 // Report
 const count = Object.keys(countries).length;
