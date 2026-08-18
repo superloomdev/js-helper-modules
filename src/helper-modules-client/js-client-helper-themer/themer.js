@@ -96,23 +96,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     // The two stages, and the one call that runs both.
 
     /********************************************************************
-        Derive a theme and emit it for one platform.
+    Derive a theme and emit it for one platform.
 
-        This is the call a host makes at startup. It is synchronous and
-        does no I/O, so a theme is ready in the same tick and rendering
-        never waits on it.
+    This is the call a host makes at startup. It is synchronous and
+    does no I/O, so a theme is ready in the same tick and rendering
+    never waits on it.
 
-        @param {Object} template - The template to derive from
-        @param {Object[]} layers - Ordered sparse overlays
-        @param {String} platform - 'web' or 'native'
-        @param {Object} [options] - Per-call overrides
+    @param {Object} template - The template to derive from
+    @param {Object[]} layers - Ordered sparse overlays
+    @param {String} platform - 'web' or 'native'
+    @param {Object} [options] - Per-call overrides
 
-        @return {Object} - Emitted theme
-        @return {Object} .tokens - Platform-ready value per token name
-        @return {Object[]} .substituted - Tokens replaced by a platform fallback
-        @return {Object[]} .lossy - Facts a platform projection could not carry
-        @return {Object[]} .corrections - Contrast rewrites that were applied
-        @return {Object[]} .violations - Contrast failures that were found
+    @return {Object} - Emitted theme
+    @return {Object} .tokens - Platform-ready value per token name
+    @return {Object[]} .substituted - Tokens replaced by a platform fallback
+    @return {Object[]} .lossy - Facts a platform projection could not carry
+    @return {Object[]} .corrections - Contrast rewrites that were applied
+    @return {Object[]} .violations - Contrast failures that were found
     *********************************************************************/
     buildTheme: function (template, layers, platform, options) {
 
@@ -136,13 +136,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
 
     /********************************************************************
-        Derive a platform-independent token map.
+    Derive a platform-independent token map.
 
-        @param {Object} template - The template to derive from
-        @param {Object[]} layers - Ordered sparse overlays
-        @param {Object} [options] - Per-call overrides
+    @param {Object} template - The template to derive from
+    @param {Object[]} layers - Ordered sparse overlays
+    @param {Object} [options] - Per-call overrides
 
-        @return {Object} - Resolution result, as documented in schemas
+    @return {Object} - Resolution result, as documented in schemas
     *********************************************************************/
     resolve: function (template, layers, options) {
 
@@ -169,20 +169,20 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
 
     /********************************************************************
-        Project a resolved token map onto one platform.
+    Project a resolved token map onto one platform.
 
-        A token unavailable on the target platform takes its declared
-        fallback rather than disappearing, and any fact a projection
-        cannot carry is reported rather than dropped.
+    A token unavailable on the target platform takes its declared
+    fallback rather than disappearing, and any fact a projection
+    cannot carry is reported rather than dropped.
 
-        @param {Object} resolved - Output of resolve
-        @param {Object} template - The template that produced it
-        @param {String} platform - 'web' or 'native'
+    @param {Object} resolved - Output of resolve
+    @param {Object} template - The template that produced it
+    @param {String} platform - 'web' or 'native'
 
-        @return {Object} - Emitted result
-        @return {Object} .tokens - Platform-ready value per token name
-        @return {Object[]} .substituted - Tokens replaced by a platform fallback
-        @return {Object[]} .lossy - Facts the projection could not carry
+    @return {Object} - Emitted result
+    @return {Object} .tokens - Platform-ready value per token name
+    @return {Object[]} .substituted - Tokens replaced by a platform fallback
+    @return {Object[]} .lossy - Facts the projection could not carry
     *********************************************************************/
     emit: function (resolved, template, platform) {
 
@@ -210,22 +210,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     // What a host needs to check a template or watch the cache.
 
     /********************************************************************
-        Check a template's structural shape without deriving from it.
+    Check a template's structural shape without deriving from it.
 
-        Reports rather than throws, and is the one function here that
-        does. It exists to be called before resolution by a build tool
-        or by a host accepting a theme document, and both want every
-        problem at once: raising the first finding turns checking a
-        theme package into a five-round guessing game.
+    Reports rather than throws, and is the one function here that
+    does. It exists to be called before resolution by a build tool
+    or by a host accepting a theme document, and both want every
+    problem at once: raising the first finding turns checking a
+    theme package into a five-round guessing game.
 
-        Resolution keeps throwing, because by then a malformed template
-        is a caller bug rather than a document under review.
+    Resolution keeps throwing, because by then a malformed template
+    is a caller bug rather than a document under review.
 
-        @param {Object} template - The template to check
+    @param {Object} template - The template to check
 
-        @return {Object} - Check result
-        @return {Boolean} .success - True when no finding was recorded
-        @return {String[]} .errors - Every finding, in the order found
+    @return {Object} - Check result
+    @return {Boolean} .success - True when no finding was recorded
+    @return {String[]} .errors - Every finding, in the order found
     *********************************************************************/
     validateTemplate: function (template) {
 
@@ -236,9 +236,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
 
     /********************************************************************
-        List the platforms this engine emits for.
+    List the platforms this engine emits for.
 
-        @return {String[]} - Platform names
+    @return {String[]} - Platform names
     *********************************************************************/
     platforms: function () {
 
@@ -249,13 +249,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
 
     /********************************************************************
-        Report this instance's cache counters.
+    Report this instance's cache counters.
 
-        @return {Object} - Cache counters
-        @return {Number} .hits - Calls served from the cache
-        @return {Number} .misses - Calls that had to derive
-        @return {Number} .evictions - Entries dropped to stay within capacity
-        @return {Number} .size - Entries currently held
+    @return {Object} - Cache counters
+    @return {Number} .hits - Calls served from the cache
+    @return {Number} .misses - Calls that had to derive
+    @return {Number} .evictions - Entries dropped to stay within capacity
+    @return {Number} .size - Entries currently held
     *********************************************************************/
     cacheStats: function () {
 
@@ -271,9 +271,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
 
     /********************************************************************
-        Drop every cached result and reset the counters.
+    Drop every cached result and reset the counters.
 
-        @return {void}
+    @return {void}
     *********************************************************************/
     clearCache: function () {
 
@@ -301,18 +301,18 @@ const _Themer = {
   // Wiring the pure parts together at loader time.
 
   /********************************************************************
-      Build the pure parts, threading siblings through the container.
+  Build the pure parts, threading siblings through the container.
 
-      Every part loader takes the uniform (shared_libs, config, errors)
-      signature, so a part that needs a sibling receives it on the
-      container rather than through a wider signature.
+  Every part loader takes the uniform (shared_libs, config, errors)
+  signature, so a part that needs a sibling receives it on the
+  container rather than through a wider signature.
 
-      @param {Object} Lib - Dependency container
-      @param {Object} CONFIG - Merged config for this instance
-      @param {Object} ERRORS - Frozen error catalog
-      @param {Object} Validators - Validators singleton
+  @param {Object} Lib - Dependency container
+  @param {Object} CONFIG - Merged config for this instance
+  @param {Object} ERRORS - Frozen error catalog
+  @param {Object} Validators - Validators singleton
 
-      @return {Object} - Map of part name to part interface
+  @return {Object} - Map of part name to part interface
   *********************************************************************/
   buildParts: function (Lib, CONFIG, ERRORS, Validators) {
 
@@ -344,15 +344,15 @@ const _Themer = {
   // Walking a resolved map through one platform's emitters.
 
   /********************************************************************
-      Project every resolved token onto one platform.
+  Project every resolved token onto one platform.
 
-      @param {Object} Parts - Pure parts
-      @param {Object} CONFIG - Merged config for this instance
-      @param {Object} resolved - Output of resolve
-      @param {Object} template - The template that produced it
-      @param {String} platform - Target platform
+  @param {Object} Parts - Pure parts
+  @param {Object} CONFIG - Merged config for this instance
+  @param {Object} resolved - Output of resolve
+  @param {Object} template - The template that produced it
+  @param {String} platform - Target platform
 
-      @return {Object} - Emitted result with its two reports
+  @return {Object} - Emitted result with its two reports
   *********************************************************************/
   project: function (Parts, CONFIG, resolved, template, platform) {
 
@@ -383,21 +383,21 @@ const _Themer = {
 
 
   /********************************************************************
-      Project one token, recording a substitution when the platform
-      cannot carry it at all.
+  Project one token, recording a substitution when the platform
+  cannot carry it at all.
 
-      @param {Object} Parts - Pure parts
-      @param {String} name - Token name
-      @param {Object} resolved - Output of resolve
-      @param {Object} meta - Template metadata
-      @param {String} platform - Target platform
-      @param {String[]} supported - Every platform this engine emits for
-      @param {Number} base_font_size - Root size for rem conversion
-      @param {Object} out - Accumulated emitted tokens
-      @param {Object[]} substituted - Accumulated substitution reports
-      @param {Object[]} lossy - Accumulated loss reports
+  @param {Object} Parts - Pure parts
+  @param {String} name - Token name
+  @param {Object} resolved - Output of resolve
+  @param {Object} meta - Template metadata
+  @param {String} platform - Target platform
+  @param {String[]} supported - Every platform this engine emits for
+  @param {Number} base_font_size - Root size for rem conversion
+  @param {Object} out - Accumulated emitted tokens
+  @param {Object[]} substituted - Accumulated substitution reports
+  @param {Object[]} lossy - Accumulated loss reports
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   projectOne: function (Parts, name, resolved, meta, platform, supported, base_font_size, out, substituted, lossy) {
 
@@ -441,20 +441,20 @@ const _Themer = {
   // stack is rebuilt on every render, so it is keyed by content.
 
   /********************************************************************
-      Build the cache key for a resolve call.
+  Build the cache key for a resolve call.
 
-      Hashing the template instead of keying it by identity would make
-      the hit path scale with token count, costing more than the
-      derivation it avoids. Keying on the layers alone would be wrong
-      rather than merely slow: a second template with the same layers
-      would receive the first template's result.
+  Hashing the template instead of keying it by identity would make
+  the hit path scale with token count, costing more than the
+  derivation it avoids. Keying on the layers alone would be wrong
+  rather than merely slow: a second template with the same layers
+  would receive the first template's result.
 
-      @param {Object} state - Per-instance state
-      @param {Object} template - The template being resolved
-      @param {Object[]} layers - Ordered sparse overlays
-      @param {Object} options - Per-call overrides
+  @param {Object} state - Per-instance state
+  @param {Object} template - The template being resolved
+  @param {Object[]} layers - Ordered sparse overlays
+  @param {Object} options - Per-call overrides
 
-      @return {String} - Cache key
+  @return {String} - Cache key
   *********************************************************************/
   resolveKey: function (state, template, layers, options) {
 
@@ -467,21 +467,21 @@ const _Themer = {
 
 
   /********************************************************************
-      Build the cache key for an emit call.
+  Build the cache key for an emit call.
 
-      Keyed on the resolved object's identity, not its content. A cached
-      resolve returns the same reference, so identity is already an
-      exact proxy for content here, and serializing a whole token map
-      per call would cost more than the projection it avoids.
+  Keyed on the resolved object's identity, not its content. A cached
+  resolve returns the same reference, so identity is already an
+  exact proxy for content here, and serializing a whole token map
+  per call would cost more than the projection it avoids.
 
-      A hand-built resolved object gets a fresh id and simply misses
-      every time, which is correct but uncached.
+  A hand-built resolved object gets a fresh id and simply misses
+  every time, which is correct but uncached.
 
-      @param {Object} state - Per-instance state
-      @param {Object} resolved - Output of resolve
-      @param {String} platform - Target platform
+  @param {Object} state - Per-instance state
+  @param {Object} resolved - Output of resolve
+  @param {String} platform - Target platform
 
-      @return {String} - Cache key
+  @return {String} - Cache key
   *********************************************************************/
   emitKey: function (state, resolved, platform) {
 
@@ -492,15 +492,15 @@ const _Themer = {
 
 
   /********************************************************************
-      Assign a short stable id to an object, by identity.
+  Assign a short stable id to an object, by identity.
 
-      The ids live in a WeakMap, so a discarded template is collectable
-      and takes its id with it.
+  The ids live in a WeakMap, so a discarded template is collectable
+  and takes its id with it.
 
-      @param {Object} state - Per-instance state
-      @param {Object} object - Object to identify
+  @param {Object} state - Per-instance state
+  @param {Object} object - Object to identify
 
-      @return {String} - Stable id for this object
+  @return {String} - Stable id for this object
   *********************************************************************/
   idOf: function (state, object) {
 
@@ -516,12 +516,12 @@ const _Themer = {
 
 
   /********************************************************************
-      Read a cache entry, refreshing its recency on a hit.
+  Read a cache entry, refreshing its recency on a hit.
 
-      @param {Object} state - Per-instance state
-      @param {String} key - Cache key
+  @param {Object} state - Per-instance state
+  @param {String} key - Cache key
 
-      @return {*} - The cached value, or undefined on a miss
+  @return {*} - The cached value, or undefined on a miss
   *********************************************************************/
   readCache: function (state, key) {
 
@@ -545,14 +545,14 @@ const _Themer = {
 
 
   /********************************************************************
-      Store a cache entry, evicting the oldest when at capacity.
+  Store a cache entry, evicting the oldest when at capacity.
 
-      @param {Object} state - Per-instance state
-      @param {Object} CONFIG - Merged config for this instance
-      @param {String} key - Cache key
-      @param {*} value - Value to store
+  @param {Object} state - Per-instance state
+  @param {Object} CONFIG - Merged config for this instance
+  @param {String} key - Cache key
+  @param {*} value - Value to store
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   writeCache: function (state, CONFIG, key, value) {
 

@@ -70,10 +70,10 @@ all headers as a plain object, and a parsed Set-Cookie array.
 @param {String} baseUrl - e.g. 'http://127.0.0.1:54321'
 @param {String} path    - URL path, e.g. '/users/42?q=1'
 @param {Object} [opts]  - { method, headers, body, cookies }
-  method  {String}        - 'GET' | 'POST' | ... (default 'GET')
-  headers {Object}        - Extra request headers
-  body    {String|Object} - Request body. Objects are JSON.stringified.
-  cookies {Object}        - { name: value } pairs sent as Cookie header
+method  {String}        - 'GET' | 'POST' | ... (default 'GET')
+headers {Object}        - Extra request headers
+body    {String|Object} - Request body. Objects are JSON.stringified.
+cookies {Object}        - { name: value } pairs sent as Cookie header
 
 @return {Promise<Object>} - { status, headers, body, setCookies, raw }
 *********************************************************************/

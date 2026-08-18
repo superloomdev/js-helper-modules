@@ -99,14 +99,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Adapter Contract ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Load all font families from the core's manifest. Iterates the
-manifest, resolves the best source for each entry (asset on native,
-url on web, path as fallback), calls expo-font's loadAsync, and
-tracks success/failure counts.
+    Load all font families from the core's manifest. Iterates the
+    manifest, resolves the best source for each entry (asset on native,
+    url on web, path as fallback), calls expo-font's loadAsync, and
+    tracks success/failure counts.
 
-@param {Object} manifest - The manifest from Font.getManifest()
+    @param {Object} manifest - The manifest from Font.getManifest()
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     loadManifest: async function (manifest) {
 
@@ -195,9 +195,9 @@ tracks success/failure counts.
 
 
     /********************************************************************
-Check whether all registered fonts have finished loading.
+    Check whether all registered fonts have finished loading.
 
-@return {Object} - { success, ready, error }
+    @return {Object} - { success, ready, error }
     *********************************************************************/
     isReady: function () {
 
@@ -211,11 +211,11 @@ Check whether all registered fonts have finished loading.
 
 
     /********************************************************************
-Check whether a specific font family has been loaded by this adapter.
+    Check whether a specific font family has been loaded by this adapter.
 
-@param {String} familyName - The family name to check
+    @param {String} familyName - The family name to check
 
-@return {Object} - { success, loaded, error }
+    @return {Object} - { success, loaded, error }
     *********************************************************************/
     isFamilyLoaded: function (familyName) {
 
@@ -231,9 +231,9 @@ Check whether a specific font family has been loaded by this adapter.
     // ~~~~~~~~~~~~~~~~~~~~ Introspection ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Get the count of successfully loaded fonts.
+    Get the count of successfully loaded fonts.
 
-@return {Object} - { success, count, error }
+    @return {Object} - { success, count, error }
     *********************************************************************/
     getLoadedCount: function () {
 
@@ -247,9 +247,9 @@ Get the count of successfully loaded fonts.
 
 
     /********************************************************************
-Get the count of fonts that failed to load.
+    Get the count of fonts that failed to load.
 
-@return {Object} - { success, count, error }
+    @return {Object} - { success, count, error }
     *********************************************************************/
     getFailedCount: function () {
 
@@ -273,27 +273,27 @@ const _Expo = {
 
 
   /********************************************************************
-Load a single font via expo-font's loadAsync. Resolves the best
-source based on what's available in the entry:
-1. asset (Expo requireable module ID) — native
-2. url (remote URL) — web
-3. path (local file path) — native fallback
+  Load a single font via expo-font's loadAsync. Resolves the best
+  source based on what's available in the entry:
+  1. asset (Expo requireable module ID) — native
+  2. url (remote URL) — web
+  3. path (local file path) — native fallback
 
-expo-font's loadAsync accepts (familyName, source) where source
-can be a requireable module, a URI string, or an object with
-{ uri, displayNames, ... }.
+  expo-font's loadAsync accepts (familyName, source) where source
+  can be a requireable module, a URI string, or an object with
+  { uri, displayNames, ... }.
 
-@param {Object} Lib       - Dependency container
-@param {Object} CONFIG    - Merged configuration
-@param {Object} ERRORS    - Error catalog
-@param {Object} Validators - Validators singleton
-@param {Object} state     - Mutable state holder
-@param {String} familyName - Font family name (with style suffix)
-@param {String} styleKey   - Weight/style key
-@param {Object} entry      - Manifest style entry
+  @param {Object} Lib       - Dependency container
+  @param {Object} CONFIG    - Merged configuration
+  @param {Object} ERRORS    - Error catalog
+  @param {Object} Validators - Validators singleton
+  @param {Object} state     - Mutable state holder
+  @param {String} familyName - Font family name (with style suffix)
+  @param {String} styleKey   - Weight/style key
+  @param {Object} entry      - Manifest style entry
 
-@return {Promise<void>}
-    *********************************************************************/
+  @return {Promise<void>}
+  *********************************************************************/
   loadFont: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, styleKey, entry) {
 
     // Validate that the entry has at least one source
@@ -316,15 +316,15 @@ can be a requireable module, a URI string, or an object with
 
 
   /********************************************************************
-Resolve the best source from a manifest entry.
+  Resolve the best source from a manifest entry.
 
-Priority: asset > url > path
+  Priority: asset > url > path
 
-@param {Object} Lib   - Dependency container (uses Lib.Utils)
-@param {Object} entry - Manifest style entry
+  @param {Object} Lib   - Dependency container (uses Lib.Utils)
+  @param {Object} entry - Manifest style entry
 
-@return {*} - Source value for expo-font's loadAsync
-    *********************************************************************/
+  @return {*} - Source value for expo-font's loadAsync
+  *********************************************************************/
   resolveSource: function (Lib, entry) {
 
     // Check for asset source (highest priority on native)

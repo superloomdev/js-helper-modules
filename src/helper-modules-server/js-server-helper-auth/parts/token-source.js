@@ -50,15 +50,15 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const TokenSource = {
 
     /********************************************************************
-Read the auth_id from the request instance using the priority chain.
+    Read the auth_id from the request instance using the priority chain.
 
-@param {Object} instance - Request instance with http_request shape
-@param {Object} options
-@param {String} options.cookie_prefix - The CONFIG.COOKIE_PREFIX value
-@param {String} options.tenant_id - Used to build the cookie name
-@param {String} [options.custom_header_name] - Optional non-standard header
+    @param {Object} instance - Request instance with http_request shape
+    @param {Object} options
+    @param {String} options.cookie_prefix - The CONFIG.COOKIE_PREFIX value
+    @param {String} options.tenant_id - Used to build the cookie name
+    @param {String} [options.custom_header_name] - Optional non-standard header
 
-@return {String|null} - The raw auth_id value or null if not found
+    @return {String|null} - The raw auth_id value or null if not found
     *********************************************************************/
     readAuthId: function (instance, options) {
 
@@ -105,12 +105,12 @@ Read the auth_id from the request instance using the priority chain.
 
 
     /********************************************************************
-Read the Authorization header and extract the Bearer token.
-Returns null if absent or wrong scheme.
+    Read the Authorization header and extract the Bearer token.
+    Returns null if absent or wrong scheme.
 
-@param {Object} headers - Lower-cased request headers map
+    @param {Object} headers - Lower-cased request headers map
 
-@return {String|null} - The bearer token or null
+    @return {String|null} - The bearer token or null
     *********************************************************************/
     readBearerToken: function (headers) {
 
@@ -151,13 +151,13 @@ Returns null if absent or wrong scheme.
 
 
     /********************************************************************
-Read a custom header. Header names are matched case-insensitively
-(HTTP convention).
+    Read a custom header. Header names are matched case-insensitively
+    (HTTP convention).
 
-@param {Object} headers - Lower-cased request headers map
-@param {String} header_name - The header to look up
+    @param {Object} headers - Lower-cased request headers map
+    @param {String} header_name - The header to look up
 
-@return {String|null} - The header value or null
+    @return {String|null} - The header value or null
     *********************************************************************/
     readCustomHeader: function (headers, header_name) {
 
@@ -178,14 +178,14 @@ Read a custom header. Header names are matched case-insensitively
 
 
     /********************************************************************
-Read a cookie value from the pre-parsed cookies map on the request instance.
-The HTTP gateway adapter populates instance.http_request.cookies before
-any application code runs.
+    Read a cookie value from the pre-parsed cookies map on the request instance.
+    The HTTP gateway adapter populates instance.http_request.cookies before
+    any application code runs.
 
-@param {Object} instance - Request instance with http_request.cookies
-@param {String} cookie_name - The cookie name to find
+    @param {Object} instance - Request instance with http_request.cookies
+    @param {String} cookie_name - The cookie name to find
 
-@return {String|null} - The cookie value or null
+    @return {String|null} - The cookie value or null
     *********************************************************************/
     readCookie: function (instance, cookie_name) {
 
@@ -216,12 +216,12 @@ any application code runs.
 
 
     /********************************************************************
-Get the request headers from the instance, normalizing the keys
-to lower case for case-insensitive lookup.
+    Get the request headers from the instance, normalizing the keys
+    to lower case for case-insensitive lookup.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Object} - Lower-cased headers map (empty if no headers)
+    @return {Object} - Lower-cased headers map (empty if no headers)
     *********************************************************************/
     getRequestHeaders: function (instance) {
 

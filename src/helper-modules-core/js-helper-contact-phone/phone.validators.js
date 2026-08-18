@@ -52,9 +52,9 @@ const Validators = {
   Validate the merged CONFIG. Throws on any missing-required violation
   so the loader fails before serving a single request.
 
-@param {Object} CONFIG - Merged module configuration
+  @param {Object} CONFIG - Merged module configuration
 
-@return {void}
+  @return {void}
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
@@ -84,14 +84,14 @@ const Validators = {
   calls never hit a partially-implemented adapter.
 
   The phone adapter contract (4 methods):
-listCountries() -> [String]
-getMetadata(country_code) -> { calling_code, min_length, max_length } | null
-validateSyntax(country_code, national_number) -> { valid, reason }
-getNumberType(country_code, national_number) -> String | null
+  listCountries() -> [String]
+  getMetadata(country_code) -> { calling_code, min_length, max_length } | null
+  validateSyntax(country_code, national_number) -> { valid, reason }
+  getNumberType(country_code, national_number) -> String | null
 
-@param {Object} adapter - Instantiated adapter object
+  @param {Object} adapter - Instantiated adapter object
 
-@return {void}
+  @return {void}
   *********************************************************************/
   validateAdapterContract: function (adapter) {
 
@@ -125,10 +125,10 @@ getNumberType(country_code, national_number) -> String | null
   /********************************************************************
   Assert that a value is a string. Throws TypeError if not.
 
-@param {String} name - Argument name for the error message
-@param {*} value - The value to check
+  @param {String} name - Argument name for the error message
+  @param {*} value - The value to check
 
-@return {void}
+  @return {void}
   *********************************************************************/
   assertString: function (name, value) {
 
@@ -145,10 +145,10 @@ getNumberType(country_code, national_number) -> String | null
   /********************************************************************
   Assert that a value is a non-empty string. Throws TypeError if not.
 
-@param {String} name - Argument name for the error message
-@param {*} value - The value to check
+  @param {String} name - Argument name for the error message
+  @param {*} value - The value to check
 
-@return {void}
+  @return {void}
   *********************************************************************/
   assertNonEmptyString: function (name, value) {
 

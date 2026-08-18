@@ -55,37 +55,37 @@ module.exports = function loader (shared_libs, config, errors) {
 const Params = {
 
   /********************************************************************
-Build a typed, validated args object from the normalized HTTP request
-data in instance.http_request.
+  Build a typed, validated args object from the normalized HTTP request
+  data in instance.http_request.
 
-Each entry in the params array describes one parameter:
-      in              {String}   - 'query' | 'body' | 'header' | 'params' | 'fixed'
+  Each entry in the params array describes one parameter:
+  in              {String}   - 'query' | 'body' | 'header' | 'params' | 'fixed'
                                    Source location for value extraction (preferred)
-      method          {String}   - 'GET' | 'POST' | 'HEADER' | 'PATH' | 'FIXED'
+  method          {String}   - 'GET' | 'POST' | 'HEADER' | 'PATH' | 'FIXED'
                                    HTTP verb context; used as source fallback when
                                    `in` is not provided (backward compatibility)
-      name            {String}   - Key name in the source location
-      rename          {String}   - Output key name in the returned args object
-      value           {*}        - Literal value (only for in: 'fixed')
-      required        {Boolean}  - true = abort and return [null, false] if missing
-      default         {*}        - Value used when param is absent and not required
-      is_number       {Boolean}  - Typecast string -> Number
-      is_boolean      {Boolean}  - Typecast via Boolean(Number(value))
-      is_json         {Boolean}  - JSON.parse the string value
-      trim            {Boolean}  - String trim; converts empty string to null
-      json_func       {Function} - Transform applied after JSON.parse
-      sanitize_func   {Function} - Sanitization function applied to the value
-      validate_func   {Function} - Must return true; failure returns [null, false]
-      invalidate_func {Function} - Must return falsy; truthy return is forwarded
+  name            {String}   - Key name in the source location
+  rename          {String}   - Output key name in the returned args object
+  value           {*}        - Literal value (only for in: 'fixed')
+  required        {Boolean}  - true = abort and return [null, false] if missing
+  default         {*}        - Value used when param is absent and not required
+  is_number       {Boolean}  - Typecast string -> Number
+  is_boolean      {Boolean}  - Typecast via Boolean(Number(value))
+  is_json         {Boolean}  - JSON.parse the string value
+  trim            {Boolean}  - String trim; converts empty string to null
+  json_func       {Function} - Transform applied after JSON.parse
+  sanitize_func   {Function} - Sanitization function applied to the value
+  validate_func   {Function} - Must return true; failure returns [null, false]
+  invalidate_func {Function} - Must return falsy; truthy return is forwarded
                                    as the error: [err, false]
 
-      @param {Object}   instance - Per-request instance with http_request populated
-      @param {Object[]} params   - Array of parameter descriptor objects
+  @param {Object}   instance - Per-request instance with http_request populated
+  @param {Object[]} params   - Array of parameter descriptor objects
 
-      @return {Array} [null, {Object}]    - On success: [null, args]
-      @return {Array} [null, false]       - On required-param failure or validation failure
-      @return {Array} [{Object}, false]   - On invalidate_func failure: [err, false]
-    *********************************************************************/
+  @return {Array} [null, {Object}]    - On success: [null, args]
+  @return {Array} [null, false]       - On required-param failure or validation failure
+  @return {Array} [{Object}, false]   - On invalidate_func failure: [err, false]
+  *********************************************************************/
   setArgsFromRequest: function (instance, params) {
 
     // Empty param list - return empty args immediately
@@ -245,9 +245,9 @@ const _Params = {
   the `in` key (OpenAPI-aligned). Falls back to translating `method`
   (legacy GET/POST/HEADER/PATH/FIXED) into the equivalent `in` value.
 
-@param {Object} param - Single parameter descriptor
+  @param {Object} param - Single parameter descriptor
 
-@return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
+  @return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
   *********************************************************************/
   resolveSource: function (param) {
 

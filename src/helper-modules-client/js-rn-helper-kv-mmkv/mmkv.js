@@ -107,12 +107,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Synchronous primitives. The async forms wrap these in resolved promises.
 
     /********************************************************************
-Get a single record by key. Returns found: false when the key is
-absent, found: true when present (including stored null).
+    Get a single record by key. Returns found: false when the key is
+    absent, found: true when present (including stored null).
 
-@param {String} key - Non-empty string without the namespace separator
+    @param {String} key - Non-empty string without the namespace separator
 
-@return {Object} - { success, value, found, error }
+    @return {Object} - { success, value, found, error }
     *********************************************************************/
     getRecordSync: function (key) {
 
@@ -215,12 +215,12 @@ absent, found: true when present (including stored null).
 
 
     /********************************************************************
-Write a record by key. Always upsert. JSON-serializes the value.
+    Write a record by key. Always upsert. JSON-serializes the value.
 
-@param {String} key   - Non-empty string without the namespace separator
-@param {*}      value - Any JSON-serializable value (undefined rejected)
+    @param {String} key   - Non-empty string without the namespace separator
+    @param {*}      value - Any JSON-serializable value (undefined rejected)
 
-@return {Object} - { success, error }
+    @return {Object} - { success, error }
     *********************************************************************/
     writeRecordSync: function (key, value) {
 
@@ -289,12 +289,12 @@ Write a record by key. Always upsert. JSON-serializes the value.
 
 
     /********************************************************************
-Delete a record by key. Idempotent: deleting an absent key is
-still success: true.
+    Delete a record by key. Idempotent: deleting an absent key is
+    still success: true.
 
-@param {String} key - Non-empty string without the namespace separator
+    @param {String} key - Non-empty string without the namespace separator
 
-@return {Object} - { success, error }
+    @return {Object} - { success, error }
     *********************************************************************/
     deleteRecordSync: function (key) {
 
@@ -352,11 +352,11 @@ still success: true.
 
 
     /********************************************************************
-Check whether a key exists in the store.
+    Check whether a key exists in the store.
 
-@param {String} key - Non-empty string without the namespace separator
+    @param {String} key - Non-empty string without the namespace separator
 
-@return {Object} - { success, exists, error }
+    @return {Object} - { success, exists, error }
     *********************************************************************/
     hasRecordSync: function (key) {
 
@@ -418,10 +418,10 @@ Check whether a key exists in the store.
 
 
     /********************************************************************
-List all keys within the namespace, with the namespace prefix
-stripped. Only keys belonging to this namespace are returned.
+    List all keys within the namespace, with the namespace prefix
+    stripped. Only keys belonging to this namespace are returned.
 
-@return {Object} - { success, keys, count, error }
+    @return {Object} - { success, keys, count, error }
     *********************************************************************/
     getAllKeysSync: function () {
 
@@ -483,12 +483,12 @@ stripped. Only keys belonging to this namespace are returned.
 
 
     /********************************************************************
-Get multiple records by key. Returns a { key: value } map. Absent
-keys are omitted from the map.
+    Get multiple records by key. Returns a { key: value } map. Absent
+    keys are omitted from the map.
 
-@param {Array<String>} keys - Array of valid key strings
+    @param {Array<String>} keys - Array of valid key strings
 
-@return {Object} - { success, values, error }
+    @return {Object} - { success, values, error }
     *********************************************************************/
     batchGetRecordsSync: function (keys) {
 
@@ -542,12 +542,12 @@ keys are omitted from the map.
 
 
     /********************************************************************
-Write multiple records. Takes a { key: value } object. Sequential
-writes; first failure stops and reports.
+    Write multiple records. Takes a { key: value } object. Sequential
+    writes; first failure stops and reports.
 
-@param {Object} pairs - Plain object of key-value pairs
+    @param {Object} pairs - Plain object of key-value pairs
 
-@return {Object} - { success, error }
+    @return {Object} - { success, error }
     *********************************************************************/
     batchWriteRecordsSync: function (pairs) {
 
@@ -590,11 +590,11 @@ writes; first failure stops and reports.
 
 
     /********************************************************************
-Delete multiple records by key. Idempotent per key.
+    Delete multiple records by key. Idempotent per key.
 
-@param {Array<String>} keys - Array of valid key strings
+    @param {Array<String>} keys - Array of valid key strings
 
-@return {Object} - { success, error }
+    @return {Object} - { success, error }
     *********************************************************************/
     batchDeleteRecordsSync: function (keys) {
 
@@ -635,11 +635,11 @@ Delete multiple records by key. Idempotent per key.
 
 
     /********************************************************************
-Clear all keys within the namespace. When the namespace is empty,
-uses the engine clearAll directly. Otherwise iterates and removes
-only namespaced keys, preserving other tenants' data.
+    Clear all keys within the namespace. When the namespace is empty,
+    uses the engine clearAll directly. Otherwise iterates and removes
+    only namespaced keys, preserving other tenants' data.
 
-@return {Object} - { success, cleared_count, error }
+    @return {Object} - { success, cleared_count, error }
     *********************************************************************/
     clearSync: function () {
 
@@ -725,11 +725,11 @@ only namespaced keys, preserving other tenants' data.
     // Portable contract. Each wraps its sync sibling in a resolved promise.
 
     /********************************************************************
-Async version of getRecordSync.
+    Async version of getRecordSync.
 
-@param {String} key - Non-empty string without the namespace separator
+    @param {String} key - Non-empty string without the namespace separator
 
-@return {Promise<Object>} - { success, value, found, error }
+    @return {Promise<Object>} - { success, value, found, error }
     *********************************************************************/
     getRecord: async function (key) {
 
@@ -739,12 +739,12 @@ Async version of getRecordSync.
 
 
     /********************************************************************
-Async version of writeRecordSync.
+    Async version of writeRecordSync.
 
-@param {String} key   - Non-empty string without the namespace separator
-@param {*}      value - Any JSON-serializable value (undefined rejected)
+    @param {String} key   - Non-empty string without the namespace separator
+    @param {*}      value - Any JSON-serializable value (undefined rejected)
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (key, value) {
 
@@ -754,11 +754,11 @@ Async version of writeRecordSync.
 
 
     /********************************************************************
-Async version of deleteRecordSync.
+    Async version of deleteRecordSync.
 
-@param {String} key - Non-empty string without the namespace separator
+    @param {String} key - Non-empty string without the namespace separator
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (key) {
 
@@ -768,11 +768,11 @@ Async version of deleteRecordSync.
 
 
     /********************************************************************
-Async version of hasRecordSync.
+    Async version of hasRecordSync.
 
-@param {String} key - Non-empty string without the namespace separator
+    @param {String} key - Non-empty string without the namespace separator
 
-@return {Promise<Object>} - { success, exists, error }
+    @return {Promise<Object>} - { success, exists, error }
     *********************************************************************/
     hasRecord: async function (key) {
 
@@ -782,9 +782,9 @@ Async version of hasRecordSync.
 
 
     /********************************************************************
-Async version of getAllKeysSync.
+    Async version of getAllKeysSync.
 
-@return {Promise<Object>} - { success, keys, count, error }
+    @return {Promise<Object>} - { success, keys, count, error }
     *********************************************************************/
     getAllKeys: async function () {
 
@@ -794,11 +794,11 @@ Async version of getAllKeysSync.
 
 
     /********************************************************************
-Async version of batchGetRecordsSync.
+    Async version of batchGetRecordsSync.
 
-@param {Array<String>} keys - Array of valid key strings
+    @param {Array<String>} keys - Array of valid key strings
 
-@return {Promise<Object>} - { success, values, error }
+    @return {Promise<Object>} - { success, values, error }
     *********************************************************************/
     batchGetRecords: async function (keys) {
 
@@ -808,11 +808,11 @@ Async version of batchGetRecordsSync.
 
 
     /********************************************************************
-Async version of batchWriteRecordsSync.
+    Async version of batchWriteRecordsSync.
 
-@param {Object} pairs - Plain object of key-value pairs
+    @param {Object} pairs - Plain object of key-value pairs
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     batchWriteRecords: async function (pairs) {
 
@@ -822,11 +822,11 @@ Async version of batchWriteRecordsSync.
 
 
     /********************************************************************
-Async version of batchDeleteRecordsSync.
+    Async version of batchDeleteRecordsSync.
 
-@param {Array<String>} keys - Array of valid key strings
+    @param {Array<String>} keys - Array of valid key strings
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     batchDeleteRecords: async function (keys) {
 
@@ -836,9 +836,9 @@ Async version of batchDeleteRecordsSync.
 
 
     /********************************************************************
-Async version of clearSync.
+    Async version of clearSync.
 
-@return {Promise<Object>} - { success, cleared_count, error }
+    @return {Promise<Object>} - { success, cleared_count, error }
     *********************************************************************/
     clear: async function () {
 
@@ -857,10 +857,10 @@ Async version of clearSync.
     // Build, strip, and check namespaced keys.
 
     /********************************************************************
-Return the namespace prefix (NAMESPACE + ':' when non-empty, '' when
-empty).
+    Return the namespace prefix (NAMESPACE + ':' when non-empty, '' when
+    empty).
 
-@return {String} - Namespace prefix
+    @return {String} - Namespace prefix
     *********************************************************************/
     getNamespacePrefix: function () {
 
@@ -874,11 +874,11 @@ empty).
 
 
     /********************************************************************
-Build the stored key by prepending the namespace prefix.
+    Build the stored key by prepending the namespace prefix.
 
-@param {String} key - User-facing key
+    @param {String} key - User-facing key
 
-@return {String} - Namespaced key for storage
+    @return {String} - Namespaced key for storage
     *********************************************************************/
     buildKey: function (key) {
 
@@ -888,11 +888,11 @@ Build the stored key by prepending the namespace prefix.
 
 
     /********************************************************************
-Strip the namespace prefix from a stored key.
+    Strip the namespace prefix from a stored key.
 
-@param {String} storedKey - Key from the storage engine
+    @param {String} storedKey - Key from the storage engine
 
-@return {String} - User-facing key without the prefix
+    @return {String} - User-facing key without the prefix
     *********************************************************************/
     stripPrefix: function (storedKey) {
 
@@ -908,11 +908,11 @@ Strip the namespace prefix from a stored key.
 
 
     /********************************************************************
-Check whether a stored key belongs to this namespace.
+    Check whether a stored key belongs to this namespace.
 
-@param {String} storedKey - Key from the storage engine
+    @param {String} storedKey - Key from the storage engine
 
-@return {boolean} - True if the key belongs to this namespace
+    @return {boolean} - True if the key belongs to this namespace
     *********************************************************************/
     isNamespacedKey: function (storedKey) {
 
@@ -931,12 +931,12 @@ Check whether a stored key belongs to this namespace.
     // Return the error object when invalid, null when valid.
 
     /********************************************************************
-Validate a single key. Returns the error object when invalid,
-null when valid.
+    Validate a single key. Returns the error object when invalid,
+    null when valid.
 
-@param {String} key - Key to validate
+    @param {String} key - Key to validate
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateKey: function (key) {
 
@@ -950,12 +950,12 @@ null when valid.
 
 
     /********************************************************************
-Validate an array of keys. Returns the error object when invalid,
-null when valid.
+    Validate an array of keys. Returns the error object when invalid,
+    null when valid.
 
-@param {Array} keys - Keys to validate
+    @param {Array} keys - Keys to validate
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateKeysArray: function (keys) {
 
@@ -977,12 +977,12 @@ null when valid.
 
 
     /********************************************************************
-Validate a pairs object for batchWriteRecords. Returns the error
-object when invalid, null when valid.
+    Validate a pairs object for batchWriteRecords. Returns the error
+    object when invalid, null when valid.
 
-@param {Object} pairs - Key-value pairs to validate
+    @param {Object} pairs - Key-value pairs to validate
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validatePairsObject: function (pairs) {
 

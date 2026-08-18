@@ -89,17 +89,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // operations. All are upsert-friendly where applicable.
 
     /********************************************************************
-Get a single record from a collection by filter (typically _id).
+    Get a single record from a collection by filter (typically _id).
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - MongoDB query filter (e.g. { _id: 'abc' }, { email: 'user@test.com' })
-@param {Object} [options] - findOne options
-@param {Object} [options.projection] - Fields to include/exclude (e.g. { name: 1 } include-only, { secret: 0 } exclude)
-@param {Object} [options.sort] - Sort order when multiple match (e.g. { created_at: -1 } descending, { name: 1 } ascending)
-@param {Object} [options.hint] - Index hint to force a specific index
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - MongoDB query filter (e.g. { _id: 'abc' }, { email: 'user@test.com' })
+    @param {Object} [options] - findOne options
+    @param {Object} [options.projection] - Fields to include/exclude (e.g. { name: 1 } include-only, { secret: 0 } exclude)
+    @param {Object} [options.sort] - Sort order when multiple match (e.g. { created_at: -1 } descending, { name: 1 } ascending)
+    @param {Object} [options.hint] - Index hint to force a specific index
 
-@return {Promise<Object>} - { success, document, error }
+    @return {Promise<Object>} - { success, document, error }
     *********************************************************************/
     getRecord: async function (instance, collection, filter, options) {
 
@@ -145,16 +145,16 @@ Get a single record from a collection by filter (typically _id).
 
 
     /********************************************************************
-Write (create or replace) a single record. Always upsert - inserts if
-the filter matches nothing, replaces if it matches. Callers never need
-to think about insert vs replace.
+    Write (create or replace) a single record. Always upsert - inserts if
+    the filter matches nothing, replaces if it matches. Callers never need
+    to think about insert vs replace.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - Filter to identify the record (e.g. { _id: 'user_1' })
-@param {Object} document - Full replacement document (no $ operators). Must include _id if filter uses _id.
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - Filter to identify the record (e.g. { _id: 'user_1' })
+    @param {Object} document - Full replacement document (no $ operators). Must include _id if filter uses _id.
 
-@return {Promise<Object>} - { success, matchedCount, modifiedCount, upsertedId, error }
+    @return {Promise<Object>} - { success, matchedCount, modifiedCount, upsertedId, error }
     *********************************************************************/
     writeRecord: async function (instance, collection, filter, document) {
 
@@ -204,13 +204,13 @@ to think about insert vs replace.
 
 
     /********************************************************************
-Delete a single record from a collection.
+    Delete a single record from a collection.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - Filter to match the record (e.g. { _id: 'user_1' }, { email: 'user@test.com' })
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - Filter to match the record (e.g. { _id: 'user_1' }, { email: 'user@test.com' })
 
-@return {Promise<Object>} - { success, deletedCount, error }
+    @return {Promise<Object>} - { success, deletedCount, error }
     *********************************************************************/
     deleteRecord: async function (instance, collection, filter) {
 
@@ -256,20 +256,20 @@ Delete a single record from a collection.
 
 
     /********************************************************************
-Update fields in a single record.
+    Update fields in a single record.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - Filter to match the record (e.g. { _id: 'user_1' })
-@param {Object} update - MongoDB update operators
-@param {Object} [update.$set] - Fields to set { field: value }
-@param {Object} [update.$inc] - Fields to increment/decrement { field: amount } (negative to decrement)
-@param {Object} [update.$unset] - Fields to remove { field: '' }
-@param {Object} [update.$push] - Values to append to arrays { field: value }
-@param {Object} [update.$pull] - Values to remove from arrays { field: value }
-@param {Object} [update.$rename] - Fields to rename { oldName: 'newName' }
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - Filter to match the record (e.g. { _id: 'user_1' })
+    @param {Object} update - MongoDB update operators
+    @param {Object} [update.$set] - Fields to set { field: value }
+    @param {Object} [update.$inc] - Fields to increment/decrement { field: amount } (negative to decrement)
+    @param {Object} [update.$unset] - Fields to remove { field: '' }
+    @param {Object} [update.$push] - Values to append to arrays { field: value }
+    @param {Object} [update.$pull] - Values to remove from arrays { field: value }
+    @param {Object} [update.$rename] - Fields to rename { oldName: 'newName' }
 
-@return {Promise<Object>} - { success, modifiedCount, error }
+    @return {Promise<Object>} - { success, modifiedCount, error }
     *********************************************************************/
     updateRecord: async function (instance, collection, filter, update) {
 
@@ -320,27 +320,27 @@ Update fields in a single record.
     // scan() permits empty filters for intentional full reads.
 
     /********************************************************************
-Query multiple records from a collection. Requires a non-empty filter
-to prevent accidental full-collection scans. Use scan() for intentional
-full-collection reads.
+    Query multiple records from a collection. Requires a non-empty filter
+    to prevent accidental full-collection scans. Use scan() for intentional
+    full-collection reads.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - MongoDB query filter (must not be empty)
-@param {String|Number|Boolean} filter.<field> - Exact match (e.g. { status: 'active' })
-@param {Object} [filter.<field>.$gt] - Greater than (e.g. { age: { $gt: 18 } })
-@param {Object} [filter.<field>.$gte] - Greater than or equal
-@param {Object} [filter.<field>.$lt] - Less than
-@param {Object} [filter.<field>.$lte] - Less than or equal
-@param {Array} [filter.<field>.$in] - Match any value in array (e.g. { status: { $in: ['active', 'pending'] } })
-@param {RegExp|String} [filter.<field>.$regex] - Regular expression match
-@param {Object} [options] - find options
-@param {Number} [options.limit] - Max documents to return
-@param {Object} [options.sort] - Sort order (e.g. { created_at: -1 } descending, { name: 1 } ascending)
-@param {Number} [options.skip] - Number of documents to skip (pagination offset)
-@param {Object} [options.projection] - Fields to include/exclude (e.g. { name: 1 } or { secret: 0 })
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - MongoDB query filter (must not be empty)
+    @param {String|Number|Boolean} filter.<field> - Exact match (e.g. { status: 'active' })
+    @param {Object} [filter.<field>.$gt] - Greater than (e.g. { age: { $gt: 18 } })
+    @param {Object} [filter.<field>.$gte] - Greater than or equal
+    @param {Object} [filter.<field>.$lt] - Less than
+    @param {Object} [filter.<field>.$lte] - Less than or equal
+    @param {Array} [filter.<field>.$in] - Match any value in array (e.g. { status: { $in: ['active', 'pending'] } })
+    @param {RegExp|String} [filter.<field>.$regex] - Regular expression match
+    @param {Object} [options] - find options
+    @param {Number} [options.limit] - Max documents to return
+    @param {Object} [options.sort] - Sort order (e.g. { created_at: -1 } descending, { name: 1 } ascending)
+    @param {Number} [options.skip] - Number of documents to skip (pagination offset)
+    @param {Object} [options.projection] - Fields to include/exclude (e.g. { name: 1 } or { secret: 0 })
 
-@return {Promise<Object>} - { success, documents, error }
+    @return {Promise<Object>} - { success, documents, error }
     *********************************************************************/
     query: async function (instance, collection, filter, options) {
 
@@ -391,13 +391,13 @@ full-collection reads.
 
 
     /********************************************************************
-Count documents matching a filter.
+    Count documents matching a filter.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - MongoDB query filter (must not be empty). Same filter syntax as query().
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - MongoDB query filter (must not be empty). Same filter syntax as query().
 
-@return {Promise<Object>} - { success, count, error }
+    @return {Promise<Object>} - { success, count, error }
     *********************************************************************/
     count: async function (instance, collection, filter) {
 
@@ -448,22 +448,22 @@ Count documents matching a filter.
 
 
     /********************************************************************
-Scan an entire collection. Returns all documents, or documents
-matching an optional filter. Unlike query(), this function permits
-empty filters for intentional full-collection reads.
+    Scan an entire collection. Returns all documents, or documents
+    matching an optional filter. Unlike query(), this function permits
+    empty filters for intentional full-collection reads.
 
-Use sparingly on large collections.
+    Use sparingly on large collections.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} [filter] - Optional MongoDB query filter. Same filter syntax as query(). Omit or pass null for all documents.
-@param {Object} [options] - find options
-@param {Number} [options.limit] - Max documents to return
-@param {Object} [options.sort] - Sort order (e.g. { index: -1 } descending, { name: 1 } ascending)
-@param {Number} [options.skip] - Number of documents to skip
-@param {Object} [options.projection] - Fields to include/exclude (e.g. { name: 1 } or { secret: 0 })
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} [filter] - Optional MongoDB query filter. Same filter syntax as query(). Omit or pass null for all documents.
+    @param {Object} [options] - find options
+    @param {Number} [options.limit] - Max documents to return
+    @param {Object} [options.sort] - Sort order (e.g. { index: -1 } descending, { name: 1 } ascending)
+    @param {Number} [options.skip] - Number of documents to skip
+    @param {Object} [options.projection] - Fields to include/exclude (e.g. { name: 1 } or { secret: 0 })
 
-@return {Promise<Object>} - { success, documents, count, error }
+    @return {Promise<Object>} - { success, documents, count, error }
     *********************************************************************/
     scan: async function (instance, collection, filter, options) {
 
@@ -518,16 +518,16 @@ Use sparingly on large collections.
     // Requires non-empty filter to prevent accidental full-collection deletion.
 
     /********************************************************************
-Delete multiple records from a single collection matching a filter.
-MongoDB-unique convenience function - no DynamoDB equivalent exists.
-DynamoDB requires explicit keys for bulk deletes; this uses filter-based
-deleteMany which is native to MongoDB.
+    Delete multiple records from a single collection matching a filter.
+    MongoDB-unique convenience function - no DynamoDB equivalent exists.
+    DynamoDB requires explicit keys for bulk deletes; this uses filter-based
+    deleteMany which is native to MongoDB.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} filter - MongoDB query filter (must not be empty). Same filter syntax as query().
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} filter - MongoDB query filter (must not be empty). Same filter syntax as query().
 
-@return {Promise<Object>} - { success, deletedCount, error }
+    @return {Promise<Object>} - { success, deletedCount, error }
     *********************************************************************/
     deleteRecordsByFilter: async function (instance, collection, filter) {
 
@@ -582,17 +582,17 @@ deleteMany which is native to MongoDB.
     // native cross-collection batch commands. Consistent with DynamoDB interface.
 
     /********************************************************************
-Batch get multiple records by _id from one or more collections.
-Consistent with DynamoDB batchGetRecords multi-table interface.
+    Batch get multiple records by _id from one or more collections.
+    Consistent with DynamoDB batchGetRecords multi-table interface.
 
-Note: MongoDB does not natively support multi-collection batch get.
-This function internally loops through each collection and merges results.
+    Note: MongoDB does not natively support multi-collection batch get.
+    This function internally loops through each collection and merges results.
 
-@param {Object} instance - Request instance
-@param {Object} idsByCollection - Map of collection names to _id arrays
-@param {Array<String|Number>} idsByCollection.<collectionName> - Array of _id values to fetch
+    @param {Object} instance - Request instance
+    @param {Object} idsByCollection - Map of collection names to _id arrays
+    @param {Array<String|Number>} idsByCollection.<collectionName> - Array of _id values to fetch
 
-@return {Promise<Object>} - { success, documents: { collectionName: [...] }, error }
+    @return {Promise<Object>} - { success, documents: { collectionName: [...] }, error }
     *********************************************************************/
     batchGetRecords: async function (instance, idsByCollection) {
 
@@ -650,23 +650,23 @@ This function internally loops through each collection and merges results.
 
 
     /********************************************************************
-Batch write and delete records across one or more collections using
-MongoDB bulkWrite. Supports mixed insertOne and deleteOne operations
-in a single call per collection.
+    Batch write and delete records across one or more collections using
+    MongoDB bulkWrite. Supports mixed insertOne and deleteOne operations
+    in a single call per collection.
 
-Consistent with DynamoDB batchWriteAndDeleteRecords multi-table interface.
+    Consistent with DynamoDB batchWriteAndDeleteRecords multi-table interface.
 
-Note: MongoDB does not natively support cross-collection bulkWrite.
-This function internally loops through each collection and runs
-bulkWrite per collection.
+    Note: MongoDB does not natively support cross-collection bulkWrite.
+    This function internally loops through each collection and runs
+    bulkWrite per collection.
 
-@param {Object} instance - Request instance
-@param {Object} operationsByCollection - Map of collection names to operation arrays
-@param {Object[]} operationsByCollection.<collectionName> - Array of operations for this collection
-@param {Object} [operationsByCollection.<collectionName>[]..put] - Document to insert (e.g. { _id: 'x', name: 'New' })
-@param {Object} [operationsByCollection.<collectionName>[]..delete] - Filter to delete (e.g. { _id: 'y' })
+    @param {Object} instance - Request instance
+    @param {Object} operationsByCollection - Map of collection names to operation arrays
+    @param {Object[]} operationsByCollection.<collectionName> - Array of operations for this collection
+    @param {Object} [operationsByCollection.<collectionName>[]..put] - Document to insert (e.g. { _id: 'x', name: 'New' })
+    @param {Object} [operationsByCollection.<collectionName>[]..delete] - Filter to delete (e.g. { _id: 'y' })
 
-@return {Promise<Object>} - { success, results: { collectionName: { insertedCount, deletedCount } }, error }
+    @return {Promise<Object>} - { success, results: { collectionName: { insertedCount, deletedCount } }, error }
     *********************************************************************/
     batchWriteAndDeleteRecords: async function (instance, operationsByCollection) {
 
@@ -739,18 +739,18 @@ bulkWrite per collection.
 
 
     /********************************************************************
-Batch write (insert) records across one or more collections.
-Consistent with DynamoDB batchWriteRecords multi-table interface.
+    Batch write (insert) records across one or more collections.
+    Consistent with DynamoDB batchWriteRecords multi-table interface.
 
-Note: MongoDB does not natively support cross-collection insertMany.
-This function internally loops through each collection and runs
-insertMany per collection.
+    Note: MongoDB does not natively support cross-collection insertMany.
+    This function internally loops through each collection and runs
+    insertMany per collection.
 
-@param {Object} instance - Request instance
-@param {Object} documentsByCollection - Map of collection names to document arrays
-@param {Object[]} documentsByCollection.<collectionName> - Array of documents to insert (each should include _id)
+    @param {Object} instance - Request instance
+    @param {Object} documentsByCollection - Map of collection names to document arrays
+    @param {Object[]} documentsByCollection.<collectionName> - Array of documents to insert (each should include _id)
 
-@return {Promise<Object>} - { success, results: { collectionName: { insertedCount } }, error }
+    @return {Promise<Object>} - { success, results: { collectionName: { insertedCount } }, error }
     *********************************************************************/
     batchWriteRecords: async function (instance, documentsByCollection) {
 
@@ -810,18 +810,18 @@ insertMany per collection.
 
 
     /********************************************************************
-Batch delete records by explicit _id from one or more collections.
-Consistent with DynamoDB batchDeleteRecords multi-table interface.
+    Batch delete records by explicit _id from one or more collections.
+    Consistent with DynamoDB batchDeleteRecords multi-table interface.
 
-Note: MongoDB does not natively support cross-collection batch delete.
-This function internally loops through each collection and runs
-deleteMany with an $in filter per collection.
+    Note: MongoDB does not natively support cross-collection batch delete.
+    This function internally loops through each collection and runs
+    deleteMany with an $in filter per collection.
 
-@param {Object} instance - Request instance
-@param {Object} idsByCollection - Map of collection names to _id arrays
-@param {Array<String|Number>} idsByCollection.<collectionName> - Array of _id values to delete
+    @param {Object} instance - Request instance
+    @param {Object} idsByCollection - Map of collection names to _id arrays
+    @param {Array<String|Number>} idsByCollection.<collectionName> - Array of _id values to delete
 
-@return {Promise<Object>} - { success, results: { collectionName: { deletedCount } }, error }
+    @return {Promise<Object>} - { success, results: { collectionName: { deletedCount } }, error }
     *********************************************************************/
     batchDeleteRecords: async function (instance, idsByCollection) {
 
@@ -885,23 +885,23 @@ deleteMany with an $in filter per collection.
     // Requires replica set (Atlas has this by default; local Docker needs --replSet).
 
     /********************************************************************
-Execute multiple write operations atomically within a transaction.
-All operations succeed or all are rolled back.
+    Execute multiple write operations atomically within a transaction.
+    All operations succeed or all are rolled back.
 
-Requires a MongoDB replica set (standalone servers do not support
-transactions). MongoDB Atlas has replica set enabled by default.
-For local Docker, start mongod with --replSet rs0.
+    Requires a MongoDB replica set (standalone servers do not support
+    transactions). MongoDB Atlas has replica set enabled by default.
+    For local Docker, start mongod with --replSet rs0.
 
-The callback receives the session and db reference. All operations
-inside the callback must pass { session } as an option to participate
-in the transaction.
+    The callback receives the session and db reference. All operations
+    inside the callback must pass { session } as an option to participate
+    in the transaction.
 
-@param {Object} instance - Request instance
-@param {Function} callback - async function(session, db) { ... }
-@param {ClientSession} callback.session - MongoDB session. Pass as { session } option to all operations.
-@param {Db} callback.db - MongoDB database reference. Use db.collection('name') to access collections.
+    @param {Object} instance - Request instance
+    @param {Function} callback - async function(session, db) { ... }
+    @param {ClientSession} callback.session - MongoDB session. Pass as { session } option to all operations.
+    @param {Db} callback.db - MongoDB database reference. Use db.collection('name') to access collections.
 
-@return {Promise<Object>} - { success, result, error }
+    @return {Promise<Object>} - { success, result, error }
     *********************************************************************/
     transactWriteRecords: async function (instance, callback) {
 
@@ -959,21 +959,21 @@ in the transaction.
     // to call repeatedly at startup without worrying about duplicates.
 
     /********************************************************************
-Create (or verify) an index on a collection. Idempotent - MongoDB's
-createIndex is a no-op when an equivalent index already exists with
-the same name and spec, which means callers can safely invoke this
-at boot time on every startup without worrying about duplicates.
+    Create (or verify) an index on a collection. Idempotent - MongoDB's
+    createIndex is a no-op when an equivalent index already exists with
+    the same name and spec, which means callers can safely invoke this
+    at boot time on every startup without worrying about duplicates.
 
-@param {Object} instance - Request instance
-@param {String} collection - Collection name
-@param {Object} spec - Index key spec (e.g. { field: 1 } ascending, { field: -1 } descending, { field: 'text' } text index)
-@param {Object} [options] - createIndex options
-@param {String} [options.name] - Explicit index name (recommended for idempotency)
-@param {Boolean} [options.unique] - Enforce uniqueness
-@param {Boolean} [options.sparse] - Skip documents missing the indexed field
-@param {Number} [options.expireAfterSeconds] - TTL index (field must be a Date type)
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} spec - Index key spec (e.g. { field: 1 } ascending, { field: -1 } descending, { field: 'text' } text index)
+    @param {Object} [options] - createIndex options
+    @param {String} [options.name] - Explicit index name (recommended for idempotency)
+    @param {Boolean} [options.unique] - Enforce uniqueness
+    @param {Boolean} [options.sparse] - Skip documents missing the indexed field
+    @param {Number} [options.expireAfterSeconds] - TTL index (field must be a Date type)
 
-@return {Promise<Object>} - { success, index_name, error }
+    @return {Promise<Object>} - { success, index_name, error }
     *********************************************************************/
     createIndex: async function (instance, collection, spec, options) {
 
@@ -1021,11 +1021,11 @@ at boot time on every startup without worrying about duplicates.
     // on shutdown or when switching database contexts.
 
     /********************************************************************
-Close the MongoDB connection for this instance.
+    Close the MongoDB connection for this instance.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     close: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -1075,11 +1075,11 @@ Close the MongoDB connection for this instance.
   const _MongoDB = {
 
     /********************************************************************
-Lazy-load the MongoDB native driver. Shared across every instance
-because the driver module itself is stateless - only MongoClient
-holds per-instance state.
+    Lazy-load the MongoDB native driver. Shared across every instance
+    because the driver module itself is stateless - only MongoClient
+    holds per-instance state.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -1092,10 +1092,10 @@ holds per-instance state.
 
 
     /********************************************************************
-Create this instance's MongoClient on first use. Connects to the
-database and caches both client and db references in state.
+    Create this instance's MongoClient on first use. Connects to the
+    database and caches both client and db references in state.
 
-@return {Promise<void>}
+    @return {Promise<void>}
     *********************************************************************/
     initIfNot: async function () {
 

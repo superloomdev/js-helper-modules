@@ -89,15 +89,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Run once on first deploy to verify the store is reachable. No-op for MongoDB.
 
     /********************************************************************
-One-time store provisioning. Run once when setting up the store for
-the first time - not on every application boot.
+    One-time store provisioning. Run once when setting up the store for
+    the first time - not on every application boot.
 
-No-op for this adapter: MongoDB creates the collection and implicit
-_id index automatically on first write. No explicit setup needed.
+    No-op for this adapter: MongoDB creates the collection and implicit
+    _id index automatically on first write. No explicit setup needed.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -119,14 +119,14 @@ _id index automatically on first write. No explicit setup needed.
     // Append a queue record identified by the compound _id subdocument.
 
     /********************************************************************
-Append a record to the collection using Lib.MongoDB.writeRecord
-with the compound _id subdocument { t, r, d, s }.
+    Append a record to the collection using Lib.MongoDB.writeRecord
+    with the compound _id subdocument { t, r, d, s }.
 
-@param {Object} instance - Request instance
-@param {Object} record   - The record to write (tenant_id, resource_id,
+    @param {Object} instance - Request instance
+    @param {Object} record   - The record to write (tenant_id, resource_id,
                                data_version, request_id, payload, action, toc)
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (instance, record) {
 
@@ -171,16 +171,16 @@ with the compound _id subdocument { t, r, d, s }.
     // Read records by exact resource or by resource_id prefix.
 
     /********************************************************************
-Return all records matching (tenant_id, resource_id), sorted by
-data_version ascending (chronological order).
+    Return all records matching (tenant_id, resource_id), sorted by
+    data_version ascending (chronological order).
 
-Uses the implicit _id index via dot notation: _id.t, _id.r, _id.d
+    Uses the implicit _id index via dot notation: _id.t, _id.r, _id.d
 
-@param {Object} instance   - Request instance
-@param {String} tenant_id  - Partition key
-@param {String} resource_id - Exact resource identifier
+    @param {Object} instance   - Request instance
+    @param {String} tenant_id  - Partition key
+    @param {String} resource_id - Exact resource identifier
 
-@return {Promise<Object>} - { success, records, error }
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
@@ -219,17 +219,17 @@ Uses the implicit _id index via dot notation: _id.t, _id.r, _id.d
 
 
     /********************************************************************
-Return all records for tenant_id whose resource_id starts with the
-given prefix, sorted by data_version ascending.
+    Return all records for tenant_id whose resource_id starts with the
+    given prefix, sorted by data_version ascending.
 
-Uses MongoDB $regex with ^anchor on _id.r for prefix matching.
-The implicit _id index supports this query pattern.
+    Uses MongoDB $regex with ^anchor on _id.r for prefix matching.
+    The implicit _id index supports this query pattern.
 
-@param {Object} instance          - Request instance
-@param {String} tenant_id         - Partition key
-@param {String} resource_id_prefix - Prefix to match (e.g., "account_123.")
+    @param {Object} instance          - Request instance
+    @param {String} tenant_id         - Partition key
+    @param {String} resource_id_prefix - Prefix to match (e.g., "account_123.")
 
-@return {Promise<Object>} - { success, records, error }
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
@@ -277,19 +277,19 @@ The implicit _id index supports this query pattern.
     // Remove stale records up to and including a data_version boundary.
 
     /********************************************************************
-Delete all records for (tenant_id, resource_id) where
-data_version <= data_version_boundary.
+    Delete all records for (tenant_id, resource_id) where
+    data_version <= data_version_boundary.
 
-Uses _id subdocument fields: _id.t, _id.r, _id.d
-This is used during claim() to remove stale records after the latest
-is selected.
+    Uses _id subdocument fields: _id.t, _id.r, _id.d
+    This is used during claim() to remove stale records after the latest
+    is selected.
 
-@param {Object} instance               - Request instance
-@param {String} tenant_id              - Partition key
-@param {String} resource_id            - Resource identifier
-@param {Number} data_version_boundary - Upper bound (inclusive)
+    @param {Object} instance               - Request instance
+    @param {String} tenant_id              - Partition key
+    @param {String} resource_id            - Resource identifier
+    @param {Number} data_version_boundary - Upper bound (inclusive)
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
@@ -333,15 +333,15 @@ is selected.
   const _Store = {
 
     /********************************************************************
-Build the compound _id subdocument from components.
-Field keys are single-character to save space: t, r, d, s
+    Build the compound _id subdocument from components.
+    Field keys are single-character to save space: t, r, d, s
 
-@param {String} tenant_id - Partition boundary
-@param {String} resource_id - Resource identifier
-@param {Number} data_version - Millisecond timestamp
-@param {String} request_id - Compact UUID tie-breaker
+    @param {String} tenant_id - Partition boundary
+    @param {String} resource_id - Resource identifier
+    @param {Number} data_version - Millisecond timestamp
+    @param {String} request_id - Compact UUID tie-breaker
 
-@return {Object} - { t, r, d, s }
+    @return {Object} - { t, r, d, s }
     *********************************************************************/
     composeId: function (tenant_id, resource_id, data_version, request_id) {
       return { t: tenant_id, r: resource_id, d: data_version, s: request_id };
@@ -349,13 +349,13 @@ Field keys are single-character to save space: t, r, d, s
 
 
     /********************************************************************
-Reconstruct a full record from the stored document.
-The stored document has _id subdocument; we expand it to top-level fields
-expected by the core module.
+    Reconstruct a full record from the stored document.
+    The stored document has _id subdocument; we expand it to top-level fields
+    expected by the core module.
 
-@param {Object} doc - The MongoDB document { _id: {t,r,d,s}, payload, action, toc }
+    @param {Object} doc - The MongoDB document { _id: {t,r,d,s}, payload, action, toc }
 
-@return {Object} - Record with top-level tenant_id, resource_id, data_version, etc.
+    @return {Object} - Record with top-level tenant_id, resource_id, data_version, etc.
     *********************************************************************/
     docToRecord: function (doc) {
       return {

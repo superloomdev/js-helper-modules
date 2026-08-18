@@ -87,19 +87,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Create, delete, and describe tables with idempotent semantics.
 
     /********************************************************************
-Create a DynamoDB table. Idempotent: if the table already exists,
-returns success with data.created set to false.
+    Create a DynamoDB table. Idempotent: if the table already exists,
+    returns success with data.created set to false.
 
-@param {Object} instance - Request instance
-@param {Object} options - Function options
-@param {String} options.table_name - Name of the table to create
-@param {Array} options.attribute_definitions - Attribute definitions [{ name, type: 'S'|'N'|'B' }]
-@param {Array} options.key_schema - Key schema [{ name, type: 'HASH'|'RANGE' }]
-@param {String} [options.billing_mode] - 'PAY_PER_REQUEST' (default) or 'PROVISIONED'
-@param {Array} [options.global_secondary_indexes] - GSI list
-@param {Object} [options.provisioned_throughput] - Required if billing_mode is PROVISIONED
+    @param {Object} instance - Request instance
+    @param {Object} options - Function options
+    @param {String} options.table_name - Name of the table to create
+    @param {Array} options.attribute_definitions - Attribute definitions [{ name, type: 'S'|'N'|'B' }]
+    @param {Array} options.key_schema - Key schema [{ name, type: 'HASH'|'RANGE' }]
+    @param {String} [options.billing_mode] - 'PAY_PER_REQUEST' (default) or 'PROVISIONED'
+    @param {Array} [options.global_secondary_indexes] - GSI list
+    @param {Object} [options.provisioned_throughput] - Required if billing_mode is PROVISIONED
 
-@return {Promise<Object>} - { success, data, error }
+    @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     createTable: async function (instance, options) {
 
@@ -211,15 +211,15 @@ returns success with data.created set to false.
 
 
     /********************************************************************
-Wait for a table to reach ACTIVE state. Polls DescribeTable
-until the table is ACTIVE or the timeout expires.
+    Wait for a table to reach ACTIVE state. Polls DescribeTable
+    until the table is ACTIVE or the timeout expires.
 
-@param {Object} instance - Request instance
-@param {Object} options - Function options
-@param {String} options.table_name - Name of the table to wait for
-@param {Number} [options.timeout_seconds] - Max wait time (default: config WAIT_TIMEOUT_SECONDS)
+    @param {Object} instance - Request instance
+    @param {Object} options - Function options
+    @param {String} options.table_name - Name of the table to wait for
+    @param {Number} [options.timeout_seconds] - Max wait time (default: config WAIT_TIMEOUT_SECONDS)
 
-@return {Promise<Object>} - { success, data, error }
+    @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     waitForTableActive: async function (instance, options) {
 
@@ -314,17 +314,17 @@ until the table is ACTIVE or the timeout expires.
 
 
     /********************************************************************
-Enable TTL on a DynamoDB table. Idempotent: if TTL is already
-enabled on the same attribute, returns success with data.enabled
-set to false. If TTL is enabled on a DIFFERENT attribute, returns
-an ADMIN_TTL_CONFLICT error.
+    Enable TTL on a DynamoDB table. Idempotent: if TTL is already
+    enabled on the same attribute, returns success with data.enabled
+    set to false. If TTL is enabled on a DIFFERENT attribute, returns
+    an ADMIN_TTL_CONFLICT error.
 
-@param {Object} instance - Request instance
-@param {Object} options - Function options
-@param {String} options.table_name - Name of the table
-@param {String} options.attribute_name - Attribute to use for TTL
+    @param {Object} instance - Request instance
+    @param {Object} options - Function options
+    @param {String} options.table_name - Name of the table
+    @param {String} options.attribute_name - Attribute to use for TTL
 
-@return {Promise<Object>} - { success, data, error }
+    @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     enableTtl: async function (instance, options) {
 
@@ -422,14 +422,14 @@ an ADMIN_TTL_CONFLICT error.
 
 
     /********************************************************************
-Delete a DynamoDB table. Idempotent: if the table does not exist,
-returns success with data.deleted set to false.
+    Delete a DynamoDB table. Idempotent: if the table does not exist,
+    returns success with data.deleted set to false.
 
-@param {Object} instance - Request instance
-@param {Object} options - Function options
-@param {String} options.table_name - Name of the table to delete
+    @param {Object} instance - Request instance
+    @param {Object} options - Function options
+    @param {String} options.table_name - Name of the table to delete
 
-@return {Promise<Object>} - { success, data, error }
+    @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     deleteTable: async function (instance, options) {
 
@@ -493,14 +493,14 @@ returns success with data.deleted set to false.
 
 
     /********************************************************************
-Describe a DynamoDB table. Returns a normalized subset of the
-table description: status, key schema, and TTL status.
+    Describe a DynamoDB table. Returns a normalized subset of the
+    table description: status, key schema, and TTL status.
 
-@param {Object} instance - Request instance
-@param {Object} options - Function options
-@param {String} options.table_name - Name of the table to describe
+    @param {Object} instance - Request instance
+    @param {Object} options - Function options
+    @param {String} options.table_name - Name of the table to describe
 
-@return {Promise<Object>} - { success, data, error }
+    @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     describeTable: async function (instance, options) {
 
@@ -568,13 +568,13 @@ table description: status, key schema, and TTL status.
     // Connection health check and graceful teardown.
 
     /********************************************************************
-Ping the DynamoDB service with admin credentials. Uses ListTables
-with a limit of 1 to verify the connection is alive and the
-credentials are valid.
+    Ping the DynamoDB service with admin credentials. Uses ListTables
+    with a limit of 1 to verify the connection is alive and the
+    credentials are valid.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, data, error }
+    @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     ping: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -621,13 +621,13 @@ credentials are valid.
 
 
     /********************************************************************
-Close the DynamoDB admin connection for this instance. Destroys
-the underlying client. Idempotent: closing an already-closed
-connection succeeds.
+    Close the DynamoDB admin connection for this instance. Destroys
+    the underlying client. Idempotent: closing an already-closed
+    connection succeeds.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     close: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -680,11 +680,11 @@ connection succeeds.
   const _DynamoDBAdmin = {
 
     /********************************************************************
-Lazy-load the AWS SDK v3 DynamoDB client and commands. Shared
-across every instance because the SDK modules themselves are
-stateless - only the DynamoDBClient holds per-instance state.
+    Lazy-load the AWS SDK v3 DynamoDB client and commands. Shared
+    across every instance because the SDK modules themselves are
+    stateless - only the DynamoDBClient holds per-instance state.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -706,11 +706,11 @@ stateless - only the DynamoDBClient holds per-instance state.
 
 
     /********************************************************************
-Create this instance's DynamoDBClient on first use. Connects to
-the DynamoDB service with admin credentials and caches the client
-reference in state.
+    Create this instance's DynamoDBClient on first use. Connects to
+    the DynamoDB service with admin credentials and caches the client
+    reference in state.
 
-@return {Promise<void>}
+    @return {Promise<void>}
     *********************************************************************/
     initIfNot: async function () {
 

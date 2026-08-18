@@ -100,19 +100,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Provider ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-ThemeProvider - holds the layer stack as React state, derives a
-theme through the pure themer engine, and provides it via context.
-Calling update_layers with a new array re-derives and re-renders.
+    ThemeProvider - holds the layer stack as React state, derives a
+    theme through the pure themer engine, and provides it via context.
+    Calling update_layers with a new array re-derives and re-renders.
 
-@param {Object}   props           - React props
-@param {Object}   props.template  - Themer template (required)
-@param {Array}    props.layers    - Ordered sparse overlays (required)
-@param {String}   props.platform  - Target platform, web or native (required)
-@param {Object}   props.options   - Per-call themer options (optional)
-@param {Function} props.transform - Transform seam (optional)
-@param {Node}     props.children  - Subtree to provide theme to
+    @param {Object}   props           - React props
+    @param {Object}   props.template  - Themer template (required)
+    @param {Array}    props.layers    - Ordered sparse overlays (required)
+    @param {String}   props.platform  - Target platform, web or native (required)
+    @param {Object}   props.options   - Per-call themer options (optional)
+    @param {Function} props.transform - Transform seam (optional)
+    @param {Node}     props.children  - Subtree to provide theme to
 
-@return {Object} - React element
+    @return {Object} - React element
     *********************************************************************/
     ThemeProvider: function (props) {
 
@@ -169,9 +169,9 @@ Calling update_layers with a new array re-derives and re-renders.
     // ~~~~~~~~~~~~~~~~~~~~ Hooks ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Hook: the full controller - { built, theme, update_layers, ...transformed }.
+    Hook: the full controller - { built, theme, update_layers, ...transformed }.
 
-@return {Object|null} - context value, or null when outside a provider
+    @return {Object|null} - context value, or null when outside a provider
     *********************************************************************/
     useThemeController: function () {
 
@@ -181,10 +181,10 @@ Hook: the full controller - { built, theme, update_layers, ...transformed }.
 
 
     /********************************************************************
-Hook: the theme - the transform's theme field when a transform is
-set, else the raw emitted tokens. Returns null outside a provider.
+    Hook: the theme - the transform's theme field when a transform is
+    set, else the raw emitted tokens. Returns null outside a provider.
 
-@return {Object|null} - the theme, or null when outside a provider
+    @return {Object|null} - the theme, or null when outside a provider
     *********************************************************************/
     useTheme: function () {
 
@@ -196,10 +196,10 @@ set, else the raw emitted tokens. Returns null outside a provider.
 
 
     /********************************************************************
-Hook: the raw emitted token map from the pure engine, before any
-transform. Returns null outside a provider.
+    Hook: the raw emitted token map from the pure engine, before any
+    transform. Returns null outside a provider.
 
-@return {Object|null} - the token map, or null when outside a provider
+    @return {Object|null} - the token map, or null when outside a provider
     *********************************************************************/
     useTokens: function () {
 

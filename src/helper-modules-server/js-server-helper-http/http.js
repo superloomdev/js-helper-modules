@@ -73,26 +73,26 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Handles auth, timeouts, content-type encoding, and response normalization.
 
     /********************************************************************
-Send HTTP request and return normalized JSON response.
-Supports GET, POST, PUT, DELETE, PATCH with various content types.
+    Send HTTP request and return normalized JSON response.
+    Supports GET, POST, PUT, DELETE, PATCH with various content types.
 
-@param {String} url - Full URL (with protocol)
-@param {String} method - HTTP method ('GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH')
-@param {Object} [params] - (Optional) Request parameters (query for GET/DELETE, body for POST/PUT/PATCH)
-@param {String} [content_type] - (Optional) 'json' | 'urlencoded' | 'multipart'. Default: 'urlencoded'
-@param {Object} [options] - (Optional) Additional options
-@param {Integer} [options.timeout] - Override default timeout (seconds)
-@param {Object} [options.headers] - Additional headers to send
-@param {Object} [options.auth] - Authentication data
-@param {String} [options.auth.bearer_token] - Bearer token for authorization
-@param {Object} [options.auth.basic] - Basic auth credentials { username, password }
+    @param {String} url - Full URL (with protocol)
+    @param {String} method - HTTP method ('GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH')
+    @param {Object} [params] - (Optional) Request parameters (query for GET/DELETE, body for POST/PUT/PATCH)
+    @param {String} [content_type] - (Optional) 'json' | 'urlencoded' | 'multipart'. Default: 'urlencoded'
+    @param {Object} [options] - (Optional) Additional options
+    @param {Integer} [options.timeout] - Override default timeout (seconds)
+    @param {Object} [options.headers] - Additional headers to send
+    @param {Object} [options.auth] - Authentication data
+    @param {String} [options.auth.bearer_token] - Bearer token for authorization
+    @param {Object} [options.auth.basic] - Basic auth credentials { username, password }
 
-@return {Promise<Object>} - Normalized response object
-@return {Boolean} .success - true if request succeeded (2xx status)
-@return {Integer} .status - HTTP response code (0 for network errors)
-@return {Object} .headers - Response headers (lowercase keys)
-@return {Object|String|null} .data - Response body (parsed JSON or raw text)
-@return {Object|null} .error - Error details if success is false
+    @return {Promise<Object>} - Normalized response object
+    @return {Boolean} .success - true if request succeeded (2xx status)
+    @return {Integer} .status - HTTP response code (0 for network errors)
+    @return {Object} .headers - Response headers (lowercase keys)
+    @return {Object|String|null} .data - Response body (parsed JSON or raw text)
+    @return {Object|null} .error - Error details if success is false
     *********************************************************************/
     fetchJSON: async function (url, method, params, content_type, options) {
 
@@ -115,13 +115,13 @@ Supports GET, POST, PUT, DELETE, PATCH with various content types.
     // HTTP verb wrappers that delegate to fetchJSON with appropriate defaults.
 
     /********************************************************************
-Send HTTP GET request and return normalized JSON response.
+    Send HTTP GET request and return normalized JSON response.
 
-@param {String} url - Full URL
-@param {Object} [params] - (Optional) Query parameters
-@param {Object} [options] - (Optional) Request options (timeout, headers, auth)
+    @param {String} url - Full URL
+    @param {Object} [params] - (Optional) Query parameters
+    @param {Object} [options] - (Optional) Request options (timeout, headers, auth)
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     get: async function (url, params, options) {
 
@@ -131,13 +131,13 @@ Send HTTP GET request and return normalized JSON response.
 
 
     /********************************************************************
-Send HTTP POST request with JSON body.
+    Send HTTP POST request with JSON body.
 
-@param {String} url - Full URL
-@param {Object} [params] - (Optional) Request body
-@param {Object} [options] - (Optional) Request options (timeout, headers, auth)
+    @param {String} url - Full URL
+    @param {Object} [params] - (Optional) Request body
+    @param {Object} [options] - (Optional) Request options (timeout, headers, auth)
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     post: async function (url, params, options) {
 
@@ -147,13 +147,13 @@ Send HTTP POST request with JSON body.
 
 
     /********************************************************************
-Send HTTP POST request with url-encoded body.
+    Send HTTP POST request with url-encoded body.
 
-@param {String} url - Full URL
-@param {Object} [params] - (Optional) Request body
-@param {Object} [options] - (Optional) Request options (timeout, headers, auth)
+    @param {String} url - Full URL
+    @param {Object} [params] - (Optional) Request body
+    @param {Object} [options] - (Optional) Request options (timeout, headers, auth)
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     postForm: async function (url, params, options) {
 
@@ -163,13 +163,13 @@ Send HTTP POST request with url-encoded body.
 
 
     /********************************************************************
-Send HTTP PUT request with JSON body.
+    Send HTTP PUT request with JSON body.
 
-@param {String} url - Full URL
-@param {Object} [params] - (Optional) Request body
-@param {Object} [options] - (Optional) Request options (timeout, headers, auth)
+    @param {String} url - Full URL
+    @param {Object} [params] - (Optional) Request body
+    @param {Object} [options] - (Optional) Request options (timeout, headers, auth)
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     put: async function (url, params, options) {
 
@@ -179,13 +179,13 @@ Send HTTP PUT request with JSON body.
 
 
     /********************************************************************
-Send HTTP DELETE request.
+    Send HTTP DELETE request.
 
-@param {String} url - Full URL
-@param {Object} [params] - (Optional) Query parameters
-@param {Object} [options] - (Optional) Request options (timeout, headers, auth)
+    @param {String} url - Full URL
+    @param {Object} [params] - (Optional) Query parameters
+    @param {Object} [options] - (Optional) Request options (timeout, headers, auth)
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     delete: async function (url, params, options) {
 
@@ -195,13 +195,13 @@ Send HTTP DELETE request.
 
 
     /********************************************************************
-Send HTTP PATCH request with JSON body.
+    Send HTTP PATCH request with JSON body.
 
-@param {String} url - Full URL
-@param {Object} [params] - (Optional) Request body
-@param {Object} [options] - (Optional) Request options (timeout, headers, auth)
+    @param {String} url - Full URL
+    @param {Object} [params] - (Optional) Request body
+    @param {Object} [options] - (Optional) Request options (timeout, headers, auth)
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     patch: async function (url, params, options) {
 
@@ -217,17 +217,17 @@ Send HTTP PATCH request with JSON body.
   const _Http = {
 
     /********************************************************************
-Internal fetch implementation using Node.js built-in global `fetch`.
+    Internal fetch implementation using Node.js built-in global `fetch`.
 
-@param {String} url - Full URL
-@param {String} method - HTTP method
-@param {Object} params - Request parameters
-@param {String} content_type - 'json' | 'urlencoded' | 'multipart'
-@param {Integer} timeout - Override timeout (seconds)
-@param {Object} headers - Additional headers
-@param {Object} auth - Authentication data { bearer_token } or { basic: { username, password } }
+    @param {String} url - Full URL
+    @param {String} method - HTTP method
+    @param {Object} params - Request parameters
+    @param {String} content_type - 'json' | 'urlencoded' | 'multipart'
+    @param {Integer} timeout - Override timeout (seconds)
+    @param {Object} headers - Additional headers
+    @param {Object} auth - Authentication data { bearer_token } or { basic: { username, password } }
 
-@return {Promise<Object>} - { success, status, headers, data, error }
+    @return {Promise<Object>} - { success, status, headers, data, error }
     *********************************************************************/
     fetch: async function (url, method, params, content_type, timeout, headers, auth) {
 
@@ -372,12 +372,12 @@ Internal fetch implementation using Node.js built-in global `fetch`.
 
 
     /********************************************************************
-Encode request body according to content type.
+    Encode request body according to content type.
 
-@param {Object|FormData} params - Payload
-@param {String} content_type - 'json' | 'urlencoded' | 'multipart'
+    @param {Object|FormData} params - Payload
+    @param {String} content_type - 'json' | 'urlencoded' | 'multipart'
 
-@return {Object} - { body, content_type_header }
+    @return {Object} - { body, content_type_header }
     *********************************************************************/
     encodeBody: function (params, content_type) {
 
@@ -413,12 +413,12 @@ Encode request body according to content type.
 
 
     /********************************************************************
-Append query string parameters to a URL.
+    Append query string parameters to a URL.
 
-@param {String} url - Base URL
-@param {Object} params - Query parameters
+    @param {String} url - Base URL
+    @param {Object} params - Query parameters
 
-@return {String} - URL with query string appended
+    @return {String} - URL with query string appended
     *********************************************************************/
     appendQueryParams: function (url, params) {
 
@@ -441,11 +441,11 @@ Append query string parameters to a URL.
 
 
     /********************************************************************
-Read response body: try JSON first, fall back to raw text. Empty body returns null.
+    Read response body: try JSON first, fall back to raw text. Empty body returns null.
 
-@param {Response} response - Fetch Response object
+    @param {Response} response - Fetch Response object
 
-@return {Promise<Object|String|null>} - Parsed JSON, raw text, or null
+    @return {Promise<Object|String|null>} - Parsed JSON, raw text, or null
     *********************************************************************/
     readResponseBody: async function (response) {
 
@@ -467,11 +467,11 @@ Read response body: try JSON first, fall back to raw text. Empty body returns nu
 
 
     /********************************************************************
-Convert Headers instance to a plain object with lowercase keys.
+    Convert Headers instance to a plain object with lowercase keys.
 
-@param {Headers} headers - Fetch Headers instance
+    @param {Headers} headers - Fetch Headers instance
 
-@return {Object} - Headers as plain object (lowercase keys)
+    @return {Object} - Headers as plain object (lowercase keys)
     *********************************************************************/
     headersToObject: function (headers) {
 

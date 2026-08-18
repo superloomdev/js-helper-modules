@@ -46,7 +46,7 @@ function createMemoryStore () {
   const Store = {
 
     /******************************************************************
-No-op schema setup - nothing to provision for an in-memory store.
+    No-op schema setup - nothing to provision for an in-memory store.
     ******************************************************************/
     setupNewStore: async function () {
       return { success: true, error: null };
@@ -54,9 +54,9 @@ No-op schema setup - nothing to provision for an in-memory store.
 
 
     /******************************************************************
-Read one record by composite key + hash. Mirrors the real stores:
-a hash mismatch returns { success: true, record: null } so a wrong
-secret looks like "not found".
+    Read one record by composite key + hash. Mirrors the real stores:
+    a hash mismatch returns { success: true, record: null } so a wrong
+    secret looks like "not found".
     ******************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -77,7 +77,7 @@ secret looks like "not found".
 
 
     /******************************************************************
-Return all records for (tenant_id, actor_id) regardless of hash.
+    Return all records for (tenant_id, actor_id) regardless of hash.
     ******************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -95,9 +95,9 @@ Return all records for (tenant_id, actor_id) regardless of hash.
 
 
     /******************************************************************
-Upsert a record. A second call with the same composite key
-replaces the mutable columns while preserving immutable ones.
-Mirrors ON CONFLICT ... DO UPDATE from the SQL stores.
+    Upsert a record. A second call with the same composite key
+    replaces the mutable columns while preserving immutable ones.
+    Mirrors ON CONFLICT ... DO UPDATE from the SQL stores.
     ******************************************************************/
     setSession: async function (instance, record) {
 
@@ -124,8 +124,8 @@ Mirrors ON CONFLICT ... DO UPDATE from the SQL stores.
 
 
     /******************************************************************
-Partial update - applies the updates object as a shallow $set.
-Identity / key fields are blocked.
+    Partial update - applies the updates object as a shallow $set.
+    Identity / key fields are blocked.
     ******************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -156,7 +156,7 @@ Identity / key fields are blocked.
 
 
     /******************************************************************
-Delete one record by composite key.
+    Delete one record by composite key.
     ******************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
@@ -167,8 +167,8 @@ Delete one record by composite key.
 
 
     /******************************************************************
-Delete many records in one call. keys is an array of
-{ actor_id, token_key } objects.
+    Delete many records in one call. keys is an array of
+    { actor_id, token_key } objects.
     ******************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -182,7 +182,7 @@ Delete many records in one call. keys is an array of
 
 
     /******************************************************************
-Sweep all records whose expires_at < instance.time.
+    Sweep all records whose expires_at < instance.time.
     ******************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
@@ -202,8 +202,8 @@ Sweep all records whose expires_at < instance.time.
 
 
     /******************************************************************
-Test helper - wipe all records. Not part of the public contract;
-only available on the memory store for test isolation.
+    Test helper - wipe all records. Not part of the public contract;
+    only available on the memory store for test isolation.
     ******************************************************************/
     _clear: function () {
       _map.clear();
@@ -211,8 +211,8 @@ only available on the memory store for test isolation.
 
 
     /******************************************************************
-Test helper - return a snapshot of all stored records. Not part
-of the public contract; only available on the memory store.
+    Test helper - return a snapshot of all stored records. Not part
+    of the public contract; only available on the memory store.
     ******************************************************************/
     _dump: function () {
       const out = [];

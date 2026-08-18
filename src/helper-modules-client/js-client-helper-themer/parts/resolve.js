@@ -88,27 +88,27 @@ const Resolve = {
 
 
   /********************************************************************
-      Resolve a template plus a cascade of layers into a complete,
-      platform-independent token map.
+  Resolve a template plus a cascade of layers into a complete,
+  platform-independent token map.
 
-      Layers apply in array order, so the last layer to pin a token
-      wins. A layer may also override scale seeds, which is what makes
-      a density change a one-number edit rather than a second theme.
+  Layers apply in array order, so the last layer to pin a token
+  wins. A layer may also override scale seeds, which is what makes
+  a density change a one-number edit rather than a second theme.
 
-      @param {Object} template - The template being resolved
-      @param {Object[]} layers - Ordered sparse overlays
-      @param {Object} options - Per-call overrides
-      @param {String} [options.contrast] - 'correct' to rewrite violations, anything else to only report
-      @param {Number} [options.min_contrast_ratio] - Overrides the configured floor
-      @param {Number} [options.motion_factor] - Scales every duration token
+  @param {Object} template - The template being resolved
+  @param {Object[]} layers - Ordered sparse overlays
+  @param {Object} options - Per-call overrides
+  @param {String} [options.contrast] - 'correct' to rewrite violations, anything else to only report
+  @param {Number} [options.min_contrast_ratio] - Overrides the configured floor
+  @param {Number} [options.motion_factor] - Scales every duration token
 
-      @return {Object} - Resolution result
-      @return {Object} .tokens - Canonical value per token name
-      @return {Object} .scales - Merged scale seeds after the cascade
-      @return {String} .polarity - Effective polarity
-      @return {Object} .stats - Route and source counts
-      @return {Object[]} .corrections - Contrast rewrites that were applied
-      @return {Object[]} .violations - Contrast failures that were found
+  @return {Object} - Resolution result
+  @return {Object} .tokens - Canonical value per token name
+  @return {Object} .scales - Merged scale seeds after the cascade
+  @return {String} .polarity - Effective polarity
+  @return {Object} .stats - Route and source counts
+  @return {Object[]} .corrections - Contrast rewrites that were applied
+  @return {Object[]} .violations - Contrast failures that were found
   *********************************************************************/
   run: function (template, layers, options) {
 
@@ -154,13 +154,13 @@ const _Resolve = {
   // Flattening the layer stack into the single world token resolution reads.
 
   /********************************************************************
-      Flatten the layer stack into a resolution context.
+  Flatten the layer stack into a resolution context.
 
-      @param {Object} template - The template being resolved
-      @param {Object[]} layers - Ordered sparse overlays
-      @param {Object} options - Per-call overrides
+  @param {Object} template - The template being resolved
+  @param {Object[]} layers - Ordered sparse overlays
+  @param {Object} options - Per-call overrides
 
-      @return {Object} - Resolution context
+  @return {Object} - Resolution context
   *********************************************************************/
   buildContext: function (template, layers, options) {
 
@@ -203,13 +203,13 @@ const _Resolve = {
 
 
   /********************************************************************
-      Fold one layer into the overlay and the scale seeds.
+  Fold one layer into the overlay and the scale seeds.
 
-      @param {Object} layer - One sparse overlay
-      @param {Object} overlay - Accumulated token pins
-      @param {Object} scales - Accumulated scale seeds
+  @param {Object} layer - One sparse overlay
+  @param {Object} overlay - Accumulated token pins
+  @param {Object} scales - Accumulated scale seeds
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   applyLayer: function (layer, overlay, scales) {
 
@@ -233,12 +233,12 @@ const _Resolve = {
 
 
   /********************************************************************
-      Determine the effective polarity for this cascade.
+  Determine the effective polarity for this cascade.
 
-      @param {Object} template - The template being resolved
-      @param {Object[]} layers - Ordered sparse overlays
+  @param {Object} template - The template being resolved
+  @param {Object[]} layers - Ordered sparse overlays
 
-      @return {String} - 'light' or 'dark'
+  @return {String} - 'light' or 'dark'
   *********************************************************************/
   effectivePolarity: function (template, layers) {
 
@@ -257,11 +257,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Determine the effective motion factor for this cascade.
+  Determine the effective motion factor for this cascade.
 
-      @param {Object[]} layers - Ordered sparse overlays
+  @param {Object[]} layers - Ordered sparse overlays
 
-      @return {Number} - Factor every duration is multiplied by
+  @return {Number} - Factor every duration is multiplied by
   *********************************************************************/
   effectiveMotionFactor: function (layers) {
 
@@ -281,14 +281,14 @@ const _Resolve = {
 
 
   /********************************************************************
-      Locate the position on the neutral ramp that the page background
-      occupies, which is where ramp-relative rules count from.
+  Locate the position on the neutral ramp that the page background
+  occupies, which is where ramp-relative rules count from.
 
-      @param {String[]} ramp - Ordered neutral ramp
-      @param {String} polarity - Effective polarity
-      @param {Object} overlay - Accumulated token pins
+  @param {String[]} ramp - Ordered neutral ramp
+  @param {String} polarity - Effective polarity
+  @param {Object} overlay - Accumulated token pins
 
-      @return {Number} - Index into the ramp
+  @return {Number} - Index into the ramp
   *********************************************************************/
   anchorIndex: function (ramp, polarity, overlay) {
 
@@ -315,12 +315,12 @@ const _Resolve = {
   // One token at a time, recursing through aliases and rule operands.
 
   /********************************************************************
-      Resolve one token by name, memoizing the result for this run.
+  Resolve one token by name, memoizing the result for this run.
 
-      @param {String} name - Token name
-      @param {Object} context - Resolution context
+  @param {String} name - Token name
+  @param {Object} context - Resolution context
 
-      @return {*} - The canonical value
+  @return {*} - The canonical value
   *********************************************************************/
   resolveToken: function (name, context) {
 
@@ -359,14 +359,14 @@ const _Resolve = {
 
 
   /********************************************************************
-      Produce the canonical value for one template entry.
+  Produce the canonical value for one template entry.
 
-      @param {String} name - Token name, for error messages
-      @param {*} entry - The template or overlay entry
-      @param {Object} context - Resolution context
-      @param {Boolean} from_theme - Whether a layer supplied the entry
+  @param {String} name - Token name, for error messages
+  @param {*} entry - The template or overlay entry
+  @param {Object} context - Resolution context
+  @param {Boolean} from_theme - Whether a layer supplied the entry
 
-      @return {*} - The canonical value
+  @return {*} - The canonical value
   *********************************************************************/
   valueOf: function (name, entry, context, from_theme) {
 
@@ -415,18 +415,18 @@ const _Resolve = {
 
 
   /********************************************************************
-      Build a type set value.
+  Build a type set value.
 
-      A type set resolves to an object rather than to separate sibling
-      tokens. That is what makes an absolute native line height
-      computable at emit time: the font size it depends on is already
-      inside the same object, so emit never reaches across tokens.
+  A type set resolves to an object rather than to separate sibling
+  tokens. That is what makes an absolute native line height
+  computable at emit time: the font size it depends on is already
+  inside the same object, so emit never reaches across tokens.
 
-      @param {String} name - Token name, for error messages
-      @param {Object} entry - Type set entry
-      @param {Object} context - Resolution context
+  @param {String} name - Token name, for error messages
+  @param {Object} entry - Type set entry
+  @param {Object} context - Resolution context
 
-      @return {Object} - Canonical type set
+  @return {Object} - Canonical type set
   *********************************************************************/
   typeSetValue: function (name, entry, context) {
 
@@ -467,17 +467,17 @@ const _Resolve = {
 
 
   /********************************************************************
-      Build a shadow value.
+  Build a shadow value.
 
-      A shadow resolves to an object for the same reason a type set
-      does: emit needs every layer together to build one platform
-      value, and sibling tokens would force cross-token reads.
+  A shadow resolves to an object for the same reason a type set
+  does: emit needs every layer together to build one platform
+  value, and sibling tokens would force cross-token reads.
 
-      @param {String} name - Token name, for error messages
-      @param {Object} entry - Shadow entry
-      @param {Object} context - Resolution context
+  @param {String} name - Token name, for error messages
+  @param {Object} entry - Shadow entry
+  @param {Object} context - Resolution context
 
-      @return {Object} - Canonical shadow
+  @return {Object} - Canonical shadow
   *********************************************************************/
   shadowValue: function (name, entry, context) {
 
@@ -501,13 +501,13 @@ const _Resolve = {
 
 
   /********************************************************************
-      Select the layer geometry for a shadow entry.
+  Select the layer geometry for a shadow entry.
 
-      @param {String} name - Token name, for error messages
-      @param {Object} entry - Shadow entry
-      @param {Object} context - Resolution context
+  @param {String} name - Token name, for error messages
+  @param {Object} entry - Shadow entry
+  @param {Object} context - Resolution context
 
-      @return {Object[]} - Copied layer geometry
+  @return {Object[]} - Copied layer geometry
   *********************************************************************/
   shadowLayers: function (name, entry, context) {
 
@@ -539,12 +539,12 @@ const _Resolve = {
 
 
   /********************************************************************
-      Resolve the colour a shadow paints with.
+  Resolve the colour a shadow paints with.
 
-      @param {Object} entry - Shadow entry
-      @param {Object} context - Resolution context
+  @param {Object} entry - Shadow entry
+  @param {Object} context - Resolution context
 
-      @return {String} - Hex colour
+  @return {String} - Hex colour
   *********************************************************************/
   shadowColour: function (entry, context) {
 
@@ -564,13 +564,13 @@ const _Resolve = {
 
 
   /********************************************************************
-      Evaluate a rule entry through its named operation.
+  Evaluate a rule entry through its named operation.
 
-      @param {String} name - Token name, for error messages
-      @param {Object} entry - Rule entry
-      @param {Object} context - Resolution context
+  @param {String} name - Token name, for error messages
+  @param {Object} entry - Rule entry
+  @param {Object} context - Resolution context
 
-      @return {*} - The operation's result
+  @return {*} - The operation's result
   *********************************************************************/
   ruleValue: function (name, entry, context) {
 
@@ -588,11 +588,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Normalize a literal entry.
+  Normalize a literal entry.
 
-      @param {*} entry - Literal entry
+  @param {*} entry - Literal entry
 
-      @return {*} - The normalized value
+  @return {*} - The normalized value
   *********************************************************************/
   literalValue: function (entry) {
 
@@ -607,17 +607,17 @@ const _Resolve = {
 
 
   /********************************************************************
-      Record which route produced a value and where the entry came from.
+  Record which route produced a value and where the entry came from.
 
-      Route is how the value was produced; source is where the entry
-      came from. Conflating them hides which parts of the chain a theme
-      actually uses.
+  Route is how the value was produced; source is where the entry
+  came from. Conflating them hides which parts of the chain a theme
+  actually uses.
 
-      @param {Object} context - Resolution context
-      @param {String} route - Route name
-      @param {Boolean} from_theme - Whether a layer supplied the entry
+  @param {Object} context - Resolution context
+  @param {String} route - Route name
+  @param {Boolean} from_theme - Whether a layer supplied the entry
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   countRoute: function (context, route, from_theme) {
 
@@ -632,15 +632,15 @@ const _Resolve = {
   // Derivations that run once over the settled token map.
 
   /********************************************************************
-      Scale every duration token by the effective motion factor.
+  Scale every duration token by the effective motion factor.
 
-      Reduced motion is a derivation over the durations a theme already
-      has, not a second theme to author and keep in step.
+  Reduced motion is a derivation over the durations a theme already
+  has, not a second theme to author and keep in step.
 
-      @param {Object} template - The template being resolved
-      @param {Object} context - Resolution context
+  @param {Object} template - The template being resolved
+  @param {Object} context - Resolution context
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   applyMotionFactor: function (template, context) {
 
@@ -663,18 +663,18 @@ const _Resolve = {
 
 
   /********************************************************************
-      Enforce the template's contrast rules over the settled values.
+  Enforce the template's contrast rules over the settled values.
 
-      Enforcement runs after resolution so it covers literals, aliases,
-      and rules alike. Whether a violation is corrected or only recorded
-      is the caller's policy: a build tool reports and fails, a runtime
-      corrects so a bad remote theme degrades instead of blanking the
-      screen.
+  Enforcement runs after resolution so it covers literals, aliases,
+  and rules alike. Whether a violation is corrected or only recorded
+  is the caller's policy: a build tool reports and fails, a runtime
+  corrects so a bad remote theme degrades instead of blanking the
+  screen.
 
-      @param {Object} template - The template being resolved
-      @param {Object} context - Resolution context
+  @param {Object} template - The template being resolved
+  @param {Object} context - Resolution context
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   applyContrastRules: function (template, context) {
 
@@ -689,13 +689,13 @@ const _Resolve = {
 
 
   /********************************************************************
-      Check one contrast rule and record or correct the outcome.
+  Check one contrast rule and record or correct the outcome.
 
-      @param {Array} rule - Triple of token name, background name, ratio
-      @param {Number} index - Rule position, for error messages
-      @param {Object} context - Resolution context
+  @param {Array} rule - Triple of token name, background name, ratio
+  @param {Number} index - Rule position, for error messages
+  @param {Object} context - Resolution context
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   applyOneContrastRule: function (rule, index, context) {
 
@@ -756,11 +756,11 @@ const _Resolve = {
   // because a type set and a shadow are both plain objects.
 
   /********************************************************************
-      Report whether an entry is an alias reference.
+  Report whether an entry is an alias reference.
 
-      @param {*} entry - Template entry
+  @param {*} entry - Template entry
 
-      @return {Boolean} - True when the entry names another token
+  @return {Boolean} - True when the entry names another token
   *********************************************************************/
   isAlias: function (entry) {
 
@@ -771,11 +771,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Report whether an entry is a rule.
+  Report whether an entry is a rule.
 
-      @param {*} entry - Template entry
+  @param {*} entry - Template entry
 
-      @return {Boolean} - True when the entry names an operation
+  @return {Boolean} - True when the entry names an operation
   *********************************************************************/
   isRule: function (entry) {
 
@@ -786,11 +786,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Report whether an entry is a generator.
+  Report whether an entry is a generator.
 
-      @param {*} entry - Template entry
+  @param {*} entry - Template entry
 
-      @return {Boolean} - True when the entry names a scale
+  @return {Boolean} - True when the entry names a scale
   *********************************************************************/
   isGenerator: function (entry) {
 
@@ -801,11 +801,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Report whether an entry is a type set.
+  Report whether an entry is a type set.
 
-      @param {*} entry - Template entry
+  @param {*} entry - Template entry
 
-      @return {Boolean} - True when the entry declares a type set
+  @return {Boolean} - True when the entry declares a type set
   *********************************************************************/
   isTypeSet: function (entry) {
 
@@ -816,11 +816,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Report whether an entry is a shadow.
+  Report whether an entry is a shadow.
 
-      @param {*} entry - Template entry
+  @param {*} entry - Template entry
 
-      @return {Boolean} - True when the entry declares a shadow
+  @return {Boolean} - True when the entry declares a shadow
   *********************************************************************/
   isShadow: function (entry) {
 
@@ -831,11 +831,11 @@ const _Resolve = {
 
 
   /********************************************************************
-      Report whether an entry is a literal value.
+  Report whether an entry is a literal value.
 
-      @param {*} entry - Template entry
+  @param {*} entry - Template entry
 
-      @return {Boolean} - True when the entry is a directly usable value
+  @return {Boolean} - True when the entry is a directly usable value
   *********************************************************************/
   isLiteral: function (entry) {
 
@@ -852,16 +852,16 @@ const _Resolve = {
 const _Operations = {
 
   /********************************************************************
-      Step a fixed distance along the neutral ramp from the page
-      background.
+  Step a fixed distance along the neutral ramp from the page
+  background.
 
-      Polarity aware: on a light theme it walks darker, on a dark theme
-      it walks lighter, so one rule serves both.
+  Polarity aware: on a light theme it walks darker, on a dark theme
+  it walks lighter, so one rule serves both.
 
-      @param {Array} args - Operation arguments
-      @param {Object} context - Resolution context
+  @param {Array} args - Operation arguments
+  @param {Object} context - Resolution context
 
-      @return {String} - Hex colour from the ramp
+  @return {String} - Hex colour from the ramp
   *********************************************************************/
   rampStep: function (args, context) {
 
@@ -878,12 +878,12 @@ const _Operations = {
 
 
   /********************************************************************
-      Read a named step from a palette hue family.
+  Read a named step from a palette hue family.
 
-      @param {Array} args - Family name and step number
-      @param {Object} context - Resolution context
+  @param {Array} args - Family name and step number
+  @param {Object} context - Resolution context
 
-      @return {String} - Hex colour from the palette
+  @return {String} - Hex colour from the palette
   *********************************************************************/
   hue: function (args, context) {
 
@@ -901,12 +901,12 @@ const _Operations = {
 
 
   /********************************************************************
-      Blend two resolved tokens.
+  Blend two resolved tokens.
 
-      @param {Array} args - Two token references and a weight
-      @param {Object} context - Resolution context
+  @param {Array} args - Two token references and a weight
+  @param {Object} context - Resolution context
 
-      @return {String} - Blended hex colour
+  @return {String} - Blended hex colour
   *********************************************************************/
   mix: function (args, context) {
 
@@ -920,12 +920,12 @@ const _Operations = {
 
 
   /********************************************************************
-      Scale an already-resolved numeric token.
+  Scale an already-resolved numeric token.
 
-      @param {Array} args - Token reference and multiplier
-      @param {Object} context - Resolution context
+  @param {Array} args - Token reference and multiplier
+  @param {Object} context - Resolution context
 
-      @return {Number} - The scaled value
+  @return {Number} - The scaled value
   *********************************************************************/
   scaleBy: function (args, context) {
 

@@ -66,15 +66,15 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const AuthId = {
 
     /********************************************************************
-Build the wire-format auth_id from its three parts. The client
-receives this string and sends it back on subsequent requests.
+    Build the wire-format auth_id from its three parts. The client
+    receives this string and sends it back on subsequent requests.
 
-@param {Object} parts
-@param {String} parts.actor_id - Actor identifier (project-supplied)
-@param {String} parts.token_key - Random key portion (module-generated)
-@param {String} parts.token_secret - Random secret portion (module-generated)
+    @param {Object} parts
+    @param {String} parts.actor_id - Actor identifier (project-supplied)
+    @param {String} parts.token_key - Random key portion (module-generated)
+    @param {String} parts.token_secret - Random secret portion (module-generated)
 
-@return {String} - The wire-format auth_id
+    @return {String} - The wire-format auth_id
     *********************************************************************/
     createAuthId: function (parts) {
 
@@ -91,12 +91,12 @@ receives this string and sends it back on subsequent requests.
 
 
     /********************************************************************
-Parse a wire-format auth_id back into its three parts. Returns null
-if the shape is wrong (caller treats this as INVALID_TOKEN).
+    Parse a wire-format auth_id back into its three parts. Returns null
+    if the shape is wrong (caller treats this as INVALID_TOKEN).
 
-@param {String} auth_id - The wire-format string
+    @param {String} auth_id - The wire-format string
 
-@return {Object|null} - { actor_id, token_key, token_secret } or null
+    @return {Object|null} - { actor_id, token_key, token_secret } or null
     *********************************************************************/
     parseAuthId: function (auth_id) {
 
@@ -143,10 +143,10 @@ if the shape is wrong (caller treats this as INVALID_TOKEN).
 
 
     /********************************************************************
-Generate a fresh random token_key. Uses the controlled charset so
-neither '-' nor '#' ever appears.
+    Generate a fresh random token_key. Uses the controlled charset so
+    neither '-' nor '#' ever appears.
 
-@return {String} - Random token_key of TOKEN_KEY_LENGTH chars
+    @return {String} - Random token_key of TOKEN_KEY_LENGTH chars
     *********************************************************************/
     generateTokenKey: function () {
 
@@ -156,9 +156,9 @@ neither '-' nor '#' ever appears.
 
 
     /********************************************************************
-Generate a fresh random token_secret. Uses the controlled charset.
+    Generate a fresh random token_secret. Uses the controlled charset.
 
-@return {String} - Random token_secret of TOKEN_SECRET_LENGTH chars
+    @return {String} - Random token_secret of TOKEN_SECRET_LENGTH chars
     *********************************************************************/
     generateTokenSecret: function () {
 
@@ -168,15 +168,15 @@ Generate a fresh random token_secret. Uses the controlled charset.
 
 
     /********************************************************************
-Hash a token_secret. The store keeps only the hash; the secret itself
-is never persisted. SHA-256 HMAC for fast, deterministic verification.
-The salt argument lets the project bind hashes to a per-actor or
-per-instance secret (defense in depth).
+    Hash a token_secret. The store keeps only the hash; the secret itself
+    is never persisted. SHA-256 HMAC for fast, deterministic verification.
+    The salt argument lets the project bind hashes to a per-actor or
+    per-instance secret (defense in depth).
 
-@param {String} token_secret - The raw secret
-@param {String} [salt] - Optional HMAC key. Default '' (no salt).
+    @param {String} token_secret - The raw secret
+    @param {String} [salt] - Optional HMAC key. Default '' (no salt).
 
-@return {String} - Hex-encoded HMAC-SHA256 hash (64 chars)
+    @return {String} - Hex-encoded HMAC-SHA256 hash (64 chars)
     *********************************************************************/
     hashTokenSecret: function (token_secret, salt) {
 
@@ -190,15 +190,15 @@ per-instance secret (defense in depth).
 
 
     /********************************************************************
-Build the composite session_key used inside DynamoDB sort key and
-MongoDB _id. SQL doesn't use this - SQL has separate columns for
-actor_id, token_key, and token_secret_hash.
+    Build the composite session_key used inside DynamoDB sort key and
+    MongoDB _id. SQL doesn't use this - SQL has separate columns for
+    actor_id, token_key, and token_secret_hash.
 
-@param {String} actor_id
-@param {String} token_key
-@param {String} token_secret_hash
+    @param {String} actor_id
+    @param {String} token_key
+    @param {String} token_secret_hash
 
-@return {String} - "{actor_id}#{token_key}#{token_secret_hash}"
+    @return {String} - "{actor_id}#{token_key}#{token_secret_hash}"
     *********************************************************************/
     composeSessionKey: function (actor_id, token_key, token_secret_hash) {
 
@@ -215,13 +215,13 @@ actor_id, token_key, and token_secret_hash.
 
 
     /********************************************************************
-The actor-prefix used for begins_with / anchored-regex queries.
-Returns "{actor_id}#" - the prefix that all session_keys for this
-actor share.
+    The actor-prefix used for begins_with / anchored-regex queries.
+    Returns "{actor_id}#" - the prefix that all session_keys for this
+    actor share.
 
-@param {String} actor_id
+    @param {String} actor_id
 
-@return {String} - "{actor_id}#"
+    @return {String} - "{actor_id}#"
     *********************************************************************/
     composeActorPrefix: function (actor_id) {
 
@@ -236,16 +236,16 @@ actor share.
 
 
     /********************************************************************
-The MongoDB _id format. Includes tenant_id as the leading segment
-so anchored-regex queries scoped by tenant + actor use the _id
-index directly (mirrors the DynamoDB single-table design).
+    The MongoDB _id format. Includes tenant_id as the leading segment
+    so anchored-regex queries scoped by tenant + actor use the _id
+    index directly (mirrors the DynamoDB single-table design).
 
-@param {String} tenant_id
-@param {String} actor_id
-@param {String} token_key
-@param {String} token_secret_hash
+    @param {String} tenant_id
+    @param {String} actor_id
+    @param {String} token_key
+    @param {String} token_secret_hash
 
-@return {String} - "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
+    @return {String} - "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
     *********************************************************************/
     composeMongoId: function (tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -260,12 +260,12 @@ index directly (mirrors the DynamoDB single-table design).
 
 
     /********************************************************************
-The MongoDB tenant+actor prefix. Used in anchored-regex listSessions.
+    The MongoDB tenant+actor prefix. Used in anchored-regex listSessions.
 
-@param {String} tenant_id
-@param {String} actor_id
+    @param {String} tenant_id
+    @param {String} actor_id
 
-@return {String} - "{tenant_id}#{actor_id}#"
+    @return {String} - "{tenant_id}#{actor_id}#"
     *********************************************************************/
     composeMongoActorPrefix: function (tenant_id, actor_id) {
 
@@ -286,13 +286,13 @@ The MongoDB tenant+actor prefix. Used in anchored-regex listSessions.
 
 
     /********************************************************************
-Throw TypeError if the value isn't a non-empty string. Used by every
-composer / parser to catch bad inputs at the source.
+    Throw TypeError if the value isn't a non-empty string. Used by every
+    composer / parser to catch bad inputs at the source.
 
-@param {*} value - Value to check
-@param {String} name - Field name (for error message)
+    @param {*} value - Value to check
+    @param {String} name - Field name (for error message)
 
-@return {void}
+    @return {void}
     *********************************************************************/
     assertNonEmptyString: function (value, name) {
 
@@ -309,14 +309,14 @@ composer / parser to catch bad inputs at the source.
 
 
     /********************************************************************
-Throw TypeError if the value contains either reserved separator
-character ('-' or '#'). Used for fields that end up in the WIRE
-auth_id (actor_id), where both separators would break parsing.
+    Throw TypeError if the value contains either reserved separator
+    character ('-' or '#'). Used for fields that end up in the WIRE
+    auth_id (actor_id), where both separators would break parsing.
 
-@param {String} value - Value to check
-@param {String} name - Field name (for error message)
+    @param {String} value - Value to check
+    @param {String} name - Field name (for error message)
 
-@return {void}
+    @return {void}
     *********************************************************************/
     assertNoReservedChars: function (value, name) {
 
@@ -332,15 +332,15 @@ auth_id (actor_id), where both separators would break parsing.
 
 
     /********************************************************************
-Throw TypeError if the value contains the '#' composite-key separator.
-Used for tenant_id, which is allowed to contain '-' (it never appears
-in the wire auth_id) but still must not contain '#' because that would
-break the MongoDB _id composite and the DynamoDB sort-key composite.
+    Throw TypeError if the value contains the '#' composite-key separator.
+    Used for tenant_id, which is allowed to contain '-' (it never appears
+    in the wire auth_id) but still must not contain '#' because that would
+    break the MongoDB _id composite and the DynamoDB sort-key composite.
 
-@param {String} value - Value to check
-@param {String} name - Field name (for error message)
+    @param {String} value - Value to check
+    @param {String} name - Field name (for error message)
 
-@return {void}
+    @return {void}
     *********************************************************************/
     assertNoHashChar: function (value, name) {
 

@@ -84,16 +84,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const SQS = {
 
     /********************************************************************
-Send a message to a queue.
+    Send a message to a queue.
 
-@param {Object} instance - Request lifecycle instance (from Instance.initialize)
-@param {String} queue_name - Queue name (not URL)
-@param {Object} message - Message body (will be JSON stringified)
-@param {Object} [options] - Send options
-@param {Integer} [options.delay_seconds] - Delay before message becomes visible (0-900)
-@param {String} [options.message_group_id] - Group ID for FIFO queues
+    @param {Object} instance - Request lifecycle instance (from Instance.initialize)
+    @param {String} queue_name - Queue name (not URL)
+    @param {Object} message - Message body (will be JSON stringified)
+    @param {Object} [options] - Send options
+    @param {Integer} [options.delay_seconds] - Delay before message becomes visible (0-900)
+    @param {String} [options.message_group_id] - Group ID for FIFO queues
 
-@return {Promise<Object>} - { success, message_id, error }
+    @return {Promise<Object>} - { success, message_id, error }
     *********************************************************************/
     send: async function (instance, queue_name, message, options) {
 
@@ -164,16 +164,16 @@ Send a message to a queue.
 
 
     /********************************************************************
-Receive messages from a queue (polling).
+    Receive messages from a queue (polling).
 
-@param {Object} instance - Request lifecycle instance (from Instance.initialize)
-@param {String} queue_name - Queue name
-@param {Object} [options] - Receive options
-@param {Integer} [options.max_messages] - Max messages to receive (1-10, default: 10)
-@param {Integer} [options.visibility_timeout] - Visibility timeout in seconds
-@param {Integer} [options.wait_time_seconds] - Long polling wait time (0-20)
+    @param {Object} instance - Request lifecycle instance (from Instance.initialize)
+    @param {String} queue_name - Queue name
+    @param {Object} [options] - Receive options
+    @param {Integer} [options.max_messages] - Max messages to receive (1-10, default: 10)
+    @param {Integer} [options.visibility_timeout] - Visibility timeout in seconds
+    @param {Integer} [options.wait_time_seconds] - Long polling wait time (0-20)
 
-@return {Promise<Object>} - { success, messages, error }
+    @return {Promise<Object>} - { success, messages, error }
     *********************************************************************/
     receive: async function (instance, queue_name, options) {
 
@@ -249,13 +249,13 @@ Receive messages from a queue (polling).
 
 
     /********************************************************************
-Delete a message from queue after successful processing.
+    Delete a message from queue after successful processing.
 
-@param {Object} instance - Request lifecycle instance (from Instance.initialize)
-@param {String} queue_name - Queue name
-@param {String} receipt_handle - Receipt handle from receive()
+    @param {Object} instance - Request lifecycle instance (from Instance.initialize)
+    @param {String} queue_name - Queue name
+    @param {String} receipt_handle - Receipt handle from receive()
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     delete: async function (instance, queue_name, receipt_handle) {
 
@@ -311,14 +311,14 @@ Delete a message from queue after successful processing.
 
 
     /********************************************************************
-Send a delayed message (scheduled for future delivery).
+    Send a delayed message (scheduled for future delivery).
 
-@param {Object} instance - Request lifecycle instance (from Instance.initialize)
-@param {String} queue_name - Queue name
-@param {Object} message - Message body (will be JSON stringified)
-@param {Integer} delay_seconds - Delay in seconds before message becomes visible (0-900)
+    @param {Object} instance - Request lifecycle instance (from Instance.initialize)
+    @param {String} queue_name - Queue name
+    @param {Object} message - Message body (will be JSON stringified)
+    @param {Integer} delay_seconds - Delay in seconds before message becomes visible (0-900)
 
-@return {Promise<Object>} - { success, message_id, error }
+    @return {Promise<Object>} - { success, message_id, error }
     *********************************************************************/
     sendDelayed: async function (instance, queue_name, message, delay_seconds) {
 
@@ -335,11 +335,11 @@ Send a delayed message (scheduled for future delivery).
   const _SQS = {
 
     /********************************************************************
-Lazy-load the AWS SDK v3 SQS adapter. Shared across every instance
-because the SDK module is stateless - only the SQS client holds
-per-instance state.
+    Lazy-load the AWS SDK v3 SQS adapter. Shared across every instance
+    because the SDK module is stateless - only the SQS client holds
+    per-instance state.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -352,11 +352,11 @@ per-instance state.
 
 
     /********************************************************************
-Create this instance's SQS client on first use. Options are built
-from the merged CONFIG; explicit credentials and custom endpoint
-(for ElasticMQ) are injected if present.
+    Create this instance's SQS client on first use. Options are built
+    from the merged CONFIG; explicit credentials and custom endpoint
+    (for ElasticMQ) are injected if present.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     initIfNot: function () {
 
@@ -403,14 +403,14 @@ from the merged CONFIG; explicit credentials and custom endpoint
 
 
     /********************************************************************
-Resolve queue URL from queue name. Caches resolved URLs in per-instance
-state to avoid repeated API calls.
+    Resolve queue URL from queue name. Caches resolved URLs in per-instance
+    state to avoid repeated API calls.
 
-If QUEUE_URL_PREFIX is configured, the URL is constructed directly.
-Otherwise, the GetQueueUrl API is called and the result is cached.
+    If QUEUE_URL_PREFIX is configured, the URL is constructed directly.
+    Otherwise, the GetQueueUrl API is called and the result is cached.
 
-@param {String} queue_name - Queue name
-@return {Promise<String>} - Resolved queue URL
+    @param {String} queue_name - Queue name
+    @return {Promise<String>} - Resolved queue URL
     *********************************************************************/
     getQueueUrl: async function (queue_name) {
 
@@ -439,11 +439,11 @@ Otherwise, the GetQueueUrl API is called and the result is cached.
 
 
     /********************************************************************
-Parse message body from JSON string. Returns the original string
-if parsing fails (non-JSON messages are supported).
+    Parse message body from JSON string. Returns the original string
+    if parsing fails (non-JSON messages are supported).
 
-@param {String} body - Raw message body string
-@return {*} - Parsed object or original string
+    @param {String} body - Raw message body string
+    @return {*} - Parsed object or original string
     *********************************************************************/
     parseBody: function (body) {
 

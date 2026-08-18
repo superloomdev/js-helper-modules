@@ -30,7 +30,7 @@ module.exports = function createMemoryStore () {
   const Store = {
 
     /******************************************************************
-Append a record to the store.
+    Append a record to the store.
     ******************************************************************/
     writeRecord: async function (instance, record) { // eslint-disable-line no-unused-vars
 
@@ -45,9 +45,9 @@ Append a record to the store.
 
 
     /******************************************************************
-Return all records matching (tenant_id, resource_id), sorted by
-data_version ascending (chronological order), request_id as
-tiebreak.
+    Return all records matching (tenant_id, resource_id), sorted by
+    data_version ascending (chronological order), request_id as
+    tiebreak.
     ******************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) { // eslint-disable-line no-unused-vars
 
@@ -72,8 +72,8 @@ tiebreak.
 
 
     /******************************************************************
-Delete all records for (tenant_id, resource_id) where
-data_version <= boundary.
+    Delete all records for (tenant_id, resource_id) where
+    data_version <= boundary.
     ******************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) { // eslint-disable-line no-unused-vars
 
@@ -98,8 +98,8 @@ data_version <= boundary.
 
 
     /******************************************************************
-Return all records for tenant_id whose resource_id starts with the
-given prefix.
+    Return all records for tenant_id whose resource_id starts with the
+    given prefix.
     ******************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) { // eslint-disable-line no-unused-vars
 
@@ -124,8 +124,8 @@ given prefix.
 
 
     /******************************************************************
-Test helper - expose the raw array for white-box assertions.
-Not part of the public contract; never used in production code.
+    Test helper - expose the raw array for white-box assertions.
+    Not part of the public contract; never used in production code.
     ******************************************************************/
     _records: _records
 

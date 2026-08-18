@@ -10,7 +10,7 @@ Load all test dependencies, build Lib container from environment.
 process.env is ONLY read here - nowhere else in test code.
 
 Config = test-wide environment values, available to test.js for any purpose
-  (e.g., AdminClient setup, assertions, debugging). Independent of any module.
+(e.g., AdminClient setup, assertions, debugging). Independent of any module.
 config_dynamodb_admin = module-specific config slice, only passed to the admin module.
 
 @return {Object} result - Runtime objects for testing

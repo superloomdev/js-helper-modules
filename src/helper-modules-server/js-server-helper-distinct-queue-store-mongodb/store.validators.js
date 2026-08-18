@@ -27,12 +27,12 @@ module.exports = function loader (Lib, ERRORS) { // eslint-disable-line no-unuse
 
 
     /********************************************************************
-Validate the merged CONFIG object. Throws on the first violation so
-misconfiguration surfaces immediately at boot time.
+    Validate the merged CONFIG object. Throws on the first violation so
+    misconfiguration surfaces immediately at boot time.
 
-@param {Object} config - Merged adapter configuration
+    @param {Object} config - Merged adapter configuration
 
-@return {void}
+    @return {void}
     *********************************************************************/
     validateConfig: function (config) {
 

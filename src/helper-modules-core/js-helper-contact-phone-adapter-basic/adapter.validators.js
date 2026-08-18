@@ -46,9 +46,9 @@ const Validators = {
   Validate the merged CONFIG. The basic adapter has no required config,
   so this is a no-op pass-through. Kept for structural conformance.
 
-@param {Object} CONFIG - Merged adapter configuration
+  @param {Object} CONFIG - Merged adapter configuration
 
-@return {void}
+  @return {void}
   *********************************************************************/
   validateConfig: function (CONFIG) { // eslint-disable-line no-unused-vars
 

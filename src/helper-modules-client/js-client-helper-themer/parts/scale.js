@@ -49,14 +49,14 @@ const Scale = {
   // that scale, and returns one number.
 
   /********************************************************************
-      Produce a spacing value as a multiple of a base mini unit.
+  Produce a spacing value as a multiple of a base mini unit.
 
-      @param {Object} params - Token parameters
-      @param {Number} params.multiplier - How many mini units this step is
-      @param {Object} seeds - Scale seeds from the template
-      @param {Number} seeds.base - Size of one mini unit
+  @param {Object} params - Token parameters
+  @param {Number} params.multiplier - How many mini units this step is
+  @param {Object} seeds - Scale seeds from the template
+  @param {Number} seeds.base - Size of one mini unit
 
-      @return {Number} - The generated value
+  @return {Number} - The generated value
   *********************************************************************/
   miniUnit: function (params, seeds) {
 
@@ -72,21 +72,21 @@ const Scale = {
 
 
   /********************************************************************
-      Produce a type size from the Carbon type scale.
+  Produce a type size from the Carbon type scale.
 
-      The scale grows by a widening increment: each group of four steps
-      adds two more pixels per step than the group before it, which is
-      what keeps small sizes close together and large sizes far apart.
+  The scale grows by a widening increment: each group of four steps
+  adds two more pixels per step than the group before it, which is
+  what keeps small sizes close together and large sizes far apart.
 
-      Iterative rather than recursive so a large step cannot exhaust
-      the stack.
+  Iterative rather than recursive so a large step cannot exhaust
+  the stack.
 
-      @param {Object} params - Token parameters
-      @param {Number} params.step - Position on the scale, starting at 1
-      @param {Object} seeds - Scale seeds from the template
-      @param {Number} seeds.base - Size at step 1
+  @param {Object} params - Token parameters
+  @param {Number} params.step - Position on the scale, starting at 1
+  @param {Object} seeds - Scale seeds from the template
+  @param {Number} seeds.base - Size at step 1
 
-      @return {Number} - The generated size
+  @return {Number} - The generated size
   *********************************************************************/
   carbonType: function (params, seeds) {
 
@@ -108,18 +108,18 @@ const Scale = {
 
 
   /********************************************************************
-      Produce a value from a plain geometric scale.
+  Produce a value from a plain geometric scale.
 
-      Included so a template is not obliged to adopt the Carbon type
-      curve; a ratio-based scale is the common alternative.
+  Included so a template is not obliged to adopt the Carbon type
+  curve; a ratio-based scale is the common alternative.
 
-      @param {Object} params - Token parameters
-      @param {Number} params.step - Position on the scale, starting at 1
-      @param {Object} seeds - Scale seeds from the template
-      @param {Number} seeds.base - Value at step 1
-      @param {Number} seeds.ratio - Multiplier between consecutive steps
+  @param {Object} params - Token parameters
+  @param {Number} params.step - Position on the scale, starting at 1
+  @param {Object} seeds - Scale seeds from the template
+  @param {Number} seeds.base - Value at step 1
+  @param {Number} seeds.ratio - Multiplier between consecutive steps
 
-      @return {Number} - The generated value
+  @return {Number} - The generated value
   *********************************************************************/
   geometric: function (params, seeds) {
 
@@ -142,13 +142,13 @@ const Scale = {
   // Resolving a generator by the name a template used.
 
   /********************************************************************
-      Return the generator a template named, or throw when it does not
-      exist.
+  Return the generator a template named, or throw when it does not
+  exist.
 
-      @param {String} name - Generator name from the token entry
-      @param {String} token_name - Token being resolved, for the message
+  @param {String} name - Generator name from the token entry
+  @param {String} token_name - Token being resolved, for the message
 
-      @return {Function} - The generator function
+  @return {Function} - The generator function
   *********************************************************************/
   byName: function (name, token_name) {
 
@@ -163,9 +163,9 @@ const Scale = {
 
 
   /********************************************************************
-      List the generator names this engine provides.
+  List the generator names this engine provides.
 
-      @return {String[]} - Generator names
+  @return {String[]} - Generator names
   *********************************************************************/
   names: function () {
 
@@ -184,12 +184,12 @@ const Scale = {
 const _Scale = {
 
   /********************************************************************
-      Report whether a key on the public object is a lookup helper
-      rather than a generator.
+  Report whether a key on the public object is a lookup helper
+  rather than a generator.
 
-      @param {String} name - Key to test
+  @param {String} name - Key to test
 
-      @return {Boolean} - True when the key is not a generator
+  @return {Boolean} - True when the key is not a generator
   *********************************************************************/
   isReserved: function (name) {
 

@@ -100,42 +100,42 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // compliance callers can opt into synchronous await.
 
     /********************************************************************
-Record one action log entry.
+    Record one action log entry.
 
-By default the store write runs in the background and this function
-returns immediately with `{ success: true }`. Pass `options.await = true`
-to make the write synchronous - required for compliance scenarios that
-must not return 200 OK until the audit row is durable.
+    By default the store write runs in the background and this function
+    returns immediately with `{ success: true }`. Pass `options.await = true`
+    to make the write synchronous - required for compliance scenarios that
+    must not return 200 OK until the audit row is durable.
 
-@param {Object} instance - Request instance (for time, lifecycle, and
+    @param {Object} instance - Request instance (for time, lifecycle, and
                                http_request auto-capture).
-@param {Object} options  - Log entry fields.
-@param {String} [options.scope]        - Multi-tenant namespace (default '').
-@param {String} options.entity_type    - Type of the affected entity
+    @param {Object} options  - Log entry fields.
+    @param {String} [options.scope]        - Multi-tenant namespace (default '').
+    @param {String} options.entity_type    - Type of the affected entity
                                              (e.g. 'user', 'project', 'invoice').
-@param {String} options.entity_id      - ID of the affected entity.
-@param {String} options.actor_type     - Type of the actor who triggered
+    @param {String} options.entity_id      - ID of the affected entity.
+    @param {String} options.actor_type     - Type of the actor who triggered
                                              the event (e.g. 'user', 'admin',
                                              'system', 'webhook').
-@param {String} options.actor_id       - ID of the actor.
-@param {String} options.action         - Dot-notation action type - e.g.
+    @param {String} options.actor_id       - ID of the actor.
+    @param {String} options.action         - Dot-notation action type - e.g.
                                              'auth.login', 'profile.name.changed'.
                                              The application owns the namespace;
                                              this module is opaque to it.
-@param {Object} [options.data]         - Free-form structured payload
+    @param {Object} [options.data]         - Free-form structured payload
                                              describing the event. Must be
                                              JSON-serializable.
-@param {String} [options.ip]           - Event IP. Auto-captured from
+    @param {String} [options.ip]           - Event IP. Auto-captured from
                                              `instance.http_request` via
                                              `Lib.HttpHandler.getHttpRequestIPAddress`
                                              when that helper is present.
-@param {String} [options.user_agent]   - Event user-agent. Same auto-capture.
-@param {String|Object} options.retention
-       - 'persistent'         -> never deleted
-       - { ttl_seconds: N }    -> deleted at created_at + N seconds
-@param {Boolean} [options.await] - Await the store write (default false).
+    @param {String} [options.user_agent]   - Event user-agent. Same auto-capture.
+    @param {String|Object} options.retention
+    - 'persistent'         -> never deleted
+    - { ttl_seconds: N }    -> deleted at created_at + N seconds
+    @param {Boolean} [options.await] - Await the store write (default false).
 
-@return {Promise<Object>} - `{ success, error }`.
+    @return {Promise<Object>} - `{ success, error }`.
     *********************************************************************/
     log: async function (instance, options) {
 
@@ -207,25 +207,25 @@ must not return 200 OK until the audit row is durable.
     // (what did Y do). Cursor pagination for large result sets.
 
     /********************************************************************
-List actions recorded for one entity, most-recent first.
+    List actions recorded for one entity, most-recent first.
 
-@param {Object} instance - Request instance.
-@param {Object} options - Query options.
-@param {String} [options.scope]          - Multi-tenant namespace (default '').
-@param {String} options.entity_type      - Entity type filter.
-@param {String} options.entity_id        - Entity id filter.
-@param {String[]} [options.actions]      - Optional action filter. Each
+    @param {Object} instance - Request instance.
+    @param {Object} options - Query options.
+    @param {String} [options.scope]          - Multi-tenant namespace (default '').
+    @param {String} options.entity_type      - Entity type filter.
+    @param {String} options.entity_id        - Entity id filter.
+    @param {String[]} [options.actions]      - Optional action filter. Each
                                                entry is a literal action or
                                                an `"auth.*"` glob prefix.
-@param {Integer} [options.start_time_ms] - Inclusive lower bound on
+    @param {Integer} [options.start_time_ms] - Inclusive lower bound on
                                                created_at_ms.
-@param {Integer} [options.end_time_ms]   - Exclusive upper bound on
+    @param {Integer} [options.end_time_ms]   - Exclusive upper bound on
                                                created_at_ms.
-@param {String} [options.cursor]         - Opaque resume token from the
+    @param {String} [options.cursor]         - Opaque resume token from the
                                                previous page's `next_cursor`.
-@param {Integer} [options.limit]         - Page size (default 50).
+    @param {Integer} [options.limit]         - Page size (default 50).
 
-@return {Promise<Object>} - `{ success, records, next_cursor, error }`.
+    @return {Promise<Object>} - `{ success, records, next_cursor, error }`.
     *********************************************************************/
     listByEntity: async function (instance, options) {
 
@@ -252,15 +252,15 @@ List actions recorded for one entity, most-recent first.
 
 
     /********************************************************************
-List actions performed by one actor, most-recent first.
+    List actions performed by one actor, most-recent first.
 
-Same return shape as listByEntity. See listByEntity for the options
-contract - `actor_type` / `actor_id` replace entity_* on this side.
+    Same return shape as listByEntity. See listByEntity for the options
+    contract - `actor_type` / `actor_id` replace entity_* on this side.
 
-@param {Object} instance - Request instance
-@param {Object} options - Query options (see listByEntity)
+    @param {Object} instance - Request instance
+    @param {Object} options - Query options (see listByEntity)
 
-@return {Promise<Object>} - `{ success, records, next_cursor, error }`
+    @return {Promise<Object>} - `{ success, records, next_cursor, error }`
     *********************************************************************/
     listByActor: async function (instance, options) {
 
@@ -292,17 +292,17 @@ contract - `actor_type` / `actor_id` replace entity_* on this side.
     // idempotently creates tables and indexes where needed.
 
     /********************************************************************
-Delete records whose `expires_at` is in the past. Intended to run
-from cron / EventBridge / `setInterval`. Native TTL on MongoDB and
-DynamoDB already handles expiry in the background; this function is
-the explicit fallback when a deployer wants deterministic cleanup.
+    Delete records whose `expires_at` is in the past. Intended to run
+    from cron / EventBridge / `setInterval`. Native TTL on MongoDB and
+    DynamoDB already handles expiry in the background; this function is
+    the explicit fallback when a deployer wants deterministic cleanup.
 
-SQL backends (postgres, mysql, sqlite) have no native TTL - this is
-the primary sweep mechanism for those.
+    SQL backends (postgres, mysql, sqlite) have no native TTL - this is
+    the primary sweep mechanism for those.
 
-@param {Object} instance - Request instance.
+    @param {Object} instance - Request instance.
 
-@return {Promise<Object>} - `{ success, deleted_count, error }`.
+    @return {Promise<Object>} - `{ success, deleted_count, error }`.
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -333,14 +333,14 @@ the primary sweep mechanism for those.
 
 
     /********************************************************************
-Idempotent backend setup. Memory store: no-op. SQL: CREATE TABLE
-IF NOT EXISTS + indexes on (entity_pk) / (actor_pk) / (expires_at).
-MongoDB: TTL index on `_ttl` + compound indexes on the two query
-paths. DynamoDB: CreateTable with the GSI for actor queries.
+    Idempotent backend setup. Memory store: no-op. SQL: CREATE TABLE
+    IF NOT EXISTS + indexes on (entity_pk) / (actor_pk) / (expires_at).
+    MongoDB: TTL index on `_ttl` + compound indexes on the two query
+    paths. DynamoDB: CreateTable with the GSI for actor queries.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - `{ success, error }`
+    @return {Promise<Object>} - `{ success, error }`
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -365,10 +365,10 @@ paths. DynamoDB: CreateTable with the GSI for actor queries.
 
 
     /********************************************************************
-Build the durable record that will be handed to the store. Pulls
-created_at from instance.time_ms, auto-captures IP / user-agent from
-the incoming HTTP request when possible, and encrypts the IP under
-CONFIG.IP_ENCRYPT_KEY when one is configured.
+    Build the durable record that will be handed to the store. Pulls
+    created_at from instance.time_ms, auto-captures IP / user-agent from
+    the incoming HTTP request when possible, and encrypts the IP under
+    CONFIG.IP_ENCRYPT_KEY when one is configured.
     *********************************************************************/
     buildRecord: function (instance, options) {
 
@@ -441,8 +441,8 @@ CONFIG.IP_ENCRYPT_KEY when one is configured.
 
 
     /********************************************************************
-Translate public list-options into the query object the stores
-consume. Stores never see the caller's raw options directly.
+    Translate public list-options into the query object the stores
+    consume. Stores never see the caller's raw options directly.
     *********************************************************************/
     buildQuery: function (options) {
 
@@ -463,9 +463,9 @@ consume. Stores never see the caller's raw options directly.
 
 
     /********************************************************************
-Decrypt IP for reads, if encryption is configured. Never throws on
-bad ciphertext - an unparseable IP column just returns the ciphertext
-so audit reviewers at least see the opaque blob rather than nothing.
+    Decrypt IP for reads, if encryption is configured. Never throws on
+    bad ciphertext - an unparseable IP column just returns the ciphertext
+    so audit reviewers at least see the opaque blob rather than nothing.
     *********************************************************************/
     enrichRecordForRead: function (record) {
 

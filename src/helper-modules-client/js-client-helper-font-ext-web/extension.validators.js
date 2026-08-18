@@ -8,11 +8,11 @@ module.exports = function (Lib, ERRORS) {
   const Validators = {
 
     /********************************************************************
-Validate the merged config object. Throws TypeError on any
-misconfiguration so the module fails at startup, not at call time.
+    Validate the merged config object. Throws TypeError on any
+    misconfiguration so the module fails at startup, not at call time.
 
-@param {Object} CONFIG - Merged config for this instance
-@return {void}
+    @param {Object} CONFIG - Merged config for this instance
+    @return {void}
     *********************************************************************/
     validateConfig: function (CONFIG) {
 
@@ -25,12 +25,12 @@ misconfiguration so the module fails at startup, not at call time.
 
 
     /********************************************************************
-Validate a manifest object. Returns the error object when invalid,
-null when valid.
+    Validate a manifest object. Returns the error object when invalid,
+    null when valid.
 
-@param {*} manifest - Value to validate as a manifest
+    @param {*} manifest - Value to validate as a manifest
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateManifest: function (manifest) {
 
@@ -44,13 +44,13 @@ null when valid.
 
 
     /********************************************************************
-Validate a style entry from the manifest. Ensures the entry has
-a `url` field (web extensions require URLs for @font-face). Returns
-the error object when invalid, null when valid.
+    Validate a style entry from the manifest. Ensures the entry has
+    a `url` field (web extensions require URLs for @font-face). Returns
+    the error object when invalid, null when valid.
 
-@param {*} entry - Style entry to validate
+    @param {*} entry - Style entry to validate
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateStyleEntry: function (entry) {
 

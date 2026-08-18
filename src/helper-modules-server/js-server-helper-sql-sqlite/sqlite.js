@@ -97,21 +97,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Typed wrappers over query() for common SELECT shapes.
 
     /********************************************************************
-Run a SELECT and return the result in the most appropriate shape:
-      0 rows             -> null
-      1 row, 1 column    -> scalar value
-      1 row, N columns   -> row object
-      N rows             -> row array (has_multiple_rows = true)
+    Run a SELECT and return the result in the most appropriate shape:
+    0 rows             -> null
+    1 row, 1 column    -> scalar value
+    1 row, N columns   -> row object
+    N rows             -> row array (has_multiple_rows = true)
 
-This is the ambiguous auto-shaping variant - use when the result shape
-is not known upfront. Prefer getRow / getRows / getValue when the shape
-is known.
+    This is the ambiguous auto-shaping variant - use when the result shape
+    is not known upfront. Prefer getRow / getRows / getValue when the shape
+    is known.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL (typically pre-built with buildQuery)
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL (typically pre-built with buildQuery)
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, result, has_multiple_rows, error }
+    @return {Promise<Object>} - { success, result, has_multiple_rows, error }
     *********************************************************************/
     get: async function (instance, sql, params) {
 
@@ -171,13 +171,13 @@ is known.
 
 
     /********************************************************************
-Run a query and return the first row, or null if there are no results.
+    Run a query and return the first row, or null if there are no results.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, row, error }
+    @return {Promise<Object>} - { success, row, error }
     *********************************************************************/
     getRow: async function (instance, sql, params) {
 
@@ -202,13 +202,13 @@ Run a query and return the first row, or null if there are no results.
 
 
     /********************************************************************
-Run a query and return every row.
+    Run a query and return every row.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, rows, count, error }
+    @return {Promise<Object>} - { success, rows, count, error }
     *********************************************************************/
     getRows: async function (instance, sql, params) {
 
@@ -235,14 +235,14 @@ Run a query and return every row.
 
 
     /********************************************************************
-Run a query and return the first column of the first row. Handy for
-COUNT(*), MAX(), and other single-value lookups.
+    Run a query and return the first column of the first row. Handy for
+    COUNT(*), MAX(), and other single-value lookups.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, value, error }
+    @return {Promise<Object>} - { success, value, error }
     *********************************************************************/
     getValue: async function (instance, sql, params) {
 
@@ -281,38 +281,38 @@ COUNT(*), MAX(), and other single-value lookups.
     // Polymorphic DML runner: single statement or atomic array.
 
     /********************************************************************
-Run INSERT / UPDATE / DELETE. Polymorphic: string for single statement,
-array for atomic transaction. Array entries may be SQL strings or
-{ sql, params } objects.
+    Run INSERT / UPDATE / DELETE. Polymorphic: string for single statement,
+    array for atomic transaction. Array entries may be SQL strings or
+    { sql, params } objects.
 
-Unlike Postgres, SQLite provides insert_id automatically via
-sqlite3_last_insert_rowid() - no RETURNING clause is required. For a
-table with INTEGER PRIMARY KEY (or ROWID), insert_id is the primary key.
+    Unlike Postgres, SQLite provides insert_id automatically via
+    sqlite3_last_insert_rowid() - no RETURNING clause is required. For a
+    table with INTEGER PRIMARY KEY (or ROWID), insert_id is the primary key.
 
-Single statement:
-      await SQLite.write(instance, 'UPDATE users SET name = ? WHERE id = ?', ['John', 1]);
+    Single statement:
+    await SQLite.write(instance, 'UPDATE users SET name = ? WHERE id = ?', ['John', 1]);
 
-Atomic transaction:
-      await SQLite.write(instance, [
-        { sql: 'INSERT INTO logs (msg) VALUES (?)', params: ['User updated'] },
-        { sql: 'UPDATE users SET updated_at = ? WHERE id = ?', params: [new Date(), 1] }
-      ]);
+    Atomic transaction:
+    await SQLite.write(instance, [
+    { sql: 'INSERT INTO logs (msg) VALUES (?)', params: ['User updated'] },
+    { sql: 'UPDATE users SET updated_at = ? WHERE id = ?', params: [new Date(), 1] }
+    ]);
 
-Returns aggregated affected_rows (summed across statements) and the
-last insert_id seen (useful for multi-insert scenarios).
+    Returns aggregated affected_rows (summed across statements) and the
+    last insert_id seen (useful for multi-insert scenarios).
 
-affected_rows = total count of rows modified by INSERT / UPDATE / DELETE.
-For array input, this is summed across all statements.
+    affected_rows = total count of rows modified by INSERT / UPDATE / DELETE.
+    For array input, this is summed across all statements.
 
-insert_id = the primary key of the last INSERT (sqlite3_last_insert_rowid).
-For array input, this is the last insert_id seen in the batch. Null for
-UPDATE / DELETE / DDL statements.
+    insert_id = the primary key of the last INSERT (sqlite3_last_insert_rowid).
+    For array input, this is the last insert_id seen in the batch. Null for
+    UPDATE / DELETE / DDL statements.
 
-@param {Object} instance - Request instance
-@param {(String|Array)} sql - Single SQL string or array of statements
-@param {Array} [params] - Placeholder values (only when sql is a String)
+    @param {Object} instance - Request instance
+    @param {(String|Array)} sql - Single SQL string or array of statements
+    @param {Array} [params] - Placeholder values (only when sql is a String)
 
-@return {Promise<Object>} - { success, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     write: async function (instance, sql, params) {
 
@@ -382,19 +382,19 @@ UPDATE / DELETE / DDL statements.
     // for a transaction batch.
 
     /********************************************************************
-Build a parameterized SQL statement into a fully-escaped string.
-Supports ? (value) and ?? (identifier) placeholders, plus the MySQL-
-style `SET ?` / `WHERE ?` object expansion.
+    Build a parameterized SQL statement into a fully-escaped string.
+    Supports ? (value) and ?? (identifier) placeholders, plus the MySQL-
+    style `SET ?` / `WHERE ?` object expansion.
 
-Examples:
-      buildQuery('SELECT * FROM ?? WHERE ?? = ?', ['users', 'id', 42])
-      buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
-      buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
+    Examples:
+    buildQuery('SELECT * FROM ?? WHERE ?? = ?', ['users', 'id', 42])
+    buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
+    buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
 
-@param {String} sql - SQL template
-@param {(Array|Object|*)} params - Values for ?/?? substitution
+    @param {String} sql - SQL template
+    @param {(Array|Object|*)} params - Values for ?/?? substitution
 
-@return {String} - Fully-escaped SQLite SQL
+    @return {String} - Fully-escaped SQLite SQL
     *********************************************************************/
     buildQuery: function (sql, params) {
 
@@ -404,17 +404,17 @@ Examples:
 
 
     /********************************************************************
-Wrap a raw SQL fragment so buildQuery() emits it unescaped.
-Mirrors mysql2.raw / the Postgres equivalent - useful for nested
-function calls, CURRENT_TIMESTAMP, and similar fragments.
+    Wrap a raw SQL fragment so buildQuery() emits it unescaped.
+    Mirrors mysql2.raw / the Postgres equivalent - useful for nested
+    function calls, CURRENT_TIMESTAMP, and similar fragments.
 
-Example:
-      const now = SQLite.buildRawText('CURRENT_TIMESTAMP');
-      SQLite.buildQuery('INSERT INTO logs SET ?', { created_at: now });
+    Example:
+    const now = SQLite.buildRawText('CURRENT_TIMESTAMP');
+    SQLite.buildQuery('INSERT INTO logs SET ?', { created_at: now });
 
-@param {String} str - Raw SQL fragment
+    @param {String} str - Raw SQL fragment
 
-@return {Object} - Raw-text marker recognized by buildQuery
+    @return {Object} - Raw-text marker recognized by buildQuery
     *********************************************************************/
     buildRawText: function (str) {
 
@@ -424,13 +424,13 @@ Example:
 
 
     /********************************************************************
-Join equality conditions with AND or OR. Identifiers and values are
-escaped automatically.
+    Join equality conditions with AND or OR. Identifiers and values are
+    escaped automatically.
 
-@param {Object} data - Key-value pairs to join
-@param {String} [multi_operator] - 'AND' (default) or 'OR'
+    @param {Object} data - Key-value pairs to join
+    @param {String} [multi_operator] - 'AND' (default) or 'OR'
 
-@return {String} - Escaped condition fragment
+    @return {String} - Escaped condition fragment
     *********************************************************************/
     buildMultiCondition: function (data, multi_operator) {
 
@@ -453,14 +453,14 @@ escaped automatically.
     // Graceful teardown of the database handle. Call on SIGTERM / shutdown.
 
     /********************************************************************
-Close the database handle. SQLite's close() is synchronous, so this
-function resolves immediately. The CLOSE_TIMEOUT_MS config key is
-present for API parity with MySQL / Postgres.
+    Close the database handle. SQLite's close() is synchronous, so this
+    function resolves immediately. The CLOSE_TIMEOUT_MS config key is
+    present for API parity with MySQL / Postgres.
 
-Persistent servers should call this from their shutdown handler;
-serverless functions can skip it since the runtime freezes idle handles.
+    Persistent servers should call this from their shutdown handler;
+    serverless functions can skip it since the runtime freezes idle handles.
 
-@return {Promise<void>}
+    @return {Promise<void>}
     *********************************************************************/
     close: async function () {
 
@@ -507,13 +507,13 @@ serverless functions can skip it since the runtime freezes idle handles.
     //   }
 
     /********************************************************************
-Return the underlying DatabaseSync handle for manual transaction control.
-Must be paired with releaseClient() for API parity with MySQL / Postgres
-(it is a no-op for SQLite but callers should still pair them).
+    Return the underlying DatabaseSync handle for manual transaction control.
+    Must be paired with releaseClient() for API parity with MySQL / Postgres
+    (it is a no-op for SQLite but callers should still pair them).
 
-@param {Object} instance - Request instance (kept for API parity with MySQL/Postgres)
+    @param {Object} instance - Request instance (kept for API parity with MySQL/Postgres)
 
-@return {Promise<Object>} - { success, client, error }
+    @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
     getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -554,11 +554,11 @@ Must be paired with releaseClient() for API parity with MySQL / Postgres
 
 
     /********************************************************************
-No-op for SQLite (single handle per instance). Kept for API parity.
+    No-op for SQLite (single handle per instance). Kept for API parity.
 
-@param {Object} client - Handle from getClient()
+    @param {Object} client - Handle from getClient()
 
-@return {void}
+    @return {void}
     *********************************************************************/
     releaseClient: function (client) { // eslint-disable-line no-unused-vars
 
@@ -578,10 +578,10 @@ No-op for SQLite (single handle per instance). Kept for API parity.
     // Lazy-load the adapter and manage the database handle.
 
     /********************************************************************
-Lazy-load the node:sqlite adapter. Shared across every instance because
-the module itself is stateless - only the database handle holds state.
+    Lazy-load the node:sqlite adapter. Shared across every instance because
+    the module itself is stateless - only the database handle holds state.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -593,14 +593,14 @@ the module itself is stateless - only the database handle holds state.
 
 
     /********************************************************************
-Create this instance's database handle on first use. Options are
-built from the merged CONFIG and tuned for SQLite 3.x.
+    Create this instance's database handle on first use. Options are
+    built from the merged CONFIG and tuned for SQLite 3.x.
 
-Applies configured PRAGMAs (journal_mode, synchronous) after open so
-callers get sensible defaults without needing to issue their own PRAGMA
-statements.
+    Applies configured PRAGMAs (journal_mode, synchronous) after open so
+    callers get sensible defaults without needing to issue their own PRAGMA
+    statements.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     initIfNot: function () {
 
@@ -644,14 +644,14 @@ statements.
 
 
     /********************************************************************
-Whitelist-validate a PRAGMA value so we can safely inline it.
-Rejects anything outside the allowed keyword set.
+    Whitelist-validate a PRAGMA value so we can safely inline it.
+    Rejects anything outside the allowed keyword set.
 
-@param {String} val - Candidate PRAGMA value
+    @param {String} val - Candidate PRAGMA value
 
-@return {String} - Same value, uppercased
+    @return {String} - Same value, uppercased
 
-@throws {Error} If the value is not whitelisted
+    @throws {Error} If the value is not whitelisted
     *********************************************************************/
     escapePragmaValue: function (val) {
 
@@ -677,13 +677,13 @@ Rejects anything outside the allowed keyword set.
     // formatters that compose them.
 
     /********************************************************************
-Escape an identifier (table / column name) with double quotes.
-Any embedded " is doubled per the SQL standard. SQLite supports
-double-quoted identifiers natively.
+    Escape an identifier (table / column name) with double quotes.
+    Any embedded " is doubled per the SQL standard. SQLite supports
+    double-quoted identifiers natively.
 
-@param {String} id - Identifier
+    @param {String} id - Identifier
 
-@return {String} - Double-quoted, safely escaped
+    @return {String} - Double-quoted, safely escaped
     *********************************************************************/
     escapeIdentifier: function (id) {
 
@@ -693,18 +693,18 @@ double-quoted identifiers natively.
 
 
     /********************************************************************
-Escape a scalar value as an SQLite literal.
-- null / undefined -> NULL
-- boolean          -> 1 / 0 (SQLite has no native boolean; convention is INTEGER)
-- number           -> digit string (checked for NaN / Infinity)
-- bigint           -> digit string
-- Date             -> ISO 8601 string literal (TEXT convention)
-- Buffer           -> X'hex' BLOB literal
-- string           -> single-quoted, embedded quotes doubled
+    Escape a scalar value as an SQLite literal.
+    - null / undefined -> NULL
+    - boolean          -> 1 / 0 (SQLite has no native boolean; convention is INTEGER)
+    - number           -> digit string (checked for NaN / Infinity)
+    - bigint           -> digit string
+    - Date             -> ISO 8601 string literal (TEXT convention)
+    - Buffer           -> X'hex' BLOB literal
+    - string           -> single-quoted, embedded quotes doubled
 
-@param {*} val - Scalar value
+    @param {*} val - Scalar value
 
-@return {String} - SQLite-safe literal
+    @return {String} - SQLite-safe literal
     *********************************************************************/
     escapeValue: function (val) {
 
@@ -743,13 +743,13 @@ Escape a scalar value as an SQLite literal.
 
 
     /********************************************************************
-Format a single value for inclusion in a fully-escaped SQL string.
-Handles scalars, arrays, objects (k=v pairs), and raw fragments.
-Composes escapeIdentifier and escapeValue.
+    Format a single value for inclusion in a fully-escaped SQL string.
+    Handles scalars, arrays, objects (k=v pairs), and raw fragments.
+    Composes escapeIdentifier and escapeValue.
 
-@param {*} val - Value to format
+    @param {*} val - Value to format
 
-@return {String} - Formatted literal
+    @return {String} - Formatted literal
     *********************************************************************/
     formatValue: function (val) {
 
@@ -778,22 +778,22 @@ Composes escapeIdentifier and escapeValue.
 
 
     /********************************************************************
-Format a SQL template into a fully-escaped string.
-Mirrors mysql2.format / the Postgres equivalent on top of SQLite
-escape rules:
-      - ?  scalar  -> escaped literal
-      - ?  array   -> comma-joined escaped literals (for IN clauses)
-      - ?  object  -> `"k1" = v1, "k2" = v2` (for SET/WHERE)
-      - ?? scalar  -> double-quoted identifier
-      - ?? array   -> comma-joined identifiers
+    Format a SQL template into a fully-escaped string.
+    Mirrors mysql2.format / the Postgres equivalent on top of SQLite
+    escape rules:
+    - ?  scalar  -> escaped literal
+    - ?  array   -> comma-joined escaped literals (for IN clauses)
+    - ?  object  -> `"k1" = v1, "k2" = v2` (for SET/WHERE)
+    - ?? scalar  -> double-quoted identifier
+    - ?? array   -> comma-joined identifiers
 
-Walks inside single-quoted strings / double-quoted identifiers /
-line comments to avoid replacing placeholders there.
+    Walks inside single-quoted strings / double-quoted identifiers /
+    line comments to avoid replacing placeholders there.
 
-@param {String} sql - Source SQL
-@param {*} params - Scalar, array, or object
+    @param {String} sql - Source SQL
+    @param {*} params - Scalar, array, or object
 
-@return {String} - Fully-escaped SQLite SQL
+    @return {String} - Fully-escaped SQLite SQL
     *********************************************************************/
     formatQuery: function (sql, params) {
 
@@ -892,17 +892,17 @@ line comments to avoid replacing placeholders there.
 
 
     /********************************************************************
-Translate ? / ?? placeholders for node:sqlite consumption:
-      - ?  -> left as-is, value pushed to out_params in order
-      - ?? -> inlined as a double-quoted identifier
+    Translate ? / ?? placeholders for node:sqlite consumption:
+    - ?  -> left as-is, value pushed to out_params in order
+    - ?? -> inlined as a double-quoted identifier
 
-Walks the SQL character-by-character so placeholders inside string
-literals, double-quoted identifiers, and -- line comments are ignored.
+    Walks the SQL character-by-character so placeholders inside string
+    literals, double-quoted identifiers, and -- line comments are ignored.
 
-@param {String} sql - Source SQL with ?/?? placeholders
-@param {Array} params - Values to bind (consumed in order)
+    @param {String} sql - Source SQL with ?/?? placeholders
+    @param {Array} params - Values to bind (consumed in order)
 
-@return {Object} - { sql, params } ready for prepare/run/all
+    @return {Object} - { sql, params } ready for prepare/run/all
     *********************************************************************/
     translatePlaceholders: function (sql, params) {
 
@@ -996,16 +996,16 @@ literals, double-quoted identifiers, and -- line comments are ignored.
 
 
     /********************************************************************
-Convert JS parameter values into SQLite-compatible bindable types.
-node:sqlite accepts: null | number | bigint | string | Buffer |
-TypedArray | DataView. We additionally support:
-      - undefined -> null
-      - boolean   -> 1 / 0
-      - Date      -> ISO string
+    Convert JS parameter values into SQLite-compatible bindable types.
+    node:sqlite accepts: null | number | bigint | string | Buffer |
+    TypedArray | DataView. We additionally support:
+    - undefined -> null
+    - boolean   -> 1 / 0
+    - Date      -> ISO string
 
-@param {Array} params - Raw JS values
+    @param {Array} params - Raw JS values
 
-@return {Array} - SQLite-bindable values
+    @return {Array} - SQLite-bindable values
     *********************************************************************/
     normalizeParams: function (params) {
 
@@ -1026,16 +1026,16 @@ TypedArray | DataView. We additionally support:
 
 
     /********************************************************************
-Classify a SQL statement as read-shape (returns rows) or write-shape
-(returns affected_rows / insert_id). Used by query() to decide whether
-to call statement.all() or statement.run().
+    Classify a SQL statement as read-shape (returns rows) or write-shape
+    (returns affected_rows / insert_id). Used by query() to decide whether
+    to call statement.all() or statement.run().
 
-Read-shape: SELECT, WITH (CTE), PRAGMA, EXPLAIN, or any statement
-containing a RETURNING clause (INSERT/UPDATE/DELETE ... RETURNING *).
+    Read-shape: SELECT, WITH (CTE), PRAGMA, EXPLAIN, or any statement
+    containing a RETURNING clause (INSERT/UPDATE/DELETE ... RETURNING *).
 
-@param {String} sql - SQL statement
+    @param {String} sql - SQL statement
 
-@return {Object} - { is_read, first_word, has_returning }
+    @return {Object} - { is_read, first_word, has_returning }
     *********************************************************************/
     classifyStatement: function (sql) {
 
@@ -1062,13 +1062,13 @@ containing a RETURNING clause (INSERT/UPDATE/DELETE ... RETURNING *).
 
 
     /********************************************************************
-Convert a bigint to number when it is safe; keep bigint otherwise.
-node:sqlite may return bigint for changes/lastInsertRowid; downstream
-JSON serialization prefers numbers when they fit in a safe integer.
+    Convert a bigint to number when it is safe; keep bigint otherwise.
+    node:sqlite may return bigint for changes/lastInsertRowid; downstream
+    JSON serialization prefers numbers when they fit in a safe integer.
 
-@param {*} val - Number or bigint
+    @param {*} val - Number or bigint
 
-@return {Number|BigInt} - Same value, narrowed when safe
+    @return {Number|BigInt} - Same value, narrowed when safe
     *********************************************************************/
     narrowInteger: function (val) {
 
@@ -1085,14 +1085,14 @@ JSON serialization prefers numbers when they fit in a safe integer.
 
 
     /********************************************************************
-Convert node:sqlite result rows (null-prototype objects) into plain
-objects so downstream consumers behave the same across MySQL / Postgres
-/ SQLite. `deepStrictEqual`, spread, and JSON.stringify all assume plain
-Object prototypes.
+    Convert node:sqlite result rows (null-prototype objects) into plain
+    objects so downstream consumers behave the same across MySQL / Postgres
+    / SQLite. `deepStrictEqual`, spread, and JSON.stringify all assume plain
+    Object prototypes.
 
-@param {Array} rows - Rows as returned by statement.all()
+    @param {Array} rows - Rows as returned by statement.all()
 
-@return {Array} - Same rows, each copied into a plain object
+    @return {Array} - Same rows, each copied into a plain object
     *********************************************************************/
     normalizeRows: function (rows) {
 
@@ -1112,17 +1112,17 @@ Object prototypes.
     // query -> execute|transaction
 
     /********************************************************************
-Run any SQL. The core workhorse - all other I/O functions route through here.
-Placeholders: ? for values, ?? for identifiers (?? inlined at runtime).
+    Run any SQL. The core workhorse - all other I/O functions route through here.
+    Placeholders: ? for values, ?? for identifiers (?? inlined at runtime).
 
-Dispatches to statement.all() for read-shape queries and statement.run()
-for write-shape queries, based on classifyStatement().
+    Dispatches to statement.all() for read-shape queries and statement.run()
+    for write-shape queries, based on classifyStatement().
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
     *********************************************************************/
     query: async function (instance, sql, params) {
 
@@ -1216,18 +1216,18 @@ for write-shape queries, based on classifyStatement().
 
 
     /********************************************************************
-Run an INSERT / UPDATE / DELETE statement. Internal helper used by write().
-Depends on query() for execution.
+    Run an INSERT / UPDATE / DELETE statement. Internal helper used by write().
+    Depends on query() for execution.
 
-insert_id is populated automatically from sqlite3_last_insert_rowid() -
-no RETURNING clause is required (unlike Postgres). For UPDATE / DELETE
-insert_id will be null.
+    insert_id is populated automatically from sqlite3_last_insert_rowid() -
+    no RETURNING clause is required (unlike Postgres). For UPDATE / DELETE
+    insert_id will be null.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     execute: async function (instance, sql, params) {
 
@@ -1254,16 +1254,16 @@ insert_id will be null.
 
 
     /********************************************************************
-Run many statements atomically. All commit, or all roll back.
-Internal helper used by write() for array input.
+    Run many statements atomically. All commit, or all roll back.
+    Internal helper used by write() for array input.
 
-Uses BEGIN / COMMIT / ROLLBACK since node:sqlite does not expose a
-transaction() wrapper.
+    Uses BEGIN / COMMIT / ROLLBACK since node:sqlite does not expose a
+    transaction() wrapper.
 
-@param {Object} instance - Request instance
-@param {Array} statements - Array of { sql, params } objects
+    @param {Object} instance - Request instance
+    @param {Array} statements - Array of { sql, params } objects
 
-@return {Promise<Object>} - { success, results, error }
+    @return {Promise<Object>} - { success, results, error }
     *********************************************************************/
     transaction: async function (instance, statements) {
 
