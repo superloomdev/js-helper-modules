@@ -99,9 +99,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Idempotent table + index setup. Creates the logs table and two
     covering indexes if they do not exist. Safe to call on every boot.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -185,10 +185,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Insert one log record. Uses a simple INSERT (no UPSERT needed -
     sort_key is unique per event).
 
-    @param {Object} instance - Request instance
-    @param {Object} record   - Canonical log record from logger.js
+@param {Object} instance - Request instance
+@param {Object} record   - Canonical log record from logger.js
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     addLog: async function (instance, record) {
 
@@ -223,10 +223,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Results are ordered most-recent first by sort_key DESC.
     Supports cursor pagination, action filter, and time range.
 
-    @param {Object} instance - Request instance
-    @param {Object} query    - Built by logger.js#buildQuery
+@param {Object} instance - Request instance
+@param {Object} query    - Built by logger.js#buildQuery
 
-    @return {Promise<Object>} - { success, records, next_cursor, error }
+@return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByEntity: async function (instance, query) {
 
@@ -271,10 +271,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     List log records for a (scope, actor_type, actor_id) triple.
     Same pagination contract as getLogsByEntity.
 
-    @param {Object} instance - Request instance
-    @param {Object} query    - Built by logger.js#buildQuery
+@param {Object} instance - Request instance
+@param {Object} query    - Built by logger.js#buildQuery
 
-    @return {Promise<Object>} - { success, records, next_cursor, error }
+@return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByActor: async function (instance, query) {
 
@@ -321,9 +321,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Delete all rows whose expires_at is not NULL and <= now (seconds).
     The expires_at index makes this a fast range scan.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -396,9 +396,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Quote an identifier using SQLite double-quote style. Rejects any
     identifier containing a double-quote to prevent DDL injection.
 
-    @param {String} name - Identifier (table or column)
+@param {String} name - Identifier (table or column)
 
-    @return {String} - Quoted identifier
+@return {String} - Quoted identifier
     *********************************************************************/
     Q: function (name) {
 
@@ -416,7 +416,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the CREATE TABLE statement. Idempotent via IF NOT EXISTS.
 
-    @return {String} - DDL statement
+@return {String} - DDL statement
     *********************************************************************/
     buildCreateTableSQL: function () {
 
@@ -449,7 +449,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Build the entity covering index for getLogsByEntity queries.
     Columns: scope + entity_type + entity_id + sort_key DESC.
 
-    @return {String} - DDL statement
+@return {String} - DDL statement
     *********************************************************************/
     buildCreateEntityIndexSQL: function () {
 
@@ -474,7 +474,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Build the actor covering index for getLogsByActor queries.
     Columns: scope + actor_type + actor_id + sort_key DESC.
 
-    @return {String} - DDL statement
+@return {String} - DDL statement
     *********************************************************************/
     buildCreateActorIndexSQL: function () {
 
@@ -498,7 +498,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the TTL index for cleanupExpiredLogs range scans.
 
-    @return {String} - DDL statement
+@return {String} - DDL statement
     *********************************************************************/
     buildCreateTTLIndexSQL: function () {
 
@@ -517,7 +517,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the INSERT statement.
 
-    @return {String} - SQL with positional ? placeholders
+@return {String} - SQL with positional ? placeholders
     *********************************************************************/
     buildInsertSQL: function () {
 
@@ -538,10 +538,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Returns { sql, params } ready to pass to lib_sql.getRows.
     Fetches limit+1 rows so the caller can detect the next page.
 
-    @param {String} mode  - 'entity' | 'actor'
-    @param {Object} query - Logger query object
+@param {String} mode  - 'entity' | 'actor'
+@param {Object} query - Logger query object
 
-    @return {Object} - { sql, params }
+@return {Object} - { sql, params }
     *********************************************************************/
     buildListSQL: function (mode, query) {
 
@@ -615,10 +615,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Encode a canonical record value for a parameterized INSERT.
 
-    @param {String} col   - Column name
-    @param {*}      value - Canonical record value
+@param {String} col   - Column name
+@param {*}      value - Canonical record value
 
-    @return {*} - DB-safe value
+@return {*} - DB-safe value
     *********************************************************************/
     toColumnValue: function (col, value) {
 
@@ -643,10 +643,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Decode a raw row value into its canonical record shape.
 
-    @param {String} col   - Column name
-    @param {*}      value - Raw DB value
+@param {String} col   - Column name
+@param {*}      value - Raw DB value
 
-    @return {*} - Canonical value
+@return {*} - Canonical value
     *********************************************************************/
     fromColumnValue: function (col, value) {
 
@@ -675,9 +675,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Canonical record -> positional values array, aligned with COLUMNS.
 
-    @param {Object} record - Canonical log record
+@param {Object} record - Canonical log record
 
-    @return {Array} - Positional values for parameterized INSERT
+@return {Array} - Positional values for parameterized INSERT
     *********************************************************************/
     recordToRow: function (record) {
 
@@ -692,9 +692,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Raw row object -> canonical record.
 
-    @param {Object} row - Raw row from SQLite driver
+@param {Object} row - Raw row from SQLite driver
 
-    @return {Object} - Canonical log record
+@return {Object} - Canonical log record
     *********************************************************************/
     rowToRecord: function (row) {
 

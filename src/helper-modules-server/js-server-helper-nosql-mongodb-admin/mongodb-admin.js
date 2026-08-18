@@ -90,12 +90,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Create a collection. Idempotent: if the collection already exists,
     returns success with data.created set to false.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Function options
-    @param {String} options.collection_name - Name of the collection to create
-    @param {Object} [options.collection_options] - Options passed to createCollection (e.g. { capped: true, size: 100000 })
+@param {Object} instance - Request instance
+@param {Object} options - Function options
+@param {String} options.collection_name - Name of the collection to create
+@param {Object} [options.collection_options] - Options passed to createCollection (e.g. { capped: true, size: 100000 })
 
-    @return {Promise<Object>} - { success, data, error }
+@return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     createCollection: async function (instance, options) {
 
@@ -163,11 +163,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Drop a collection. Idempotent: if the collection does not exist,
     returns success with data.dropped set to false.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Function options
-    @param {String} options.collection_name - Name of the collection to drop
+@param {Object} instance - Request instance
+@param {Object} options - Function options
+@param {String} options.collection_name - Name of the collection to drop
 
-    @return {Promise<Object>} - { success, data, error }
+@return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     dropCollection: async function (instance, options) {
 
@@ -238,14 +238,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Create one or more indexes on a collection. Idempotent: indexes that
     already exist with an identical spec are counted in data.skipped.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Function options
-    @param {String} options.collection_name - Name of the collection
-    @param {Array} options.indexes - Array of index specs. Each: { keys, index_options? }
-    @param {Object} options.indexes[].keys - Index key spec (e.g. { field: 1 })
-    @param {Object} [options.indexes[].index_options] - createIndex options (e.g. { name: 'idx_field', unique: true })
+@param {Object} instance - Request instance
+@param {Object} options - Function options
+@param {String} options.collection_name - Name of the collection
+@param {Array} options.indexes - Array of index specs. Each: { keys, index_options? }
+@param {Object} options.indexes[].keys - Index key spec (e.g. { field: 1 })
+@param {Object} [options.indexes[].index_options] - createIndex options (e.g. { name: 'idx_field', unique: true })
 
-    @return {Promise<Object>} - { success, data, error }
+@return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     createIndexes: async function (instance, options) {
 
@@ -341,13 +341,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     set to false. If a TTL index exists on a DIFFERENT field, returns
     an ADMIN_TTL_CONFLICT error.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Function options
-    @param {String} options.collection_name - Name of the collection
-    @param {String} options.field_name - Date field to index (must store BSON Date values)
-    @param {Number} options.expire_after_seconds - TTL in seconds
+@param {Object} instance - Request instance
+@param {Object} options - Function options
+@param {String} options.collection_name - Name of the collection
+@param {String} options.field_name - Date field to index (must store BSON Date values)
+@param {Number} options.expire_after_seconds - TTL in seconds
 
-    @return {Promise<Object>} - { success, data, error }
+@return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     enableTtlIndex: async function (instance, options) {
 
@@ -466,11 +466,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     List all indexes on a collection.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Function options
-    @param {String} options.collection_name - Name of the collection
+@param {Object} instance - Request instance
+@param {Object} options - Function options
+@param {String} options.collection_name - Name of the collection
 
-    @return {Promise<Object>} - { success, data, error }
+@return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     listIndexes: async function (instance, options) {
 
@@ -525,9 +525,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Ping the MongoDB server with admin credentials. Verifies the
     connection is alive and the admin user can authenticate.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, data, error }
+@return {Promise<Object>} - { success, data, error }
     *********************************************************************/
     ping: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -575,9 +575,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Close the MongoDB admin connection for this instance.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     close: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -635,7 +635,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     because the driver module itself is stateless - only MongoClient
     holds per-instance state.
 
-    @return {void}
+@return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -652,7 +652,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     database with admin credentials and caches both client and db
     references in state.
 
-    @return {Promise<void>}
+@return {Promise<void>}
     *********************************************************************/
     initIfNot: async function () {
 

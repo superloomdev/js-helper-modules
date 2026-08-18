@@ -66,9 +66,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Provides granular reason codes for common failure modes before
     falling back to validator.isEmail() for the full check.
 
-    @param {String} email - Email address to validate
+@param {String} email - Email address to validate
 
-    @return {Object} - { valid: Boolean, reason: String|null }
+@return {Object} - { valid: Boolean, reason: String|null }
     *********************************************************************/
     validateSyntax: function (email) {
 
@@ -134,9 +134,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Check if a domain is a known disposable email provider.
     Checks against the committed list of ~5K disposable domains.
 
-    @param {String} domain - Domain part (e.g. 'mailinator.com')
+@param {String} domain - Domain part (e.g. 'mailinator.com')
 
-    @return {Boolean} - true if the domain is disposable
+@return {Boolean} - true if the domain is disposable
     *********************************************************************/
     isDisposableDomain: function (domain) {
 
@@ -153,9 +153,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     WARNING: Never use for storage or delivery. Duplicate detection only.
 
-    @param {String} email - Email address to canonicalize
+@param {String} email - Email address to canonicalize
 
-    @return {String|null} - Canonicalized email or null if invalid
+@return {String|null} - Canonicalized email or null if invalid
     *********************************************************************/
     canonicalize: function (email) {
 

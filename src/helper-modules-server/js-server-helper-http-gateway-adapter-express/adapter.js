@@ -100,11 +100,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     url              {String} - Request URL path with query string
     response_handler {Function} - Wraps Express res
 
-    @param {Object}   raw_request       - Express req object
-    @param {Object}   raw_context       - Unused (no execution context in Express)
-    @param {Object}   response_callback - Express res object
+@param {Object}   raw_request       - Express req object
+@param {Object}   raw_context       - Unused (no execution context in Express)
+@param {Object}   response_callback - Express res object
 
-    @return {Object} - Normalized request fields plus response_handler
+@return {Object} - Normalized request fields plus response_handler
     *********************************************************************/
     extractRequest: function (raw_request, rawContext, response_callback) {
 
@@ -179,11 +179,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Object            -> JSON.stringify
     Anything else     -> String(value)
 
-    @param {Integer} status  - HTTP status code
-    @param {Object}  headers - Response headers map
-    @param {*}       body    - Response body (string, object, Buffer, or null)
+@param {Integer} status  - HTTP status code
+@param {Object}  headers - Response headers map
+@param {*}       body    - Response body (string, object, Buffer, or null)
 
-    @return {Object} - { statusCode, headers, body }
+@return {Object} - { statusCode, headers, body }
     *********************************************************************/
     buildResponseEnvelope: function (status, headers, body) {
 
@@ -221,9 +221,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Projects fronting Express with CloudFront can implement a custom
     adapter that reads the CloudFront-Viewer-Country forwarded header.
 
-    @param {Object} headers - Request headers (unused)
+@param {Object} headers - Request headers (unused)
 
-    @return {null}
+@return {null}
     *********************************************************************/
     getCountryCode: function (headers) { // eslint-disable-line no-unused-vars
       return null;
@@ -240,9 +240,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Parse a raw Cookie header string into a key/value map.
     Used as fallback when cookie-parser middleware is not installed.
 
-    @param {String} cookie_header - Raw value of the Cookie header
+@param {String} cookie_header - Raw value of the Cookie header
 
-    @return {Object} - { name: value, ... }
+@return {Object} - { name: value, ... }
     *********************************************************************/
     parseCookieHeader: function (cookie_header) {
 

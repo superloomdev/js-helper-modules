@@ -95,9 +95,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Idempotent table provisioning. Pay-per-request billing is the
     correct default for a bursty verification workload.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -141,11 +141,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Direct GetItem on the composite key. Returns null when absent.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, record, error }
+@return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getRecord: async function (instance, scope, key) {
 
@@ -197,12 +197,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Upsert via PutItem. DynamoDB always overwrites by composite key.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
-    @param {Object} record   - { code, fail_count, created_at, expires_at }
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
+@param {Object} record   - { code, fail_count, created_at, expires_at }
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setRecord: async function (instance, scope, key, record) {
 
@@ -248,11 +248,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Atomic ADD via the helper's increment parameter.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     incrementFailCount: async function (instance, scope, key) {
 
@@ -291,11 +291,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Idempotent delete.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, scope, key) {
 
@@ -335,9 +335,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     matching keys. The native TTL on `expires_at` is the primary
     mechanism; this method supports explicit lifecycle control.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 

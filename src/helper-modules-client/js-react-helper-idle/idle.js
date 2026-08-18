@@ -109,11 +109,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     host-supplied activity sources on mount, unsubscribes on unmount.
     Registers thresholds on mount and unregisters them on unmount.
 
-    @param {Object} options             - Hook options
-    @param {Array}  options.sources     - Activity source subscribe/unsubscribe pairs
-    @param {Array}  options.thresholds  - Array of { ms, callback } to register on mount
+@param {Object} options             - Hook options
+@param {Array}  options.sources     - Activity source subscribe/unsubscribe pairs
+@param {Array}  options.thresholds  - Array of { ms, callback } to register on mount
 
-    @return {Object} - { isIdle, touch, pause, resume }
+@return {Object} - { isIdle, touch, pause, resume }
     *********************************************************************/
     useIdle: function (options) {
 
@@ -192,7 +192,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Record user activity. Re-arms every registered threshold. Ignored
     while paused, reported as touched: false.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     touch: function () {
 
@@ -225,7 +225,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Pause idle detection. Closes the current analytics period, clears
     all pending threshold timers, and freezes the elapsed clock.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     pause: function () {
 
@@ -265,7 +265,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Resume idle detection from a paused state. Reschedules thresholds
     for their remaining delta. Idempotent.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     resume: function () {
 
@@ -307,10 +307,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Register a callback to fire after ms of continuous inactivity.
 
-    @param {number} ms        - Threshold in milliseconds (must be positive)
-    @param {Function} callback - Function called when threshold fires
+@param {number} ms        - Threshold in milliseconds (must be positive)
+@param {Function} callback - Function called when threshold fires
 
-    @return {Object} - { success, data: { id }, error }
+@return {Object} - { success, data: { id }, error }
     *********************************************************************/
     registerIdleHandler: function (ms, callback) {
 
@@ -364,9 +364,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Unregister one handler by the id returned from registerIdleHandler.
 
-    @param {number} id - Handler id to remove
+@param {number} id - Handler id to remove
 
-    @return {Object} - { success, data: { removed }, error }
+@return {Object} - { success, data: { removed }, error }
     *********************************************************************/
     unregisterIdleHandler: function (id) {
 
@@ -401,7 +401,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Unregister every handler.
 
-    @return {Object} - { success, data: { removed_count }, error }
+@return {Object} - { success, data: { removed_count }, error }
     *********************************************************************/
     clearIdleHandlers: function () {
 
@@ -441,7 +441,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get milliseconds elapsed since the last activity. Frozen while
     paused.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getElapsed: function () {
 
@@ -467,7 +467,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the timestamp of the last recorded activity.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getLastActive: function () {
 
@@ -485,7 +485,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get total milliseconds spent in the idle state, including the
     in-progress period.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getTotalIdle: function () {
 
@@ -512,7 +512,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get total milliseconds spent in the active state, including the
     in-progress period.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getTotalActive: function () {
 
@@ -694,7 +694,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Calculate milliseconds elapsed since last activity.
 
-    @return {number} - Elapsed ms
+@return {number} - Elapsed ms
     *********************************************************************/
     getElapsedMs: function () {
 

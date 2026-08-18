@@ -149,9 +149,9 @@ const Validators = {
   contract. Throws at startup when any method is missing so runtime
   requests never hit a partially-implemented store.
 
-    @param {Object} store - Instantiated store object
+@param {Object} store - Instantiated store object
 
-    @return {void}
+@return {void}
   *********************************************************************/
   validateStoreContract: function (store) {
 

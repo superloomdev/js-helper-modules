@@ -99,11 +99,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     is not known upfront. Prefer getRow / getRows / getValue when the shape
     is known.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL (typically pre-built with buildQuery)
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL (typically pre-built with buildQuery)
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, result, has_multiple_rows, error }
+@return {Promise<Object>} - { success, result, has_multiple_rows, error }
     *********************************************************************/
     get: async function (instance, sql, params) {
 
@@ -165,11 +165,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Run a query and return the first row, or null if there are no results.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, row, error }
+@return {Promise<Object>} - { success, row, error }
     *********************************************************************/
     getRow: async function (instance, sql, params) {
 
@@ -196,11 +196,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Run a query and return every row.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, rows, count, error }
+@return {Promise<Object>} - { success, rows, count, error }
     *********************************************************************/
     getRows: async function (instance, sql, params) {
 
@@ -230,11 +230,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Run a query and return the first column of the first row. Handy for
     COUNT(*), MAX(), and other single-value lookups.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, value, error }
+@return {Promise<Object>} - { success, value, error }
     *********************************************************************/
     getValue: async function (instance, sql, params) {
 
@@ -302,11 +302,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     INSERT multiple rows and need the ID of the final one). Postgres has
     no LAST_INSERT_ID() equivalent, so the SQL must include RETURNING id.
 
-    @param {Object} instance - Request instance
-    @param {(String|Array)} sql - Single SQL string or array of statements
-    @param {Array} [params] - Placeholder values (only when sql is a String)
+@param {Object} instance - Request instance
+@param {(String|Array)} sql - Single SQL string or array of statements
+@param {Array} [params] - Placeholder values (only when sql is a String)
 
-    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
+@return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     write: async function (instance, sql, params) {
 
@@ -387,10 +387,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
       buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
 
-    @param {String} sql - SQL template
-    @param {(Array|Object|*)} params - Values for ?/?? substitution
+@param {String} sql - SQL template
+@param {(Array|Object|*)} params - Values for ?/?? substitution
 
-    @return {String} - Fully-escaped Postgres SQL
+@return {String} - Fully-escaped Postgres SQL
     *********************************************************************/
     buildQuery: function (sql, params) {
 
@@ -409,9 +409,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       );
       Postgres.buildQuery('INSERT INTO address SET ?', { point: point });
 
-    @param {String} str - Raw SQL fragment
+@param {String} str - Raw SQL fragment
 
-    @return {Object} - Raw-text marker recognized by buildQuery
+@return {Object} - Raw-text marker recognized by buildQuery
     *********************************************************************/
     buildRawText: function (str) {
 
@@ -424,10 +424,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Join equality conditions with AND or OR. Identifiers and values are
     escaped automatically.
 
-    @param {Object} data - Key-value pairs to join
-    @param {String} [multi_operator] - 'AND' (default) or 'OR'
+@param {Object} data - Key-value pairs to join
+@param {String} [multi_operator] - 'AND' (default) or 'OR'
 
-    @return {String} - Escaped condition fragment
+@return {String} - Escaped condition fragment
     *********************************************************************/
     buildMultiCondition: function (data, multi_operator) {
 
@@ -456,7 +456,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Persistent servers should call this from their shutdown handler;
     serverless functions can skip it since the runtime freezes idle pools.
 
-    @return {Promise<void>}
+@return {Promise<void>}
     *********************************************************************/
     close: async function () {
 
@@ -517,9 +517,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Check out a dedicated pool connection for manual transaction control.
     Must be paired with releaseClient() or the pool will leak.
 
-    @param {Object} instance - Request instance (kept for API parity with MySQL/SQLite)
+@param {Object} instance - Request instance (kept for API parity with MySQL/SQLite)
 
-    @return {Promise<Object>} - { success, client, error }
+@return {Promise<Object>} - { success, client, error }
     *********************************************************************/
     getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -564,9 +564,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Return a client from getClient() back to the pool. No-op if null.
 
-    @param {Object} client - Connection from getClient()
+@param {Object} client - Connection from getClient()
 
-    @return {void}
+@return {void}
     *********************************************************************/
     releaseClient: function (client) {
 
@@ -591,7 +591,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Lazy-load the pg adapter. Shared across every instance because
     the driver itself is stateless - only the pool holds state.
 
-    @return {void}
+@return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -606,7 +606,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Create this instance's connection pool on first use. Options are
     built from the merged CONFIG and tuned for Postgres 15 / Aurora.
 
-    @return {void}
+@return {void}
     *********************************************************************/
     initIfNot: function () {
 
@@ -671,7 +671,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     method exists for API parity with the MySQL module but relies on
     pool.end() rather than reaching into pool internals.
 
-    @return {void}
+@return {void}
     *********************************************************************/
     destroyPool: function () {
 
@@ -699,9 +699,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Escape an identifier (table / column name) with double quotes.
     Any embedded " is doubled per the SQL standard.
 
-    @param {String} id - Identifier
+@param {String} id - Identifier
 
-    @return {String} - Double-quoted, safely escaped
+@return {String} - Double-quoted, safely escaped
     *********************************************************************/
     escapeIdentifier: function (id) {
 
@@ -721,9 +721,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
                           falls back to E'...' escape if the string
                           contains backslashes
 
-    @param {*} val - Scalar value
+@param {*} val - Scalar value
 
-    @return {String} - Postgres-safe literal
+@return {String} - Postgres-safe literal
     *********************************************************************/
     escapeValue: function (val) {
 
@@ -773,9 +773,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Handles scalars, arrays, objects (k=v pairs), and raw fragments.
     Composes escapeIdentifier and escapeValue.
 
-    @param {*} val - Value to format
+@param {*} val - Value to format
 
-    @return {String} - Formatted literal
+@return {String} - Formatted literal
     *********************************************************************/
     formatValue: function (val) {
 
@@ -815,10 +815,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Walks inside single-quoted strings / double-quoted identifiers /
     line comments to avoid replacing placeholders there.
 
-    @param {String} sql - Source SQL
-    @param {*} params - Scalar, array, or object
+@param {String} sql - Source SQL
+@param {*} params - Scalar, array, or object
 
-    @return {String} - Fully-escaped Postgres SQL
+@return {String} - Fully-escaped Postgres SQL
     *********************************************************************/
     formatQuery: function (sql, params) {
 
@@ -922,10 +922,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Walks the SQL character-by-character so placeholders inside string
     literals, double-quoted identifiers, and -- line comments are ignored.
 
-    @param {String} sql - Source SQL with ?/?? placeholders
-    @param {Array} params - Values to bind (consumed in order)
+@param {String} sql - Source SQL with ?/?? placeholders
+@param {Array} params - Values to bind (consumed in order)
 
-    @return {Object} - { sql, params } ready for pool.query
+@return {Object} - { sql, params } ready for pool.query
     *********************************************************************/
     translatePlaceholders: function (sql, params) {
 
@@ -1019,9 +1019,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Extract the primary-key insert id from a pg result if the caller
     used `INSERT ... RETURNING id` (or RETURNING *).
 
-    @param {Object} result - Raw pg result
+@param {Object} result - Raw pg result
 
-    @return {*} - id value, or null if not present
+@return {*} - id value, or null if not present
     *********************************************************************/
     extractInsertId: function (result) {
 
@@ -1047,11 +1047,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Run any SQL. The core workhorse - all other I/O functions route through here.
     Placeholders: ? for values, ?? for identifiers (translated to $N at runtime).
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
+@return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
     *********************************************************************/
     query: async function (instance, sql, params) {
 
@@ -1111,11 +1111,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     in the SQL to get the new primary key - it will be surfaced as
     `insert_id` in the result.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
+@return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     execute: async function (instance, sql, params) {
 
@@ -1149,10 +1149,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Internal helper used by write() for array input. Depends on initIfNot()
     for pool access and manages its own connection lifecycle.
 
-    @param {Object} instance - Request instance
-    @param {Array} statements - Array of { sql, params } objects
+@param {Object} instance - Request instance
+@param {Array} statements - Array of { sql, params } objects
 
-    @return {Promise<Object>} - { success, results, error }
+@return {Promise<Object>} - { success, results, error }
     *********************************************************************/
     transaction: async function (instance, statements) {
 

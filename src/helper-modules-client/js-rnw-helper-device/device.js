@@ -113,7 +113,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the current platform OS string.
 
-    @return {Object} - { success, platform, error }
+@return {Object} - { success, platform, error }
     *********************************************************************/
     getPlatform: function () {
 
@@ -132,7 +132,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the current viewport dimensions.
 
-    @return {Object} - { success, width, height, error }
+@return {Object} - { success, width, height, error }
     *********************************************************************/
     getViewport: function () {
 
@@ -172,9 +172,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Subscribe to viewport dimension changes. The callback receives
     { width, height } on each change. Returns an unsubscribe function.
 
-    @param {Function} callback - Called with { width, height } on change
+@param {Function} callback - Called with { width, height } on change
 
-    @return {Object} - { success, unsubscribe, error }
+@return {Object} - { success, unsubscribe, error }
     *********************************************************************/
     onViewportChange: function (callback) {
 
@@ -212,7 +212,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the current network state. Requires NetInfo to be injected.
 
-    @return {Promise<Object>} - { success, isConnected, type, error }
+@return {Promise<Object>} - { success, isConnected, type, error }
     *********************************************************************/
     getNetworkState: async function () {
 
@@ -266,9 +266,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     state string ('active' | 'background' | 'inactive'). Requires
     AppState to be injected. Returns an unsubscribe function.
 
-    @param {Function} callback - Called with the new state string
+@param {Function} callback - Called with the new state string
 
-    @return {Object} - { success, unsubscribe, error }
+@return {Object} - { success, unsubscribe, error }
     *********************************************************************/
     onAppStateChange: function (callback) {
 
@@ -317,7 +317,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get safe-area insets. Requires SafeArea to be injected.
 
-    @return {Object} - { success, top, bottom, left, right, error }
+@return {Object} - { success, top, bottom, left, right, error }
     *********************************************************************/
     getSafeAreaInsets: function () {
 

@@ -111,9 +111,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     call on every boot. When no admin is injected, returns
     NOT_IMPLEMENTED with a message naming the admin module.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -195,13 +195,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     _id so a wrong secret produces a miss (no timing leak, no extra
     read). Returns null record when the document is not found.
 
-    @param {Object} instance          - Request instance
-    @param {string} tenant_id         - Tenant identifier
-    @param {string} actor_id          - Actor identifier
-    @param {string} token_key         - Token key
-    @param {string} token_secret_hash - Hash baked into _id
+@param {Object} instance          - Request instance
+@param {string} tenant_id         - Tenant identifier
+@param {string} actor_id          - Actor identifier
+@param {string} token_key         - Token key
+@param {string} token_secret_hash - Hash baked into _id
 
-    @return {Promise<Object>} - { success, record, error }
+@return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -243,11 +243,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     List all sessions for (tenant_id, actor_id). Uses equality on the
     pre-computed `prefix` field so we hit the B-tree index directly.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
 
-    @return {Promise<Object>} - { success, records, error }
+@return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -299,10 +299,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     same (tenant_id, actor_id, token_key, token_secret_hash) quadruple
     yields exactly one document.
 
-    @param {Object} instance - Request instance
-    @param {Object} record   - Canonical session record
+@param {Object} instance - Request instance
+@param {Object} record   - Canonical session record
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
@@ -344,13 +344,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     locate the document (the caller only has actor_id + token_key,
     not the hash baked into _id). Throws TypeError on identity fields.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
-    @param {string} token_key - Token key
-    @param {Object} updates   - Partial record (mutable fields only)
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
+@param {string} token_key - Token key
+@param {Object} updates   - Partial record (mutable fields only)
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -419,12 +419,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Delete by (tenant_id, actor_id, token_key). Uses an anchored prefix
     regex on _id since the caller does not have the hash.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
-    @param {string} token_key - Token key
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
+@param {string} token_key - Token key
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
@@ -465,11 +465,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Bulk delete by $or over all _id prefixes. One deleteMany round-trip.
     No-op success if keys array is empty.
 
-    @param {Object}   instance  - Request instance
-    @param {string}   tenant_id - Tenant identifier
-    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
+@param {Object}   instance  - Request instance
+@param {string}   tenant_id - Tenant identifier
+@param {Object[]} keys      - Array of { actor_id, token_key } pairs
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -528,9 +528,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     native TTL requires a Date-typed field; this manual deleteMany is
     the garbage-collection path - run it on a cron.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
@@ -589,9 +589,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     regex metacharacters so tenant_id and actor_id values that contain
     dots, brackets, etc. never corrupt the anchored prefix pattern.
 
-    @param {String} str - Raw string to escape
+@param {String} str - Raw string to escape
 
-    @return {String} - Regex-safe escaped string
+@return {String} - Regex-safe escaped string
     *********************************************************************/
     escapeRegExp: function (str) {
 
@@ -609,12 +609,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     produces a different _id and MongoDB returns null without reading
     the document (O(1), no timing leak).
 
-    @param {String} tenant_id         - Tenant identifier
-    @param {String} actor_id          - Actor identifier
-    @param {String} token_key         - Session token key
-    @param {String} token_secret_hash - Hashed token secret
+@param {String} tenant_id         - Tenant identifier
+@param {String} actor_id          - Actor identifier
+@param {String} token_key         - Session token key
+@param {String} token_secret_hash - Hashed token secret
 
-    @return {String} - Composite _id string
+@return {String} - Composite _id string
     *********************************************************************/
     composeMongoId: function (tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -631,10 +631,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Equality queries on this field (via a btree index) replace the
     anchored-regex scan on _id for listSessionsByActor.
 
-    @param {String} tenant_id - Tenant identifier
-    @param {String} actor_id  - Actor identifier
+@param {String} tenant_id - Tenant identifier
+@param {String} actor_id  - Actor identifier
 
-    @return {String} - Prefix string
+@return {String} - Prefix string
     *********************************************************************/
     composeMongoActorPrefix: function (tenant_id, actor_id) {
 
@@ -648,9 +648,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Build the document shape persisted by this store. Merges the
     canonical record with the computed _id and prefix fields.
 
-    @param {Object} record - Canonical session record
+@param {Object} record - Canonical session record
 
-    @return {Object} - MongoDB document (_id + prefix + record fields)
+@return {Object} - MongoDB document (_id + prefix + record fields)
     *********************************************************************/
     recordToDoc: function (record) {
 
@@ -673,9 +673,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Strip MongoDB-specific fields so callers receive a clean canonical
     record. Returns null for missing or undefined input.
 
-    @param {Object} doc - Raw MongoDB document
+@param {Object} doc - Raw MongoDB document
 
-    @return {Object|null} - Canonical session record, or null
+@return {Object|null} - Canonical session record, or null
     *********************************************************************/
     docToRecord: function (doc) {
 

@@ -90,14 +90,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Generate a presigned PUT URL for uploading a file directly to S3.
     Uses HTTP PUT method for simple file uploads. The URL is valid for a limited time (default 15 minutes).
 
-    @param {String} bucket - S3 bucket name
-    @param {String} key - Object key (path/filename in S3)
-    @param {String} contentType - MIME type of the file to be uploaded
-    @param {Object} [options] - (Optional) Additional options
-    @param {Integer} [options.expiresIn] - URL expiration time in seconds. Default: 900 (15 min)
-    @param {Object} [options.metadata] - Custom metadata to attach to object
+@param {String} bucket - S3 bucket name
+@param {String} key - Object key (path/filename in S3)
+@param {String} contentType - MIME type of the file to be uploaded
+@param {Object} [options] - (Optional) Additional options
+@param {Integer} [options.expiresIn] - URL expiration time in seconds. Default: 900 (15 min)
+@param {Object} [options.metadata] - Custom metadata to attach to object
 
-    @return {Promise<Object>} - { success, url, fields, error }
+@return {Promise<Object>} - { success, url, fields, error }
     * @return {Boolean} success - true on success
     * @return {String} url - Presigned URL for PUT upload (HTTP PUT method)
     * @return {Object} fields - Empty object for PUT uploads
@@ -163,13 +163,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Generate a presigned GET URL for downloading a file directly from S3.
     The URL is valid for a limited time (default 1 hour).
 
-    @param {String} bucket - S3 bucket name
-    @param {String} key - Object key (path/filename in S3)
-    @param {Object} [options] - (Optional) Additional options
-    @param {Integer} [options.expiresIn] - URL expiration time in seconds. Default: 3600 (1 hour)
-    @param {String} [options.responseContentDisposition] - Content-Disposition header override
+@param {String} bucket - S3 bucket name
+@param {String} key - Object key (path/filename in S3)
+@param {Object} [options] - (Optional) Additional options
+@param {Integer} [options.expiresIn] - URL expiration time in seconds. Default: 3600 (1 hour)
+@param {String} [options.responseContentDisposition] - Content-Disposition header override
 
-    @return {Promise<Object>} - { success, url, error }
+@return {Promise<Object>} - { success, url, error }
     * @return {Boolean} success - true on success
     * @return {String} url - Presigned URL for GET download
     * @return {Object|null} error - Error details if failed
@@ -240,14 +240,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Uses HTTP POST method with form fields for multipart/form-data uploads.
     The URL is valid for a limited time (default 15 minutes).
 
-    @param {String} bucket - S3 bucket name
-    @param {String} key - Object key (path/filename in S3)
-    @param {String} contentType - MIME type of the file to be uploaded
-    @param {Object} [options] - (Optional) Additional options
-    @param {Integer} [options.expiresIn] - URL expiration time in seconds. Default: 900 (15 min)
-    @param {Object} [options.metadata] - Custom metadata to attach to object
+@param {String} bucket - S3 bucket name
+@param {String} key - Object key (path/filename in S3)
+@param {String} contentType - MIME type of the file to be uploaded
+@param {Object} [options] - (Optional) Additional options
+@param {Integer} [options.expiresIn] - URL expiration time in seconds. Default: 900 (15 min)
+@param {Object} [options.metadata] - Custom metadata to attach to object
 
-    @return {Promise<Object>} - { success, url, fields, error }
+@return {Promise<Object>} - { success, url, fields, error }
     * @return {Boolean} success - true on success
     * @return {String} url - Presigned URL for POST upload (HTTP POST method)
     * @return {Object} fields - Form fields for POST upload
@@ -322,11 +322,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Lazy-load AWS SDK v3 S3 client and presigner.
 
-    @param {Object} Lib - Dependency container (Utils, Debug, Instance)
-    @param {Object} CONFIG - Merged configuration for this instance
-    @param {Object} state - Mutable state holder (S3Client reference)
+@param {Object} Lib - Dependency container (Utils, Debug, Instance)
+@param {Object} CONFIG - Merged configuration for this instance
+@param {Object} state - Mutable state holder (S3Client reference)
 
-    @return {void}
+@return {void}
     *********************************************************************/
     initSDK: function (Lib, CONFIG, state) {
 

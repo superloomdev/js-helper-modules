@@ -99,15 +99,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Generate, store, and return a numeric PIN (charset: 0-9).
     Common use case: short numeric OTP delivered via SMS.
 
-    @param {Object} instance - Request instance for time and lifecycle
-    @param {Object} options - Per-call parameters
-    @param {String} options.scope - Logical owner namespace
-    @param {String} options.key - Specific verification purpose
-    @param {Integer} options.length - Number of characters in the PIN
-    @param {Integer} options.ttl_seconds - Lifetime before expiry
-    @param {Integer} options.cooldown_seconds - Min gap before next pin for same scope+key
+@param {Object} instance - Request instance for time and lifecycle
+@param {Object} options - Per-call parameters
+@param {String} options.scope - Logical owner namespace
+@param {String} options.key - Specific verification purpose
+@param {Integer} options.length - Number of characters in the PIN
+@param {Integer} options.ttl_seconds - Lifetime before expiry
+@param {Integer} options.cooldown_seconds - Min gap before next pin for same scope+key
 
-    @return {Promise<Object>} - { success, code, expires_at, error }
+@return {Promise<Object>} - { success, code, expires_at, error }
     *********************************************************************/
     createPin: async function (instance, options) {
 
@@ -122,10 +122,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Common use case: 6-8 character login or 2FA code printed or read aloud.
     Uppercase, no look-alikes (I, L, O, U excluded).
 
-    @param {Object} instance - Request instance for time and lifecycle
-    @param {Object} options - Per-call parameters (see createPin)
+@param {Object} instance - Request instance for time and lifecycle
+@param {Object} options - Per-call parameters (see createPin)
 
-    @return {Promise<Object>} - { success, code, expires_at, error }
+@return {Promise<Object>} - { success, code, expires_at, error }
     *********************************************************************/
     createCode: async function (instance, options) {
 
@@ -140,10 +140,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Common use case: magic link tail dropped into a query string.
     Highest entropy per character.
 
-    @param {Object} instance - Request instance for time and lifecycle
-    @param {Object} options - Per-call parameters (see createPin)
+@param {Object} instance - Request instance for time and lifecycle
+@param {Object} options - Per-call parameters (see createPin)
 
-    @return {Promise<Object>} - { success, code, expires_at, error }
+@return {Promise<Object>} - { success, code, expires_at, error }
     *********************************************************************/
     createToken: async function (instance, options) {
 
@@ -161,14 +161,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     On match, the record is deleted in the background (one-time use).
     On mismatch, the fail count is atomically incremented.
 
-    @param {Object} instance - Request instance for time and lifecycle
-    @param {Object} options - Per-call parameters
-    @param {String} options.scope - Logical owner namespace
-    @param {String} options.key - Specific verification purpose
-    @param {String} options.value - Value submitted by the caller
-    @param {Integer} options.max_fail_count - Reject after this many failed attempts
+@param {Object} instance - Request instance for time and lifecycle
+@param {Object} options - Per-call parameters
+@param {String} options.scope - Logical owner namespace
+@param {String} options.key - Specific verification purpose
+@param {String} options.value - Value submitted by the caller
+@param {Integer} options.max_fail_count - Reject after this many failed attempts
 
-    @return {Promise<Object>} - { success, error }. On failure, error.type
+@return {Promise<Object>} - { success, error }. On failure, error.type
     is one of: VERIFY_NOT_FOUND, VERIFY_EXPIRED, VERIFY_MAX_FAILS, VERIFY_WRONG_VALUE, VERIFY_SERVICE_UNAVAILABLE.
     *********************************************************************/
     verify: async function (instance, options) {
@@ -192,9 +192,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Intended to be called from a scheduled job (cron, setInterval,
     CloudWatch Events -> Lambda), not on every request.
 
-    @param {Object} instance - Request instance for time reference
+@param {Object} instance - Request instance for time reference
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 
@@ -211,9 +211,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     `expires_at` is opt-in at the table level - enable via AWS console
     or IaC, not by this module). Stores that need no setup are no-ops.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -242,11 +242,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     a fresh code from the supplied charset, write the record. Used by
     createPin, createCode, and createToken.
 
-    @param {Object} instance - Request instance for time and lifecycle
-    @param {Object} options - Caller-provided options
-    @param {String} charset - Charset to draw the code from
+@param {Object} instance - Request instance for time and lifecycle
+@param {Object} options - Caller-provided options
+@param {String} charset - Charset to draw the code from
 
-    @return {Promise<Object>} - { success, code, expires_at, error }
+@return {Promise<Object>} - { success, code, expires_at, error }
     *********************************************************************/
     generateAndStore: async function (instance, options, charset) {
 
@@ -326,10 +326,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     background via Lib.Instance.backgroundRoutine so the caller is not
     blocked waiting for cleanup.
 
-    @param {Object} instance - Request instance for time and lifecycle
-    @param {Object} options - Caller-provided options
+@param {Object} instance - Request instance for time and lifecycle
+@param {Object} options - Caller-provided options
 
-    @return {Promise<Object>} - { success, error } - same shape as createPin
+@return {Promise<Object>} - { success, error } - same shape as createPin
     *********************************************************************/
     consume: async function (instance, options) {
 
@@ -399,9 +399,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     implements this; a missing implementation is a programmer error and
     throws rather than returning an envelope.
 
-    @param {Object} instance - Request instance for time reference
+@param {Object} instance - Request instance for time reference
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpired: async function (instance) {
 
@@ -440,11 +440,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     waiting on the cleanup write. Lib and store are closed over from
     createInterface.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {void}
+@return {void}
     *********************************************************************/
     scheduleBackgroundDelete: function (instance, scope, key) {
 

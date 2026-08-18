@@ -60,9 +60,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     default to null (or false for booleans). Required fields trigger a
     TypeError if absent - those are programmer errors, not envelope errors.
 
-    @param {Object} fields - Named field values
+@param {Object} fields - Named field values
 
-    @return {Object} - Canonical session record
+@return {Object} - Canonical session record
     *********************************************************************/
     buildRecord: function (fields) {
 
@@ -134,7 +134,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     The list of canonical field names. Stores use this to know which keys
     must be serialized/deserialized. Order matches buildRecord.
 
-    @return {String[]} - All canonical field names in order
+@return {String[]} - All canonical field names in order
     *********************************************************************/
     getFieldNames: function () {
 
@@ -164,10 +164,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     Throw TypeError if the named field is not a non-empty string.
     Used during record construction to catch programmer errors fast.
 
-    @param {Object} fields - Named field values
-    @param {String} key - Field name to check
+@param {Object} fields - Named field values
+@param {String} key - Field name to check
 
-    @return {void}
+@return {void}
     *********************************************************************/
     assertRequiredString: function (fields, key) {
 
@@ -186,10 +186,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     /********************************************************************
     Throw TypeError if the named field is not an integer.
 
-    @param {Object} fields - Named field values
-    @param {String} key - Field name to check
+@param {Object} fields - Named field values
+@param {String} key - Field name to check
 
-    @return {void}
+@return {void}
     *********************************************************************/
     assertRequiredInteger: function (fields, key) {
 
@@ -209,9 +209,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     Map undefined/null/empty-string to null. Used for optional fields so
     the record always has explicit nulls, not undefined keys.
 
-    @param {*} value - Field value
+@param {*} value - Field value
 
-    @return {*} - The value, or null if undefined/null/empty
+@return {*} - The value, or null if undefined/null/empty
     *********************************************************************/
     coerceNullable: function (value) {
 
@@ -234,9 +234,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     /********************************************************************
     Map undefined to false; otherwise pass-through (already boolean).
 
-    @param {*} value - Field value
+@param {*} value - Field value
 
-    @return {Boolean} - The value coerced to boolean
+@return {Boolean} - The value coerced to boolean
     *********************************************************************/
     coerceBoolean: function (value) {
 
@@ -256,9 +256,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     silently - throws TypeError on non-integer values, mirroring the
     required-integer assertion).
 
-    @param {*} value - Field value
+@param {*} value - Field value
 
-    @return {Integer|null} - The integer value or null
+@return {Integer|null} - The integer value or null
     *********************************************************************/
     coerceNullableInteger: function (value) {
 

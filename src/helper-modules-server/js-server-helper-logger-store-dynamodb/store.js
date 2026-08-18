@@ -102,9 +102,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     provisioned out-of-band (IaC, AWS Console, or CloudFormation).
     This method returns success to satisfy the logger module contract.
 
-    @param {Object} instance - Request instance (unused)
+@param {Object} instance - Request instance (unused)
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -126,10 +126,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Append one log record via PutItem. The sort_key contains a random
     suffix making collisions effectively impossible.
 
-    @param {Object} instance - Request instance
-    @param {Object} record   - Log record to persist
+@param {Object} instance - Request instance
+@param {Object} record   - Log record to persist
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     addLog: async function (instance, record) {
 
@@ -176,10 +176,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Get log records by entity. Queries the base table on pk prefix.
     Supports action filtering, time range, and cursor pagination.
 
-    @param {Object} instance - Request instance
-    @param {Object} query    - Query parameters (scope, entity_type, entity_id, etc.)
+@param {Object} instance - Request instance
+@param {Object} query    - Query parameters (scope, entity_type, entity_id, etc.)
 
-    @return {Promise<Object>} - { success, records, next_cursor, error }
+@return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByEntity: async function (instance, query) {
 
@@ -192,10 +192,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Get log records by actor. Queries the GSI on actor_pk prefix.
     Supports action filtering, time range, and cursor pagination.
 
-    @param {Object} instance - Request instance
-    @param {Object} query    - Query parameters (scope, actor_type, actor_id, etc.)
+@param {Object} instance - Request instance
+@param {Object} query    - Query parameters (scope, actor_type, actor_id, etc.)
 
-    @return {Promise<Object>} - { success, records, next_cursor, error }
+@return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByActor: async function (instance, query) {
 
@@ -213,9 +213,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Cleanup expired logs. Scans the table for records whose expires_at
     is set and already passed, then batch-deletes them.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -273,11 +273,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Core list implementation for both entity and actor queries.
     Builds the query dynamically based on query parameters.
 
-    @param {Object} instance - Request instance
-    @param {Object} query    - Query parameters
-    @param {String} type     - 'entity' or 'actor'
+@param {Object} instance - Request instance
+@param {Object} query    - Query parameters
+@param {String} type     - 'entity' or 'actor'
 
-    @return {Promise<Object>} - { success, records, next_cursor, error }
+@return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     listByIndex: async function (instance, query, type) {
 

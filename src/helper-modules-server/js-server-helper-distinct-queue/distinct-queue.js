@@ -104,14 +104,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     On success, returns the generated request_id so the caller can log or
     return it to the external service that submitted the job.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Per-call parameters
-    @param {String} options.tenant_id - Partition boundary
-    @param {String} options.resource_id - Opaque resource identifier within the tenant
-    @param {Object} options.payload - Arbitrary data stored as-is, returned by claim
-    @param {String} options.action - Opaque label for the worker, returned by claim
+@param {Object} instance - Request instance
+@param {Object} options - Per-call parameters
+@param {String} options.tenant_id - Partition boundary
+@param {String} options.resource_id - Opaque resource identifier within the tenant
+@param {Object} options.payload - Arbitrary data stored as-is, returned by claim
+@param {String} options.action - Opaque label for the worker, returned by claim
 
-    @return {Promise<Object>} - { success, request_id, error }
+@return {Promise<Object>} - { success, request_id, error }
     *********************************************************************/
     enqueue: async function (instance, options) {
 
@@ -185,12 +185,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     payload is null (nothing to process). The poller loops claim until
     payload is null.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Per-call parameters
-    @param {String} options.tenant_id - Partition boundary
-    @param {String} options.resource_id - Opaque resource identifier within the tenant
+@param {Object} instance - Request instance
+@param {Object} options - Per-call parameters
+@param {String} options.tenant_id - Partition boundary
+@param {String} options.resource_id - Opaque resource identifier within the tenant
 
-    @return {Promise<Object>} - { success, payload, action, error }
+@return {Promise<Object>} - { success, payload, action, error }
     *********************************************************************/
     claim: async function (instance, options) {
 
@@ -283,12 +283,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Operational query. Returns all records whose resource_id begins with
     resource_id_prefix. Not used in the normal enqueue/claim flow.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Per-call parameters
-    @param {String} options.tenant_id - Partition boundary
-    @param {String} options.resource_id_prefix - Prefix to match
+@param {Object} instance - Request instance
+@param {Object} options - Per-call parameters
+@param {String} options.tenant_id - Partition boundary
+@param {String} options.resource_id_prefix - Prefix to match
 
-    @return {Promise<Object>} - { success, records, error }
+@return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listByPrefix: async function (instance, options) {
 
@@ -354,7 +354,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Generate the ordering signal: current time in milliseconds.
     Delegates to Lib.Utils.getUnixTimeInMilliSeconds().
 
-    @return {Number} - Current unix timestamp in milliseconds
+@return {Number} - Current unix timestamp in milliseconds
     *********************************************************************/
     generateDataVersion: function () {
       return Lib.Utils.getUnixTimeInMilliSeconds();
@@ -369,14 +369,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     not construct a storage key - each adapter derives its own key from
     these raw fields.
 
-    @param {String} tenant_id    - Partition boundary
-    @param {String} resource_id  - Opaque resource identifier
-    @param {Object} payload      - Caller-supplied data
-    @param {String} action       - Opaque label for the worker
-    @param {Number} data_version - Millisecond timestamp
-    @param {String} request_id   - Compact UUID for uniqueness and tiebreaking
+@param {String} tenant_id    - Partition boundary
+@param {String} resource_id  - Opaque resource identifier
+@param {Object} payload      - Caller-supplied data
+@param {String} action       - Opaque label for the worker
+@param {Number} data_version - Millisecond timestamp
+@param {String} request_id   - Compact UUID for uniqueness and tiebreaking
 
-    @return {Object} - Canonical record with fields: tenant_id, resource_id,
+@return {Object} - Canonical record with fields: tenant_id, resource_id,
     data_version, request_id, payload, action, toc (copy of data_version for
     store adapter indexing)
     *********************************************************************/
@@ -407,9 +407,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     are treated as interchangeable, not "latest wins". Either way the caller
     deletes all records <= the winner, so same-ms records are fully coalesced.
 
-    @param {Array} records - Array of record objects
+@param {Array} records - Array of record objects
 
-    @return {Object} - The winning record
+@return {Object} - The winning record
     *********************************************************************/
     pickLatest: function (records) {
 
@@ -440,7 +440,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     and caller correlation. Uses the full compact UUID (cryptographically
     secure). Returned to the caller on successful enqueue.
 
-    @return {String} - Full compact UUID string
+@return {String} - Full compact UUID string
     *********************************************************************/
     generateRequestId: function () {
 

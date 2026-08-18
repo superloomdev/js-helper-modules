@@ -11,7 +11,7 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars 
     Validate the merged config object. Throws TypeError on programmer
     error.
 
-    @param {Object} CONFIG - Merged configuration
+@param {Object} CONFIG - Merged configuration
     *********************************************************************/
     validateConfig: function (CONFIG) {
 

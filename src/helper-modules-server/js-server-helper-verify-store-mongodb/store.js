@@ -94,9 +94,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     `_id` index is implicit so no second index is needed for the
     primary access path.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -136,11 +136,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Equality lookup on the compound `_id` - O(1) via the implicit index.
     Returns null when absent.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, record, error }
+@return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getRecord: async function (instance, scope, key) {
 
@@ -194,12 +194,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     so a single source of truth (epoch seconds) feeds both the TTL
     sweeper and the verify-time expiry check.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
-    @param {Object} record   - { code, fail_count, created_at, expires_at }
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
+@param {Object} record   - { code, fail_count, created_at, expires_at }
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setRecord: async function (instance, scope, key, record) {
 
@@ -247,11 +247,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Atomic $inc - safe under concurrent verify attempts.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     incrementFailCount: async function (instance, scope, key) {
 
@@ -288,11 +288,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Idempotent delete (missing _id is treated as success).
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, scope, key) {
 
@@ -331,9 +331,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Manual sweep mirroring the SQL stores. The native TTL index is the
     primary mechanism, but this method supports explicit lifecycle control.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 

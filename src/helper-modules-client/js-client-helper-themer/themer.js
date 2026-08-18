@@ -23,10 +23,10 @@
     Factory loader. One call returns one independent instance with its
     own config and its own result cache.
 
-    @param {Object} shared_libs - Lib container with Utils and Debug
-    @param {Object} config - Overrides merged over module config defaults
+@param {Object} shared_libs - Lib container with Utils and Debug
+@param {Object} config - Overrides merged over module config defaults
 
-    @return {Object} - Public Themer interface
+@return {Object} - Public Themer interface
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
@@ -78,14 +78,14 @@ module.exports = function loader (shared_libs, config) {
     functions close over the provided Lib, CONFIG, ERRORS, Validators,
     Parts, and state.
 
-    @param {Object} Lib - Dependency container
-    @param {Object} CONFIG - Merged config for this instance
-    @param {Object} ERRORS - Frozen error catalog
-    @param {Object} Validators - Validators singleton
-    @param {Object} Parts - Pure parts built by the loader
-    @param {Object} state - Mutable per-instance state
+@param {Object} Lib - Dependency container
+@param {Object} CONFIG - Merged config for this instance
+@param {Object} ERRORS - Frozen error catalog
+@param {Object} Validators - Validators singleton
+@param {Object} Parts - Pure parts built by the loader
+@param {Object} state - Mutable per-instance state
 
-    @return {Object} - Public Themer interface
+@return {Object} - Public Themer interface
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state) {
 

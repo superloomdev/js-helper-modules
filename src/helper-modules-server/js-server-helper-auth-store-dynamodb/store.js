@@ -120,9 +120,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     call on every boot. When no admin is injected, returns
     NOT_IMPLEMENTED.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -229,13 +229,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Exact key lookup. Hash compare after the read stays local so a
     wrong secret looks like "record not found" (no timing leak).
 
-    @param {Object} instance          - Request instance
-    @param {string} tenant_id         - Tenant identifier
-    @param {string} actor_id          - Actor identifier
-    @param {string} token_key         - Token key
-    @param {string} token_secret_hash - Expected hash for constant-time compare
+@param {Object} instance          - Request instance
+@param {string} tenant_id         - Tenant identifier
+@param {string} actor_id          - Actor identifier
+@param {string} token_key         - Token key
+@param {string} token_secret_hash - Expected hash for constant-time compare
 
-    @return {Promise<Object>} - { success, record, error }
+@return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -291,11 +291,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Query by partition key with SK begins_with - hits the composite
     key's primary index, no scan.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
 
-    @return {Promise<Object>} - { success, records, error }
+@return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -348,10 +348,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Upsert via PutItem. The same (tenant_id, actor_id, token_key)
     triple overwrites the existing item.
 
-    @param {Object} instance - Request instance
-    @param {Object} record   - Canonical session record
+@param {Object} instance - Request instance
+@param {Object} record   - Canonical session record
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
@@ -388,13 +388,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Partial update via UpdateItem (SET expression). Throws TypeError
     on identity fields.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
-    @param {string} token_key - Token key
-    @param {Object} updates   - Partial record (mutable fields only)
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
+@param {string} token_key - Token key
+@param {Object} updates   - Partial record (mutable fields only)
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -456,12 +456,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Delete one session by composite key.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
-    @param {string} token_key - Token key
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
+@param {string} token_key - Token key
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
@@ -498,11 +498,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Batch delete many sessions. AWS 25-item limit; helper chunks
     automatically. No-op success if keys is empty.
 
-    @param {Object}   instance  - Request instance
-    @param {string}   tenant_id - Tenant identifier
-    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
+@param {Object}   instance  - Request instance
+@param {string}   tenant_id - Tenant identifier
+@param {Object[]} keys      - Array of { actor_id, token_key } pairs
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -561,9 +561,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Production deployments may enable DynamoDB TTL on expires_at
     for automatic expiry without scans.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
@@ -655,10 +655,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     validated for '-' and '#' by the higher auth layer; token_key is
     generated from the controlled TOKEN_CHARSET so '#' never appears.
 
-    @param {String} actor_id  - Actor identifier
-    @param {String} token_key - Session token key
+@param {String} actor_id  - Actor identifier
+@param {String} token_key - Session token key
 
-    @return {String} - "{actor_id}#{token_key}"
+@return {String} - "{actor_id}#{token_key}"
     *********************************************************************/
     sortKey: function (actor_id, token_key) {
 
@@ -673,9 +673,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Each canonical field becomes a top-level attribute; tenant_id is
     the PK and session_key is the SK.
 
-    @param {Object} record - Canonical session record
+@param {Object} record - Canonical session record
 
-    @return {Object} - DynamoDB item (record + PK/SK attributes)
+@return {Object} - DynamoDB item (record + PK/SK attributes)
     *********************************************************************/
     recordToItem: function (record) {
 
@@ -695,9 +695,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Strip the DynamoDB-only session_key attribute so callers receive a
     clean canonical record.
 
-    @param {Object} item - Raw DynamoDB item
+@param {Object} item - Raw DynamoDB item
 
-    @return {Object|null} - Canonical session record, or null
+@return {Object|null} - Canonical session record, or null
     *********************************************************************/
     itemToRecord: function (item) {
 
