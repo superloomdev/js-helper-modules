@@ -167,7 +167,7 @@ Object.keys(metadataCountries).forEach(function (isoCode) {
 
 // Generate the output file
 const header = [
-  '// Info: Generated country data for js-helper-contact-phone-adapter-basic.',
+  '// Info: Generated country data for helper-contact-phone-adapter-basic.',
   '// Source: libphonenumber-js (Google PhoneNumberMetadata.xml, min metadata)',
   '// License: MIT',
   '// Generated: ' + new Date().toISOString().split('T')[0],
