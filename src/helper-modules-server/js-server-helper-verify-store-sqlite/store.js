@@ -107,8 +107,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // statements use IF NOT EXISTS so repeated calls are no-ops.
 
     /********************************************************************
-    Idempotent table + index creation. Both statements use
-    IF NOT EXISTS so the method is safe to call on every boot.
+Idempotent table + index creation. Both statements use
+IF NOT EXISTS so the method is safe to call on every boot.
 
 @param {Object} instance - Request instance
 
@@ -150,7 +150,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // on a miss; incrementFailCount is an atomic in-place UPDATE.
 
     /********************************************************************
-    Read by composite primary key (scope, id). Returns null when absent.
+Read by composite primary key (scope, id). Returns null when absent.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -194,9 +194,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Upsert via INSERT ... ON CONFLICT DO UPDATE SET. A second call
-    with the same (scope, id) key replaces the mutable columns in
-    a single round-trip.
+Upsert via INSERT ... ON CONFLICT DO UPDATE SET. A second call
+with the same (scope, id) key replaces the mutable columns in
+a single round-trip.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -237,8 +237,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Atomic fail-counter increment via in-place UPDATE. Safe under
-    concurrent verify attempts - each call adds exactly 1.
+Atomic fail-counter increment via in-place UPDATE. Safe under
+concurrent verify attempts - each call adds exactly 1.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -280,8 +280,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Idempotent delete by composite key. A missing row is treated as
-    success so callers do not need to check existence first.
+Idempotent delete by composite key. A missing row is treated as
+success so callers do not need to check existence first.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -328,9 +328,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // range scan even as the table grows.
 
     /********************************************************************
-    Sweep expired records. Uses the expires_at index for an efficient
-    range scan. SQLite has no native TTL, so this is the
-    garbage-collection path - run it on a cron.
+Sweep expired records. Uses the expires_at index for an efficient
+range scan. SQLite has no native TTL, so this is the
+garbage-collection path - run it on a cron.
 
 @param {Object} instance - Request instance
 
@@ -379,10 +379,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using SQLite's native double-quote style (same
-    as Postgres). The table_name arrives from STORE_CONFIG, so this
-    guard makes identifier injection impossible even if the caller
-    passes a crafted table name.
+Quote an identifier using SQLite's native double-quote style (same
+as Postgres). The table_name arrives from STORE_CONFIG, so this
+guard makes identifier injection impossible even if the caller
+passes a crafted table name.
 
 @param {String} name - Identifier (table or column)
 
@@ -402,10 +402,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE + CREATE INDEX DDL array. Idempotent via
-    IF NOT EXISTS. Called once at createInterface time and stored on
-    _Store so the strings are not rebuilt on every initialize() call.
-    Closes over CONFIG from createInterface.
+Build the CREATE TABLE + CREATE INDEX DDL array. Idempotent via
+IF NOT EXISTS. Called once at createInterface time and stored on
+_Store so the strings are not rebuilt on every initialize() call.
+Closes over CONFIG from createInterface.
 
 @return {Array<String>} - [CREATE TABLE stmt, CREATE INDEX stmt]
     *********************************************************************/
@@ -433,11 +433,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the SQLite UPSERT statement. Uses
+Build the SQLite UPSERT statement. Uses
       INSERT ... ON CONFLICT (scope, id) DO UPDATE SET col = excluded.col
-    Supported since SQLite 3.24 (2018) and available everywhere
-    node:sqlite ships. Called once at createInterface time.
-    Closes over CONFIG from createInterface.
+Supported since SQLite 3.24 (2018) and available everywhere
+node:sqlite ships. Called once at createInterface time.
+Closes over CONFIG from createInterface.
 
 @return {String} - SQL template using `?` placeholders
     *********************************************************************/

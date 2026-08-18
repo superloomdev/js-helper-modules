@@ -90,7 +90,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Pure functions that build service params without I/O.
 
     /********************************************************************
-    Build service params for a PutObject command.
+Build service params for a PutObject command.
 
 @param {String} bucket - S3 bucket name
 @param {String} key - Object key (full path including filename)
@@ -129,7 +129,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Build service params for a GetObject command.
+Build service params for a GetObject command.
 
 @param {String} bucket - S3 bucket name
 @param {String} key - Object key
@@ -147,7 +147,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Build service params for a DeleteObject command.
+Build service params for a DeleteObject command.
 
 @param {String} bucket - S3 bucket name
 @param {String} key - Object key
@@ -165,7 +165,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Build service params for a CopyObject command.
+Build service params for a CopyObject command.
 
 @param {String} source_bucket - Source bucket name
 @param {String} source_key - Source object key
@@ -200,7 +200,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Execute pre-built service params against S3.
 
     /********************************************************************
-    Execute a pre-built PutObject command (from commandBuilderForUploadObject).
+Execute a pre-built PutObject command (from commandBuilderForUploadObject).
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -252,8 +252,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built GetObject command (from commandBuilderForGetObject).
-    Drains the response stream and returns the body as Buffer or string.
+Execute a pre-built GetObject command (from commandBuilderForGetObject).
+Drains the response stream and returns the body as Buffer or string.
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -322,7 +322,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
+Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -372,7 +372,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
+Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -428,8 +428,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // High-level functions that build params then execute.
 
     /********************************************************************
-    List objects in a bucket with an optional prefix filter. Returns up to
-    1000 keys in a single call (S3 ListObjectsV2 default page size).
+List objects in a bucket with an optional prefix filter. Returns up to
+1000 keys in a single call (S3 ListObjectsV2 default page size).
 
 @param {Object} instance - Request instance
 @param {String} bucket - S3 bucket name
@@ -494,7 +494,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObject.
+Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObject.
 
 @param {Object} instance - Request instance
 @param {String} bucket - S3 bucket name
@@ -518,9 +518,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Upload multiple files in parallel. Each file entry mirrors the uploadFile
-    signature as an object. Returns aggregate success only when every upload
-    succeeds; the results array contains per-file outcomes.
+Upload multiple files in parallel. Each file entry mirrors the uploadFile
+signature as an object. Returns aggregate success only when every upload
+succeeds; the results array contains per-file outcomes.
 
 @param {Object} instance - Request instance
 @param {Object[]} files - Array of file descriptors
@@ -591,7 +591,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
+Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
 
 @param {Object} instance - Request instance
 @param {String} bucket - S3 bucket name
@@ -612,7 +612,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObject.
+Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObject.
 
 @param {Object} instance - Request instance
 @param {String} bucket - S3 bucket name
@@ -632,9 +632,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete multiple files in a single bucket with automatic 1000-item chunking.
-    AWS DeleteObjects limit is 1000 keys per request; this function handles
-    any number of keys by recursively splitting into 1000-item chunks.
+Delete multiple files in a single bucket with automatic 1000-item chunking.
+AWS DeleteObjects limit is 1000 keys per request; this function handles
+any number of keys by recursively splitting into 1000-item chunks.
 
 @param {Object} instance - Request instance
 @param {String} bucket - S3 bucket name
@@ -728,7 +728,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
+Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
 
 @param {Object} instance - Request instance
 @param {String} source_bucket - Source bucket name
@@ -751,9 +751,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Move a file: copy to destination, then delete source. If the copy fails,
-    the source is left intact. Deletion failure is non-fatal - the copy has
-    succeeded and the destination is authoritative.
+Move a file: copy to destination, then delete source. If the copy fails,
+the source is left intact. Deletion failure is non-fatal - the copy has
+succeeded and the destination is authoritative.
 
 @param {Object} instance - Request instance
 @param {String} source_bucket - Source bucket name
@@ -790,9 +790,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _S3 = {
 
     /********************************************************************
-    Lazy-load the AWS SDK v3 adapter. Shared across every instance because
-    the SDK module itself is stateless - only the S3Client holds per-instance
-    state (region, credentials, endpoint).
+Lazy-load the AWS SDK v3 adapter. Shared across every instance because
+the SDK module itself is stateless - only the S3Client holds per-instance
+state (region, credentials, endpoint).
 
 @return {void}
     *********************************************************************/
@@ -807,10 +807,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's S3 client on first use. Options are built from
-    the merged CONFIG; explicit credentials, custom endpoint (for MinIO or
-    other S3-compatible servers), and path-style addressing are injected
-    when present.
+Create this instance's S3 client on first use. Options are built from
+the merged CONFIG; explicit credentials, custom endpoint (for MinIO or
+other S3-compatible servers), and path-style addressing are injected
+when present.
 
 @return {void}
     *********************************************************************/

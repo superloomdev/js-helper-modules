@@ -94,7 +94,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List all country codes the adapter has data for.
+List all country codes the adapter has data for.
 
 @return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
     *********************************************************************/
@@ -109,8 +109,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get metadata (calling code, length bounds) for a country.
-    Uses libphonenumber-js's Metadata API to extract possibleLengths.
+Get metadata (calling code, length bounds) for a country.
+Uses libphonenumber-js's Metadata API to extract possibleLengths.
 
 @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
@@ -189,10 +189,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Validate a national phone number's syntax using libphonenumber-js.
-    Provides digit pattern validation in addition to length and charset.
-    Returns { valid, reason } where reason is a stable error type string
-    matching the core's error catalog.
+Validate a national phone number's syntax using libphonenumber-js.
+Provides digit pattern validation in addition to length and charset.
+Returns { valid, reason } where reason is a stable error type string
+matching the core's error catalog.
 
 @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
 @param {String} national_number - National number digits
@@ -325,10 +325,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get the type of a phone number using libphonenumber-js.
-    Returns one of: MOBILE, FIXED_LINE, FIXED_LINE_OR_MOBILE, TOLL_FREE,
-    PREMIUM_RATE, SHARED_COST, VOIP, PERSONAL_NUMBER, PAGER, UAN, VOICEMAIL.
-    Returns null if the type cannot be determined.
+Get the type of a phone number using libphonenumber-js.
+Returns one of: MOBILE, FIXED_LINE, FIXED_LINE_OR_MOBILE, TOLL_FREE,
+PREMIUM_RATE, SHARED_COST, VOIP, PERSONAL_NUMBER, PAGER, UAN, VOICEMAIL.
+Returns null if the type cannot be determined.
 
 @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
 @param {String} national_number - National number digits

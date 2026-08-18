@@ -18,8 +18,8 @@ let ERRORS;
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-    Singleton part loader. Assigns the uniform part dependencies to
-    module scope and returns the shared Scale object.
+Singleton part loader. Assigns the uniform part dependencies to
+module scope and returns the shared Scale object.
 
 @param {Object} shared_libs - Lib container with Utils
 @param {Object} config - Merged config from the parent module

@@ -87,15 +87,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Typed wrappers over query() for common SELECT shapes.
 
     /********************************************************************
-    Run a SELECT and return the result in the most appropriate shape:
+Run a SELECT and return the result in the most appropriate shape:
       0 rows             -> null
       1 row, 1 column  -> scalar value
       1 row, N columns -> row object
       N rows             -> row array (has_multiple_rows = true)
 
-    This is the ambiguous auto-shaping variant - use when the result shape
-    is not known upfront. Prefer getRow / getRows / getValue when the shape
-    is known.
+This is the ambiguous auto-shaping variant - use when the result shape
+is not known upfront. Prefer getRow / getRows / getValue when the shape
+is known.
 
 @param {Object} instance - Request instance
 @param {String} sql - SQL (typically pre-built with buildQuery)
@@ -162,7 +162,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Run a query and return the first row, or null if there are no results.
+Run a query and return the first row, or null if there are no results.
 
 @param {Object} instance - Request instance
 @param {String} sql - SQL with ?/?? placeholders
@@ -195,7 +195,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Run a query and return every row.
+Run a query and return every row.
 
 @param {Object} instance - Request instance
 @param {String} sql - SQL with ?/?? placeholders
@@ -230,8 +230,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Run a query and return the first column of the first row. Handy for
-    COUNT(*), MAX(), and other single-value lookups.
+Run a query and return the first column of the first row. Handy for
+COUNT(*), MAX(), and other single-value lookups.
 
 @param {Object} instance - Request instance
 @param {String} sql - SQL with ?/?? placeholders
@@ -278,29 +278,29 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Polymorphic DML runner: single statement or atomic array.
 
     /********************************************************************
-    Run INSERT / UPDATE / DELETE. Polymorphic: string for single statement,
-    array for atomic transaction. Array entries may be SQL strings or
-    { sql, params } objects.
+Run INSERT / UPDATE / DELETE. Polymorphic: string for single statement,
+array for atomic transaction. Array entries may be SQL strings or
+{ sql, params } objects.
 
-    Single statement:
+Single statement:
       await MySQL.write(instance, 'UPDATE users SET name = ? WHERE id = ?', ['John', 1]);
 
-    Atomic transaction:
+Atomic transaction:
       await MySQL.write(instance, [
         { sql: 'INSERT INTO logs (msg) VALUES (?)', params: ['User updated'] },
         { sql: 'UPDATE users SET updated_at = NOW() WHERE id = ?', params: [1] }
       ]);
 
-    Returns aggregated affected_rows (summed across statements) and the
-    last insert_id seen (useful for multi-insert scenarios).
+Returns aggregated affected_rows (summed across statements) and the
+last insert_id seen (useful for multi-insert scenarios).
 
-    affected_rows = total count of rows modified by INSERT / UPDATE / DELETE.
-    For array input, this is summed across all statements (e.g., 2 INSERTs
-    that each add 1 row = affected_rows: 2).
+affected_rows = total count of rows modified by INSERT / UPDATE / DELETE.
+For array input, this is summed across all statements (e.g., 2 INSERTs
+that each add 1 row = affected_rows: 2).
 
-    insert_id = the auto-increment primary key from the last INSERT. For
-    array input, this is the last insertId seen in the batch (useful when
-    you INSERT multiple rows and need the ID of the final one).
+insert_id = the auto-increment primary key from the last INSERT. For
+array input, this is the last insertId seen in the batch (useful when
+you INSERT multiple rows and need the ID of the final one).
 
 @param {Object} instance - Request instance
 @param {(String|Array)} sql - Single SQL string or array of statements
@@ -377,11 +377,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // for a transaction batch.
 
     /********************************************************************
-    Compile a parameterized SQL template into a fully-escaped string.
-    Uses ? for values and ?? for identifiers. Pair with buildRawText()
-    for fragments that must not be escaped.
+Compile a parameterized SQL template into a fully-escaped string.
+Uses ? for values and ?? for identifiers. Pair with buildRawText()
+for fragments that must not be escaped.
 
-    Examples:
+Examples:
       buildQuery('SELECT * FROM ?? WHERE ?? = ?', ['users', 'id', 42])
       buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
       buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
@@ -400,10 +400,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Mark a SQL fragment as raw so buildQuery() leaves it unescaped.
-    Use for spatial functions, nested sub-queries, and similar fragments.
+Mark a SQL fragment as raw so buildQuery() leaves it unescaped.
+Use for spatial functions, nested sub-queries, and similar fragments.
 
-    Example:
+Example:
       const point = Lib.SqlDB.buildRawText(
         "ST_GeomFromText('POINT(28.61 77.20)', 4326)"
       );
@@ -425,8 +425,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Join equality conditions with AND or OR. Identifiers and values are
-    escaped automatically.
+Join equality conditions with AND or OR. Identifiers and values are
+escaped automatically.
 
 @param {Object} data - Key-value pairs to join
 @param {String} [multi_operator] - 'AND' (default) or 'OR'
@@ -454,11 +454,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Graceful teardown of the connection pool. Call on SIGTERM / shutdown.
 
     /********************************************************************
-    Close the pool gracefully. Waits up to CONFIG.CLOSE_TIMEOUT_MS for
-    active queries to finish, then force-destroys any remaining connections.
+Close the pool gracefully. Waits up to CONFIG.CLOSE_TIMEOUT_MS for
+active queries to finish, then force-destroys any remaining connections.
 
-    Persistent servers should call this from their shutdown handler;
-    serverless functions can skip it since the runtime freezes idle pools.
+Persistent servers should call this from their shutdown handler;
+serverless functions can skip it since the runtime freezes idle pools.
 
 @return {Promise<void>}
     *********************************************************************/
@@ -518,8 +518,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     //   }
 
     /********************************************************************
-    Check out a dedicated pool connection for manual transaction control.
-    Must be paired with releaseClient() or the pool will leak.
+Check out a dedicated pool connection for manual transaction control.
+Must be paired with releaseClient() or the pool will leak.
 
 @param {Object} instance - Request instance (kept for API parity with Postgres/SQLite)
 
@@ -566,7 +566,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Return a client from getClient() back to the pool. No-op if null.
+Return a client from getClient() back to the pool. No-op if null.
 
 @param {Object} client - Connection from getClient()
 
@@ -592,8 +592,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Lazy-load the adapter and manage the connection pool.
 
     /********************************************************************
-    Lazy-load the mysql2 adapter. Shared across every instance because
-    the driver itself is stateless - only the pool holds state.
+Lazy-load the mysql2 adapter. Shared across every instance because
+the driver itself is stateless - only the pool holds state.
 
 @return {void}
     *********************************************************************/
@@ -613,8 +613,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's connection pool on first use. Options are
-    built from the merged CONFIG and tuned for MySQL 8+.
+Create this instance's connection pool on first use. Options are
+built from the merged CONFIG and tuned for MySQL 8+.
 
 @return {void}
     *********************************************************************/
@@ -671,8 +671,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Destroy every connection in the pool. Internal helper used by close()
-    when graceful shutdown times out. Public code should call close().
+Destroy every connection in the pool. Internal helper used by close()
+when graceful shutdown times out. Public code should call close().
 
 @return {void}
     *********************************************************************/
@@ -710,8 +710,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // query -> execute|transaction
 
     /********************************************************************
-    Run any SQL. The core workhorse - all other I/O functions route through here.
-    Placeholders: ? for values, ?? for identifiers.
+Run any SQL. The core workhorse - all other I/O functions route through here.
+Placeholders: ? for values, ?? for identifiers.
 
 @param {Object} instance - Request instance
 @param {String} sql - SQL with ?/?? placeholders
@@ -770,8 +770,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Run an INSERT / UPDATE / DELETE statement. Internal helper used by write().
-    Depends on query() for execution.
+Run an INSERT / UPDATE / DELETE statement. Internal helper used by write().
+Depends on query() for execution.
 
 @param {Object} instance - Request instance
 @param {String} sql - SQL with ?/?? placeholders
@@ -808,9 +808,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Run many statements atomically. All commit, or all roll back.
-    Internal helper used by write() for array input. Depends on initIfNot()
-    for pool access and manages its own connection lifecycle.
+Run many statements atomically. All commit, or all roll back.
+Internal helper used by write() for array input. Depends on initIfNot()
+for pool access and manages its own connection lifecycle.
 
 @param {Object} instance - Request instance
 @param {Array} statements - Array of { sql, params }

@@ -92,8 +92,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Idempotent table provisioning. Pay-per-request billing is the
-    correct default for a bursty verification workload.
+Idempotent table provisioning. Pay-per-request billing is the
+correct default for a bursty verification workload.
 
 @param {Object} instance - Request instance
 
@@ -139,7 +139,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ CRUD ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Direct GetItem on the composite key. Returns null when absent.
+Direct GetItem on the composite key. Returns null when absent.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -195,7 +195,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Upsert via PutItem. DynamoDB always overwrites by composite key.
+Upsert via PutItem. DynamoDB always overwrites by composite key.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -246,7 +246,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Atomic ADD via the helper's increment parameter.
+Atomic ADD via the helper's increment parameter.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -289,7 +289,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Idempotent delete.
+Idempotent delete.
 
 @param {Object} instance - Request instance
 @param {String} scope    - Logical owner namespace
@@ -331,9 +331,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Lifecycle ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Explicit sweep. Scan with a FilterExpression then batch-delete the
-    matching keys. The native TTL on `expires_at` is the primary
-    mechanism; this method supports explicit lifecycle control.
+Explicit sweep. Scan with a FilterExpression then batch-delete the
+matching keys. The native TTL on `expires_at` is the primary
+mechanism; this method supports explicit lifecycle control.
 
 @param {Object} instance - Request instance
 

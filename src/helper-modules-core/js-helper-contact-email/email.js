@@ -87,9 +87,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // ~~~~~~~~~~~~~~~~~~~~ Sanitization ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Strip disallowed characters from an email address.
-    Trims whitespace and removes characters not in the allowed set.
-    Does not validate - just cleans.
+Strip disallowed characters from an email address.
+Trims whitespace and removes characters not in the allowed set.
+Does not validate - just cleans.
 
 @param {String} email - Raw email input
 
@@ -113,9 +113,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // Split an email on @. Do not validate.
 
     /********************************************************************
-    Extract the domain part (after @) from an email address.
-    Returns null if there is no @ or the domain is empty.
-    Does not validate the domain.
+Extract the domain part (after @) from an email address.
+Returns null if there is no @ or the domain is empty.
+Does not validate the domain.
 
 @param {String} email - Email address
 
@@ -149,9 +149,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Extract the local part (before @) from an email address.
-    Returns null if there is no @ or the local part is empty.
-    Does not validate the local part.
+Extract the local part (before @) from an email address.
+Returns null if there is no @ or the local part is empty.
+Does not validate the local part.
 
 @param {String} email - Email address
 
@@ -187,9 +187,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // ~~~~~~~~~~~~~~~~~~~~ Validation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Validate an email address's syntax. Delegates to the adapter for
-    the actual syntax check. The adapter returns { valid, reason }
-    where reason is a stable error type string.
+Validate an email address's syntax. Delegates to the adapter for
+the actual syntax check. The adapter returns { valid, reason }
+where reason is a stable error type string.
 
 @param {String} email - Email address to validate
 
@@ -221,12 +221,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
 
     /********************************************************************
-    Check if an email address uses a disposable domain. Delegates to
-    the adapter's isDisposableDomain after extracting the domain part.
-    Returns an envelope so the caller gets the reason.
+Check if an email address uses a disposable domain. Delegates to
+the adapter's isDisposableDomain after extracting the domain part.
+Returns an envelope so the caller gets the reason.
 
-    The basic adapter always returns false (no disposable data).
-    The extended adapter checks against a committed list of ~5K domains.
+The basic adapter always returns false (no disposable data).
+The extended adapter checks against a committed list of ~5K domains.
 
 @param {String} email - Email address to check
 
@@ -274,10 +274,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // ~~~~~~~~~~~~~~~~~~~~ Predicates ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Quick predicate: is the domain of this email a known disposable
-    provider? Delegates to the adapter after extracting the domain.
+Quick predicate: is the domain of this email a known disposable
+provider? Delegates to the adapter after extracting the domain.
 
-    The basic adapter always returns false.
+The basic adapter always returns false.
 
 @param {String} domain - Domain part (e.g. 'gmail.com')
 
@@ -298,14 +298,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // For duplicate detection only. Never use for storage or delivery.
 
     /********************************************************************
-    Canonicalize an email address for duplicate detection.
-    Delegates to the adapter. The basic adapter does Gmail-only folding
-    (remove dots, remove plus-tags). The extended adapter uses
-    validator.normalizeEmail() for all providers.
+Canonicalize an email address for duplicate detection.
+Delegates to the adapter. The basic adapter does Gmail-only folding
+(remove dots, remove plus-tags). The extended adapter uses
+validator.normalizeEmail() for all providers.
 
-    WARNING: Never use the canonicalized address for storage or delivery.
-    It exists for duplicate detection only. Storing a Gmail-folded
-    address loses the user's actual address.
+WARNING: Never use the canonicalized address for storage or delivery.
+It exists for duplicate detection only. Storing a Gmail-folded
+address loses the user's actual address.
 
 @param {String} email - Email address to canonicalize
 

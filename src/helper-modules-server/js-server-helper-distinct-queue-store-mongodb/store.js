@@ -89,11 +89,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Run once on first deploy to verify the store is reachable. No-op for MongoDB.
 
     /********************************************************************
-    One-time store provisioning. Run once when setting up the store for
-    the first time - not on every application boot.
+One-time store provisioning. Run once when setting up the store for
+the first time - not on every application boot.
 
-    No-op for this adapter: MongoDB creates the collection and implicit
-    _id index automatically on first write. No explicit setup needed.
+No-op for this adapter: MongoDB creates the collection and implicit
+_id index automatically on first write. No explicit setup needed.
 
 @param {Object} instance - Request instance
 
@@ -119,8 +119,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Append a queue record identified by the compound _id subdocument.
 
     /********************************************************************
-    Append a record to the collection using Lib.MongoDB.writeRecord
-    with the compound _id subdocument { t, r, d, s }.
+Append a record to the collection using Lib.MongoDB.writeRecord
+with the compound _id subdocument { t, r, d, s }.
 
 @param {Object} instance - Request instance
 @param {Object} record   - The record to write (tenant_id, resource_id,
@@ -171,10 +171,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Read records by exact resource or by resource_id prefix.
 
     /********************************************************************
-    Return all records matching (tenant_id, resource_id), sorted by
-    data_version ascending (chronological order).
+Return all records matching (tenant_id, resource_id), sorted by
+data_version ascending (chronological order).
 
-    Uses the implicit _id index via dot notation: _id.t, _id.r, _id.d
+Uses the implicit _id index via dot notation: _id.t, _id.r, _id.d
 
 @param {Object} instance   - Request instance
 @param {String} tenant_id  - Partition key
@@ -219,11 +219,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return all records for tenant_id whose resource_id starts with the
-    given prefix, sorted by data_version ascending.
+Return all records for tenant_id whose resource_id starts with the
+given prefix, sorted by data_version ascending.
 
-    Uses MongoDB $regex with ^anchor on _id.r for prefix matching.
-    The implicit _id index supports this query pattern.
+Uses MongoDB $regex with ^anchor on _id.r for prefix matching.
+The implicit _id index supports this query pattern.
 
 @param {Object} instance          - Request instance
 @param {String} tenant_id         - Partition key
@@ -277,12 +277,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Remove stale records up to and including a data_version boundary.
 
     /********************************************************************
-    Delete all records for (tenant_id, resource_id) where
-    data_version <= data_version_boundary.
+Delete all records for (tenant_id, resource_id) where
+data_version <= data_version_boundary.
 
-    Uses _id subdocument fields: _id.t, _id.r, _id.d
-    This is used during claim() to remove stale records after the latest
-    is selected.
+Uses _id subdocument fields: _id.t, _id.r, _id.d
+This is used during claim() to remove stale records after the latest
+is selected.
 
 @param {Object} instance               - Request instance
 @param {String} tenant_id              - Partition key
@@ -333,8 +333,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const _Store = {
 
     /********************************************************************
-    Build the compound _id subdocument from components.
-    Field keys are single-character to save space: t, r, d, s
+Build the compound _id subdocument from components.
+Field keys are single-character to save space: t, r, d, s
 
 @param {String} tenant_id - Partition boundary
 @param {String} resource_id - Resource identifier
@@ -349,9 +349,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Reconstruct a full record from the stored document.
-    The stored document has _id subdocument; we expand it to top-level fields
-    expected by the core module.
+Reconstruct a full record from the stored document.
+The stored document has _id subdocument; we expand it to top-level fields
+expected by the core module.
 
 @param {Object} doc - The MongoDB document { _id: {t,r,d,s}, payload, action, toc }
 

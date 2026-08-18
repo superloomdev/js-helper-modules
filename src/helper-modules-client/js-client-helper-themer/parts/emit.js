@@ -31,8 +31,8 @@ const PLATFORMS = ['web', 'native'];
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-    Singleton part loader. Assigns the uniform part dependencies plus
-    the colour part to module scope and returns the shared Emit object.
+Singleton part loader. Assigns the uniform part dependencies plus
+the colour part to module scope and returns the shared Emit object.
 
 @param {Object} shared_libs - Lib container with Utils and the Color part
 @param {Object} config - Merged config from the parent module

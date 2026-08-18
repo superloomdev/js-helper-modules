@@ -115,10 +115,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // out-of-band.
 
     /********************************************************************
-    Provision the DynamoDB table and enable TTL for this store.
-    Delegates to Lib.DynamoDBAdmin when injected. Idempotent: safe to
-    call on every boot. When no admin is injected, returns
-    NOT_IMPLEMENTED.
+Provision the DynamoDB table and enable TTL for this store.
+Delegates to Lib.DynamoDBAdmin when injected. Idempotent: safe to
+call on every boot. When no admin is injected, returns
+NOT_IMPLEMENTED.
 
 @param {Object} instance - Request instance
 
@@ -226,8 +226,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // composite key's primary index, no scan and no GSI.
 
     /********************************************************************
-    Exact key lookup. Hash compare after the read stays local so a
-    wrong secret looks like "record not found" (no timing leak).
+Exact key lookup. Hash compare after the read stays local so a
+wrong secret looks like "record not found" (no timing leak).
 
 @param {Object} instance          - Request instance
 @param {string} tenant_id         - Tenant identifier
@@ -288,8 +288,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Query by partition key with SK begins_with - hits the composite
-    key's primary index, no scan.
+Query by partition key with SK begins_with - hits the composite
+key's primary index, no scan.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -345,8 +345,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // integrity tamper-proof.
 
     /********************************************************************
-    Upsert via PutItem. The same (tenant_id, actor_id, token_key)
-    triple overwrites the existing item.
+Upsert via PutItem. The same (tenant_id, actor_id, token_key)
+triple overwrites the existing item.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical session record
@@ -385,8 +385,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Partial update via UpdateItem (SET expression). Throws TypeError
-    on identity fields.
+Partial update via UpdateItem (SET expression). Throws TypeError
+on identity fields.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -454,7 +454,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // stay bounded-cost regardless of session count.
 
     /********************************************************************
-    Delete one session by composite key.
+Delete one session by composite key.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -495,8 +495,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Batch delete many sessions. AWS 25-item limit; helper chunks
-    automatically. No-op success if keys is empty.
+Batch delete many sessions. AWS 25-item limit; helper chunks
+automatically. No-op success if keys is empty.
 
 @param {Object}   instance  - Request instance
 @param {string}   tenant_id - Tenant identifier
@@ -557,9 +557,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // matches the TTL-attribute format AWS expects).
 
     /********************************************************************
-    Sweep expired sessions. Scan with filter then batchDelete.
-    Production deployments may enable DynamoDB TTL on expires_at
-    for automatic expiry without scans.
+Sweep expired sessions. Scan with filter then batchDelete.
+Production deployments may enable DynamoDB TTL on expires_at
+for automatic expiry without scans.
 
 @param {Object} instance - Request instance
 
@@ -651,9 +651,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Compose the sort key from actor_id and token_key. actor_id is
-    validated for '-' and '#' by the higher auth layer; token_key is
-    generated from the controlled TOKEN_CHARSET so '#' never appears.
+Compose the sort key from actor_id and token_key. actor_id is
+validated for '-' and '#' by the higher auth layer; token_key is
+generated from the controlled TOKEN_CHARSET so '#' never appears.
 
 @param {String} actor_id  - Actor identifier
 @param {String} token_key - Session token key
@@ -669,9 +669,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a canonical session record into the DynamoDB item shape.
-    Each canonical field becomes a top-level attribute; tenant_id is
-    the PK and session_key is the SK.
+Convert a canonical session record into the DynamoDB item shape.
+Each canonical field becomes a top-level attribute; tenant_id is
+the PK and session_key is the SK.
 
 @param {Object} record - Canonical session record
 
@@ -692,8 +692,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Strip the DynamoDB-only session_key attribute so callers receive a
-    clean canonical record.
+Strip the DynamoDB-only session_key attribute so callers receive a
+clean canonical record.
 
 @param {Object} item - Raw DynamoDB item
 

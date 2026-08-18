@@ -84,7 +84,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Create table and indexes. Safe to call on every boot (IF NOT EXISTS).
+Create table and indexes. Safe to call on every boot (IF NOT EXISTS).
 
 @param {Object} instance - Request instance
 
@@ -106,7 +106,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Append a single log record. PK conflict silently ignored.
+Append a single log record. PK conflict silently ignored.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical log record from logger.js
@@ -131,7 +131,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a specific entity, most-recent first.
+List log records for a specific entity, most-recent first.
 
 @param {Object} instance - Request instance
 @param {Object} query    - { scope, entity_type, entity_id, actions?, limit?, cursor? }
@@ -164,7 +164,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a specific actor, most-recent first.
+List log records for a specific actor, most-recent first.
 
 @param {Object} instance - Request instance
 @param {Object} query    - { scope, actor_type, actor_id, limit?, cursor? }
@@ -197,7 +197,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Delete all rows with expires_at <= now (seconds).
+Delete all rows with expires_at <= now (seconds).
 
 @param {Object} instance - Request instance
 
@@ -248,7 +248,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using MySQL backtick style.
+Quote an identifier using MySQL backtick style.
 
 @param {String} name - Identifier (table or column)
 
@@ -266,7 +266,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE DDL.
+Build the CREATE TABLE DDL.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -304,8 +304,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the INSERT SQL. Conflicts on sort_key (PK) are silently
-    ignored via ON DUPLICATE KEY UPDATE.
+Build the INSERT SQL. Conflicts on sort_key (PK) are silently
+ignored via ON DUPLICATE KEY UPDATE.
 
 @return {String} - SQL template using ? placeholders
     *********************************************************************/
@@ -330,7 +330,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the SELECT SQL for entity-scoped log queries.
+Build the SELECT SQL for entity-scoped log queries.
 
 @param {Object} query - { scope, entity_type, entity_id, actions?, limit?, cursor? }
 
@@ -371,7 +371,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the SELECT SQL for actor-scoped log queries.
+Build the SELECT SQL for actor-scoped log queries.
 
 @param {Object} query - { scope, actor_type, actor_id, limit?, cursor? }
 
@@ -402,7 +402,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a canonical record to an ordered array of column values.
+Convert a canonical record to an ordered array of column values.
 
 @param {Object} record - Canonical log record
 
@@ -430,8 +430,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert a database row back to a canonical record object.
-    Coerces BIGINT columns from string to number (mysql2 driver quirk).
+Convert a database row back to a canonical record object.
+Coerces BIGINT columns from string to number (mysql2 driver quirk).
 
 @param {Object} row - Raw database row
 

@@ -112,9 +112,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // keeps both the table and the sweep-index idempotent.
 
     /********************************************************************
-    Idempotent table + index setup. Creates the sessions table with
-    the expires_at index inlined (MySQL does not support CREATE INDEX
-    IF NOT EXISTS). Safe to call on every boot.
+Idempotent table + index setup. Creates the sessions table with
+the expires_at index inlined (MySQL does not support CREATE INDEX
+IF NOT EXISTS). Safe to call on every boot.
 
 @param {Object} instance - Request instance
 
@@ -155,8 +155,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // single index reads even at large scale.
 
     /********************************************************************
-    Read a single session by (tenant_id, actor_id, token_key). Returns
-    null record on hash mismatch - identical to "not found" shape.
+Read a single session by (tenant_id, actor_id, token_key). Returns
+null record on hash mismatch - identical to "not found" shape.
 
 @param {Object} instance          - Request instance
 @param {string} tenant_id         - Tenant identifier
@@ -224,7 +224,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return all sessions for a (tenant_id, actor_id) pair.
+Return all sessions for a (tenant_id, actor_id) pair.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -277,7 +277,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // refuses any identity column to keep PK integrity tamper-proof.
 
     /********************************************************************
-    Insert or upsert a session by composite primary key.
+Insert or upsert a session by composite primary key.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical session record
@@ -313,8 +313,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Partial UPDATE for mutable per-session fields. Throws TypeError
-    if `updates` contains any identity or primary-key column.
+Partial UPDATE for mutable per-session fields. Throws TypeError
+if `updates` contains any identity or primary-key column.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -392,7 +392,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // replacement stay constant-cost regardless of session count.
 
     /********************************************************************
-    Delete one session by composite primary key.
+Delete one session by composite primary key.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -436,8 +436,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Bulk delete sessions for a tenant. Single round-trip with an
-    OR-joined clause. No-op success if keys array is empty.
+Bulk delete sessions for a tenant. Single round-trip with an
+OR-joined clause. No-op success if keys array is empty.
 
 @param {Object}   instance  - Request instance
 @param {string}   tenant_id - Tenant identifier
@@ -507,8 +507,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // efficient range scan even as the table grows.
 
     /********************************************************************
-    Sweep all expired sessions. MySQL has no native TTL; this is
-    the garbage-collection path - run it on a cron.
+Sweep all expired sessions. MySQL has no native TTL; this is
+the garbage-collection path - run it on a cron.
 
 @param {Object} instance - Request instance
 
@@ -600,10 +600,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using MySQL's native backtick style. Rejects
-    any identifier containing a backtick or double-quote so identifiers
-    can never inject DDL through the table_name configuration.
-    Closes over config from createInterface.
+Quote an identifier using MySQL's native backtick style. Rejects
+any identifier containing a backtick or double-quote so identifiers
+can never inject DDL through the table_name configuration.
+Closes over config from createInterface.
 
 @param {String} name - Identifier (table or column)
 
@@ -628,11 +628,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE statement for MySQL. Idempotent via
-    CREATE TABLE IF NOT EXISTS. The expires_at index is inlined because
-    MySQL has no CREATE INDEX IF NOT EXISTS - inlining it here makes
-    both the table and the index idempotent under a single statement.
-    Closes over config from createInterface.
+Build the CREATE TABLE statement for MySQL. Idempotent via
+CREATE TABLE IF NOT EXISTS. The expires_at index is inlined because
+MySQL has no CREATE INDEX IF NOT EXISTS - inlining it here makes
+both the table and the index idempotent under a single statement.
+Closes over config from createInterface.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -682,11 +682,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the MySQL UPSERT statement. Uses
+Build the MySQL UPSERT statement. Uses
       INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)
-    so a second call with the same (tenant_id, actor_id, token_key)
-    replaces the mutable columns in a single round-trip.
-    Closes over config from createInterface.
+so a second call with the same (tenant_id, actor_id, token_key)
+replaces the mutable columns in a single round-trip.
+Closes over config from createInterface.
 
 @return {String} - SQL template using `?` placeholders
     *********************************************************************/
@@ -722,9 +722,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Encode a canonical-record value for a parameterized INSERT / UPDATE.
-    MySQL TINYINT(1) expects 0/1 for booleans; custom_data is JSON-
-    enveloped; undefined maps to null.
+Encode a canonical-record value for a parameterized INSERT / UPDATE.
+MySQL TINYINT(1) expects 0/1 for booleans; custom_data is JSON-
+enveloped; undefined maps to null.
 
 @param {String} col   - Column name
 @param {*}      value - Canonical record value
@@ -757,10 +757,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Decode a raw row value into its canonical-record shape. mysql2
-    returns TINYINT(1) as 0/1 by default; we coerce back to boolean.
-    custom_data is parsed from the TEXT-stored JSON envelope. BIGINT
-    columns may arrive as strings in some driver configurations.
+Decode a raw row value into its canonical-record shape. mysql2
+returns TINYINT(1) as 0/1 by default; we coerce back to boolean.
+custom_data is parsed from the TEXT-stored JSON envelope. BIGINT
+columns may arrive as strings in some driver configurations.
 
 @param {String} col   - Column name
 @param {*}      value - Raw DB value
@@ -814,7 +814,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Canonical record -> positional values array, aligned with COLUMNS.
+Canonical record -> positional values array, aligned with COLUMNS.
 
 @param {Object} record - Canonical session record
 
@@ -831,7 +831,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Raw row object -> canonical record.
+Raw row object -> canonical record.
 
 @param {Object} row - Raw row from MySQL driver
 

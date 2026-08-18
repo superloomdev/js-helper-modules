@@ -98,9 +98,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // is satisfied.
 
     /********************************************************************
-    Idempotent schema setup. DynamoDB tables and GSIs should be
-    provisioned out-of-band (IaC, AWS Console, or CloudFormation).
-    This method returns success to satisfy the logger module contract.
+Idempotent schema setup. DynamoDB tables and GSIs should be
+provisioned out-of-band (IaC, AWS Console, or CloudFormation).
+This method returns success to satisfy the logger module contract.
 
 @param {Object} instance - Request instance (unused)
 
@@ -123,8 +123,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // are effectively impossible - no UPSERT logic needed.
 
     /********************************************************************
-    Append one log record via PutItem. The sort_key contains a random
-    suffix making collisions effectively impossible.
+Append one log record via PutItem. The sort_key contains a random
+suffix making collisions effectively impossible.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Log record to persist
@@ -173,8 +173,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Entity and actor lookups via Query on base table and GSI.
 
     /********************************************************************
-    Get log records by entity. Queries the base table on pk prefix.
-    Supports action filtering, time range, and cursor pagination.
+Get log records by entity. Queries the base table on pk prefix.
+Supports action filtering, time range, and cursor pagination.
 
 @param {Object} instance - Request instance
 @param {Object} query    - Query parameters (scope, entity_type, entity_id, etc.)
@@ -189,8 +189,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Get log records by actor. Queries the GSI on actor_pk prefix.
-    Supports action filtering, time range, and cursor pagination.
+Get log records by actor. Queries the GSI on actor_pk prefix.
+Supports action filtering, time range, and cursor pagination.
 
 @param {Object} instance - Request instance
 @param {Object} query    - Query parameters (scope, actor_type, actor_id, etc.)
@@ -210,8 +210,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // the store contract (deleted_count reflects actual deletions) holds.
 
     /********************************************************************
-    Cleanup expired logs. Scans the table for records whose expires_at
-    is set and already passed, then batch-deletes them.
+Cleanup expired logs. Scans the table for records whose expires_at
+is set and already passed, then batch-deletes them.
 
 @param {Object} instance - Request instance
 
@@ -270,8 +270,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Core list implementation for both entity and actor queries.
-    Builds the query dynamically based on query parameters.
+Core list implementation for both entity and actor queries.
+Builds the query dynamically based on query parameters.
 
 @param {Object} instance - Request instance
 @param {Object} query    - Query parameters

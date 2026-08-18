@@ -55,10 +55,10 @@ module.exports = function loader (shared_libs, config, errors) {
 const Params = {
 
   /********************************************************************
-    Build a typed, validated args object from the normalized HTTP request
-    data in instance.http_request.
+Build a typed, validated args object from the normalized HTTP request
+data in instance.http_request.
 
-    Each entry in the params array describes one parameter:
+Each entry in the params array describes one parameter:
       in              {String}   - 'query' | 'body' | 'header' | 'params' | 'fixed'
                                    Source location for value extraction (preferred)
       method          {String}   - 'GET' | 'POST' | 'HEADER' | 'PATH' | 'FIXED'

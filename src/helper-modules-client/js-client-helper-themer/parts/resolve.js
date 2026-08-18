@@ -55,9 +55,9 @@ const ELEVATION = {
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-    Singleton part loader. Assigns the uniform part dependencies plus
-    the sibling parts and validators, and returns the shared Resolve
-    object.
+Singleton part loader. Assigns the uniform part dependencies plus
+the sibling parts and validators, and returns the shared Resolve
+object.
 
 @param {Object} shared_libs - Lib container with Utils, Color, Scale, Validators
 @param {Object} config - Merged config from the parent module

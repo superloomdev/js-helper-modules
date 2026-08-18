@@ -96,8 +96,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Start, pause, resume, stop, and reset keyed timers.
 
     /********************************************************************
-    Start a keyed timer. If the key already exists, the previous timer
-    is stopped and replaced.
+Start a keyed timer. If the key already exists, the previous timer
+is stopped and replaced.
 
 @param {string} key              - Timer key (defaults to 'default')
 @param {Object} options          - Timer options
@@ -169,8 +169,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Pause a keyed timer. Freezes the elapsed clock and clears pending
-    tick/done timers.
+Pause a keyed timer. Freezes the elapsed clock and clears pending
+tick/done timers.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -221,8 +221,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Resume a paused timer. Adjusts the pause accumulator and
-    reschedules tick/done timers for the remaining delta.
+Resume a paused timer. Adjusts the pause accumulator and
+reschedules tick/done timers for the remaining delta.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -280,7 +280,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Stop a keyed timer. Clears all timers and removes the record.
+Stop a keyed timer. Clears all timers and removes the record.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -316,8 +316,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Reset a keyed timer to its initial state. Keeps the same options
-    but restarts the clock from now.
+Reset a keyed timer to its initial state. Keeps the same options
+but restarts the clock from now.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -365,7 +365,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Stop every timer and clear the registry.
+Stop every timer and clear the registry.
 
 @return {Object} - { success, data, error }
     *********************************************************************/
@@ -393,8 +393,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Drift-corrected read-only accessors.
 
     /********************************************************************
-    Get milliseconds remaining for a countdown timer. Computed from
-    wall-clock arithmetic, never from a per-tick counter.
+Get milliseconds remaining for a countdown timer. Computed from
+wall-clock arithmetic, never from a per-tick counter.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -430,8 +430,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Get milliseconds elapsed since the timer started. Computed from
-    wall-clock arithmetic, never from a per-tick counter.
+Get milliseconds elapsed since the timer started. Computed from
+wall-clock arithmetic, never from a per-tick counter.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -467,7 +467,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Get the current state of a keyed timer.
+Get the current state of a keyed timer.
 
 @param {string} key - Timer key (defaults to 'default')
 
@@ -508,8 +508,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // useTimer and useCountdown bridge timer state into re-renders.
 
     /********************************************************************
-    React hook for a keyed timer. Owns useState for the displayed
-    value, feeds it from onTick, and stops the timer on unmount.
+React hook for a keyed timer. Owns useState for the displayed
+value, feeds it from onTick, and stops the timer on unmount.
 
 @param {string} key              - Timer key (defaults to 'default')
 @param {Object} options          - Same options as start()
@@ -590,8 +590,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    React hook for a countdown timer. Convenience wrapper around
-    useTimer with direction fixed to 'down'.
+React hook for a countdown timer. Convenience wrapper around
+useTimer with direction fixed to 'down'.
 
 @param {string} key              - Timer key (defaults to 'default')
 @param {number} duration_ms      - Countdown duration in ms
@@ -627,7 +627,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Drift-corrected computation from wall-clock arithmetic.
 
     /********************************************************************
-    Compute elapsed ms for a timer, subtracting paused time.
+Compute elapsed ms for a timer, subtracting paused time.
 
 @param {string} key - Timer key
 
@@ -650,7 +650,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Compute remaining ms for a countdown timer.
+Compute remaining ms for a countdown timer.
 
 @param {string} key - Timer key
 
@@ -678,8 +678,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Tick intervals and done callbacks.
 
     /********************************************************************
-    Schedule the tick interval for a timer. Each tick fires onTick
-    with the current drift-corrected value.
+Schedule the tick interval for a timer. Each tick fires onTick
+with the current drift-corrected value.
     *********************************************************************/
     scheduleTicks: function (key) {
 
@@ -715,8 +715,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Schedule the done callback for a countdown timer. Fires once
-    when the remaining delta reaches zero.
+Schedule the done callback for a countdown timer. Fires once
+when the remaining delta reaches zero.
     *********************************************************************/
     scheduleDone: function (key) {
 
@@ -752,7 +752,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Clear the tick interval for a timer.
+Clear the tick interval for a timer.
     *********************************************************************/
     clearTickInterval: function (key) {
 
@@ -767,7 +767,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Clear all pending timers (tick + done) for a timer.
+Clear all pending timers (tick + done) for a timer.
     *********************************************************************/
     clearTimers: function (key) {
 
@@ -784,7 +784,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Stop and delete a timer by key.
+Stop and delete a timer by key.
     *********************************************************************/
     stopByKey: function (key) {
 

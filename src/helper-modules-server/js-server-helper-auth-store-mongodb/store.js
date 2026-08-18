@@ -106,10 +106,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // out-of-band.
 
     /********************************************************************
-    Provision the collection and secondary indexes for this store.
-    Delegates to Lib.MongoDBAdmin when injected. Idempotent: safe to
-    call on every boot. When no admin is injected, returns
-    NOT_IMPLEMENTED with a message naming the admin module.
+Provision the collection and secondary indexes for this store.
+Delegates to Lib.MongoDBAdmin when injected. Idempotent: safe to
+call on every boot. When no admin is injected, returns
+NOT_IMPLEMENTED with a message naming the admin module.
 
 @param {Object} instance - Request instance
 
@@ -191,9 +191,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // field, hitting the B-tree directly.
 
     /********************************************************************
-    Direct read by composite _id. The token_secret_hash is baked into
-    _id so a wrong secret produces a miss (no timing leak, no extra
-    read). Returns null record when the document is not found.
+Direct read by composite _id. The token_secret_hash is baked into
+_id so a wrong secret produces a miss (no timing leak, no extra
+read). Returns null record when the document is not found.
 
 @param {Object} instance          - Request instance
 @param {string} tenant_id         - Tenant identifier
@@ -240,8 +240,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List all sessions for (tenant_id, actor_id). Uses equality on the
-    pre-computed `prefix` field so we hit the B-tree index directly.
+List all sessions for (tenant_id, actor_id). Uses equality on the
+pre-computed `prefix` field so we hit the B-tree index directly.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -295,9 +295,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // $set and refuses identity/PK fields (including _id and prefix).
 
     /********************************************************************
-    Upsert a session document. replaceOne+upsert on _id ensures the
-    same (tenant_id, actor_id, token_key, token_secret_hash) quadruple
-    yields exactly one document.
+Upsert a session document. replaceOne+upsert on _id ensures the
+same (tenant_id, actor_id, token_key, token_secret_hash) quadruple
+yields exactly one document.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical session record
@@ -340,9 +340,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Partial update via $set. Uses an anchored prefix regex on _id to
-    locate the document (the caller only has actor_id + token_key,
-    not the hash baked into _id). Throws TypeError on identity fields.
+Partial update via $set. Uses an anchored prefix regex on _id to
+locate the document (the caller only has actor_id + token_key,
+not the hash baked into _id). Throws TypeError on identity fields.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -416,8 +416,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // matches because {actor_id + token_key} is unique per tenant.
 
     /********************************************************************
-    Delete by (tenant_id, actor_id, token_key). Uses an anchored prefix
-    regex on _id since the caller does not have the hash.
+Delete by (tenant_id, actor_id, token_key). Uses an anchored prefix
+regex on _id since the caller does not have the hash.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -462,8 +462,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Bulk delete by $or over all _id prefixes. One deleteMany round-trip.
-    No-op success if keys array is empty.
+Bulk delete by $or over all _id prefixes. One deleteMany round-trip.
+No-op success if keys array is empty.
 
 @param {Object}   instance  - Request instance
 @param {string}   tenant_id - Tenant identifier
@@ -524,9 +524,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // manual sweep is the garbage-collection path - run it on a cron.
 
     /********************************************************************
-    Sweep expired sessions using the expires_at integer field. MongoDB
-    native TTL requires a Date-typed field; this manual deleteMany is
-    the garbage-collection path - run it on a cron.
+Sweep expired sessions using the expires_at integer field. MongoDB
+native TTL requires a Date-typed field; this manual deleteMany is
+the garbage-collection path - run it on a cron.
 
 @param {Object} instance - Request instance
 
@@ -585,9 +585,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Escape a string for safe use inside a RegExp literal. Handles all
-    regex metacharacters so tenant_id and actor_id values that contain
-    dots, brackets, etc. never corrupt the anchored prefix pattern.
+Escape a string for safe use inside a RegExp literal. Handles all
+regex metacharacters so tenant_id and actor_id values that contain
+dots, brackets, etc. never corrupt the anchored prefix pattern.
 
 @param {String} str - Raw string to escape
 
@@ -602,12 +602,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the MongoDB _id for a session document. Composite key:
+Build the MongoDB _id for a session document. Composite key:
       "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
 
-    Including the hash in _id means a wrong-secret getSession probe
-    produces a different _id and MongoDB returns null without reading
-    the document (O(1), no timing leak).
+Including the hash in _id means a wrong-secret getSession probe
+produces a different _id and MongoDB returns null without reading
+the document (O(1), no timing leak).
 
 @param {String} tenant_id         - Tenant identifier
 @param {String} actor_id          - Actor identifier
@@ -625,11 +625,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the indexed `prefix` field stored on every document. Format:
+Build the indexed `prefix` field stored on every document. Format:
       "{tenant_id}#{actor_id}#"
 
-    Equality queries on this field (via a btree index) replace the
-    anchored-regex scan on _id for listSessionsByActor.
+Equality queries on this field (via a btree index) replace the
+anchored-regex scan on _id for listSessionsByActor.
 
 @param {String} tenant_id - Tenant identifier
 @param {String} actor_id  - Actor identifier
@@ -645,8 +645,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the document shape persisted by this store. Merges the
-    canonical record with the computed _id and prefix fields.
+Build the document shape persisted by this store. Merges the
+canonical record with the computed _id and prefix fields.
 
 @param {Object} record - Canonical session record
 
@@ -670,8 +670,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Strip MongoDB-specific fields so callers receive a clean canonical
-    record. Returns null for missing or undefined input.
+Strip MongoDB-specific fields so callers receive a clean canonical
+record. Returns null for missing or undefined input.
 
 @param {Object} doc - Raw MongoDB document
 

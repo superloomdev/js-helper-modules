@@ -30,12 +30,12 @@ module.exports = function makeStubAdapter () {
   const adapter = {
 
     /****************************************************************
-    Populate instance with normalized HTTP request data from a plain
-    raw_request object. The raw_request shape mirrors what real adapters
-    produce after normalization - tests pass it pre-normalized so they
-    can focus on gateway logic, not wire-format parsing.
+Populate instance with normalized HTTP request data from a plain
+raw_request object. The raw_request shape mirrors what real adapters
+produce after normalization - tests pass it pre-normalized so they
+can focus on gateway logic, not wire-format parsing.
 
-    raw_request shape (all keys optional; defaults to empty):
+raw_request shape (all keys optional; defaults to empty):
       headers  {Object} - Lowercase header key -> value map
       query    {Object} - Query-string parameters
       body     {Object} - Request body parameters
@@ -77,8 +77,8 @@ module.exports = function makeStubAdapter () {
 
 
     /****************************************************************
-    Build a response envelope. Returns a plain object that mirrors the
-    shape real adapters produce, suitable for test assertions.
+Build a response envelope. Returns a plain object that mirrors the
+shape real adapters produce, suitable for test assertions.
 
 @param {Integer} status  - HTTP status code
 @param {Object}  headers - Response headers map
@@ -115,8 +115,8 @@ module.exports = function makeStubAdapter () {
 
 
     /****************************************************************
-    Return the viewer country code if the adapter can supply it.
-    The stub adapter never has this information - returns null.
+Return the viewer country code if the adapter can supply it.
+The stub adapter never has this information - returns null.
 
 @param {Object} _headers - Request headers (unused)
 

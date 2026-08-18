@@ -84,7 +84,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const SQS = {
 
     /********************************************************************
-    Send a message to a queue.
+Send a message to a queue.
 
 @param {Object} instance - Request lifecycle instance (from Instance.initialize)
 @param {String} queue_name - Queue name (not URL)
@@ -164,7 +164,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Receive messages from a queue (polling).
+Receive messages from a queue (polling).
 
 @param {Object} instance - Request lifecycle instance (from Instance.initialize)
 @param {String} queue_name - Queue name
@@ -249,7 +249,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete a message from queue after successful processing.
+Delete a message from queue after successful processing.
 
 @param {Object} instance - Request lifecycle instance (from Instance.initialize)
 @param {String} queue_name - Queue name
@@ -311,7 +311,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Send a delayed message (scheduled for future delivery).
+Send a delayed message (scheduled for future delivery).
 
 @param {Object} instance - Request lifecycle instance (from Instance.initialize)
 @param {String} queue_name - Queue name
@@ -335,9 +335,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _SQS = {
 
     /********************************************************************
-    Lazy-load the AWS SDK v3 SQS adapter. Shared across every instance
-    because the SDK module is stateless - only the SQS client holds
-    per-instance state.
+Lazy-load the AWS SDK v3 SQS adapter. Shared across every instance
+because the SDK module is stateless - only the SQS client holds
+per-instance state.
 
 @return {void}
     *********************************************************************/
@@ -352,9 +352,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's SQS client on first use. Options are built
-    from the merged CONFIG; explicit credentials and custom endpoint
-    (for ElasticMQ) are injected if present.
+Create this instance's SQS client on first use. Options are built
+from the merged CONFIG; explicit credentials and custom endpoint
+(for ElasticMQ) are injected if present.
 
 @return {void}
     *********************************************************************/
@@ -403,11 +403,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Resolve queue URL from queue name. Caches resolved URLs in per-instance
-    state to avoid repeated API calls.
+Resolve queue URL from queue name. Caches resolved URLs in per-instance
+state to avoid repeated API calls.
 
-    If QUEUE_URL_PREFIX is configured, the URL is constructed directly.
-    Otherwise, the GetQueueUrl API is called and the result is cached.
+If QUEUE_URL_PREFIX is configured, the URL is constructed directly.
+Otherwise, the GetQueueUrl API is called and the result is cached.
 
 @param {String} queue_name - Queue name
 @return {Promise<String>} - Resolved queue URL
@@ -439,8 +439,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Parse message body from JSON string. Returns the original string
-    if parsing fails (non-JSON messages are supported).
+Parse message body from JSON string. Returns the original string
+if parsing fails (non-JSON messages are supported).
 
 @param {String} body - Raw message body string
 @return {*} - Parsed object or original string

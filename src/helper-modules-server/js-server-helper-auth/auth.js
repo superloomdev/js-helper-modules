@@ -130,10 +130,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     // Create / verify / remove sessions for the current actor.
 
     /********************************************************************
-    Create a new session for an actor. Enforces tier limits + same-install
-    replacement via the list-then-filter algorithm. Returns a cookie descriptor
-    in `cookies` when COOKIE_PREFIX is configured - pass it to
-    Lib.HttpGateway.returnHttpResponse as the cookies argument.
+Create a new session for an actor. Enforces tier limits + same-install
+replacement via the list-then-filter algorithm. Returns a cookie descriptor
+in `cookies` when COOKIE_PREFIX is configured - pass it to
+Lib.HttpGateway.returnHttpResponse as the cookies argument.
 
 @param {Object} instance - Request instance (provides time + lifecycle)
 @param {Object} options - See parts/validators.js validateCreateSessionOptions
@@ -327,11 +327,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Verify an inbound auth_id (or read it from the request via the
-    token-source priority chain). Hydrates instance.session on success.
-    Schedules a throttled background refresh of last_active_at +
-    expires_at + client_* fields when LAST_ACTIVE_UPDATE_INTERVAL_SECONDS
-    has elapsed since the last refresh.
+Verify an inbound auth_id (or read it from the request via the
+token-source priority chain). Hydrates instance.session on success.
+Schedules a throttled background refresh of last_active_at +
+expires_at + client_* fields when LAST_ACTIVE_UPDATE_INTERVAL_SECONDS
+has elapsed since the last refresh.
 
 @param {Object} instance - Request instance
 @param {Object} [options] - Optional explicit auth_id + tenant_id
@@ -459,7 +459,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Delete one session by (tenant_id, actor_id, token_key).
+Delete one session by (tenant_id, actor_id, token_key).
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id, token_key }
@@ -511,8 +511,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Remove all sessions for an actor except the one whose token_key is
-    identified by keep_token_key. Used for "log out everywhere else".
+Remove all sessions for an actor except the one whose token_key is
+identified by keep_token_key. Used for "log out everywhere else".
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id, keep_token_key }
@@ -583,8 +583,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Delete all sessions for an actor. Used for password reset and
-    forced re-auth.
+Delete all sessions for an actor. Used for password reset and
+forced re-auth.
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id }
@@ -667,8 +667,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     // Read-only listing and counting for the current actor.
 
     /********************************************************************
-    List all sessions for an actor. The classic "Active devices" UI
-    backend. Does not modify state.
+List all sessions for an actor. The classic "Active devices" UI
+backend. Does not modify state.
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id }
@@ -713,8 +713,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Count active sessions for an actor. Convenience wrapper over
-    listSessions for callers that need only a number.
+Count active sessions for an actor. Convenience wrapper over
+listSessions for callers that need only a number.
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id }
@@ -744,15 +744,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    List active sessions whose push_provider + push_token are both set.
-    Used by a push-notification module to fan out a message to all
-    devices owned by an actor without re-querying device state on every
-    push call.
+List active sessions whose push_provider + push_token are both set.
+Used by a push-notification module to fan out a message to all
+devices owned by an actor without re-querying device state on every
+push call.
 
-    Returns the canonical session shape; the push module reads
-    push_provider + push_token + install_platform + install_form_factor
-    from each record. Sessions with null push fields are omitted, as
-    are expired sessions (mirrors listSessions).
+Returns the canonical session shape; the push module reads
+push_provider + push_token + install_platform + install_form_factor
+from each record. Sessions with null push fields are omitted, as
+are expired sessions (mirrors listSessions).
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id }
@@ -798,8 +798,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     // Attach / detach the per-session push provider + token.
 
     /********************************************************************
-    Bind a push provider + token to an existing session. Called after
-    the client app obtains push permission from the OS / browser.
+Bind a push provider + token to an existing session. Called after
+the client app obtains push permission from the OS / browser.
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id, token_key, push_provider, push_token }
@@ -841,8 +841,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Unbind the push provider + token from a session. Called when the OS
-    revokes the token, or the client opts out of push.
+Unbind the push provider + token from a session. Called when the OS
+revokes the token, or the client opts out of push.
 
 @param {Object} instance - Request instance
 @param {Object} options - { tenant_id, actor_id, token_key }
@@ -888,17 +888,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     // sweep that purges expired rows.
 
     /********************************************************************
-    Idempotent backend schema setup. SQL backends (sqlite, postgres,
-    mysql) issue CREATE TABLE IF NOT EXISTS plus CREATE INDEX
-    IF NOT EXISTS for the expires_at index in a single call. Safe to
-    run on every boot.
+Idempotent backend schema setup. SQL backends (sqlite, postgres,
+mysql) issue CREATE TABLE IF NOT EXISTS plus CREATE INDEX
+IF NOT EXISTS for the expires_at index in a single call. Safe to
+run on every boot.
 
-    NoSQL backends (mongodb, dynamodb) implement this method as a no-op
-    that returns { success: false, error: AUTH_NOT_IMPLEMENTED } - their
-    schema (collections, tables, secondary indexes, native TTL) must be
-    provisioned out-of-band via infra-as-code or a one-shot script using
-    the underlying helper module. A custom store that omits the method
-    entirely trips the capability gate below and throws TypeError.
+NoSQL backends (mongodb, dynamodb) implement this method as a no-op
+that returns { success: false, error: AUTH_NOT_IMPLEMENTED } - their
+schema (collections, tables, secondary indexes, native TTL) must be
+provisioned out-of-band via infra-as-code or a one-shot script using
+the underlying helper module. A custom store that omits the method
+entirely trips the capability gate below and throws TypeError.
 
 @param {Object} instance - Request instance
 
@@ -922,8 +922,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Sweep expired sessions. Optional - only useful for SQL backends
-    without native TTL. Recommended frequency: once per day via cron.
+Sweep expired sessions. Optional - only useful for SQL backends
+without native TTL. Recommended frequency: once per day via cron.
 
 @param {Object} instance - Request instance
 
@@ -966,9 +966,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     // Pure helpers for building / parsing the wire-format auth_id.
 
     /********************************************************************
-    Pure helper: build a wire-format auth_id from its three parts.
-    Useful for tests and for flows that mint an auth_id outside of
-    createSession.
+Pure helper: build a wire-format auth_id from its three parts.
+Useful for tests and for flows that mint an auth_id outside of
+createSession.
 
 @param {Object} parts - { actor_id, token_key, token_secret }
 
@@ -982,8 +982,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Pure helper: parse a wire-format auth_id back into its three parts.
-    Returns null if the shape is wrong.
+Pure helper: parse a wire-format auth_id back into its three parts.
+Returns null if the shape is wrong.
 
 @param {String} auth_id - The wire-format string
 
@@ -1001,13 +1001,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     // ENABLE_JWT=true. Each call throws if JWT mode is off.
 
     /********************************************************************
-    Stateless JWT verification. Decodes + verifies the signature and
-    standard claims (iat / exp / iss / aud) without any DB read. Use
-    this on every authenticated request when JWT mode is enabled - the
-    DB is consulted only on /refresh.
+Stateless JWT verification. Decodes + verifies the signature and
+standard claims (iat / exp / iss / aud) without any DB read. Use
+this on every authenticated request when JWT mode is enabled - the
+DB is consulted only on /refresh.
 
-    Returns either the verified claims or one of the standard auth
-    errors mapped from ERRORS.
+Returns either the verified claims or one of the standard auth
+errors mapped from ERRORS.
 
 @param {Object} instance - Request instance
 @param {Object} options
@@ -1081,9 +1081,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Mint a fresh access JWT for an existing session. Useful after
-    verifySession - e.g., a "session warmup" endpoint that hands out
-    short-lived JWTs based on a long-lived auth_id cookie.
+Mint a fresh access JWT for an existing session. Useful after
+verifySession - e.g., a "session warmup" endpoint that hands out
+short-lived JWTs based on a long-lived auth_id cookie.
 
 @param {Object} instance - Request instance
 @param {Object} options
@@ -1119,12 +1119,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Exchange a refresh token for a new access + new refresh token. The
-    old refresh token is invalidated by rotating the stored hash. The
-    underlying session record is touched (last_active_at / expires_at)
-    so a steady refresh stream keeps the session alive.
+Exchange a refresh token for a new access + new refresh token. The
+old refresh token is invalidated by rotating the stored hash. The
+underlying session record is touched (last_active_at / expires_at)
+so a steady refresh stream keeps the session alive.
 
-    Refresh token wire format:
+Refresh token wire format:
       "{actor_id}-{token_key}-{refresh_secret}"
 
 @param {Object} instance - Request instance
@@ -1302,10 +1302,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
 
     /********************************************************************
-    Schedule a fire-and-forget refresh of last_active_at + expires_at
-    on the session record. Runs in parallel with the request's response
-    so the user doesn't wait on a DB write that doesn't affect the result.
-    Closes over Lib, store, and CONFIG from createInterface.
+Schedule a fire-and-forget refresh of last_active_at + expires_at
+on the session record. Runs in parallel with the request's response
+so the user doesn't wait on a DB write that doesn't affect the result.
+Closes over Lib, store, and CONFIG from createInterface.
 
 @param {Object}  instance    - Request instance
 @param {Object}  record      - The session record to refresh

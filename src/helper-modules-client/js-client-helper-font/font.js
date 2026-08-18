@@ -93,23 +93,23 @@ const Font = {
   map or a flat entry for a single weight.
 
   Each style entry must have at least one source field:
-    - url:   remote URL (used by web extension for @font-face)
-    - path:  local file path (used by native extensions)
-    - asset: requireable module ID (used by Expo extension)
+- url:   remote URL (used by web extension for @font-face)
+- path:  local file path (used by native extensions)
+- asset: requireable module ID (used by Expo extension)
 
   Example manifest:
   {
-    Poppins: {
+Poppins: {
       styles: {
         '400': { url: 'https://fonts.gstatic.com/.../poppins-400.woff2', path: '/app/fonts/poppins-400.ttf' },
         '600': { url: 'https://fonts.gstatic.com/.../poppins-600.woff2', path: '/app/fonts/poppins-600.ttf' }
       }
-    },
-    Lora: {
+},
+Lora: {
       url: 'https://example.com/lora-regular.ttf',
       path: '/app/fonts/lora-regular.ttf',
       weight: '400'
-    }
+}
   }
 
   @param {Object} manifest - Family manifest object

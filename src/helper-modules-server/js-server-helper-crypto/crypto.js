@@ -78,7 +78,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Cryptographically secure random generation and UUID helpers.
 
     /********************************************************************
-    Generate cryptographically secure random string from a character set
+Generate cryptographically secure random string from a character set
 
 @param {String} charset - Superset of characters to pick from
 @param {Integer} length - Desired length of output string
@@ -107,7 +107,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate time-prefixed random string (base36 time + random padding)
+Generate time-prefixed random string (base36 time + random padding)
 
 @param {Integer} time - Current Unix time in seconds
 @param {Integer} [min_length] - (Optional) Minimum total length, padded with random chars
@@ -139,7 +139,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate UUIDv4 string (36 characters, hexadecimal)
+Generate UUIDv4 string (36 characters, hexadecimal)
 
 @return {String} - Random UUIDv4 ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')
     *********************************************************************/
@@ -151,8 +151,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate compact UUID (25 characters, base36)
-    Standard UUID with hyphens removed, converted to base36
+Generate compact UUID (25 characters, base36)
+Standard UUID with hyphens removed, converted to base36
 
 @return {String} - Compact UUID in base36 (25 chars)
     *********************************************************************/
@@ -169,7 +169,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // MD5 for checksums, SHA256-HMAC for secure keyed hashing.
 
     /********************************************************************
-    Generate MD5 hash of a string (32 characters, hexadecimal)
+Generate MD5 hash of a string (32 characters, hexadecimal)
 
 @param {String} str - String to hash
 
@@ -183,7 +183,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Generate HMAC-SHA256 hash of a string (64 characters, hexadecimal)
+Generate HMAC-SHA256 hash of a string (64 characters, hexadecimal)
 
 @param {String} str - String to hash
 @param {String} [secret] - (Optional) Secret key for HMAC. Default ''
@@ -205,7 +205,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Symmetric encryption using AES-128-CBC.
 
     /********************************************************************
-    Encrypt a string using AES-128-CBC
+Encrypt a string using AES-128-CBC
 
 @param {String} str - String to encrypt
 @param {String} secret - Secret key for encryption
@@ -228,7 +228,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Decrypt a string encrypted with AES-128-CBC
+Decrypt a string encrypted with AES-128-CBC
 
 @param {String} str - Encrypted hexadecimal string
 @param {String} secret - Secret key used for encryption
@@ -254,7 +254,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Integer <-> base36 conversion utilities.
 
     /********************************************************************
-    Convert integer to base36 string
+Convert integer to base36 string
 
 @param {Integer} num - Number to convert
 
@@ -268,7 +268,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert base36 string to integer
+Convert base36 string to integer
 
 @param {String} str - Base36 string
 
@@ -285,7 +285,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Standard and URL-safe base64 encoding/decoding.
 
     /********************************************************************
-    Convert string to base64
+Convert string to base64
 
 @param {String} str - String to encode
 
@@ -299,7 +299,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert base64 string to UTF-8 string
+Convert base64 string to UTF-8 string
 
 @param {String} str - Base64 string to decode
 
@@ -313,7 +313,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert Buffer to base64 string
+Convert Buffer to base64 string
 
 @param {Buffer} obj - Buffer object
 
@@ -327,8 +327,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert standard base64 to URL-safe base64
-    Replaces '+' with '-', '/' with '_', removes trailing '='
+Convert standard base64 to URL-safe base64
+Replaces '+' with '-', '/' with '_', removes trailing '='
 
 @param {String} str - Standard base64 string
 
@@ -345,8 +345,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert URL-safe base64 back to standard base64
-    Replaces '-' with '+', '_' with '/', adds trailing '=' padding
+Convert URL-safe base64 back to standard base64
+Replaces '-' with '+', '_' with '/', adds trailing '=' padding
 
 @param {String} str - URL-safe base64 string
 
@@ -376,7 +376,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const _Crypto = {
 
     /********************************************************************
-    Convert hexadecimal string to base36
+Convert hexadecimal string to base36
 
 @param {String} hex - Hexadecimal string
 

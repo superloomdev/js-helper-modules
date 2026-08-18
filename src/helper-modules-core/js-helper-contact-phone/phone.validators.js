@@ -84,10 +84,10 @@ const Validators = {
   calls never hit a partially-implemented adapter.
 
   The phone adapter contract (4 methods):
-    listCountries() -> [String]
-    getMetadata(country_code) -> { calling_code, min_length, max_length } | null
-    validateSyntax(country_code, national_number) -> { valid, reason }
-    getNumberType(country_code, national_number) -> String | null
+listCountries() -> [String]
+getMetadata(country_code) -> { calling_code, min_length, max_length } | null
+validateSyntax(country_code, national_number) -> { valid, reason }
+getNumberType(country_code, national_number) -> String | null
 
 @param {Object} adapter - Instantiated adapter object
 

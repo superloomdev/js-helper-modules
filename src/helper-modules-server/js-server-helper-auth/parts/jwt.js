@@ -66,9 +66,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Mint an access JWT. Returns a compact JWS string using HS256 over the
-    provided claims + standard registered claims (iss, aud, iat, exp,
-    jti, sub).
+Mint an access JWT. Returns a compact JWS string using HS256 over the
+provided claims + standard registered claims (iss, aud, iat, exp,
+jti, sub).
 
 @param {Object} options
 @param {Object} options.session - Canonical session record (for claims)
@@ -124,9 +124,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Verify a JWT signature + standard claims. Returns a result object
-    with the decoded claims on success or an error code otherwise.
-    Entirely in-memory - no DB read.
+Verify a JWT signature + standard claims. Returns a result object
+with the decoded claims on success or an error code otherwise.
+Entirely in-memory - no DB read.
 
 @param {Object} options
 @param {String} options.jwt - compact JWS string
@@ -232,8 +232,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Generate a random opaque refresh token. Returns the plaintext; the
-    caller hashes it before persisting.
+Generate a random opaque refresh token. Returns the plaintext; the
+caller hashes it before persisting.
 
 @return {String} - Random refresh token
     *********************************************************************/
@@ -246,8 +246,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Deterministic hash of a refresh token for DB storage. Uses the auth
-    module's SHA-256 helper so it matches the token_secret_hash algorithm.
+Deterministic hash of a refresh token for DB storage. Uses the auth
+module's SHA-256 helper so it matches the token_secret_hash algorithm.
 
 @param {String} refresh_token - Plaintext refresh token
 
@@ -262,7 +262,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    base64url encoder for UTF-8 strings.
+base64url encoder for UTF-8 strings.
     *********************************************************************/
     base64UrlEncode: function (str) {
 
@@ -277,7 +277,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    base64url encoder for raw Buffers.
+base64url encoder for raw Buffers.
     *********************************************************************/
     base64UrlEncodeBuffer: function (buffer) {
 
@@ -292,7 +292,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    base64url decoder - returns UTF-8 string.
+base64url decoder - returns UTF-8 string.
     *********************************************************************/
     base64UrlDecode: function (str) {
 

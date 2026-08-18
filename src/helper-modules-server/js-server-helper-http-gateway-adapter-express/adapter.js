@@ -81,24 +81,24 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const Adapter = {
 
     /********************************************************************
-    Extract normalized HTTP request data from an Express req object.
-    Reads headers, query, body, params, cookies, and method directly
-    from the Express request object.
+Extract normalized HTTP request data from an Express req object.
+Reads headers, query, body, params, cookies, and method directly
+from the Express request object.
 
-    Express is expected to be configured with:
-    - express.json() or express.urlencoded() middleware for body parsing
-    - cookie-parser middleware for req.cookies (optional; falls back to
+Express is expected to be configured with:
+- express.json() or express.urlencoded() middleware for body parsing
+- cookie-parser middleware for req.cookies (optional; falls back to
       parsing the raw Cookie header if req.cookies is absent)
 
-    Returned fields:
-    headers          {Object} - Lowercase header key -> value map
-    cookies          {Object} - Parsed cookies map
-    query            {Object} - Query-string parameters (req.query)
-    body             {Object} - Request body (req.body)
-    params           {Object} - Path parameters (req.params)
-    method           {String} - HTTP method ('GET', 'POST', ...)
-    url              {String} - Request URL path with query string
-    response_handler {Function} - Wraps Express res
+Returned fields:
+headers          {Object} - Lowercase header key -> value map
+cookies          {Object} - Parsed cookies map
+query            {Object} - Query-string parameters (req.query)
+body             {Object} - Request body (req.body)
+params           {Object} - Path parameters (req.params)
+method           {String} - HTTP method ('GET', 'POST', ...)
+url              {String} - Request URL path with query string
+response_handler {Function} - Wraps Express res
 
 @param {Object}   raw_request       - Express req object
 @param {Object}   raw_context       - Unused (no execution context in Express)
@@ -168,16 +168,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the Express-compatible response envelope. Produces a plain
-    object with statusCode, headers, and body - the same shape used by
-    the gateway's returnHttpResponse logic. The actual send is performed
-    by the response_handler returned from extractRequest.
+Build the Express-compatible response envelope. Produces a plain
+object with statusCode, headers, and body - the same shape used by
+the gateway's returnHttpResponse logic. The actual send is performed
+by the response_handler returned from extractRequest.
 
-    Body normalization rules:
-    null / undefined  -> ''
-    Buffer            -> base64 string
-    Object            -> JSON.stringify
-    Anything else     -> String(value)
+Body normalization rules:
+null / undefined  -> ''
+Buffer            -> base64 string
+Object            -> JSON.stringify
+Anything else     -> String(value)
 
 @param {Integer} status  - HTTP status code
 @param {Object}  headers - Response headers map
@@ -217,9 +217,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Express has no CDN layer - always returns null.
-    Projects fronting Express with CloudFront can implement a custom
-    adapter that reads the CloudFront-Viewer-Country forwarded header.
+Express has no CDN layer - always returns null.
+Projects fronting Express with CloudFront can implement a custom
+adapter that reads the CloudFront-Viewer-Country forwarded header.
 
 @param {Object} headers - Request headers (unused)
 
@@ -237,8 +237,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const _Adapter = {
 
     /********************************************************************
-    Parse a raw Cookie header string into a key/value map.
-    Used as fallback when cookie-parser middleware is not installed.
+Parse a raw Cookie header string into a key/value map.
+Used as fallback when cookie-parser middleware is not installed.
 
 @param {String} cookie_header - Raw value of the Cookie header
 

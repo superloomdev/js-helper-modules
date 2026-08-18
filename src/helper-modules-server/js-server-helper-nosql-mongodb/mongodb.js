@@ -89,7 +89,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // operations. All are upsert-friendly where applicable.
 
     /********************************************************************
-    Get a single record from a collection by filter (typically _id).
+Get a single record from a collection by filter (typically _id).
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -145,9 +145,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Write (create or replace) a single record. Always upsert - inserts if
-    the filter matches nothing, replaces if it matches. Callers never need
-    to think about insert vs replace.
+Write (create or replace) a single record. Always upsert - inserts if
+the filter matches nothing, replaces if it matches. Callers never need
+to think about insert vs replace.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -204,7 +204,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete a single record from a collection.
+Delete a single record from a collection.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -256,7 +256,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Update fields in a single record.
+Update fields in a single record.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -320,9 +320,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // scan() permits empty filters for intentional full reads.
 
     /********************************************************************
-    Query multiple records from a collection. Requires a non-empty filter
-    to prevent accidental full-collection scans. Use scan() for intentional
-    full-collection reads.
+Query multiple records from a collection. Requires a non-empty filter
+to prevent accidental full-collection scans. Use scan() for intentional
+full-collection reads.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -391,7 +391,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Count documents matching a filter.
+Count documents matching a filter.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -448,11 +448,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Scan an entire collection. Returns all documents, or documents
-    matching an optional filter. Unlike query(), this function permits
-    empty filters for intentional full-collection reads.
+Scan an entire collection. Returns all documents, or documents
+matching an optional filter. Unlike query(), this function permits
+empty filters for intentional full-collection reads.
 
-    Use sparingly on large collections.
+Use sparingly on large collections.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -518,10 +518,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Requires non-empty filter to prevent accidental full-collection deletion.
 
     /********************************************************************
-    Delete multiple records from a single collection matching a filter.
-    MongoDB-unique convenience function - no DynamoDB equivalent exists.
-    DynamoDB requires explicit keys for bulk deletes; this uses filter-based
-    deleteMany which is native to MongoDB.
+Delete multiple records from a single collection matching a filter.
+MongoDB-unique convenience function - no DynamoDB equivalent exists.
+DynamoDB requires explicit keys for bulk deletes; this uses filter-based
+deleteMany which is native to MongoDB.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -582,11 +582,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // native cross-collection batch commands. Consistent with DynamoDB interface.
 
     /********************************************************************
-    Batch get multiple records by _id from one or more collections.
-    Consistent with DynamoDB batchGetRecords multi-table interface.
+Batch get multiple records by _id from one or more collections.
+Consistent with DynamoDB batchGetRecords multi-table interface.
 
-    Note: MongoDB does not natively support multi-collection batch get.
-    This function internally loops through each collection and merges results.
+Note: MongoDB does not natively support multi-collection batch get.
+This function internally loops through each collection and merges results.
 
 @param {Object} instance - Request instance
 @param {Object} idsByCollection - Map of collection names to _id arrays
@@ -650,15 +650,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch write and delete records across one or more collections using
-    MongoDB bulkWrite. Supports mixed insertOne and deleteOne operations
-    in a single call per collection.
+Batch write and delete records across one or more collections using
+MongoDB bulkWrite. Supports mixed insertOne and deleteOne operations
+in a single call per collection.
 
-    Consistent with DynamoDB batchWriteAndDeleteRecords multi-table interface.
+Consistent with DynamoDB batchWriteAndDeleteRecords multi-table interface.
 
-    Note: MongoDB does not natively support cross-collection bulkWrite.
-    This function internally loops through each collection and runs
-    bulkWrite per collection.
+Note: MongoDB does not natively support cross-collection bulkWrite.
+This function internally loops through each collection and runs
+bulkWrite per collection.
 
 @param {Object} instance - Request instance
 @param {Object} operationsByCollection - Map of collection names to operation arrays
@@ -739,12 +739,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch write (insert) records across one or more collections.
-    Consistent with DynamoDB batchWriteRecords multi-table interface.
+Batch write (insert) records across one or more collections.
+Consistent with DynamoDB batchWriteRecords multi-table interface.
 
-    Note: MongoDB does not natively support cross-collection insertMany.
-    This function internally loops through each collection and runs
-    insertMany per collection.
+Note: MongoDB does not natively support cross-collection insertMany.
+This function internally loops through each collection and runs
+insertMany per collection.
 
 @param {Object} instance - Request instance
 @param {Object} documentsByCollection - Map of collection names to document arrays
@@ -810,12 +810,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch delete records by explicit _id from one or more collections.
-    Consistent with DynamoDB batchDeleteRecords multi-table interface.
+Batch delete records by explicit _id from one or more collections.
+Consistent with DynamoDB batchDeleteRecords multi-table interface.
 
-    Note: MongoDB does not natively support cross-collection batch delete.
-    This function internally loops through each collection and runs
-    deleteMany with an $in filter per collection.
+Note: MongoDB does not natively support cross-collection batch delete.
+This function internally loops through each collection and runs
+deleteMany with an $in filter per collection.
 
 @param {Object} instance - Request instance
 @param {Object} idsByCollection - Map of collection names to _id arrays
@@ -885,16 +885,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Requires replica set (Atlas has this by default; local Docker needs --replSet).
 
     /********************************************************************
-    Execute multiple write operations atomically within a transaction.
-    All operations succeed or all are rolled back.
+Execute multiple write operations atomically within a transaction.
+All operations succeed or all are rolled back.
 
-    Requires a MongoDB replica set (standalone servers do not support
-    transactions). MongoDB Atlas has replica set enabled by default.
-    For local Docker, start mongod with --replSet rs0.
+Requires a MongoDB replica set (standalone servers do not support
+transactions). MongoDB Atlas has replica set enabled by default.
+For local Docker, start mongod with --replSet rs0.
 
-    The callback receives the session and db reference. All operations
-    inside the callback must pass { session } as an option to participate
-    in the transaction.
+The callback receives the session and db reference. All operations
+inside the callback must pass { session } as an option to participate
+in the transaction.
 
 @param {Object} instance - Request instance
 @param {Function} callback - async function(session, db) { ... }
@@ -959,10 +959,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // to call repeatedly at startup without worrying about duplicates.
 
     /********************************************************************
-    Create (or verify) an index on a collection. Idempotent - MongoDB's
-    createIndex is a no-op when an equivalent index already exists with
-    the same name and spec, which means callers can safely invoke this
-    at boot time on every startup without worrying about duplicates.
+Create (or verify) an index on a collection. Idempotent - MongoDB's
+createIndex is a no-op when an equivalent index already exists with
+the same name and spec, which means callers can safely invoke this
+at boot time on every startup without worrying about duplicates.
 
 @param {Object} instance - Request instance
 @param {String} collection - Collection name
@@ -1021,7 +1021,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // on shutdown or when switching database contexts.
 
     /********************************************************************
-    Close the MongoDB connection for this instance.
+Close the MongoDB connection for this instance.
 
 @param {Object} instance - Request instance
 
@@ -1075,9 +1075,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _MongoDB = {
 
     /********************************************************************
-    Lazy-load the MongoDB native driver. Shared across every instance
-    because the driver module itself is stateless - only MongoClient
-    holds per-instance state.
+Lazy-load the MongoDB native driver. Shared across every instance
+because the driver module itself is stateless - only MongoClient
+holds per-instance state.
 
 @return {void}
     *********************************************************************/
@@ -1092,8 +1092,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's MongoClient on first use. Connects to the
-    database and caches both client and db references in state.
+Create this instance's MongoClient on first use. Connects to the
+database and caches both client and db references in state.
 
 @return {Promise<void>}
     *********************************************************************/

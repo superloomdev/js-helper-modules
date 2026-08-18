@@ -88,7 +88,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Pure functions that build service params without I/O.
 
     /********************************************************************
-    Build service params for a Put command.
+Build service params for a Put command.
 
 @param {String} table - Table name
 @param {Object} data - Item data to store
@@ -106,7 +106,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Build service params for a Delete command.
+Build service params for a Delete command.
 
 @param {String} table - Table name
 @param {Object} key - Primary key of record to delete
@@ -124,7 +124,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Build service params for an Update command. Supports SET, REMOVE, INCREMENT, DECREMENT.
+Build service params for an Update command. Supports SET, REMOVE, INCREMENT, DECREMENT.
 
 @param {String} table - Table name
 @param {Object} key - Primary key of record to update
@@ -134,9 +134,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 @param {Object} [decrement] - Keys to decrement { key: amount }
 @param {String} [return_state] - ReturnValues enum: 'ALL_NEW' | 'ALL_OLD' | 'UPDATED_NEW' | 'UPDATED_OLD' | 'NONE'
 
-    Note: The builder currently supports SET, REMOVE, INCREMENT, and DECREMENT.
-    Additional DynamoDB operations (list_append, if_not_exists, ADD/DELETE on
-    sets, ConditionExpression) will be added to this builder as needed.
+Note: The builder currently supports SET, REMOVE, INCREMENT, and DECREMENT.
+Additional DynamoDB operations (list_append, if_not_exists, ADD/DELETE on
+sets, ConditionExpression) will be added to this builder as needed.
 
 @return {Object} - Service params for UpdateCommand or transactWrite Update
     *********************************************************************/
@@ -217,7 +217,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Execute pre-built service params against DynamoDB.
 
     /********************************************************************
-    Execute a pre-built Put command (from commandBuilderForAddRecord).
+Execute a pre-built Put command (from commandBuilderForAddRecord).
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -266,7 +266,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
+Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -315,7 +315,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built Update command (from commandBuilderForUpdateRecord).
+Execute a pre-built Update command (from commandBuilderForUpdateRecord).
 
 @param {Object} instance - Request instance
 @param {Object} service_params - Pre-built service params
@@ -370,7 +370,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // High-level functions that build params then execute.
 
     /********************************************************************
-    Get a single record by primary key.
+Get a single record by primary key.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -423,8 +423,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Write (create or replace) a record. Always upsert - inserts if absent,
-    replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
+Write (create or replace) a record. Always upsert - inserts if absent,
+replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -444,7 +444,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteRecord.
+Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteRecord.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -464,8 +464,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Update an item using structured builder (SET/REMOVE/INCREMENT/DECREMENT).
-    DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
+Update an item using structured builder (SET/REMOVE/INCREMENT/DECREMENT).
+DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -492,7 +492,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Query items by partition key with full feature set.
+Query items by partition key with full feature set.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -607,7 +607,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Count records matching a partition key (uses query with SELECT='COUNT').
+Count records matching a partition key (uses query with SELECT='COUNT').
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -631,7 +631,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Scan entire table (use sparingly on large tables).
+Scan entire table (use sparingly on large tables).
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -695,7 +695,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch get multiple items from one or more tables.
+Batch get multiple items from one or more tables.
 
 @param {Object} instance - Request instance
 @param {Object} keysByTable - { tableName: [key1, key2, ...] }
@@ -751,7 +751,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch write (put/delete) items across one or more tables.
+Batch write (put/delete) items across one or more tables.
 
 @param {Object} instance - Request instance
 @param {Object} requestsByTable - { tableName: [{ put: item }, { delete: key }] }
@@ -804,9 +804,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch add (put) records across tables with automatic 25-item chunking.
-    AWS BatchWriteItem limit is 25 items per request. This function handles
-    any number of items by recursively splitting into 25-item chunks.
+Batch add (put) records across tables with automatic 25-item chunking.
+AWS BatchWriteItem limit is 25 items per request. This function handles
+any number of items by recursively splitting into 25-item chunks.
 
 @param {Object} instance - Request instance
 @param {Object} itemsByTable - { tableName: [item1, item2, ...] }
@@ -892,9 +892,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Batch delete records across tables with automatic 25-item chunking.
-    AWS BatchWriteItem limit is 25 items per request. This function handles
-    any number of keys by recursively splitting into 25-item chunks.
+Batch delete records across tables with automatic 25-item chunking.
+AWS BatchWriteItem limit is 25 items per request. This function handles
+any number of keys by recursively splitting into 25-item chunks.
 
 @param {Object} instance - Request instance
 @param {Object} keysByTable - { tableName: [key1, key2, ...] }
@@ -982,11 +982,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Table management ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Create a DynamoDB table. Idempotent - if the table already exists
-    with any schema, returns success without modification. Intended for
-    app-managed single-table designs and emulated-testing setups; in
-    production, prefer infrastructure-as-code (CloudFormation / Terraform)
-    for table provisioning.
+Create a DynamoDB table. Idempotent - if the table already exists
+with any schema, returns success without modification. Intended for
+app-managed single-table designs and emulated-testing setups; in
+production, prefer infrastructure-as-code (CloudFormation / Terraform)
+for table provisioning.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -1066,9 +1066,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete a DynamoDB table. Primarily for test teardown; production
-    table lifecycle should be managed by IaC. Idempotent - returns
-    success when the table is already absent.
+Delete a DynamoDB table. Primarily for test teardown; production
+table lifecycle should be managed by IaC. Idempotent - returns
+success when the table is already absent.
 
 @param {Object} instance - Request instance
 @param {String} table - Table name
@@ -1116,9 +1116,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Transactions ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Atomic write transaction across one or more tables. Groups up to 10 actions.
-    Uses pre-built command objects from commandBuilderForAddRecord, commandBuilderForDeleteRecord,
-    and commandBuilderForUpdateRecord.
+Atomic write transaction across one or more tables. Groups up to 10 actions.
+Uses pre-built command objects from commandBuilderForAddRecord, commandBuilderForDeleteRecord,
+and commandBuilderForUpdateRecord.
 
 @param {Object} instance - Request instance
 @param {Object[]} [add_records] - Array of Put service params
@@ -1199,16 +1199,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _DynamoDB = {
 
     /********************************************************************
-    Transform caller-friendly batch write requests into AWS SDK format.
+Transform caller-friendly batch write requests into AWS SDK format.
 
-    Input format (caller-friendly):
-    { tableName: [{ put: item }, { delete: key }] }
+Input format (caller-friendly):
+{ tableName: [{ put: item }, { delete: key }] }
 
-    Output format (AWS SDK BatchWriteCommand):
-    { tableName: [{ PutRequest: { Item: item } }, { DeleteRequest: { Key: key } }] }
+Output format (AWS SDK BatchWriteCommand):
+{ tableName: [{ PutRequest: { Item: item } }, { DeleteRequest: { Key: key } }] }
 
-    Each request object must have either a 'put' key (for insert/replace) or a
-    'delete' key (for removal). Any request without either key is filtered out.
+Each request object must have either a 'put' key (for insert/replace) or a
+'delete' key (for removal). Any request without either key is filtered out.
 
 @param {Object} requestsByTable - Caller-friendly batch write requests
 @return {Object} - AWS SDK-formatted RequestItems
@@ -1245,9 +1245,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Lazy-load the AWS SDK v3 adapters. Shared across every instance because
-    the SDK modules themselves are stateless - only the DocumentClient
-    holds per-instance state.
+Lazy-load the AWS SDK v3 adapters. Shared across every instance because
+the SDK modules themselves are stateless - only the DocumentClient
+holds per-instance state.
 
 @return {void}
     *********************************************************************/
@@ -1267,9 +1267,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's DynamoDB Document Client on first use. Options
-    are built from the merged CONFIG; explicit credentials and custom
-    endpoint (for DynamoDB Local) are injected if present.
+Create this instance's DynamoDB Document Client on first use. Options
+are built from the merged CONFIG; explicit credentials and custom
+endpoint (for DynamoDB Local) are injected if present.
 
 @return {void}
     *********************************************************************/

@@ -87,8 +87,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Create, delete, and describe tables with idempotent semantics.
 
     /********************************************************************
-    Create a DynamoDB table. Idempotent: if the table already exists,
-    returns success with data.created set to false.
+Create a DynamoDB table. Idempotent: if the table already exists,
+returns success with data.created set to false.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -211,8 +211,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Wait for a table to reach ACTIVE state. Polls DescribeTable
-    until the table is ACTIVE or the timeout expires.
+Wait for a table to reach ACTIVE state. Polls DescribeTable
+until the table is ACTIVE or the timeout expires.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -314,10 +314,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Enable TTL on a DynamoDB table. Idempotent: if TTL is already
-    enabled on the same attribute, returns success with data.enabled
-    set to false. If TTL is enabled on a DIFFERENT attribute, returns
-    an ADMIN_TTL_CONFLICT error.
+Enable TTL on a DynamoDB table. Idempotent: if TTL is already
+enabled on the same attribute, returns success with data.enabled
+set to false. If TTL is enabled on a DIFFERENT attribute, returns
+an ADMIN_TTL_CONFLICT error.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -422,8 +422,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Delete a DynamoDB table. Idempotent: if the table does not exist,
-    returns success with data.deleted set to false.
+Delete a DynamoDB table. Idempotent: if the table does not exist,
+returns success with data.deleted set to false.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -493,8 +493,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Describe a DynamoDB table. Returns a normalized subset of the
-    table description: status, key schema, and TTL status.
+Describe a DynamoDB table. Returns a normalized subset of the
+table description: status, key schema, and TTL status.
 
 @param {Object} instance - Request instance
 @param {Object} options - Function options
@@ -568,9 +568,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Connection health check and graceful teardown.
 
     /********************************************************************
-    Ping the DynamoDB service with admin credentials. Uses ListTables
-    with a limit of 1 to verify the connection is alive and the
-    credentials are valid.
+Ping the DynamoDB service with admin credentials. Uses ListTables
+with a limit of 1 to verify the connection is alive and the
+credentials are valid.
 
 @param {Object} instance - Request instance
 
@@ -621,9 +621,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Close the DynamoDB admin connection for this instance. Destroys
-    the underlying client. Idempotent: closing an already-closed
-    connection succeeds.
+Close the DynamoDB admin connection for this instance. Destroys
+the underlying client. Idempotent: closing an already-closed
+connection succeeds.
 
 @param {Object} instance - Request instance
 
@@ -680,9 +680,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _DynamoDBAdmin = {
 
     /********************************************************************
-    Lazy-load the AWS SDK v3 DynamoDB client and commands. Shared
-    across every instance because the SDK modules themselves are
-    stateless - only the DynamoDBClient holds per-instance state.
+Lazy-load the AWS SDK v3 DynamoDB client and commands. Shared
+across every instance because the SDK modules themselves are
+stateless - only the DynamoDBClient holds per-instance state.
 
 @return {void}
     *********************************************************************/
@@ -706,9 +706,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create this instance's DynamoDBClient on first use. Connects to
-    the DynamoDB service with admin credentials and caches the client
-    reference in state.
+Create this instance's DynamoDBClient on first use. Connects to
+the DynamoDB service with admin credentials and caches the client
+reference in state.
 
 @return {Promise<void>}
     *********************************************************************/

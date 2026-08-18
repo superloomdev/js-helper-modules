@@ -9,8 +9,8 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars
   const Validators = {
 
     /********************************************************************
-    Validate the merged config object. Throws TypeError on any
-    misconfiguration so the module fails at startup, not at call time.
+Validate the merged config object. Throws TypeError on any
+misconfiguration so the module fails at startup, not at call time.
 
 @param {Object} CONFIG - Merged config for this instance
 @return {void}

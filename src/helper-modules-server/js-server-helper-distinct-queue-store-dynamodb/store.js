@@ -89,9 +89,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Idempotent table provisioning. Creates the table with composite key
-    { p, id } if it doesn't exist. Pay-per-request billing is the
-    correct default for queue workloads.
+Idempotent table provisioning. Creates the table with composite key
+{ p, id } if it doesn't exist. Pay-per-request billing is the
+correct default for queue workloads.
 
 @param {Object} instance - Request instance
 
@@ -138,8 +138,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Write Operation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Append a record to the table. Uses PutItem for atomic write.
-    The item has composite key { p, id } plus payload, action, toc.
+Append a record to the table. Uses PutItem for atomic write.
+The item has composite key { p, id } plus payload, action, toc.
 
 @param {Object} instance - Request instance
 @param {Object} record   - The record to write (tenant_id, resource_id,
@@ -192,10 +192,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Query Operations ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Return all records matching (tenant_id, resource_id), sorted by
-    data_version ascending (chronological order).
+Return all records matching (tenant_id, resource_id), sorted by
+data_version ascending (chronological order).
 
-    Uses Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
+Uses Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
 
 @param {Object} instance   - Request instance
 @param {String} tenant_id  - Partition key
@@ -236,10 +236,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return all records for tenant_id whose resource_id starts with the
-    given prefix, sorted by data_version ascending.
+Return all records for tenant_id whose resource_id starts with the
+given prefix, sorted by data_version ascending.
 
-    Uses Query with PK=tenant_id AND begins_with(SK, prefix)
+Uses Query with PK=tenant_id AND begins_with(SK, prefix)
 
 @param {Object} instance          - Request instance
 @param {String} tenant_id         - Partition key
@@ -282,13 +282,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Delete Operation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Delete all records for (tenant_id, resource_id) where
-    data_version <= data_version_boundary.
+Delete all records for (tenant_id, resource_id) where
+data_version <= data_version_boundary.
 
-    DynamoDB does not support range delete, so we:
-    1. Query for all records matching tenant_id + resource_id
-    2. Filter to items where data_version <= boundary
-    3. Batch delete the matching keys
+DynamoDB does not support range delete, so we:
+1. Query for all records matching tenant_id + resource_id
+2. Filter to items where data_version <= boundary
+3. Batch delete the matching keys
 
 @param {Object} instance               - Request instance
 @param {String} tenant_id              - Partition key
@@ -377,8 +377,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Key Composition & Parsing ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Compose the DynamoDB sort key from raw record fields. The three
-    segments are joined by CONFIG.KEY_DELIMITER:
+Compose the DynamoDB sort key from raw record fields. The three
+segments are joined by CONFIG.KEY_DELIMITER:
       resource_id + CONFIG.KEY_DELIMITER + data_version + CONFIG.KEY_DELIMITER + request_id
 
 @param {String} resource_id  - Opaque resource identifier
@@ -393,8 +393,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Parse a composite sort key back into its three segments. Inverse of
-    composeSortKey. data_version is coerced back to a Number.
+Parse a composite sort key back into its three segments. Inverse of
+composeSortKey. data_version is coerced back to a Number.
 
 @param {String} sort_key - The stored sort key
 
@@ -411,9 +411,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the begins_with prefix that matches exactly one resource_id.
-    Appending the delimiter prevents matching sibling resources whose
-    ids merely start with this resource_id (e.g. "acc_1" vs "acc_12").
+Build the begins_with prefix that matches exactly one resource_id.
+Appending the delimiter prevents matching sibling resources whose
+ids merely start with this resource_id (e.g. "acc_1" vs "acc_12").
 
 @param {String} resource_id - Exact resource identifier
 
@@ -427,10 +427,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Query Helpers ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Run a partition-scoped begins_with query on the sort key. Shared by
-    queryByResourceId, queryByResourceIdPrefix, and the read phase of
-    deleteByDataVersionLte. Returns the raw driver result so each caller
-    owns its own success/error shaping.
+Run a partition-scoped begins_with query on the sort key. Shared by
+queryByResourceId, queryByResourceIdPrefix, and the read phase of
+deleteByDataVersionLte. Returns the raw driver result so each caller
+owns its own success/error shaping.
 
 @param {Object} instance     - Request instance
 @param {String} tenant_id    - Partition key value
@@ -456,9 +456,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Record Reconstruction ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Reconstruct a full record from the DynamoDB item. The item has PK
-    `p`, SK `id`, and attributes payload, action, toc. The sort key is
-    parsed back into resource_id, data_version, and request_id.
+Reconstruct a full record from the DynamoDB item. The item has PK
+`p`, SK `id`, and attributes payload, action, toc. The sort key is
+parsed back into resource_id, data_version, and request_id.
 
 @param {Object} item - The DynamoDB item { p, id, payload, action, toc }
 
@@ -482,9 +482,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Error Helpers ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Log a backend driver failure in the shape every public method uses
-    before returning ERRORS.SERVICE_UNAVAILABLE. Centralizes the debug
-    payload so the operation label is the only thing that varies.
+Log a backend driver failure in the shape every public method uses
+before returning ERRORS.SERVICE_UNAVAILABLE. Centralizes the debug
+payload so the operation label is the only thing that varies.
 
 @param {String} operation    - Label of the failing operation
 @param {Object} driver_error - The error object from the driver result

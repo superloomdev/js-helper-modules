@@ -73,8 +73,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Handles auth, timeouts, content-type encoding, and response normalization.
 
     /********************************************************************
-    Send HTTP request and return normalized JSON response.
-    Supports GET, POST, PUT, DELETE, PATCH with various content types.
+Send HTTP request and return normalized JSON response.
+Supports GET, POST, PUT, DELETE, PATCH with various content types.
 
 @param {String} url - Full URL (with protocol)
 @param {String} method - HTTP method ('GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH')
@@ -115,7 +115,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // HTTP verb wrappers that delegate to fetchJSON with appropriate defaults.
 
     /********************************************************************
-    Send HTTP GET request and return normalized JSON response.
+Send HTTP GET request and return normalized JSON response.
 
 @param {String} url - Full URL
 @param {Object} [params] - (Optional) Query parameters
@@ -131,7 +131,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Send HTTP POST request with JSON body.
+Send HTTP POST request with JSON body.
 
 @param {String} url - Full URL
 @param {Object} [params] - (Optional) Request body
@@ -147,7 +147,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Send HTTP POST request with url-encoded body.
+Send HTTP POST request with url-encoded body.
 
 @param {String} url - Full URL
 @param {Object} [params] - (Optional) Request body
@@ -163,7 +163,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Send HTTP PUT request with JSON body.
+Send HTTP PUT request with JSON body.
 
 @param {String} url - Full URL
 @param {Object} [params] - (Optional) Request body
@@ -179,7 +179,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Send HTTP DELETE request.
+Send HTTP DELETE request.
 
 @param {String} url - Full URL
 @param {Object} [params] - (Optional) Query parameters
@@ -195,7 +195,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Send HTTP PATCH request with JSON body.
+Send HTTP PATCH request with JSON body.
 
 @param {String} url - Full URL
 @param {Object} [params] - (Optional) Request body
@@ -217,7 +217,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const _Http = {
 
     /********************************************************************
-    Internal fetch implementation using Node.js built-in global `fetch`.
+Internal fetch implementation using Node.js built-in global `fetch`.
 
 @param {String} url - Full URL
 @param {String} method - HTTP method
@@ -372,7 +372,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Encode request body according to content type.
+Encode request body according to content type.
 
 @param {Object|FormData} params - Payload
 @param {String} content_type - 'json' | 'urlencoded' | 'multipart'
@@ -413,7 +413,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Append query string parameters to a URL.
+Append query string parameters to a URL.
 
 @param {String} url - Base URL
 @param {Object} params - Query parameters
@@ -441,7 +441,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Read response body: try JSON first, fall back to raw text. Empty body returns null.
+Read response body: try JSON first, fall back to raw text. Empty body returns null.
 
 @param {Response} response - Fetch Response object
 
@@ -467,7 +467,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Convert Headers instance to a plain object with lowercase keys.
+Convert Headers instance to a plain object with lowercase keys.
 
 @param {Headers} headers - Fetch Headers instance
 

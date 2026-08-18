@@ -8,8 +8,8 @@ module.exports = function (Lib, ERRORS) {
   const Validators = {
 
     /********************************************************************
-    Validate the merged config object. Throws TypeError on any
-    misconfiguration so the module fails at startup, not at call time.
+Validate the merged config object. Throws TypeError on any
+misconfiguration so the module fails at startup, not at call time.
 
 @param {Object} CONFIG - Merged config for this instance
 @return {void}
@@ -25,8 +25,8 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a manifest object. Returns the error object when invalid,
-    null when valid.
+Validate a manifest object. Returns the error object when invalid,
+null when valid.
 
 @param {*} manifest - Value to validate as a manifest
 
@@ -44,9 +44,9 @@ module.exports = function (Lib, ERRORS) {
 
 
     /********************************************************************
-    Validate a style entry from the manifest. Ensures the entry has
-    a `url` field (web extensions require URLs for @font-face). Returns
-    the error object when invalid, null when valid.
+Validate a style entry from the manifest. Ensures the entry has
+a `url` field (web extensions require URLs for @font-face). Returns
+the error object when invalid, null when valid.
 
 @param {*} entry - Style entry to validate
 

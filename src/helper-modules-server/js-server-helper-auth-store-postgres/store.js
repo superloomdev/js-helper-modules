@@ -108,9 +108,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // statements use IF NOT EXISTS so repeated calls are no-ops.
 
     /********************************************************************
-    Idempotent table + index setup. Creates the sessions table and
-    the expires_at index if they do not exist (Postgres supports
-    CREATE ... IF NOT EXISTS for both). Safe to call on every boot.
+Idempotent table + index setup. Creates the sessions table and
+the expires_at index if they do not exist (Postgres supports
+CREATE ... IF NOT EXISTS for both). Safe to call on every boot.
 
 @param {Object} instance - Request instance
 
@@ -169,8 +169,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // single index reads even at large scale.
 
     /********************************************************************
-    Read a single session by (tenant_id, actor_id, token_key). Returns
-    null record on hash mismatch - identical to "not found" shape.
+Read a single session by (tenant_id, actor_id, token_key). Returns
+null record on hash mismatch - identical to "not found" shape.
 
 @param {Object} instance          - Request instance
 @param {string} tenant_id         - Tenant identifier
@@ -238,7 +238,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Return all sessions for a (tenant_id, actor_id) pair.
+Return all sessions for a (tenant_id, actor_id) pair.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -291,7 +291,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // refuses any identity column to keep PK integrity tamper-proof.
 
     /********************************************************************
-    Insert or upsert a session by composite primary key.
+Insert or upsert a session by composite primary key.
 
 @param {Object} instance - Request instance
 @param {Object} record   - Canonical session record
@@ -327,8 +327,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Partial UPDATE for mutable per-session fields. Throws TypeError
-    if `updates` contains any identity or primary-key column.
+Partial UPDATE for mutable per-session fields. Throws TypeError
+if `updates` contains any identity or primary-key column.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -406,7 +406,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // replacement stay constant-cost regardless of session count.
 
     /********************************************************************
-    Delete one session by composite primary key.
+Delete one session by composite primary key.
 
 @param {Object} instance  - Request instance
 @param {string} tenant_id - Tenant identifier
@@ -450,8 +450,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Bulk delete sessions for a tenant. Single round-trip with an
-    OR-joined clause. No-op success if keys array is empty.
+Bulk delete sessions for a tenant. Single round-trip with an
+OR-joined clause. No-op success if keys array is empty.
 
 @param {Object}   instance  - Request instance
 @param {string}   tenant_id - Tenant identifier
@@ -521,8 +521,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // range scan even as the table grows.
 
     /********************************************************************
-    Sweep all expired sessions. Postgres has no native TTL; this is
-    the garbage-collection path - run it on a cron.
+Sweep all expired sessions. Postgres has no native TTL; this is
+the garbage-collection path - run it on a cron.
 
 @param {Object} instance - Request instance
 
@@ -613,10 +613,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Quote an identifier using Postgres's native double-quote style.
-    Rejects any identifier containing a double-quote so identifiers can
-    never inject DDL through the table_name configuration.
-    Closes over config from createInterface.
+Quote an identifier using Postgres's native double-quote style.
+Rejects any identifier containing a double-quote so identifiers can
+never inject DDL through the table_name configuration.
+Closes over config from createInterface.
 
 @param {String} name - Identifier (table or column)
 
@@ -636,9 +636,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE TABLE statement for Postgres. Idempotent via
-    CREATE TABLE IF NOT EXISTS. Safe to call on every boot.
-    Closes over config from createInterface.
+Build the CREATE TABLE statement for Postgres. Idempotent via
+CREATE TABLE IF NOT EXISTS. Safe to call on every boot.
+Closes over config from createInterface.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -685,10 +685,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the CREATE INDEX statement for the expires_at index. Uses
-    CREATE INDEX IF NOT EXISTS for idempotency. The index powers the
-    cleanupExpiredSessions range scan.
-    Closes over config from createInterface.
+Build the CREATE INDEX statement for the expires_at index. Uses
+CREATE INDEX IF NOT EXISTS for idempotency. The index powers the
+cleanupExpiredSessions range scan.
+Closes over config from createInterface.
 
 @return {String} - DDL statement
     *********************************************************************/
@@ -707,11 +707,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Build the Postgres UPSERT statement. Uses
+Build the Postgres UPSERT statement. Uses
       INSERT ... ON CONFLICT (pk) DO UPDATE SET col = EXCLUDED.col
-    EXCLUDED is the Postgres uppercase pseudo-table name for the
-    conflicting row's proposed values.
-    Closes over config from createInterface.
+EXCLUDED is the Postgres uppercase pseudo-table name for the
+conflicting row's proposed values.
+Closes over config from createInterface.
 
 @return {String} - SQL template using `?` placeholders
     *********************************************************************/
@@ -751,9 +751,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Encode a canonical-record value for a parameterized INSERT / UPDATE.
-    Postgres handles booleans natively, so only custom_data needs a
-    JSON envelope and undefined needs the null coercion.
+Encode a canonical-record value for a parameterized INSERT / UPDATE.
+Postgres handles booleans natively, so only custom_data needs a
+JSON envelope and undefined needs the null coercion.
 
 @param {String} col   - Column name
 @param {*}      value - Canonical record value
@@ -786,10 +786,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Decode a raw row value into its canonical-record shape. The pg
-    driver may return BIGINT columns as strings - they are coerced back
-    to numbers. Booleans come through native. custom_data is parsed
-    from the TEXT-stored JSON envelope.
+Decode a raw row value into its canonical-record shape. The pg
+driver may return BIGINT columns as strings - they are coerced back
+to numbers. Booleans come through native. custom_data is parsed
+from the TEXT-stored JSON envelope.
 
 @param {String} col   - Column name
 @param {*}      value - Raw DB value
@@ -839,7 +839,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Canonical record -> positional values array, aligned with COLUMNS.
+Canonical record -> positional values array, aligned with COLUMNS.
 
 @param {Object} record - Canonical session record
 
@@ -856,7 +856,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    Raw row object -> canonical record.
+Raw row object -> canonical record.
 
 @param {Object} row - Raw row from Postgres driver
 

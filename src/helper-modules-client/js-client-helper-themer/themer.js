@@ -20,8 +20,8 @@
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-    Factory loader. One call returns one independent instance with its
-    own config and its own result cache.
+Factory loader. One call returns one independent instance with its
+own config and its own result cache.
 
 @param {Object} shared_libs - Lib container with Utils and Debug
 @param {Object} config - Overrides merged over module config defaults
@@ -74,9 +74,9 @@ module.exports = function loader (shared_libs, config) {
 /////////////////////////// createInterface START //////////////////////////////
 
 /********************************************************************
-    Builds the public interface for one instance. Public and private
-    functions close over the provided Lib, CONFIG, ERRORS, Validators,
-    Parts, and state.
+Builds the public interface for one instance. Public and private
+functions close over the provided Lib, CONFIG, ERRORS, Validators,
+Parts, and state.
 
 @param {Object} Lib - Dependency container
 @param {Object} CONFIG - Merged config for this instance

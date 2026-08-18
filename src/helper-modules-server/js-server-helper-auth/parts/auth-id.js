@@ -66,8 +66,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const AuthId = {
 
     /********************************************************************
-    Build the wire-format auth_id from its three parts. The client
-    receives this string and sends it back on subsequent requests.
+Build the wire-format auth_id from its three parts. The client
+receives this string and sends it back on subsequent requests.
 
 @param {Object} parts
 @param {String} parts.actor_id - Actor identifier (project-supplied)
@@ -91,8 +91,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Parse a wire-format auth_id back into its three parts. Returns null
-    if the shape is wrong (caller treats this as INVALID_TOKEN).
+Parse a wire-format auth_id back into its three parts. Returns null
+if the shape is wrong (caller treats this as INVALID_TOKEN).
 
 @param {String} auth_id - The wire-format string
 
@@ -143,8 +143,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Generate a fresh random token_key. Uses the controlled charset so
-    neither '-' nor '#' ever appears.
+Generate a fresh random token_key. Uses the controlled charset so
+neither '-' nor '#' ever appears.
 
 @return {String} - Random token_key of TOKEN_KEY_LENGTH chars
     *********************************************************************/
@@ -156,7 +156,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Generate a fresh random token_secret. Uses the controlled charset.
+Generate a fresh random token_secret. Uses the controlled charset.
 
 @return {String} - Random token_secret of TOKEN_SECRET_LENGTH chars
     *********************************************************************/
@@ -168,10 +168,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Hash a token_secret. The store keeps only the hash; the secret itself
-    is never persisted. SHA-256 HMAC for fast, deterministic verification.
-    The salt argument lets the project bind hashes to a per-actor or
-    per-instance secret (defense in depth).
+Hash a token_secret. The store keeps only the hash; the secret itself
+is never persisted. SHA-256 HMAC for fast, deterministic verification.
+The salt argument lets the project bind hashes to a per-actor or
+per-instance secret (defense in depth).
 
 @param {String} token_secret - The raw secret
 @param {String} [salt] - Optional HMAC key. Default '' (no salt).
@@ -190,9 +190,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Build the composite session_key used inside DynamoDB sort key and
-    MongoDB _id. SQL doesn't use this - SQL has separate columns for
-    actor_id, token_key, and token_secret_hash.
+Build the composite session_key used inside DynamoDB sort key and
+MongoDB _id. SQL doesn't use this - SQL has separate columns for
+actor_id, token_key, and token_secret_hash.
 
 @param {String} actor_id
 @param {String} token_key
@@ -215,9 +215,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    The actor-prefix used for begins_with / anchored-regex queries.
-    Returns "{actor_id}#" - the prefix that all session_keys for this
-    actor share.
+The actor-prefix used for begins_with / anchored-regex queries.
+Returns "{actor_id}#" - the prefix that all session_keys for this
+actor share.
 
 @param {String} actor_id
 
@@ -236,9 +236,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    The MongoDB _id format. Includes tenant_id as the leading segment
-    so anchored-regex queries scoped by tenant + actor use the _id
-    index directly (mirrors the DynamoDB single-table design).
+The MongoDB _id format. Includes tenant_id as the leading segment
+so anchored-regex queries scoped by tenant + actor use the _id
+index directly (mirrors the DynamoDB single-table design).
 
 @param {String} tenant_id
 @param {String} actor_id
@@ -260,7 +260,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    The MongoDB tenant+actor prefix. Used in anchored-regex listSessions.
+The MongoDB tenant+actor prefix. Used in anchored-regex listSessions.
 
 @param {String} tenant_id
 @param {String} actor_id
@@ -286,8 +286,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Throw TypeError if the value isn't a non-empty string. Used by every
-    composer / parser to catch bad inputs at the source.
+Throw TypeError if the value isn't a non-empty string. Used by every
+composer / parser to catch bad inputs at the source.
 
 @param {*} value - Value to check
 @param {String} name - Field name (for error message)
@@ -309,9 +309,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Throw TypeError if the value contains either reserved separator
-    character ('-' or '#'). Used for fields that end up in the WIRE
-    auth_id (actor_id), where both separators would break parsing.
+Throw TypeError if the value contains either reserved separator
+character ('-' or '#'). Used for fields that end up in the WIRE
+auth_id (actor_id), where both separators would break parsing.
 
 @param {String} value - Value to check
 @param {String} name - Field name (for error message)
@@ -332,10 +332,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Throw TypeError if the value contains the '#' composite-key separator.
-    Used for tenant_id, which is allowed to contain '-' (it never appears
-    in the wire auth_id) but still must not contain '#' because that would
-    break the MongoDB _id composite and the DynamoDB sort-key composite.
+Throw TypeError if the value contains the '#' composite-key separator.
+Used for tenant_id, which is allowed to contain '-' (it never appears
+in the wire auth_id) but still must not contain '#' because that would
+break the MongoDB _id composite and the DynamoDB sort-key composite.
 
 @param {String} value - Value to check
 @param {String} name - Field name (for error message)

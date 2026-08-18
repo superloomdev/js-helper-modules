@@ -116,9 +116,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     // Initialize and inspect the per-request HTTP state on instance.
 
     /********************************************************************
-    Initialize HTTP request data in instance from raw runtime data.
-    Delegates to the configured adapter which normalizes the wire-format.
-    Gateway then writes the normalized request data onto instance.
+Initialize HTTP request data in instance from raw runtime data.
+Delegates to the configured adapter which normalizes the wire-format.
+Gateway then writes the normalized request data onto instance.
 
 @param {Object}   instance          - Per-request instance to populate
 @param {Object}   raw_request       - Raw request from runtime (event / req)
@@ -149,7 +149,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Return true if the instance was initialized with HTTP request data.
+Return true if the instance was initialized with HTTP request data.
 
 @param {Object} instance - Per-request instance
 
@@ -169,9 +169,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     // Build typed, validated args from the normalized HTTP request data.
 
     /********************************************************************
-    Build a typed, validated args object from the normalized HTTP request
-    data in instance.http_request. See parts/params.js for the full param
-    descriptor shape.
+Build a typed, validated args object from the normalized HTTP request
+data in instance.http_request. See parts/params.js for the full param
+descriptor shape.
 
 @param {Object}   instance - Per-request instance with http_request populated
 @param {Object[]} params   - Array of parameter descriptor objects
@@ -191,12 +191,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     // Send responses back through the runtime adapter.
 
     /********************************************************************
-    Send an HTTP response back through the runtime callback.
-    Merges default headers (Cache-Control, Content-Type) with caller-
-    supplied headers, serializes any cookie descriptors into Set-Cookie
-    header strings, then fires the response with the body.
+Send an HTTP response back through the runtime callback.
+Merges default headers (Cache-Control, Content-Type) with caller-
+supplied headers, serializes any cookie descriptors into Set-Cookie
+header strings, then fires the response with the body.
 
-    Param order mirrors the HTTP response sequence:
+Param order mirrors the HTTP response sequence:
       status -> headers -> cookies -> body
 
 @param {Object}  instance         - Per-request instance
@@ -261,7 +261,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Send a body-less HTTP status response back through the runtime callback.
+Send a body-less HTTP status response back through the runtime callback.
 
 @param {Object} instance     - Per-request instance
 @param {String} status_name  - One of: 'not_modified' | 'bad_request' |
@@ -277,7 +277,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Send a 301 permanent redirect response back through the runtime callback.
+Send a 301 permanent redirect response back through the runtime callback.
 
 @param {Object} instance  - Per-request instance
 @param {String} location  - Redirect target URI
@@ -296,7 +296,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Send a 301 redirect to '/404' back through the runtime callback.
+Send a 301 redirect to '/404' back through the runtime callback.
 
 @param {Object} instance - Per-request instance
 
@@ -313,9 +313,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     // Read transport-level metadata from the normalized request.
 
     /********************************************************************
-    Get the client IP address from the request headers.
-    Uses the x-forwarded-for header; returns the first IP in the chain
-    (the originating client address).
+Get the client IP address from the request headers.
+Uses the x-forwarded-for header; returns the first IP in the chain
+(the originating client address).
 
 @param {Object} instance - Per-request instance
 
@@ -333,7 +333,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Get the User-Agent string from the request headers.
+Get the User-Agent string from the request headers.
 
 @param {Object} instance - Per-request instance
 
@@ -351,8 +351,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Get the Origin header from the request.
-    Returns the scheme + host (e.g. 'https://api.example.com').
+Get the Origin header from the request.
+Returns the scheme + host (e.g. 'https://api.example.com').
 
 @param {Object} instance - Per-request instance
 
@@ -370,9 +370,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Get the viewer country code from the request.
-    Availability depends on the adapter - adapters that cannot supply
-    this (e.g. Express without a CDN) return null.
+Get the viewer country code from the request.
+Availability depends on the adapter - adapters that cannot supply
+this (e.g. Express without a CDN) return null.
 
 @param {Object} instance - Per-request instance
 
@@ -386,9 +386,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Extract the Bearer token from the Authorization header.
-    Returns the token string without the 'Bearer ' prefix, or null
-    if the header is absent or does not start with 'Bearer '.
+Extract the Bearer token from the Authorization header.
+Returns the token string without the 'Bearer ' prefix, or null
+if the header is absent or does not start with 'Bearer '.
 
 @param {Object} instance - Per-request instance
 
@@ -422,9 +422,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Return true if the request is a CORS preflight (OPTIONS + Origin).
-    A preflight request is an HTTP OPTIONS request with an Origin header,
-    sent by browsers before cross-origin requests.
+Return true if the request is a CORS preflight (OPTIONS + Origin).
+A preflight request is an HTTP OPTIONS request with an Origin header,
+sent by browsers before cross-origin requests.
 
 @param {Object} instance - Per-request instance
 
@@ -444,15 +444,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     // Construct cookie descriptors for serialization at the gateway boundary.
 
     /********************************************************************
-    Build a cookie descriptor object (or add to an existing one).
-    The descriptor is a plain object keyed by cookie name. Pass it as
-    the 4th argument (cookies) to returnHttpResponse for serialization.
+Build a cookie descriptor object (or add to an existing one).
+The descriptor is a plain object keyed by cookie name. Pass it as
+the 4th argument (cookies) to returnHttpResponse for serialization.
 
-    Cookie name is used as the key, so a second call with the same name
-    overwrites the first (natural dedup / override).
+Cookie name is used as the key, so a second call with the same name
+overwrites the first (natural dedup / override).
 
-    ttl = 0  means expire/clear the cookie immediately (Max-Age=0).
-    ttl > 0  sets a persistent cookie that expires after that many seconds.
+ttl = 0  means expire/clear the cookie immediately (Max-Age=0).
+ttl > 0  sets a persistent cookie that expires after that many seconds.
 
 @param {Object|null} existing    - Previous buildCookie result to append
                                    to, or null to start a fresh object
@@ -487,11 +487,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     // General-purpose HTTP helpers.
 
     /********************************************************************
-    Format a Unix timestamp (seconds) as an HTTP-date string.
-    If no date is provided the current time is used.
+Format a Unix timestamp (seconds) as an HTTP-date string.
+If no date is provided the current time is used.
 
-    Format: "Day, DD Mon YYYY HH:MM:SS GMT"
-    Example: "Wed, 21 Oct 2015 07:28:00 GMT"
+Format: "Day, DD Mon YYYY HH:MM:SS GMT"
+Example: "Wed, 21 Oct 2015 07:28:00 GMT"
 
 @param {Number} [timestamp_seconds] - Unix timestamp (seconds). Optional.
 
@@ -509,7 +509,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
 
 
     /********************************************************************
-    Extract the component parts of a URL.
+Extract the component parts of a URL.
 
 @param {String} url - Full URL string to parse
 

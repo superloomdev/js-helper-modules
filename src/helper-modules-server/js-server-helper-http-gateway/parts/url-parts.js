@@ -50,8 +50,8 @@ const UrlParts = {
   Extract the component parts of a URL.
 
   Examples:
-    'http://www.abc.example.co.uk:8080/path'
-    -> { sub_domain: 'www.abc', domain: 'example.co.uk',
+'http://www.abc.example.co.uk:8080/path'
+-> { sub_domain: 'www.abc', domain: 'example.co.uk',
          domain_without_tld: 'example', tld: 'co.uk',
          hostname: 'www.abc.example.co.uk', is_ip: false }
 

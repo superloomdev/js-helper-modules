@@ -128,10 +128,10 @@ const Cookies = {
   sameSite attribute entirely for these browsers.
 
   Affected clients:
-    - iOS 12 (WebKit bug)
-    - macOS 10.14 with Safari or embedded browser (WebKit bug)
-    - UC Browser < 12.13.2
-    - Chromium 51-66 (drops unrecognized SameSite values)
+- iOS 12 (WebKit bug)
+- macOS 10.14 with Safari or embedded browser (WebKit bug)
+- UC Browser < 12.13.2
+- Chromium 51-66 (drops unrecognized SameSite values)
 
   @param {String} user_agent - User-Agent request header value
 
