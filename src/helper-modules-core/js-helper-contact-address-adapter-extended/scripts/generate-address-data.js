@@ -7,7 +7,7 @@
 // License: MIT (postal-code-checker), MIT (libphonenumber-js)
 //
 // Re-run: npm run generate
-// Output: _data/extended.address-data.js
+// Output: data/extended.address-data.json
 'use strict';
 
 
@@ -74,27 +74,9 @@ countries.forEach(function (cc) {
 
 });
 
-// Generate output
-const header = [
-  '// Info: Generated address data for helper-contact-address-adapter-extended.',
-  '// Source: postal-code-checker (postal patterns + subdivisions),',
-  '//         libphonenumber-js (country list)',
-  '// License: MIT',
-  '// Generated: ' + new Date().toISOString().split('T')[0],
-  '// Re-run: npm run generate',
-  '//',
-  '// Contains: postal code regex patterns and ISO 3166-2 subdivision lists.',
-  '// Countries with required: false have no postal system.',
-  '// Do not edit by hand - regenerate with npm run generate.',
-  '\'use strict\';',
-  '',
-  ''
-].join('\n');
-
-const body = 'module.exports = ' + JSON.stringify(data, null, 2) + ';';
-
-const outputPath = path.join(__dirname, 'extended.address-data.js');
-fs.writeFileSync(outputPath, header + body + '\n');
+// Generate output - pure JSON, no comments or module.exports wrapper
+const outputPath = path.join(__dirname, '..', 'data', 'extended.address-data.json');
+fs.writeFileSync(outputPath, JSON.stringify(data, null, 2) + '\n');
 
 // Stats
 const withPatterns = Object.values(data).filter(function (d) {

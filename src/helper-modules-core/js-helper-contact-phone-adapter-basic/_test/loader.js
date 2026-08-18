@@ -17,7 +17,7 @@ const ContactPhone = require('helper-contact-phone')(Lib, {
 });
 
 // Load the country data for assertions
-const COUNTRY_DATA = require('helper-contact-phone-adapter-basic/_data/basic.country-data.js');
+const COUNTRY_DATA = require('helper-contact-phone-adapter-basic/data/basic.country-data.json');
 
 
 module.exports = {

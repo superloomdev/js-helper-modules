@@ -1,7 +1,7 @@
 # Note: README.md, ROBOTS.md, and docs/ are intentionally NOT excluded.
 THOUGHTS.md
 _test/
-_data/generate.js
+scripts/
 eslint.config.js
 .github/
 node_modules/
