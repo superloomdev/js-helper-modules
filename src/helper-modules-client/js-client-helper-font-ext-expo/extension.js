@@ -104,9 +104,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     url on web, path as fallback), calls expo-font's loadAsync, and
     tracks success/failure counts.
 
-    @param {Object} manifest - The manifest from Font.getManifest()
+@param {Object} manifest - The manifest from Font.getManifest()
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     loadManifest: async function (manifest) {
 
@@ -197,7 +197,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether all registered fonts have finished loading.
 
-    @return {Object} - { success, ready, error }
+@return {Object} - { success, ready, error }
     *********************************************************************/
     isReady: function () {
 
@@ -213,9 +213,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether a specific font family has been loaded by this adapter.
 
-    @param {String} familyName - The family name to check
+@param {String} familyName - The family name to check
 
-    @return {Object} - { success, loaded, error }
+@return {Object} - { success, loaded, error }
     *********************************************************************/
     isFamilyLoaded: function (familyName) {
 
@@ -233,7 +233,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the count of successfully loaded fonts.
 
-    @return {Object} - { success, count, error }
+@return {Object} - { success, count, error }
     *********************************************************************/
     getLoadedCount: function () {
 
@@ -249,7 +249,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the count of fonts that failed to load.
 
-    @return {Object} - { success, count, error }
+@return {Object} - { success, count, error }
     *********************************************************************/
     getFailedCount: function () {
 
@@ -283,16 +283,16 @@ const _Expo = {
     can be a requireable module, a URI string, or an object with
     { uri, displayNames, ... }.
 
-    @param {Object} Lib       - Dependency container
-    @param {Object} CONFIG    - Merged configuration
-    @param {Object} ERRORS    - Error catalog
-    @param {Object} Validators - Validators singleton
-    @param {Object} state     - Mutable state holder
-    @param {String} familyName - Font family name (with style suffix)
-    @param {String} styleKey   - Weight/style key
-    @param {Object} entry      - Manifest style entry
+@param {Object} Lib       - Dependency container
+@param {Object} CONFIG    - Merged configuration
+@param {Object} ERRORS    - Error catalog
+@param {Object} Validators - Validators singleton
+@param {Object} state     - Mutable state holder
+@param {String} familyName - Font family name (with style suffix)
+@param {String} styleKey   - Weight/style key
+@param {Object} entry      - Manifest style entry
 
-    @return {Promise<void>}
+@return {Promise<void>}
     *********************************************************************/
   loadFont: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, styleKey, entry) {
 
@@ -320,10 +320,10 @@ const _Expo = {
 
     Priority: asset > url > path
 
-    @param {Object} Lib   - Dependency container (uses Lib.Utils)
-    @param {Object} entry - Manifest style entry
+@param {Object} Lib   - Dependency container (uses Lib.Utils)
+@param {Object} entry - Manifest style entry
 
-    @return {*} - Source value for expo-font's loadAsync
+@return {*} - Source value for expo-font's loadAsync
     *********************************************************************/
   resolveSource: function (Lib, entry) {
 

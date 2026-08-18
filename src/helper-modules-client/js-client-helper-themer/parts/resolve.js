@@ -59,11 +59,11 @@ const ELEVATION = {
     the sibling parts and validators, and returns the shared Resolve
     object.
 
-    @param {Object} shared_libs - Lib container with Utils, Color, Scale, Validators
-    @param {Object} config - Merged config from the parent module
-    @param {Object} errors - Frozen error catalog from the parent module
+@param {Object} shared_libs - Lib container with Utils, Color, Scale, Validators
+@param {Object} config - Merged config from the parent module
+@param {Object} errors - Frozen error catalog from the parent module
 
-    @return {Object} - Public Resolve interface
+@return {Object} - Public Resolve interface
 *********************************************************************/
 module.exports = function loader (shared_libs, config, errors) {
 

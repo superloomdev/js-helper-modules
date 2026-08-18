@@ -99,15 +99,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Start a keyed timer. If the key already exists, the previous timer
     is stopped and replaced.
 
-    @param {string} key              - Timer key (defaults to 'default')
-    @param {Object} options          - Timer options
-    @param {number} options.duration_ms  - Total duration in ms (required)
-    @param {string} options.direction    - 'down' or 'up' (default: 'down')
-    @param {number} options.tick_ms      - Tick interval in ms (default: 1000)
-    @param {Function} options.onTick     - Called on each tick with current value
-    @param {Function} options.onDone     - Called when countdown reaches zero
+@param {string} key              - Timer key (defaults to 'default')
+@param {Object} options          - Timer options
+@param {number} options.duration_ms  - Total duration in ms (required)
+@param {string} options.direction    - 'down' or 'up' (default: 'down')
+@param {number} options.tick_ms      - Tick interval in ms (default: 1000)
+@param {Function} options.onTick     - Called on each tick with current value
+@param {Function} options.onDone     - Called when countdown reaches zero
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     start: function (key, options) {
 
@@ -172,9 +172,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Pause a keyed timer. Freezes the elapsed clock and clears pending
     tick/done timers.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     pause: function (key) {
 
@@ -224,9 +224,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Resume a paused timer. Adjusts the pause accumulator and
     reschedules tick/done timers for the remaining delta.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     resume: function (key) {
 
@@ -282,9 +282,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Stop a keyed timer. Clears all timers and removes the record.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     stop: function (key) {
 
@@ -319,9 +319,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Reset a keyed timer to its initial state. Keeps the same options
     but restarts the clock from now.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     reset: function (key) {
 
@@ -367,7 +367,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Stop every timer and clear the registry.
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     stopAll: function () {
 
@@ -396,9 +396,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get milliseconds remaining for a countdown timer. Computed from
     wall-clock arithmetic, never from a per-tick counter.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getRemaining: function (key) {
 
@@ -433,9 +433,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get milliseconds elapsed since the timer started. Computed from
     wall-clock arithmetic, never from a per-tick counter.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getElapsed: function (key) {
 
@@ -469,9 +469,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the current state of a keyed timer.
 
-    @param {string} key - Timer key (defaults to 'default')
+@param {string} key - Timer key (defaults to 'default')
 
-    @return {Object} - { success, data, error }
+@return {Object} - { success, data, error }
     *********************************************************************/
     getState: function (key) {
 
@@ -511,10 +511,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     React hook for a keyed timer. Owns useState for the displayed
     value, feeds it from onTick, and stops the timer on unmount.
 
-    @param {string} key              - Timer key (defaults to 'default')
-    @param {Object} options          - Same options as start()
+@param {string} key              - Timer key (defaults to 'default')
+@param {Object} options          - Same options as start()
 
-    @return {Object} - { value, start, pause, resume, stop, reset, getRemaining, getElapsed }
+@return {Object} - { value, start, pause, resume, stop, reset, getRemaining, getElapsed }
     *********************************************************************/
     useTimer: function (key, options) {
 
@@ -593,10 +593,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     React hook for a countdown timer. Convenience wrapper around
     useTimer with direction fixed to 'down'.
 
-    @param {string} key              - Timer key (defaults to 'default')
-    @param {number} duration_ms      - Countdown duration in ms
+@param {string} key              - Timer key (defaults to 'default')
+@param {number} duration_ms      - Countdown duration in ms
 
-    @return {Object} - { value, start, pause, resume, stop, reset, getRemaining, getElapsed }
+@return {Object} - { value, start, pause, resume, stop, reset, getRemaining, getElapsed }
     *********************************************************************/
     useCountdown: function (key, duration_ms) {
 
@@ -629,9 +629,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Compute elapsed ms for a timer, subtracting paused time.
 
-    @param {string} key - Timer key
+@param {string} key - Timer key
 
-    @return {number} - Elapsed ms
+@return {number} - Elapsed ms
     *********************************************************************/
     computeElapsed: function (key) {
 
@@ -652,9 +652,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Compute remaining ms for a countdown timer.
 
-    @param {string} key - Timer key
+@param {string} key - Timer key
 
-    @return {number} - Remaining ms (never negative)
+@return {number} - Remaining ms (never negative)
     *********************************************************************/
     computeRemaining: function (key) {
 

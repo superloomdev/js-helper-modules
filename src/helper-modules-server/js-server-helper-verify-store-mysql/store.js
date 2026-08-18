@@ -105,9 +105,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     the CREATE TABLE statement so no separate CREATE INDEX call is
     needed - universally supported across MySQL versions.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -147,11 +147,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Read by composite primary key (scope, id). Returns null when absent.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, record, error }
+@return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getRecord: async function (instance, scope, key) {
 
@@ -193,12 +193,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     with the same (scope, id) key replaces the mutable columns in
     a single round-trip.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
-    @param {Object} record   - { code, fail_count, created_at, expires_at }
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
+@param {Object} record   - { code, fail_count, created_at, expires_at }
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setRecord: async function (instance, scope, key, record) {
 
@@ -235,11 +235,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Atomic fail-counter increment via in-place UPDATE. Safe under
     concurrent verify attempts - each call adds exactly 1.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     incrementFailCount: async function (instance, scope, key) {
 
@@ -278,11 +278,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Idempotent delete by composite key. A missing row is treated as
     success so callers do not need to check existence first.
 
-    @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
-    @param {String} key      - Specific verification purpose
+@param {Object} instance - Request instance
+@param {String} scope    - Logical owner namespace
+@param {String} key      - Specific verification purpose
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, scope, key) {
 
@@ -326,9 +326,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Sweep expired records. Uses the expires_at index for an efficient
     range scan. Run on a cron for garbage collection.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 
@@ -377,9 +377,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     arrives from CONFIG, so this guard makes identifier
     injection impossible even if the caller passes a crafted name.
 
-    @param {String} name - Identifier (table or column)
+@param {String} name - Identifier (table or column)
 
-    @return {String} - Backtick-quoted identifier
+@return {String} - Backtick-quoted identifier
     *********************************************************************/
     BT: function (name) {
 
@@ -399,7 +399,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     for broad MySQL version compatibility. Called once at
     createInterface time. Closes over CONFIG from createInterface.
 
-    @return {Array<String>} - [CREATE TABLE stmt]
+@return {Array<String>} - [CREATE TABLE stmt]
     *********************************************************************/
     buildDDL: function () {
 
@@ -430,7 +430,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Called once at createInterface time.
     Closes over CONFIG from createInterface.
 
-    @return {String} - SQL template using `?` placeholders
+@return {String} - SQL template using `?` placeholders
     *********************************************************************/
     buildUpsertSQL: function () {
 

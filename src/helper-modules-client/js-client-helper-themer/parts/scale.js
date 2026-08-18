@@ -21,11 +21,11 @@ let ERRORS;
     Singleton part loader. Assigns the uniform part dependencies to
     module scope and returns the shared Scale object.
 
-    @param {Object} shared_libs - Lib container with Utils
-    @param {Object} config - Merged config from the parent module
-    @param {Object} errors - Frozen error catalog from the parent module
+@param {Object} shared_libs - Lib container with Utils
+@param {Object} config - Merged config from the parent module
+@param {Object} errors - Frozen error catalog from the parent module
 
-    @return {Object} - Public Scale interface
+@return {Object} - Public Scale interface
 *********************************************************************/
 module.exports = function loader (shared_libs, config, errors) {
 

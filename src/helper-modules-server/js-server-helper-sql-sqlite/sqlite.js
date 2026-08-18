@@ -107,11 +107,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     is not known upfront. Prefer getRow / getRows / getValue when the shape
     is known.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL (typically pre-built with buildQuery)
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL (typically pre-built with buildQuery)
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, result, has_multiple_rows, error }
+@return {Promise<Object>} - { success, result, has_multiple_rows, error }
     *********************************************************************/
     get: async function (instance, sql, params) {
 
@@ -173,11 +173,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Run a query and return the first row, or null if there are no results.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, row, error }
+@return {Promise<Object>} - { success, row, error }
     *********************************************************************/
     getRow: async function (instance, sql, params) {
 
@@ -204,11 +204,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Run a query and return every row.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, rows, count, error }
+@return {Promise<Object>} - { success, rows, count, error }
     *********************************************************************/
     getRows: async function (instance, sql, params) {
 
@@ -238,11 +238,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Run a query and return the first column of the first row. Handy for
     COUNT(*), MAX(), and other single-value lookups.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, value, error }
+@return {Promise<Object>} - { success, value, error }
     *********************************************************************/
     getValue: async function (instance, sql, params) {
 
@@ -308,11 +308,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     For array input, this is the last insert_id seen in the batch. Null for
     UPDATE / DELETE / DDL statements.
 
-    @param {Object} instance - Request instance
-    @param {(String|Array)} sql - Single SQL string or array of statements
-    @param {Array} [params] - Placeholder values (only when sql is a String)
+@param {Object} instance - Request instance
+@param {(String|Array)} sql - Single SQL string or array of statements
+@param {Array} [params] - Placeholder values (only when sql is a String)
 
-    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
+@return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     write: async function (instance, sql, params) {
 
@@ -391,10 +391,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
       buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
 
-    @param {String} sql - SQL template
-    @param {(Array|Object|*)} params - Values for ?/?? substitution
+@param {String} sql - SQL template
+@param {(Array|Object|*)} params - Values for ?/?? substitution
 
-    @return {String} - Fully-escaped SQLite SQL
+@return {String} - Fully-escaped SQLite SQL
     *********************************************************************/
     buildQuery: function (sql, params) {
 
@@ -412,9 +412,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       const now = SQLite.buildRawText('CURRENT_TIMESTAMP');
       SQLite.buildQuery('INSERT INTO logs SET ?', { created_at: now });
 
-    @param {String} str - Raw SQL fragment
+@param {String} str - Raw SQL fragment
 
-    @return {Object} - Raw-text marker recognized by buildQuery
+@return {Object} - Raw-text marker recognized by buildQuery
     *********************************************************************/
     buildRawText: function (str) {
 
@@ -427,10 +427,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Join equality conditions with AND or OR. Identifiers and values are
     escaped automatically.
 
-    @param {Object} data - Key-value pairs to join
-    @param {String} [multi_operator] - 'AND' (default) or 'OR'
+@param {Object} data - Key-value pairs to join
+@param {String} [multi_operator] - 'AND' (default) or 'OR'
 
-    @return {String} - Escaped condition fragment
+@return {String} - Escaped condition fragment
     *********************************************************************/
     buildMultiCondition: function (data, multi_operator) {
 
@@ -460,7 +460,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Persistent servers should call this from their shutdown handler;
     serverless functions can skip it since the runtime freezes idle handles.
 
-    @return {Promise<void>}
+@return {Promise<void>}
     *********************************************************************/
     close: async function () {
 
@@ -511,9 +511,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Must be paired with releaseClient() for API parity with MySQL / Postgres
     (it is a no-op for SQLite but callers should still pair them).
 
-    @param {Object} instance - Request instance (kept for API parity with MySQL/Postgres)
+@param {Object} instance - Request instance (kept for API parity with MySQL/Postgres)
 
-    @return {Promise<Object>} - { success, client, error }
+@return {Promise<Object>} - { success, client, error }
     *********************************************************************/
     getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -556,9 +556,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     No-op for SQLite (single handle per instance). Kept for API parity.
 
-    @param {Object} client - Handle from getClient()
+@param {Object} client - Handle from getClient()
 
-    @return {void}
+@return {void}
     *********************************************************************/
     releaseClient: function (client) { // eslint-disable-line no-unused-vars
 
@@ -581,7 +581,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Lazy-load the node:sqlite adapter. Shared across every instance because
     the module itself is stateless - only the database handle holds state.
 
-    @return {void}
+@return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -600,7 +600,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     callers get sensible defaults without needing to issue their own PRAGMA
     statements.
 
-    @return {void}
+@return {void}
     *********************************************************************/
     initIfNot: function () {
 
@@ -647,9 +647,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Whitelist-validate a PRAGMA value so we can safely inline it.
     Rejects anything outside the allowed keyword set.
 
-    @param {String} val - Candidate PRAGMA value
+@param {String} val - Candidate PRAGMA value
 
-    @return {String} - Same value, uppercased
+@return {String} - Same value, uppercased
 
     @throws {Error} If the value is not whitelisted
     *********************************************************************/
@@ -681,9 +681,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Any embedded " is doubled per the SQL standard. SQLite supports
     double-quoted identifiers natively.
 
-    @param {String} id - Identifier
+@param {String} id - Identifier
 
-    @return {String} - Double-quoted, safely escaped
+@return {String} - Double-quoted, safely escaped
     *********************************************************************/
     escapeIdentifier: function (id) {
 
@@ -702,9 +702,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     - Buffer           -> X'hex' BLOB literal
     - string           -> single-quoted, embedded quotes doubled
 
-    @param {*} val - Scalar value
+@param {*} val - Scalar value
 
-    @return {String} - SQLite-safe literal
+@return {String} - SQLite-safe literal
     *********************************************************************/
     escapeValue: function (val) {
 
@@ -747,9 +747,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Handles scalars, arrays, objects (k=v pairs), and raw fragments.
     Composes escapeIdentifier and escapeValue.
 
-    @param {*} val - Value to format
+@param {*} val - Value to format
 
-    @return {String} - Formatted literal
+@return {String} - Formatted literal
     *********************************************************************/
     formatValue: function (val) {
 
@@ -790,10 +790,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Walks inside single-quoted strings / double-quoted identifiers /
     line comments to avoid replacing placeholders there.
 
-    @param {String} sql - Source SQL
-    @param {*} params - Scalar, array, or object
+@param {String} sql - Source SQL
+@param {*} params - Scalar, array, or object
 
-    @return {String} - Fully-escaped SQLite SQL
+@return {String} - Fully-escaped SQLite SQL
     *********************************************************************/
     formatQuery: function (sql, params) {
 
@@ -899,10 +899,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Walks the SQL character-by-character so placeholders inside string
     literals, double-quoted identifiers, and -- line comments are ignored.
 
-    @param {String} sql - Source SQL with ?/?? placeholders
-    @param {Array} params - Values to bind (consumed in order)
+@param {String} sql - Source SQL with ?/?? placeholders
+@param {Array} params - Values to bind (consumed in order)
 
-    @return {Object} - { sql, params } ready for prepare/run/all
+@return {Object} - { sql, params } ready for prepare/run/all
     *********************************************************************/
     translatePlaceholders: function (sql, params) {
 
@@ -1003,9 +1003,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       - boolean   -> 1 / 0
       - Date      -> ISO string
 
-    @param {Array} params - Raw JS values
+@param {Array} params - Raw JS values
 
-    @return {Array} - SQLite-bindable values
+@return {Array} - SQLite-bindable values
     *********************************************************************/
     normalizeParams: function (params) {
 
@@ -1033,9 +1033,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Read-shape: SELECT, WITH (CTE), PRAGMA, EXPLAIN, or any statement
     containing a RETURNING clause (INSERT/UPDATE/DELETE ... RETURNING *).
 
-    @param {String} sql - SQL statement
+@param {String} sql - SQL statement
 
-    @return {Object} - { is_read, first_word, has_returning }
+@return {Object} - { is_read, first_word, has_returning }
     *********************************************************************/
     classifyStatement: function (sql) {
 
@@ -1066,9 +1066,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     node:sqlite may return bigint for changes/lastInsertRowid; downstream
     JSON serialization prefers numbers when they fit in a safe integer.
 
-    @param {*} val - Number or bigint
+@param {*} val - Number or bigint
 
-    @return {Number|BigInt} - Same value, narrowed when safe
+@return {Number|BigInt} - Same value, narrowed when safe
     *********************************************************************/
     narrowInteger: function (val) {
 
@@ -1090,9 +1090,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     / SQLite. `deepStrictEqual`, spread, and JSON.stringify all assume plain
     Object prototypes.
 
-    @param {Array} rows - Rows as returned by statement.all()
+@param {Array} rows - Rows as returned by statement.all()
 
-    @return {Array} - Same rows, each copied into a plain object
+@return {Array} - Same rows, each copied into a plain object
     *********************************************************************/
     normalizeRows: function (rows) {
 
@@ -1118,11 +1118,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Dispatches to statement.all() for read-shape queries and statement.run()
     for write-shape queries, based on classifyStatement().
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
+@return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
     *********************************************************************/
     query: async function (instance, sql, params) {
 
@@ -1223,11 +1223,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     no RETURNING clause is required (unlike Postgres). For UPDATE / DELETE
     insert_id will be null.
 
-    @param {Object} instance - Request instance
-    @param {String} sql - SQL with ?/?? placeholders
-    @param {Array} [params] - Placeholder values
+@param {Object} instance - Request instance
+@param {String} sql - SQL with ?/?? placeholders
+@param {Array} [params] - Placeholder values
 
-    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
+@return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     execute: async function (instance, sql, params) {
 
@@ -1260,10 +1260,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Uses BEGIN / COMMIT / ROLLBACK since node:sqlite does not expose a
     transaction() wrapper.
 
-    @param {Object} instance - Request instance
-    @param {Array} statements - Array of { sql, params } objects
+@param {Object} instance - Request instance
+@param {Array} statements - Array of { sql, params } objects
 
-    @return {Promise<Object>} - { success, results, error }
+@return {Promise<Object>} - { success, results, error }
     *********************************************************************/
     transaction: async function (instance, statements) {
 

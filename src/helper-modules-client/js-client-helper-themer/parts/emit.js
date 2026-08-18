@@ -34,11 +34,11 @@ const PLATFORMS = ['web', 'native'];
     Singleton part loader. Assigns the uniform part dependencies plus
     the colour part to module scope and returns the shared Emit object.
 
-    @param {Object} shared_libs - Lib container with Utils and the Color part
-    @param {Object} config - Merged config from the parent module
-    @param {Object} errors - Frozen error catalog from the parent module
+@param {Object} shared_libs - Lib container with Utils and the Color part
+@param {Object} config - Merged config from the parent module
+@param {Object} errors - Frozen error catalog from the parent module
 
-    @return {Object} - Public Emit interface
+@return {Object} - Public Emit interface
 *********************************************************************/
 module.exports = function loader (shared_libs, config, errors) {
 

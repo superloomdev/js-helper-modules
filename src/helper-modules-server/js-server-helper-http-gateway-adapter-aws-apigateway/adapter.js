@@ -95,11 +95,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     url              {String}   - Request URL path with query string
     response_handler {Function} - Wraps the Lambda callback
 
-    @param {Object}   raw_request       - Raw API Gateway v2.0 event
-    @param {Object}   raw_context       - Lambda execution context (unused)
-    @param {Function} response_callback - Lambda callback function(err, response)
+@param {Object}   raw_request       - Raw API Gateway v2.0 event
+@param {Object}   raw_context       - Lambda execution context (unused)
+@param {Function} response_callback - Lambda callback function(err, response)
 
-    @return {Object} - Normalized request fields plus response_handler
+@return {Object} - Normalized request fields plus response_handler
     *********************************************************************/
     extractRequest: function (raw_request, rawContext, response_callback) {
 
@@ -163,11 +163,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Object            -> JSON.stringify
     Anything else     -> String(value)
 
-    @param {Integer} status  - HTTP status code
-    @param {Object}  headers - Response headers map
-    @param {*}       body    - Response body (string, object, Buffer, or null)
+@param {Integer} status  - HTTP status code
+@param {Object}  headers - Response headers map
+@param {*}       body    - Response body (string, object, Buffer, or null)
 
-    @return {Object} - { statusCode, headers, body, isBase64Encoded }
+@return {Object} - { statusCode, headers, body, isBase64Encoded }
     *********************************************************************/
     buildResponseEnvelope: function (status, headers, body) {
 
@@ -208,9 +208,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     CloudFront-Viewer-Country header (forwarded through API Gateway).
     Returns null when not present.
 
-    @param {Object} headers - Lowercase request headers
+@param {Object} headers - Lowercase request headers
 
-    @return {String|null} - ISO 3166-1 alpha-2 country code, or null
+@return {String|null} - ISO 3166-1 alpha-2 country code, or null
     *********************************************************************/
     getCountryCode: function (headers) {
 
@@ -236,9 +236,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Parse a raw Cookie header string into a key/value map.
     Returns empty object on empty or missing input.
 
-    @param {String} cookie_header - Raw value of the Cookie header
+@param {String} cookie_header - Raw value of the Cookie header
 
-    @return {Object} - { name: value, ... }
+@return {Object} - { name: value, ... }
     *********************************************************************/
     parseCookieHeader: function (cookie_header) {
 
@@ -284,9 +284,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Parse a URL-encoded body string (application/x-www-form-urlencoded)
     into a key/value map. Returns empty object on empty or missing input.
 
-    @param {String} body - URL-encoded body string
+@param {String} body - URL-encoded body string
 
-    @return {Object} - { key: value, ... }
+@return {Object} - { key: value, ... }
     *********************************************************************/
     parseUrlEncodedBody: function (body) {
 
@@ -315,9 +315,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Normalize all header keys to lowercase. API Gateway may deliver
     headers with mixed casing depending on version and origin.
 
-    @param {Object} raw_headers - Headers object from the event
+@param {Object} raw_headers - Headers object from the event
 
-    @return {Object} - New object with all keys lowercased
+@return {Object} - New object with all keys lowercased
     *********************************************************************/
     lowercaseHeaders: function (raw_headers) {
 
@@ -346,10 +346,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Parse the POST body from an API Gateway event. Detects content-type
     and parses accordingly. Returns empty object when body is absent.
 
-    @param {Object} event   - Raw API Gateway event
-    @param {Object} headers - Lowercase headers map (already normalized)
+@param {Object} event   - Raw API Gateway event
+@param {Object} headers - Lowercase headers map (already normalized)
 
-    @return {Object} - Parsed body as key/value map
+@return {Object} - Parsed body as key/value map
     *********************************************************************/
     parseBody: function (event, headers) {
 

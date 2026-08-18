@@ -97,9 +97,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Strip non-numeric characters from a national phone number.
     Returns the digit-only string. Empty string in, empty string out.
 
-    @param {String} national_number - Raw phone number input
+@param {String} national_number - Raw phone number input
 
-    @return {String} - Digits only
+@return {String} - Digits only
     *********************************************************************/
     sanitizeNumber: function (national_number) {
 
@@ -117,9 +117,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     include a + prefix and a calling code. Returns the cleaned string
     preserving the leading + if present.
 
-    @param {String} phone - Raw full phone number input (e.g. '+91 98765 43210')
+@param {String} phone - Raw full phone number input (e.g. '+91 98765 43210')
 
-    @return {String} - Cleaned string (e.g. '+919876543210')
+@return {String} - Cleaned string (e.g. '+919876543210')
     *********************************************************************/
     sanitizeFullNumber: function (phone) {
 
@@ -146,9 +146,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     /********************************************************************
     Check if a country code is known to the adapter.
 
-    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
+@param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-    @return {Boolean} - true if the adapter has metadata for this country
+@return {Boolean} - true if the adapter has metadata for this country
     *********************************************************************/
     isKnownCountry: function (country_code) {
 
@@ -167,7 +167,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     /********************************************************************
     List all country codes the adapter knows about.
 
-    @return {Object} - { success, countries, error }
+@return {Object} - { success, countries, error }
     *********************************************************************/
     listCountries: function () {
 
@@ -187,9 +187,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     /********************************************************************
     Get metadata (calling code, length bounds) for a country.
 
-    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
+@param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-    @return {Object} - { success, metadata, error }
+@return {Object} - { success, metadata, error }
     *********************************************************************/
     getCountryMetadata: function (country_code) {
 
@@ -226,10 +226,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Delegates to the adapter for syntax checking. The adapter returns
     { valid, reason } where reason is a stable error type string.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     validateSyntax: function (country_code, national_number) {
 
@@ -265,10 +265,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     The basic adapter always returns null (no type data).
     The extended adapter returns the actual type from libphonenumber-js.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {Object} - { success, type, error }
+@return {Object} - { success, type, error }
     *********************************************************************/
     getNumberType: function (country_code, national_number) {
 
@@ -309,10 +309,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Returns null if the country is unknown or the result would exceed
     the E.164 maximum length of 15 digits.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {String|null} - E.164 string (e.g. '+919876543210') or null
+@return {String|null} - E.164 string (e.g. '+919876543210') or null
     *********************************************************************/
     formatE164: function (country_code, national_number) {
 
@@ -346,10 +346,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Developer-friendly alias for formatE164. Same behavior, clearer name
     for developers who do not know E.164 by heart.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {String|null} - Full number string (e.g. '+919876543210') or null
+@return {String|null} - Full number string (e.g. '+919876543210') or null
     *********************************************************************/
     formatFullNumber: function (country_code, national_number) {
 
@@ -370,9 +370,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Returns null if the string is not a valid E.164 format or if no
     known country matches the calling code prefix.
 
-    @param {String} e164_number - E.164 string (e.g. '+919876543210')
+@param {String} e164_number - E.164 string (e.g. '+919876543210')
 
-    @return {Object|null} - { country_code, national_number } or null
+@return {Object|null} - { country_code, national_number } or null
     *********************************************************************/
     parseE164: function (e164_number) {
 
@@ -453,9 +453,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Developer-friendly alias for parseE164. Same behavior, clearer name
     for developers who do not know E.164 by heart.
 
-    @param {String} full_number - Full number string (e.g. '+919876543210')
+@param {String} full_number - Full number string (e.g. '+919876543210')
 
-    @return {Object|null} - { country_code, national_number } or null
+@return {Object|null} - { country_code, national_number } or null
     *********************************************************************/
     parseFullNumber: function (full_number) {
 
@@ -478,10 +478,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
     This is a storage convention, not a display format.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {String|null} - Phone ID (e.g. 'in.0123456789') or null
+@return {String|null} - Phone ID (e.g. 'in.0123456789') or null
     *********************************************************************/
     createPhoneId: function (country_code, national_number) {
 
@@ -510,9 +510,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Parse a phone ID back into its country code and national number.
     Returns null if the format is invalid or the country is unknown.
 
-    @param {String} phone_id - Phone ID (e.g. 'in.0123456789')
+@param {String} phone_id - Phone ID (e.g. 'in.0123456789')
 
-    @return {Object|null} - { country_code, national_number } or null
+@return {Object|null} - { country_code, national_number } or null
     *********************************************************************/
     parsePhoneId: function (phone_id) {
 

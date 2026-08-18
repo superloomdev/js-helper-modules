@@ -73,10 +73,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Log a debug-level message. Use for verbose development diagnostics.
 
-    @param {String} message - Log message
-    @param {Object} [data] - (Optional) Additional data to log
+@param {String} message - Log message
+@param {Object} [data] - (Optional) Additional data to log
 
-    @return {void}
+@return {void}
     *********************************************************************/
     debug: function (message, data) {
 
@@ -88,10 +88,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Log an info-level message. Use for general operational information.
 
-    @param {String} message - Log message
-    @param {Object} [data] - (Optional) Additional data to log
+@param {String} message - Log message
+@param {Object} [data] - (Optional) Additional data to log
 
-    @return {void}
+@return {void}
     *********************************************************************/
     info: function (message, data) {
 
@@ -103,10 +103,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Log a warn-level message. Use for recoverable issues or deprecations.
 
-    @param {String} message - Log message
-    @param {Object} [data] - (Optional) Additional data to log
+@param {String} message - Log message
+@param {Object} [data] - (Optional) Additional data to log
 
-    @return {void}
+@return {void}
     *********************************************************************/
     warn: function (message, data) {
 
@@ -118,11 +118,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Log an error-level message. Use for errors that need investigation.
 
-    @param {String} message - Log message
-    @param {Error|Object} [error] - (Optional) Error object or additional data
-    @param {String} [extra_info] - (Optional) Extra context for the error
+@param {String} message - Log message
+@param {Error|Object} [error] - (Optional) Error object or additional data
+@param {String} [extra_info] - (Optional) Extra context for the error
 
-    @return {void}
+@return {void}
     *********************************************************************/
     error: function (message, error, extra_info) {
 
@@ -150,9 +150,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Backward-compatible interface to console.log.
     Logs at 'info' level. Use debug/info/warn/error for new code.
 
-    @param {...*} args - Forward all arguments as-is
+@param {...*} args - Forward all arguments as-is
 
-    @return {void}
+@return {void}
     *********************************************************************/
     log: function () {
 
@@ -167,11 +167,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Performance audit log. Measures elapsed time and heap memory usage.
     Use to track connection times, query durations, and API response times.
 
-    @param {String} action - Action identifier (e.g., 'End', 'Error')
-    @param {String} routine - Process name being audited
-    @param {Number} [reference_time] - (Optional) Start time in unix-milliseconds
+@param {String} action - Action identifier (e.g., 'End', 'Error')
+@param {String} routine - Process name being audited
+@param {Number} [reference_time] - (Optional) Start time in unix-milliseconds
 
-    @return {void}
+@return {void}
     *********************************************************************/
     performanceAuditLog: function (action, routine, reference_time) {
 
@@ -226,9 +226,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Check if a message at the given level should be logged
 
-    @param {String} level - Log level to check ('debug'|'info'|'warn'|'error')
+@param {String} level - Log level to check ('debug'|'info'|'warn'|'error')
 
-    @return {Boolean} - true if should log, false if suppressed
+@return {Boolean} - true if should log, false if suppressed
     *********************************************************************/
     shouldLog: function (level) {
 
@@ -243,11 +243,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Write a log entry in the configured format
 
-    @param {String} level - Log level ('debug'|'info'|'warn'|'error')
-    @param {String} message - Log message
-    @param {Object} [data] - (Optional) Additional structured data
+@param {String} level - Log level ('debug'|'info'|'warn'|'error')
+@param {String} message - Log message
+@param {Object} [data] - (Optional) Additional structured data
 
-    @return {void}
+@return {void}
     *********************************************************************/
     writeLog: function (level, message, data) {
 
@@ -269,11 +269,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Write a structured JSON log line (CloudWatch / log aggregator compatible)
 
-    @param {String} level - Log level
-    @param {String} message - Log message
-    @param {Object} [data] - Additional data
+@param {String} level - Log level
+@param {String} message - Log message
+@param {Object} [data] - Additional data
 
-    @return {void}
+@return {void}
     *********************************************************************/
     writeJsonLog: function (level, message, data) {
 
@@ -303,11 +303,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Write a human-readable text log line (local dev / Docker stdout)
 
-    @param {String} level - Log level
-    @param {String} message - Log message
-    @param {Object} [data] - Additional data
+@param {String} level - Log level
+@param {String} message - Log message
+@param {Object} [data] - Additional data
 
-    @return {void}
+@return {void}
     *********************************************************************/
     writeTextLog: function (level, message, data) {
 

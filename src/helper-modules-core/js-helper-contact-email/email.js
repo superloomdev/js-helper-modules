@@ -91,9 +91,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Trims whitespace and removes characters not in the allowed set.
     Does not validate - just cleans.
 
-    @param {String} email - Raw email input
+@param {String} email - Raw email input
 
-    @return {String} - Sanitized email
+@return {String} - Sanitized email
     *********************************************************************/
     sanitizeEmail: function (email) {
 
@@ -117,9 +117,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Returns null if there is no @ or the domain is empty.
     Does not validate the domain.
 
-    @param {String} email - Email address
+@param {String} email - Email address
 
-    @return {String|null} - Domain part or null
+@return {String|null} - Domain part or null
     *********************************************************************/
     getDomainPart: function (email) {
 
@@ -153,9 +153,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     Returns null if there is no @ or the local part is empty.
     Does not validate the local part.
 
-    @param {String} email - Email address
+@param {String} email - Email address
 
-    @return {String|null} - Local part or null
+@return {String|null} - Local part or null
     *********************************************************************/
     getLocalPart: function (email) {
 
@@ -191,9 +191,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     the actual syntax check. The adapter returns { valid, reason }
     where reason is a stable error type string.
 
-    @param {String} email - Email address to validate
+@param {String} email - Email address to validate
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     validateSyntax: function (email) {
 
@@ -228,9 +228,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     The basic adapter always returns false (no disposable data).
     The extended adapter checks against a committed list of ~5K domains.
 
-    @param {String} email - Email address to check
+@param {String} email - Email address to check
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     validateDisposable: function (email) {
 
@@ -279,9 +279,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
     The basic adapter always returns false.
 
-    @param {String} domain - Domain part (e.g. 'gmail.com')
+@param {String} domain - Domain part (e.g. 'gmail.com')
 
-    @return {Boolean} - true if the domain is disposable
+@return {Boolean} - true if the domain is disposable
     *********************************************************************/
     isDisposableDomain: function (domain) {
 
@@ -307,9 +307,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     It exists for duplicate detection only. Storing a Gmail-folded
     address loses the user's actual address.
 
-    @param {String} email - Email address to canonicalize
+@param {String} email - Email address to canonicalize
 
-    @return {String|null} - Canonicalized email or null if invalid
+@return {String|null} - Canonicalized email or null if invalid
     *********************************************************************/
     canonicalize: function (email) {
 

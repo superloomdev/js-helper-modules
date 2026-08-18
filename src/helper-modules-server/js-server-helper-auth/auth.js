@@ -135,10 +135,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     in `cookies` when COOKIE_PREFIX is configured - pass it to
     Lib.HttpGateway.returnHttpResponse as the cookies argument.
 
-    @param {Object} instance - Request instance (provides time + lifecycle)
-    @param {Object} options - See parts/validators.js validateCreateSessionOptions
+@param {Object} instance - Request instance (provides time + lifecycle)
+@param {Object} options - See parts/validators.js validateCreateSessionOptions
 
-    @return {Promise<Object>} - { success, auth_id, session, cookies, error }
+@return {Promise<Object>} - { success, auth_id, session, cookies, error }
     *********************************************************************/
     createSession: async function (instance, options) {
 
@@ -333,10 +333,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     expires_at + client_* fields when LAST_ACTIVE_UPDATE_INTERVAL_SECONDS
     has elapsed since the last refresh.
 
-    @param {Object} instance - Request instance
-    @param {Object} [options] - Optional explicit auth_id + tenant_id
+@param {Object} instance - Request instance
+@param {Object} [options] - Optional explicit auth_id + tenant_id
 
-    @return {Promise<Object>} - { success, session, error }
+@return {Promise<Object>} - { success, session, error }
     *********************************************************************/
     verifySession: async function (instance, options) {
 
@@ -461,10 +461,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     /********************************************************************
     Delete one session by (tenant_id, actor_id, token_key).
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id, token_key }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id, token_key }
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     removeSession: async function (instance, options) {
 
@@ -514,10 +514,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Remove all sessions for an actor except the one whose token_key is
     identified by keep_token_key. Used for "log out everywhere else".
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id, keep_token_key }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id, keep_token_key }
 
-    @return {Promise<Object>} - { success, removed_count, error }
+@return {Promise<Object>} - { success, removed_count, error }
     *********************************************************************/
     removeOtherSessions: async function (instance, options) {
 
@@ -586,10 +586,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Delete all sessions for an actor. Used for password reset and
     forced re-auth.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id }
 
-    @return {Promise<Object>} - { success, removed_count, error }
+@return {Promise<Object>} - { success, removed_count, error }
     *********************************************************************/
     removeAllSessions: async function (instance, options) {
 
@@ -670,10 +670,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     List all sessions for an actor. The classic "Active devices" UI
     backend. Does not modify state.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id }
 
-    @return {Promise<Object>} - { success, sessions, error }
+@return {Promise<Object>} - { success, sessions, error }
     *********************************************************************/
     listSessions: async function (instance, options) {
 
@@ -716,10 +716,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Count active sessions for an actor. Convenience wrapper over
     listSessions for callers that need only a number.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id }
 
-    @return {Promise<Object>} - { success, count, error }
+@return {Promise<Object>} - { success, count, error }
     *********************************************************************/
     countSessions: async function (instance, options) {
 
@@ -754,10 +754,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     from each record. Sessions with null push fields are omitted, as
     are expired sessions (mirrors listSessions).
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id }
 
-    @return {Promise<Object>} - { success, targets, error }
+@return {Promise<Object>} - { success, targets, error }
     *********************************************************************/
     listPushTargetsByActor: async function (instance, options) {
 
@@ -801,10 +801,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Bind a push provider + token to an existing session. Called after
     the client app obtains push permission from the OS / browser.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id, token_key, push_provider, push_token }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id, token_key, push_provider, push_token }
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     attachDeviceToSession: async function (instance, options) {
 
@@ -844,10 +844,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Unbind the push provider + token from a session. Called when the OS
     revokes the token, or the client opts out of push.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - { tenant_id, actor_id, token_key }
+@param {Object} instance - Request instance
+@param {Object} options - { tenant_id, actor_id, token_key }
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     detachDeviceFromSession: async function (instance, options) {
 
@@ -900,9 +900,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     the underlying helper module. A custom store that omits the method
     entirely trips the capability gate below and throws TypeError.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -925,9 +925,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Sweep expired sessions. Optional - only useful for SQL backends
     without native TTL. Recommended frequency: once per day via cron.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
@@ -970,9 +970,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Useful for tests and for flows that mint an auth_id outside of
     createSession.
 
-    @param {Object} parts - { actor_id, token_key, token_secret }
+@param {Object} parts - { actor_id, token_key, token_secret }
 
-    @return {String} - The wire-format auth_id
+@return {String} - The wire-format auth_id
     *********************************************************************/
     createAuthId: function (parts) {
 
@@ -985,9 +985,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Pure helper: parse a wire-format auth_id back into its three parts.
     Returns null if the shape is wrong.
 
-    @param {String} auth_id - The wire-format string
+@param {String} auth_id - The wire-format string
 
-    @return {Object|null} - { actor_id, token_key, token_secret } or null
+@return {Object|null} - { actor_id, token_key, token_secret } or null
     *********************************************************************/
     parseAuthId: function (auth_id) {
 
@@ -1009,11 +1009,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Returns either the verified claims or one of the standard auth
     errors mapped from ERRORS.
 
-    @param {Object} instance - Request instance
-    @param {Object} options
-    @param {String} options.jwt - Compact JWS string (access token)
+@param {Object} instance - Request instance
+@param {Object} options
+@param {String} options.jwt - Compact JWS string (access token)
 
-    @return {Object} - { success, claims, error }
+@return {Object} - { success, claims, error }
     *********************************************************************/
     verifyJwt: function (instance, options) {
 
@@ -1085,11 +1085,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     verifySession - e.g., a "session warmup" endpoint that hands out
     short-lived JWTs based on a long-lived auth_id cookie.
 
-    @param {Object} instance - Request instance
-    @param {Object} options
-    @param {Object} options.session - Canonical session record
+@param {Object} instance - Request instance
+@param {Object} options
+@param {Object} options.session - Canonical session record
 
-    @return {Object} - { success, access_token, error }
+@return {Object} - { success, access_token, error }
     *********************************************************************/
     signSessionJwt: function (instance, options) {
 
@@ -1127,12 +1127,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     Refresh token wire format:
       "{actor_id}-{token_key}-{refresh_secret}"
 
-    @param {Object} instance - Request instance
-    @param {Object} options
-    @param {String} options.tenant_id - Required (refresh tokens scope by tenant)
-    @param {String} options.refresh_token - The wire-format refresh token
+@param {Object} instance - Request instance
+@param {Object} options
+@param {String} options.tenant_id - Required (refresh tokens scope by tenant)
+@param {String} options.refresh_token - The wire-format refresh token
 
-    @return {Object} - { success, access_token, refresh_token, session, error }
+@return {Object} - { success, access_token, refresh_token, session, error }
     *********************************************************************/
     refreshSessionJwt: async function (instance, options) {
 
@@ -1307,12 +1307,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     so the user doesn't wait on a DB write that doesn't affect the result.
     Closes over Lib, store, and CONFIG from createInterface.
 
-    @param {Object}  instance    - Request instance
-    @param {Object}  record      - The session record to refresh
-    @param {Integer} ttl_seconds - The actor's TTL
-    @param {String}  tenant_id   - Tenant identifier for the store call
+@param {Object}  instance    - Request instance
+@param {Object}  record      - The session record to refresh
+@param {Integer} ttl_seconds - The actor's TTL
+@param {String}  tenant_id   - Tenant identifier for the store call
 
-    @return {void}
+@return {void}
     *********************************************************************/
     scheduleBackgroundRefresh: function (instance, record, ttl_seconds, tenant_id) {
 

@@ -44,11 +44,11 @@ module.exports = function makeStubAdapter () {
       method   {String} - 'GET' | 'POST' | ...
       url      {String} - Request URL path with query string
 
-    @param {Object}   raw_request       - Pre-normalized request data
-    @param {Object}   raw_context       - Ignored by this adapter
-    @param {Function} response_callback - Runtime callback wrapper target
+@param {Object}   raw_request       - Pre-normalized request data
+@param {Object}   raw_context       - Ignored by this adapter
+@param {Function} response_callback - Runtime callback wrapper target
 
-    @return {Object} - Normalized request payload + response_handler
+@return {Object} - Normalized request payload + response_handler
     ****************************************************************/
     extractRequest: function (raw_request, _raw_context, response_callback) {
 
@@ -80,11 +80,11 @@ module.exports = function makeStubAdapter () {
     Build a response envelope. Returns a plain object that mirrors the
     shape real adapters produce, suitable for test assertions.
 
-    @param {Integer} status  - HTTP status code
-    @param {Object}  headers - Response headers map
-    @param {*}       body    - Response body (string, object, or Buffer)
+@param {Integer} status  - HTTP status code
+@param {Object}  headers - Response headers map
+@param {*}       body    - Response body (string, object, or Buffer)
 
-    @return {Object} - { status, headers, body }
+@return {Object} - { status, headers, body }
     ****************************************************************/
     buildResponseEnvelope: function (status, headers, body) {
 
@@ -118,9 +118,9 @@ module.exports = function makeStubAdapter () {
     Return the viewer country code if the adapter can supply it.
     The stub adapter never has this information - returns null.
 
-    @param {Object} _headers - Request headers (unused)
+@param {Object} _headers - Request headers (unused)
 
-    @return {null}
+@return {null}
     ****************************************************************/
     getCountryCode: function (_headers) {
       return null;

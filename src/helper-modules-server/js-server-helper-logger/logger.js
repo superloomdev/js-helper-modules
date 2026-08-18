@@ -107,35 +107,35 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     to make the write synchronous - required for compliance scenarios that
     must not return 200 OK until the audit row is durable.
 
-    @param {Object} instance - Request instance (for time, lifecycle, and
+@param {Object} instance - Request instance (for time, lifecycle, and
                                http_request auto-capture).
-    @param {Object} options  - Log entry fields.
-    @param {String} [options.scope]        - Multi-tenant namespace (default '').
-    @param {String} options.entity_type    - Type of the affected entity
+@param {Object} options  - Log entry fields.
+@param {String} [options.scope]        - Multi-tenant namespace (default '').
+@param {String} options.entity_type    - Type of the affected entity
                                              (e.g. 'user', 'project', 'invoice').
-    @param {String} options.entity_id      - ID of the affected entity.
-    @param {String} options.actor_type     - Type of the actor who triggered
+@param {String} options.entity_id      - ID of the affected entity.
+@param {String} options.actor_type     - Type of the actor who triggered
                                              the event (e.g. 'user', 'admin',
                                              'system', 'webhook').
-    @param {String} options.actor_id       - ID of the actor.
-    @param {String} options.action         - Dot-notation action type - e.g.
+@param {String} options.actor_id       - ID of the actor.
+@param {String} options.action         - Dot-notation action type - e.g.
                                              'auth.login', 'profile.name.changed'.
                                              The application owns the namespace;
                                              this module is opaque to it.
-    @param {Object} [options.data]         - Free-form structured payload
+@param {Object} [options.data]         - Free-form structured payload
                                              describing the event. Must be
                                              JSON-serializable.
-    @param {String} [options.ip]           - Event IP. Auto-captured from
+@param {String} [options.ip]           - Event IP. Auto-captured from
                                              `instance.http_request` via
                                              `Lib.HttpHandler.getHttpRequestIPAddress`
                                              when that helper is present.
-    @param {String} [options.user_agent]   - Event user-agent. Same auto-capture.
-    @param {String|Object} options.retention
+@param {String} [options.user_agent]   - Event user-agent. Same auto-capture.
+@param {String|Object} options.retention
        - 'persistent'         -> never deleted
        - { ttl_seconds: N }    -> deleted at created_at + N seconds
-    @param {Boolean} [options.await] - Await the store write (default false).
+@param {Boolean} [options.await] - Await the store write (default false).
 
-    @return {Promise<Object>} - `{ success, error }`.
+@return {Promise<Object>} - `{ success, error }`.
     *********************************************************************/
     log: async function (instance, options) {
 
@@ -209,23 +209,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     /********************************************************************
     List actions recorded for one entity, most-recent first.
 
-    @param {Object} instance - Request instance.
-    @param {Object} options - Query options.
-    @param {String} [options.scope]          - Multi-tenant namespace (default '').
-    @param {String} options.entity_type      - Entity type filter.
-    @param {String} options.entity_id        - Entity id filter.
-    @param {String[]} [options.actions]      - Optional action filter. Each
+@param {Object} instance - Request instance.
+@param {Object} options - Query options.
+@param {String} [options.scope]          - Multi-tenant namespace (default '').
+@param {String} options.entity_type      - Entity type filter.
+@param {String} options.entity_id        - Entity id filter.
+@param {String[]} [options.actions]      - Optional action filter. Each
                                                entry is a literal action or
                                                an `"auth.*"` glob prefix.
-    @param {Integer} [options.start_time_ms] - Inclusive lower bound on
+@param {Integer} [options.start_time_ms] - Inclusive lower bound on
                                                created_at_ms.
-    @param {Integer} [options.end_time_ms]   - Exclusive upper bound on
+@param {Integer} [options.end_time_ms]   - Exclusive upper bound on
                                                created_at_ms.
-    @param {String} [options.cursor]         - Opaque resume token from the
+@param {String} [options.cursor]         - Opaque resume token from the
                                                previous page's `next_cursor`.
-    @param {Integer} [options.limit]         - Page size (default 50).
+@param {Integer} [options.limit]         - Page size (default 50).
 
-    @return {Promise<Object>} - `{ success, records, next_cursor, error }`.
+@return {Promise<Object>} - `{ success, records, next_cursor, error }`.
     *********************************************************************/
     listByEntity: async function (instance, options) {
 
@@ -257,10 +257,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     Same return shape as listByEntity. See listByEntity for the options
     contract - `actor_type` / `actor_id` replace entity_* on this side.
 
-    @param {Object} instance - Request instance
-    @param {Object} options - Query options (see listByEntity)
+@param {Object} instance - Request instance
+@param {Object} options - Query options (see listByEntity)
 
-    @return {Promise<Object>} - `{ success, records, next_cursor, error }`
+@return {Promise<Object>} - `{ success, records, next_cursor, error }`
     *********************************************************************/
     listByActor: async function (instance, options) {
 
@@ -300,9 +300,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     SQL backends (postgres, mysql, sqlite) have no native TTL - this is
     the primary sweep mechanism for those.
 
-    @param {Object} instance - Request instance.
+@param {Object} instance - Request instance.
 
-    @return {Promise<Object>} - `{ success, deleted_count, error }`.
+@return {Promise<Object>} - `{ success, deleted_count, error }`.
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -338,9 +338,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     MongoDB: TTL index on `_ttl` + compound indexes on the two query
     paths. DynamoDB: CreateTable with the GSI for actor queries.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - `{ success, error }`
+@return {Promise<Object>} - `{ success, error }`
     *********************************************************************/
     setupNewStore: async function (instance) {
 

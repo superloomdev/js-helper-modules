@@ -96,7 +96,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     List all country codes the adapter has data for.
 
-    @return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
+@return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
     *********************************************************************/
     listCountries: function () {
 
@@ -112,9 +112,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Get metadata (calling code, length bounds) for a country.
     Uses libphonenumber-js's Metadata API to extract possibleLengths.
 
-    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
+@param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-    @return {Object|null} - { calling_code, min_length, max_length } or null
+@return {Object|null} - { calling_code, min_length, max_length } or null
     *********************************************************************/
     getMetadata: function (country_code) {
 
@@ -194,10 +194,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Returns { valid, reason } where reason is a stable error type string
     matching the core's error catalog.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {Object} - { valid: Boolean, reason: String|null }
+@return {Object} - { valid: Boolean, reason: String|null }
     *********************************************************************/
     validateSyntax: function (country_code, national_number) {
 
@@ -330,10 +330,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     PREMIUM_RATE, SHARED_COST, VOIP, PERSONAL_NUMBER, PAGER, UAN, VOICEMAIL.
     Returns null if the type cannot be determined.
 
-    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-    @param {String} national_number - National number digits
+@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+@param {String} national_number - National number digits
 
-    @return {String|null} - Number type or null
+@return {String|null} - Number type or null
     *********************************************************************/
     getNumberType: function (country_code, national_number) {
 

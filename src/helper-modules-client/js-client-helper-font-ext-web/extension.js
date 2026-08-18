@@ -97,9 +97,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     CSS strings via the core, creates a <style> node, and appends it
     to the DOM.
 
-    @param {Object} manifest - The manifest from Font.getManifest()
+@param {Object} manifest - The manifest from Font.getManifest()
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     loadManifest: async function (manifest) {
 
@@ -222,7 +222,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether all registered fonts have finished loading.
 
-    @return {Object} - { success, ready, error }
+@return {Object} - { success, ready, error }
     *********************************************************************/
     isReady: function () {
 
@@ -238,9 +238,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether a specific font family has been loaded by this adapter.
 
-    @param {String} familyName - The family name to check
+@param {String} familyName - The family name to check
 
-    @return {Object} - { success, loaded, error }
+@return {Object} - { success, loaded, error }
     *********************************************************************/
     isFamilyLoaded: function (familyName) {
 
@@ -259,7 +259,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Remove the injected style node from the DOM. Useful for hot
     reload or test cleanup.
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     unload: function () {
 

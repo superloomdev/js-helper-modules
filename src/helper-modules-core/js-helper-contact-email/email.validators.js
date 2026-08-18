@@ -43,9 +43,9 @@ const Validators = {
   /********************************************************************
   Validate the merged CONFIG. Throws on any missing-required violation.
 
-    @param {Object} CONFIG - Merged module configuration
+@param {Object} CONFIG - Merged module configuration
 
-    @return {void}
+@return {void}
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
@@ -72,9 +72,9 @@ const Validators = {
     isDisposableDomain(domain) -> Boolean
     canonicalize(email) -> String | null
 
-    @param {Object} adapter - Instantiated adapter object
+@param {Object} adapter - Instantiated adapter object
 
-    @return {void}
+@return {void}
   *********************************************************************/
   validateAdapterContract: function (adapter) {
 
@@ -103,10 +103,10 @@ const Validators = {
   /********************************************************************
   Assert that a value is a string. Throws TypeError if not.
 
-    @param {String} name - Argument name for the error message
-    @param {*} value - The value to check
+@param {String} name - Argument name for the error message
+@param {*} value - The value to check
 
-    @return {void}
+@return {void}
   *********************************************************************/
   assertString: function (name, value) {
 

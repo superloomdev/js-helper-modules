@@ -245,9 +245,9 @@ const _Params = {
   the `in` key (OpenAPI-aligned). Falls back to translating `method`
   (legacy GET/POST/HEADER/PATH/FIXED) into the equivalent `in` value.
 
-    @param {Object} param - Single parameter descriptor
+@param {Object} param - Single parameter descriptor
 
-    @return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
+@return {String|null} - Resolved source: 'query' | 'body' | 'header' | 'params' | 'fixed' | null
   *********************************************************************/
   resolveSource: function (param) {
 

@@ -114,9 +114,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     the expires_at index if they do not exist (SQLite supports
     CREATE ... IF NOT EXISTS for both). Safe to call on every boot.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -174,13 +174,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Read a single session by (tenant_id, actor_id, token_key). Returns
     null record on hash mismatch - identical to "not found" shape.
 
-    @param {Object} instance          - Request instance
-    @param {string} tenant_id         - Tenant identifier
-    @param {string} actor_id          - Actor identifier
-    @param {string} token_key         - Token key (partial key)
-    @param {string} token_secret_hash - Hash to verify after fetch
+@param {Object} instance          - Request instance
+@param {string} tenant_id         - Tenant identifier
+@param {string} actor_id          - Actor identifier
+@param {string} token_key         - Token key (partial key)
+@param {string} token_secret_hash - Hash to verify after fetch
 
-    @return {Promise<Object>} - { success, record, error }
+@return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -242,11 +242,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Return all sessions for a (tenant_id, actor_id) pair.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
 
-    @return {Promise<Object>} - { success, records, error }
+@return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -295,10 +295,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Insert or upsert a session by composite primary key.
 
-    @param {Object} instance - Request instance
-    @param {Object} record   - Canonical session record
+@param {Object} instance - Request instance
+@param {Object} record   - Canonical session record
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
@@ -332,13 +332,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Partial UPDATE for mutable per-session fields. Throws TypeError
     if `updates` contains any identity or primary-key column.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
-    @param {string} token_key - Token key
-    @param {Object} updates   - Partial record (mutable fields only)
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
+@param {string} token_key - Token key
+@param {Object} updates   - Partial record (mutable fields only)
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -410,12 +410,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Delete one session by composite primary key.
 
-    @param {Object} instance  - Request instance
-    @param {string} tenant_id - Tenant identifier
-    @param {string} actor_id  - Actor identifier
-    @param {string} token_key - Token key
+@param {Object} instance  - Request instance
+@param {string} tenant_id - Tenant identifier
+@param {string} actor_id  - Actor identifier
+@param {string} token_key - Token key
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
@@ -455,11 +455,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Bulk delete sessions for a tenant. Single round-trip with an
     OR-joined clause. No-op success if keys array is empty.
 
-    @param {Object}   instance  - Request instance
-    @param {string}   tenant_id - Tenant identifier
-    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
+@param {Object}   instance  - Request instance
+@param {string}   tenant_id - Tenant identifier
+@param {Object[]} keys      - Array of { actor_id, token_key } pairs
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -527,9 +527,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     the garbage-collection path - run it on a cron for file-backed
     deployments.
 
-    @param {Object} instance - Request instance
+@param {Object} instance - Request instance
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+@return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
@@ -612,9 +612,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     as Postgres). Rejects any identifier containing a double-quote so
     identifiers can never inject DDL through the table_name config.
 
-    @param {String} name - Identifier (table or column)
+@param {String} name - Identifier (table or column)
 
-    @return {String} - Quoted identifier
+@return {String} - Quoted identifier
     *********************************************************************/
     Q: function (name) {
 
@@ -634,7 +634,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     CREATE TABLE IF NOT EXISTS. Safe to call on every boot.
     Closes over config from createInterface.
 
-    @return {String} - DDL statement
+@return {String} - DDL statement
     *********************************************************************/
     buildCreateTableSQL: function () {
 
@@ -684,7 +684,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     cleanupExpiredSessions range scan.
     Closes over config from createInterface.
 
-    @return {String} - DDL statement
+@return {String} - DDL statement
     *********************************************************************/
     buildCreateIndexSQL: function () {
 
@@ -707,7 +707,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     node:sqlite ships.
     Closes over config from createInterface.
 
-    @return {String} - SQL template using `?` placeholders
+@return {String} - SQL template using `?` placeholders
     *********************************************************************/
     buildUpsertSQL: function () {
 
@@ -748,10 +748,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Encode a canonical-record value for a parameterized INSERT / UPDATE.
     SQLite needs 0/1 for booleans and a JSON envelope for custom_data.
 
-    @param {String} col   - Column name
-    @param {*}      value - Canonical record value
+@param {String} col   - Column name
+@param {*}      value - Canonical record value
 
-    @return {*} - DB-safe value
+@return {*} - DB-safe value
     *********************************************************************/
     toColumnValue: function (col, value) {
 
@@ -784,10 +784,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     exist as a distinct type), booleans come back as 0/1, and
     custom_data comes back as the TEXT string we wrote, which we parse.
 
-    @param {String} col   - Column name
-    @param {*}      value - Raw DB value
+@param {String} col   - Column name
+@param {*}      value - Raw DB value
 
-    @return {*} - Canonical value
+@return {*} - Canonical value
     *********************************************************************/
     fromColumnValue: function (col, value) {
 
@@ -833,9 +833,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Canonical record -> positional values array, aligned with COLUMNS.
 
-    @param {Object} record - Canonical session record
+@param {Object} record - Canonical session record
 
-    @return {Array} - Positional values for parameterized INSERT
+@return {Array} - Positional values for parameterized INSERT
     *********************************************************************/
     recordToRow: function (record) {
 
@@ -850,9 +850,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Raw row object -> canonical record.
 
-    @param {Object} row - Raw row from SQLite driver
+@param {Object} row - Raw row from SQLite driver
 
-    @return {Object} - Canonical session record
+@return {Object} - Canonical session record
     *********************************************************************/
     rowToRecord: function (row) {
 

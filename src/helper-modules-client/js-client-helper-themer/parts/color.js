@@ -26,11 +26,11 @@ const palette_family_cache = new WeakMap();
     Singleton part loader. Assigns the uniform part dependencies to
     module scope and returns the shared Color object.
 
-    @param {Object} shared_libs - Lib container with Utils
-    @param {Object} config - Merged config from the parent module
-    @param {Object} errors - Frozen error catalog from the parent module
+@param {Object} shared_libs - Lib container with Utils
+@param {Object} config - Merged config from the parent module
+@param {Object} errors - Frozen error catalog from the parent module
 
-    @return {Object} - Public Color interface
+@return {Object} - Public Color interface
 *********************************************************************/
 module.exports = function loader (shared_libs, config, errors) {
 

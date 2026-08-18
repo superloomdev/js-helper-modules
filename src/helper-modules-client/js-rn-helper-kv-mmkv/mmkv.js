@@ -110,9 +110,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get a single record by key. Returns found: false when the key is
     absent, found: true when present (including stored null).
 
-    @param {String} key - Non-empty string without the namespace separator
+@param {String} key - Non-empty string without the namespace separator
 
-    @return {Object} - { success, value, found, error }
+@return {Object} - { success, value, found, error }
     *********************************************************************/
     getRecordSync: function (key) {
 
@@ -217,10 +217,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Write a record by key. Always upsert. JSON-serializes the value.
 
-    @param {String} key   - Non-empty string without the namespace separator
-    @param {*}      value - Any JSON-serializable value (undefined rejected)
+@param {String} key   - Non-empty string without the namespace separator
+@param {*}      value - Any JSON-serializable value (undefined rejected)
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     writeRecordSync: function (key, value) {
 
@@ -292,9 +292,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Delete a record by key. Idempotent: deleting an absent key is
     still success: true.
 
-    @param {String} key - Non-empty string without the namespace separator
+@param {String} key - Non-empty string without the namespace separator
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     deleteRecordSync: function (key) {
 
@@ -354,9 +354,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether a key exists in the store.
 
-    @param {String} key - Non-empty string without the namespace separator
+@param {String} key - Non-empty string without the namespace separator
 
-    @return {Object} - { success, exists, error }
+@return {Object} - { success, exists, error }
     *********************************************************************/
     hasRecordSync: function (key) {
 
@@ -421,7 +421,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     List all keys within the namespace, with the namespace prefix
     stripped. Only keys belonging to this namespace are returned.
 
-    @return {Object} - { success, keys, count, error }
+@return {Object} - { success, keys, count, error }
     *********************************************************************/
     getAllKeysSync: function () {
 
@@ -486,9 +486,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get multiple records by key. Returns a { key: value } map. Absent
     keys are omitted from the map.
 
-    @param {Array<String>} keys - Array of valid key strings
+@param {Array<String>} keys - Array of valid key strings
 
-    @return {Object} - { success, values, error }
+@return {Object} - { success, values, error }
     *********************************************************************/
     batchGetRecordsSync: function (keys) {
 
@@ -545,9 +545,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Write multiple records. Takes a { key: value } object. Sequential
     writes; first failure stops and reports.
 
-    @param {Object} pairs - Plain object of key-value pairs
+@param {Object} pairs - Plain object of key-value pairs
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     batchWriteRecordsSync: function (pairs) {
 
@@ -592,9 +592,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Delete multiple records by key. Idempotent per key.
 
-    @param {Array<String>} keys - Array of valid key strings
+@param {Array<String>} keys - Array of valid key strings
 
-    @return {Object} - { success, error }
+@return {Object} - { success, error }
     *********************************************************************/
     batchDeleteRecordsSync: function (keys) {
 
@@ -639,7 +639,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     uses the engine clearAll directly. Otherwise iterates and removes
     only namespaced keys, preserving other tenants' data.
 
-    @return {Object} - { success, cleared_count, error }
+@return {Object} - { success, cleared_count, error }
     *********************************************************************/
     clearSync: function () {
 
@@ -727,9 +727,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of getRecordSync.
 
-    @param {String} key - Non-empty string without the namespace separator
+@param {String} key - Non-empty string without the namespace separator
 
-    @return {Promise<Object>} - { success, value, found, error }
+@return {Promise<Object>} - { success, value, found, error }
     *********************************************************************/
     getRecord: async function (key) {
 
@@ -741,10 +741,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of writeRecordSync.
 
-    @param {String} key   - Non-empty string without the namespace separator
-    @param {*}      value - Any JSON-serializable value (undefined rejected)
+@param {String} key   - Non-empty string without the namespace separator
+@param {*}      value - Any JSON-serializable value (undefined rejected)
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (key, value) {
 
@@ -756,9 +756,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of deleteRecordSync.
 
-    @param {String} key - Non-empty string without the namespace separator
+@param {String} key - Non-empty string without the namespace separator
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (key) {
 
@@ -770,9 +770,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of hasRecordSync.
 
-    @param {String} key - Non-empty string without the namespace separator
+@param {String} key - Non-empty string without the namespace separator
 
-    @return {Promise<Object>} - { success, exists, error }
+@return {Promise<Object>} - { success, exists, error }
     *********************************************************************/
     hasRecord: async function (key) {
 
@@ -784,7 +784,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of getAllKeysSync.
 
-    @return {Promise<Object>} - { success, keys, count, error }
+@return {Promise<Object>} - { success, keys, count, error }
     *********************************************************************/
     getAllKeys: async function () {
 
@@ -796,9 +796,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of batchGetRecordsSync.
 
-    @param {Array<String>} keys - Array of valid key strings
+@param {Array<String>} keys - Array of valid key strings
 
-    @return {Promise<Object>} - { success, values, error }
+@return {Promise<Object>} - { success, values, error }
     *********************************************************************/
     batchGetRecords: async function (keys) {
 
@@ -810,9 +810,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of batchWriteRecordsSync.
 
-    @param {Object} pairs - Plain object of key-value pairs
+@param {Object} pairs - Plain object of key-value pairs
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     batchWriteRecords: async function (pairs) {
 
@@ -824,9 +824,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of batchDeleteRecordsSync.
 
-    @param {Array<String>} keys - Array of valid key strings
+@param {Array<String>} keys - Array of valid key strings
 
-    @return {Promise<Object>} - { success, error }
+@return {Promise<Object>} - { success, error }
     *********************************************************************/
     batchDeleteRecords: async function (keys) {
 
@@ -838,7 +838,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Async version of clearSync.
 
-    @return {Promise<Object>} - { success, cleared_count, error }
+@return {Promise<Object>} - { success, cleared_count, error }
     *********************************************************************/
     clear: async function () {
 
@@ -860,7 +860,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Return the namespace prefix (NAMESPACE + ':' when non-empty, '' when
     empty).
 
-    @return {String} - Namespace prefix
+@return {String} - Namespace prefix
     *********************************************************************/
     getNamespacePrefix: function () {
 
@@ -876,9 +876,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Build the stored key by prepending the namespace prefix.
 
-    @param {String} key - User-facing key
+@param {String} key - User-facing key
 
-    @return {String} - Namespaced key for storage
+@return {String} - Namespaced key for storage
     *********************************************************************/
     buildKey: function (key) {
 
@@ -890,9 +890,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Strip the namespace prefix from a stored key.
 
-    @param {String} storedKey - Key from the storage engine
+@param {String} storedKey - Key from the storage engine
 
-    @return {String} - User-facing key without the prefix
+@return {String} - User-facing key without the prefix
     *********************************************************************/
     stripPrefix: function (storedKey) {
 
@@ -910,9 +910,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether a stored key belongs to this namespace.
 
-    @param {String} storedKey - Key from the storage engine
+@param {String} storedKey - Key from the storage engine
 
-    @return {boolean} - True if the key belongs to this namespace
+@return {boolean} - True if the key belongs to this namespace
     *********************************************************************/
     isNamespacedKey: function (storedKey) {
 
@@ -934,9 +934,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Validate a single key. Returns the error object when invalid,
     null when valid.
 
-    @param {String} key - Key to validate
+@param {String} key - Key to validate
 
-    @return {Object|null} - Error object or null
+@return {Object|null} - Error object or null
     *********************************************************************/
     validateKey: function (key) {
 
@@ -953,9 +953,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Validate an array of keys. Returns the error object when invalid,
     null when valid.
 
-    @param {Array} keys - Keys to validate
+@param {Array} keys - Keys to validate
 
-    @return {Object|null} - Error object or null
+@return {Object|null} - Error object or null
     *********************************************************************/
     validateKeysArray: function (keys) {
 
@@ -980,9 +980,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Validate a pairs object for batchWriteRecords. Returns the error
     object when invalid, null when valid.
 
-    @param {Object} pairs - Key-value pairs to validate
+@param {Object} pairs - Key-value pairs to validate
 
-    @return {Object|null} - Error object or null
+@return {Object|null} - Error object or null
     *********************************************************************/
     validatePairsObject: function (pairs) {
 

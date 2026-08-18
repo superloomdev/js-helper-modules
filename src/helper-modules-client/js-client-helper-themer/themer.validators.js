@@ -29,10 +29,10 @@ let collector = null;
     Module-root singleton loader. Assigns the injected Lib and error
     catalog to module scope and returns the shared Validators object.
 
-    @param {Object} shared_libs - Lib container with Utils
-    @param {Object} errors - Frozen error catalog owned by the main module
+@param {Object} shared_libs - Lib container with Utils
+@param {Object} errors - Frozen error catalog owned by the main module
 
-    @return {Object} - Public Validators interface
+@return {Object} - Public Validators interface
 *********************************************************************/
 module.exports = function loader (shared_libs, errors) {
 
