@@ -94,7 +94,7 @@ const header = [
 const body = 'module.exports = ' + JSON.stringify(data, null, 2) + ';';
 
 const outputPath = path.join(__dirname, 'extended.address-data.js');
-fs.writeFileSync(outputPath, header + body);
+fs.writeFileSync(outputPath, header + body + '\n');
 
 // Stats
 const withPatterns = Object.values(data).filter(function (d) {

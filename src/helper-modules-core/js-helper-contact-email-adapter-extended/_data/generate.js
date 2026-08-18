@@ -36,7 +36,7 @@ const header = [
 const body = 'module.exports = new Set(' + JSON.stringify(domains) + ');';
 
 const outputPath = path.join(__dirname, 'disposable-domains.js');
-fs.writeFileSync(outputPath, header + body);
+fs.writeFileSync(outputPath, header + body + '\n');
 
 console.log('Generated ' + outputPath);
 console.log('Domains: ' + domains.length);
