@@ -233,6 +233,31 @@ describe('isObject', function () {
 });
 
 
+describe('isArray', function () {
+
+  it('should return true when value is array', function () {
+    assert.strictEqual(Utils.isArray([]), true);
+  });
+
+  it('should return true when value is non-empty array', function () {
+    assert.strictEqual(Utils.isArray([1, 2, 3]), true);
+  });
+
+  it('should return false when value is plain object', function () {
+    assert.strictEqual(Utils.isArray({ a: 1 }), false);
+  });
+
+  it('should return false when value is null', function () {
+    assert.strictEqual(Utils.isArray(null), false);
+  });
+
+  it('should return false when value is string', function () {
+    assert.strictEqual(Utils.isArray('a'), false);
+  });
+
+});
+
+
 describe('isFunction', function () {
 
   it('should return true when value is function declaration', function () {
@@ -304,6 +329,31 @@ describe('isEmptyObject', function () {
 
   it('should return false when value is object with keys', function () {
     assert.strictEqual(Utils.isEmptyObject({ a: 1 }), false);
+  });
+
+});
+
+
+describe('isEmptyArray', function () {
+
+  it('should return true when value is empty array', function () {
+    assert.strictEqual(Utils.isEmptyArray([]), true);
+  });
+
+  it('should return false when value is non-empty array', function () {
+    assert.strictEqual(Utils.isEmptyArray([1, 2, 3]), false);
+  });
+
+  it('should return false when value is not an array', function () {
+    assert.strictEqual(Utils.isEmptyArray({}), false);
+  });
+
+  it('should return false when value is null', function () {
+    assert.strictEqual(Utils.isEmptyArray(null), false);
+  });
+
+  it('should return false when value is string', function () {
+    assert.strictEqual(Utils.isEmptyArray('a'), false);
   });
 
 });

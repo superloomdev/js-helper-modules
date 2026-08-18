@@ -1,6 +1,6 @@
 # @superloomdev/js-helper-utils
 
-Foundation utility module. 54 exported functions covering type checks, validation, sanitization, data manipulation, and string/number/CSV/URL utilities. Pure JavaScript, synchronous, side-effect-free, zero runtime dependencies.
+Foundation utility module. 56 exported functions covering type checks, validation, sanitization, data manipulation, and string/number/CSV/URL utilities. Pure JavaScript, synchronous, side-effect-free, zero runtime dependencies.
 
 ## Type
 Class A. Foundation utility. No service dependency (no Docker, no external service).
@@ -31,7 +31,7 @@ Lib.Utils = require('helper-utils')(Lib, {});
 ## Config Keys
 None.
 
-## Exported Functions (54 total)
+## Exported Functions (56 total)
 
 ### Type Checks
 isNull(arg) → Boolean | async:no
@@ -42,10 +42,12 @@ isNumber(arg) → Boolean | async:no - excludes NaN
 isString(arg) → Boolean | async:no
 isInteger(num) → Boolean | async:no
 isObject(arg) → Boolean | async:no - any non-null object (includes arrays, Date, etc.)
+isArray(arg) → Boolean | async:no
 isFunction(arg) → Boolean | async:no
 isError(arg) → Boolean | async:no
 isEmptyString(str) → Boolean | async:no
 isEmptyObject(obj) → Boolean | async:no
+isEmptyArray(arr) → Boolean | async:no
 isEmpty(arg) → Boolean | async:no - handles null, '', [], {}
 inArray(arr, element) → Boolean | async:no
 
