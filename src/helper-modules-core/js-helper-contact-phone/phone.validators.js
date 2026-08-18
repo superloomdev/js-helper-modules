@@ -153,7 +153,7 @@ const Validators = {
   assertNonEmptyString: function (name, value) {
 
     // Reject if value is not a string or is empty
-    if (!Lib.Utils.isString(value) || value.length === 0) {
+    if (!Lib.Utils.isString(value) || Lib.Utils.isEmptyString(value)) {
       throw new TypeError(
         '[helper-contact-phone] ' + name + ' must be a non-empty string'
       );

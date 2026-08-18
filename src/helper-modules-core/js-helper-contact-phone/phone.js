@@ -388,7 +388,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       const digits = e164_number.slice(1);
 
       // Must have at least one digit
-      if (digits.length === 0) {
+      if (Lib.Utils.isEmptyString(digits)) {
         return null;
       }
 
@@ -432,7 +432,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
           const national_number = digits.slice(candidate.calling_code.length);
 
           // Verify the national number is non-empty
-          if (national_number.length > 0) {
+          if (!Lib.Utils.isEmptyString(national_number)) {
 
             // Return the parsed result
             return {
@@ -498,7 +498,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       }
 
       // Reverse the national number
-      const reversed = national_number.split('').reverse().join('');
+      const reversed = Lib.Utils.stringReverse(national_number);
 
       // Build the phone ID
       return country_code + CONFIG.PHONE_ID_SEPARATOR + reversed;
@@ -533,7 +533,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       const reversed = phone_id.slice(sepIndex + sep.length);
 
       // Both parts must be non-empty
-      if (country_code.length === 0 || reversed.length === 0) {
+      if (Lib.Utils.isEmptyString(country_code) || Lib.Utils.isEmptyString(reversed)) {
         return null;
       }
 
@@ -546,7 +546,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       }
 
       // Un-reverse the national number
-      const national_number = reversed.split('').reverse().join('');
+      const national_number = Lib.Utils.stringReverse(reversed);
 
       // Return the parsed components
       return {
