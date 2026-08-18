@@ -73,7 +73,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     validateSyntax: function (email) {
 
       // Empty check
-      if (!email || email.length === 0) {
+      if (Lib.Utils.isNullOrUndefined(email) || Lib.Utils.isEmptyString(email)) {
         return {
           valid: false,
           reason: 'CONTACT_EMAIL_EMPTY'

@@ -138,7 +138,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       const domain = email.slice(atIndex + 1);
 
       // Empty domain
-      if (domain.length === 0) {
+      if (Lib.Utils.isEmptyString(domain)) {
         return null;
       }
 
@@ -174,7 +174,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       const local = email.slice(0, atIndex);
 
       // Empty local
-      if (local.length === 0) {
+      if (Lib.Utils.isEmptyString(local)) {
         return null;
       }
 
