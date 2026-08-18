@@ -38,7 +38,7 @@ Example: `/js-helper-module-publish src/helper-modules-core/js-helper-money`
    # Cwd = [module_root]
    npm run lint 2>&1 | tail -20
    ```
-2. **Clean-install tests must be green:**
+2. **Clean-install tests must be green** (Pre-Commit Protocol fresh-install gate - `codebase-superloom/docs/dev/testing-local-modules.md` - Pre-Commit Protocol; mandatory every publish, not just during refactoring):
    // turbo
    ```bash
    # Cwd = [module_root]/_test
@@ -141,7 +141,7 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 
 ## Per-run Verification Checklist
 
-- [ ] Pre-publish gate: lint exit 0, clean-install tests green
+- [ ] Pre-publish gate: lint exit 0, clean-install tests green (Pre-Commit Protocol: fresh install mandatory every publish)
 - [ ] Package identity verified: name, private, license, engines, registry, version
 - [ ] Ship check: only source + docs + README + ROBOTS + package.json in tarball
 - [ ] CI registration added (first publish) or confirmed present (subsequent)
