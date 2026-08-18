@@ -259,13 +259,19 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    Each hit is either a violation to convert to the peer dep primitive, or a permitted form (e.g. `.includes()` on strings is `String.prototype.includes`, not array membership). Record the verdict per hit.
 9. **Peer-dependency utilization review (manual gate - not greppable):** Read the module's `package.json` peerDependencies. For each peer dep, read its `ROBOTS.md` to get the full function signature list. Then re-read the module's source code and check: is any operation reimplementing a function that's available in a peer dep? Record findings as `file:line -> peer dep function that should be used -> current inline implementation`. This catches gaps that pattern-matching cannot (e.g. a module reimplementing `Lib.Debug.performanceAuditLog` manually, or using raw `JSON.parse` with try/catch when `Lib.Utils.stringToJSON` exists). The reply MUST contain `Peer-dep utilization: [clean | N gaps -> fixed]`.
 10. `file:` rule:
-10. `file:` rule:
     // turbo
     ```bash
     # Cwd = [module_root]/_test
     grep -n "file:" package.json
     ```
-11. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file and check ALL of the following:
+11. **No `_data/` directory (hard gate).** The `_data/` directory is not a recognized archetype. Generated data lives in `data/` as pure JSON; dev scripts live in `scripts/`. See `module-structure.md` - Dev Scripts.
+    // turbo
+    ```bash
+    # Cwd = codebase-js-helper-modules
+    find '[module-path]' -type d -name "_data" -not -path "*/node_modules/*"
+    ```
+    Must return nothing. If it returns a result, the module must be migrated: generated data to `data/*.json`, scripts to `scripts/*.js`.
+12. **Step-comment conformance (hard gate).** Read every function body in every source `.js` file and check ALL of the following:
 
    **a) Universal rule (every function, not just I/O):** The first logical block after the opening `{` has a step comment. Every subsequent logical block separated by a blank line also has a step comment. No exceptions for short functions - even a single-block function gets its opening step comment. (`code-formatting.md` - Inline Step Comments Inside Functions, lines 546-551)
 
@@ -276,9 +282,9 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    **d) Loop bodies:** A loop body carrying more than two operations gets a step comment per operation, separated by blank lines. The comment above the loop states what the iteration accomplishes; the comments inside cover each operation. (`code-formatting.md` - Inline Step Comments Inside Functions, line 553)
 
    The Mandatory Set is the audit floor, not the ceiling: blocks outside the set still follow the universal rule. Lint, tests, and sweeps cannot see comments; this check is manual. The reply MUST contain `Step-comment conformance: [clean | N gaps -> fixed]`.
-12. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element, including function bodies against the skeleton's worked body. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
-13. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
-14. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
+13. **Skeleton conformance re-diff (hard gate).** Re-open the class skeleton beside the entry file; re-verify element by element, including function bodies against the skeleton's worked body. The reply MUST contain `Skeleton conformance: [clean | N mismatches -> fixed]`.
+14. **Manual checks** (not greppable): table cells without trailing periods; README free of signatures/config tables/install commands; three `ROBOTS.md` signatures spot-checked against `docs/api.md`.
+15. State convergence explicitly: "Pass N found zero new findings; previous pass also clean - converged." Valid ONLY with the Phase B read-evidence table and the conformance verdict present in this conversation.
 
 ### Phase E - Present (approval gate, never skip)
 
@@ -319,6 +325,7 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] Skeleton conformance verdict line output
 - [ ] Step-comment conformance verdict line output (all 4 sub-checks: universal rule, mandatory set, every return, loop bodies)
 - [ ] `file:` rule holds
+- [ ] No `_data/` directory (generated data in `data/*.json`, scripts in `scripts/`)
 - [ ] Converged: two consecutive clean passes, stated with evidence
 - [ ] Phase E report presented; explicit user approval before any mutation
 - [ ] New failure modes journaled; embedded Standard amended if needed; plan updated; STOPPED
