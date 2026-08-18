@@ -145,7 +145,7 @@ Run everything. Any finding returns to Phase C, then the ENTIRE phase re-runs. E
    # Cwd = [module_root]
    npm run lint 2>&1 | tail -20
    ```
-2. Tests via clean install (all green; E409 from the registry is transient - wait 30-60s and re-run; never `--legacy-peer-deps`):
+2. Tests via clean install (all green; E409 from the registry is transient - wait 30-60s and re-run; never `--legacy-peer-deps`). This is the Pre-Commit Protocol fresh-install gate (`codebase-superloom/docs/dev/testing-local-modules.md` - Pre-Commit Protocol). It is mandatory every run, not just during refactoring:
    // turbo
    ```bash
    # Cwd = [module_root]/_test
@@ -310,7 +310,7 @@ If this run exposed a failure mode or a gap in the standard or in this workflow:
 - [ ] Gap list built, every line cited (audit verdict line output)
 - [ ] All edits by hand - zero scripts, zero bulk rewrites
 - [ ] Fixes applied S1 -> S2 -> S3 -> sweeps -> docs (ROBOTS last) -> naming; renames swept repo-wide
-- [ ] Lint exit 0; clean-install tests green
+- [ ] Lint exit 0; clean-install tests green (Pre-Commit Protocol: fresh install mandatory every run)
 - [ ] Sweep battery clean (each sweep result reported explicitly: clean or hits with judgment); plan-reference sweep run; JSDoc awk silent; performance-audit ownership judged
 - [ ] Companions exist; single-require holds; fixed interface slots kept
 - [ ] Type-guard sweep run; every `typeof` hit judged as violation or permitted form
