@@ -259,7 +259,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       }
 
       // No patterns - fall back to length bounds
-      if (data.patterns.length === 0) {
+      if (Lib.Utils.isEmptyArray(data.patterns)) {
         return {
           valid: true,
           reason: null
@@ -334,7 +334,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       }
 
       // No subdivision data - accept anything (graceful fallback)
-      if (!data.subdivisions || data.subdivisions.length === 0) {
+      if (!data.subdivisions || Lib.Utils.isEmptyArray(data.subdivisions)) {
         return {
           valid: true,
           reason: null
