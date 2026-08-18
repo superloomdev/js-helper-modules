@@ -77,11 +77,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) {
     // null for unknown codes.
 
     /********************************************************************
-Check if a currency code is known to the module.
+    Check if a currency code is known to the module.
 
-@param {String} code - Currency code (e.g., 'usd', 'INR')
+    @param {String} code - Currency code (e.g., 'usd', 'INR')
 
-@return {Boolean} - True if known, false otherwise (including null/undefined)
+    @return {Boolean} - True if known, false otherwise (including null/undefined)
     *********************************************************************/
     isCurrencyCode: function (code) {
 
@@ -108,12 +108,12 @@ Check if a currency code is known to the module.
 
 
     /********************************************************************
-Sanitize a currency code. Lowercase, strip non-letters.
-Returns null if result has wrong length.
+    Sanitize a currency code. Lowercase, strip non-letters.
+    Returns null if result has wrong length.
 
-@param {*} code - Currency code to sanitize
+    @param {*} code - Currency code to sanitize
 
-@return {String|null} - Sanitized code or null
+    @return {String|null} - Sanitized code or null
     *********************************************************************/
     sanitizeCurrencyCode: function (code) {
 
@@ -124,12 +124,12 @@ Returns null if result has wrong length.
 
 
     /********************************************************************
-Validate a currency code without throwing.
-Returns false if valid, or an array of error objects on failure.
+    Validate a currency code without throwing.
+    Returns false if valid, or an array of error objects on failure.
 
-@param {*} code - Currency code to validate
+    @param {*} code - Currency code to validate
 
-@return {false|Array} - false if valid, Error[] if invalid
+    @return {false|Array} - false if valid, Error[] if invalid
     *********************************************************************/
     validateCurrencyCode: function (code) {
 
@@ -140,11 +140,11 @@ Returns false if valid, or an array of error objects on failure.
 
 
     /********************************************************************
-Get the native currency symbol (e.g., '₹', '$', '€').
+    Get the native currency symbol (e.g., '₹', '$', '€').
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {String|null} - Native symbol, or null if unknown
+    @return {String|null} - Native symbol, or null if unknown
     *********************************************************************/
     getCurrencySymbol: function (currency_code) {
 
@@ -161,15 +161,15 @@ Get the native currency symbol (e.g., '₹', '$', '€').
 
 
     /********************************************************************
-Get the locale-aware currency symbol. Returns the native symbol
-when the country_code matches the first two characters of the
-currency code (e.g., 'inr' in 'in'). Otherwise returns the
-standard (ISO alpha) symbol.
+    Get the locale-aware currency symbol. Returns the native symbol
+    when the country_code matches the first two characters of the
+    currency code (e.g., 'inr' in 'in'). Otherwise returns the
+    standard (ISO alpha) symbol.
 
-@param {String} currency_code - Currency code
-@param {String} country_code  - ISO 3166-1 alpha-2 country code
+    @param {String} currency_code - Currency code
+    @param {String} country_code  - ISO 3166-1 alpha-2 country code
 
-@return {String|null} - Locale-aware symbol, or null if unknown
+    @return {String|null} - Locale-aware symbol, or null if unknown
     *********************************************************************/
     getCurrencySymbolForLocale: function (currency_code, country_code) {
 
@@ -196,11 +196,11 @@ standard (ISO alpha) symbol.
 
 
     /********************************************************************
-Get the ISO 4217 alpha code (e.g., 'USD', 'INR').
+    Get the ISO 4217 alpha code (e.g., 'USD', 'INR').
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {String|null} - ISO alpha code, or null if unknown
+    @return {String|null} - ISO alpha code, or null if unknown
     *********************************************************************/
     getCurrencyIsoAlpha: function (currency_code) {
 
@@ -217,11 +217,11 @@ Get the ISO 4217 alpha code (e.g., 'USD', 'INR').
 
 
     /********************************************************************
-Get the ISO 4217 numeric code as a zero-padded string (e.g., '840', '036').
+    Get the ISO 4217 numeric code as a zero-padded string (e.g., '840', '036').
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {String|null} - ISO numeric code, or null if unknown
+    @return {String|null} - ISO numeric code, or null if unknown
     *********************************************************************/
     getCurrencyIsoNumeric: function (currency_code) {
 
@@ -238,11 +238,11 @@ Get the ISO 4217 numeric code as a zero-padded string (e.g., '840', '036').
 
 
     /********************************************************************
-Get the English name for a currency (ISO 4217 official name).
+    Get the English name for a currency (ISO 4217 official name).
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {String|null} - English name, or null if unknown
+    @return {String|null} - English name, or null if unknown
     *********************************************************************/
     getCurrencyName: function (currency_code) {
 
@@ -259,11 +259,11 @@ Get the English name for a currency (ISO 4217 official name).
 
 
     /********************************************************************
-Get the native minor currency symbol (e.g., '¢' for USD).
+    Get the native minor currency symbol (e.g., '¢' for USD).
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {String|null} - Native minor symbol, or null if currency
+    @return {String|null} - Native minor symbol, or null if currency
                               has none or is unknown
     *********************************************************************/
     getCurrencySymbolMinor: function (currency_code) {
@@ -281,16 +281,16 @@ Get the native minor currency symbol (e.g., '¢' for USD).
 
 
     /********************************************************************
-Get the locale-aware minor currency symbol. Returns the native minor
-symbol when the country_code matches the first two characters of the
-currency code. Otherwise returns the standard (ISO alpha) symbol.
-Returns null if the currency's native minor symbol is null (e.g., INR
-has no minor symbol).
+    Get the locale-aware minor currency symbol. Returns the native minor
+    symbol when the country_code matches the first two characters of the
+    currency code. Otherwise returns the standard (ISO alpha) symbol.
+    Returns null if the currency's native minor symbol is null (e.g., INR
+    has no minor symbol).
 
-@param {String} currency_code - Currency code
-@param {String} country_code  - ISO 3166-1 alpha-2 country code
+    @param {String} currency_code - Currency code
+    @param {String} country_code  - ISO 3166-1 alpha-2 country code
 
-@return {String|null} - Locale-aware minor symbol, or null if
+    @return {String|null} - Locale-aware minor symbol, or null if
                             currency has no minor symbol or is unknown
     *********************************************************************/
     getCurrencySymbolMinorForLocale: function (currency_code, country_code) {
@@ -326,11 +326,11 @@ has no minor symbol).
 
 
     /********************************************************************
-Get the number of decimal places for a currency.
+    Get the number of decimal places for a currency.
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {Integer|null} - Decimal places (e.g., 2), or null if unknown
+    @return {Integer|null} - Decimal places (e.g., 2), or null if unknown
     *********************************************************************/
     getCurrencyDecimals: function (currency_code) {
 
@@ -347,13 +347,13 @@ Get the number of decimal places for a currency.
 
 
     /********************************************************************
-Get the minimum transactional unit for a currency.
-This is the smallest amount that can be transacted (e.g., 0.01 for USD,
-1 for INR).
+    Get the minimum transactional unit for a currency.
+    This is the smallest amount that can be transacted (e.g., 0.01 for USD,
+    1 for INR).
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {Number|null} - Minimum transactional unit, or null if unknown
+    @return {Number|null} - Minimum transactional unit, or null if unknown
     *********************************************************************/
     getCurrencyMinTransactionalUnit: function (currency_code) {
 
@@ -370,11 +370,11 @@ This is the smallest amount that can be transacted (e.g., 0.01 for USD,
 
 
     /********************************************************************
-Get the available denominations for a currency.
+    Get the available denominations for a currency.
 
-@param {String} currency_code - Currency code
+    @param {String} currency_code - Currency code
 
-@return {Object|null} - { minor: [...], major: [...] } or null if
+    @return {Object|null} - { minor: [...], major: [...] } or null if
                               currency has no denominations or is unknown
     *********************************************************************/
     getCurrencyDenominations: function (currency_code) {
@@ -402,14 +402,14 @@ Get the available denominations for a currency.
     // Float-safe rounding and string formatting for display.
 
     /********************************************************************
-Round an amount to the correct number of decimal places for a currency.
-Uses Lib.Utils.round internally.
+    Round an amount to the correct number of decimal places for a currency.
+    Uses Lib.Utils.round internally.
 
-@param {Number} amount - Amount to round
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
+    @param {Number} amount - Amount to round
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
 
-@return {Number} - Rounded amount
+    @return {Number} - Rounded amount
     *********************************************************************/
     roundAmount: function (amount, currency_code, decimals) {
 
@@ -430,15 +430,15 @@ Uses Lib.Utils.round internally.
 
 
     /********************************************************************
-Format an amount as a string with correct decimal places.
-Adds trailing zeros unless no_pad is true and the result is a whole number.
+    Format an amount as a string with correct decimal places.
+    Adds trailing zeros unless no_pad is true and the result is a whole number.
 
-@param {Number} amount - Amount to format
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
-@param {Boolean} [no_pad] - If true, don't add trailing zeros for whole numbers
+    @param {Number} amount - Amount to format
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
+    @param {Boolean} [no_pad] - If true, don't add trailing zeros for whole numbers
 
-@return {String} - Formatted amount string
+    @return {String} - Formatted amount string
     *********************************************************************/
     formatAmount: function (amount, currency_code, decimals, no_pad) {
 
@@ -467,15 +467,15 @@ Adds trailing zeros unless no_pad is true and the result is a whole number.
     // Conversions to/from fractional units and transactional rounding.
 
     /********************************************************************
-Round an amount to the nearest minimum transactional unit.
-When apply_min_unit is false, applies standard rounding.
+    Round an amount to the nearest minimum transactional unit.
+    When apply_min_unit is false, applies standard rounding.
 
-@param {Number} amount - Amount to round
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
-@param {Boolean} [apply_min_unit] - If true, round to min transactional unit
+    @param {Number} amount - Amount to round
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
+    @param {Boolean} [apply_min_unit] - If true, round to min transactional unit
 
-@return {Number} - Rounded transactional amount
+    @return {Number} - Rounded transactional amount
     *********************************************************************/
     getTransactionalAmount: function (amount, currency_code, decimals, apply_min_unit) {
 
@@ -509,14 +509,14 @@ When apply_min_unit is false, applies standard rounding.
 
 
     /********************************************************************
-Convert an amount to fractional units (e.g., $10.57 -> 1057 cents).
-Applies transactional rounding first.
+    Convert an amount to fractional units (e.g., $10.57 -> 1057 cents).
+    Applies transactional rounding first.
 
-@param {Number} amount - Amount in large currency
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
+    @param {Number} amount - Amount in large currency
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
 
-@return {Integer} - Amount in fractional units
+    @return {Integer} - Amount in fractional units
     *********************************************************************/
     toFractionalUnits: function (amount, currency_code, decimals) {
 
@@ -539,13 +539,13 @@ Applies transactional rounding first.
 
 
     /********************************************************************
-Convert fractional units back to large currency (e.g., 1057 -> $10.57).
+    Convert fractional units back to large currency (e.g., 1057 -> $10.57).
 
-@param {Number} amount - Amount in fractional units
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
+    @param {Number} amount - Amount in fractional units
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
 
-@return {Number} - Amount in large currency
+    @return {Number} - Amount in large currency
     *********************************************************************/
     fromFractionalUnits: function (amount, currency_code, decimals) {
 
@@ -569,14 +569,14 @@ Convert fractional units back to large currency (e.g., 1057 -> $10.57).
     // Summing multiple amounts safely using integer arithmetic internally.
 
     /********************************************************************
-Sum an array of amounts safely, avoiding floating-point errors.
-(e.g., 0.1 + 0.2 = 0.3 exactly, not 0.30000000000000004)
+    Sum an array of amounts safely, avoiding floating-point errors.
+    (e.g., 0.1 + 0.2 = 0.3 exactly, not 0.30000000000000004)
 
-@param {Number[]} amounts - Array of amounts to sum
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
+    @param {Number[]} amounts - Array of amounts to sum
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
 
-@return {Number} - Summed amount
+    @return {Number} - Summed amount
     *********************************************************************/
     sum: function (amounts, currency_code, decimals) {
 
@@ -602,15 +602,15 @@ Sum an array of amounts safely, avoiding floating-point errors.
 
 
     /********************************************************************
-Calculate total amount from denomination counts.
+    Calculate total amount from denomination counts.
 
-@param {Array} [majors] - Array of { value, count } for major denominations
-@param {Array} [minors] - Array of { value, count } for minor denominations (in fractional units)
-@param {String} currency_code - Currency code
-@param {Number} [decimals] - Optional override for decimal places
-@param {Boolean} [apply_min_unit] - If true, apply min transactional unit rounding
+    @param {Array} [majors] - Array of { value, count } for major denominations
+    @param {Array} [minors] - Array of { value, count } for minor denominations (in fractional units)
+    @param {String} currency_code - Currency code
+    @param {Number} [decimals] - Optional override for decimal places
+    @param {Boolean} [apply_min_unit] - If true, apply min transactional unit rounding
 
-@return {Number} - Calculated total amount
+    @return {Number} - Calculated total amount
     *********************************************************************/
     calculateTotalFromDenominations: function (majors, minors, currency_code, decimals, apply_min_unit) {
 
@@ -668,14 +668,14 @@ Calculate total amount from denomination counts.
   const _Money = {
 
     /********************************************************************
-Convert a large-currency amount to integer representation
-by multiplying by 10^decimals.
+    Convert a large-currency amount to integer representation
+    by multiplying by 10^decimals.
 
-@param {Number} amount - Amount in large currency
-@param {String} code - Normalized currency code (already validated)
-@param {Number} decimals - Decimal places for this currency
+    @param {Number} amount - Amount in large currency
+    @param {String} code - Normalized currency code (already validated)
+    @param {Number} decimals - Decimal places for this currency
 
-@return {Integer} - Amount in integer units
+    @return {Integer} - Amount in integer units
     *********************************************************************/
     toIntegerAmount: function (amount, code, decimals) {
 
@@ -688,14 +688,14 @@ by multiplying by 10^decimals.
 
 
     /********************************************************************
-Convert an integer amount back to large-currency representation
-by dividing by 10^decimals and rounding appropriately.
+    Convert an integer amount back to large-currency representation
+    by dividing by 10^decimals and rounding appropriately.
 
-@param {Number} integer_amount - Amount in integer units
-@param {String} code - Normalized currency code (already validated)
-@param {Number} decimals - Decimal places for this currency
+    @param {Number} integer_amount - Amount in integer units
+    @param {String} code - Normalized currency code (already validated)
+    @param {Number} decimals - Decimal places for this currency
 
-@return {Number} - Amount in large currency
+    @return {Number} - Amount in large currency
     *********************************************************************/
     fromIntegerAmount: function (integer_amount, code, decimals) {
 

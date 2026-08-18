@@ -89,21 +89,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Typed wrappers over query() for common SELECT shapes.
 
     /********************************************************************
-Run a SELECT and return the result in the most appropriate shape:
-      0 rows             -> null
-      1 row, 1 column    -> scalar value
-      1 row, N columns   -> row object
-      N rows             -> row array (has_multiple_rows = true)
+    Run a SELECT and return the result in the most appropriate shape:
+    0 rows             -> null
+    1 row, 1 column    -> scalar value
+    1 row, N columns   -> row object
+    N rows             -> row array (has_multiple_rows = true)
 
-This is the ambiguous auto-shaping variant - use when the result shape
-is not known upfront. Prefer getRow / getRows / getValue when the shape
-is known.
+    This is the ambiguous auto-shaping variant - use when the result shape
+    is not known upfront. Prefer getRow / getRows / getValue when the shape
+    is known.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL (typically pre-built with buildQuery)
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL (typically pre-built with buildQuery)
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, result, has_multiple_rows, error }
+    @return {Promise<Object>} - { success, result, has_multiple_rows, error }
     *********************************************************************/
     get: async function (instance, sql, params) {
 
@@ -163,13 +163,13 @@ is known.
 
 
     /********************************************************************
-Run a query and return the first row, or null if there are no results.
+    Run a query and return the first row, or null if there are no results.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, row, error }
+    @return {Promise<Object>} - { success, row, error }
     *********************************************************************/
     getRow: async function (instance, sql, params) {
 
@@ -194,13 +194,13 @@ Run a query and return the first row, or null if there are no results.
 
 
     /********************************************************************
-Run a query and return every row.
+    Run a query and return every row.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, rows, count, error }
+    @return {Promise<Object>} - { success, rows, count, error }
     *********************************************************************/
     getRows: async function (instance, sql, params) {
 
@@ -227,14 +227,14 @@ Run a query and return every row.
 
 
     /********************************************************************
-Run a query and return the first column of the first row. Handy for
-COUNT(*), MAX(), and other single-value lookups.
+    Run a query and return the first column of the first row. Handy for
+    COUNT(*), MAX(), and other single-value lookups.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, value, error }
+    @return {Promise<Object>} - { success, value, error }
     *********************************************************************/
     getValue: async function (instance, sql, params) {
 
@@ -273,40 +273,40 @@ COUNT(*), MAX(), and other single-value lookups.
     // Polymorphic DML runner: single statement or atomic array.
 
     /********************************************************************
-Run INSERT / UPDATE / DELETE. Polymorphic: string for single statement,
-array for atomic transaction. Array entries may be SQL strings or
-{ sql, params } objects.
+    Run INSERT / UPDATE / DELETE. Polymorphic: string for single statement,
+    array for atomic transaction. Array entries may be SQL strings or
+    { sql, params } objects.
 
-Postgres does not have MySQL's LAST_INSERT_ID(); use `RETURNING id`
-in the SQL to get the new primary key - it will be surfaced as
-`insert_id` in the result.
+    Postgres does not have MySQL's LAST_INSERT_ID(); use `RETURNING id`
+    in the SQL to get the new primary key - it will be surfaced as
+    `insert_id` in the result.
 
-Single statement:
-      await Postgres.write(instance, 'UPDATE users SET name = ? WHERE id = ?', ['John', 1]);
+    Single statement:
+    await Postgres.write(instance, 'UPDATE users SET name = ? WHERE id = ?', ['John', 1]);
 
-Atomic transaction:
-      await Postgres.write(instance, [
-        { sql: 'INSERT INTO logs (msg) VALUES (?)', params: ['User updated'] },
-        { sql: 'UPDATE users SET updated_at = NOW() WHERE id = ?', params: [1] }
-      ]);
+    Atomic transaction:
+    await Postgres.write(instance, [
+    { sql: 'INSERT INTO logs (msg) VALUES (?)', params: ['User updated'] },
+    { sql: 'UPDATE users SET updated_at = NOW() WHERE id = ?', params: [1] }
+    ]);
 
-Returns aggregated affected_rows (summed across statements) and the
-last insert_id seen (useful for multi-insert scenarios).
+    Returns aggregated affected_rows (summed across statements) and the
+    last insert_id seen (useful for multi-insert scenarios).
 
-affected_rows = total count of rows modified by INSERT / UPDATE / DELETE.
-For array input, this is summed across all statements (e.g., 2 INSERTs
-that each add 1 row = affected_rows: 2).
+    affected_rows = total count of rows modified by INSERT / UPDATE / DELETE.
+    For array input, this is summed across all statements (e.g., 2 INSERTs
+    that each add 1 row = affected_rows: 2).
 
-insert_id = the primary key from the last INSERT ... RETURNING id. For
-array input, this is the last id seen in the batch (useful when you
-INSERT multiple rows and need the ID of the final one). Postgres has
-no LAST_INSERT_ID() equivalent, so the SQL must include RETURNING id.
+    insert_id = the primary key from the last INSERT ... RETURNING id. For
+    array input, this is the last id seen in the batch (useful when you
+    INSERT multiple rows and need the ID of the final one). Postgres has
+    no LAST_INSERT_ID() equivalent, so the SQL must include RETURNING id.
 
-@param {Object} instance - Request instance
-@param {(String|Array)} sql - Single SQL string or array of statements
-@param {Array} [params] - Placeholder values (only when sql is a String)
+    @param {Object} instance - Request instance
+    @param {(String|Array)} sql - Single SQL string or array of statements
+    @param {Array} [params] - Placeholder values (only when sql is a String)
 
-@return {Promise<Object>} - { success, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     write: async function (instance, sql, params) {
 
@@ -378,19 +378,19 @@ no LAST_INSERT_ID() equivalent, so the SQL must include RETURNING id.
     // for a transaction batch.
 
     /********************************************************************
-Build a parameterized SQL statement into a fully-escaped string.
-Supports ? (value) and ?? (identifier) placeholders, plus the MySQL-
-style `SET ?` / `WHERE ?` object expansion.
+    Build a parameterized SQL statement into a fully-escaped string.
+    Supports ? (value) and ?? (identifier) placeholders, plus the MySQL-
+    style `SET ?` / `WHERE ?` object expansion.
 
-Examples:
-      buildQuery('SELECT * FROM ?? WHERE ?? = ?', ['users', 'id', 42])
-      buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
-      buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
+    Examples:
+    buildQuery('SELECT * FROM ?? WHERE ?? = ?', ['users', 'id', 42])
+    buildQuery('INSERT INTO test SET ?',        { name: 'Alice' })
+    buildQuery('UPDATE t SET ? WHERE ?',        [{ a: 1 }, { id: 5 }])
 
-@param {String} sql - SQL template
-@param {(Array|Object|*)} params - Values for ?/?? substitution
+    @param {String} sql - SQL template
+    @param {(Array|Object|*)} params - Values for ?/?? substitution
 
-@return {String} - Fully-escaped Postgres SQL
+    @return {String} - Fully-escaped Postgres SQL
     *********************************************************************/
     buildQuery: function (sql, params) {
 
@@ -400,18 +400,18 @@ Examples:
 
 
     /********************************************************************
-Wrap a raw SQL fragment so buildQuery() emits it unescaped.
-Mirrors mysql2.raw - useful for spatial SQL and nested functions.
+    Wrap a raw SQL fragment so buildQuery() emits it unescaped.
+    Mirrors mysql2.raw - useful for spatial SQL and nested functions.
 
-Example:
-      const point = Postgres.buildRawText(
-        "ST_GeomFromText('POINT(28.61 77.20)', 4326)"
-      );
-      Postgres.buildQuery('INSERT INTO address SET ?', { point: point });
+    Example:
+    const point = Postgres.buildRawText(
+    "ST_GeomFromText('POINT(28.61 77.20)', 4326)"
+    );
+    Postgres.buildQuery('INSERT INTO address SET ?', { point: point });
 
-@param {String} str - Raw SQL fragment
+    @param {String} str - Raw SQL fragment
 
-@return {Object} - Raw-text marker recognized by buildQuery
+    @return {Object} - Raw-text marker recognized by buildQuery
     *********************************************************************/
     buildRawText: function (str) {
 
@@ -421,13 +421,13 @@ Example:
 
 
     /********************************************************************
-Join equality conditions with AND or OR. Identifiers and values are
-escaped automatically.
+    Join equality conditions with AND or OR. Identifiers and values are
+    escaped automatically.
 
-@param {Object} data - Key-value pairs to join
-@param {String} [multi_operator] - 'AND' (default) or 'OR'
+    @param {Object} data - Key-value pairs to join
+    @param {String} [multi_operator] - 'AND' (default) or 'OR'
 
-@return {String} - Escaped condition fragment
+    @return {String} - Escaped condition fragment
     *********************************************************************/
     buildMultiCondition: function (data, multi_operator) {
 
@@ -450,13 +450,13 @@ escaped automatically.
     // Graceful teardown of the connection pool. Call on SIGTERM / shutdown.
 
     /********************************************************************
-Close the pool gracefully. Waits up to CONFIG.CLOSE_TIMEOUT_MS for
-active queries to finish, then force-destroys any remaining connections.
+    Close the pool gracefully. Waits up to CONFIG.CLOSE_TIMEOUT_MS for
+    active queries to finish, then force-destroys any remaining connections.
 
-Persistent servers should call this from their shutdown handler;
-serverless functions can skip it since the runtime freezes idle pools.
+    Persistent servers should call this from their shutdown handler;
+    serverless functions can skip it since the runtime freezes idle pools.
 
-@return {Promise<void>}
+    @return {Promise<void>}
     *********************************************************************/
     close: async function () {
 
@@ -514,12 +514,12 @@ serverless functions can skip it since the runtime freezes idle pools.
     //   }
 
     /********************************************************************
-Check out a dedicated pool connection for manual transaction control.
-Must be paired with releaseClient() or the pool will leak.
+    Check out a dedicated pool connection for manual transaction control.
+    Must be paired with releaseClient() or the pool will leak.
 
-@param {Object} instance - Request instance (kept for API parity with MySQL/SQLite)
+    @param {Object} instance - Request instance (kept for API parity with MySQL/SQLite)
 
-@return {Promise<Object>} - { success, client, error }
+    @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
     getClient: async function (instance) { // eslint-disable-line no-unused-vars
 
@@ -562,11 +562,11 @@ Must be paired with releaseClient() or the pool will leak.
 
 
     /********************************************************************
-Return a client from getClient() back to the pool. No-op if null.
+    Return a client from getClient() back to the pool. No-op if null.
 
-@param {Object} client - Connection from getClient()
+    @param {Object} client - Connection from getClient()
 
-@return {void}
+    @return {void}
     *********************************************************************/
     releaseClient: function (client) {
 
@@ -588,10 +588,10 @@ Return a client from getClient() back to the pool. No-op if null.
     // Lazy-load the adapter and manage the connection pool.
 
     /********************************************************************
-Lazy-load the pg adapter. Shared across every instance because
-the driver itself is stateless - only the pool holds state.
+    Lazy-load the pg adapter. Shared across every instance because
+    the driver itself is stateless - only the pool holds state.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -603,10 +603,10 @@ the driver itself is stateless - only the pool holds state.
 
 
     /********************************************************************
-Create this instance's connection pool on first use. Options are
-built from the merged CONFIG and tuned for Postgres 15 / Aurora.
+    Create this instance's connection pool on first use. Options are
+    built from the merged CONFIG and tuned for Postgres 15 / Aurora.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     initIfNot: function () {
 
@@ -663,15 +663,15 @@ built from the merged CONFIG and tuned for Postgres 15 / Aurora.
 
 
     /********************************************************************
-Destroy every connection in the pool. Internal helper used by close()
-when graceful shutdown times out. Public code should call close().
+    Destroy every connection in the pool. Internal helper used by close()
+    when graceful shutdown times out. Public code should call close().
 
-pg.Pool does not expose internal connection arrays like mysql2. The
-graceful `pool.end()` in close() is the correct teardown path. This
-method exists for API parity with the MySQL module but relies on
-pool.end() rather than reaching into pool internals.
+    pg.Pool does not expose internal connection arrays like mysql2. The
+    graceful `pool.end()` in close() is the correct teardown path. This
+    method exists for API parity with the MySQL module but relies on
+    pool.end() rather than reaching into pool internals.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     destroyPool: function () {
 
@@ -696,12 +696,12 @@ pool.end() rather than reaching into pool internals.
     // formatters that compose them.
 
     /********************************************************************
-Escape an identifier (table / column name) with double quotes.
-Any embedded " is doubled per the SQL standard.
+    Escape an identifier (table / column name) with double quotes.
+    Any embedded " is doubled per the SQL standard.
 
-@param {String} id - Identifier
+    @param {String} id - Identifier
 
-@return {String} - Double-quoted, safely escaped
+    @return {String} - Double-quoted, safely escaped
     *********************************************************************/
     escapeIdentifier: function (id) {
 
@@ -711,19 +711,19 @@ Any embedded " is doubled per the SQL standard.
 
 
     /********************************************************************
-Escape a scalar value as a Postgres literal.
-- null / undefined -> NULL
-- boolean          -> TRUE / FALSE
-- number           -> digit string (checked for NaN / Infinity)
-- Date             -> ISO timestamp literal
-- Buffer           -> hex bytea literal
-- string           -> single-quoted, embedded quotes doubled;
+    Escape a scalar value as a Postgres literal.
+    - null / undefined -> NULL
+    - boolean          -> TRUE / FALSE
+    - number           -> digit string (checked for NaN / Infinity)
+    - Date             -> ISO timestamp literal
+    - Buffer           -> hex bytea literal
+    - string           -> single-quoted, embedded quotes doubled;
                           falls back to E'...' escape if the string
                           contains backslashes
 
-@param {*} val - Scalar value
+    @param {*} val - Scalar value
 
-@return {String} - Postgres-safe literal
+    @return {String} - Postgres-safe literal
     *********************************************************************/
     escapeValue: function (val) {
 
@@ -769,13 +769,13 @@ Escape a scalar value as a Postgres literal.
 
 
     /********************************************************************
-Format a single value for inclusion in a fully-escaped SQL string.
-Handles scalars, arrays, objects (k=v pairs), and raw fragments.
-Composes escapeIdentifier and escapeValue.
+    Format a single value for inclusion in a fully-escaped SQL string.
+    Handles scalars, arrays, objects (k=v pairs), and raw fragments.
+    Composes escapeIdentifier and escapeValue.
 
-@param {*} val - Value to format
+    @param {*} val - Value to format
 
-@return {String} - Formatted literal
+    @return {String} - Formatted literal
     *********************************************************************/
     formatValue: function (val) {
 
@@ -804,21 +804,21 @@ Composes escapeIdentifier and escapeValue.
 
 
     /********************************************************************
-Format a SQL template into a fully-escaped string.
-Mirrors mysql2.format semantics on top of Postgres escape rules:
-      - ?  scalar  -> escaped literal
-      - ?  array   -> comma-joined escaped literals (for IN clauses)
-      - ?  object  -> `"k1" = v1, "k2" = v2` (for SET/WHERE)
-      - ?? scalar  -> double-quoted identifier
-      - ?? array   -> comma-joined identifiers
+    Format a SQL template into a fully-escaped string.
+    Mirrors mysql2.format semantics on top of Postgres escape rules:
+    - ?  scalar  -> escaped literal
+    - ?  array   -> comma-joined escaped literals (for IN clauses)
+    - ?  object  -> `"k1" = v1, "k2" = v2` (for SET/WHERE)
+    - ?? scalar  -> double-quoted identifier
+    - ?? array   -> comma-joined identifiers
 
-Walks inside single-quoted strings / double-quoted identifiers /
-line comments to avoid replacing placeholders there.
+    Walks inside single-quoted strings / double-quoted identifiers /
+    line comments to avoid replacing placeholders there.
 
-@param {String} sql - Source SQL
-@param {*} params - Scalar, array, or object
+    @param {String} sql - Source SQL
+    @param {*} params - Scalar, array, or object
 
-@return {String} - Fully-escaped Postgres SQL
+    @return {String} - Fully-escaped Postgres SQL
     *********************************************************************/
     formatQuery: function (sql, params) {
 
@@ -916,16 +916,16 @@ line comments to avoid replacing placeholders there.
     // time, and pull primary-key values out of RETURNING clauses.
 
     /********************************************************************
-Translate MySQL-style placeholders (? values, ?? identifiers) into
-Postgres native placeholders ($1, $2, ...) with identifiers inlined.
+    Translate MySQL-style placeholders (? values, ?? identifiers) into
+    Postgres native placeholders ($1, $2, ...) with identifiers inlined.
 
-Walks the SQL character-by-character so placeholders inside string
-literals, double-quoted identifiers, and -- line comments are ignored.
+    Walks the SQL character-by-character so placeholders inside string
+    literals, double-quoted identifiers, and -- line comments are ignored.
 
-@param {String} sql - Source SQL with ?/?? placeholders
-@param {Array} params - Values to bind (consumed in order)
+    @param {String} sql - Source SQL with ?/?? placeholders
+    @param {Array} params - Values to bind (consumed in order)
 
-@return {Object} - { sql, params } ready for pool.query
+    @return {Object} - { sql, params } ready for pool.query
     *********************************************************************/
     translatePlaceholders: function (sql, params) {
 
@@ -1016,12 +1016,12 @@ literals, double-quoted identifiers, and -- line comments are ignored.
 
 
     /********************************************************************
-Extract the primary-key insert id from a pg result if the caller
-used `INSERT ... RETURNING id` (or RETURNING *).
+    Extract the primary-key insert id from a pg result if the caller
+    used `INSERT ... RETURNING id` (or RETURNING *).
 
-@param {Object} result - Raw pg result
+    @param {Object} result - Raw pg result
 
-@return {*} - id value, or null if not present
+    @return {*} - id value, or null if not present
     *********************************************************************/
     extractInsertId: function (result) {
 
@@ -1044,14 +1044,14 @@ used `INSERT ... RETURNING id` (or RETURNING *).
     // query -> execute|transaction
 
     /********************************************************************
-Run any SQL. The core workhorse - all other I/O functions route through here.
-Placeholders: ? for values, ?? for identifiers (translated to $N at runtime).
+    Run any SQL. The core workhorse - all other I/O functions route through here.
+    Placeholders: ? for values, ?? for identifiers (translated to $N at runtime).
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, rows, affected_rows, insert_id, error }
     *********************************************************************/
     query: async function (instance, sql, params) {
 
@@ -1104,18 +1104,18 @@ Placeholders: ? for values, ?? for identifiers (translated to $N at runtime).
 
 
     /********************************************************************
-Run an INSERT / UPDATE / DELETE statement. Internal helper used by write().
-Depends on query() for execution.
+    Run an INSERT / UPDATE / DELETE statement. Internal helper used by write().
+    Depends on query() for execution.
 
-Postgres does not have MySQL's LAST_INSERT_ID(); use `RETURNING id`
-in the SQL to get the new primary key - it will be surfaced as
-`insert_id` in the result.
+    Postgres does not have MySQL's LAST_INSERT_ID(); use `RETURNING id`
+    in the SQL to get the new primary key - it will be surfaced as
+    `insert_id` in the result.
 
-@param {Object} instance - Request instance
-@param {String} sql - SQL with ?/?? placeholders
-@param {Array} [params] - Placeholder values
+    @param {Object} instance - Request instance
+    @param {String} sql - SQL with ?/?? placeholders
+    @param {Array} [params] - Placeholder values
 
-@return {Promise<Object>} - { success, affected_rows, insert_id, error }
+    @return {Promise<Object>} - { success, affected_rows, insert_id, error }
     *********************************************************************/
     execute: async function (instance, sql, params) {
 
@@ -1145,14 +1145,14 @@ in the SQL to get the new primary key - it will be surfaced as
 
 
     /********************************************************************
-Run many statements atomically. All commit, or all roll back.
-Internal helper used by write() for array input. Depends on initIfNot()
-for pool access and manages its own connection lifecycle.
+    Run many statements atomically. All commit, or all roll back.
+    Internal helper used by write() for array input. Depends on initIfNot()
+    for pool access and manages its own connection lifecycle.
 
-@param {Object} instance - Request instance
-@param {Array} statements - Array of { sql, params } objects
+    @param {Object} instance - Request instance
+    @param {Array} statements - Array of { sql, params } objects
 
-@return {Promise<Object>} - { success, results, error }
+    @return {Promise<Object>} - { success, results, error }
     *********************************************************************/
     transaction: async function (instance, statements) {
 

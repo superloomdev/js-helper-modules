@@ -68,22 +68,22 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
   const Policy = {
 
     /********************************************************************
-Decide whether a new session can be inserted, and which existing
-sessions (if any) need to be deleted to make room.
+    Decide whether a new session can be inserted, and which existing
+    sessions (if any) need to be deleted to make room.
 
-@param {Object} options
-@param {Object[]} options.existing - All existing session records for this actor
-@param {Integer}  options.now - Current unix-seconds timestamp
-@param {String}   options.install_id - The new session's install_id (or null)
-@param {String}   options.install_form_factor - The new session's form_factor
-@param {String}   options.install_platform - The new session's platform
-@param {Object}   options.limits - The CONFIG.LIMITS object
-@param {Integer}    options.limits.total_max
-@param {Object|null} options.limits.by_form_factor_max
-@param {Object|null} options.limits.by_platform_max
-@param {Boolean}    options.limits.evict_oldest_on_limit
+    @param {Object} options
+    @param {Object[]} options.existing - All existing session records for this actor
+    @param {Integer}  options.now - Current unix-seconds timestamp
+    @param {String}   options.install_id - The new session's install_id (or null)
+    @param {String}   options.install_form_factor - The new session's form_factor
+    @param {String}   options.install_platform - The new session's platform
+    @param {Object}   options.limits - The CONFIG.LIMITS object
+    @param {Integer}    options.limits.total_max
+    @param {Object|null} options.limits.by_form_factor_max
+    @param {Object|null} options.limits.by_platform_max
+    @param {Boolean}    options.limits.evict_oldest_on_limit
 
-@return {Object} - Decision envelope
+    @return {Object} - Decision envelope
     *********************************************************************/
     applyLimits: function (options) {
 
@@ -225,13 +225,13 @@ sessions (if any) need to be deleted to make room.
 
 
     /********************************************************************
-Check the total-count cap. After same-install replacement, would
-inserting one more session push us strictly over total_max?
+    Check the total-count cap. After same-install replacement, would
+    inserting one more session push us strictly over total_max?
 
-@param {Object[]} active - Active sessions after same-install replacement
-@param {Integer} total_max - The total cap
+    @param {Object[]} active - Active sessions after same-install replacement
+    @param {Integer} total_max - The total cap
 
-@return {Object} - { over_cap: boolean, count: integer, max: integer }
+    @return {Object} - { over_cap: boolean, count: integer, max: integer }
     *********************************************************************/
     checkTotal: function (active, total_max) {
 
@@ -247,12 +247,12 @@ inserting one more session push us strictly over total_max?
 
 
     /********************************************************************
-Pick the session with the smallest last_active_at (oldest LRU).
-Returns null if the input is empty.
+    Pick the session with the smallest last_active_at (oldest LRU).
+    Returns null if the input is empty.
 
-@param {Object[]} candidates - Sessions to choose from
+    @param {Object[]} candidates - Sessions to choose from
 
-@return {Object|null} - The LRU session or null
+    @return {Object|null} - The LRU session or null
     *********************************************************************/
     pickOldest: function (candidates) {
 
@@ -278,13 +278,13 @@ Returns null if the input is empty.
 
 
     /********************************************************************
-Remove a session from a list by matching on (actor_id, token_key).
-Returns a new array; does not mutate the input.
+    Remove a session from a list by matching on (actor_id, token_key).
+    Returns a new array; does not mutate the input.
 
-@param {Object[]} list - The list to filter
-@param {Object} target - The session to remove
+    @param {Object[]} list - The list to filter
+    @param {Object} target - The session to remove
 
-@return {Object[]} - New list without the target session
+    @return {Object[]} - New list without the target session
     *********************************************************************/
     removeBySessionKey: function (list, target) {
 

@@ -105,15 +105,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // useIdle bridges the threshold registry into React re-renders.
 
     /********************************************************************
-React hook that bridges idle state into re-renders. Subscribes to
-host-supplied activity sources on mount, unsubscribes on unmount.
-Registers thresholds on mount and unregisters them on unmount.
+    React hook that bridges idle state into re-renders. Subscribes to
+    host-supplied activity sources on mount, unsubscribes on unmount.
+    Registers thresholds on mount and unregisters them on unmount.
 
-@param {Object} options             - Hook options
-@param {Array}  options.sources     - Activity source subscribe/unsubscribe pairs
-@param {Array}  options.thresholds  - Array of { ms, callback } to register on mount
+    @param {Object} options             - Hook options
+    @param {Array}  options.sources     - Activity source subscribe/unsubscribe pairs
+    @param {Array}  options.thresholds  - Array of { ms, callback } to register on mount
 
-@return {Object} - { isIdle, touch, pause, resume }
+    @return {Object} - { isIdle, touch, pause, resume }
     *********************************************************************/
     useIdle: function (options) {
 
@@ -189,10 +189,10 @@ Registers thresholds on mount and unregisters them on unmount.
     // Direct control of idle detection without React.
 
     /********************************************************************
-Record user activity. Re-arms every registered threshold. Ignored
-while paused, reported as touched: false.
+    Record user activity. Re-arms every registered threshold. Ignored
+    while paused, reported as touched: false.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     touch: function () {
 
@@ -222,10 +222,10 @@ while paused, reported as touched: false.
 
 
     /********************************************************************
-Pause idle detection. Closes the current analytics period, clears
-all pending threshold timers, and freezes the elapsed clock.
+    Pause idle detection. Closes the current analytics period, clears
+    all pending threshold timers, and freezes the elapsed clock.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     pause: function () {
 
@@ -262,10 +262,10 @@ all pending threshold timers, and freezes the elapsed clock.
 
 
     /********************************************************************
-Resume idle detection from a paused state. Reschedules thresholds
-for their remaining delta. Idempotent.
+    Resume idle detection from a paused state. Reschedules thresholds
+    for their remaining delta. Idempotent.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     resume: function () {
 
@@ -305,12 +305,12 @@ for their remaining delta. Idempotent.
     // Register callbacks to fire after ms of continuous inactivity.
 
     /********************************************************************
-Register a callback to fire after ms of continuous inactivity.
+    Register a callback to fire after ms of continuous inactivity.
 
-@param {number} ms        - Threshold in milliseconds (must be positive)
-@param {Function} callback - Function called when threshold fires
+    @param {number} ms        - Threshold in milliseconds (must be positive)
+    @param {Function} callback - Function called when threshold fires
 
-@return {Object} - { success, data: { id }, error }
+    @return {Object} - { success, data: { id }, error }
     *********************************************************************/
     registerIdleHandler: function (ms, callback) {
 
@@ -362,11 +362,11 @@ Register a callback to fire after ms of continuous inactivity.
 
 
     /********************************************************************
-Unregister one handler by the id returned from registerIdleHandler.
+    Unregister one handler by the id returned from registerIdleHandler.
 
-@param {number} id - Handler id to remove
+    @param {number} id - Handler id to remove
 
-@return {Object} - { success, data: { removed }, error }
+    @return {Object} - { success, data: { removed }, error }
     *********************************************************************/
     unregisterIdleHandler: function (id) {
 
@@ -399,9 +399,9 @@ Unregister one handler by the id returned from registerIdleHandler.
 
 
     /********************************************************************
-Unregister every handler.
+    Unregister every handler.
 
-@return {Object} - { success, data: { removed_count }, error }
+    @return {Object} - { success, data: { removed_count }, error }
     *********************************************************************/
     clearIdleHandlers: function () {
 
@@ -438,10 +438,10 @@ Unregister every handler.
     // Read-only accessors for idle state and analytics.
 
     /********************************************************************
-Get milliseconds elapsed since the last activity. Frozen while
-paused.
+    Get milliseconds elapsed since the last activity. Frozen while
+    paused.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     getElapsed: function () {
 
@@ -465,9 +465,9 @@ paused.
 
 
     /********************************************************************
-Get the timestamp of the last recorded activity.
+    Get the timestamp of the last recorded activity.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     getLastActive: function () {
 
@@ -482,10 +482,10 @@ Get the timestamp of the last recorded activity.
 
 
     /********************************************************************
-Get total milliseconds spent in the idle state, including the
-in-progress period.
+    Get total milliseconds spent in the idle state, including the
+    in-progress period.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     getTotalIdle: function () {
 
@@ -509,10 +509,10 @@ in-progress period.
 
 
     /********************************************************************
-Get total milliseconds spent in the active state, including the
-in-progress period.
+    Get total milliseconds spent in the active state, including the
+    in-progress period.
 
-@return {Object} - { success, data, error }
+    @return {Object} - { success, data, error }
     *********************************************************************/
     getTotalActive: function () {
 
@@ -546,8 +546,8 @@ in-progress period.
     // Timer scheduling, analytics period tracking, and elapsed computation.
 
     /********************************************************************
-Record activity and re-arm all thresholds. Closes the idle
-analytics period and opens a fresh active period.
+    Record activity and re-arm all thresholds. Closes the idle
+    analytics period and opens a fresh active period.
     *********************************************************************/
     touch: function () {
 
@@ -580,8 +580,8 @@ analytics period and opens a fresh active period.
 
 
     /********************************************************************
-Close the current analytics period into its total. Called on
-pause and before rescheduling thresholds.
+    Close the current analytics period into its total. Called on
+    pause and before rescheduling thresholds.
     *********************************************************************/
     closePeriod: function () {
 
@@ -607,8 +607,8 @@ pause and before rescheduling thresholds.
 
 
     /********************************************************************
-Schedule (or fire) a single threshold by id. If the threshold's
-ms has already elapsed, fire immediately.
+    Schedule (or fire) a single threshold by id. If the threshold's
+    ms has already elapsed, fire immediately.
     *********************************************************************/
     scheduleThreshold: function (id) {
 
@@ -650,8 +650,8 @@ ms has already elapsed, fire immediately.
 
 
     /********************************************************************
-Reschedule all registered thresholds for their remaining delta.
-Called on touch and on resume.
+    Reschedule all registered thresholds for their remaining delta.
+    Called on touch and on resume.
     *********************************************************************/
     rescheduleThresholds: function () {
 
@@ -675,7 +675,7 @@ Called on touch and on resume.
 
 
     /********************************************************************
-Clear all pending threshold timers without removing handlers.
+    Clear all pending threshold timers without removing handlers.
     *********************************************************************/
     clearAllTimers: function () {
 
@@ -692,9 +692,9 @@ Clear all pending threshold timers without removing handlers.
 
 
     /********************************************************************
-Calculate milliseconds elapsed since last activity.
+    Calculate milliseconds elapsed since last activity.
 
-@return {number} - Elapsed ms
+    @return {number} - Elapsed ms
     *********************************************************************/
     getElapsedMs: function () {
 
@@ -710,9 +710,9 @@ Calculate milliseconds elapsed since last activity.
 
 
     /********************************************************************
-Check if the idle classification has flipped and update the
-analytics period accordingly. Called before threshold callbacks
-fire.
+    Check if the idle classification has flipped and update the
+    analytics period accordingly. Called before threshold callbacks
+    fire.
     *********************************************************************/
     checkIdleTransition: function () {
 

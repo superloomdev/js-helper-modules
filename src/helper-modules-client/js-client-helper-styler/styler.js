@@ -310,8 +310,8 @@ const _Styler = { // Private helpers accessible within this module only
 
   /********************************************************************
   Apply one color swatch rule against the resolved values:
-{ ref: 'primary' }                                -> copy a value
-{ operation: 'mix', args: ['primary', 'bg', 12] } -> run a named ColorOp
+  { ref: 'primary' }                                -> copy a value
+  { operation: 'mix', args: ['primary', 'bg', 12] } -> run a named ColorOp
 
   @param {Object} rule   - swatch rule ({ ref } or { operation, args })
   @param {Object} values - resolved value map (defaults + theme)

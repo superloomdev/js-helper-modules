@@ -66,19 +66,19 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-Mint an access JWT. Returns a compact JWS string using HS256 over the
-provided claims + standard registered claims (iss, aud, iat, exp,
-jti, sub).
+    Mint an access JWT. Returns a compact JWS string using HS256 over the
+    provided claims + standard registered claims (iss, aud, iat, exp,
+    jti, sub).
 
-@param {Object} options
-@param {Object} options.session - Canonical session record (for claims)
-@param {String} options.signing_key - HMAC secret
-@param {String} options.issuer - iss claim
-@param {String} options.audience - aud claim
-@param {Integer} options.access_token_ttl_seconds - lifetime in seconds
-@param {Integer} options.now - current epoch seconds (from instance.time)
+    @param {Object} options
+    @param {Object} options.session - Canonical session record (for claims)
+    @param {String} options.signing_key - HMAC secret
+    @param {String} options.issuer - iss claim
+    @param {String} options.audience - aud claim
+    @param {Integer} options.access_token_ttl_seconds - lifetime in seconds
+    @param {Integer} options.now - current epoch seconds (from instance.time)
 
-@return {String} - Compact JWS (three base64url segments joined by '.')
+    @return {String} - Compact JWS (three base64url segments joined by '.')
     *********************************************************************/
     signSessionJwt: function (options) {
 
@@ -124,19 +124,19 @@ jti, sub).
 
 
     /********************************************************************
-Verify a JWT signature + standard claims. Returns a result object
-with the decoded claims on success or an error code otherwise.
-Entirely in-memory - no DB read.
+    Verify a JWT signature + standard claims. Returns a result object
+    with the decoded claims on success or an error code otherwise.
+    Entirely in-memory - no DB read.
 
-@param {Object} options
-@param {String} options.jwt - compact JWS string
-@param {String} options.signing_key - HMAC secret
-@param {String} options.issuer - expected iss
-@param {String} options.audience - expected aud
-@param {Integer} options.now - current epoch seconds
+    @param {Object} options
+    @param {String} options.jwt - compact JWS string
+    @param {String} options.signing_key - HMAC secret
+    @param {String} options.issuer - expected iss
+    @param {String} options.audience - expected aud
+    @param {Integer} options.now - current epoch seconds
 
-@return {Object} - { success, claims, error_code }
-      error_code: 'MALFORMED' | 'BAD_ALG' | 'BAD_SIGNATURE'
+    @return {Object} - { success, claims, error_code }
+    error_code: 'MALFORMED' | 'BAD_ALG' | 'BAD_SIGNATURE'
                   | 'EXPIRED' | 'BAD_ISSUER' | 'BAD_AUDIENCE'
     *********************************************************************/
     verifySessionJwt: function (options) {
@@ -232,10 +232,10 @@ Entirely in-memory - no DB read.
 
 
     /********************************************************************
-Generate a random opaque refresh token. Returns the plaintext; the
-caller hashes it before persisting.
+    Generate a random opaque refresh token. Returns the plaintext; the
+    caller hashes it before persisting.
 
-@return {String} - Random refresh token
+    @return {String} - Random refresh token
     *********************************************************************/
     generateRefreshToken: function () {
 
@@ -246,12 +246,12 @@ caller hashes it before persisting.
 
 
     /********************************************************************
-Deterministic hash of a refresh token for DB storage. Uses the auth
-module's SHA-256 helper so it matches the token_secret_hash algorithm.
+    Deterministic hash of a refresh token for DB storage. Uses the auth
+    module's SHA-256 helper so it matches the token_secret_hash algorithm.
 
-@param {String} refresh_token - Plaintext refresh token
+    @param {String} refresh_token - Plaintext refresh token
 
-@return {String} - Hex-encoded SHA-256 hash (64 chars)
+    @return {String} - Hex-encoded SHA-256 hash (64 chars)
     *********************************************************************/
     hashRefreshToken: function (refresh_token) {
 
@@ -262,7 +262,7 @@ module's SHA-256 helper so it matches the token_secret_hash algorithm.
 
 
     /********************************************************************
-base64url encoder for UTF-8 strings.
+    base64url encoder for UTF-8 strings.
     *********************************************************************/
     base64UrlEncode: function (str) {
 
@@ -277,7 +277,7 @@ base64url encoder for UTF-8 strings.
 
 
     /********************************************************************
-base64url encoder for raw Buffers.
+    base64url encoder for raw Buffers.
     *********************************************************************/
     base64UrlEncodeBuffer: function (buffer) {
 
@@ -292,7 +292,7 @@ base64url encoder for raw Buffers.
 
 
     /********************************************************************
-base64url decoder - returns UTF-8 string.
+    base64url decoder - returns UTF-8 string.
     *********************************************************************/
     base64UrlDecode: function (str) {
 

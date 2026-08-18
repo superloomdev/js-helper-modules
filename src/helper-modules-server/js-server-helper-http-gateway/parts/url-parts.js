@@ -50,20 +50,20 @@ const UrlParts = {
   Extract the component parts of a URL.
 
   Examples:
-'http://www.abc.example.co.uk:8080/path'
--> { sub_domain: 'www.abc', domain: 'example.co.uk',
+  'http://www.abc.example.co.uk:8080/path'
+  -> { sub_domain: 'www.abc', domain: 'example.co.uk',
          domain_without_tld: 'example', tld: 'co.uk',
          hostname: 'www.abc.example.co.uk', is_ip: false }
 
   @param {String} url - Full URL string to parse
 
   @return {Object} - Parsed URL components
-@param {String}  sub_domain          - Subdomain portion ('www.abc')
-@param {String}  domain              - Full domain with TLD ('example.co.uk')
-@param {String}  domain_without_tld  - Domain name without TLD ('example')
-@param {String}  tld                 - Public suffix / TLD ('co.uk')
-@param {String}  hostname            - Full hostname ('www.abc.example.co.uk')
-@param {Boolean} is_ip               - true when URL is an IP address
+  @param {String}  sub_domain          - Subdomain portion ('www.abc')
+  @param {String}  domain              - Full domain with TLD ('example.co.uk')
+  @param {String}  domain_without_tld  - Domain name without TLD ('example')
+  @param {String}  tld                 - Public suffix / TLD ('co.uk')
+  @param {String}  hostname            - Full hostname ('www.abc.example.co.uk')
+  @param {Boolean} is_ip               - true when URL is an IP address
   *********************************************************************/
   getUrlParts: function (url) {
 

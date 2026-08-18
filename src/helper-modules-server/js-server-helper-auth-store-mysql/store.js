@@ -112,13 +112,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // keeps both the table and the sweep-index idempotent.
 
     /********************************************************************
-Idempotent table + index setup. Creates the sessions table with
-the expires_at index inlined (MySQL does not support CREATE INDEX
-IF NOT EXISTS). Safe to call on every boot.
+    Idempotent table + index setup. Creates the sessions table with
+    the expires_at index inlined (MySQL does not support CREATE INDEX
+    IF NOT EXISTS). Safe to call on every boot.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -155,16 +155,16 @@ IF NOT EXISTS). Safe to call on every boot.
     // single index reads even at large scale.
 
     /********************************************************************
-Read a single session by (tenant_id, actor_id, token_key). Returns
-null record on hash mismatch - identical to "not found" shape.
+    Read a single session by (tenant_id, actor_id, token_key). Returns
+    null record on hash mismatch - identical to "not found" shape.
 
-@param {Object} instance          - Request instance
-@param {string} tenant_id         - Tenant identifier
-@param {string} actor_id          - Actor identifier
-@param {string} token_key         - Token key (partial key)
-@param {string} token_secret_hash - Hash to verify after fetch
+    @param {Object} instance          - Request instance
+    @param {string} tenant_id         - Tenant identifier
+    @param {string} actor_id          - Actor identifier
+    @param {string} token_key         - Token key (partial key)
+    @param {string} token_secret_hash - Hash to verify after fetch
 
-@return {Promise<Object>} - { success, record, error }
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
@@ -224,13 +224,13 @@ null record on hash mismatch - identical to "not found" shape.
 
 
     /********************************************************************
-Return all sessions for a (tenant_id, actor_id) pair.
+    Return all sessions for a (tenant_id, actor_id) pair.
 
-@param {Object} instance  - Request instance
-@param {string} tenant_id - Tenant identifier
-@param {string} actor_id  - Actor identifier
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
 
-@return {Promise<Object>} - { success, records, error }
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
@@ -277,12 +277,12 @@ Return all sessions for a (tenant_id, actor_id) pair.
     // refuses any identity column to keep PK integrity tamper-proof.
 
     /********************************************************************
-Insert or upsert a session by composite primary key.
+    Insert or upsert a session by composite primary key.
 
-@param {Object} instance - Request instance
-@param {Object} record   - Canonical session record
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical session record
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setSession: async function (instance, record) {
 
@@ -313,16 +313,16 @@ Insert or upsert a session by composite primary key.
 
 
     /********************************************************************
-Partial UPDATE for mutable per-session fields. Throws TypeError
-if `updates` contains any identity or primary-key column.
+    Partial UPDATE for mutable per-session fields. Throws TypeError
+    if `updates` contains any identity or primary-key column.
 
-@param {Object} instance  - Request instance
-@param {string} tenant_id - Tenant identifier
-@param {string} actor_id  - Actor identifier
-@param {string} token_key - Token key
-@param {Object} updates   - Partial record (mutable fields only)
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
+    @param {Object} updates   - Partial record (mutable fields only)
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     updateSessionActivity: async function (instance, tenant_id, actor_id, token_key, updates) {
 
@@ -392,14 +392,14 @@ if `updates` contains any identity or primary-key column.
     // replacement stay constant-cost regardless of session count.
 
     /********************************************************************
-Delete one session by composite primary key.
+    Delete one session by composite primary key.
 
-@param {Object} instance  - Request instance
-@param {string} tenant_id - Tenant identifier
-@param {string} actor_id  - Actor identifier
-@param {string} token_key - Token key
+    @param {Object} instance  - Request instance
+    @param {string} tenant_id - Tenant identifier
+    @param {string} actor_id  - Actor identifier
+    @param {string} token_key - Token key
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
@@ -436,14 +436,14 @@ Delete one session by composite primary key.
 
 
     /********************************************************************
-Bulk delete sessions for a tenant. Single round-trip with an
-OR-joined clause. No-op success if keys array is empty.
+    Bulk delete sessions for a tenant. Single round-trip with an
+    OR-joined clause. No-op success if keys array is empty.
 
-@param {Object}   instance  - Request instance
-@param {string}   tenant_id - Tenant identifier
-@param {Object[]} keys      - Array of { actor_id, token_key } pairs
+    @param {Object}   instance  - Request instance
+    @param {string}   tenant_id - Tenant identifier
+    @param {Object[]} keys      - Array of { actor_id, token_key } pairs
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteSessions: async function (instance, tenant_id, keys) {
 
@@ -507,12 +507,12 @@ OR-joined clause. No-op success if keys array is empty.
     // efficient range scan even as the table grows.
 
     /********************************************************************
-Sweep all expired sessions. MySQL has no native TTL; this is
-the garbage-collection path - run it on a cron.
+    Sweep all expired sessions. MySQL has no native TTL; this is
+    the garbage-collection path - run it on a cron.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredSessions: async function (instance) {
 
@@ -600,14 +600,14 @@ the garbage-collection path - run it on a cron.
 
 
     /********************************************************************
-Quote an identifier using MySQL's native backtick style. Rejects
-any identifier containing a backtick or double-quote so identifiers
-can never inject DDL through the table_name configuration.
-Closes over config from createInterface.
+    Quote an identifier using MySQL's native backtick style. Rejects
+    any identifier containing a backtick or double-quote so identifiers
+    can never inject DDL through the table_name configuration.
+    Closes over config from createInterface.
 
-@param {String} name - Identifier (table or column)
+    @param {String} name - Identifier (table or column)
 
-@return {String} - Quoted identifier
+    @return {String} - Quoted identifier
     *********************************************************************/
     Q: function (name) {
 
@@ -628,13 +628,13 @@ Closes over config from createInterface.
 
 
     /********************************************************************
-Build the CREATE TABLE statement for MySQL. Idempotent via
-CREATE TABLE IF NOT EXISTS. The expires_at index is inlined because
-MySQL has no CREATE INDEX IF NOT EXISTS - inlining it here makes
-both the table and the index idempotent under a single statement.
-Closes over config from createInterface.
+    Build the CREATE TABLE statement for MySQL. Idempotent via
+    CREATE TABLE IF NOT EXISTS. The expires_at index is inlined because
+    MySQL has no CREATE INDEX IF NOT EXISTS - inlining it here makes
+    both the table and the index idempotent under a single statement.
+    Closes over config from createInterface.
 
-@return {String} - DDL statement
+    @return {String} - DDL statement
     *********************************************************************/
     buildSchemaDDL: function () {
 
@@ -682,13 +682,13 @@ Closes over config from createInterface.
 
 
     /********************************************************************
-Build the MySQL UPSERT statement. Uses
-      INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)
-so a second call with the same (tenant_id, actor_id, token_key)
-replaces the mutable columns in a single round-trip.
-Closes over config from createInterface.
+    Build the MySQL UPSERT statement. Uses
+    INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)
+    so a second call with the same (tenant_id, actor_id, token_key)
+    replaces the mutable columns in a single round-trip.
+    Closes over config from createInterface.
 
-@return {String} - SQL template using `?` placeholders
+    @return {String} - SQL template using `?` placeholders
     *********************************************************************/
     buildUpsertSQL: function () {
 
@@ -722,14 +722,14 @@ Closes over config from createInterface.
 
 
     /********************************************************************
-Encode a canonical-record value for a parameterized INSERT / UPDATE.
-MySQL TINYINT(1) expects 0/1 for booleans; custom_data is JSON-
-enveloped; undefined maps to null.
+    Encode a canonical-record value for a parameterized INSERT / UPDATE.
+    MySQL TINYINT(1) expects 0/1 for booleans; custom_data is JSON-
+    enveloped; undefined maps to null.
 
-@param {String} col   - Column name
-@param {*}      value - Canonical record value
+    @param {String} col   - Column name
+    @param {*}      value - Canonical record value
 
-@return {*} - DB-safe value
+    @return {*} - DB-safe value
     *********************************************************************/
     toColumnValue: function (col, value) {
 
@@ -757,15 +757,15 @@ enveloped; undefined maps to null.
 
 
     /********************************************************************
-Decode a raw row value into its canonical-record shape. mysql2
-returns TINYINT(1) as 0/1 by default; we coerce back to boolean.
-custom_data is parsed from the TEXT-stored JSON envelope. BIGINT
-columns may arrive as strings in some driver configurations.
+    Decode a raw row value into its canonical-record shape. mysql2
+    returns TINYINT(1) as 0/1 by default; we coerce back to boolean.
+    custom_data is parsed from the TEXT-stored JSON envelope. BIGINT
+    columns may arrive as strings in some driver configurations.
 
-@param {String} col   - Column name
-@param {*}      value - Raw DB value
+    @param {String} col   - Column name
+    @param {*}      value - Raw DB value
 
-@return {*} - Canonical value
+    @return {*} - Canonical value
     *********************************************************************/
     fromColumnValue: function (col, value) {
 
@@ -814,11 +814,11 @@ columns may arrive as strings in some driver configurations.
 
 
     /********************************************************************
-Canonical record -> positional values array, aligned with COLUMNS.
+    Canonical record -> positional values array, aligned with COLUMNS.
 
-@param {Object} record - Canonical session record
+    @param {Object} record - Canonical session record
 
-@return {Array} - Positional values for parameterized INSERT
+    @return {Array} - Positional values for parameterized INSERT
     *********************************************************************/
     recordToRow: function (record) {
 
@@ -831,11 +831,11 @@ Canonical record -> positional values array, aligned with COLUMNS.
 
 
     /********************************************************************
-Raw row object -> canonical record.
+    Raw row object -> canonical record.
 
-@param {Object} row - Raw row from MySQL driver
+    @param {Object} row - Raw row from MySQL driver
 
-@return {Object} - Canonical session record
+    @return {Object} - Canonical session record
     *********************************************************************/
     rowToRecord: function (row) {
 

@@ -92,12 +92,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Idempotent table provisioning. Pay-per-request billing is the
-correct default for a bursty verification workload.
+    Idempotent table provisioning. Pay-per-request billing is the
+    correct default for a bursty verification workload.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -139,13 +139,13 @@ correct default for a bursty verification workload.
     // ~~~~~~~~~~~~~~~~~~~~ CRUD ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Direct GetItem on the composite key. Returns null when absent.
+    Direct GetItem on the composite key. Returns null when absent.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, record, error }
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getRecord: async function (instance, scope, key) {
 
@@ -195,14 +195,14 @@ Direct GetItem on the composite key. Returns null when absent.
 
 
     /********************************************************************
-Upsert via PutItem. DynamoDB always overwrites by composite key.
+    Upsert via PutItem. DynamoDB always overwrites by composite key.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
-@param {Object} record   - { code, fail_count, created_at, expires_at }
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
+    @param {Object} record   - { code, fail_count, created_at, expires_at }
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setRecord: async function (instance, scope, key, record) {
 
@@ -246,13 +246,13 @@ Upsert via PutItem. DynamoDB always overwrites by composite key.
 
 
     /********************************************************************
-Atomic ADD via the helper's increment parameter.
+    Atomic ADD via the helper's increment parameter.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     incrementFailCount: async function (instance, scope, key) {
 
@@ -289,13 +289,13 @@ Atomic ADD via the helper's increment parameter.
 
 
     /********************************************************************
-Idempotent delete.
+    Idempotent delete.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, scope, key) {
 
@@ -331,13 +331,13 @@ Idempotent delete.
     // ~~~~~~~~~~~~~~~~~~~~ Lifecycle ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Explicit sweep. Scan with a FilterExpression then batch-delete the
-matching keys. The native TTL on `expires_at` is the primary
-mechanism; this method supports explicit lifecycle control.
+    Explicit sweep. Scan with a FilterExpression then batch-delete the
+    matching keys. The native TTL on `expires_at` is the primary
+    mechanism; this method supports explicit lifecycle control.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 

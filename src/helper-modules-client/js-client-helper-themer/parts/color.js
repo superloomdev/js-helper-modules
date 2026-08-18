@@ -53,17 +53,17 @@ const Color = {
   // Hex to channels and back, the base every other function here builds on.
 
   /********************************************************************
-      Parse a hex colour into red, green, and blue channels.
+  Parse a hex colour into red, green, and blue channels.
 
-      Accepts both the three-digit and six-digit forms, with or without
-      a leading hash.
+  Accepts both the three-digit and six-digit forms, with or without
+  a leading hash.
 
-      @param {String} hex - Hex colour such as '#0f62fe' or 'f0f'
+  @param {String} hex - Hex colour such as '#0f62fe' or 'f0f'
 
-      @return {Object} - Channel values
-      @return {Number} .r - Red channel, 0 to 255
-      @return {Number} .g - Green channel, 0 to 255
-      @return {Number} .b - Blue channel, 0 to 255
+  @return {Object} - Channel values
+  @return {Number} .r - Red channel, 0 to 255
+  @return {Number} .g - Green channel, 0 to 255
+  @return {Number} .b - Blue channel, 0 to 255
   *********************************************************************/
   parseHex: function (hex) {
 
@@ -86,14 +86,14 @@ const Color = {
 
 
   /********************************************************************
-      Compose red, green, and blue channels into a hex colour.
+  Compose red, green, and blue channels into a hex colour.
 
-      @param {Object} rgb - Channel values
-      @param {Number} rgb.r - Red channel
-      @param {Number} rgb.g - Green channel
-      @param {Number} rgb.b - Blue channel
+  @param {Object} rgb - Channel values
+  @param {Number} rgb.r - Red channel
+  @param {Number} rgb.g - Green channel
+  @param {Number} rgb.b - Blue channel
 
-      @return {String} - Hex colour with a leading hash
+  @return {String} - Hex colour with a leading hash
   *********************************************************************/
   toHex: function (rgb) {
 
@@ -104,18 +104,18 @@ const Color = {
 
 
   /********************************************************************
-      Convert a hex colour to hue, saturation, and lightness.
+  Convert a hex colour to hue, saturation, and lightness.
 
-      Lightness is the axis the contrast pass moves, and moving it in
-      HSL keeps the hue and saturation intact so a brand colour stays
-      recognizable instead of washing toward grey.
+  Lightness is the axis the contrast pass moves, and moving it in
+  HSL keeps the hue and saturation intact so a brand colour stays
+  recognizable instead of washing toward grey.
 
-      @param {String} hex - Hex colour
+  @param {String} hex - Hex colour
 
-      @return {Object} - HSL triple
-      @return {Number} .h - Hue in degrees, 0 to 360
-      @return {Number} .s - Saturation, 0 to 1
-      @return {Number} .l - Lightness, 0 to 1
+  @return {Object} - HSL triple
+  @return {Number} .h - Hue in degrees, 0 to 360
+  @return {Number} .s - Saturation, 0 to 1
+  @return {Number} .l - Lightness, 0 to 1
   *********************************************************************/
   rgbToHsl: function (hex) {
 
@@ -156,14 +156,14 @@ const Color = {
 
 
   /********************************************************************
-      Convert hue, saturation, and lightness back to a hex colour.
+  Convert hue, saturation, and lightness back to a hex colour.
 
-      @param {Object} hsl - HSL triple
-      @param {Number} hsl.h - Hue in degrees
-      @param {Number} hsl.s - Saturation, 0 to 1
-      @param {Number} hsl.l - Lightness, 0 to 1
+  @param {Object} hsl - HSL triple
+  @param {Number} hsl.h - Hue in degrees
+  @param {Number} hsl.s - Saturation, 0 to 1
+  @param {Number} hsl.l - Lightness, 0 to 1
 
-      @return {String} - Hex colour with a leading hash
+  @return {String} - Hex colour with a leading hash
   *********************************************************************/
   hslToRgb: function (hsl) {
 
@@ -191,15 +191,15 @@ const Color = {
   // The two readings the contrast rules are written against.
 
   /********************************************************************
-      Compute the relative luminance of a hex colour.
+  Compute the relative luminance of a hex colour.
 
-      Follows the WCAG definition, including the per-channel gamma
-      expansion, so the ratio it feeds is the one accessibility
-      thresholds are written against.
+  Follows the WCAG definition, including the per-channel gamma
+  expansion, so the ratio it feeds is the one accessibility
+  thresholds are written against.
 
-      @param {String} hex - Hex colour
+  @param {String} hex - Hex colour
 
-      @return {Number} - Relative luminance, 0 to 1
+  @return {Number} - Relative luminance, 0 to 1
   *********************************************************************/
   luminance: function (hex) {
 
@@ -216,12 +216,12 @@ const Color = {
 
 
   /********************************************************************
-      Compute the contrast ratio between two hex colours.
+  Compute the contrast ratio between two hex colours.
 
-      @param {String} hex_a - First colour
-      @param {String} hex_b - Second colour
+  @param {String} hex_a - First colour
+  @param {String} hex_b - Second colour
 
-      @return {Number} - Ratio from 1 to 21
+  @return {Number} - Ratio from 1 to 21
   *********************************************************************/
   contrastRatio: function (hex_a, hex_b) {
 
@@ -239,13 +239,13 @@ const Color = {
   // Producing a new colour from existing ones.
 
   /********************************************************************
-      Blend two hex colours by weight.
+  Blend two hex colours by weight.
 
-      @param {String} hex_a - Colour the weight applies to
-      @param {String} hex_b - Colour that supplies the remainder
-      @param {Number} weight_percent - Share of the first colour, 0 to 100
+  @param {String} hex_a - Colour the weight applies to
+  @param {String} hex_b - Colour that supplies the remainder
+  @param {Number} weight_percent - Share of the first colour, 0 to 100
 
-      @return {String} - Blended hex colour
+  @return {String} - Blended hex colour
   *********************************************************************/
   mix: function (hex_a, hex_b, weight_percent) {
 
@@ -265,12 +265,12 @@ const Color = {
 
 
   /********************************************************************
-      Express a hex colour as an rgba string at a given opacity.
+  Express a hex colour as an rgba string at a given opacity.
 
-      @param {String} hex - Hex colour
-      @param {Number} opacity - Alpha value, 0 to 1
+  @param {String} hex - Hex colour
+  @param {Number} opacity - Alpha value, 0 to 1
 
-      @return {String} - CSS rgba string
+  @return {String} - CSS rgba string
   *********************************************************************/
   rgbaFrom: function (hex, opacity) {
 
@@ -288,11 +288,11 @@ const Color = {
   // colour that exists nowhere in the palette, so it is the last resort.
 
   /********************************************************************
-      Group a flat palette into hue families with ordered steps.
+  Group a flat palette into hue families with ordered steps.
 
-      @param {Object} palette - Flat map such as { red60: '#da1e28' }
+  @param {Object} palette - Flat map such as { red60: '#da1e28' }
 
-      @return {Object} - Map of family name to steps, ascending by step
+  @return {Object} - Map of family name to steps, ascending by step
   *********************************************************************/
   groupPalette: function (palette) {
 
@@ -342,17 +342,17 @@ const Color = {
 
 
   /********************************************************************
-      Find a compliant replacement for a colour that fails a contrast
-      threshold against its background.
+  Find a compliant replacement for a colour that fails a contrast
+  threshold against its background.
 
-      @param {String} before - The failing colour
-      @param {String} against - The colour it must contrast with
-      @param {Number} min_ratio - Required contrast ratio
-      @param {Object} palette - Flat palette, used by the snap strategy
+  @param {String} before - The failing colour
+  @param {String} against - The colour it must contrast with
+  @param {Number} min_ratio - Required contrast ratio
+  @param {Object} palette - Flat palette, used by the snap strategy
 
-      @return {Object} - Correction result
-      @return {String} .value - The replacement colour
-      @return {String} .strategy - Which strategy produced the replacement
+  @return {Object} - Correction result
+  @return {String} .value - The replacement colour
+  @return {String} .strategy - Which strategy produced the replacement
   *********************************************************************/
   correctForContrast: function (before, against, min_ratio, palette) {
 
@@ -386,11 +386,11 @@ const Color = {
 const _Color = {
 
   /********************************************************************
-      Clamp a channel to the byte range and render it as a hex pair.
+  Clamp a channel to the byte range and render it as a hex pair.
 
-      @param {Number} value - Raw channel value
+  @param {Number} value - Raw channel value
 
-      @return {String} - Two-character hex pair
+  @return {String} - Two-character hex pair
   *********************************************************************/
   channelToPair: function (value) {
 
@@ -403,11 +403,11 @@ const _Color = {
 
 
   /********************************************************************
-      Expand one channel out of gamma for the luminance calculation.
+  Expand one channel out of gamma for the luminance calculation.
 
-      @param {Number} value - Channel value, 0 to 255
+  @param {Number} value - Channel value, 0 to 255
 
-      @return {Number} - Linear channel value, 0 to 1
+  @return {Number} - Linear channel value, 0 to 1
   *********************************************************************/
   channelLuminance: function (value) {
 
@@ -420,15 +420,15 @@ const _Color = {
 
 
   /********************************************************************
-      Compute the hue angle from normalized channels.
+  Compute the hue angle from normalized channels.
 
-      @param {Number} rn - Red channel, 0 to 1
-      @param {Number} gn - Green channel, 0 to 1
-      @param {Number} bn - Blue channel, 0 to 1
-      @param {Number} max - Largest of the three channels
-      @param {Number} delta - Spread between largest and smallest
+  @param {Number} rn - Red channel, 0 to 1
+  @param {Number} gn - Green channel, 0 to 1
+  @param {Number} bn - Blue channel, 0 to 1
+  @param {Number} max - Largest of the three channels
+  @param {Number} delta - Spread between largest and smallest
 
-      @return {Number} - Hue in degrees, possibly negative
+  @return {Number} - Hue in degrees, possibly negative
   *********************************************************************/
   hueFromChannels: function (rn, gn, bn, max, delta) {
 
@@ -447,13 +447,13 @@ const _Color = {
 
 
   /********************************************************************
-      Place chroma into the correct sextant of the colour wheel.
+  Place chroma into the correct sextant of the colour wheel.
 
-      @param {Number} hp - Hue divided by 60
-      @param {Number} c - Chroma
-      @param {Number} x - Intermediate component
+  @param {Number} hp - Hue divided by 60
+  @param {Number} c - Chroma
+  @param {Number} x - Intermediate component
 
-      @return {Number[]} - Red, green, and blue components before lifting
+  @return {Number[]} - Red, green, and blue components before lifting
   *********************************************************************/
   sextantChannels: function (hp, c, x) {
 
@@ -484,16 +484,16 @@ const _Color = {
 
 
   /********************************************************************
-      Walk the failing colour's own palette family to the nearest
-      compliant step.
+  Walk the failing colour's own palette family to the nearest
+  compliant step.
 
-      @param {String} before - The failing colour
-      @param {String} against - The colour it must contrast with
-      @param {Number} min_ratio - Required contrast ratio
-      @param {Object} families - Grouped palette from groupPalette
-      @param {Boolean} needs_lighter - Whether to walk toward lighter steps
+  @param {String} before - The failing colour
+  @param {String} against - The colour it must contrast with
+  @param {Number} min_ratio - Required contrast ratio
+  @param {Object} families - Grouped palette from groupPalette
+  @param {Boolean} needs_lighter - Whether to walk toward lighter steps
 
-      @return {Object|null} - Correction result, or null when not applicable
+  @return {Object|null} - Correction result, or null when not applicable
   *********************************************************************/
   snapWithinFamily: function (before, against, min_ratio, families, needs_lighter) {
 
@@ -535,14 +535,14 @@ const _Color = {
 
 
   /********************************************************************
-      Move a colour's lightness while holding its hue and saturation.
+  Move a colour's lightness while holding its hue and saturation.
 
-      @param {String} before - The failing colour
-      @param {String} against - The colour it must contrast with
-      @param {Number} min_ratio - Required contrast ratio
-      @param {Boolean} needs_lighter - Whether to raise lightness
+  @param {String} before - The failing colour
+  @param {String} against - The colour it must contrast with
+  @param {Number} min_ratio - Required contrast ratio
+  @param {Boolean} needs_lighter - Whether to raise lightness
 
-      @return {Object|null} - Correction result, or null when not applicable
+  @return {Object|null} - Correction result, or null when not applicable
   *********************************************************************/
   shiftLightness: function (before, against, min_ratio, needs_lighter) {
 
@@ -582,17 +582,17 @@ const _Color = {
 
 
   /********************************************************************
-      Mix the colour toward white or black until it complies.
+  Mix the colour toward white or black until it complies.
 
-      This is the last resort, because the result is a colour that
-      exists nowhere in the palette.
+  This is the last resort, because the result is a colour that
+  exists nowhere in the palette.
 
-      @param {String} before - The failing colour
-      @param {String} against - The colour it must contrast with
-      @param {Number} min_ratio - Required contrast ratio
-      @param {Boolean} needs_lighter - Whether to mix toward white
+  @param {String} before - The failing colour
+  @param {String} against - The colour it must contrast with
+  @param {Number} min_ratio - Required contrast ratio
+  @param {Boolean} needs_lighter - Whether to mix toward white
 
-      @return {Object} - Correction result
+  @return {Object} - Correction result
   *********************************************************************/
   mixToExtreme: function (before, against, min_ratio, needs_lighter) {
 
@@ -623,12 +623,12 @@ const _Color = {
 
 
   /********************************************************************
-      Find the index of a hex value within an ordered family.
+  Find the index of a hex value within an ordered family.
 
-      @param {Object[]} steps - Family steps from groupPalette
-      @param {String} target - Lowercased hex to locate
+  @param {Object[]} steps - Family steps from groupPalette
+  @param {String} target - Lowercased hex to locate
 
-      @return {Number} - Index, or -1 when absent
+  @return {Number} - Index, or -1 when absent
   *********************************************************************/
   indexOfHex: function (steps, target) {
 

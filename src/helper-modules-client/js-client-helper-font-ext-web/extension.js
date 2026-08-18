@@ -93,13 +93,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Adapter Contract ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Load all font families from the core's manifest. Builds @font-face
-CSS strings via the core, creates a <style> node, and appends it
-to the DOM.
+    Load all font families from the core's manifest. Builds @font-face
+    CSS strings via the core, creates a <style> node, and appends it
+    to the DOM.
 
-@param {Object} manifest - The manifest from Font.getManifest()
+    @param {Object} manifest - The manifest from Font.getManifest()
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     loadManifest: async function (manifest) {
 
@@ -220,9 +220,9 @@ to the DOM.
 
 
     /********************************************************************
-Check whether all registered fonts have finished loading.
+    Check whether all registered fonts have finished loading.
 
-@return {Object} - { success, ready, error }
+    @return {Object} - { success, ready, error }
     *********************************************************************/
     isReady: function () {
 
@@ -236,11 +236,11 @@ Check whether all registered fonts have finished loading.
 
 
     /********************************************************************
-Check whether a specific font family has been loaded by this adapter.
+    Check whether a specific font family has been loaded by this adapter.
 
-@param {String} familyName - The family name to check
+    @param {String} familyName - The family name to check
 
-@return {Object} - { success, loaded, error }
+    @return {Object} - { success, loaded, error }
     *********************************************************************/
     isFamilyLoaded: function (familyName) {
 
@@ -256,10 +256,10 @@ Check whether a specific font family has been loaded by this adapter.
     // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Remove the injected style node from the DOM. Useful for hot
-reload or test cleanup.
+    Remove the injected style node from the DOM. Useful for hot
+    reload or test cleanup.
 
-@return {Object} - { success, error }
+    @return {Object} - { success, error }
     *********************************************************************/
     unload: function () {
 

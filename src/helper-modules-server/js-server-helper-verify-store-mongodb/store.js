@@ -90,13 +90,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Idempotent setup. Creates the TTL index on `_ttl`. The compound
-`_id` index is implicit so no second index is needed for the
-primary access path.
+    Idempotent setup. Creates the TTL index on `_ttl`. The compound
+    `_id` index is implicit so no second index is needed for the
+    primary access path.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -133,14 +133,14 @@ primary access path.
     // ~~~~~~~~~~~~~~~~~~~~ CRUD ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Equality lookup on the compound `_id` - O(1) via the implicit index.
-Returns null when absent.
+    Equality lookup on the compound `_id` - O(1) via the implicit index.
+    Returns null when absent.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, record, error }
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getRecord: async function (instance, scope, key) {
 
@@ -190,16 +190,16 @@ Returns null when absent.
 
 
     /********************************************************************
-Upsert via replaceOne. The `_ttl` Date is computed from `expires_at`
-so a single source of truth (epoch seconds) feeds both the TTL
-sweeper and the verify-time expiry check.
+    Upsert via replaceOne. The `_ttl` Date is computed from `expires_at`
+    so a single source of truth (epoch seconds) feeds both the TTL
+    sweeper and the verify-time expiry check.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
-@param {Object} record   - { code, fail_count, created_at, expires_at }
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
+    @param {Object} record   - { code, fail_count, created_at, expires_at }
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setRecord: async function (instance, scope, key, record) {
 
@@ -245,13 +245,13 @@ sweeper and the verify-time expiry check.
 
 
     /********************************************************************
-Atomic $inc - safe under concurrent verify attempts.
+    Atomic $inc - safe under concurrent verify attempts.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     incrementFailCount: async function (instance, scope, key) {
 
@@ -286,13 +286,13 @@ Atomic $inc - safe under concurrent verify attempts.
 
 
     /********************************************************************
-Idempotent delete (missing _id is treated as success).
+    Idempotent delete (missing _id is treated as success).
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, scope, key) {
 
@@ -328,12 +328,12 @@ Idempotent delete (missing _id is treated as success).
     // ~~~~~~~~~~~~~~~~~~~~ Lifecycle ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Manual sweep mirroring the SQL stores. The native TTL index is the
-primary mechanism, but this method supports explicit lifecycle control.
+    Manual sweep mirroring the SQL stores. The native TTL index is the
+    primary mechanism, but this method supports explicit lifecycle control.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 

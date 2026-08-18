@@ -73,10 +73,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Instance creation and state initialization.
 
     /********************************************************************
-Initialize a new request instance object.
-The instance is a lightweight reference passed to all functions during a request.
+    Initialize a new request instance object.
+    The instance is a lightweight reference passed to all functions during a request.
 
-@return {Object} - New instance object with default properties
+    @return {Object} - New instance object with default properties
     *********************************************************************/
     initialize: function () {
 
@@ -101,14 +101,14 @@ The instance is a lightweight reference passed to all functions during a request
     // Cleanup queue management and execution.
 
     /********************************************************************
-Add a cleanup function to instance's cleanup queue.
-Cleanup functions are executed when the request completes and all background routines finish.
-Each cleanup function receives the instance as its only parameter.
+    Add a cleanup function to instance's cleanup queue.
+    Cleanup functions are executed when the request completes and all background routines finish.
+    Each cleanup function receives the instance as its only parameter.
 
-@param {Object} instance - Request instance object reference
-@param {Function} cleanup_function - Function to call during cleanup. Signature: fn(instance)
+    @param {Object} instance - Request instance object reference
+    @param {Function} cleanup_function - Function to call during cleanup. Signature: fn(instance)
 
-@return {void}
+    @return {void}
     *********************************************************************/
     addCleanupRoutine: function (instance, cleanup_function) {
 
@@ -119,12 +119,12 @@ Each cleanup function receives the instance as its only parameter.
 
 
     /********************************************************************
-Run all cleanup functions in the cleanup queue.
-Only runs if all background routines have completed.
+    Run all cleanup functions in the cleanup queue.
+    Only runs if all background routines have completed.
 
-@param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance object reference
 
-@return {void}
+    @return {void}
     *********************************************************************/
     cleanup: function (instance) {
 
@@ -148,14 +148,14 @@ Only runs if all background routines have completed.
 
 
     /********************************************************************
-Register a new background routine on the instance.
-Background routines run in parallel and do not block the response.
-When a background routine completes, call the returned function to signal completion.
-Cleanup is automatically triggered when all background routines finish.
+    Register a new background routine on the instance.
+    Background routines run in parallel and do not block the response.
+    When a background routine completes, call the returned function to signal completion.
+    Cleanup is automatically triggered when all background routines finish.
 
-@param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance object reference
 
-@return {Function} - Completion callback. Call this when the background routine finishes.
+    @return {Function} - Completion callback. Call this when the background routine finishes.
     *********************************************************************/
     backgroundRoutine: function (instance) {
 
@@ -171,11 +171,11 @@ Cleanup is automatically triggered when all background routines finish.
 
 
     /********************************************************************
-Get the current number of pending background routines
+    Get the current number of pending background routines
 
-@param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance object reference
 
-@return {Integer} - Number of pending background routines
+    @return {Integer} - Number of pending background routines
     *********************************************************************/
     getBackgroundQueueCount: function (instance) {
 
@@ -186,11 +186,11 @@ Get the current number of pending background routines
 
 
     /********************************************************************
-Get the number of registered cleanup routines
+    Get the number of registered cleanup routines
 
-@param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance object reference
 
-@return {Integer} - Number of cleanup functions in queue
+    @return {Integer} - Number of cleanup functions in queue
     *********************************************************************/
     getCleanupQueueCount: function (instance) {
 
@@ -201,11 +201,11 @@ Get the number of registered cleanup routines
 
 
     /********************************************************************
-Get instance age in milliseconds (time since initialization)
+    Get instance age in milliseconds (time since initialization)
 
-@param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance object reference
 
-@return {Integer} - Milliseconds since instance was initialized
+    @return {Integer} - Milliseconds since instance was initialized
     *********************************************************************/
     getAge: function (instance) {
 
@@ -222,12 +222,12 @@ Get instance age in milliseconds (time since initialization)
   const _Instance = {
 
     /********************************************************************
-Callback executed when a background routine completes.
-Decrements the background counter and triggers cleanup if all routines are done.
+    Callback executed when a background routine completes.
+    Decrements the background counter and triggers cleanup if all routines are done.
 
-@param {Object} instance - Request instance object reference
+    @param {Object} instance - Request instance object reference
 
-@return {void}
+    @return {void}
     *********************************************************************/
     backgroundRoutineComplete: function (instance) {
 

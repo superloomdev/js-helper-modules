@@ -64,9 +64,9 @@ const Emit = {
   // What the parent module needs to know about the available targets.
 
   /********************************************************************
-      List the platforms this engine emits for.
+  List the platforms this engine emits for.
 
-      @return {String[]} - Platform names
+  @return {String[]} - Platform names
   *********************************************************************/
   platforms: function () {
 
@@ -77,11 +77,11 @@ const Emit = {
 
 
   /********************************************************************
-      Return the emitter table for one platform.
+  Return the emitter table for one platform.
 
-      @param {String} platform - Platform name
+  @param {String} platform - Platform name
 
-      @return {Object} - Map of token group to emitter function
+  @return {Object} - Map of token group to emitter function
   *********************************************************************/
   forPlatform: function (platform) {
 
@@ -92,17 +92,17 @@ const Emit = {
 
 
   /********************************************************************
-      Project one resolved value onto one platform.
+  Project one resolved value onto one platform.
 
-      @param {*} value - Canonical value from resolution
-      @param {String} group - Token group naming which emitter applies
-      @param {String} platform - Target platform
-      @param {Object} context - Per-call emit context
-      @param {Number} context.base_font_size - Root size for rem conversion
-      @param {String} context.token - Token name, for loss reports
-      @param {Object[]} context.lossy - Collector for reported losses
+  @param {*} value - Canonical value from resolution
+  @param {String} group - Token group naming which emitter applies
+  @param {String} platform - Target platform
+  @param {Object} context - Per-call emit context
+  @param {Number} context.base_font_size - Root size for rem conversion
+  @param {String} context.token - Token name, for loss reports
+  @param {Object[]} context.lossy - Collector for reported losses
 
-      @return {*} - The projected value
+  @return {*} - The projected value
   *********************************************************************/
   value: function (value, group, platform, context) {
 
@@ -127,9 +127,9 @@ const Emit = {
 const _Emit = {
 
   /********************************************************************
-      Build the per-platform emitter tables.
+  Build the per-platform emitter tables.
 
-      @return {Object} - Map of platform name to emitter table
+  @return {Object} - Map of platform name to emitter table
   *********************************************************************/
   tables: function () {
 
@@ -143,9 +143,9 @@ const _Emit = {
 
 
   /********************************************************************
-      Emitters for the web target.
+  Emitters for the web target.
 
-      @return {Object} - Map of token group to emitter function
+  @return {Object} - Map of token group to emitter function
   *********************************************************************/
   webTable: function () {
 
@@ -189,9 +189,9 @@ const _Emit = {
 
 
   /********************************************************************
-      Emitters for the React Native target.
+  Emitters for the React Native target.
 
-      @return {Object} - Map of token group to emitter function
+  @return {Object} - Map of token group to emitter function
   *********************************************************************/
   nativeTable: function () {
 
@@ -235,16 +235,16 @@ const _Emit = {
 
 
   /********************************************************************
-      Project a shadow onto CSS.
+  Project a shadow onto CSS.
 
-      Web is the only one of the three targets that can express a
-      layered shadow, so every layer survives. CSS paints the first
-      layer on top.
+  Web is the only one of the three targets that can express a
+  layered shadow, so every layer survives. CSS paints the first
+  layer on top.
 
-      @param {Object} v - Canonical shadow value
-      @param {Object[]} v.layers - Ordered shadow layers
+  @param {Object} v - Canonical shadow value
+  @param {Object[]} v.layers - Ordered shadow layers
 
-      @return {String} - CSS box-shadow value
+  @return {String} - CSS box-shadow value
   *********************************************************************/
   webShadow: function (v) {
 
@@ -270,19 +270,19 @@ const _Emit = {
 
 
   /********************************************************************
-      Project a shadow onto React Native.
+  Project a shadow onto React Native.
 
-      One object carries both families: iOS reads the shadow properties
-      and ignores elevation, Android reads elevation and ignores the
-      rest. That tolerance is what keeps the shadow group at two emit
-      targets instead of three.
+  One object carries both families: iOS reads the shadow properties
+  and ignores elevation, Android reads elevation and ignores the
+  rest. That tolerance is what keeps the shadow group at two emit
+  targets instead of three.
 
-      @param {Object} v - Canonical shadow value
-      @param {Object[]} v.layers - Ordered shadow layers
-      @param {Number} v.elevation - Android elevation seed
-      @param {Object} ctx - Emit context carrying the loss collector
+  @param {Object} v - Canonical shadow value
+  @param {Object[]} v.layers - Ordered shadow layers
+  @param {Number} v.elevation - Android elevation seed
+  @param {Object} ctx - Emit context carrying the loss collector
 
-      @return {Object} - React Native style fragment
+  @return {Object} - React Native style fragment
   *********************************************************************/
   nativeShadow: function (v, ctx) {
 
@@ -306,15 +306,15 @@ const _Emit = {
 
 
   /********************************************************************
-      Report the facts a native shadow projection discards.
+  Report the facts a native shadow projection discards.
 
-      A value that vanishes with no record is the failure this reporting
-      exists to prevent.
+  A value that vanishes with no record is the failure this reporting
+  exists to prevent.
 
-      @param {Object} v - Canonical shadow value
-      @param {Object} ctx - Emit context carrying the loss collector
+  @param {Object} v - Canonical shadow value
+  @param {Object} ctx - Emit context carrying the loss collector
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   reportShadowLoss: function (v, ctx) {
 
@@ -347,12 +347,12 @@ const _Emit = {
 
 
   /********************************************************************
-      Project a type set onto CSS.
+  Project a type set onto CSS.
 
-      @param {Object} v - Canonical type set
-      @param {Object} ctx - Emit context carrying the root font size
+  @param {Object} v - Canonical type set
+  @param {Object} ctx - Emit context carrying the root font size
 
-      @return {Object} - CSS-ready declaration block
+  @return {Object} - CSS-ready declaration block
   *********************************************************************/
   webTypeSet: function (v, ctx) {
 
@@ -382,15 +382,15 @@ const _Emit = {
 
 
   /********************************************************************
-      Project a type set onto React Native.
+  Project a type set onto React Native.
 
-      React Native needs an absolute line height rather than a ratio.
-      Because a type set resolves to one object, the font size that the
-      line height depends on is already present, with no sibling lookup.
+  React Native needs an absolute line height rather than a ratio.
+  Because a type set resolves to one object, the font size that the
+  line height depends on is already present, with no sibling lookup.
 
-      @param {Object} v - Canonical type set
+  @param {Object} v - Canonical type set
 
-      @return {Object} - React Native text style fragment
+  @return {Object} - React Native text style fragment
   *********************************************************************/
   nativeTypeSet: function (v) {
 

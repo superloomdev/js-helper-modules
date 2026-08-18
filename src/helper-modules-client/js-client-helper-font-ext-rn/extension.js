@@ -99,13 +99,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Adapter Contract ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Load all font families from the core's manifest. Iterates the
-manifest, calls the native loader for each font file, and tracks
-success/failure counts.
+    Load all font families from the core's manifest. Iterates the
+    manifest, calls the native loader for each font file, and tracks
+    success/failure counts.
 
-@param {Object} manifest - The manifest from Font.getManifest()
+    @param {Object} manifest - The manifest from Font.getManifest()
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     loadManifest: async function (manifest) {
 
@@ -194,9 +194,9 @@ success/failure counts.
 
 
     /********************************************************************
-Check whether all registered fonts have finished loading.
+    Check whether all registered fonts have finished loading.
 
-@return {Object} - { success, ready, error }
+    @return {Object} - { success, ready, error }
     *********************************************************************/
     isReady: function () {
 
@@ -210,11 +210,11 @@ Check whether all registered fonts have finished loading.
 
 
     /********************************************************************
-Check whether a specific font family has been loaded by this adapter.
+    Check whether a specific font family has been loaded by this adapter.
 
-@param {String} familyName - The family name to check
+    @param {String} familyName - The family name to check
 
-@return {Object} - { success, loaded, error }
+    @return {Object} - { success, loaded, error }
     *********************************************************************/
     isFamilyLoaded: function (familyName) {
 
@@ -230,9 +230,9 @@ Check whether a specific font family has been loaded by this adapter.
     // ~~~~~~~~~~~~~~~~~~~~ Introspection ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Get the count of successfully loaded fonts.
+    Get the count of successfully loaded fonts.
 
-@return {Object} - { success, count, error }
+    @return {Object} - { success, count, error }
     *********************************************************************/
     getLoadedCount: function () {
 
@@ -246,9 +246,9 @@ Get the count of successfully loaded fonts.
 
 
     /********************************************************************
-Get the count of fonts that failed to load.
+    Get the count of fonts that failed to load.
 
-@return {Object} - { success, count, error }
+    @return {Object} - { success, count, error }
     *********************************************************************/
     getFailedCount: function () {
 
@@ -272,20 +272,20 @@ const _RN = {
 
 
   /********************************************************************
-Load a single font file via the native loader. The native loader
-expects (name, url) or (name, file path). We pass the family name
-and the URL from the manifest entry.
+  Load a single font file via the native loader. The native loader
+  expects (name, url) or (name, file path). We pass the family name
+  and the URL from the manifest entry.
 
-@param {Object} Lib       - Dependency container
-@param {Object} CONFIG    - Merged configuration
-@param {Object} ERRORS    - Error catalog
-@param {Object} Validators - Validators singleton
-@param {Object} state     - Mutable state holder
-@param {String} familyName - Font family name
-@param {Object} entry      - Manifest style entry { url, weight, style }
+  @param {Object} Lib       - Dependency container
+  @param {Object} CONFIG    - Merged configuration
+  @param {Object} ERRORS    - Error catalog
+  @param {Object} Validators - Validators singleton
+  @param {Object} state     - Mutable state holder
+  @param {String} familyName - Font family name
+  @param {Object} entry      - Manifest style entry { url, weight, style }
 
-@return {Promise<void>}
-    *********************************************************************/
+  @return {Promise<void>}
+  *********************************************************************/
   loadFontFile: async function (Lib, CONFIG, ERRORS, Validators, state, familyName, entry) {
 
     // Validate that the entry has a path (native extensions require local files)

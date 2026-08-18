@@ -89,13 +89,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Idempotent table provisioning. Creates the table with composite key
-{ p, id } if it doesn't exist. Pay-per-request billing is the
-correct default for queue workloads.
+    Idempotent table provisioning. Creates the table with composite key
+    { p, id } if it doesn't exist. Pay-per-request billing is the
+    correct default for queue workloads.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -138,14 +138,14 @@ correct default for queue workloads.
     // ~~~~~~~~~~~~~~~~~~~~ Write Operation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Append a record to the table. Uses PutItem for atomic write.
-The item has composite key { p, id } plus payload, action, toc.
+    Append a record to the table. Uses PutItem for atomic write.
+    The item has composite key { p, id } plus payload, action, toc.
 
-@param {Object} instance - Request instance
-@param {Object} record   - The record to write (tenant_id, resource_id,
+    @param {Object} instance - Request instance
+    @param {Object} record   - The record to write (tenant_id, resource_id,
                                data_version, request_id, payload, action, toc)
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (instance, record) {
 
@@ -192,16 +192,16 @@ The item has composite key { p, id } plus payload, action, toc.
     // ~~~~~~~~~~~~~~~~~~~~ Query Operations ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Return all records matching (tenant_id, resource_id), sorted by
-data_version ascending (chronological order).
+    Return all records matching (tenant_id, resource_id), sorted by
+    data_version ascending (chronological order).
 
-Uses Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
+    Uses Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
 
-@param {Object} instance   - Request instance
-@param {String} tenant_id  - Partition key
-@param {String} resource_id - Exact resource identifier
+    @param {Object} instance   - Request instance
+    @param {String} tenant_id  - Partition key
+    @param {String} resource_id - Exact resource identifier
 
-@return {Promise<Object>} - { success, records, error }
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     queryByResourceId: async function (instance, tenant_id, resource_id) {
 
@@ -236,16 +236,16 @@ Uses Query with PK=tenant_id AND begins_with(SK, resource_id + '\u001F')
 
 
     /********************************************************************
-Return all records for tenant_id whose resource_id starts with the
-given prefix, sorted by data_version ascending.
+    Return all records for tenant_id whose resource_id starts with the
+    given prefix, sorted by data_version ascending.
 
-Uses Query with PK=tenant_id AND begins_with(SK, prefix)
+    Uses Query with PK=tenant_id AND begins_with(SK, prefix)
 
-@param {Object} instance          - Request instance
-@param {String} tenant_id         - Partition key
-@param {String} resource_id_prefix - Prefix to match (e.g., "account_123.")
+    @param {Object} instance          - Request instance
+    @param {String} tenant_id         - Partition key
+    @param {String} resource_id_prefix - Prefix to match (e.g., "account_123.")
 
-@return {Promise<Object>} - { success, records, error }
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     queryByResourceIdPrefix: async function (instance, tenant_id, resource_id_prefix) {
 
@@ -282,20 +282,20 @@ Uses Query with PK=tenant_id AND begins_with(SK, prefix)
     // ~~~~~~~~~~~~~~~~~~~~ Delete Operation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Delete all records for (tenant_id, resource_id) where
-data_version <= data_version_boundary.
+    Delete all records for (tenant_id, resource_id) where
+    data_version <= data_version_boundary.
 
-DynamoDB does not support range delete, so we:
-1. Query for all records matching tenant_id + resource_id
-2. Filter to items where data_version <= boundary
-3. Batch delete the matching keys
+    DynamoDB does not support range delete, so we:
+    1. Query for all records matching tenant_id + resource_id
+    2. Filter to items where data_version <= boundary
+    3. Batch delete the matching keys
 
-@param {Object} instance               - Request instance
-@param {String} tenant_id              - Partition key
-@param {String} resource_id            - Resource identifier
-@param {Number} data_version_boundary - Upper bound (inclusive)
+    @param {Object} instance               - Request instance
+    @param {String} tenant_id              - Partition key
+    @param {String} resource_id            - Resource identifier
+    @param {Number} data_version_boundary - Upper bound (inclusive)
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteByDataVersionLte: async function (instance, tenant_id, resource_id, data_version_boundary) {
 
@@ -377,15 +377,15 @@ DynamoDB does not support range delete, so we:
     // ~~~~~~~~~~~~~~~~~~~~ Key Composition & Parsing ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Compose the DynamoDB sort key from raw record fields. The three
-segments are joined by CONFIG.KEY_DELIMITER:
-      resource_id + CONFIG.KEY_DELIMITER + data_version + CONFIG.KEY_DELIMITER + request_id
+    Compose the DynamoDB sort key from raw record fields. The three
+    segments are joined by CONFIG.KEY_DELIMITER:
+    resource_id + CONFIG.KEY_DELIMITER + data_version + CONFIG.KEY_DELIMITER + request_id
 
-@param {String} resource_id  - Opaque resource identifier
-@param {Number} data_version - Millisecond timestamp
-@param {String} request_id   - Compact UUID
+    @param {String} resource_id  - Opaque resource identifier
+    @param {Number} data_version - Millisecond timestamp
+    @param {String} request_id   - Compact UUID
 
-@return {String} - Composite sort key
+    @return {String} - Composite sort key
     *********************************************************************/
     composeSortKey: function (resource_id, data_version, request_id) {
       return resource_id + CONFIG.KEY_DELIMITER + data_version + CONFIG.KEY_DELIMITER + request_id;
@@ -393,12 +393,12 @@ segments are joined by CONFIG.KEY_DELIMITER:
 
 
     /********************************************************************
-Parse a composite sort key back into its three segments. Inverse of
-composeSortKey. data_version is coerced back to a Number.
+    Parse a composite sort key back into its three segments. Inverse of
+    composeSortKey. data_version is coerced back to a Number.
 
-@param {String} sort_key - The stored sort key
+    @param {String} sort_key - The stored sort key
 
-@return {Object} - { resource_id, data_version, request_id }
+    @return {Object} - { resource_id, data_version, request_id }
     *********************************************************************/
     parseSortKey: function (sort_key) {
       const parts = sort_key.split(CONFIG.KEY_DELIMITER);
@@ -411,13 +411,13 @@ composeSortKey. data_version is coerced back to a Number.
 
 
     /********************************************************************
-Build the begins_with prefix that matches exactly one resource_id.
-Appending the delimiter prevents matching sibling resources whose
-ids merely start with this resource_id (e.g. "acc_1" vs "acc_12").
+    Build the begins_with prefix that matches exactly one resource_id.
+    Appending the delimiter prevents matching sibling resources whose
+    ids merely start with this resource_id (e.g. "acc_1" vs "acc_12").
 
-@param {String} resource_id - Exact resource identifier
+    @param {String} resource_id - Exact resource identifier
 
-@return {String} - Prefix ending in the key delimiter
+    @return {String} - Prefix ending in the key delimiter
     *********************************************************************/
     exactResourcePrefix: function (resource_id) {
       return resource_id + CONFIG.KEY_DELIMITER;
@@ -427,16 +427,16 @@ ids merely start with this resource_id (e.g. "acc_1" vs "acc_12").
     // ~~~~~~~~~~~~~~~~~~~~ Query Helpers ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Run a partition-scoped begins_with query on the sort key. Shared by
-queryByResourceId, queryByResourceIdPrefix, and the read phase of
-deleteByDataVersionLte. Returns the raw driver result so each caller
-owns its own success/error shaping.
+    Run a partition-scoped begins_with query on the sort key. Shared by
+    queryByResourceId, queryByResourceIdPrefix, and the read phase of
+    deleteByDataVersionLte. Returns the raw driver result so each caller
+    owns its own success/error shaping.
 
-@param {Object} instance     - Request instance
-@param {String} tenant_id    - Partition key value
-@param {String} prefix_value - Sort key prefix to match
+    @param {Object} instance     - Request instance
+    @param {String} tenant_id    - Partition key value
+    @param {String} prefix_value - Sort key prefix to match
 
-@return {Promise<Object>} - Raw driver result { success, items, error }
+    @return {Promise<Object>} - Raw driver result { success, items, error }
     *********************************************************************/
     runPrefixQuery: function (instance, tenant_id, prefix_value) {
       return Lib.DynamoDB.query(
@@ -456,13 +456,13 @@ owns its own success/error shaping.
     // ~~~~~~~~~~~~~~~~~~~~ Record Reconstruction ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Reconstruct a full record from the DynamoDB item. The item has PK
-`p`, SK `id`, and attributes payload, action, toc. The sort key is
-parsed back into resource_id, data_version, and request_id.
+    Reconstruct a full record from the DynamoDB item. The item has PK
+    `p`, SK `id`, and attributes payload, action, toc. The sort key is
+    parsed back into resource_id, data_version, and request_id.
 
-@param {Object} item - The DynamoDB item { p, id, payload, action, toc }
+    @param {Object} item - The DynamoDB item { p, id, payload, action, toc }
 
-@return {Object} - Record with top-level tenant_id, resource_id, data_version, etc.
+    @return {Object} - Record with top-level tenant_id, resource_id, data_version, etc.
     *********************************************************************/
     itemToRecord: function (item) {
       const key = _Store.parseSortKey(item.id);
@@ -482,14 +482,14 @@ parsed back into resource_id, data_version, and request_id.
     // ~~~~~~~~~~~~~~~~~~~~ Error Helpers ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Log a backend driver failure in the shape every public method uses
-before returning ERRORS.SERVICE_UNAVAILABLE. Centralizes the debug
-payload so the operation label is the only thing that varies.
+    Log a backend driver failure in the shape every public method uses
+    before returning ERRORS.SERVICE_UNAVAILABLE. Centralizes the debug
+    payload so the operation label is the only thing that varies.
 
-@param {String} operation    - Label of the failing operation
-@param {Object} driver_error - The error object from the driver result
+    @param {String} operation    - Label of the failing operation
+    @param {Object} driver_error - The error object from the driver result
 
-@return {void}
+    @return {void}
     *********************************************************************/
     logDriverFailure: function (operation, driver_error) {
       Lib.Debug.debug('DistinctQueue dynamodb ' + operation + ' failed', {

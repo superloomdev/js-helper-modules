@@ -94,12 +94,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // A sanitizer cannot meaningfully fail - it returns what it can.
 
     /********************************************************************
-Strip non-numeric characters from a national phone number.
-Returns the digit-only string. Empty string in, empty string out.
+    Strip non-numeric characters from a national phone number.
+    Returns the digit-only string. Empty string in, empty string out.
 
-@param {String} national_number - Raw phone number input
+    @param {String} national_number - Raw phone number input
 
-@return {String} - Digits only
+    @return {String} - Digits only
     *********************************************************************/
     sanitizeNumber: function (national_number) {
 
@@ -113,13 +113,13 @@ Returns the digit-only string. Empty string in, empty string out.
 
 
     /********************************************************************
-Strip disallowed characters from a full phone number that may
-include a + prefix and a calling code. Returns the cleaned string
-preserving the leading + if present.
+    Strip disallowed characters from a full phone number that may
+    include a + prefix and a calling code. Returns the cleaned string
+    preserving the leading + if present.
 
-@param {String} phone - Raw full phone number input (e.g. '+91 98765 43210')
+    @param {String} phone - Raw full phone number input (e.g. '+91 98765 43210')
 
-@return {String} - Cleaned string (e.g. '+919876543210')
+    @return {String} - Cleaned string (e.g. '+919876543210')
     *********************************************************************/
     sanitizeFullNumber: function (phone) {
 
@@ -144,11 +144,11 @@ preserving the leading + if present.
     // Cheap boolean checks. No error reason, just yes or no.
 
     /********************************************************************
-Check if a country code is known to the adapter.
+    Check if a country code is known to the adapter.
 
-@param {String} country_code - ISO 3166-1 alpha-2, lowercase
+    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-@return {Boolean} - true if the adapter has metadata for this country
+    @return {Boolean} - true if the adapter has metadata for this country
     *********************************************************************/
     isKnownCountry: function (country_code) {
 
@@ -165,9 +165,9 @@ Check if a country code is known to the adapter.
     // Return envelopes with payload on success, error on failure.
 
     /********************************************************************
-List all country codes the adapter knows about.
+    List all country codes the adapter knows about.
 
-@return {Object} - { success, countries, error }
+    @return {Object} - { success, countries, error }
     *********************************************************************/
     listCountries: function () {
 
@@ -185,11 +185,11 @@ List all country codes the adapter knows about.
 
 
     /********************************************************************
-Get metadata (calling code, length bounds) for a country.
+    Get metadata (calling code, length bounds) for a country.
 
-@param {String} country_code - ISO 3166-1 alpha-2, lowercase
+    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-@return {Object} - { success, metadata, error }
+    @return {Object} - { success, metadata, error }
     *********************************************************************/
     getCountryMetadata: function (country_code) {
 
@@ -222,14 +222,14 @@ Get metadata (calling code, length bounds) for a country.
     // Return envelopes: { success, error }. The caller learns why.
 
     /********************************************************************
-Validate a national phone number against the country's rules.
-Delegates to the adapter for syntax checking. The adapter returns
-{ valid, reason } where reason is a stable error type string.
+    Validate a national phone number against the country's rules.
+    Delegates to the adapter for syntax checking. The adapter returns
+    { valid, reason } where reason is a stable error type string.
 
-@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-@param {String} national_number - National number digits
+    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+    @param {String} national_number - National number digits
 
-@return {Object} - { success, error }
+    @return {Object} - { success, error }
     *********************************************************************/
     validateSyntax: function (country_code, national_number) {
 
@@ -261,14 +261,14 @@ Delegates to the adapter for syntax checking. The adapter returns
     // Classification: mobile, fixed line, etc.
 
     /********************************************************************
-Get the type of a phone number (MOBILE, FIXED_LINE, etc.).
-The basic adapter always returns null (no type data).
-The extended adapter returns the actual type from libphonenumber-js.
+    Get the type of a phone number (MOBILE, FIXED_LINE, etc.).
+    The basic adapter always returns null (no type data).
+    The extended adapter returns the actual type from libphonenumber-js.
 
-@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-@param {String} national_number - National number digits
+    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+    @param {String} national_number - National number digits
 
-@return {Object} - { success, type, error }
+    @return {Object} - { success, type, error }
     *********************************************************************/
     getNumberType: function (country_code, national_number) {
 
@@ -305,14 +305,14 @@ The extended adapter returns the actual type from libphonenumber-js.
     // Render values into externally-standardized strings.
 
     /********************************************************************
-Format a phone number as an E.164 string: +<calling_code><national_number>.
-Returns null if the country is unknown or the result would exceed
-the E.164 maximum length of 15 digits.
+    Format a phone number as an E.164 string: +<calling_code><national_number>.
+    Returns null if the country is unknown or the result would exceed
+    the E.164 maximum length of 15 digits.
 
-@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-@param {String} national_number - National number digits
+    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+    @param {String} national_number - National number digits
 
-@return {String|null} - E.164 string (e.g. '+919876543210') or null
+    @return {String|null} - E.164 string (e.g. '+919876543210') or null
     *********************************************************************/
     formatE164: function (country_code, national_number) {
 
@@ -343,13 +343,13 @@ the E.164 maximum length of 15 digits.
 
 
     /********************************************************************
-Developer-friendly alias for formatE164. Same behavior, clearer name
-for developers who do not know E.164 by heart.
+    Developer-friendly alias for formatE164. Same behavior, clearer name
+    for developers who do not know E.164 by heart.
 
-@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-@param {String} national_number - National number digits
+    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+    @param {String} national_number - National number digits
 
-@return {String|null} - Full number string (e.g. '+919876543210') or null
+    @return {String|null} - Full number string (e.g. '+919876543210') or null
     *********************************************************************/
     formatFullNumber: function (country_code, national_number) {
 
@@ -363,16 +363,16 @@ for developers who do not know E.164 by heart.
     // Read structured values back out of strings. Return Object or null.
 
     /********************************************************************
-Parse an E.164 string into its country code and national number.
-Anchors the match to the string start to avoid the CTP bug (B2)
-where a recurring digit sequence caused a wrong split.
+    Parse an E.164 string into its country code and national number.
+    Anchors the match to the string start to avoid the CTP bug (B2)
+    where a recurring digit sequence caused a wrong split.
 
-Returns null if the string is not a valid E.164 format or if no
-known country matches the calling code prefix.
+    Returns null if the string is not a valid E.164 format or if no
+    known country matches the calling code prefix.
 
-@param {String} e164_number - E.164 string (e.g. '+919876543210')
+    @param {String} e164_number - E.164 string (e.g. '+919876543210')
 
-@return {Object|null} - { country_code, national_number } or null
+    @return {Object|null} - { country_code, national_number } or null
     *********************************************************************/
     parseE164: function (e164_number) {
 
@@ -450,12 +450,12 @@ known country matches the calling code prefix.
 
 
     /********************************************************************
-Developer-friendly alias for parseE164. Same behavior, clearer name
-for developers who do not know E.164 by heart.
+    Developer-friendly alias for parseE164. Same behavior, clearer name
+    for developers who do not know E.164 by heart.
 
-@param {String} full_number - Full number string (e.g. '+919876543210')
+    @param {String} full_number - Full number string (e.g. '+919876543210')
 
-@return {Object|null} - { country_code, national_number } or null
+    @return {Object|null} - { country_code, national_number } or null
     *********************************************************************/
     parseFullNumber: function (full_number) {
 
@@ -472,16 +472,16 @@ for developers who do not know E.164 by heart.
     // Reversal distributes sequentially-issued numbers across partitions.
 
     /********************************************************************
-Create a phone ID from a country code and national number.
-The encoding is: country_code + '.' + reversed(national_number).
-Returns null if the country is unknown.
+    Create a phone ID from a country code and national number.
+    The encoding is: country_code + '.' + reversed(national_number).
+    Returns null if the country is unknown.
 
-This is a storage convention, not a display format.
+    This is a storage convention, not a display format.
 
-@param {String} country_code    - ISO 3166-1 alpha-2, lowercase
-@param {String} national_number - National number digits
+    @param {String} country_code    - ISO 3166-1 alpha-2, lowercase
+    @param {String} national_number - National number digits
 
-@return {String|null} - Phone ID (e.g. 'in.0123456789') or null
+    @return {String|null} - Phone ID (e.g. 'in.0123456789') or null
     *********************************************************************/
     createPhoneId: function (country_code, national_number) {
 
@@ -507,12 +507,12 @@ This is a storage convention, not a display format.
 
 
     /********************************************************************
-Parse a phone ID back into its country code and national number.
-Returns null if the format is invalid or the country is unknown.
+    Parse a phone ID back into its country code and national number.
+    Returns null if the format is invalid or the country is unknown.
 
-@param {String} phone_id - Phone ID (e.g. 'in.0123456789')
+    @param {String} phone_id - Phone ID (e.g. 'in.0123456789')
 
-@return {Object|null} - { country_code, national_number } or null
+    @return {Object|null} - { country_code, national_number } or null
     *********************************************************************/
     parsePhoneId: function (phone_id) {
 

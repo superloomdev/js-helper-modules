@@ -70,13 +70,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Uses Web Crypto API when available, falls back to Math.random.
 
     /********************************************************************
-Generate random string from a character set.
-Uses Web Crypto when available, falls back to Math.random.
+    Generate random string from a character set.
+    Uses Web Crypto when available, falls back to Math.random.
 
-@param {String} charset - Superset of characters to pick from
-@param {Integer} length - Desired length of output string
+    @param {String} charset - Superset of characters to pick from
+    @param {Integer} length - Desired length of output string
 
-@return {String} - Random string of specified length
+    @return {String} - Random string of specified length
     *********************************************************************/
     generateRandomString: function (charset, length) {
 
@@ -102,9 +102,9 @@ Uses Web Crypto when available, falls back to Math.random.
 
 
     /********************************************************************
-Generate UUIDv4 string
+    Generate UUIDv4 string
 
-@return {String} - Random UUIDv4 ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')
+    @return {String} - Random UUIDv4 ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')
     *********************************************************************/
     generateUUID: function () {
 
@@ -123,10 +123,10 @@ Generate UUIDv4 string
 
 
     /********************************************************************
-Generate compact UUID (25 characters, base36)
-Standard UUID with hyphens removed, converted to base36
+    Generate compact UUID (25 characters, base36)
+    Standard UUID with hyphens removed, converted to base36
 
-@return {String} - Compact UUID in base36 (25 chars)
+    @return {String} - Compact UUID in base36 (25 chars)
     *********************************************************************/
     generateCompactUUID: function () {
 
@@ -143,11 +143,11 @@ Standard UUID with hyphens removed, converted to base36
     // Standard base64 encode/decode for string data.
 
     /********************************************************************
-Convert UTF-8 string to base64
+    Convert UTF-8 string to base64
 
-@param {String} str - String to encode
+    @param {String} str - String to encode
 
-@return {String} - Base64 encoded string
+    @return {String} - Base64 encoded string
     *********************************************************************/
     stringToBase64: function (str) {
 
@@ -158,11 +158,11 @@ Convert UTF-8 string to base64
 
 
     /********************************************************************
-Convert base64 string to UTF-8 string
+    Convert base64 string to UTF-8 string
 
-@param {String} str - Base64 string to decode
+    @param {String} str - Base64 string to decode
 
-@return {String} - Decoded string
+    @return {String} - Decoded string
     *********************************************************************/
     base64ToString: function (str) {
 
@@ -177,12 +177,12 @@ Convert base64 string to UTF-8 string
     // URL-safe replaces + with -, / with _, and removes padding.
 
     /********************************************************************
-Convert standard base64 to URL-safe base64
-Replaces '+' with '-', '/' with '_', removes trailing '='
+    Convert standard base64 to URL-safe base64
+    Replaces '+' with '-', '/' with '_', removes trailing '='
 
-@param {String} str - Standard base64 string
+    @param {String} str - Standard base64 string
 
-@return {String} - URL-safe base64 string
+    @return {String} - URL-safe base64 string
     *********************************************************************/
     urlEncodeBase64: function (str) {
 
@@ -196,12 +196,12 @@ Replaces '+' with '-', '/' with '_', removes trailing '='
 
 
     /********************************************************************
-Convert URL-safe base64 back to standard base64
-Replaces '-' with '+', '_' with '/', adds trailing '=' padding
+    Convert URL-safe base64 back to standard base64
+    Replaces '-' with '+', '_' with '/', adds trailing '=' padding
 
-@param {String} str - URL-safe base64 string
+    @param {String} str - URL-safe base64 string
 
-@return {String} - Standard base64 string
+    @return {String} - Standard base64 string
     *********************************************************************/
     urlDecodeBase64: function (str) {
 
@@ -229,9 +229,9 @@ Replaces '-' with '+', '_' with '/', adds trailing '=' padding
   const _Crypto = {
 
     /********************************************************************
-Return Web Crypto object if available
+    Return Web Crypto object if available
 
-@return {Object|null}
+    @return {Object|null}
     *********************************************************************/
     webCrypto: function () {
 
@@ -245,11 +245,11 @@ Return Web Crypto object if available
 
 
     /********************************************************************
-Generate random byte-like values
+    Generate random byte-like values
 
-@param {Integer} length
+    @param {Integer} length
 
-@return {Array<Integer>}
+    @return {Array<Integer>}
     *********************************************************************/
     getRandomValues: function (length) {
 
@@ -277,9 +277,9 @@ Generate random byte-like values
 
 
     /********************************************************************
-UUIDv4 polyfill when randomUUID is unavailable
+    UUIDv4 polyfill when randomUUID is unavailable
 
-@return {String}
+    @return {String}
     *********************************************************************/
     uuidV4Polyfill: function () {
 
@@ -305,11 +305,11 @@ UUIDv4 polyfill when randomUUID is unavailable
 
 
     /********************************************************************
-Convert hexadecimal string to base36
+    Convert hexadecimal string to base36
 
-@param {String} hex - Hexadecimal string
+    @param {String} hex - Hexadecimal string
 
-@return {String} - Base36 string
+    @return {String} - Base36 string
     *********************************************************************/
     hexToBase36: function (hex) {
 
@@ -330,11 +330,11 @@ Convert hexadecimal string to base36
 
 
     /********************************************************************
-Encode UTF-8 string to base64 in browser/node compatible way
+    Encode UTF-8 string to base64 in browser/node compatible way
 
-@param {String} str
+    @param {String} str
 
-@return {String}
+    @return {String}
     *********************************************************************/
     utf8ToBase64: function (str) {
 
@@ -359,11 +359,11 @@ Encode UTF-8 string to base64 in browser/node compatible way
 
 
     /********************************************************************
-Decode base64 to UTF-8 string in browser/node compatible way
+    Decode base64 to UTF-8 string in browser/node compatible way
 
-@param {String} str
+    @param {String} str
 
-@return {String}
+    @return {String}
     *********************************************************************/
     base64ToUtf8: function (str) {
 

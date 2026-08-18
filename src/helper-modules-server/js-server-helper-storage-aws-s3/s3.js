@@ -90,16 +90,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Pure functions that build service params without I/O.
 
     /********************************************************************
-Build service params for a PutObject command.
+    Build service params for a PutObject command.
 
-@param {String} bucket - S3 bucket name
-@param {String} key - Object key (full path including filename)
-@param {Buffer|Uint8Array|Blob|string|Readable} body - File content
-@param {String} [content_type] - MIME type (default 'application/octet-stream')
-@param {Object} [metadata] - Custom user metadata (stored as x-amz-meta-*)
-@param {Boolean} [is_public] - If true sets ACL 'public-read', if false 'private', if null leaves ACL unset
+    @param {String} bucket - S3 bucket name
+    @param {String} key - Object key (full path including filename)
+    @param {Buffer|Uint8Array|Blob|string|Readable} body - File content
+    @param {String} [content_type] - MIME type (default 'application/octet-stream')
+    @param {Object} [metadata] - Custom user metadata (stored as x-amz-meta-*)
+    @param {Boolean} [is_public] - If true sets ACL 'public-read', if false 'private', if null leaves ACL unset
 
-@return {Object} - Service params for PutObjectCommand
+    @return {Object} - Service params for PutObjectCommand
     *********************************************************************/
     commandBuilderForUploadObject: function (bucket, key, body, content_type, metadata, is_public) {
 
@@ -129,12 +129,12 @@ Build service params for a PutObject command.
 
 
     /********************************************************************
-Build service params for a GetObject command.
+    Build service params for a GetObject command.
 
-@param {String} bucket - S3 bucket name
-@param {String} key - Object key
+    @param {String} bucket - S3 bucket name
+    @param {String} key - Object key
 
-@return {Object} - Service params for GetObjectCommand
+    @return {Object} - Service params for GetObjectCommand
     *********************************************************************/
     commandBuilderForGetObject: function (bucket, key) {
 
@@ -147,12 +147,12 @@ Build service params for a GetObject command.
 
 
     /********************************************************************
-Build service params for a DeleteObject command.
+    Build service params for a DeleteObject command.
 
-@param {String} bucket - S3 bucket name
-@param {String} key - Object key
+    @param {String} bucket - S3 bucket name
+    @param {String} key - Object key
 
-@return {Object} - Service params for DeleteObjectCommand
+    @return {Object} - Service params for DeleteObjectCommand
     *********************************************************************/
     commandBuilderForDeleteObject: function (bucket, key) {
 
@@ -165,15 +165,15 @@ Build service params for a DeleteObject command.
 
 
     /********************************************************************
-Build service params for a CopyObject command.
+    Build service params for a CopyObject command.
 
-@param {String} source_bucket - Source bucket name
-@param {String} source_key - Source object key
-@param {String} dest_bucket - Destination bucket name
-@param {String} dest_key - Destination object key
-@param {Boolean} [is_public] - If true sets ACL 'public-read', if false 'private', if null leaves ACL unset
+    @param {String} source_bucket - Source bucket name
+    @param {String} source_key - Source object key
+    @param {String} dest_bucket - Destination bucket name
+    @param {String} dest_key - Destination object key
+    @param {Boolean} [is_public] - If true sets ACL 'public-read', if false 'private', if null leaves ACL unset
 
-@return {Object} - Service params for CopyObjectCommand
+    @return {Object} - Service params for CopyObjectCommand
     *********************************************************************/
     commandBuilderForCopyObject: function (source_bucket, source_key, dest_bucket, dest_key, is_public) {
 
@@ -200,12 +200,12 @@ Build service params for a CopyObject command.
     // Execute pre-built service params against S3.
 
     /********************************************************************
-Execute a pre-built PutObject command (from commandBuilderForUploadObject).
+    Execute a pre-built PutObject command (from commandBuilderForUploadObject).
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
 
-@return {Promise<Object>} - { success, etag, error }
+    @return {Promise<Object>} - { success, etag, error }
     *********************************************************************/
     commandUploadObject: async function (instance, service_params) {
 
@@ -252,14 +252,14 @@ Execute a pre-built PutObject command (from commandBuilderForUploadObject).
 
 
     /********************************************************************
-Execute a pre-built GetObject command (from commandBuilderForGetObject).
-Drains the response stream and returns the body as Buffer or string.
+    Execute a pre-built GetObject command (from commandBuilderForGetObject).
+    Drains the response stream and returns the body as Buffer or string.
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
-@param {Boolean} [output_as_string] - If true returns body as UTF-8 string, else Buffer
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
+    @param {Boolean} [output_as_string] - If true returns body as UTF-8 string, else Buffer
 
-@return {Promise<Object>} - { success, body, content_type, metadata, error }
+    @return {Promise<Object>} - { success, body, content_type, metadata, error }
     *********************************************************************/
     commandGetObject: async function (instance, service_params, output_as_string) {
 
@@ -322,12 +322,12 @@ Drains the response stream and returns the body as Buffer or string.
 
 
     /********************************************************************
-Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
+    Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     commandDeleteObject: async function (instance, service_params) {
 
@@ -372,12 +372,12 @@ Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
 
 
     /********************************************************************
-Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
+    Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     commandCopyObject: async function (instance, service_params) {
 
@@ -428,14 +428,14 @@ Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
     // High-level functions that build params then execute.
 
     /********************************************************************
-List objects in a bucket with an optional prefix filter. Returns up to
-1000 keys in a single call (S3 ListObjectsV2 default page size).
+    List objects in a bucket with an optional prefix filter. Returns up to
+    1000 keys in a single call (S3 ListObjectsV2 default page size).
 
-@param {Object} instance - Request instance
-@param {String} bucket - S3 bucket name
-@param {String} [prefix] - Key prefix filter
+    @param {Object} instance - Request instance
+    @param {String} bucket - S3 bucket name
+    @param {String} [prefix] - Key prefix filter
 
-@return {Promise<Object>} - { success, keys, error }
+    @return {Promise<Object>} - { success, keys, error }
     *********************************************************************/
     listObjects: async function (instance, bucket, prefix) {
 
@@ -494,17 +494,17 @@ List objects in a bucket with an optional prefix filter. Returns up to
 
 
     /********************************************************************
-Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObject.
+    Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObject.
 
-@param {Object} instance - Request instance
-@param {String} bucket - S3 bucket name
-@param {String} key - Object key
-@param {Buffer|Uint8Array|Blob|string|Readable} body - File content
-@param {String} [content_type] - MIME type
-@param {Object} [metadata] - Custom user metadata
-@param {Boolean} [is_public] - Set ACL public-read or private
+    @param {Object} instance - Request instance
+    @param {String} bucket - S3 bucket name
+    @param {String} key - Object key
+    @param {Buffer|Uint8Array|Blob|string|Readable} body - File content
+    @param {String} [content_type] - MIME type
+    @param {Object} [metadata] - Custom user metadata
+    @param {Boolean} [is_public] - Set ACL public-read or private
 
-@return {Promise<Object>} - { success, etag, error }
+    @return {Promise<Object>} - { success, etag, error }
     *********************************************************************/
     uploadFile: async function (instance, bucket, key, body, content_type, metadata, is_public) {
 
@@ -518,20 +518,20 @@ Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObj
 
 
     /********************************************************************
-Upload multiple files in parallel. Each file entry mirrors the uploadFile
-signature as an object. Returns aggregate success only when every upload
-succeeds; the results array contains per-file outcomes.
+    Upload multiple files in parallel. Each file entry mirrors the uploadFile
+    signature as an object. Returns aggregate success only when every upload
+    succeeds; the results array contains per-file outcomes.
 
-@param {Object} instance - Request instance
-@param {Object[]} files - Array of file descriptors
-@param {String} files[].bucket - S3 bucket name
-@param {String} files[].key - Object key
-@param {Buffer|Uint8Array|Blob|string|Readable} files[].body - File content
-@param {String} [files[].content_type] - MIME type
-@param {Object} [files[].metadata] - Custom user metadata
-@param {Boolean} [files[].is_public] - Set ACL public-read or private
+    @param {Object} instance - Request instance
+    @param {Object[]} files - Array of file descriptors
+    @param {String} files[].bucket - S3 bucket name
+    @param {String} files[].key - Object key
+    @param {Buffer|Uint8Array|Blob|string|Readable} files[].body - File content
+    @param {String} [files[].content_type] - MIME type
+    @param {Object} [files[].metadata] - Custom user metadata
+    @param {Boolean} [files[].is_public] - Set ACL public-read or private
 
-@return {Promise<Object>} - { success, results, error }
+    @return {Promise<Object>} - { success, results, error }
     *********************************************************************/
     uploadFiles: async function (instance, files) {
 
@@ -591,14 +591,14 @@ succeeds; the results array contains per-file outcomes.
 
 
     /********************************************************************
-Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
+    Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
 
-@param {Object} instance - Request instance
-@param {String} bucket - S3 bucket name
-@param {String} key - Object key
-@param {Boolean} [output_as_string] - If true returns body as UTF-8 string, else Buffer
+    @param {Object} instance - Request instance
+    @param {String} bucket - S3 bucket name
+    @param {String} key - Object key
+    @param {Boolean} [output_as_string] - If true returns body as UTF-8 string, else Buffer
 
-@return {Promise<Object>} - { success, body, content_type, metadata, error }
+    @return {Promise<Object>} - { success, body, content_type, metadata, error }
     *********************************************************************/
     getFile: async function (instance, bucket, key, output_as_string) {
 
@@ -612,13 +612,13 @@ Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
 
 
     /********************************************************************
-Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObject.
+    Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObject.
 
-@param {Object} instance - Request instance
-@param {String} bucket - S3 bucket name
-@param {String} key - Object key
+    @param {Object} instance - Request instance
+    @param {String} bucket - S3 bucket name
+    @param {String} key - Object key
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteFile: async function (instance, bucket, key) {
 
@@ -632,15 +632,15 @@ Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObj
 
 
     /********************************************************************
-Delete multiple files in a single bucket with automatic 1000-item chunking.
-AWS DeleteObjects limit is 1000 keys per request; this function handles
-any number of keys by recursively splitting into 1000-item chunks.
+    Delete multiple files in a single bucket with automatic 1000-item chunking.
+    AWS DeleteObjects limit is 1000 keys per request; this function handles
+    any number of keys by recursively splitting into 1000-item chunks.
 
-@param {Object} instance - Request instance
-@param {String} bucket - S3 bucket name
-@param {String[]} keys - Array of object keys to delete
+    @param {Object} instance - Request instance
+    @param {String} bucket - S3 bucket name
+    @param {String[]} keys - Array of object keys to delete
 
-@return {Promise<Object>} - { success, deleted, error }
+    @return {Promise<Object>} - { success, deleted, error }
     *********************************************************************/
     deleteFiles: async function (instance, bucket, keys) {
 
@@ -728,16 +728,16 @@ any number of keys by recursively splitting into 1000-item chunks.
 
 
     /********************************************************************
-Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
+    Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
 
-@param {Object} instance - Request instance
-@param {String} source_bucket - Source bucket name
-@param {String} source_key - Source object key
-@param {String} dest_bucket - Destination bucket name
-@param {String} dest_key - Destination object key
-@param {Boolean} [is_public] - Set ACL public-read or private on destination
+    @param {Object} instance - Request instance
+    @param {String} source_bucket - Source bucket name
+    @param {String} source_key - Source object key
+    @param {String} dest_bucket - Destination bucket name
+    @param {String} dest_key - Destination object key
+    @param {Boolean} [is_public] - Set ACL public-read or private on destination
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     copyFile: async function (instance, source_bucket, source_key, dest_bucket, dest_key, is_public) {
 
@@ -751,18 +751,18 @@ Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
 
 
     /********************************************************************
-Move a file: copy to destination, then delete source. If the copy fails,
-the source is left intact. Deletion failure is non-fatal - the copy has
-succeeded and the destination is authoritative.
+    Move a file: copy to destination, then delete source. If the copy fails,
+    the source is left intact. Deletion failure is non-fatal - the copy has
+    succeeded and the destination is authoritative.
 
-@param {Object} instance - Request instance
-@param {String} source_bucket - Source bucket name
-@param {String} source_key - Source object key
-@param {String} dest_bucket - Destination bucket name
-@param {String} dest_key - Destination object key
-@param {Boolean} [is_public] - Set ACL public-read or private on destination
+    @param {Object} instance - Request instance
+    @param {String} source_bucket - Source bucket name
+    @param {String} source_key - Source object key
+    @param {String} dest_bucket - Destination bucket name
+    @param {String} dest_key - Destination object key
+    @param {Boolean} [is_public] - Set ACL public-read or private on destination
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     moveFile: async function (instance, source_bucket, source_key, dest_bucket, dest_key, is_public) {
 
@@ -790,11 +790,11 @@ succeeded and the destination is authoritative.
   const _S3 = {
 
     /********************************************************************
-Lazy-load the AWS SDK v3 adapter. Shared across every instance because
-the SDK module itself is stateless - only the S3Client holds per-instance
-state (region, credentials, endpoint).
+    Lazy-load the AWS SDK v3 adapter. Shared across every instance because
+    the SDK module itself is stateless - only the S3Client holds per-instance
+    state (region, credentials, endpoint).
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -807,12 +807,12 @@ state (region, credentials, endpoint).
 
 
     /********************************************************************
-Create this instance's S3 client on first use. Options are built from
-the merged CONFIG; explicit credentials, custom endpoint (for MinIO or
-other S3-compatible servers), and path-style addressing are injected
-when present.
+    Create this instance's S3 client on first use. Options are built from
+    the merged CONFIG; explicit credentials, custom endpoint (for MinIO or
+    other S3-compatible servers), and path-style addressing are injected
+    when present.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     initIfNot: function () {
 

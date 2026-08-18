@@ -90,13 +90,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Idempotent index setup. Creates two compound query indexes and one
-sparse TTL index. Safe to call on every boot - createIndex is
-idempotent in MongoDB.
+    Idempotent index setup. Creates two compound query indexes and one
+    sparse TTL index. Safe to call on every boot - createIndex is
+    idempotent in MongoDB.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -173,13 +173,13 @@ idempotent in MongoDB.
     // ~~~~~~~~~~~~~~~~~~~~ Write ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Insert one log record. sort_key is used as `_id` so duplicate
-writes on the same sort_key are idempotent (upsert by _id).
+    Insert one log record. sort_key is used as `_id` so duplicate
+    writes on the same sort_key are idempotent (upsert by _id).
 
-@param {Object} instance - Request instance
-@param {Object} record   - Canonical log record from logger.js
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical log record from logger.js
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     addLog: async function (instance, record) {
 
@@ -219,14 +219,14 @@ writes on the same sort_key are idempotent (upsert by _id).
     // ~~~~~~~~~~~~~~~~~~~~ Read ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-List log records for a (scope, entity_type, entity_id) triple.
-Results are ordered most-recent first by sort_key DESC.
-Supports cursor pagination, action filter, and time range.
+    List log records for a (scope, entity_type, entity_id) triple.
+    Results are ordered most-recent first by sort_key DESC.
+    Supports cursor pagination, action filter, and time range.
 
-@param {Object} instance - Request instance
-@param {Object} query    - Built by logger.js#buildQuery
+    @param {Object} instance - Request instance
+    @param {Object} query    - Built by logger.js#buildQuery
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByEntity: async function (instance, query) {
 
@@ -236,13 +236,13 @@ Supports cursor pagination, action filter, and time range.
 
 
     /********************************************************************
-List log records for a (scope, actor_type, actor_id) triple.
-Same pagination contract as getLogsByEntity.
+    List log records for a (scope, actor_type, actor_id) triple.
+    Same pagination contract as getLogsByEntity.
 
-@param {Object} instance - Request instance
-@param {Object} query    - Built by logger.js#buildQuery
+    @param {Object} instance - Request instance
+    @param {Object} query    - Built by logger.js#buildQuery
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByActor: async function (instance, query) {
 
@@ -254,13 +254,13 @@ Same pagination contract as getLogsByEntity.
     // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Delete all documents whose expires_at is not null and <= now (seconds).
-The native TTL index handles automatic sweeping, but this method
-provides explicit lifecycle control matching the SQL adapters.
+    Delete all documents whose expires_at is not null and <= now (seconds).
+    The native TTL index handles automatic sweeping, but this method
+    provides explicit lifecycle control matching the SQL adapters.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -306,14 +306,14 @@ provides explicit lifecycle control matching the SQL adapters.
 
 
     /********************************************************************
-Core list implementation for both entity and actor queries.
-Builds the MongoDB filter, sort, and limit from query parameters.
+    Core list implementation for both entity and actor queries.
+    Builds the MongoDB filter, sort, and limit from query parameters.
 
-@param {Object} instance - Request instance
-@param {Object} query    - Logger query object
-@param {String} type     - 'entity' or 'actor'
+    @param {Object} instance - Request instance
+    @param {Object} query    - Logger query object
+    @param {String} type     - 'entity' or 'actor'
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     listByIndex: async function (instance, query, type) {
 
@@ -401,12 +401,12 @@ Builds the MongoDB filter, sort, and limit from query parameters.
 
 
     /********************************************************************
-Convert a canonical log record to a MongoDB document.
-Adds _id (sort_key) and optional _ttl Date for the TTL sweeper.
+    Convert a canonical log record to a MongoDB document.
+    Adds _id (sort_key) and optional _ttl Date for the TTL sweeper.
 
-@param {Object} record - Canonical log record from logger.js
+    @param {Object} record - Canonical log record from logger.js
 
-@return {Object} - MongoDB document
+    @return {Object} - MongoDB document
     *********************************************************************/
     recordToDocument: function (record) {
 
@@ -438,12 +438,12 @@ Adds _id (sort_key) and optional _ttl Date for the TTL sweeper.
 
 
     /********************************************************************
-Convert a MongoDB document back to the canonical record shape.
-Strips internal MongoDB fields (_id, _ttl).
+    Convert a MongoDB document back to the canonical record shape.
+    Strips internal MongoDB fields (_id, _ttl).
 
-@param {Object} doc - Raw MongoDB document
+    @param {Object} doc - Raw MongoDB document
 
-@return {Object} - Canonical log record
+    @return {Object} - Canonical log record
     *********************************************************************/
     documentToRecord: function (doc) {
 

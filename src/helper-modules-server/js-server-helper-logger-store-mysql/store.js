@@ -84,11 +84,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-Create table and indexes. Safe to call on every boot (IF NOT EXISTS).
+    Create table and indexes. Safe to call on every boot (IF NOT EXISTS).
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -106,12 +106,12 @@ Create table and indexes. Safe to call on every boot (IF NOT EXISTS).
 
 
     /********************************************************************
-Append a single log record. PK conflict silently ignored.
+    Append a single log record. PK conflict silently ignored.
 
-@param {Object} instance - Request instance
-@param {Object} record   - Canonical log record from logger.js
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical log record from logger.js
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     addLog: async function (instance, record) {
 
@@ -131,12 +131,12 @@ Append a single log record. PK conflict silently ignored.
 
 
     /********************************************************************
-List log records for a specific entity, most-recent first.
+    List log records for a specific entity, most-recent first.
 
-@param {Object} instance - Request instance
-@param {Object} query    - { scope, entity_type, entity_id, actions?, limit?, cursor? }
+    @param {Object} instance - Request instance
+    @param {Object} query    - { scope, entity_type, entity_id, actions?, limit?, cursor? }
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByEntity: async function (instance, query) {
 
@@ -164,12 +164,12 @@ List log records for a specific entity, most-recent first.
 
 
     /********************************************************************
-List log records for a specific actor, most-recent first.
+    List log records for a specific actor, most-recent first.
 
-@param {Object} instance - Request instance
-@param {Object} query    - { scope, actor_type, actor_id, limit?, cursor? }
+    @param {Object} instance - Request instance
+    @param {Object} query    - { scope, actor_type, actor_id, limit?, cursor? }
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByActor: async function (instance, query) {
 
@@ -197,11 +197,11 @@ List log records for a specific actor, most-recent first.
 
 
     /********************************************************************
-Delete all rows with expires_at <= now (seconds).
+    Delete all rows with expires_at <= now (seconds).
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -248,11 +248,11 @@ Delete all rows with expires_at <= now (seconds).
 
 
     /********************************************************************
-Quote an identifier using MySQL backtick style.
+    Quote an identifier using MySQL backtick style.
 
-@param {String} name - Identifier (table or column)
+    @param {String} name - Identifier (table or column)
 
-@return {String} - Quoted identifier
+    @return {String} - Quoted identifier
     *********************************************************************/
     Q: function (name) {
 
@@ -266,9 +266,9 @@ Quote an identifier using MySQL backtick style.
 
 
     /********************************************************************
-Build the CREATE TABLE DDL.
+    Build the CREATE TABLE DDL.
 
-@return {String} - DDL statement
+    @return {String} - DDL statement
     *********************************************************************/
     buildCreateTableSQL: function () {
 
@@ -304,10 +304,10 @@ Build the CREATE TABLE DDL.
 
 
     /********************************************************************
-Build the INSERT SQL. Conflicts on sort_key (PK) are silently
-ignored via ON DUPLICATE KEY UPDATE.
+    Build the INSERT SQL. Conflicts on sort_key (PK) are silently
+    ignored via ON DUPLICATE KEY UPDATE.
 
-@return {String} - SQL template using ? placeholders
+    @return {String} - SQL template using ? placeholders
     *********************************************************************/
     buildInsertSQL: function () {
 
@@ -330,11 +330,11 @@ ignored via ON DUPLICATE KEY UPDATE.
 
 
     /********************************************************************
-Build the SELECT SQL for entity-scoped log queries.
+    Build the SELECT SQL for entity-scoped log queries.
 
-@param {Object} query - { scope, entity_type, entity_id, actions?, limit?, cursor? }
+    @param {Object} query - { scope, entity_type, entity_id, actions?, limit?, cursor? }
 
-@return {Object} - { sql, values }
+    @return {Object} - { sql, values }
     *********************************************************************/
     buildEntityQuery: function (query) {
 
@@ -371,11 +371,11 @@ Build the SELECT SQL for entity-scoped log queries.
 
 
     /********************************************************************
-Build the SELECT SQL for actor-scoped log queries.
+    Build the SELECT SQL for actor-scoped log queries.
 
-@param {Object} query - { scope, actor_type, actor_id, limit?, cursor? }
+    @param {Object} query - { scope, actor_type, actor_id, limit?, cursor? }
 
-@return {Object} - { sql, values }
+    @return {Object} - { sql, values }
     *********************************************************************/
     buildActorQuery: function (query) {
 
@@ -402,11 +402,11 @@ Build the SELECT SQL for actor-scoped log queries.
 
 
     /********************************************************************
-Convert a canonical record to an ordered array of column values.
+    Convert a canonical record to an ordered array of column values.
 
-@param {Object} record - Canonical log record
+    @param {Object} record - Canonical log record
 
-@return {Array} - Ordered values array
+    @return {Array} - Ordered values array
     *********************************************************************/
     recordToRow: function (record) {
 
@@ -430,12 +430,12 @@ Convert a canonical record to an ordered array of column values.
 
 
     /********************************************************************
-Convert a database row back to a canonical record object.
-Coerces BIGINT columns from string to number (mysql2 driver quirk).
+    Convert a database row back to a canonical record object.
+    Coerces BIGINT columns from string to number (mysql2 driver quirk).
 
-@param {Object} row - Raw database row
+    @param {Object} row - Raw database row
 
-@return {Object} - Canonical log record
+    @return {Object} - Canonical log record
     *********************************************************************/
     rowToRecord: function (row) {
 

@@ -51,12 +51,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-Validate an email address's syntax using a simple regex.
-Provides granular reason codes for common failure modes.
+    Validate an email address's syntax using a simple regex.
+    Provides granular reason codes for common failure modes.
 
-@param {String} email - Email address to validate
+    @param {String} email - Email address to validate
 
-@return {Object} - { valid: Boolean, reason: String|null }
+    @return {Object} - { valid: Boolean, reason: String|null }
     *********************************************************************/
     validateSyntax: function (email) {
 
@@ -119,12 +119,12 @@ Provides granular reason codes for common failure modes.
 
 
     /********************************************************************
-Check if a domain is a known disposable email provider.
-The basic adapter has no disposable data and always returns false.
+    Check if a domain is a known disposable email provider.
+    The basic adapter has no disposable data and always returns false.
 
-@param {String} domain - Domain part (e.g. 'gmail.com')
+    @param {String} domain - Domain part (e.g. 'gmail.com')
 
-@return {Boolean} - Always false (no disposable data in basic adapter)
+    @return {Boolean} - Always false (no disposable data in basic adapter)
     *********************************************************************/
     isDisposableDomain: function (domain) { // eslint-disable-line no-unused-vars
 
@@ -135,15 +135,15 @@ The basic adapter has no disposable data and always returns false.
 
 
     /********************************************************************
-Canonicalize an email address for duplicate detection.
-Gmail: remove dots, remove plus-tags.
-Other domains: return as-is (lowercased).
+    Canonicalize an email address for duplicate detection.
+    Gmail: remove dots, remove plus-tags.
+    Other domains: return as-is (lowercased).
 
-WARNING: Never use for storage or delivery. Duplicate detection only.
+    WARNING: Never use for storage or delivery. Duplicate detection only.
 
-@param {String} email - Email address to canonicalize
+    @param {String} email - Email address to canonicalize
 
-@return {String|null} - Canonicalized email or null if invalid
+    @return {String|null} - Canonicalized email or null if invalid
     *********************************************************************/
     canonicalize: function (email) {
 

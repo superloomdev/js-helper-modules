@@ -20,8 +20,8 @@ Each call produces an independent adapter with its own `sent` array
 so tests can run in isolation.
 
 @return {Object} - { adapter, sent }
-  adapter {Object} - Ready-to-use adapter with 3-method contract
-  sent    {Array}  - Array of { status, headers, body } for each response sent
+adapter {Object} - Ready-to-use adapter with 3-method contract
+sent    {Array}  - Array of { status, headers, body } for each response sent
 *********************************************************************/
 module.exports = function makeStubAdapter () {
 
@@ -30,25 +30,25 @@ module.exports = function makeStubAdapter () {
   const adapter = {
 
     /****************************************************************
-Populate instance with normalized HTTP request data from a plain
-raw_request object. The raw_request shape mirrors what real adapters
-produce after normalization - tests pass it pre-normalized so they
-can focus on gateway logic, not wire-format parsing.
+    Populate instance with normalized HTTP request data from a plain
+    raw_request object. The raw_request shape mirrors what real adapters
+    produce after normalization - tests pass it pre-normalized so they
+    can focus on gateway logic, not wire-format parsing.
 
-raw_request shape (all keys optional; defaults to empty):
-      headers  {Object} - Lowercase header key -> value map
-      query    {Object} - Query-string parameters
-      body     {Object} - Request body parameters
-      params   {Object} - Path parameters
-      cookies  {Object} - Parsed cookies
-      method   {String} - 'GET' | 'POST' | ...
-      url      {String} - Request URL path with query string
+    raw_request shape (all keys optional; defaults to empty):
+    headers  {Object} - Lowercase header key -> value map
+    query    {Object} - Query-string parameters
+    body     {Object} - Request body parameters
+    params   {Object} - Path parameters
+    cookies  {Object} - Parsed cookies
+    method   {String} - 'GET' | 'POST' | ...
+    url      {String} - Request URL path with query string
 
-@param {Object}   raw_request       - Pre-normalized request data
-@param {Object}   raw_context       - Ignored by this adapter
-@param {Function} response_callback - Runtime callback wrapper target
+    @param {Object}   raw_request       - Pre-normalized request data
+    @param {Object}   raw_context       - Ignored by this adapter
+    @param {Function} response_callback - Runtime callback wrapper target
 
-@return {Object} - Normalized request payload + response_handler
+    @return {Object} - Normalized request payload + response_handler
     ****************************************************************/
     extractRequest: function (raw_request, _raw_context, response_callback) {
 
@@ -77,14 +77,14 @@ raw_request shape (all keys optional; defaults to empty):
 
 
     /****************************************************************
-Build a response envelope. Returns a plain object that mirrors the
-shape real adapters produce, suitable for test assertions.
+    Build a response envelope. Returns a plain object that mirrors the
+    shape real adapters produce, suitable for test assertions.
 
-@param {Integer} status  - HTTP status code
-@param {Object}  headers - Response headers map
-@param {*}       body    - Response body (string, object, or Buffer)
+    @param {Integer} status  - HTTP status code
+    @param {Object}  headers - Response headers map
+    @param {*}       body    - Response body (string, object, or Buffer)
 
-@return {Object} - { status, headers, body }
+    @return {Object} - { status, headers, body }
     ****************************************************************/
     buildResponseEnvelope: function (status, headers, body) {
 
@@ -115,12 +115,12 @@ shape real adapters produce, suitable for test assertions.
 
 
     /****************************************************************
-Return the viewer country code if the adapter can supply it.
-The stub adapter never has this information - returns null.
+    Return the viewer country code if the adapter can supply it.
+    The stub adapter never has this information - returns null.
 
-@param {Object} _headers - Request headers (unused)
+    @param {Object} _headers - Request headers (unused)
 
-@return {null}
+    @return {null}
     ****************************************************************/
     getCountryCode: function (_headers) {
       return null;

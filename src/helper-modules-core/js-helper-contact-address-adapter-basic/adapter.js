@@ -56,9 +56,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-List all country codes the adapter has data for.
+    List all country codes the adapter has data for.
 
-@return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
+    @return {Array} - Array of ISO 3166-1 alpha-2 country codes (lowercase)
     *********************************************************************/
     listCountries: function () {
 
@@ -69,12 +69,12 @@ List all country codes the adapter has data for.
 
 
     /********************************************************************
-Get the postal code rule for a country.
-Returns null for unknown countries.
+    Get the postal code rule for a country.
+    Returns null for unknown countries.
 
-@param {String} country_code - ISO 3166-1 alpha-2, lowercase
+    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-@return {Object|null} - { min_length, max_length, pattern, required }
+    @return {Object|null} - { min_length, max_length, pattern, required }
     *********************************************************************/
     getPostalRule: function (country_code) {
 
@@ -98,12 +98,12 @@ Returns null for unknown countries.
 
 
     /********************************************************************
-List subdivisions for a country.
-The basic adapter has no subdivision data and always returns null.
+    List subdivisions for a country.
+    The basic adapter has no subdivision data and always returns null.
 
-@param {String} country_code - ISO 3166-1 alpha-2, lowercase
+    @param {String} country_code - ISO 3166-1 alpha-2, lowercase
 
-@return {null} - Always null (no subdivision data in basic adapter)
+    @return {null} - Always null (no subdivision data in basic adapter)
     *********************************************************************/
     listSubdivisions: function (country_code) { // eslint-disable-line no-unused-vars
 
@@ -114,13 +114,13 @@ The basic adapter has no subdivision data and always returns null.
 
 
     /********************************************************************
-Validate a postal code for a country using length bounds only.
-No regex pattern validation.
+    Validate a postal code for a country using length bounds only.
+    No regex pattern validation.
 
-@param {String} country_code  - ISO 3166-1 alpha-2, lowercase
-@param {String} postal_code   - Postal code to validate
+    @param {String} country_code  - ISO 3166-1 alpha-2, lowercase
+    @param {String} postal_code   - Postal code to validate
 
-@return {Object} - { valid: Boolean, reason: String|null }
+    @return {Object} - { valid: Boolean, reason: String|null }
     *********************************************************************/
     validatePostalCode: function (country_code, postal_code) {
 
@@ -169,13 +169,13 @@ No regex pattern validation.
 
 
     /********************************************************************
-Validate a subdivision code for a country.
-The basic adapter has no subdivision data and always returns valid.
+    Validate a subdivision code for a country.
+    The basic adapter has no subdivision data and always returns valid.
 
-@param {String} country_code       - ISO 3166-1 alpha-2, lowercase
-@param {String} subdivision_code   - Subdivision code to validate
+    @param {String} country_code       - ISO 3166-1 alpha-2, lowercase
+    @param {String} subdivision_code   - Subdivision code to validate
 
-@return {Object} - { valid: true, reason: null }
+    @return {Object} - { valid: true, reason: null }
     *********************************************************************/
     validateSubdivision: function (country_code, subdivision_code) { // eslint-disable-line no-unused-vars
 

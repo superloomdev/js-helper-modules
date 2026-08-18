@@ -88,12 +88,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Pure functions that build service params without I/O.
 
     /********************************************************************
-Build service params for a Put command.
+    Build service params for a Put command.
 
-@param {String} table - Table name
-@param {Object} data - Item data to store
+    @param {String} table - Table name
+    @param {Object} data - Item data to store
 
-@return {Object} - Service params for PutCommand or transactWrite Put
+    @return {Object} - Service params for PutCommand or transactWrite Put
     *********************************************************************/
     commandBuilderForAddRecord: function (table, data) {
 
@@ -106,12 +106,12 @@ Build service params for a Put command.
 
 
     /********************************************************************
-Build service params for a Delete command.
+    Build service params for a Delete command.
 
-@param {String} table - Table name
-@param {Object} key - Primary key of record to delete
+    @param {String} table - Table name
+    @param {Object} key - Primary key of record to delete
 
-@return {Object} - Service params for DeleteCommand or transactWrite Delete
+    @return {Object} - Service params for DeleteCommand or transactWrite Delete
     *********************************************************************/
     commandBuilderForDeleteRecord: function (table, key) {
 
@@ -124,21 +124,21 @@ Build service params for a Delete command.
 
 
     /********************************************************************
-Build service params for an Update command. Supports SET, REMOVE, INCREMENT, DECREMENT.
+    Build service params for an Update command. Supports SET, REMOVE, INCREMENT, DECREMENT.
 
-@param {String} table - Table name
-@param {Object} key - Primary key of record to update
-@param {Object} [update_data] - Key-value pairs to SET
-@param {String[]} [remove_keys] - Keys to REMOVE
-@param {Object} [increment] - Keys to increment { key: amount }
-@param {Object} [decrement] - Keys to decrement { key: amount }
-@param {String} [return_state] - ReturnValues enum: 'ALL_NEW' | 'ALL_OLD' | 'UPDATED_NEW' | 'UPDATED_OLD' | 'NONE'
+    @param {String} table - Table name
+    @param {Object} key - Primary key of record to update
+    @param {Object} [update_data] - Key-value pairs to SET
+    @param {String[]} [remove_keys] - Keys to REMOVE
+    @param {Object} [increment] - Keys to increment { key: amount }
+    @param {Object} [decrement] - Keys to decrement { key: amount }
+    @param {String} [return_state] - ReturnValues enum: 'ALL_NEW' | 'ALL_OLD' | 'UPDATED_NEW' | 'UPDATED_OLD' | 'NONE'
 
-Note: The builder currently supports SET, REMOVE, INCREMENT, and DECREMENT.
-Additional DynamoDB operations (list_append, if_not_exists, ADD/DELETE on
-sets, ConditionExpression) will be added to this builder as needed.
+    Note: The builder currently supports SET, REMOVE, INCREMENT, and DECREMENT.
+    Additional DynamoDB operations (list_append, if_not_exists, ADD/DELETE on
+    sets, ConditionExpression) will be added to this builder as needed.
 
-@return {Object} - Service params for UpdateCommand or transactWrite Update
+    @return {Object} - Service params for UpdateCommand or transactWrite Update
     *********************************************************************/
     commandBuilderForUpdateRecord: function (table, key, update_data, remove_keys, increment, decrement, return_state) {
 
@@ -217,12 +217,12 @@ sets, ConditionExpression) will be added to this builder as needed.
     // Execute pre-built service params against DynamoDB.
 
     /********************************************************************
-Execute a pre-built Put command (from commandBuilderForAddRecord).
+    Execute a pre-built Put command (from commandBuilderForAddRecord).
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     commandAddRecord: async function (instance, service_params) {
 
@@ -266,12 +266,12 @@ Execute a pre-built Put command (from commandBuilderForAddRecord).
 
 
     /********************************************************************
-Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
+    Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     commandDeleteRecord: async function (instance, service_params) {
 
@@ -315,12 +315,12 @@ Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
 
 
     /********************************************************************
-Execute a pre-built Update command (from commandBuilderForUpdateRecord).
+    Execute a pre-built Update command (from commandBuilderForUpdateRecord).
 
-@param {Object} instance - Request instance
-@param {Object} service_params - Pre-built service params
+    @param {Object} instance - Request instance
+    @param {Object} service_params - Pre-built service params
 
-@return {Promise<Object>} - { success, attributes, error }
+    @return {Promise<Object>} - { success, attributes, error }
     *********************************************************************/
     commandUpdateRecord: async function (instance, service_params) {
 
@@ -370,13 +370,13 @@ Execute a pre-built Update command (from commandBuilderForUpdateRecord).
     // High-level functions that build params then execute.
 
     /********************************************************************
-Get a single record by primary key.
+    Get a single record by primary key.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} key - Primary key { pk, sk } or { id }
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} key - Primary key { pk, sk } or { id }
 
-@return {Promise<Object>} - { success, item, error }
+    @return {Promise<Object>} - { success, item, error }
     *********************************************************************/
     getRecord: async function (instance, table, key) {
 
@@ -423,14 +423,14 @@ Get a single record by primary key.
 
 
     /********************************************************************
-Write (create or replace) a record. Always upsert - inserts if absent,
-replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
+    Write (create or replace) a record. Always upsert - inserts if absent,
+    replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} item - Item to store
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} item - Item to store
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     writeRecord: async function (instance, table, item) {
 
@@ -444,13 +444,13 @@ replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
 
 
     /********************************************************************
-Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteRecord.
+    Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteRecord.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} key - Primary key
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} key - Primary key
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, table, key) {
 
@@ -464,19 +464,19 @@ Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteR
 
 
     /********************************************************************
-Update an item using structured builder (SET/REMOVE/INCREMENT/DECREMENT).
-DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
+    Update an item using structured builder (SET/REMOVE/INCREMENT/DECREMENT).
+    DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} key - Primary key
-@param {Object} [update_data] - Key-value pairs to SET
-@param {String[]} [remove_keys] - Keys to REMOVE
-@param {Object} [increment] - Keys to increment { key: amount }
-@param {Object} [decrement] - Keys to decrement { key: amount }
-@param {String} [return_state] - ReturnValues enum
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} key - Primary key
+    @param {Object} [update_data] - Key-value pairs to SET
+    @param {String[]} [remove_keys] - Keys to REMOVE
+    @param {Object} [increment] - Keys to increment { key: amount }
+    @param {Object} [decrement] - Keys to decrement { key: amount }
+    @param {String} [return_state] - ReturnValues enum
 
-@return {Promise<Object>} - { success, attributes, error }
+    @return {Promise<Object>} - { success, attributes, error }
     *********************************************************************/
     updateRecord: async function (instance, table, key, update_data, remove_keys, increment, decrement, return_state) {
 
@@ -492,23 +492,23 @@ DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
 
 
     /********************************************************************
-Query items by partition key with full feature set.
+    Query items by partition key with full feature set.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} params - Query parameters
-@param {String} params.pk - Partition key value
-@param {String} params.pkName - Partition key attribute name
-@param {String} [params.skCondition] - Sort key condition expression
-@param {Object} [params.skValues] - Sort key expression values
-@param {Number} [params.limit] - Max items to return
-@param {String} [params.indexName] - Global secondary index name
-@param {Object} [params.startKey] - ExclusiveStartKey for pagination
-@param {Boolean} [params.scanForward] - true=ascending, false=descending (default: false)
-@param {String[]} [params.fields] - ProjectionExpression fields list
-@param {String} [params.select] - Select enum: ALL_ATTRIBUTES | COUNT
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} params - Query parameters
+    @param {String} params.pk - Partition key value
+    @param {String} params.pkName - Partition key attribute name
+    @param {String} [params.skCondition] - Sort key condition expression
+    @param {Object} [params.skValues] - Sort key expression values
+    @param {Number} [params.limit] - Max items to return
+    @param {String} [params.indexName] - Global secondary index name
+    @param {Object} [params.startKey] - ExclusiveStartKey for pagination
+    @param {Boolean} [params.scanForward] - true=ascending, false=descending (default: false)
+    @param {String[]} [params.fields] - ProjectionExpression fields list
+    @param {String} [params.select] - Select enum: ALL_ATTRIBUTES | COUNT
 
-@return {Promise<Object>} - { success, items, count, last_key, error }
+    @return {Promise<Object>} - { success, items, count, last_key, error }
     *********************************************************************/
     query: async function (instance, table, params) {
 
@@ -607,13 +607,13 @@ Query items by partition key with full feature set.
 
 
     /********************************************************************
-Count records matching a partition key (uses query with SELECT='COUNT').
+    Count records matching a partition key (uses query with SELECT='COUNT').
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} params - Same as query params (pk, pkName, skCondition, skValues, indexName)
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} params - Same as query params (pk, pkName, skCondition, skValues, indexName)
 
-@return {Promise<Object>} - { success, count, error }
+    @return {Promise<Object>} - { success, count, error }
     *********************************************************************/
     count: async function (instance, table, params) {
 
@@ -631,13 +631,13 @@ Count records matching a partition key (uses query with SELECT='COUNT').
 
 
     /********************************************************************
-Scan entire table (use sparingly on large tables).
+    Scan entire table (use sparingly on large tables).
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} [filter] - Filter expression { expression, names, values }
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} [filter] - Filter expression { expression, names, values }
 
-@return {Promise<Object>} - { success, items, count, error }
+    @return {Promise<Object>} - { success, items, count, error }
     *********************************************************************/
     scan: async function (instance, table, filter) {
 
@@ -695,12 +695,12 @@ Scan entire table (use sparingly on large tables).
 
 
     /********************************************************************
-Batch get multiple items from one or more tables.
+    Batch get multiple items from one or more tables.
 
-@param {Object} instance - Request instance
-@param {Object} keysByTable - { tableName: [key1, key2, ...] }
+    @param {Object} instance - Request instance
+    @param {Object} keysByTable - { tableName: [key1, key2, ...] }
 
-@return {Promise<Object>} - { success, items, error }
+    @return {Promise<Object>} - { success, items, error }
     *********************************************************************/
     batchGetRecords: async function (instance, keysByTable) {
 
@@ -751,12 +751,12 @@ Batch get multiple items from one or more tables.
 
 
     /********************************************************************
-Batch write (put/delete) items across one or more tables.
+    Batch write (put/delete) items across one or more tables.
 
-@param {Object} instance - Request instance
-@param {Object} requestsByTable - { tableName: [{ put: item }, { delete: key }] }
+    @param {Object} instance - Request instance
+    @param {Object} requestsByTable - { tableName: [{ put: item }, { delete: key }] }
 
-@return {Promise<Object>} - { success, unprocessed, error }
+    @return {Promise<Object>} - { success, unprocessed, error }
     *********************************************************************/
     batchWriteAndDeleteRecords: async function (instance, requestsByTable) {
 
@@ -804,14 +804,14 @@ Batch write (put/delete) items across one or more tables.
 
 
     /********************************************************************
-Batch add (put) records across tables with automatic 25-item chunking.
-AWS BatchWriteItem limit is 25 items per request. This function handles
-any number of items by recursively splitting into 25-item chunks.
+    Batch add (put) records across tables with automatic 25-item chunking.
+    AWS BatchWriteItem limit is 25 items per request. This function handles
+    any number of items by recursively splitting into 25-item chunks.
 
-@param {Object} instance - Request instance
-@param {Object} itemsByTable - { tableName: [item1, item2, ...] }
+    @param {Object} instance - Request instance
+    @param {Object} itemsByTable - { tableName: [item1, item2, ...] }
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     batchWriteRecords: async function (instance, itemsByTable) {
 
@@ -892,14 +892,14 @@ any number of items by recursively splitting into 25-item chunks.
 
 
     /********************************************************************
-Batch delete records across tables with automatic 25-item chunking.
-AWS BatchWriteItem limit is 25 items per request. This function handles
-any number of keys by recursively splitting into 25-item chunks.
+    Batch delete records across tables with automatic 25-item chunking.
+    AWS BatchWriteItem limit is 25 items per request. This function handles
+    any number of keys by recursively splitting into 25-item chunks.
 
-@param {Object} instance - Request instance
-@param {Object} keysByTable - { tableName: [key1, key2, ...] }
+    @param {Object} instance - Request instance
+    @param {Object} keysByTable - { tableName: [key1, key2, ...] }
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     batchDeleteRecords: async function (instance, keysByTable) {
 
@@ -982,21 +982,21 @@ any number of keys by recursively splitting into 25-item chunks.
     // ~~~~~~~~~~~~~~~~~~~~ Table management ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Create a DynamoDB table. Idempotent - if the table already exists
-with any schema, returns success without modification. Intended for
-app-managed single-table designs and emulated-testing setups; in
-production, prefer infrastructure-as-code (CloudFormation / Terraform)
-for table provisioning.
+    Create a DynamoDB table. Idempotent - if the table already exists
+    with any schema, returns success without modification. Intended for
+    app-managed single-table designs and emulated-testing setups; in
+    production, prefer infrastructure-as-code (CloudFormation / Terraform)
+    for table provisioning.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
-@param {Object} params - Table definition
-@param {Object[]} params.attribute_definitions - [{ name, type: 'S'|'N'|'B' }]
-@param {Object[]} params.key_schema - [{ name, type: 'HASH'|'RANGE' }]
-@param {String} [params.billing_mode] - 'PAY_PER_REQUEST' (default) or 'PROVISIONED'
-@param {Object[]} [params.global_secondary_indexes] - Optional GSI list (same shape)
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} params - Table definition
+    @param {Object[]} params.attribute_definitions - [{ name, type: 'S'|'N'|'B' }]
+    @param {Object[]} params.key_schema - [{ name, type: 'HASH'|'RANGE' }]
+    @param {String} [params.billing_mode] - 'PAY_PER_REQUEST' (default) or 'PROVISIONED'
+    @param {Object[]} [params.global_secondary_indexes] - Optional GSI list (same shape)
 
-@return {Promise<Object>} - { success, already_exists, error }
+    @return {Promise<Object>} - { success, already_exists, error }
     *********************************************************************/
     createTable: async function (instance, table, params) {
 
@@ -1066,14 +1066,14 @@ for table provisioning.
 
 
     /********************************************************************
-Delete a DynamoDB table. Primarily for test teardown; production
-table lifecycle should be managed by IaC. Idempotent - returns
-success when the table is already absent.
+    Delete a DynamoDB table. Primarily for test teardown; production
+    table lifecycle should be managed by IaC. Idempotent - returns
+    success when the table is already absent.
 
-@param {Object} instance - Request instance
-@param {String} table - Table name
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
 
-@return {Promise<Object>} - { success, already_absent, error }
+    @return {Promise<Object>} - { success, already_absent, error }
     *********************************************************************/
     deleteTable: async function (instance, table) {
 
@@ -1116,16 +1116,16 @@ success when the table is already absent.
     // ~~~~~~~~~~~~~~~~~~~~ Transactions ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Atomic write transaction across one or more tables. Groups up to 10 actions.
-Uses pre-built command objects from commandBuilderForAddRecord, commandBuilderForDeleteRecord,
-and commandBuilderForUpdateRecord.
+    Atomic write transaction across one or more tables. Groups up to 10 actions.
+    Uses pre-built command objects from commandBuilderForAddRecord, commandBuilderForDeleteRecord,
+    and commandBuilderForUpdateRecord.
 
-@param {Object} instance - Request instance
-@param {Object[]} [add_records] - Array of Put service params
-@param {Object[]} [update_records] - Array of Update service params
-@param {Object[]} [delete_records] - Array of Delete service params
+    @param {Object} instance - Request instance
+    @param {Object[]} [add_records] - Array of Put service params
+    @param {Object[]} [update_records] - Array of Update service params
+    @param {Object[]} [delete_records] - Array of Delete service params
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     transactWriteRecords: async function (instance, add_records, update_records, delete_records) {
 
@@ -1199,19 +1199,19 @@ and commandBuilderForUpdateRecord.
   const _DynamoDB = {
 
     /********************************************************************
-Transform caller-friendly batch write requests into AWS SDK format.
+    Transform caller-friendly batch write requests into AWS SDK format.
 
-Input format (caller-friendly):
-{ tableName: [{ put: item }, { delete: key }] }
+    Input format (caller-friendly):
+    { tableName: [{ put: item }, { delete: key }] }
 
-Output format (AWS SDK BatchWriteCommand):
-{ tableName: [{ PutRequest: { Item: item } }, { DeleteRequest: { Key: key } }] }
+    Output format (AWS SDK BatchWriteCommand):
+    { tableName: [{ PutRequest: { Item: item } }, { DeleteRequest: { Key: key } }] }
 
-Each request object must have either a 'put' key (for insert/replace) or a
-'delete' key (for removal). Any request without either key is filtered out.
+    Each request object must have either a 'put' key (for insert/replace) or a
+    'delete' key (for removal). Any request without either key is filtered out.
 
-@param {Object} requestsByTable - Caller-friendly batch write requests
-@return {Object} - AWS SDK-formatted RequestItems
+    @param {Object} requestsByTable - Caller-friendly batch write requests
+    @return {Object} - AWS SDK-formatted RequestItems
     *********************************************************************/
     buildBatchWriteRequestItems: function (requestsByTable) {
 
@@ -1245,11 +1245,11 @@ Each request object must have either a 'put' key (for insert/replace) or a
 
 
     /********************************************************************
-Lazy-load the AWS SDK v3 adapters. Shared across every instance because
-the SDK modules themselves are stateless - only the DocumentClient
-holds per-instance state.
+    Lazy-load the AWS SDK v3 adapters. Shared across every instance because
+    the SDK modules themselves are stateless - only the DocumentClient
+    holds per-instance state.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     ensureAdapter: function () {
 
@@ -1267,11 +1267,11 @@ holds per-instance state.
 
 
     /********************************************************************
-Create this instance's DynamoDB Document Client on first use. Options
-are built from the merged CONFIG; explicit credentials and custom
-endpoint (for DynamoDB Local) are injected if present.
+    Create this instance's DynamoDB Document Client on first use. Options
+    are built from the merged CONFIG; explicit credentials and custom
+    endpoint (for DynamoDB Local) are injected if present.
 
-@return {void}
+    @return {void}
     *********************************************************************/
     initIfNot: function () {
 

@@ -97,21 +97,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Append-only writes. No reads on the write path.
 
     /********************************************************************
-Append a new job record for a (tenant_id, resource_id) pair. Generates
-data_version (Date.now() ms) and a unique request_id internally. Write-
-only - no reads. Safe to call from many concurrent Lambda handlers.
+    Append a new job record for a (tenant_id, resource_id) pair. Generates
+    data_version (Date.now() ms) and a unique request_id internally. Write-
+    only - no reads. Safe to call from many concurrent Lambda handlers.
 
-On success, returns the generated request_id so the caller can log or
-return it to the external service that submitted the job.
+    On success, returns the generated request_id so the caller can log or
+    return it to the external service that submitted the job.
 
-@param {Object} instance - Request instance
-@param {Object} options - Per-call parameters
-@param {String} options.tenant_id - Partition boundary
-@param {String} options.resource_id - Opaque resource identifier within the tenant
-@param {Object} options.payload - Arbitrary data stored as-is, returned by claim
-@param {String} options.action - Opaque label for the worker, returned by claim
+    @param {Object} instance - Request instance
+    @param {Object} options - Per-call parameters
+    @param {String} options.tenant_id - Partition boundary
+    @param {String} options.resource_id - Opaque resource identifier within the tenant
+    @param {Object} options.payload - Arbitrary data stored as-is, returned by claim
+    @param {String} options.action - Opaque label for the worker, returned by claim
 
-@return {Promise<Object>} - { success, request_id, error }
+    @return {Promise<Object>} - { success, request_id, error }
     *********************************************************************/
     enqueue: async function (instance, options) {
 
@@ -172,25 +172,25 @@ return it to the external service that submitted the job.
     // Read, select winner, and clean stale records atomically.
 
     /********************************************************************
-Query all records for a (tenant_id, resource_id). Pick the record with
-the highest data_version. Delete all records with data_version <= that
-value. Return the winning record's payload and action.
+    Query all records for a (tenant_id, resource_id). Pick the record with
+    the highest data_version. Delete all records with data_version <= that
+    value. Return the winning record's payload and action.
 
-Ordering granularity is one millisecond (see pickLatest). Writes that are
-at least 1ms apart are strictly ordered; writes that land in the same
-millisecond are treated as interchangeable - claim returns one of them and
-coalesces (deletes) the rest, leaving nothing behind.
+    Ordering granularity is one millisecond (see pickLatest). Writes that are
+    at least 1ms apart are strictly ordered; writes that land in the same
+    millisecond are treated as interchangeable - claim returns one of them and
+    coalesces (deletes) the rest, leaving nothing behind.
 
-Called only by the single scheduled poller. When no records exist,
-payload is null (nothing to process). The poller loops claim until
-payload is null.
+    Called only by the single scheduled poller. When no records exist,
+    payload is null (nothing to process). The poller loops claim until
+    payload is null.
 
-@param {Object} instance - Request instance
-@param {Object} options - Per-call parameters
-@param {String} options.tenant_id - Partition boundary
-@param {String} options.resource_id - Opaque resource identifier within the tenant
+    @param {Object} instance - Request instance
+    @param {Object} options - Per-call parameters
+    @param {String} options.tenant_id - Partition boundary
+    @param {String} options.resource_id - Opaque resource identifier within the tenant
 
-@return {Promise<Object>} - { success, payload, action, error }
+    @return {Promise<Object>} - { success, payload, action, error }
     *********************************************************************/
     claim: async function (instance, options) {
 
@@ -280,15 +280,15 @@ payload is null.
     // Prefix-based queries for visibility and debugging.
 
     /********************************************************************
-Operational query. Returns all records whose resource_id begins with
-resource_id_prefix. Not used in the normal enqueue/claim flow.
+    Operational query. Returns all records whose resource_id begins with
+    resource_id_prefix. Not used in the normal enqueue/claim flow.
 
-@param {Object} instance - Request instance
-@param {Object} options - Per-call parameters
-@param {String} options.tenant_id - Partition boundary
-@param {String} options.resource_id_prefix - Prefix to match
+    @param {Object} instance - Request instance
+    @param {Object} options - Per-call parameters
+    @param {String} options.tenant_id - Partition boundary
+    @param {String} options.resource_id_prefix - Prefix to match
 
-@return {Promise<Object>} - { success, records, error }
+    @return {Promise<Object>} - { success, records, error }
     *********************************************************************/
     listByPrefix: async function (instance, options) {
 
@@ -351,10 +351,10 @@ resource_id_prefix. Not used in the normal enqueue/claim flow.
     // Data version timestamp for ordering.
 
     /********************************************************************
-Generate the ordering signal: current time in milliseconds.
-Delegates to Lib.Utils.getUnixTimeInMilliSeconds().
+    Generate the ordering signal: current time in milliseconds.
+    Delegates to Lib.Utils.getUnixTimeInMilliSeconds().
 
-@return {Number} - Current unix timestamp in milliseconds
+    @return {Number} - Current unix timestamp in milliseconds
     *********************************************************************/
     generateDataVersion: function () {
       return Lib.Utils.getUnixTimeInMilliSeconds();
@@ -365,20 +365,20 @@ Delegates to Lib.Utils.getUnixTimeInMilliSeconds().
     // Shape assembly and winner selection.
 
     /********************************************************************
-Assemble the canonical record shape for storage. The core module does
-not construct a storage key - each adapter derives its own key from
-these raw fields.
+    Assemble the canonical record shape for storage. The core module does
+    not construct a storage key - each adapter derives its own key from
+    these raw fields.
 
-@param {String} tenant_id    - Partition boundary
-@param {String} resource_id  - Opaque resource identifier
-@param {Object} payload      - Caller-supplied data
-@param {String} action       - Opaque label for the worker
-@param {Number} data_version - Millisecond timestamp
-@param {String} request_id   - Compact UUID for uniqueness and tiebreaking
+    @param {String} tenant_id    - Partition boundary
+    @param {String} resource_id  - Opaque resource identifier
+    @param {Object} payload      - Caller-supplied data
+    @param {String} action       - Opaque label for the worker
+    @param {Number} data_version - Millisecond timestamp
+    @param {String} request_id   - Compact UUID for uniqueness and tiebreaking
 
-@return {Object} - Canonical record with fields: tenant_id, resource_id,
-data_version, request_id, payload, action, toc (copy of data_version for
-store adapter indexing)
+    @return {Object} - Canonical record with fields: tenant_id, resource_id,
+    data_version, request_id, payload, action, toc (copy of data_version for
+    store adapter indexing)
     *********************************************************************/
     buildRecord: function (tenant_id, resource_id, payload, action, data_version, request_id) {
 
@@ -396,20 +396,20 @@ store adapter indexing)
 
 
     /********************************************************************
-Pick the record with the highest data_version from an array.
+    Pick the record with the highest data_version from an array.
 
-data_version has millisecond granularity, so records that differ by
-at least 1ms are strictly ordered (later wins). When two records share
-the same millisecond they have identical data_version; the tie is then
-broken on the lexicographically larger request_id. Since request_id
-is a random UUID, that winner is stable for a given set of records but
-arbitrary with respect to actual write order - same-millisecond writes
-are treated as interchangeable, not "latest wins". Either way the caller
-deletes all records <= the winner, so same-ms records are fully coalesced.
+    data_version has millisecond granularity, so records that differ by
+    at least 1ms are strictly ordered (later wins). When two records share
+    the same millisecond they have identical data_version; the tie is then
+    broken on the lexicographically larger request_id. Since request_id
+    is a random UUID, that winner is stable for a given set of records but
+    arbitrary with respect to actual write order - same-millisecond writes
+    are treated as interchangeable, not "latest wins". Either way the caller
+    deletes all records <= the winner, so same-ms records are fully coalesced.
 
-@param {Array} records - Array of record objects
+    @param {Array} records - Array of record objects
 
-@return {Object} - The winning record
+    @return {Object} - The winning record
     *********************************************************************/
     pickLatest: function (records) {
 
@@ -436,11 +436,11 @@ deletes all records <= the winner, so same-ms records are fully coalesced.
     // Cryptographically secure request identifier.
 
     /********************************************************************
-Generate a request_id for uniqueness, same-millisecond tiebreaking,
-and caller correlation. Uses the full compact UUID (cryptographically
-secure). Returned to the caller on successful enqueue.
+    Generate a request_id for uniqueness, same-millisecond tiebreaking,
+    and caller correlation. Uses the full compact UUID (cryptographically
+    secure). Returned to the caller on successful enqueue.
 
-@return {String} - Full compact UUID string
+    @return {String} - Full compact UUID string
     *********************************************************************/
     generateRequestId: function () {
 

@@ -9,11 +9,11 @@ module.exports = function (Lib, ERRORS) {
   const Validators = {
 
     /********************************************************************
-Validate the merged config object. Throws TypeError on any
-misconfiguration so the module fails at startup, not at call time.
+    Validate the merged config object. Throws TypeError on any
+    misconfiguration so the module fails at startup, not at call time.
 
-@param {Object} CONFIG - Merged config for this instance
-@return {void}
+    @param {Object} CONFIG - Merged config for this instance
+    @return {void}
     *********************************************************************/
     validateConfig: function (CONFIG) {
 
@@ -31,12 +31,12 @@ misconfiguration so the module fails at startup, not at call time.
 
 
     /********************************************************************
-Validate a manifest object. Returns the error object when invalid,
-null when valid.
+    Validate a manifest object. Returns the error object when invalid,
+    null when valid.
 
-@param {*} manifest - Value to validate as a manifest
+    @param {*} manifest - Value to validate as a manifest
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateManifest: function (manifest) {
 
@@ -50,12 +50,12 @@ null when valid.
 
 
     /********************************************************************
-Validate a family name. Returns the error object when invalid,
-null when valid.
+    Validate a family name. Returns the error object when invalid,
+    null when valid.
 
-@param {*} name - Value to validate as a family name
+    @param {*} name - Value to validate as a family name
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateFamilyName: function (name) {
 
@@ -69,12 +69,12 @@ null when valid.
 
 
     /********************************************************************
-Validate a token. Returns the error object when invalid,
-null when valid.
+    Validate a token. Returns the error object when invalid,
+    null when valid.
 
-@param {*} token - Value to validate as a token
+    @param {*} token - Value to validate as a token
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateToken: function (token) {
 
@@ -88,12 +88,12 @@ null when valid.
 
 
     /********************************************************************
-Validate a URL. Returns the error object when invalid,
-null when valid.
+    Validate a URL. Returns the error object when invalid,
+    null when valid.
 
-@param {*} url - Value to validate as a URL
+    @param {*} url - Value to validate as a URL
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateUrl: function (url) {
 
@@ -107,12 +107,12 @@ null when valid.
 
 
     /********************************************************************
-Validate a font weight. Returns the error object when invalid,
-null when valid.
+    Validate a font weight. Returns the error object when invalid,
+    null when valid.
 
-@param {*} weight - Value to validate as a weight
+    @param {*} weight - Value to validate as a weight
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateWeight: function (weight) {
 
@@ -130,12 +130,12 @@ null when valid.
 
 
     /********************************************************************
-Validate a font style. Returns the error object when invalid,
-null when valid.
+    Validate a font style. Returns the error object when invalid,
+    null when valid.
 
-@param {*} style - Value to validate as a style
+    @param {*} style - Value to validate as a style
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateStyle: function (style) {
 
@@ -153,13 +153,13 @@ null when valid.
 
 
     /********************************************************************
-Validate a style entry from the manifest. Ensures at least one
-source field (url, path, or asset) is present. Returns the error
-object when invalid, null when valid.
+    Validate a style entry from the manifest. Ensures at least one
+    source field (url, path, or asset) is present. Returns the error
+    object when invalid, null when valid.
 
-@param {*} entry - Style entry to validate
+    @param {*} entry - Style entry to validate
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateStyleEntry: function (entry) {
 
@@ -181,12 +181,12 @@ object when invalid, null when valid.
 
 
     /********************************************************************
-Validate a roles mapping object. Returns the error object when
-invalid, null when valid.
+    Validate a roles mapping object. Returns the error object when
+    invalid, null when valid.
 
-@param {*} roles - Value to validate as a roles mapping
+    @param {*} roles - Value to validate as a roles mapping
 
-@return {Object|null} - Error object or null
+    @return {Object|null} - Error object or null
     *********************************************************************/
     validateRoles: function (roles) {
 

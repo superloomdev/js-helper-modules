@@ -82,24 +82,24 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   const Adapter = {
 
     /********************************************************************
-Extract normalized HTTP request data from a raw API Gateway payload
-format v2.0 event (HTTP API or Lambda Function URLs).
+    Extract normalized HTTP request data from a raw API Gateway payload
+    format v2.0 event (HTTP API or Lambda Function URLs).
 
-Returned fields:
-headers          {Object}   - Lowercase header key -> value map
-cookies          {Object}   - Parsed cookies map
-query            {Object}   - Query-string parameters
-body             {Object}   - Parsed body parameters
-params           {Object}   - Path parameters
-method           {String}   - HTTP method ('GET', 'POST', ...)
-url              {String}   - Request URL path with query string
-response_handler {Function} - Wraps the Lambda callback
+    Returned fields:
+    headers          {Object}   - Lowercase header key -> value map
+    cookies          {Object}   - Parsed cookies map
+    query            {Object}   - Query-string parameters
+    body             {Object}   - Parsed body parameters
+    params           {Object}   - Path parameters
+    method           {String}   - HTTP method ('GET', 'POST', ...)
+    url              {String}   - Request URL path with query string
+    response_handler {Function} - Wraps the Lambda callback
 
-@param {Object}   raw_request       - Raw API Gateway v2.0 event
-@param {Object}   raw_context       - Lambda execution context (unused)
-@param {Function} response_callback - Lambda callback function(err, response)
+    @param {Object}   raw_request       - Raw API Gateway v2.0 event
+    @param {Object}   raw_context       - Lambda execution context (unused)
+    @param {Function} response_callback - Lambda callback function(err, response)
 
-@return {Object} - Normalized request fields plus response_handler
+    @return {Object} - Normalized request fields plus response_handler
     *********************************************************************/
     extractRequest: function (raw_request, rawContext, response_callback) {
 
@@ -154,20 +154,20 @@ response_handler {Function} - Wraps the Lambda callback
 
 
     /********************************************************************
-Build the API Gateway response envelope. API Gateway expects
-{ statusCode, headers, body, isBase64Encoded }.
+    Build the API Gateway response envelope. API Gateway expects
+    { statusCode, headers, body, isBase64Encoded }.
 
-Body normalization rules:
-null / undefined  -> ''
-Buffer            -> base64 string (isBase64Encoded = true)
-Object            -> JSON.stringify
-Anything else     -> String(value)
+    Body normalization rules:
+    null / undefined  -> ''
+    Buffer            -> base64 string (isBase64Encoded = true)
+    Object            -> JSON.stringify
+    Anything else     -> String(value)
 
-@param {Integer} status  - HTTP status code
-@param {Object}  headers - Response headers map
-@param {*}       body    - Response body (string, object, Buffer, or null)
+    @param {Integer} status  - HTTP status code
+    @param {Object}  headers - Response headers map
+    @param {*}       body    - Response body (string, object, Buffer, or null)
 
-@return {Object} - { statusCode, headers, body, isBase64Encoded }
+    @return {Object} - { statusCode, headers, body, isBase64Encoded }
     *********************************************************************/
     buildResponseEnvelope: function (status, headers, body) {
 
@@ -204,13 +204,13 @@ Anything else     -> String(value)
 
 
     /********************************************************************
-Return the viewer country code if supplied by CloudFront via the
-CloudFront-Viewer-Country header (forwarded through API Gateway).
-Returns null when not present.
+    Return the viewer country code if supplied by CloudFront via the
+    CloudFront-Viewer-Country header (forwarded through API Gateway).
+    Returns null when not present.
 
-@param {Object} headers - Lowercase request headers
+    @param {Object} headers - Lowercase request headers
 
-@return {String|null} - ISO 3166-1 alpha-2 country code, or null
+    @return {String|null} - ISO 3166-1 alpha-2 country code, or null
     *********************************************************************/
     getCountryCode: function (headers) {
 
@@ -233,12 +233,12 @@ Returns null when not present.
   const _Adapter = {
 
     /********************************************************************
-Parse a raw Cookie header string into a key/value map.
-Returns empty object on empty or missing input.
+    Parse a raw Cookie header string into a key/value map.
+    Returns empty object on empty or missing input.
 
-@param {String} cookie_header - Raw value of the Cookie header
+    @param {String} cookie_header - Raw value of the Cookie header
 
-@return {Object} - { name: value, ... }
+    @return {Object} - { name: value, ... }
     *********************************************************************/
     parseCookieHeader: function (cookie_header) {
 
@@ -281,12 +281,12 @@ Returns empty object on empty or missing input.
 
 
     /********************************************************************
-Parse a URL-encoded body string (application/x-www-form-urlencoded)
-into a key/value map. Returns empty object on empty or missing input.
+    Parse a URL-encoded body string (application/x-www-form-urlencoded)
+    into a key/value map. Returns empty object on empty or missing input.
 
-@param {String} body - URL-encoded body string
+    @param {String} body - URL-encoded body string
 
-@return {Object} - { key: value, ... }
+    @return {Object} - { key: value, ... }
     *********************************************************************/
     parseUrlEncodedBody: function (body) {
 
@@ -312,12 +312,12 @@ into a key/value map. Returns empty object on empty or missing input.
 
 
     /********************************************************************
-Normalize all header keys to lowercase. API Gateway may deliver
-headers with mixed casing depending on version and origin.
+    Normalize all header keys to lowercase. API Gateway may deliver
+    headers with mixed casing depending on version and origin.
 
-@param {Object} raw_headers - Headers object from the event
+    @param {Object} raw_headers - Headers object from the event
 
-@return {Object} - New object with all keys lowercased
+    @return {Object} - New object with all keys lowercased
     *********************************************************************/
     lowercaseHeaders: function (raw_headers) {
 
@@ -343,13 +343,13 @@ headers with mixed casing depending on version and origin.
 
 
     /********************************************************************
-Parse the POST body from an API Gateway event. Detects content-type
-and parses accordingly. Returns empty object when body is absent.
+    Parse the POST body from an API Gateway event. Detects content-type
+    and parses accordingly. Returns empty object when body is absent.
 
-@param {Object} event   - Raw API Gateway event
-@param {Object} headers - Lowercase headers map (already normalized)
+    @param {Object} event   - Raw API Gateway event
+    @param {Object} headers - Lowercase headers map (already normalized)
 
-@return {Object} - Parsed body as key/value map
+    @return {Object} - Parsed body as key/value map
     *********************************************************************/
     parseBody: function (event, headers) {
 

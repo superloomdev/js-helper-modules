@@ -96,12 +96,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Schema Setup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Idempotent table + index setup. Creates the logs table and two
-covering indexes if they do not exist. Safe to call on every boot.
+    Idempotent table + index setup. Creates the logs table and two
+    covering indexes if they do not exist. Safe to call on every boot.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -182,13 +182,13 @@ covering indexes if they do not exist. Safe to call on every boot.
     // ~~~~~~~~~~~~~~~~~~~~ Write ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Insert one log record. Uses a simple INSERT (no UPSERT needed -
-sort_key is unique per event).
+    Insert one log record. Uses a simple INSERT (no UPSERT needed -
+    sort_key is unique per event).
 
-@param {Object} instance - Request instance
-@param {Object} record   - Canonical log record from logger.js
+    @param {Object} instance - Request instance
+    @param {Object} record   - Canonical log record from logger.js
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     addLog: async function (instance, record) {
 
@@ -219,14 +219,14 @@ sort_key is unique per event).
     // ~~~~~~~~~~~~~~~~~~~~ Read ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-List log records for a (scope, entity_type, entity_id) triple.
-Results are ordered most-recent first by sort_key DESC.
-Supports cursor pagination, action filter, and time range.
+    List log records for a (scope, entity_type, entity_id) triple.
+    Results are ordered most-recent first by sort_key DESC.
+    Supports cursor pagination, action filter, and time range.
 
-@param {Object} instance - Request instance
-@param {Object} query    - Built by logger.js#buildQuery
+    @param {Object} instance - Request instance
+    @param {Object} query    - Built by logger.js#buildQuery
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByEntity: async function (instance, query) {
 
@@ -268,13 +268,13 @@ Supports cursor pagination, action filter, and time range.
 
 
     /********************************************************************
-List log records for a (scope, actor_type, actor_id) triple.
-Same pagination contract as getLogsByEntity.
+    List log records for a (scope, actor_type, actor_id) triple.
+    Same pagination contract as getLogsByEntity.
 
-@param {Object} instance - Request instance
-@param {Object} query    - Built by logger.js#buildQuery
+    @param {Object} instance - Request instance
+    @param {Object} query    - Built by logger.js#buildQuery
 
-@return {Promise<Object>} - { success, records, next_cursor, error }
+    @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
     getLogsByActor: async function (instance, query) {
 
@@ -318,12 +318,12 @@ Same pagination contract as getLogsByEntity.
     // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-Delete all rows whose expires_at is not NULL and <= now (seconds).
-The expires_at index makes this a fast range scan.
+    Delete all rows whose expires_at is not NULL and <= now (seconds).
+    The expires_at index makes this a fast range scan.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredLogs: async function (instance) {
 
@@ -372,8 +372,8 @@ The expires_at index makes this a fast range scan.
 
 
     /********************************************************************
-The ordered list of columns for INSERT statements. Must match the
-CREATE TABLE column order.
+    The ordered list of columns for INSERT statements. Must match the
+    CREATE TABLE column order.
     *********************************************************************/
     COLUMNS: [
       'scope',
@@ -393,12 +393,12 @@ CREATE TABLE column order.
 
 
     /********************************************************************
-Quote an identifier using SQLite double-quote style. Rejects any
-identifier containing a double-quote to prevent DDL injection.
+    Quote an identifier using SQLite double-quote style. Rejects any
+    identifier containing a double-quote to prevent DDL injection.
 
-@param {String} name - Identifier (table or column)
+    @param {String} name - Identifier (table or column)
 
-@return {String} - Quoted identifier
+    @return {String} - Quoted identifier
     *********************************************************************/
     Q: function (name) {
 
@@ -414,9 +414,9 @@ identifier containing a double-quote to prevent DDL injection.
 
 
     /********************************************************************
-Build the CREATE TABLE statement. Idempotent via IF NOT EXISTS.
+    Build the CREATE TABLE statement. Idempotent via IF NOT EXISTS.
 
-@return {String} - DDL statement
+    @return {String} - DDL statement
     *********************************************************************/
     buildCreateTableSQL: function () {
 
@@ -446,10 +446,10 @@ Build the CREATE TABLE statement. Idempotent via IF NOT EXISTS.
 
 
     /********************************************************************
-Build the entity covering index for getLogsByEntity queries.
-Columns: scope + entity_type + entity_id + sort_key DESC.
+    Build the entity covering index for getLogsByEntity queries.
+    Columns: scope + entity_type + entity_id + sort_key DESC.
 
-@return {String} - DDL statement
+    @return {String} - DDL statement
     *********************************************************************/
     buildCreateEntityIndexSQL: function () {
 
@@ -471,10 +471,10 @@ Columns: scope + entity_type + entity_id + sort_key DESC.
 
 
     /********************************************************************
-Build the actor covering index for getLogsByActor queries.
-Columns: scope + actor_type + actor_id + sort_key DESC.
+    Build the actor covering index for getLogsByActor queries.
+    Columns: scope + actor_type + actor_id + sort_key DESC.
 
-@return {String} - DDL statement
+    @return {String} - DDL statement
     *********************************************************************/
     buildCreateActorIndexSQL: function () {
 
@@ -496,9 +496,9 @@ Columns: scope + actor_type + actor_id + sort_key DESC.
 
 
     /********************************************************************
-Build the TTL index for cleanupExpiredLogs range scans.
+    Build the TTL index for cleanupExpiredLogs range scans.
 
-@return {String} - DDL statement
+    @return {String} - DDL statement
     *********************************************************************/
     buildCreateTTLIndexSQL: function () {
 
@@ -515,9 +515,9 @@ Build the TTL index for cleanupExpiredLogs range scans.
 
 
     /********************************************************************
-Build the INSERT statement.
+    Build the INSERT statement.
 
-@return {String} - SQL with positional ? placeholders
+    @return {String} - SQL with positional ? placeholders
     *********************************************************************/
     buildInsertSQL: function () {
 
@@ -534,14 +534,14 @@ Build the INSERT statement.
 
 
     /********************************************************************
-Build a SELECT statement for getLogsByEntity or getLogsByActor.
-Returns { sql, params } ready to pass to lib_sql.getRows.
-Fetches limit+1 rows so the caller can detect the next page.
+    Build a SELECT statement for getLogsByEntity or getLogsByActor.
+    Returns { sql, params } ready to pass to lib_sql.getRows.
+    Fetches limit+1 rows so the caller can detect the next page.
 
-@param {String} mode  - 'entity' | 'actor'
-@param {Object} query - Logger query object
+    @param {String} mode  - 'entity' | 'actor'
+    @param {Object} query - Logger query object
 
-@return {Object} - { sql, params }
+    @return {Object} - { sql, params }
     *********************************************************************/
     buildListSQL: function (mode, query) {
 
@@ -613,12 +613,12 @@ Fetches limit+1 rows so the caller can detect the next page.
 
 
     /********************************************************************
-Encode a canonical record value for a parameterized INSERT.
+    Encode a canonical record value for a parameterized INSERT.
 
-@param {String} col   - Column name
-@param {*}      value - Canonical record value
+    @param {String} col   - Column name
+    @param {*}      value - Canonical record value
 
-@return {*} - DB-safe value
+    @return {*} - DB-safe value
     *********************************************************************/
     toColumnValue: function (col, value) {
 
@@ -641,12 +641,12 @@ Encode a canonical record value for a parameterized INSERT.
 
 
     /********************************************************************
-Decode a raw row value into its canonical record shape.
+    Decode a raw row value into its canonical record shape.
 
-@param {String} col   - Column name
-@param {*}      value - Raw DB value
+    @param {String} col   - Column name
+    @param {*}      value - Raw DB value
 
-@return {*} - Canonical value
+    @return {*} - Canonical value
     *********************************************************************/
     fromColumnValue: function (col, value) {
 
@@ -673,11 +673,11 @@ Decode a raw row value into its canonical record shape.
 
 
     /********************************************************************
-Canonical record -> positional values array, aligned with COLUMNS.
+    Canonical record -> positional values array, aligned with COLUMNS.
 
-@param {Object} record - Canonical log record
+    @param {Object} record - Canonical log record
 
-@return {Array} - Positional values for parameterized INSERT
+    @return {Array} - Positional values for parameterized INSERT
     *********************************************************************/
     recordToRow: function (record) {
 
@@ -690,11 +690,11 @@ Canonical record -> positional values array, aligned with COLUMNS.
 
 
     /********************************************************************
-Raw row object -> canonical record.
+    Raw row object -> canonical record.
 
-@param {Object} row - Raw row from SQLite driver
+    @param {Object} row - Raw row from SQLite driver
 
-@return {Object} - Canonical log record
+    @return {Object} - Canonical log record
     *********************************************************************/
     rowToRecord: function (row) {
 

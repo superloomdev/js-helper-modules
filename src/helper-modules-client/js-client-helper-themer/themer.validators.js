@@ -54,12 +54,12 @@ const Validators = {
   // Runs once per loader call, before any derivation happens.
 
   /********************************************************************
-      Validate the merged config object. Throws on any misconfiguration
-      so the module fails at startup rather than at first render.
+  Validate the merged config object. Throws on any misconfiguration
+  so the module fails at startup rather than at first render.
 
-      @param {Object} CONFIG - Merged config for this instance
+  @param {Object} CONFIG - Merged config for this instance
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   validateConfig: function (CONFIG) {
 
@@ -90,14 +90,14 @@ const Validators = {
   // The build-time surface, which gathers findings instead of raising them.
 
   /********************************************************************
-      Run the template checks in collecting mode and return every
-      finding rather than throwing on the first.
+  Run the template checks in collecting mode and return every
+  finding rather than throwing on the first.
 
-      @param {*} template - Value to check as a template
+  @param {*} template - Value to check as a template
 
-      @return {Object} - Check result
-      @return {Boolean} .success - True when no finding was recorded
-      @return {String[]} .errors - Every finding, in the order found
+  @return {Object} - Check result
+  @return {Boolean} .success - True when no finding was recorded
+  @return {String[]} .errors - Every finding, in the order found
   *********************************************************************/
   checkTemplate: function (template) {
 
@@ -140,14 +140,14 @@ const Validators = {
   // Runs on every public call, before the engine reads the argument.
 
   /********************************************************************
-      Validate the structural shape of a template. Checks the sections
-      the engine reads, not the meaning of individual token entries;
-      entry-level rules are enforced during resolution where the token
-      name is known.
+  Validate the structural shape of a template. Checks the sections
+  the engine reads, not the meaning of individual token entries;
+  entry-level rules are enforced during resolution where the token
+  name is known.
 
-      @param {*} template - Value to validate as a template
+  @param {*} template - Value to validate as a template
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   validateTemplate: function (template) {
 
@@ -185,12 +185,12 @@ const Validators = {
 
 
   /********************************************************************
-      Validate a layer stack. Each layer is a sparse overlay applied in
-      array order, so a malformed entry would silently skip its pins.
+  Validate a layer stack. Each layer is a sparse overlay applied in
+  array order, so a malformed entry would silently skip its pins.
 
-      @param {*} layers - Value to validate as a layer array
+  @param {*} layers - Value to validate as a layer array
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   validateLayers: function (layers) {
 
@@ -212,11 +212,11 @@ const Validators = {
 
 
   /********************************************************************
-      Validate the per-call options bundle.
+  Validate the per-call options bundle.
 
-      @param {*} options - Value to validate as an options object
+  @param {*} options - Value to validate as an options object
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   validateOptions: function (options) {
 
@@ -244,13 +244,13 @@ const Validators = {
 
 
   /********************************************************************
-      Validate a platform name against the emitters this engine ships.
+  Validate a platform name against the emitters this engine ships.
 
-      @param {*} platform - Value to validate as a platform name
+  @param {*} platform - Value to validate as a platform name
 
-      @param {String[]} supported - Platform names the engine emits for
+  @param {String[]} supported - Platform names the engine emits for
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   validatePlatform: function (platform, supported) {
 
@@ -266,12 +266,12 @@ const Validators = {
   // Called by the engine during resolution, where the token name is known.
 
   /********************************************************************
-      Assert that a value is a number greater than zero.
+  Assert that a value is a number greater than zero.
 
-      @param {*} value - Value to check
-      @param {String} path - Dotted field path for the message
+  @param {*} value - Value to check
+  @param {String} path - Dotted field path for the message
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   assertPositiveNumber: function (value, path) {
 
@@ -284,12 +284,12 @@ const Validators = {
 
 
   /********************************************************************
-      Assert that a value is a number of zero or greater.
+  Assert that a value is a number of zero or greater.
 
-      @param {*} value - Value to check
-      @param {String} path - Dotted field path for the message
+  @param {*} value - Value to check
+  @param {String} path - Dotted field path for the message
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   assertNonNegativeNumber: function (value, path) {
 
@@ -302,12 +302,12 @@ const Validators = {
 
 
   /********************************************************************
-      Assert that a value is a proportion between 0 and 1 inclusive.
+  Assert that a value is a proportion between 0 and 1 inclusive.
 
-      @param {*} value - Value to check
-      @param {String} path - Dotted field path for the message
+  @param {*} value - Value to check
+  @param {String} path - Dotted field path for the message
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   assertUnitInterval: function (value, path) {
 
@@ -320,12 +320,12 @@ const Validators = {
 
 
   /********************************************************************
-      Assert that a value is a contrast ratio between 1 and 21 inclusive.
+  Assert that a value is a contrast ratio between 1 and 21 inclusive.
 
-      @param {*} value - Value to check
-      @param {String} path - Dotted field path for the message
+  @param {*} value - Value to check
+  @param {String} path - Dotted field path for the message
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   assertContrastRatio: function (value, path) {
 
@@ -338,14 +338,14 @@ const Validators = {
 
 
   /********************************************************************
-      Throw a programmer error naming a field and the rule it broke.
-      Exposed so the engine raises failures in the same format the
-      validators do.
+  Throw a programmer error naming a field and the rule it broke.
+  Exposed so the engine raises failures in the same format the
+  validators do.
 
-      @param {String} path - Dotted field path that is wrong
-      @param {String} rule - Expected-shape clause from the error catalog
+  @param {String} path - Dotted field path that is wrong
+  @param {String} rule - Expected-shape clause from the error catalog
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   fail: function (path, rule) {
 
@@ -362,15 +362,15 @@ const Validators = {
 const _Validators = {
 
   /********************************************************************
-      Compose and throw a programmer-error message.
+  Compose and throw a programmer-error message.
 
-      The shape is the framework's programmer-error format: an alias
-      prefix, the field path that is wrong, and the constraint it failed.
+  The shape is the framework's programmer-error format: an alias
+  prefix, the field path that is wrong, and the constraint it failed.
 
-      @param {String} path - Dotted field path that is wrong
-      @param {String} rule - Expected-shape clause from the error catalog
+  @param {String} path - Dotted field path that is wrong
+  @param {String} rule - Expected-shape clause from the error catalog
 
-      @return {void}
+  @return {void}
   *********************************************************************/
   fail: function (path, rule) {
 

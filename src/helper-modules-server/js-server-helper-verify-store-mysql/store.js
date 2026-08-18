@@ -101,13 +101,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // statement for broad MySQL version compatibility.
 
     /********************************************************************
-Idempotent table creation. The expires_at index is inlined in
-the CREATE TABLE statement so no separate CREATE INDEX call is
-needed - universally supported across MySQL versions.
+    Idempotent table creation. The expires_at index is inlined in
+    the CREATE TABLE statement so no separate CREATE INDEX call is
+    needed - universally supported across MySQL versions.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setupNewStore: async function (instance) {
 
@@ -145,13 +145,13 @@ needed - universally supported across MySQL versions.
     // on a miss; incrementFailCount is an atomic in-place UPDATE.
 
     /********************************************************************
-Read by composite primary key (scope, id). Returns null when absent.
+    Read by composite primary key (scope, id). Returns null when absent.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, record, error }
+    @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
     getRecord: async function (instance, scope, key) {
 
@@ -189,16 +189,16 @@ Read by composite primary key (scope, id). Returns null when absent.
 
 
     /********************************************************************
-Upsert via INSERT ... ON DUPLICATE KEY UPDATE. A second call
-with the same (scope, id) key replaces the mutable columns in
-a single round-trip.
+    Upsert via INSERT ... ON DUPLICATE KEY UPDATE. A second call
+    with the same (scope, id) key replaces the mutable columns in
+    a single round-trip.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
-@param {Object} record   - { code, fail_count, created_at, expires_at }
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
+    @param {Object} record   - { code, fail_count, created_at, expires_at }
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setRecord: async function (instance, scope, key, record) {
 
@@ -232,14 +232,14 @@ a single round-trip.
 
 
     /********************************************************************
-Atomic fail-counter increment via in-place UPDATE. Safe under
-concurrent verify attempts - each call adds exactly 1.
+    Atomic fail-counter increment via in-place UPDATE. Safe under
+    concurrent verify attempts - each call adds exactly 1.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     incrementFailCount: async function (instance, scope, key) {
 
@@ -275,14 +275,14 @@ concurrent verify attempts - each call adds exactly 1.
 
 
     /********************************************************************
-Idempotent delete by composite key. A missing row is treated as
-success so callers do not need to check existence first.
+    Idempotent delete by composite key. A missing row is treated as
+    success so callers do not need to check existence first.
 
-@param {Object} instance - Request instance
-@param {String} scope    - Logical owner namespace
-@param {String} key      - Specific verification purpose
+    @param {Object} instance - Request instance
+    @param {String} scope    - Logical owner namespace
+    @param {String} key      - Specific verification purpose
 
-@return {Promise<Object>} - { success, error }
+    @return {Promise<Object>} - { success, error }
     *********************************************************************/
     deleteRecord: async function (instance, scope, key) {
 
@@ -323,12 +323,12 @@ success so callers do not need to check existence first.
     // efficient range scan even as the table grows.
 
     /********************************************************************
-Sweep expired records. Uses the expires_at index for an efficient
-range scan. Run on a cron for garbage collection.
+    Sweep expired records. Uses the expires_at index for an efficient
+    range scan. Run on a cron for garbage collection.
 
-@param {Object} instance - Request instance
+    @param {Object} instance - Request instance
 
-@return {Promise<Object>} - { success, deleted_count, error }
+    @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     cleanupExpiredRecords: async function (instance) {
 
@@ -373,13 +373,13 @@ range scan. Run on a cron for garbage collection.
 
 
     /********************************************************************
-Quote an identifier using MySQL backtick style. The table_name
-arrives from CONFIG, so this guard makes identifier
-injection impossible even if the caller passes a crafted name.
+    Quote an identifier using MySQL backtick style. The table_name
+    arrives from CONFIG, so this guard makes identifier
+    injection impossible even if the caller passes a crafted name.
 
-@param {String} name - Identifier (table or column)
+    @param {String} name - Identifier (table or column)
 
-@return {String} - Backtick-quoted identifier
+    @return {String} - Backtick-quoted identifier
     *********************************************************************/
     BT: function (name) {
 
@@ -395,11 +395,11 @@ injection impossible even if the caller passes a crafted name.
 
 
     /********************************************************************
-Build the CREATE TABLE DDL array. The expires_at index is inlined
-for broad MySQL version compatibility. Called once at
-createInterface time. Closes over CONFIG from createInterface.
+    Build the CREATE TABLE DDL array. The expires_at index is inlined
+    for broad MySQL version compatibility. Called once at
+    createInterface time. Closes over CONFIG from createInterface.
 
-@return {Array<String>} - [CREATE TABLE stmt]
+    @return {Array<String>} - [CREATE TABLE stmt]
     *********************************************************************/
     buildDDL: function () {
 
@@ -425,12 +425,12 @@ createInterface time. Closes over CONFIG from createInterface.
 
 
     /********************************************************************
-Build the MySQL UPSERT statement. Uses
-      INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)
-Called once at createInterface time.
-Closes over CONFIG from createInterface.
+    Build the MySQL UPSERT statement. Uses
+    INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)
+    Called once at createInterface time.
+    Closes over CONFIG from createInterface.
 
-@return {String} - SQL template using `?` placeholders
+    @return {String} - SQL template using `?` placeholders
     *********************************************************************/
     buildUpsertSQL: function () {
 

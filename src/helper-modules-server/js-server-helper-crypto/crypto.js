@@ -78,12 +78,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // Cryptographically secure random generation and UUID helpers.
 
     /********************************************************************
-Generate cryptographically secure random string from a character set
+    Generate cryptographically secure random string from a character set
 
-@param {String} charset - Superset of characters to pick from
-@param {Integer} length - Desired length of output string
+    @param {String} charset - Superset of characters to pick from
+    @param {Integer} length - Desired length of output string
 
-@return {String} - Random string of specified length
+    @return {String} - Random string of specified length
     *********************************************************************/
     generateRandomString: function (charset, length) {
 
@@ -107,13 +107,13 @@ Generate cryptographically secure random string from a character set
 
 
     /********************************************************************
-Generate time-prefixed random string (base36 time + random padding)
+    Generate time-prefixed random string (base36 time + random padding)
 
-@param {Integer} time - Current Unix time in seconds
-@param {Integer} [min_length] - (Optional) Minimum total length, padded with random chars
-@param {Integer} [epoch_offset] - (Optional) Custom epoch start date in seconds
+    @param {Integer} time - Current Unix time in seconds
+    @param {Integer} [min_length] - (Optional) Minimum total length, padded with random chars
+    @param {Integer} [epoch_offset] - (Optional) Custom epoch start date in seconds
 
-@return {String} - Time-based random string in base36
+    @return {String} - Time-based random string in base36
     *********************************************************************/
     generateTimeRandomString: function (time, min_length, epoch_offset) {
 
@@ -139,9 +139,9 @@ Generate time-prefixed random string (base36 time + random padding)
 
 
     /********************************************************************
-Generate UUIDv4 string (36 characters, hexadecimal)
+    Generate UUIDv4 string (36 characters, hexadecimal)
 
-@return {String} - Random UUIDv4 ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')
+    @return {String} - Random UUIDv4 ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')
     *********************************************************************/
     generateUUID: function () {
 
@@ -151,10 +151,10 @@ Generate UUIDv4 string (36 characters, hexadecimal)
 
 
     /********************************************************************
-Generate compact UUID (25 characters, base36)
-Standard UUID with hyphens removed, converted to base36
+    Generate compact UUID (25 characters, base36)
+    Standard UUID with hyphens removed, converted to base36
 
-@return {String} - Compact UUID in base36 (25 chars)
+    @return {String} - Compact UUID in base36 (25 chars)
     *********************************************************************/
     generateCompactUUID: function () {
 
@@ -169,11 +169,11 @@ Standard UUID with hyphens removed, converted to base36
     // MD5 for checksums, SHA256-HMAC for secure keyed hashing.
 
     /********************************************************************
-Generate MD5 hash of a string (32 characters, hexadecimal)
+    Generate MD5 hash of a string (32 characters, hexadecimal)
 
-@param {String} str - String to hash
+    @param {String} str - String to hash
 
-@return {String} - MD5 hash
+    @return {String} - MD5 hash
     *********************************************************************/
     md5String: function (str) {
 
@@ -183,12 +183,12 @@ Generate MD5 hash of a string (32 characters, hexadecimal)
 
 
     /********************************************************************
-Generate HMAC-SHA256 hash of a string (64 characters, hexadecimal)
+    Generate HMAC-SHA256 hash of a string (64 characters, hexadecimal)
 
-@param {String} str - String to hash
-@param {String} [secret] - (Optional) Secret key for HMAC. Default ''
+    @param {String} str - String to hash
+    @param {String} [secret] - (Optional) Secret key for HMAC. Default ''
 
-@return {String} - SHA256 HMAC hash
+    @return {String} - SHA256 HMAC hash
     *********************************************************************/
     sha256String: function (str, secret) {
 
@@ -205,12 +205,12 @@ Generate HMAC-SHA256 hash of a string (64 characters, hexadecimal)
     // Symmetric encryption using AES-128-CBC.
 
     /********************************************************************
-Encrypt a string using AES-128-CBC
+    Encrypt a string using AES-128-CBC
 
-@param {String} str - String to encrypt
-@param {String} secret - Secret key for encryption
+    @param {String} str - String to encrypt
+    @param {String} secret - Secret key for encryption
 
-@return {String} - Encrypted hexadecimal string
+    @return {String} - Encrypted hexadecimal string
     *********************************************************************/
     aesEncrypt: function (str, secret) {
 
@@ -228,12 +228,12 @@ Encrypt a string using AES-128-CBC
 
 
     /********************************************************************
-Decrypt a string encrypted with AES-128-CBC
+    Decrypt a string encrypted with AES-128-CBC
 
-@param {String} str - Encrypted hexadecimal string
-@param {String} secret - Secret key used for encryption
+    @param {String} str - Encrypted hexadecimal string
+    @param {String} secret - Secret key used for encryption
 
-@return {String} - Decrypted string
+    @return {String} - Decrypted string
     *********************************************************************/
     aesDecrypt: function (str, secret) {
 
@@ -254,11 +254,11 @@ Decrypt a string encrypted with AES-128-CBC
     // Integer <-> base36 conversion utilities.
 
     /********************************************************************
-Convert integer to base36 string
+    Convert integer to base36 string
 
-@param {Integer} num - Number to convert
+    @param {Integer} num - Number to convert
 
-@return {String} - Base36 representation
+    @return {String} - Base36 representation
     *********************************************************************/
     intToBase36: function (num) {
 
@@ -268,11 +268,11 @@ Convert integer to base36 string
 
 
     /********************************************************************
-Convert base36 string to integer
+    Convert base36 string to integer
 
-@param {String} str - Base36 string
+    @param {String} str - Base36 string
 
-@return {Integer} - Numeric value
+    @return {Integer} - Numeric value
     *********************************************************************/
     base36ToInt: function (str) {
 
@@ -285,11 +285,11 @@ Convert base36 string to integer
     // Standard and URL-safe base64 encoding/decoding.
 
     /********************************************************************
-Convert string to base64
+    Convert string to base64
 
-@param {String} str - String to encode
+    @param {String} str - String to encode
 
-@return {String} - Base64 encoded string
+    @return {String} - Base64 encoded string
     *********************************************************************/
     stringToBase64: function (str) {
 
@@ -299,11 +299,11 @@ Convert string to base64
 
 
     /********************************************************************
-Convert base64 string to UTF-8 string
+    Convert base64 string to UTF-8 string
 
-@param {String} str - Base64 string to decode
+    @param {String} str - Base64 string to decode
 
-@return {String} - Decoded string
+    @return {String} - Decoded string
     *********************************************************************/
     base64ToString: function (str) {
 
@@ -313,11 +313,11 @@ Convert base64 string to UTF-8 string
 
 
     /********************************************************************
-Convert Buffer to base64 string
+    Convert Buffer to base64 string
 
-@param {Buffer} obj - Buffer object
+    @param {Buffer} obj - Buffer object
 
-@return {String} - Base64 string
+    @return {String} - Base64 string
     *********************************************************************/
     bufferToBase64: function (obj) {
 
@@ -327,12 +327,12 @@ Convert Buffer to base64 string
 
 
     /********************************************************************
-Convert standard base64 to URL-safe base64
-Replaces '+' with '-', '/' with '_', removes trailing '='
+    Convert standard base64 to URL-safe base64
+    Replaces '+' with '-', '/' with '_', removes trailing '='
 
-@param {String} str - Standard base64 string
+    @param {String} str - Standard base64 string
 
-@return {String} - URL-safe base64 string
+    @return {String} - URL-safe base64 string
     *********************************************************************/
     urlEncodeBase64: function (str) {
 
@@ -345,12 +345,12 @@ Replaces '+' with '-', '/' with '_', removes trailing '='
 
 
     /********************************************************************
-Convert URL-safe base64 back to standard base64
-Replaces '-' with '+', '_' with '/', adds trailing '=' padding
+    Convert URL-safe base64 back to standard base64
+    Replaces '-' with '+', '_' with '/', adds trailing '=' padding
 
-@param {String} str - URL-safe base64 string
+    @param {String} str - URL-safe base64 string
 
-@return {String} - Standard base64 string
+    @return {String} - Standard base64 string
     *********************************************************************/
     urlDecodeBase64: function (str) {
 
@@ -376,11 +376,11 @@ Replaces '-' with '+', '_' with '/', adds trailing '=' padding
   const _Crypto = {
 
     /********************************************************************
-Convert hexadecimal string to base36
+    Convert hexadecimal string to base36
 
-@param {String} hex - Hexadecimal string
+    @param {String} hex - Hexadecimal string
 
-@return {String} - Base36 string
+    @return {String} - Base36 string
     *********************************************************************/
     hexToBase36: function (hex) {
 
