@@ -175,6 +175,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     performanceAuditLog: function (action, routine, reference_time) {
 
+      // Skip audit logging when debug level is disabled
       if (!_Debug.shouldLog('debug')) {
         return;
       }
