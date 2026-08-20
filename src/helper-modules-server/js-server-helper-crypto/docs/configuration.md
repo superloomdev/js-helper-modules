@@ -33,13 +33,27 @@ Loader call semantics:
 
 ## Configuration Keys
 
-One key, used internally by the base-conversion helpers. Override only when you need a custom display alphabet.
+### Base Conversion
 
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `BASE36_CHARSET` | `string` | `'0123456789abcdefghijklmnopqrstuvwxyz'` | Alphabet used by `generateCompactUUID` and the random-padding inside `generateTimeRandomString`. Must be exactly 36 unique characters in ascending base-36 order if you replace it |
 
 > **When to override `BASE36_CHARSET`.** Only when the application needs a custom display alphabet (for example, to avoid visually-confusable characters in a public-facing identifier). The default is the canonical base-36 alphabet.
+
+### Password Hashing (scrypt)
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `PASSWORD_HASH_COST_N` | `number` | `16384` | scrypt CPU/memory cost parameter. Must be a power of 2 |
+| `PASSWORD_HASH_BLOCK_SIZE_R` | `number` | `8` | scrypt block size parameter |
+| `PASSWORD_HASH_PARALLELIZATION_P` | `number` | `1` | scrypt parallelization parameter |
+| `PASSWORD_HASH_KEY_LENGTH_BYTES` | `number` | `64` | scrypt output key length in bytes |
+| `PASSWORD_HASH_SALT_LENGTH_BYTES` | `number` | `16` | scrypt salt length in bytes |
+
+> **Upgradeable parameters.** The output format of `generatePasswordHash` is self-describing (`scrypt$N$r$p$salt$digest`). Raising `PASSWORD_HASH_COST_N` in config does not break verification of old hashes: `checkPassword` reads the parameters from the stored hash, not from `CONFIG`. This lets you increase the cost over time without a migration.
+>
+> **maxmem.** `scryptSync` throws when `N * r * p` exceeds the default `maxmem`. The module passes an explicit `maxmem` of `256 * N * r` so a project that raises `N` in config does not hit an opaque failure.
 
 ---
 
