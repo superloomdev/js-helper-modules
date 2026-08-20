@@ -88,7 +88,7 @@ module.exports = function runSharedStoreSuite (args) {
       const instance = buildInstance();
 
       const log_result = await Logger.log(instance, {
-        scope: 'tenant-A',
+        tenant_id: 'tenant-A',
         entity_type: 'user',
         entity_id: uniqueId('user'),
         actor_type: 'admin',

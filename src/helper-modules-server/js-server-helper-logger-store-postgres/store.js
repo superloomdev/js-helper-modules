@@ -104,8 +104,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     setupNewStore: async function (instance) {
 
       const create_table_sql = _Store.buildCreateTableSQL();
-      const create_idx_entity_sql = _Store.buildCreateIndexSQL('entity_sort', ['scope', 'entity_type', 'entity_id', 'sort_key']);
-      const create_idx_actor_sql  = _Store.buildCreateIndexSQL('actor_sort',  ['scope', 'actor_type', 'actor_id', 'sort_key']);
+      const create_idx_entity_sql = _Store.buildCreateIndexSQL('entity_sort', ['tenant_id', 'entity_type', 'entity_id', 'sort_key']);
+      const create_idx_actor_sql  = _Store.buildCreateIndexSQL('actor_sort',  ['tenant_id', 'actor_type', 'actor_id', 'sort_key']);
       const create_idx_expires_sql = _Store.buildCreateIndexSQL('expires_at', ['expires_at']);
 
       const r1 = await Lib.SQL.write(instance, create_table_sql, []);
@@ -178,7 +178,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Supports optional action filter and cursor-based pagination.
 
     @param {Object} instance - Request instance
-    @param {Object} query    - { scope, entity_type, entity_id, actions?, limit?, cursor? }
+    @param {Object} query    - { tenant_id, entity_type, entity_id, actions?, limit?, cursor? }
 
     @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
@@ -220,7 +220,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Supports cursor-based pagination.
 
     @param {Object} instance - Request instance
-    @param {Object} query    - { scope, actor_type, actor_id, limit?, cursor? }
+    @param {Object} query    - { tenant_id, actor_type, actor_id, limit?, cursor? }
 
     @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
@@ -311,7 +311,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     // Ordered list of every persisted column (matches INSERT order)
     COLUMNS: [
-      'scope',
+      'tenant_id',
       'entity_type',
       'entity_id',
       'actor_type',
@@ -362,7 +362,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
-          '  ' + Q('scope')        + ' VARCHAR(128) NOT NULL DEFAULT \'\',' +
+          '  ' + Q('tenant_id')        + ' VARCHAR(128) NOT NULL DEFAULT \'\',' +
           '  ' + Q('entity_type')  + ' VARCHAR(64)  NOT NULL,' +
           '  ' + Q('entity_id')    + ' VARCHAR(128) NOT NULL,' +
           '  ' + Q('actor_type')   + ' VARCHAR(64)  NOT NULL,' +
@@ -432,7 +432,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the SELECT SQL for entity-scoped log queries.
 
-    @param {Object} query - { scope, entity_type, entity_id, actions?, limit?, cursor? }
+    @param {Object} query - { tenant_id, entity_type, entity_id, actions?, limit?, cursor? }
 
     @return {Object} - { sql, values }
     *********************************************************************/
@@ -444,7 +444,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const values = [];
 
       let sql = 'SELECT * FROM ' + t + ' WHERE ';
-      sql += Q('scope') + ' = ?'; values.push(query.scope || '');
+      sql += Q('tenant_id') + ' = ?'; values.push(query.tenant_id || '');
       sql += ' AND ' + Q('entity_type') + ' = ?'; values.push(query.entity_type);
       sql += ' AND ' + Q('entity_id') + ' = ?'; values.push(query.entity_id);
 
@@ -473,7 +473,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the SELECT SQL for actor-scoped log queries.
 
-    @param {Object} query - { scope, actor_type, actor_id, limit?, cursor? }
+    @param {Object} query - { tenant_id, actor_type, actor_id, limit?, cursor? }
 
     @return {Object} - { sql, values }
     *********************************************************************/
@@ -485,7 +485,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const values = [];
 
       let sql = 'SELECT * FROM ' + t + ' WHERE ';
-      sql += Q('scope') + ' = ?'; values.push(query.scope || '');
+      sql += Q('tenant_id') + ' = ?'; values.push(query.tenant_id || '');
       sql += ' AND ' + Q('actor_type') + ' = ?'; values.push(query.actor_type);
       sql += ' AND ' + Q('actor_id') + ' = ?'; values.push(query.actor_id);
 
@@ -512,7 +512,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     recordToRow: function (record) {
 
       return [
-        record.scope        || '',
+        record.tenant_id        || '',
         record.entity_type,
         record.entity_id,
         record.actor_type,
@@ -541,7 +541,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     rowToRecord: function (row) {
 
       return {
-        scope:        row.scope        || '',
+        tenant_id:        row.tenant_id        || '',
         entity_type:  row.entity_type,
         entity_id:    row.entity_id,
         actor_type:   row.actor_type,
