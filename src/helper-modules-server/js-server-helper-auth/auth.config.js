@@ -64,7 +64,8 @@ module.exports = {
     audience: null,
     access_token_ttl_seconds: 900,        // 15 minutes
     refresh_token_ttl_seconds: 2592000,   // 30 days
-    rotate_refresh_token: true            // RFC 6819 best practice
+    rotate_refresh_token: true,           // RFC 6819 best practice
+    claims_max_bytes: 1024                // Max byte size of the slc claim payload
   },
 
   // Cookie name prefix. The full cookie name is

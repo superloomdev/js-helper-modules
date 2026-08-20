@@ -57,7 +57,7 @@ Validates options, runs the limit policy (list-then-filter), batch-deletes evict
 | Option | Type | Required | Description |
 |---|---|---|---|
 | `tenant_id` | `string` | Yes | Tenant scoping key. All store queries are scoped to this value. `#` is forbidden and throws `TypeError` |
-| `actor_id` | `string` | Yes | The authenticating actor. Reserved characters `-` and `#` are forbidden and throw `TypeError` |
+| `actor_id` | `string` | Yes | The authenticating actor. `\u001F` is forbidden and throws `TypeError`; `-` and `#` are allowed (a standard UUID is a valid `actor_id`) |
 | `install_id` | `string` | No | Device or browser install identifier. When supplied and matching an existing session, that session is replaced atomically regardless of caps |
 | `install_platform` | `string` | Yes | One of `'web'`, `'ios'`, `'android'`, `'macos'`, `'windows'`, `'linux'`, `'other'`. Used by `LIMITS.by_platform_max` |
 | `install_form_factor` | `string` | Yes | One of `'desktop'`, `'mobile'`, `'tablet'`, `'tv'`, `'watch'`, `'other'`. Used by `LIMITS.by_form_factor_max` |
@@ -71,10 +71,11 @@ Validates options, runs the limit policy (list-then-filter), batch-deletes evict
 | `client_ip_address` | `string` | No | IPv4 or IPv6 of the request origin |
 | `client_user_agent` | `string` | No | HTTP `User-Agent` at login time |
 | `custom_data` | `object` | No | Arbitrary JSON stored verbatim with the session |
+| `claims` | `object` | No | Caller-supplied claims, nested under `slc` in the JWT payload. Must not contain the key `slc` itself. Rejected with `JWT_CLAIMS_TOO_LARGE` if the JSON encoding exceeds `JWT.claims_max_bytes` bytes. Ignored when `ENABLE_JWT` is `false` |
 
 **Returns** `{ success, auth_id, session, cookies, error }` in DB mode. In JWT mode also `{ access_token, refresh_token }`. `cookies` is `null` when `COOKIE_PREFIX` is not configured.
 
-Possible errors: `LIMIT_REACHED` (when caps are hit and `LIMITS.evict_oldest_on_limit` is `false`), `SERVICE_UNAVAILABLE` (store failure).
+Possible errors: `LIMIT_REACHED` (when caps are hit and `LIMITS.evict_oldest_on_limit` is `false`), `SERVICE_UNAVAILABLE` (store failure), `JWT_CLAIMS_TOO_LARGE` (claims payload exceeds `JWT.claims_max_bytes`).
 
 ### `verifySession(instance, options)` *(async)*
 
@@ -253,7 +254,7 @@ Stateless verification of an access token. Decodes the header and payload, check
 |---|---|---|---|
 | `jwt` | `string` | Yes | Compact JWS string |
 
-**Returns** `{ success, claims, error }`. On success, `claims` contains `iss`, `aud`, `iat`, `exp`, `jti`, `sub`, `atp` (actor type), `tid` (tenant), `ikd` (install kind), `tkk` (token key).
+**Returns** `{ success, claims, error }`. On success, `claims` contains `iss`, `aud`, `iat`, `exp`, `jti`, `sub`, `atp` (actor type), `tid` (tenant), `ikd` (install kind), `tkk` (token key), and optionally `slc` (caller-supplied claims, present only when `options.claims` was passed to `createSession`).
 
 Possible errors: `INVALID_TOKEN`, `SESSION_EXPIRED`, `ACTOR_TYPE_MISMATCH`.
 
@@ -294,5 +295,6 @@ All operational errors are frozen objects from `auth.errors.js` with shape `{ ty
 | `AUTH_SESSION_EXPIRED` | `verifySession`, `verifyJwt`, `refreshSessionJwt` | `expires_at` is in the past |
 | `AUTH_ACTOR_TYPE_MISMATCH` | `verifySession`, `verifyJwt` | Stored `actor_type` does not match `CONFIG.ACTOR_TYPE` |
 | `AUTH_NOT_IMPLEMENTED` | `setupNewStore` on NoSQL backends | The operation has no meaning on this backend; provision the schema out-of-band |
+| `AUTH_JWT_CLAIMS_TOO_LARGE` | `createSession` | The `options.claims` payload exceeds `JWT.claims_max_bytes` |
 
-> **Programmer errors throw.** Invalid `Store` config at loader time, mutation of identity fields, and reserved characters in `actor_id` throw `TypeError` immediately. The catalog above only covers operational failures.
+> **Programmer errors throw.** Invalid `Store` config at loader time, mutation of identity fields, and `\u001F` in `actor_id` or `tenant_id` throw `TypeError` immediately. The catalog above only covers operational failures.

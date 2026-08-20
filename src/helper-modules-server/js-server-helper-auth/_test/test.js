@@ -856,3 +856,141 @@ describe('createSession wire-format validation (plan 0042)', function () {
   });
 
 });
+
+
+// ============================================================================
+// OPAQUE CLAIMS PASSTHROUGH (plan 0122)
+// ============================================================================
+
+describe('createSession claims passthrough (plan 0122)', function () {
+
+  const jwt_config = {
+    Store: MemoryStore._createNew(),
+    ACTOR_TYPE: 'user',
+    TTL_SECONDS: 3600,
+    LIMITS: { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true },
+    ENABLE_JWT: true,
+    JWT: {
+      signing_key: 'test-signing-key-at-least-32-chars-long!!',
+      issuer: 'test-iss',
+      audience: 'test-aud',
+      access_token_ttl_seconds: 900,
+      refresh_token_ttl_seconds: 2592000,
+      rotate_refresh_token: true,
+      claims_max_bytes: 1024
+    }
+  };
+
+  const buildInstanceLocal = function (time_seconds) {
+
+    const instance = Lib.Instance.initialize();
+    if (typeof time_seconds === 'number') {
+      instance.time = time_seconds;
+      instance.time_ms = time_seconds * 1000;
+    }
+    return instance;
+
+  };
+
+  it('claims absent produces a byte-identical token to the pre-change path', async function () {
+
+    const auth = AuthFactory(Lib, jwt_config);
+    const instance = buildInstanceLocal(1000);
+
+    // Create a session without claims
+    const result = await auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+
+    assert.ok(result.success);
+    assert.ok(result.access_token);
+
+    // Decode the JWT payload and verify no 'slc' key is present
+    const parts = result.access_token.split('.');
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    assert.equal(Object.prototype.hasOwnProperty.call(payload, 'slc'), false);
+
+  });
+
+  it('claims round-trip through verifySessionJwt unchanged under slc', async function () {
+
+    const auth = AuthFactory(Lib, jwt_config);
+    const instance = buildInstanceLocal(1000);
+
+    const result = await auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop',
+      claims: { r: ['manager'] }
+    });
+
+    assert.ok(result.success);
+    assert.ok(result.access_token);
+
+    // Decode the JWT payload and verify claims are nested under 'slc'
+    const parts = result.access_token.split('.');
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    assert.ok(Object.prototype.hasOwnProperty.call(payload, 'slc'));
+    assert.deepEqual(payload.slc, { r: ['manager'] });
+
+  });
+
+  it('claims containing the key "slc" throws TypeError and mints no token', async function () {
+
+    const auth = AuthFactory(Lib, jwt_config);
+    const instance = buildInstanceLocal(1000);
+
+    await assert.rejects(
+      auth.createSession(instance, {
+        tenant_id: 'T', actor_id: 'A1',
+        install_platform: 'web', install_form_factor: 'desktop',
+        claims: { slc: 1 }
+      }),
+      function (err) {
+        return err instanceof TypeError &&
+          /must not contain the key "slc"/.test(err.message);
+      }
+    );
+
+  });
+
+  it('claims over claims_max_bytes returns error envelope and mints no token', async function () {
+
+    // Build a config with a very small claims_max_bytes
+    const small_config = Object.assign({}, jwt_config, {
+      JWT: Object.assign({}, jwt_config.JWT, { claims_max_bytes: 10 })
+    });
+    const auth = AuthFactory(Lib, small_config);
+    const instance = buildInstanceLocal(1000);
+
+    const result = await auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop',
+      claims: { r: ['manager', 'admin', 'superadmin'] }
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.error, ERRORS.JWT_CLAIMS_TOO_LARGE);
+    assert.equal(result.access_token, null);
+
+  });
+
+  it('claims is a no-op when ENABLE_JWT is false', async function () {
+
+    const no_jwt_config = Object.assign({}, jwt_config, { ENABLE_JWT: false });
+    const auth = AuthFactory(Lib, no_jwt_config);
+    const instance = buildInstanceLocal(1000);
+
+    // claims is accepted and silently ignored when JWT is off
+    const result = await auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'A1',
+      install_platform: 'web', install_form_factor: 'desktop',
+      claims: { r: ['manager'] }
+    });
+
+    assert.ok(result.success);
+    assert.equal(result.access_token, null);
+
+  });
+
+});

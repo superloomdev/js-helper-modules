@@ -36,6 +36,11 @@ module.exports = Object.freeze({
   NOT_IMPLEMENTED: Object.freeze({
     type: 'AUTH_NOT_IMPLEMENTED',
     message: 'This operation is not yet implemented for this backend'
+  }),
+
+  JWT_CLAIMS_TOO_LARGE: Object.freeze({
+    type: 'AUTH_JWT_CLAIMS_TOO_LARGE',
+    message: 'The claims payload exceeds the configured maximum byte size'
   })
 
 });

@@ -99,13 +99,14 @@ Inbound cookies are read from `instance.http_request.cookies` (already parsed by
 
 createSession(instance, options) -> { success, auth_id, session, cookies, [access_token, refresh_token], error } | async:yes
   Validates options, runs limit policy (list-then-filter), batch-deletes evictions, inserts new session. Returns cookie descriptor in `cookies` when COOKIE_PREFIX is set. In JWT mode also mints access_token + refresh_token.
-  - options.tenant_id (required; no `#`), options.actor_id (required; no `-` or `#`)
+  - options.tenant_id (required; no `\u001F`), options.actor_id (required; no `\u001F`; `-` and `#` are allowed)
   - options.install_id (optional; matches existing session for atomic same-device replacement)
   - options.install_platform (required: web|ios|android|macos|windows|linux|other)
   - options.install_form_factor (required: mobile|tablet|desktop|tv|watch|other)
   - options.client_* (optional metadata: name/version/os/screen/ip/ua)
   - options.custom_data (optional project-owned object)
-  - Errors: AUTH_LIMIT_REACHED, AUTH_SERVICE_UNAVAILABLE
+  - options.claims (optional; nested under `slc` in the JWT payload; max `JWT.claims_max_bytes` bytes)
+  - Errors: AUTH_LIMIT_REACHED, AUTH_SERVICE_UNAVAILABLE, AUTH_JWT_CLAIMS_TOO_LARGE
 
 verifySession(instance, options) -> { success, session, error } | async:yes
   Reads token from Authorization: Bearer header or `instance.http_request.cookies[cookie_name]`. Hydrates `instance.session`. Schedules a throttled background refresh of last_active_at + expires_at.
@@ -170,11 +171,13 @@ parseAuthId(auth_id) -> { actor_id, token_key, token_secret } | null
 
 verifyJwt(instance, { jwt }) -> { success, claims, error } | async:no
   Stateless HS256 verification. **No store read.** Checks signature, expiry, issuer, audience, ACTOR_TYPE.
-  - claims = { iss, aud, iat, exp, jti, sub, atp, tid, ikd, tkk }
+  - claims = { iss, aud, iat, exp, jti, sub, atp, tid, ikd, tkk, slc? }
+  - `slc` is present only when the caller supplied `options.claims` at createSession time
   - Errors: AUTH_INVALID_TOKEN, AUTH_SESSION_EXPIRED, AUTH_ACTOR_TYPE_MISMATCH
 
-signSessionJwt(instance, { session }) -> { success, access_token, error } | async:no
+signSessionJwt(instance, { session, claims? }) -> { success, access_token, error } | async:no
   Mint a fresh access JWT for an existing session record.
+  - `claims` is optional; nested under `slc` in the JWT payload
 
 refreshSessionJwt(instance, { tenant_id, refresh_token }) -> { success, session, access_token, refresh_token, error } | async:yes
   Exchange a refresh token for a new pair. Old refresh token invalidated by hash rotation (single-use). expires_at rolled forward by TTL_SECONDS.

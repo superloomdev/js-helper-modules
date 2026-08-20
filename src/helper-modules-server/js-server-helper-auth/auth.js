@@ -301,13 +301,33 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       let access_token = null;
       let refresh_token = null;
       if (CONFIG.ENABLE_JWT === true) {
+
+        // Check claims size limit before minting. An oversized payload is
+        // a data-dependent operational error, not a programmer error, so
+        // it returns the error envelope rather than throwing.
+        if (!Lib.Utils.isNullOrUndefined(options.claims)) {
+          const claims_bytes = Buffer.byteLength(JSON.stringify(options.claims), 'utf8');
+          if (claims_bytes > CONFIG.JWT.claims_max_bytes) {
+            return {
+              success: false,
+              auth_id: null,
+              access_token: null,
+              refresh_token: null,
+              session: null,
+              cookies: null,
+              error: ERRORS.JWT_CLAIMS_TOO_LARGE
+            };
+          }
+        }
+
         access_token = Jwt.signSessionJwt({
           session: record,
           signing_key: CONFIG.JWT.signing_key,
           issuer: CONFIG.JWT.issuer,
           audience: CONFIG.JWT.audience,
           access_token_ttl_seconds: CONFIG.JWT.access_token_ttl_seconds,
-          now: now
+          now: now,
+          claims: options.claims
         });
         refresh_token = options.actor_id + '-' + token_key + '-' + refresh_token_plaintext;
       }
@@ -1088,6 +1108,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     @param {Object} instance - Request instance
     @param {Object} options
     @param {Object} options.session - Canonical session record
+    @param {Object} [options.claims] - Caller-supplied claims, nested under 'slc'
 
     @return {Object} - { success, access_token, error }
     *********************************************************************/
@@ -1105,7 +1126,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
         issuer: CONFIG.JWT.issuer,
         audience: CONFIG.JWT.audience,
         access_token_ttl_seconds: CONFIG.JWT.access_token_ttl_seconds,
-        now: instance.time
+        now: instance.time,
+        claims: options.claims
       });
 
       // Return the signed access token
