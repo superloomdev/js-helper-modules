@@ -1,0 +1,35 @@
+{
+  "name": "@superloomdev/js-server-helper-cache",
+  "description": "Application-level cache with TTL and namespacing. Cache-aside pattern. Store adapter injected via config.",
+  "version": "1.0.0",
+  "main": "cache.js",
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0"
+  },
+  "optionalPeerDependencies": {
+    "helper-cache-store-valkey": "npm:@superloomdev/js-server-helper-cache-store-valkey@^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  }
+}

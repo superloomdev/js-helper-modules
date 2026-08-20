@@ -4603,3 +4603,121 @@ jobs:
             echo "Publishing $PKG_NAME@$PKG_VERSION..."
             npm publish
           fi
+
+  test-cache:
+    needs: [detect, publish-kv-aws-elasticache]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-cache')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-cache
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-cache:
+    needs: [detect, test-cache]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-cache'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-cache')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-cache
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+  test-cache-store-valkey:
+    needs: [detect, publish-cache]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-cache-store-valkey')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-valkey
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-cache-store-valkey:
+    needs: [detect, test-cache-store-valkey]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-cache-store-valkey'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-cache-store-valkey')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-valkey
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
