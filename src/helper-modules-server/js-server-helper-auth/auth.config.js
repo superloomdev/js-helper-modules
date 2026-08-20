@@ -35,11 +35,11 @@ module.exports = {
 
     // Per-form_factor cap. null = unlimited per form_factor.
     // Partial maps are allowed: { mobile: 3 } caps mobile only.
-    by_form_factor_max: null,
+    BY_FORM_FACTOR_MAX: null,
 
     // Per-platform cap. null = unlimited per platform.
     // Partial maps are allowed: { ios: 2, android: 2 }.
-    by_platform_max: null,
+    BY_PLATFORM_MAX: null,
 
     // When a cap is hit:
     //   true  -> evict the LRU session within the violated tier (default)
