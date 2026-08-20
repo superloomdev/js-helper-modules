@@ -7,23 +7,23 @@ Single-table design with a GSI for the second query pattern. The adapter does **
 **Base table:**
 | Attribute | DynamoDB Type | Role |
 |-----------|---------------|------|
-| `pk` | String (S) | Partition key (PK) - written by `addLog` as `"{scope}#{entity_type}#{entity_id}"` |
+| `pk` | String (S) | Partition key (PK) - written by `addLog` as `"{tenant_id}#{entity_type}#{entity_id}"` |
 | `sort_key` | String (S) | Sort key (SK) - timestamp-based unique string |
 
 **GSI (`actor_pk-sort_key-index`):**
 | Attribute | DynamoDB Type | Role |
 |-----------|---------------|------|
-| `actor_pk` | String (S) | GSI Partition key - written by `addLog` as `"{scope}#{actor_type}#{actor_id}"` |
+| `actor_pk` | String (S) | GSI Partition key - written by `addLog` as `"{tenant_id}#{actor_type}#{actor_id}"` |
 | `sort_key` | String (S) | GSI Sort key |
 
 ## Item Attributes
 
 | Attribute | DynamoDB Type | Nullable | Notes |
 |-----------|---------------|----------|-------|
-| `pk` | S | No | Computed on write from scope + entity_type + entity_id. Base table PK. |
-| `actor_pk` | S | No | Computed on write from scope + actor_type + actor_id. GSI PK. |
+| `pk` | S | No | Computed on write from tenant_id + entity_type + entity_id. Base table PK. |
+| `actor_pk` | S | No | Computed on write from tenant_id + actor_type + actor_id. GSI PK. |
 | `sort_key` | S | No | Timestamp-based unique string. Same format as SQL adapters. Also the base table SK and the GSI SK. |
-| `scope` | S | No | Namespace. |
+| `tenant_id` | S | No | Namespace. |
 | `entity_type` | S | No | Entity type. |
 | `entity_id` | S | No | Entity identifier. |
 | `actor_type` | S | No | Actor type. |

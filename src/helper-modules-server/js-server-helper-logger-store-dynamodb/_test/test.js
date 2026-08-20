@@ -175,14 +175,14 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     const store = buildStore();
     const instance = buildInstance(1000);
 
-    const record = makeLogRecord({ scope: 'tenant-A', entity_id: 'user-1', action: 'user.login' });
+    const record = makeLogRecord({ tenant_id: 'tenant-A', entity_id: 'user-1', action: 'user.login' });
     const writeResult = await store.addLog(instance, record);
 
     assert.equal(writeResult.success, true);
     assert.equal(writeResult.error, null);
 
     const listResult = await store.getLogsByEntity(instance, {
-      scope: 'tenant-A',
+      tenant_id: 'tenant-A',
       entity_type: 'user',
       entity_id: 'user-1'
     });
@@ -199,11 +199,11 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     const instance = buildInstance(2000);
 
     // Write two records with different sort_keys (time-based)
-    await store.addLog(instance, makeLogRecord({ scope: 'tenant-B', entity_id: 'user-2', action: 'action.first', sort_key: '2000-abc' }));
-    await store.addLog(instance, makeLogRecord({ scope: 'tenant-B', entity_id: 'user-2', action: 'action.second', sort_key: '3000-xyz' }));
+    await store.addLog(instance, makeLogRecord({ tenant_id: 'tenant-B', entity_id: 'user-2', action: 'action.first', sort_key: '2000-abc' }));
+    await store.addLog(instance, makeLogRecord({ tenant_id: 'tenant-B', entity_id: 'user-2', action: 'action.second', sort_key: '3000-xyz' }));
 
     const listResult = await store.getLogsByEntity(instance, {
-      scope: 'tenant-B',
+      tenant_id: 'tenant-B',
       entity_type: 'user',
       entity_id: 'user-2'
     });
@@ -222,12 +222,12 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     const instance = buildInstance(4000);
 
     // Write three records
-    await store.addLog(instance, makeLogRecord({ scope: 'tenant-C', entity_id: 'user-3', action: 'user.login', sort_key: '4000-a' }));
-    await store.addLog(instance, makeLogRecord({ scope: 'tenant-C', entity_id: 'user-3', action: 'user.logout', sort_key: '4001-b' }));
-    await store.addLog(instance, makeLogRecord({ scope: 'tenant-C', entity_id: 'user-3', action: 'profile.update', sort_key: '4002-c' }));
+    await store.addLog(instance, makeLogRecord({ tenant_id: 'tenant-C', entity_id: 'user-3', action: 'user.login', sort_key: '4000-a' }));
+    await store.addLog(instance, makeLogRecord({ tenant_id: 'tenant-C', entity_id: 'user-3', action: 'user.logout', sort_key: '4001-b' }));
+    await store.addLog(instance, makeLogRecord({ tenant_id: 'tenant-C', entity_id: 'user-3', action: 'profile.update', sort_key: '4002-c' }));
 
     const listResult = await store.getLogsByEntity(instance, {
-      scope: 'tenant-C',
+      tenant_id: 'tenant-C',
       entity_type: 'user',
       entity_id: 'user-3',
       actions: ['user.login', 'user.logout']
@@ -246,7 +246,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     // Write 5 records
     for (let i = 0; i < 5; i++) {
       await store.addLog(instance, makeLogRecord({
-        scope: 'tenant-D',
+        tenant_id: 'tenant-D',
         entity_id: 'user-4',
         action: 'action.' + i,
         sort_key: (5000 + i) + '-' + i
@@ -255,7 +255,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
 
     // Get first page of 2
     const page1 = await store.getLogsByEntity(instance, {
-      scope: 'tenant-D',
+      tenant_id: 'tenant-D',
       entity_type: 'user',
       entity_id: 'user-4',
       limit: 2
@@ -267,7 +267,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
 
     // Get second page
     const page2 = await store.getLogsByEntity(instance, {
-      scope: 'tenant-D',
+      tenant_id: 'tenant-D',
       entity_type: 'user',
       entity_id: 'user-4',
       limit: 2,
@@ -280,7 +280,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
 
     // Get final page
     const page3 = await store.getLogsByEntity(instance, {
-      scope: 'tenant-D',
+      tenant_id: 'tenant-D',
       entity_type: 'user',
       entity_id: 'user-4',
       limit: 2,
@@ -314,21 +314,21 @@ describe('Tier 1: getLogsByActor', { concurrency: false }, function () {
     // Seed records for two different actors
     const store = buildStore();
     await store.addLog(instance, makeLogRecord({
-      scope: 'tenant-E',
+      tenant_id: 'tenant-E',
       entity_id: 'user-5',
       actor_id: 'admin-1',
       action: 'user.delete',
       sort_key: '6000-a'
     }));
     await store.addLog(instance, makeLogRecord({
-      scope: 'tenant-E',
+      tenant_id: 'tenant-E',
       entity_id: 'project-1',
       actor_id: 'admin-1',
       action: 'project.create',
       sort_key: '6001-b'
     }));
     await store.addLog(instance, makeLogRecord({
-      scope: 'tenant-E',
+      tenant_id: 'tenant-E',
       entity_id: 'user-6',
       actor_id: 'admin-2',
       action: 'user.create',
@@ -346,7 +346,7 @@ describe('Tier 1: getLogsByActor', { concurrency: false }, function () {
     const instance = buildInstance(7000);
 
     const result = await store.getLogsByActor(instance, {
-      scope: 'tenant-E',
+      tenant_id: 'tenant-E',
       actor_type: 'admin',
       actor_id: 'admin-1'
     });
@@ -365,7 +365,7 @@ describe('Tier 1: getLogsByActor', { concurrency: false }, function () {
     const instance = buildInstance(7000);
 
     const result = await store.getLogsByActor(instance, {
-      scope: 'tenant-E',
+      tenant_id: 'tenant-E',
       actor_type: 'admin',
       actor_id: 'admin-2'
     });
@@ -447,7 +447,7 @@ runSharedStoreSuite({
 function makeLogRecord(overrides) {
 
   return Object.assign({
-    scope: 'tenant-test',
+    tenant_id: 'tenant-test',
     entity_type: 'user',
     entity_id: 'user-test',
     actor_type: 'admin',
@@ -461,8 +461,8 @@ function makeLogRecord(overrides) {
     sort_key: '1000-abc',
     expires_at: null,
     // DynamoDB-specific computed fields
-    pk: (overrides && overrides.scope || 'tenant-test') + '#user#' + (overrides && overrides.entity_id || 'user-test'),
-    actor_pk: (overrides && overrides.scope || 'tenant-test') + '#admin#' + (overrides && overrides.actor_id || 'admin-test')
+    pk: (overrides && overrides.tenant_id || 'tenant-test') + '#user#' + (overrides && overrides.entity_id || 'user-test'),
+    actor_pk: (overrides && overrides.tenant_id || 'tenant-test') + '#admin#' + (overrides && overrides.actor_id || 'admin-test')
   }, overrides || {});
 
 }

@@ -7,7 +7,7 @@ An AWS DynamoDB-backed implementation of the [Logger](https://github.com/superlo
 
 ## What This Is
 
-A thin layer between the Logger parent module and a DynamoDB log table. The base table partition key `pk` is written as `"{scope}#{entity_type}#{entity_id}"`; a GSI (`actor_pk-sort_key-index`) covers the actor query path. The `expires_at` attribute doubles as the DynamoDB TTL attribute.
+A thin layer between the Logger parent module and a DynamoDB log table. The base table partition key `pk` is written as `"{tenant_id}#{entity_type}#{entity_id}"`; a GSI (`actor_pk-sort_key-index`) covers the actor query path. The `expires_at` attribute doubles as the DynamoDB TTL attribute.
 
 It is always used together with the Logger parent and the [`js-server-helper-nosql-aws-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-aws-dynamodb) driver helper.
 

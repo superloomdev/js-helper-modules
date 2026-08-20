@@ -22,9 +22,9 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 | Attribute | DynamoDB type | Role |
 |-----------|---------------|------|
-| `pk` | String (S) | Partition key (PK) of the base table - written as `"{scope}#{entity_type}#{entity_id}"` |
+| `pk` | String (S) | Partition key (PK) of the base table - written as `"{tenant_id}#{entity_type}#{entity_id}"` |
 | `sort_key` | String (S) | Sort key (SK) of the base table - timestamp-based unique string |
-| `actor_pk` | String (S) | Partition key of the GSI - written as `"{scope}#{actor_type}#{actor_id}"` |
+| `actor_pk` | String (S) | Partition key of the GSI - written as `"{tenant_id}#{actor_type}#{actor_id}"` |
 | `expires_at` | Number (N) | TTL attribute (Unix epoch seconds). Enable TTL out-of-band. |
 
 GSI name: `actor_pk-sort_key-index`. GSI keys: PK=`actor_pk`, SK=`sort_key`.
@@ -45,11 +45,11 @@ GSI name: `actor_pk-sort_key-index`. GSI keys: PK=`actor_pk`, SK=`sort_key`.
 
 2. **`setupNewStore` is a no-op.** Returns `{ success: true, error: null }` without calling DynamoDB. The table and GSI must be provisioned out-of-band (CloudFormation, CDK, Terraform, AWS Console). The contract is satisfied so the Logger parent's idempotent setup flow still works.
 
-3. **`addLog` uses `PutItem` and computes the keys at write time.** The adapter assigns `pk = "{scope}#{entity_type}#{entity_id}"` and `actor_pk = "{scope}#{actor_type}#{actor_id}"` to the record before writing. The `sort_key` carries a random suffix making collisions effectively impossible - no UPSERT logic needed.
+3. **`addLog` uses `PutItem` and computes the keys at write time.** The adapter assigns `pk = "{tenant_id}#{entity_type}#{entity_id}"` and `actor_pk = "{tenant_id}#{actor_type}#{actor_id}"` to the record before writing. The `sort_key` carries a random suffix making collisions effectively impossible - no UPSERT logic needed.
 
-4. **`getLogsByEntity` queries the base table** with `pkName: 'pk'`, `pk` set to `"{scope}#{entity_type}#{entity_id}"`, sort key descending, optional `sort_key` cursor.
+4. **`getLogsByEntity` queries the base table** with `pkName: 'pk'`, `pk` set to `"{tenant_id}#{entity_type}#{entity_id}"`, sort key descending, optional `sort_key` cursor.
 
-5. **`getLogsByActor` queries the GSI** with `indexName: 'actor_pk-sort_key-index'`, `pkName: 'actor_pk'`, `pk` set to `"{scope}#{actor_type}#{actor_id}"`, sort key descending.
+5. **`getLogsByActor` queries the GSI** with `indexName: 'actor_pk-sort_key-index'`, `pkName: 'actor_pk'`, `pk` set to `"{tenant_id}#{actor_type}#{actor_id}"`, sort key descending.
 
 6. **`cleanupExpiredLogs` does a full table `Scan` (no `FilterExpression`) then filters client-side and `BatchWriteItem` deletes.** Delete keys are `{ pk, sort_key }`. Native TTL handles automatic expiry (~48h) - this method provides deterministic `deleted_count` for tests and immediate cleanup.
 

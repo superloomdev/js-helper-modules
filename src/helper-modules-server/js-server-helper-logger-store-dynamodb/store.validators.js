@@ -17,7 +17,7 @@ let ERRORS; // eslint-disable-line no-unused-vars
 /////////////////////////// Module-Loader START //////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib + ERRORS and returns the module-scope
+Singleton loader. Injects Lib + ERRORS and returns the module-tenant_id
 Validators object.
 
 @param {Object} shared_libs - Dependency container (Utils)
