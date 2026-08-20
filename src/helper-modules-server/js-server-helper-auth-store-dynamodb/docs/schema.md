@@ -21,7 +21,7 @@ The adapter uses one DynamoDB table per `actor_type` (e.g. `sessions_user`, `ses
 | Key | Attribute Name | Type | Value |
 |---|---|---|---|
 | Partition Key (PK) | `tenant_id` | String | The tenant identifier |
-| Sort Key (SK) | `session_key` | String | `` `${actor_id}#${token_key}` `` |
+| Sort Key (SK) | `session_key` | String | `` `${actor_id}\u001F${token_key}` `` |
 
 The Sort Key attribute name is `session_key`. This is an internal implementation detail; the canonical record shape exposed to callers never contains `session_key` (it is stripped on read).
 
@@ -31,14 +31,14 @@ This layout ensures every hot-path query is a direct primary-index hit. No Globa
 
 | Operation | PK Value | SK Value / Condition | DynamoDB API |
 |---|---|---|---|
-| `getSession` | `tenant_id` | `session_key = "${actor_id}#${token_key}"` | `GetItem` |
-| `listSessionsByActor` | `tenant_id` | `begins_with(session_key, "${actor_id}#")` | `Query` |
-| `setSession` | `tenant_id` | `session_key = "${actor_id}#${token_key}"` | `PutItem` |
-| `deleteSession` | `tenant_id` | `session_key = "${actor_id}#${token_key}"` | `DeleteItem` |
-| `deleteSessions` (each key) | `tenant_id` | `session_key = "${actor_id}#${token_key}"` | `BatchWriteItem` |
+| `getSession` | `tenant_id` | `session_key = "${actor_id}\u001F${token_key}"` | `GetItem` |
+| `listSessionsByActor` | `tenant_id` | `begins_with(session_key, "${actor_id}\u001F")` | `Query` |
+| `setSession` | `tenant_id` | `session_key = "${actor_id}\u001F${token_key}"` | `PutItem` |
+| `deleteSession` | `tenant_id` | `session_key = "${actor_id}\u001F${token_key}"` | `DeleteItem` |
+| `deleteSessions` (each key) | `tenant_id` | `session_key = "${actor_id}\u001F${token_key}"` | `BatchWriteItem` |
 | `cleanupExpiredSessions` | (scan entire table) | `FilterExpression: expires_at < :now` | `Scan` then `BatchWriteItem` |
 
-The `begins_with` condition for `listSessionsByActor` leverages DynamoDB's sort-key prefix matching. All sessions for an actor share the same prefix (`` `${actor_id}#` ``), so the Query returns them in a single operation with no GSI.
+The `begins_with` condition for `listSessionsByActor` leverages DynamoDB's sort-key prefix matching. All sessions for an actor share the same prefix (`` `${actor_id}\u001F` ``), so the Query returns them in a single operation with no GSI.
 
 ## Attribute Mapping
 
@@ -72,7 +72,7 @@ Canonical record fields map to DynamoDB attribute types as follows:
 | `push_token` | String (S) or Null | |
 | `custom_data` | Map (M) or Null | Stored as native Map; `null` omits the attribute entirely |
 
-**DynamoDB-specific attribute:** `session_key` (String) is the Sort Key. It is computed as `` `${actor_id}#${token_key}` `` and is stripped from the returned record on read.
+**DynamoDB-specific attribute:** `session_key` (String) is the Sort Key. It is computed as `` `${actor_id}\u001F${token_key}` `` and is stripped from the returned record on read.
 
 ## Item Shape Example
 
@@ -168,7 +168,7 @@ SessionsUserTable:
       Enabled: true
 ```
 
-**Important:** The Sort Key attribute name is `session_key`, not `actor_id_token_key` or any other variant. The adapter source computes `session_key` as `` `${actor_id}#${token_key}` ``. The CloudFormation definition must match exactly.
+**Important:** The Sort Key attribute name is `session_key`, not `actor_id_token_key` or any other variant. The adapter source computes `session_key` as `` `${actor_id}\u001F${token_key}` ``. The CloudFormation definition must match exactly.
 
 For CDK (TypeScript):
 

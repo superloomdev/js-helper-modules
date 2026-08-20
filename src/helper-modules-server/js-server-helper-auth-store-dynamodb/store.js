@@ -2,14 +2,14 @@
 // Uses a single-table design tuned for the auth query patterns:
 //
 //   Partition Key:  tenant_id
-//   Sort Key:       "{actor_id}#{token_key}"
+//   Sort Key:       "{actor_id}\u001F{token_key}"
 //
 // This layout makes every hot-path query a direct index hit:
 //
-//   getSession(t, a, k, h)    -> GetItem  (PK=t, SK=a#k), then hash compare
-//   listSessionsByActor(t, a) -> Query    (PK=t, SK begins_with "a#")
-//   deleteSession(t, a, k)    -> DeleteItem (PK=t, SK=a#k)
-//   setSession(record)        -> PutItem  (PK=t, SK=a#k, attrs)
+//   getSession(t, a, k, h)    -> GetItem  (PK=t, SK=a\u001Fk), then hash compare
+//   listSessionsByActor(t, a) -> Query    (PK=t, SK begins_with "a\u001F")
+//   deleteSession(t, a, k)    -> DeleteItem (PK=t, SK=a\u001Fk)
+//   setSession(record)        -> PutItem  (PK=t, SK=a\u001Fk, attrs)
 //   cleanupExpiredSessions    -> Scan with FilterExpression on expires_at
 //
 // No GSI is required. LRU eviction and install-id replacement both use
@@ -300,7 +300,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     listSessionsByActor: async function (instance, tenant_id, actor_id) {
 
       // Build the sort-key prefix that all sessions for this actor share
-      const prefix = actor_id + '#';
+      const prefix = actor_id + '\u001F';
 
       // Query using the PK + SK begins_with condition
       const result = await Lib.DynamoDB.query(instance, CONFIG.TABLE_NAME, {
@@ -652,18 +652,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Compose the sort key from actor_id and token_key. actor_id is
-    validated for '-' and '#' by the higher auth layer; token_key is
-    generated from the controlled TOKEN_CHARSET so '#' never appears.
+    validated for '\u001F' by the higher auth layer; token_key is
+    generated from the controlled TOKEN_CHARSET so '\u001F' never appears.
 
     @param {String} actor_id  - Actor identifier
     @param {String} token_key - Session token key
 
-    @return {String} - "{actor_id}#{token_key}"
+    @return {String} - "{actor_id}\u001F{token_key}"
     *********************************************************************/
     sortKey: function (actor_id, token_key) {
 
-      // Concatenate with the # separator reserved for composite keys
-      return actor_id + '#' + token_key;
+      // Concatenate with the \u001F separator reserved for composite keys
+      return actor_id + '\u001F' + token_key;
 
     },
 
