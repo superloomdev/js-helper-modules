@@ -103,7 +103,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Create the TTL index on `_ttl` - idempotent via createIndex
       const result = await Lib.MongoDB.createIndex(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _ttl: 1 },
         { name: 'verify_ttl_idx', expireAfterSeconds: 0 }
       );
@@ -147,7 +147,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Equality lookup on the compound _id - O(1) via the implicit index
       const result = await Lib.MongoDB.getRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: { scope: scope, id: key } }
       );
 
@@ -217,7 +217,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Upsert via replaceOne - always overwrites by compound _id
       const result = await Lib.MongoDB.writeRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         filter,
         document
       );
@@ -258,7 +258,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Atomic $inc - safe under concurrent verify attempts
       const result = await Lib.MongoDB.updateRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: { scope: scope, id: key } },
         { $inc: { fail_count: 1 } }
       );
@@ -299,7 +299,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Delete by compound _id - idempotent (missing document is success)
       const result = await Lib.MongoDB.deleteRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: { scope: scope, id: key } }
       );
 
@@ -341,7 +341,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const now = instance.time;
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { expires_at: { $lt: now } }
       );
 

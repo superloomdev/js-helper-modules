@@ -13,7 +13,7 @@ const Idle = require('helper-idle')({
   Utils: Utils,
   Debug: Debug
 }, {
-  idle_ms: 1000
+  IDLE_MS: 1000
 });
 
 // Export everything tests need

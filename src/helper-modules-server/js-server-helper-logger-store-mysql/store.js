@@ -207,7 +207,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       const now_sec = Lib.Utils.getUnixTime();
       const sql = (
-        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('expires_at') + ' IS NOT NULL' +
         '   AND ' + _Store.Q('expires_at') + ' <= ?'
       );
@@ -273,8 +273,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateTableSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
-      const tn = CONFIG.table_name;
+      const t = Q(CONFIG.TABLE_NAME);
+      const tn = CONFIG.TABLE_NAME;
 
       // All indexes are inlined because MySQL does not support CREATE INDEX IF NOT EXISTS.
       // Inlining makes the single CREATE TABLE IF NOT EXISTS statement fully idempotent.
@@ -313,7 +313,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const cols = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';
@@ -339,7 +339,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildEntityQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 
@@ -380,7 +380,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildActorQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 

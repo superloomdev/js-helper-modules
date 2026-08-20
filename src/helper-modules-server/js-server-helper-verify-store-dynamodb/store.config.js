@@ -8,6 +8,6 @@ module.exports = {
 
   // Table name for verification codes. Must be a valid DynamoDB table name.
   // The adapter does not quote or escape this.
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 
 };

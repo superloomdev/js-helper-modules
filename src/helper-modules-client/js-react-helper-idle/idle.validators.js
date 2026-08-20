@@ -16,8 +16,8 @@ module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars 
     validateConfig: function (CONFIG) {
 
       // idle_ms must be a positive number
-      if (!Lib.Utils.isNullOrUndefined(CONFIG.idle_ms)) {
-        if (!Lib.Utils.isNumber(CONFIG.idle_ms) || CONFIG.idle_ms <= 0) {
+      if (!Lib.Utils.isNullOrUndefined(CONFIG.IDLE_MS)) {
+        if (!Lib.Utils.isNumber(CONFIG.IDLE_MS) || CONFIG.IDLE_MS <= 0) {
           throw new TypeError('helper-idle: idle_ms must be a positive number');
         }
       }

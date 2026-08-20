@@ -8,7 +8,7 @@ Requires a running MySQL or MariaDB instance. Uses `helper-sql-mysql` (pooled `m
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, {
-  table_name: 'action_log'  // required. one table per logger instance
+  TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -16,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -42,7 +42,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 6. **`data` column is JSON-serialized TEXT.** Serialized on write, parsed on read.
 
-7. **Identifiers are backtick-quoted (`` `col` ``).** The adapter rejects any `table_name` containing a backtick.
+7. **Identifiers are backtick-quoted (`` `col` ``).** The adapter rejects any `TABLE_NAME` containing a backtick.
 
 8. **All indexes are inlined in `CREATE TABLE IF NOT EXISTS`.** MySQL does not support `CREATE INDEX IF NOT EXISTS` standalone. Entity, actor, and expires_at indexes are all inlined.
 

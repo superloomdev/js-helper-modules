@@ -8,13 +8,13 @@ Embedded / in-process. Uses Node's built-in `node:sqlite` through the `helper-sq
 
 ```js
 const Store = require('helper-verify-store-sqlite')(Lib, {
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
-| `table_name` | String | Yes | Name of the verification table |
+| `TABLE_NAME` | String | Yes | Name of the verification table |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods to satisfy its persistence needs.
 
@@ -22,11 +22,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  table_name: 'verification_codes'  // required. one table per verify instance
+  TABLE_NAME: 'verification_codes'  // required. one table per verify instance
 }
 ```
 
-The `table_name` key is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver arrives via `shared_libs.SQL` (injected by the application).
+The `TABLE_NAME` key is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver arrives via `shared_libs.SQL` (injected by the application).
 
 ## Store Contract
 
@@ -55,7 +55,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 6. **`cleanupExpiredRecords` uses `instance.time`.** The bound parameter is the request instance's frozen clock, not `Lib.Utils.getUnixTime()`. This keeps cleanup consistent with the verify-time expiry check.
 
-7. **Identifiers are double-quoted (`"col`).** The adapter rejects any `table_name` containing a double-quote at quoting time to prevent DDL injection.
+7. **Identifiers are double-quoted (`"col`).** The adapter rejects any `TABLE_NAME` containing a double-quote at quoting time to prevent DDL injection.
 
 8. **Index name is `{table_name}_expires_at_idx`.** The index name is deterministic and derived from `STORE_CONFIG.table_name` at createInterface time. A table rename means a new index name.
 

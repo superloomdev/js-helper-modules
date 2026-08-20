@@ -43,7 +43,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   return AuthStoreSQLiteFactory(Lib, {
-    table_name: table || TEST_TABLE
+    TABLE_NAME: table || TEST_TABLE
   });
 
 };
@@ -58,8 +58,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory(Lib, { table_name: '' }); },
-      /table_name is required/
+      function () { AuthStoreSQLiteFactory(Lib, { TABLE_NAME: '' }); },
+      /TABLE_NAME is required/
     );
 
   });
@@ -67,15 +67,15 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { AuthStoreSQLiteFactory(Lib, { table_name: null }); },
-      /table_name is required/
+      function () { AuthStoreSQLiteFactory(Lib, { TABLE_NAME: null }); },
+      /TABLE_NAME is required/
     );
 
   });
 
   it('returns a store object when config is valid', function () {
 
-    const store = AuthStoreSQLiteFactory(Lib, { table_name: 'valid_table' });
+    const store = AuthStoreSQLiteFactory(Lib, { TABLE_NAME: 'valid_table' });
     assert.ok(store);
     assert.ok(typeof store.setupNewStore === 'function');
 
@@ -101,7 +101,7 @@ describe('Tier 1: _Store identifier quoting', function () {
 
     assert.throws(
       function () {
-        AuthStoreSQLiteFactory(Lib, { table_name: 'bad"table' });
+        AuthStoreSQLiteFactory(Lib, { TABLE_NAME: 'bad"table' });
       },
       /identifier contains double-quote/
     );
@@ -607,7 +607,7 @@ describe('Tier 1: large multi-actor list isolation', function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    Store:     AuthStoreSQLiteFactory(Lib, { table_name: TEST_TABLE }),
+    Store:     AuthStoreSQLiteFactory(Lib, { TABLE_NAME: TEST_TABLE }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

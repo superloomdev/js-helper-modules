@@ -25,7 +25,7 @@ Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
 
 // Load the DynamoDB store adapter
 Lib.DistinctQueueStore = require('helper-distinct-queue-store-dynamodb')(Lib, {
-  table_name: 'queue_jobs'
+  TABLE_NAME: 'queue_jobs'
 });
 
 // Load distinct-queue with the ready-to-use store object
@@ -43,7 +43,7 @@ The adapter is a store implementation for `helper-distinct-queue`.
 It is loaded with dependency injection: the project loader provides `Lib`
 (including `Lib.DynamoDB`), and the adapter owns its own configuration:
 
-- **`table_name`** - DynamoDB table name for queue records (required)
+- **`TABLE_NAME`** - DynamoDB table name for queue records (required)
 - **`KEY_DELIMITER`** - Sort key field separator (default: `\u001F`, override with care)
 
 The adapter returns a ready-to-use store object that the parent module

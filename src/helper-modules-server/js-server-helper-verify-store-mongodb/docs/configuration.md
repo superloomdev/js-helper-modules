@@ -4,7 +4,7 @@
 
 ```js
 const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, {
-  collection_name: 'verification_codes'
+  COLLECTION_NAME: 'verification_codes'
 });
 
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
@@ -16,7 +16,7 @@ Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
 
 | Key | Type | Required | Description |
 |-----|------|----------|--------------|
-| `collection_name` | `String` | Yes | Name of the verification collection. One collection per Verify instance. |
+| `COLLECTION_NAME` | `String` | Yes | Name of the verification collection. One collection per Verify instance. |
 
 ## Dependencies
 

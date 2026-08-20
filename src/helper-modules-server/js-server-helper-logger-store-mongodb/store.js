@@ -103,7 +103,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Entity query index: (scope, entity_type, entity_id, sort_key DESC)
       const entity_result = await Lib.MongoDB.createIndex(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
         { name: 'logger_entity_idx' }
       );
@@ -123,7 +123,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Actor query index: (scope, actor_type, actor_id, sort_key DESC)
       const actor_result = await Lib.MongoDB.createIndex(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
         { name: 'logger_actor_idx' }
       );
@@ -144,7 +144,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Sparse so persistent records (no _ttl field) are never touched by the sweeper
       const ttl_result = await Lib.MongoDB.createIndex(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _ttl: 1 },
         { name: 'logger_ttl_idx', expireAfterSeconds: 0, sparse: true }
       );
@@ -189,7 +189,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Upsert by _id (sort_key) - idempotent for duplicate writes
       const result = await Lib.MongoDB.writeRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: record.sort_key },
         document
       );
@@ -269,7 +269,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const now = Lib.Utils.getUnixTime();
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { expires_at: { $ne: null, $lte: now } }
       );
 
@@ -359,7 +359,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       const result = await Lib.MongoDB.query(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         filter,
         { sort: { sort_key: -1 }, limit: limit }
       );

@@ -104,15 +104,15 @@ const Validators = {
     }
 
     if (
-      !Lib.Utils.isNumber(CONFIG.LIMITS.total_max) ||
-      !Lib.Utils.isInteger(CONFIG.LIMITS.total_max) ||
-      CONFIG.LIMITS.total_max <= 0
+      !Lib.Utils.isNumber(CONFIG.LIMITS.TOTAL_MAX) ||
+      !Lib.Utils.isInteger(CONFIG.LIMITS.TOTAL_MAX) ||
+      CONFIG.LIMITS.TOTAL_MAX <= 0
     ) {
-      throw new Error('[helper-auth] CONFIG.LIMITS.total_max must be a positive integer');
+      throw new Error('[helper-auth] CONFIG.LIMITS.TOTAL_MAX must be a positive integer');
     }
 
-    if (!Lib.Utils.isBoolean(CONFIG.LIMITS.evict_oldest_on_limit)) {
-      throw new Error('[helper-auth] CONFIG.LIMITS.evict_oldest_on_limit must be a boolean');
+    if (!Lib.Utils.isBoolean(CONFIG.LIMITS.EVICT_OLDEST_ON_LIMIT)) {
+      throw new Error('[helper-auth] CONFIG.LIMITS.EVICT_OLDEST_ON_LIMIT must be a boolean');
     }
 
     // JWT mode: when enabled, signing key + issuer + audience are mandatory.

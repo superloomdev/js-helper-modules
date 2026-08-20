@@ -6,7 +6,7 @@ The adapter is configured and instantiated independently, then passed to the Ver
 
 ```js
 const Store = require('helper-verify-store-sqlite')(Lib, {
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 });
 
 Lib.Verify = require('helper-verify')(Lib, {
@@ -20,9 +20,9 @@ The adapter validates its configuration at construction time and throws an `Erro
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
-| `table_name` | `String` | Yes | Name of the verification table. Must not contain a double-quote. One table per Verify instance. |
+| `TABLE_NAME` | `String` | Yes | Name of the verification table. Must not contain a double-quote. One table per Verify instance. |
 
-The validator rejects missing, null, or empty-string values. The `table_name` double-quote guard fires at quoting time (first DDL or query call), not at validation time. The SQL driver arrives via `shared_libs.SQL` (injected by the application).
+The validator rejects missing, null, or empty-string values. The `TABLE_NAME` double-quote guard fires at quoting time (first DDL or query call), not at validation time. The SQL driver arrives via `shared_libs.SQL` (injected by the application).
 
 ## Dependencies
 

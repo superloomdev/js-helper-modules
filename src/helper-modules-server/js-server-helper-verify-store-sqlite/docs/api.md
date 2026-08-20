@@ -6,7 +6,7 @@ This adapter implements the 6-method store contract consumed by `helper-verify`.
 
 ```js
 const store = require('helper-verify-store-sqlite')(Lib, {
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 });
 ```
 

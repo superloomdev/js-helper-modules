@@ -21,7 +21,7 @@ module.exports = function loader (shared_libs, config) {
 
 ```js
 const Store = require('helper-verify-store-postgres')({
-  table_name: 'verification_codes',
+  TABLE_NAME: 'verification_codes',
   lib_postgresql: Lib.PostgreSQL
 });
 

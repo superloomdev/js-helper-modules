@@ -21,7 +21,7 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 
 ```js
 const store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
-  collection_name: 'sessions_user'
+  COLLECTION_NAME: 'sessions_user'
 });
 ```
 

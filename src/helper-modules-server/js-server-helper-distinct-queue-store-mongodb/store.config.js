@@ -6,6 +6,6 @@
 module.exports = {
 
   // MongoDB collection name for queue records. Required - no default.
-  collection_name: null
+  COLLECTION_NAME: null
 
 };

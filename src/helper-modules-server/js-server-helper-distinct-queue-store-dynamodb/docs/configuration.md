@@ -10,7 +10,7 @@ you provide to the parent module's `CONFIG.Store` key.
 ```javascript
 // Load the adapter with Lib injected and its own config
 const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
-  table_name: 'distinct_queue_jobs'
+  TABLE_NAME: 'distinct_queue_jobs'
 });
 
 // Pass the ready-to-use store to the parent module
@@ -21,7 +21,7 @@ Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
 
 ## Configuration Keys
 
-### `table_name`
+### `TABLE_NAME`
 
 **Type:** `string`  
 **Required:** Yes
@@ -29,7 +29,7 @@ Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
 The DynamoDB table name for queue records. The table will be created automatically by `setupNewStore()` if it doesn't exist.
 
 ```javascript
-table_name: 'myapp_queue_jobs'
+TABLE_NAME: 'myapp_queue_jobs'
 ```
 
 ### `KEY_DELIMITER`
@@ -81,7 +81,7 @@ Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
 
 // 3. Load the store adapter (Lib injected), then the parent module
 const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
-  table_name: 'queue_jobs'
+  TABLE_NAME: 'queue_jobs'
 });
 Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
   Store: Store
@@ -110,7 +110,7 @@ See the `_test/` directory for a complete Docker Compose setup with DynamoDB Loc
 
 The adapter validates configuration at load time and throws if:
 
-- `table_name` is missing or empty
+- `TABLE_NAME` is missing or empty
 - `KEY_DELIMITER` is missing or empty
 - `Lib.DynamoDB` is not injected
 

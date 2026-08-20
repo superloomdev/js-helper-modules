@@ -187,7 +187,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Fetch the session row by composite primary key
       const result = await Lib.SQL.getRow(
         instance,
-        'SELECT * FROM ' + _Store.Q(CONFIG.table_name) +
+        'SELECT * FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?' +
         '   AND ' + _Store.Q('token_key') + ' = ?',
@@ -253,7 +253,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Fetch all session rows for this actor under the given tenant
       const result = await Lib.SQL.getRows(
         instance,
-        'SELECT * FROM ' + _Store.Q(CONFIG.table_name) +
+        'SELECT * FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?',
         [tenant_id, actor_id]
@@ -370,7 +370,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Run the partial UPDATE against the target session row
       const stmt =
-        'UPDATE ' + _Store.Q(CONFIG.table_name) +
+        'UPDATE ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' SET ' + set_parts.join(', ') +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?' +
@@ -422,7 +422,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Remove the session row by composite primary key
       const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ?' +
         '   AND ' + _Store.Q('actor_id')  + ' = ?' +
         '   AND ' + _Store.Q('token_key') + ' = ?',
@@ -489,7 +489,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Delete all matched sessions in one round-trip
       const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('tenant_id') + ' = ? AND (' + clauses + ')',
         params
       );
@@ -537,7 +537,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const now = instance.time;
       const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.Q(CONFIG.table_name) + ' WHERE ' + _Store.Q('expires_at') + ' < ?',
+        'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) + ' WHERE ' + _Store.Q('expires_at') + ' < ?',
         [now]
       );
 
@@ -640,7 +640,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the quoted table identifier then emit the full DDL
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
           '  ' + Q('tenant_id')           + ' TEXT NOT NULL,' +
@@ -690,10 +690,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build a deterministic index name and emit the CREATE INDEX DDL
       const Q = _Store.Q;
-      const idx_name = 'idx_' + CONFIG.table_name + '_expires_at';
+      const idx_name = 'idx_' + CONFIG.TABLE_NAME + '_expires_at';
       return (
         'CREATE INDEX IF NOT EXISTS ' + Q(idx_name) +
-        ' ON ' + Q(CONFIG.table_name) +
+        ' ON ' + Q(CONFIG.TABLE_NAME) +
         ' (' + Q('expires_at') + ')'
       );
 
@@ -715,7 +715,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
       const UPSERT_IMMUTABLE_COLUMNS = _Store.UPSERT_IMMUTABLE_COLUMNS;
-      const tq = Q(CONFIG.table_name);
+      const tq = Q(CONFIG.TABLE_NAME);
       const cols_quoted = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';

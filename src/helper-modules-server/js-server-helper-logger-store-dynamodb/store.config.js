@@ -3,5 +3,5 @@
 
 
 module.exports = {
-  table_name: null  // Required. One table per Logger instance. No safe default.
+  TABLE_NAME: null  // Required. One table per Logger instance. No safe default.
 };

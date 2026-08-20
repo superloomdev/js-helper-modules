@@ -44,7 +44,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (collection) {
 
   return LoggerStoreMongoDBFactory(Lib, {
-    collection_name: collection || TEST_COLLECTION
+    COLLECTION_NAME: collection || TEST_COLLECTION
   });
 
 };
@@ -91,8 +91,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is empty string', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory(Lib, { collection_name: '' }); },
-      /collection_name is required/
+      function () { LoggerStoreMongoDBFactory(Lib, { COLLECTION_NAME: '' }); },
+      /COLLECTION_NAME is required/
     );
 
   });
@@ -100,14 +100,14 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is null', function () {
 
     assert.throws(
-      function () { LoggerStoreMongoDBFactory(Lib, { collection_name: null }); },
-      /collection_name is required/
+      function () { LoggerStoreMongoDBFactory(Lib, { COLLECTION_NAME: null }); },
+      /COLLECTION_NAME is required/
     );
 
   });
 
   it('returns a store object for valid config', function () {
-    const store = LoggerStoreMongoDBFactory(Lib, { collection_name: 'x' });
+    const store = LoggerStoreMongoDBFactory(Lib, { COLLECTION_NAME: 'x' });
     assert.equal(typeof store.setupNewStore, 'function');
     assert.equal(typeof store.addLog, 'function');
   });
@@ -357,7 +357,7 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 const buildLogger = function (overrides) {
 
   const Store = LoggerStoreMongoDBFactory(Lib, {
-    collection_name: TEST_COLLECTION
+    COLLECTION_NAME: TEST_COLLECTION
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));

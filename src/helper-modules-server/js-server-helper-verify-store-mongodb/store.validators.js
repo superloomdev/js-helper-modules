@@ -46,13 +46,13 @@ const Validators = {
   *********************************************************************/
   validateConfig: function (config) {
 
-    // collection_name is required and must be a non-empty string
+    // COLLECTION_NAME is required and must be a non-empty string
     if (
-      Lib.Utils.isNullOrUndefined(config.collection_name) ||
-      !Lib.Utils.isString(config.collection_name) ||
-      Lib.Utils.isEmptyString(config.collection_name)
+      Lib.Utils.isNullOrUndefined(config.COLLECTION_NAME) ||
+      !Lib.Utils.isString(config.COLLECTION_NAME) ||
+      Lib.Utils.isEmptyString(config.COLLECTION_NAME)
     ) {
-      throw new Error('[helper-verify-store-mongodb] config.collection_name is required');
+      throw new Error('[helper-verify-store-mongodb] config.COLLECTION_NAME is required');
     }
 
   }

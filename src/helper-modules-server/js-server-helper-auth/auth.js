@@ -1163,7 +1163,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
 
       // Locate the session record using the same listSessionsByActor
       // path used elsewhere in the module. Sessions per actor are
-      // capped via LIMITS.total_max so the linear scan is bounded.
+      // capped via LIMITS.TOTAL_MAX so the linear scan is bounded.
       const list_result = await store.listSessionsByActor(
         instance,
         options.tenant_id,

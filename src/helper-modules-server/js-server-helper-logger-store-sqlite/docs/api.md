@@ -6,7 +6,7 @@ This adapter implements the 5-method store contract consumed by `helper-logger`.
 
 ```js
 const store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
-  table_name: 'action_log'
+  TABLE_NAME: 'action_log'
 });
 ```
 

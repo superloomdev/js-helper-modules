@@ -46,7 +46,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (collection) {
 
   return AuthStoreMongoDBFactory(Lib, {
-    collection_name: collection || TEST_COLLECTION
+    COLLECTION_NAME: collection || TEST_COLLECTION
   });
 
 };
@@ -93,8 +93,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is empty string', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory(Lib, { collection_name: '' }); },
-      /collection_name is required/
+      function () { AuthStoreMongoDBFactory(Lib, { COLLECTION_NAME: '' }); },
+      /COLLECTION_NAME is required/
     );
 
   });
@@ -102,15 +102,15 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is null', function () {
 
     assert.throws(
-      function () { AuthStoreMongoDBFactory(Lib, { collection_name: null }); },
-      /collection_name is required/
+      function () { AuthStoreMongoDBFactory(Lib, { COLLECTION_NAME: null }); },
+      /COLLECTION_NAME is required/
     );
 
   });
 
   it('returns a store object when config is valid', function () {
 
-    const store = AuthStoreMongoDBFactory(Lib, { collection_name: 'valid_col' });
+    const store = AuthStoreMongoDBFactory(Lib, { COLLECTION_NAME: 'valid_col' });
     assert.ok(store);
     assert.ok(typeof store.setupNewStore === 'function');
 
@@ -432,7 +432,7 @@ describe('Tier 1: cleanupExpiredSessions', { concurrency: false }, function () {
 const buildAuth = function (overrides) {
 
   const config = Object.assign({
-    Store:     AuthStoreMongoDBFactory(Lib, { collection_name: TEST_COLLECTION }),
+    Store:     AuthStoreMongoDBFactory(Lib, { COLLECTION_NAME: TEST_COLLECTION }),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,

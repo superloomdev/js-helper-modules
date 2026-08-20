@@ -26,10 +26,10 @@ None. JWT signing uses Node's built-in `crypto` (via `Lib.Crypto`).
 
 ```javascript
 Lib.AuthUser = require('helper-auth')(Lib, {
-  Store:        require('helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
+  Store:        require('helper-auth-store-postgres')({ TABLE_NAME: 'sessions_user', lib_sql: Lib.Postgres }),
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
-  LIMITS:       { total_max: 20, evict_oldest_on_limit: true },
+  LIMITS:       { TOTAL_MAX: 20, EVICT_OLDEST_ON_LIMIT: true },
   COOKIE_PREFIX: 'sl_user_'
 });
 ```
@@ -38,8 +38,8 @@ One Auth instance per `actor_type`:
 
 ```javascript
 const AuthFactory = require('helper-auth');
-Lib.AuthUser  = AuthFactory(Lib, { ACTOR_TYPE: 'user',  Store: require('...auth-store-postgres')({ table_name: 'sessions_user',  lib_sql: Lib.Postgres }) });
-Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-store-postgres')({ table_name: 'sessions_admin', lib_sql: Lib.Postgres }) });
+Lib.AuthUser  = AuthFactory(Lib, { ACTOR_TYPE: 'user',  Store: require('...auth-store-postgres')({ TABLE_NAME: 'sessions_user',  lib_sql: Lib.Postgres }) });
+Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-store-postgres')({ TABLE_NAME: 'sessions_admin', lib_sql: Lib.Postgres }) });
 ```
 
 **Store must be a ready-to-use store object returned by calling the adapter with its config.** Passing a function or string is rejected at loader time.
@@ -50,11 +50,11 @@ The adapter owns its own config. Pass config directly when calling the adapter:
 
 | Adapter | Required keys |
 |---|---|
-| `auth-store-sqlite` | `table_name`, `lib_sql` (Lib.SQLite instance) |
-| `auth-store-postgres` | `table_name`, `lib_sql` (Lib.Postgres instance) |
-| `auth-store-mysql` | `table_name`, `lib_sql` (Lib.MySQL instance) |
-| `auth-store-mongodb` | `collection_name`, `lib_mongodb` (Lib.MongoDB instance) |
-| `auth-store-dynamodb` | `table_name`, `lib_dynamodb` (Lib.DynamoDB instance) |
+| `auth-store-sqlite` | `TABLE_NAME`, `lib_sql` (Lib.SQLite instance) |
+| `auth-store-postgres` | `TABLE_NAME`, `lib_sql` (Lib.Postgres instance) |
+| `auth-store-mysql` | `TABLE_NAME`, `lib_sql` (Lib.MySQL instance) |
+| `auth-store-mongodb` | `COLLECTION_NAME`, `lib_mongodb` (Lib.MongoDB instance) |
+| `auth-store-dynamodb` | `TABLE_NAME`, `lib_dynamodb` (Lib.DynamoDB instance) |
 
 ## Cookie Descriptor Pattern
 
@@ -188,7 +188,7 @@ All errors are frozen objects from `auth.errors.js` with shape `{ type, message 
 | error.type | Returned by | Meaning |
 |---|---|---|
 | AUTH_SERVICE_UNAVAILABLE | every store-touching function | Store driver reported an error |
-| AUTH_LIMIT_REACHED | createSession | Cap hit and `LIMITS.evict_oldest_on_limit: false` |
+| AUTH_LIMIT_REACHED | createSession | Cap hit and `LIMITS.EVICT_OLDEST_ON_LIMIT: false` |
 | AUTH_INVALID_TOKEN | verifySession, verifyJwt, refreshSessionJwt | Malformed token, wrong secret, missing row, replayed refresh token |
 | AUTH_SESSION_EXPIRED | verifySession, verifyJwt, refreshSessionJwt | `expires_at` is in the past |
 | AUTH_ACTOR_TYPE_MISMATCH | verifySession, verifyJwt | Stored actor_type != CONFIG.ACTOR_TYPE |

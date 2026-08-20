@@ -5,7 +5,7 @@ This adapter implements the 5-method store contract consumed by `helper-logger`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, { table_name: 'action_log' });
+const store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, { TABLE_NAME: 'action_log' });
 ```
 
 ## Store Contract

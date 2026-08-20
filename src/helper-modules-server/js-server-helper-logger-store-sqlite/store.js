@@ -333,7 +333,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // and then call this method after the real clock has advanced past it.
       const now_sec = Lib.Utils.getUnixTime();
       const sql = (
-        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('expires_at') + ' IS NOT NULL' +
         '   AND ' + _Store.Q('expires_at') + ' <= ?'
       );
@@ -421,7 +421,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateTableSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -454,7 +454,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateEntityIndexSQL: function () {
 
       const Q = _Store.Q;
-      const t = CONFIG.table_name;
+      const t = CONFIG.TABLE_NAME;
       const idx = Q('idx_' + t + '_entity');
 
       return (
@@ -479,7 +479,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateActorIndexSQL: function () {
 
       const Q = _Store.Q;
-      const t = CONFIG.table_name;
+      const t = CONFIG.TABLE_NAME;
       const idx = Q('idx_' + t + '_actor');
 
       return (
@@ -503,7 +503,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateTTLIndexSQL: function () {
 
       const Q = _Store.Q;
-      const t = CONFIG.table_name;
+      const t = CONFIG.TABLE_NAME;
       const idx = Q('idx_' + t + '_expires_at');
 
       return (
@@ -522,7 +522,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildInsertSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const cols = _Store.COLUMNS.map(Q).join(', ');
       const placeholders = _Store.COLUMNS.map(function () {
         return '?';
@@ -546,7 +546,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildListSQL: function (mode, query) {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const parts = [];
       const params = [];
 

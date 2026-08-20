@@ -8,7 +8,7 @@ Class F storage adapter. MySQL backend for `helper-auth`. Standard factory shape
 Lib.SQL = Lib.MySQL;  // alias so the adapter picks Lib.SQL
 
 const Store = require('@superloomdev/js-server-helper-auth-store-mysql')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -19,7 +19,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 | Config key | Type | Notes |
 |---|---|---|
-| `table_name` | String | Required. One table per actor_type |
+| `TABLE_NAME` | String | Required. One table per actor_type |
 
 The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the injected container. Auth forwards error envelopes transparently.
 
@@ -27,11 +27,11 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the 
 
 ```js
 {
-  table_name: 'sessions_user'  // required. one table per actor_type
+  TABLE_NAME: 'sessions_user'  // required. one table per actor_type
 }
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -68,7 +68,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 9. **`custom_data` is JSON-encoded into a TEXT column.** On read the JSON is parsed back to an object. Corrupt stored values surface as `null`, not as throws.
 
-10. **`table_name` cannot contain a backtick.** The adapter throws at quoting time. The loader does not reject this at config-validation time; a malformed `table_name` surfaces on first call.
+10. **`TABLE_NAME` cannot contain a backtick.** The adapter throws at quoting time. The loader does not reject this at config-validation time; a malformed `TABLE_NAME` surfaces on first call.
 
 11. **`setupNewStore` is one statement.** Issues a single `CREATE TABLE IF NOT EXISTS` with the `expires_at` index inlined as `INDEX idx_expires_at (expires_at)`. MySQL does not support `CREATE INDEX IF NOT EXISTS` as a standalone statement, so the inline form is the only idempotent path for creating both the table and the index in one boot-time call.
 

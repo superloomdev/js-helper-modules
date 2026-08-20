@@ -130,7 +130,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Step 1: Create the collection (idempotent - already-exists is success)
       const create_result = await Lib.MongoDBAdmin.createCollection(instance, {
-        collection_name: CONFIG.collection_name
+        collection_name: CONFIG.COLLECTION_NAME
       });
 
       // Return error if collection creation failed
@@ -138,7 +138,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         Lib.Debug.debug('Auth mongodb setupNewStore createCollection failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
-          collection: CONFIG.collection_name,
+          collection: CONFIG.COLLECTION_NAME,
           admin_error: create_result.error && create_result.error.type
         });
 
@@ -152,7 +152,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Step 2: Create the prefix index (required for listSessionsByActor)
       // and the expires_at index (recommended for cleanupExpiredSessions)
       const indexes_result = await Lib.MongoDBAdmin.createIndexes(instance, {
-        collection_name: CONFIG.collection_name,
+        collection_name: CONFIG.COLLECTION_NAME,
         indexes: [
           { keys: { prefix: 1 }, index_options: { name: 'idx_prefix' } },
           { keys: { expires_at: 1 }, index_options: { name: 'idx_expires_at' } }
@@ -164,7 +164,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         Lib.Debug.debug('Auth mongodb setupNewStore createIndexes failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
-          collection: CONFIG.collection_name,
+          collection: CONFIG.COLLECTION_NAME,
           admin_error: indexes_result.error && indexes_result.error.type
         });
 
@@ -211,7 +211,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Fetch the document by _id - mismatch returns null naturally
       const result = await Lib.MongoDB.getRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: _id }
       );
 
@@ -257,7 +257,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Query using exact equality on the indexed `prefix` field
       const result = await Lib.MongoDB.query(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { prefix: prefix }
       );
 
@@ -312,7 +312,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Upsert by _id - replaces existing doc or inserts if absent
       const result = await Lib.MongoDB.writeRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: doc._id },
         doc
       );
@@ -382,7 +382,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Run the partial $set update against the matched document
       const result = await Lib.MongoDB.updateRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: anchored },
         { $set: updates }
       );
@@ -435,7 +435,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Delete the matched document by prefix regex on _id
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: anchored }
       );
 
@@ -490,7 +490,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Delete all matched documents in one deleteMany round-trip
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { $or: or_clauses }
       );
 
@@ -538,7 +538,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const now = instance.time;
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { expires_at: { $lt: now } }
       );
 

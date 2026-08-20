@@ -8,7 +8,7 @@ Requires a running MongoDB instance. Uses `helper-nosql-mongodb` (native driver 
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
-  collection_name: 'action_log'  // required. one collection per logger instance
+  COLLECTION_NAME: 'action_log'  // required. one collection per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -16,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-`collection_name` is required. The loader throws an `Error` if it is missing, null, or empty. `Lib.MongoDB` must be present on the injected `shared_libs` container.
+`COLLECTION_NAME` is required. The loader throws an `Error` if it is missing, null, or empty. `Lib.MongoDB` must be present on the injected `shared_libs` container.
 
 ## Store Contract
 

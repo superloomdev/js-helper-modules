@@ -23,7 +23,7 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 Lib.SQL = Lib.Postgres;  // alias so the adapter picks Lib.SQL
 
 const store = require('@superloomdev/js-server-helper-auth-store-postgres')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 ```
 

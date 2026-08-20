@@ -8,6 +8,6 @@ module.exports = {
 
   // Table name for verification codes. Must be a valid MySQL identifier
   // without backticks. The adapter quotes identifiers internally.
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 
 };

@@ -139,7 +139,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Step 1: Create the table with PK=tenant_id, SK=session_key
       const create_result = await Lib.DynamoDBAdmin.createTable(instance, {
-        table_name: CONFIG.table_name,
+        table_name: CONFIG.TABLE_NAME,
         attribute_definitions: [
           { name: 'tenant_id', type: 'S' },
           { name: 'session_key', type: 'S' }
@@ -155,7 +155,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         Lib.Debug.debug('Auth dynamodb setupNewStore createTable failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
-          table: CONFIG.table_name,
+          table: CONFIG.TABLE_NAME,
           admin_error: create_result.error && create_result.error.type
         });
 
@@ -168,7 +168,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Step 2: Wait for the table to reach ACTIVE state
       const wait_result = await Lib.DynamoDBAdmin.waitForTableActive(instance, {
-        table_name: CONFIG.table_name
+        table_name: CONFIG.TABLE_NAME
       });
 
       // Return error if wait failed
@@ -176,7 +176,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         Lib.Debug.debug('Auth dynamodb setupNewStore waitForTableActive failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
-          table: CONFIG.table_name,
+          table: CONFIG.TABLE_NAME,
           admin_error: wait_result.error && wait_result.error.type
         });
 
@@ -189,7 +189,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Step 3: Enable native TTL on the expires_at attribute
       const ttl_result = await Lib.DynamoDBAdmin.enableTtl(instance, {
-        table_name: CONFIG.table_name,
+        table_name: CONFIG.TABLE_NAME,
         attribute_name: 'expires_at'
       });
 
@@ -198,7 +198,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         Lib.Debug.debug('Auth dynamodb setupNewStore enableTtl failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
-          table: CONFIG.table_name,
+          table: CONFIG.TABLE_NAME,
           admin_error: ttl_result.error && ttl_result.error.type
         });
 
@@ -240,7 +240,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     getSession: async function (instance, tenant_id, actor_id, token_key, token_secret_hash) {
 
       // Fetch the item by composite primary key
-      const result = await Lib.DynamoDB.getRecord(instance, CONFIG.table_name, {
+      const result = await Lib.DynamoDB.getRecord(instance, CONFIG.TABLE_NAME, {
         tenant_id: tenant_id,
         session_key: _Store.sortKey(actor_id, token_key)
       });
@@ -303,7 +303,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const prefix = actor_id + '#';
 
       // Query using the PK + SK begins_with condition
-      const result = await Lib.DynamoDB.query(instance, CONFIG.table_name, {
+      const result = await Lib.DynamoDB.query(instance, CONFIG.TABLE_NAME, {
         pk: tenant_id,
         pkName: 'tenant_id',
         skCondition: 'begins_with(session_key, :sk)',
@@ -358,7 +358,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Encode the canonical record to a DynamoDB item and write it
       const result = await Lib.DynamoDB.writeRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         _Store.recordToItem(record)
       );
 
@@ -420,7 +420,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Run the partial UpdateItem against the target session item
       const result = await Lib.DynamoDB.updateRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         { tenant_id: tenant_id, session_key: _Store.sortKey(actor_id, token_key) },
         updates
       );
@@ -468,7 +468,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Remove the item by its composite primary key
       const result = await Lib.DynamoDB.deleteRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         { tenant_id: tenant_id, session_key: _Store.sortKey(actor_id, token_key) }
       );
 
@@ -516,7 +516,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the batchDeleteRecords key map for this table
       const keysByTable = {};
-      keysByTable[CONFIG.table_name] = keys.map(function (k) {
+      keysByTable[CONFIG.TABLE_NAME] = keys.map(function (k) {
         return {
           tenant_id: tenant_id,
           session_key: _Store.sortKey(k.actor_id, k.token_key)
@@ -569,7 +569,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Scan for all items whose expires_at is in the past
       const now = instance.time;
-      const scan_result = await Lib.DynamoDB.scan(instance, CONFIG.table_name, {
+      const scan_result = await Lib.DynamoDB.scan(instance, CONFIG.TABLE_NAME, {
         expression: '#ea < :now',
         names: { '#ea': 'expires_at' },
         values: { ':now': now }
@@ -600,7 +600,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the batchDelete key map from the scanned items
       const keysByTable = {};
-      keysByTable[CONFIG.table_name] = scan_result.items.map(function (item) {
+      keysByTable[CONFIG.TABLE_NAME] = scan_result.items.map(function (item) {
         return { tenant_id: item.tenant_id, session_key: item.session_key };
       });
 

@@ -23,7 +23,7 @@ module.exports = function (Lib, ERRORS) {
       }
 
       // roles must be a plain object (or absent)
-      if (CONFIG.roles !== undefined && (!Lib.Utils.isObject(CONFIG.roles) || Array.isArray(CONFIG.roles))) {
+      if (CONFIG.ROLES !== undefined && (!Lib.Utils.isObject(CONFIG.ROLES) || Array.isArray(CONFIG.ROLES))) {
         throw new TypeError('[helper-font] roles must be a plain object');
       }
 

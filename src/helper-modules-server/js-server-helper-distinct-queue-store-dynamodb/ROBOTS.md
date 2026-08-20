@@ -11,7 +11,7 @@
 ```js
 // Load the adapter with Lib injected
 const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
-  table_name: 'queue_jobs'
+  TABLE_NAME: 'queue_jobs'
 });
 
 // Pass the ready-to-use store object to the parent module
@@ -24,7 +24,7 @@ Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
 
 Loaded via `loader(shared_libs, config)`. Config keys:
 
-- `table_name` - DynamoDB table name (string, required)
+- `TABLE_NAME` - DynamoDB table name (string, required)
 - `KEY_DELIMITER` - Sort key field separator (string, default `\u001F` - override with care)
 
 The DynamoDB driver is taken from the injected `Lib.DynamoDB`.

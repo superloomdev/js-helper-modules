@@ -6,7 +6,7 @@ This adapter is fully independent. Construct it before the Logger parent and pas
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
-  table_name: 'action_log'
+  TABLE_NAME: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -19,7 +19,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 | Key | Type | Required | Description |
 |-----|------|----------|--------------|
-| `table_name` | `String` | Yes | Name of the log table. Must not contain a double-quote. One table per Logger instance. |
+| `TABLE_NAME` | `String` | Yes | Name of the log table. Must not contain a double-quote. One table per Logger instance. |
 
 ## Dependencies
 

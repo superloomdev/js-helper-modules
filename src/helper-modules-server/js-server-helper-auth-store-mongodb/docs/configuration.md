@@ -21,7 +21,7 @@ Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
 });
 
 const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
-  collection_name: 'sessions_user'
+  COLLECTION_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -41,9 +41,9 @@ The MongoDB client is **not** created at loader time. `Lib.MongoDB` lazy-initial
 
 | Key | Type | Required | Description |
 |---|---|---|---|
-| `collection_name` | String | Yes | Name of the sessions collection. Use one collection per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
+| `COLLECTION_NAME` | String | Yes | Name of the sessions collection. Use one collection per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
 
-The validator throws an `Error` at loader time if `collection_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `COLLECTION_NAME` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
 ## Peer Dependencies
 

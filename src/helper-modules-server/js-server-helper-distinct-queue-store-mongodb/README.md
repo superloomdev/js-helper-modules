@@ -24,7 +24,7 @@ Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
 
 // Load the MongoDB store adapter
 Lib.DistinctQueueStore = require('helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'queue_jobs'
+  COLLECTION_NAME: 'queue_jobs'
 });
 
 // Load distinct-queue with the ready-to-use store object
@@ -38,7 +38,7 @@ await Lib.DistinctQueueStore.setupNewStore(Lib.Instance.initialize());
 
 ## Configuration
 
-- **`collection_name`** - MongoDB collection name for queue records (required)
+- **`COLLECTION_NAME`** - MongoDB collection name for queue records (required)
 - `Lib.MongoDB` is read from the injected `Lib` container - no separate `lib_mongodb` config key
 
 ## Extended Documentation

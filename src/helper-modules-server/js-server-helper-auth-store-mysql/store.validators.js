@@ -45,19 +45,19 @@ const Validators = {
   Throws on the first violation so misconfiguration surfaces
   immediately at boot time.
 
-  @param {Object} config - { table_name } (plain data only)
+  @param {Object} config - { TABLE_NAME } (plain data only)
 
   @return {void}
   *********************************************************************/
   validateConfig: function (config) {
 
-    // table_name is required and must be a non-empty string
+    // TABLE_NAME is required and must be a non-empty string
     if (
-      Lib.Utils.isNullOrUndefined(config.table_name) ||
-      !Lib.Utils.isString(config.table_name) ||
-      Lib.Utils.isEmptyString(config.table_name)
+      Lib.Utils.isNullOrUndefined(config.TABLE_NAME) ||
+      !Lib.Utils.isString(config.TABLE_NAME) ||
+      Lib.Utils.isEmptyString(config.TABLE_NAME)
     ) {
-      throw new Error('[helper-auth-store-mysql] config.table_name is required');
+      throw new Error('[helper-auth-store-mysql] config.TABLE_NAME is required');
     }
 
   }

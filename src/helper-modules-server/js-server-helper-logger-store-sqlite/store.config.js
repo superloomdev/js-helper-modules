@@ -9,6 +9,6 @@ module.exports = {
   // Table name for log records. Must be a valid SQLite identifier.
   // The adapter double-quotes all identifiers; table names must not contain
   // a double-quote character.
-  table_name: 'action_log'
+  TABLE_NAME: 'action_log'
 
 };

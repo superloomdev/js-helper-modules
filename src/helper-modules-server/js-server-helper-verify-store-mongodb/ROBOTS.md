@@ -8,14 +8,14 @@ Requires a running MongoDB instance. Uses `helper-nosql-mongodb` (native driver 
 
 ```js
 const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, {
-  collection_name: 'verification_codes'
+  COLLECTION_NAME: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
 | `shared_libs` | Object | Yes | Dependency container (Utils, Debug, MongoDB) |
-| `collection_name` | String | Yes | Name of the verification collection |
+| `COLLECTION_NAME` | String | Yes | Name of the verification collection |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods.
 
@@ -23,11 +23,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  collection_name: 'verification_codes'  // required. one collection per verify instance
+  COLLECTION_NAME: 'verification_codes'  // required. one collection per verify instance
 }
 ```
 
-`collection_name` is required. The loader throws an `Error` if it is missing, null, or empty. The MongoDB driver is injected via `shared_libs.MongoDB`.
+`COLLECTION_NAME` is required. The loader throws an `Error` if it is missing, null, or empty. The MongoDB driver is injected via `shared_libs.MongoDB`.
 
 ## Store Contract
 

@@ -8,14 +8,14 @@ The adapter provisions the table itself via `setupNewStore` using `PAY_PER_REQUE
 
 ```js
 const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, {
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
 | `shared_libs` | Object | Yes | Dependency container (Utils, Debug, DynamoDB) |
-| `table_name` | String | Yes | Name of the DynamoDB table |
+| `TABLE_NAME` | String | Yes | Name of the DynamoDB table |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods.
 
@@ -23,11 +23,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  table_name: 'verification_codes'  // required. one table per verify instance
+  TABLE_NAME: 'verification_codes'  // required. one table per verify instance
 }
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. The DynamoDB driver is injected via `shared_libs.DynamoDB`.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty. The DynamoDB driver is injected via `shared_libs.DynamoDB`.
 
 ## Store Contract
 

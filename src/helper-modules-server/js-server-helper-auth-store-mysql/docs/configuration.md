@@ -24,7 +24,7 @@ Lib.MySQL = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
 Lib.SQL = Lib.MySQL;  // alias so the adapter picks Lib.SQL
 
 const Store = require('@superloomdev/js-server-helper-auth-store-mysql')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -44,11 +44,11 @@ The connection pool is **not** created at loader time. `Lib.MySQL` lazy-initiali
 
 | Key | Type | Required | Description |
 |---|---|---|---|
-| `table_name` | String | Yes | Name of the sessions table. Use one table per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
+| `TABLE_NAME` | String | Yes | Name of the sessions table. Use one table per `actor_type` (`sessions_user`, `sessions_admin`, `sessions_device`, etc.) so multiple Auth instances can share one database without collision |
 
-The validator throws an `Error` at loader time if `table_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `TABLE_NAME` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
-`table_name` cannot contain a backtick character. The check happens lazily on first SQL build, not at config-validation time. Use lowercase, underscored identifiers (`sessions_user`, not `` `Sessions` ``).
+`TABLE_NAME` cannot contain a backtick character. The check happens lazily on first SQL build, not at config-validation time. Use lowercase, underscored identifiers (`sessions_user`, not `` `Sessions` ``).
 
 ## Peer Dependencies
 

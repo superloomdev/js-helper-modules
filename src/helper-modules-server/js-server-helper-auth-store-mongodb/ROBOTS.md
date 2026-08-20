@@ -6,7 +6,7 @@ Class F storage adapter. MongoDB backend for `helper-auth`. Standard factory sha
 
 ```js
 const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
-  collection_name: 'sessions_user'
+  COLLECTION_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -17,7 +17,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 | Config key | Type | Notes |
 |---|---|---|
-| `collection_name` | String | Required. One collection per actor_type |
+| `COLLECTION_NAME` | String | Required. One collection per actor_type |
 
 The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.MongoDB` by reference from the injected container. Auth forwards error envelopes transparently.
 
@@ -25,11 +25,11 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.MongoDB` by reference from 
 
 ```js
 {
-  collection_name: 'sessions_user'  // required. one collection per actor_type
+  COLLECTION_NAME: 'sessions_user'  // required. one collection per actor_type
 }
 ```
 
-`collection_name` is required. The loader throws an `Error` if it is missing, null, or empty.
+`COLLECTION_NAME` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 

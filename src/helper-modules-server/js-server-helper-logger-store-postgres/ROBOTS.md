@@ -8,7 +8,7 @@ Requires a running PostgreSQL instance. Uses `helper-sql-postgres` (pooled `pg` 
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, {
-  table_name: 'action_log'  // required. one table per logger instance
+  TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -16,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -44,7 +44,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 6. **`data` column is JSON-serialized TEXT.** Serialized on write, parsed on read.
 
-7. **Identifiers are double-quoted (`"col"`).** The adapter rejects any `table_name` containing a double-quote.
+7. **Identifiers are double-quoted (`"col"`).** The adapter rejects any `TABLE_NAME` containing a double-quote.
 
 8. **Three separate `CREATE INDEX IF NOT EXISTS` statements** are used (entity, actor, expires_at). Unlike MySQL, PostgreSQL supports standalone `CREATE INDEX IF NOT EXISTS`.
 

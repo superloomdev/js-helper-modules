@@ -78,10 +78,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     @param {String}   options.install_form_factor - The new session's form_factor
     @param {String}   options.install_platform - The new session's platform
     @param {Object}   options.limits - The CONFIG.LIMITS object
-    @param {Integer}    options.limits.total_max
-    @param {Object|null} options.limits.by_form_factor_max
-    @param {Object|null} options.limits.by_platform_max
-    @param {Boolean}    options.limits.evict_oldest_on_limit
+    @param {Integer}    options.limits.TOTAL_MAX
+    @param {Object|null} options.limits.BY_FORM_FACTOR_MAX
+    @param {Object|null} options.limits.BY_PLATFORM_MAX
+    @param {Boolean}    options.limits.EVICT_OLDEST_ON_LIMIT
 
     @return {Object} - Decision envelope
     *********************************************************************/
@@ -124,10 +124,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
       }
 
       // Step 2: Total-count cap
-      const total_check = Policy.checkTotal(active, options.limits.total_max);
+      const total_check = Policy.checkTotal(active, options.limits.TOTAL_MAX);
       if (total_check.over_cap === true) {
 
-        if (options.limits.evict_oldest_on_limit === true) {
+        if (options.limits.EVICT_OLDEST_ON_LIMIT === true) {
 
           // Evict the LRU session to make room for the new one
           const victim = Policy.pickOldest(active);
@@ -145,12 +145,12 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Step 3: Per-form-factor cap
       if (
-        options.limits.by_form_factor_max !== null &&
-        options.limits.by_form_factor_max !== undefined
+        options.limits.BY_FORM_FACTOR_MAX !== null &&
+        options.limits.BY_FORM_FACTOR_MAX !== undefined
       ) {
 
         // Look up the per-form-factor cap; undefined means no cap for this form_factor
-        const ff_cap = options.limits.by_form_factor_max[options.install_form_factor];
+        const ff_cap = options.limits.BY_FORM_FACTOR_MAX[options.install_form_factor];
 
         if (Number.isFinite(ff_cap)) {
 
@@ -161,7 +161,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
           if (ff_active.length >= ff_cap) {
 
-            if (options.limits.evict_oldest_on_limit === true) {
+            if (options.limits.EVICT_OLDEST_ON_LIMIT === true) {
 
               // Evict the LRU session in this form_factor tier
               const victim = Policy.pickOldest(ff_active);
@@ -183,12 +183,12 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
       // Step 4: Per-platform cap
       if (
-        options.limits.by_platform_max !== null &&
-        options.limits.by_platform_max !== undefined
+        options.limits.BY_PLATFORM_MAX !== null &&
+        options.limits.BY_PLATFORM_MAX !== undefined
       ) {
 
         // Look up the per-platform cap; undefined means no cap for this platform
-        const plat_cap = options.limits.by_platform_max[options.install_platform];
+        const plat_cap = options.limits.BY_PLATFORM_MAX[options.install_platform];
 
         if (Number.isFinite(plat_cap)) {
 
@@ -199,7 +199,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
           if (plat_active.length >= plat_cap) {
 
-            if (options.limits.evict_oldest_on_limit === true) {
+            if (options.limits.EVICT_OLDEST_ON_LIMIT === true) {
 
               // Evict the LRU session in this platform tier
               const victim = Policy.pickOldest(plat_active);

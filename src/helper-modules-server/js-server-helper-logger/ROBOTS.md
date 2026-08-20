@@ -21,7 +21,7 @@ module.exports = function loader (shared_libs, config) {
 
 ```js
 const Store = require('helper-logger-store-postgres')({
-  table_name: 'action_log',
+  TABLE_NAME: 'action_log',
   lib_sql:    Lib.Postgres
 });
 

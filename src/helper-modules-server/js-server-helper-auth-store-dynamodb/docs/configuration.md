@@ -20,7 +20,7 @@ Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib,
 });
 
 const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -38,9 +38,9 @@ The AWS SDK client is **not** created at loader time. `Lib.DynamoDB` lazy-initia
 
 | Key | Type | Required | Description |
 |---|---|---|---|
-| `table_name` | String | Yes | Name of the DynamoDB table. Must match the table name provisioned out-of-band |
+| `TABLE_NAME` | String | Yes | Name of the DynamoDB table. Must match the table name provisioned out-of-band |
 
-The validator throws an `Error` at loader time if `table_name` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
+The validator throws an `Error` at loader time if `TABLE_NAME` is missing, null, undefined, or the empty string. The throw is intentional. Misconfiguration must fail at boot, never silently at first request.
 
 The table must exist before the adapter is used. When `Lib.DynamoDBAdmin` is injected (from `js-server-helper-nosql-aws-dynamodb-admin`), `setupNewStore` creates the table with the correct PK/SK schema, waits for ACTIVE, and enables native TTL on `expires_at` - all idempotently. When no admin is injected, `setupNewStore` returns `NOT_IMPLEMENTED` and the table must be provisioned out-of-band via IaC or AWS Console. See [schema.md](schema.md) for the exact table definition.
 
