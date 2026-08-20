@@ -328,7 +328,7 @@ const Font = {
     }
 
     // Build the @font-face CSS string
-    const css = _Font.constructFontFace(name, url, weight, style);
+    const css = _Font.buildFontFaceCss(name, url, weight, style);
 
     return {
       success: true,
@@ -526,7 +526,7 @@ const _Font = {
 
 
   /********************************************************************
-  Construct a @font-face CSS string from parts.
+  Build a @font-face CSS string from parts.
 
   @param {String} name   - Font family name
   @param {String} url    - Font file URL
@@ -535,7 +535,7 @@ const _Font = {
 
   @return {String} - The @font-face CSS string
   *********************************************************************/
-  constructFontFace: function (name, url, weight, style) {
+  buildFontFaceCss: function (name, url, weight, style) {
 
     // Build the font-family and src declarations
     const declarations = [
