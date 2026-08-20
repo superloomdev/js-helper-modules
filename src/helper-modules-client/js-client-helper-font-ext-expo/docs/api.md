@@ -40,7 +40,7 @@ const { success, error } = await ExpoFontAdapter.loadManifest(Font.getManifest()
 Returns whether all fonts have been loaded.
 
 ```javascript
-const { success, ready, error } = ExpoFontAdapter.isReady();
+const ready = ExpoFontAdapter.isReady();
 ```
 
 ### isFamilyLoaded(familyName)
@@ -48,7 +48,7 @@ const { success, ready, error } = ExpoFontAdapter.isReady();
 Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
 
 ```javascript
-const { success, loaded, error } = ExpoFontAdapter.isFamilyLoaded('Poppins');
+const loaded = ExpoFontAdapter.isFamilyLoaded('Poppins');
 ```
 
 ### getLoadedCount()

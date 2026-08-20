@@ -68,6 +68,30 @@ module.exports = function (Lib, ERRORS) {
     },
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ Programmer-Error Assertions ~~~~~~~~~~~~~~~~~~~~
+    // Throw TypeError on bad arguments. Used by is* functions that return
+    // bare Boolean per the function-naming doctrine.
+
+
+    /********************************************************************
+    Throw TypeError if family name is missing or not a non-empty string.
+
+    @param {*} name - Value to validate as a family name
+    @param {String} fn_name - Public function name for error message
+
+    @return {void}
+    *********************************************************************/
+    assertFamilyName: function (name, fn_name) {
+
+      if (!Lib.Utils.isString(name) || name.length === 0) {
+        throw new TypeError(
+          '[helper-font] ' + fn_name + ': family_name must be a non-empty string'
+        );
+      }
+
+    },
+
+
     /********************************************************************
     Validate a token. Returns the error object when invalid,
     null when valid.

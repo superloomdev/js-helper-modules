@@ -133,14 +133,14 @@ Font.getRegisteredFamilies();
 
 ### isRegistered(familyName)
 
-Checks whether a family name is in the registry. Returns `true` for any family added via `registerFamilies` plus the seeded 'System' family.
+Checks whether a family name is in the registry. Returns `true` for any family added via `registerFamilies` plus the seeded 'System' family. Throws `TypeError` if `familyName` is not a non-empty string.
 
 ```javascript
 Font.isRegistered('Poppins');
-// { success: true, registered: true, error: null }
+// true
 
 Font.isRegistered('Unknown');
-// { success: true, registered: false, error: null }
+// false
 ```
 
 ## Adapter Contract
@@ -164,7 +164,7 @@ Each extension implements platform-specific loading:
 ### isReady()
 
 ```javascript
-function isReady() -> { success, ready, error }
+function isReady() -> Boolean
 ```
 
 Check whether all registered fonts have finished loading.

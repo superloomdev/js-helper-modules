@@ -52,14 +52,14 @@ loadManifest(manifest) -> Promise<{ success, error }> | async:yes
   Entries with only path or asset (native/Expo-only) are silently skipped.
   manifest is the output of Font.getManifest().
 
-isReady() -> { success, ready, error } | async:no
+isReady() -> Boolean | async:no
   Returns whether all fonts have been loaded (style node injected).
 
-isFamilyLoaded(familyName) -> { success, loaded, error } | async:no
+isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a specific font family has been loaded by this adapter.
   Used for incremental loading to skip already-loaded families.
 
-unload() -> { success, error } | async:no
+clearManifest() -> void | async:no
   Removes the injected <style> node from the DOM. Useful for hot reload or cleanup.
 ```
 

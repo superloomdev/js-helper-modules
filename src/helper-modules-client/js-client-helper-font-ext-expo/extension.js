@@ -197,15 +197,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Check whether all registered fonts have finished loading.
 
-    @return {Object} - { success, ready, error }
+    @return {Boolean} - true if all fonts have loaded, false otherwise
     *********************************************************************/
     isReady: function () {
 
-      return {
-        success: true,
-        ready: state.loaded,
-        error: null
-      };
+      return state.loaded;
 
     },
 
@@ -215,15 +211,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @param {String} familyName - The family name to check
 
-    @return {Object} - { success, loaded, error }
+    @return {Boolean} - true if the family has been loaded, false otherwise
     *********************************************************************/
     isFamilyLoaded: function (familyName) {
 
-      return {
-        success: true,
-        loaded: state.loadedFamilies.has(familyName),
-        error: null
-      };
+      return state.loadedFamilies.has(familyName);
 
     },
 
