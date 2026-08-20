@@ -1,0 +1,19 @@
+# Valkey for module testing
+# Lifecycle managed by npm scripts: npm test starts -> tests -> stops and removes
+# Ephemeral - data lost on container stop
+
+name: superloom-test-valkey
+
+services:
+
+  valkey:
+    container_name: superloom-test-valkey
+    image: valkey/valkey:latest
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 2s
