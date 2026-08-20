@@ -134,7 +134,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     List log records for a specific entity, most-recent first.
 
     @param {Object} instance - Request instance
-    @param {Object} query    - { scope, entity_type, entity_id, actions?, limit?, cursor? }
+    @param {Object} query    - { tenant_id, entity_type, entity_id, actions?, limit?, cursor? }
 
     @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
@@ -167,7 +167,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     List log records for a specific actor, most-recent first.
 
     @param {Object} instance - Request instance
-    @param {Object} query    - { scope, actor_type, actor_id, limit?, cursor? }
+    @param {Object} query    - { tenant_id, actor_type, actor_id, limit?, cursor? }
 
     @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
@@ -240,7 +240,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     COLUMNS: [
-      'scope', 'entity_type', 'entity_id',
+      'tenant_id', 'entity_type', 'entity_id',
       'actor_type', 'actor_id', 'action',
       'data', 'ip', 'user_agent',
       'created_at', 'created_at_ms', 'sort_key', 'expires_at'
@@ -280,7 +280,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Inlining makes the single CREATE TABLE IF NOT EXISTS statement fully idempotent.
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
-          '  ' + Q('scope')         + ' VARCHAR(128) NOT NULL DEFAULT \'\',' +
+          '  ' + Q('tenant_id')         + ' VARCHAR(128) NOT NULL DEFAULT \'\',' +
           '  ' + Q('entity_type')   + ' VARCHAR(64)  NOT NULL,' +
           '  ' + Q('entity_id')     + ' VARCHAR(128) NOT NULL,' +
           '  ' + Q('actor_type')    + ' VARCHAR(64)  NOT NULL,' +
@@ -294,8 +294,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
           '  ' + Q('sort_key')      + ' VARCHAR(64)  NOT NULL,' +
           '  ' + Q('expires_at')    + ' BIGINT,' +
           '  PRIMARY KEY (' + Q('sort_key') + '),' +
-          '  INDEX ' + Q('idx_' + tn + '_entity_sort') + ' (' + Q('scope') + ', ' + Q('entity_type') + ', ' + Q('entity_id') + ', ' + Q('sort_key') + '),' +
-          '  INDEX ' + Q('idx_' + tn + '_actor_sort')  + ' (' + Q('scope') + ', ' + Q('actor_type')  + ', ' + Q('actor_id')  + ', ' + Q('sort_key') + '),' +
+          '  INDEX ' + Q('idx_' + tn + '_entity_sort') + ' (' + Q('tenant_id') + ', ' + Q('entity_type') + ', ' + Q('entity_id') + ', ' + Q('sort_key') + '),' +
+          '  INDEX ' + Q('idx_' + tn + '_actor_sort')  + ' (' + Q('tenant_id') + ', ' + Q('actor_type')  + ', ' + Q('actor_id')  + ', ' + Q('sort_key') + '),' +
           '  INDEX ' + Q('idx_' + tn + '_expires_at')  + ' (' + Q('expires_at') + ')' +
           ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
       );
@@ -332,7 +332,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the SELECT SQL for entity-scoped log queries.
 
-    @param {Object} query - { scope, entity_type, entity_id, actions?, limit?, cursor? }
+    @param {Object} query - { tenant_id, entity_type, entity_id, actions?, limit?, cursor? }
 
     @return {Object} - { sql, values }
     *********************************************************************/
@@ -344,7 +344,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const values = [];
 
       let sql = 'SELECT * FROM ' + t + ' WHERE ';
-      sql += Q('scope') + ' = ?'; values.push(query.scope || '');
+      sql += Q('tenant_id') + ' = ?'; values.push(query.tenant_id || '');
       sql += ' AND ' + Q('entity_type') + ' = ?'; values.push(query.entity_type);
       sql += ' AND ' + Q('entity_id') + ' = ?'; values.push(query.entity_id);
 
@@ -373,7 +373,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     /********************************************************************
     Build the SELECT SQL for actor-scoped log queries.
 
-    @param {Object} query - { scope, actor_type, actor_id, limit?, cursor? }
+    @param {Object} query - { tenant_id, actor_type, actor_id, limit?, cursor? }
 
     @return {Object} - { sql, values }
     *********************************************************************/
@@ -385,7 +385,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const values = [];
 
       let sql = 'SELECT * FROM ' + t + ' WHERE ';
-      sql += Q('scope') + ' = ?'; values.push(query.scope || '');
+      sql += Q('tenant_id') + ' = ?'; values.push(query.tenant_id || '');
       sql += ' AND ' + Q('actor_type') + ' = ?'; values.push(query.actor_type);
       sql += ' AND ' + Q('actor_id') + ' = ?'; values.push(query.actor_id);
 
@@ -411,7 +411,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     recordToRow: function (record) {
 
       return [
-        record.scope        || '',
+        record.tenant_id        || '',
         record.entity_type,
         record.entity_id,
         record.actor_type,
@@ -440,7 +440,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     rowToRecord: function (row) {
 
       return {
-        scope:         row.scope        || '',
+        tenant_id:         row.tenant_id        || '',
         entity_type:   row.entity_type,
         entity_id:     row.entity_id,
         actor_type:    row.actor_type,

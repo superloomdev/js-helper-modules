@@ -127,7 +127,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     assert.equal(writeResult.error, null);
 
     const listResult = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-user-1'
+      tenant_id: '', entity_type: 'user', entity_id: 'my-user-1'
     });
 
     assert.equal(listResult.success, true);
@@ -146,7 +146,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     await store.addLog(instance, makeLogRecord({ entity_id: 'my-user-2', action: 'action.second', sort_key: '3000-xyz' }));
 
     const listResult = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-user-2'
+      tenant_id: '', entity_type: 'user', entity_id: 'my-user-2'
     });
 
     assert.equal(listResult.success, true);
@@ -167,7 +167,7 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     await store.addLog(instance, makeLogRecord({ entity_id: 'my-user-3', action: 'profile.update', sort_key: '4002-c' }));
 
     const listResult = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-user-3',
+      tenant_id: '', entity_type: 'user', entity_id: 'my-user-3',
       actions: ['user.login', 'user.logout']
     });
 
@@ -191,21 +191,21 @@ describe('Tier 1: addLog and getLogsByEntity round-trip', { concurrency: false }
     }
 
     const page1 = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-user-4', limit: 2
+      tenant_id: '', entity_type: 'user', entity_id: 'my-user-4', limit: 2
     });
     assert.equal(page1.success, true);
     assert.equal(page1.records.length, 2);
     assert.ok(page1.next_cursor);
 
     const page2 = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-user-4', limit: 2, cursor: page1.next_cursor
+      tenant_id: '', entity_type: 'user', entity_id: 'my-user-4', limit: 2, cursor: page1.next_cursor
     });
     assert.equal(page2.success, true);
     assert.equal(page2.records.length, 2);
     assert.ok(page2.next_cursor);
 
     const page3 = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-user-4', limit: 2, cursor: page2.next_cursor
+      tenant_id: '', entity_type: 'user', entity_id: 'my-user-4', limit: 2, cursor: page2.next_cursor
     });
     assert.equal(page3.success, true);
     assert.equal(page3.records.length, 1);
@@ -233,7 +233,7 @@ describe('Tier 1: getLogsByActor', { concurrency: false }, function () {
 
     const store = buildStore(TABLE_ACTOR);
     const result = await store.getLogsByActor(buildInstance(7000), {
-      scope: '', actor_type: 'admin', actor_id: 'admin-1'
+      tenant_id: '', actor_type: 'admin', actor_id: 'admin-1'
     });
 
     assert.equal(result.success, true);
@@ -248,7 +248,7 @@ describe('Tier 1: getLogsByActor', { concurrency: false }, function () {
 
     const store = buildStore(TABLE_ACTOR);
     const result = await store.getLogsByActor(buildInstance(7000), {
-      scope: '', actor_type: 'admin', actor_id: 'admin-2'
+      tenant_id: '', actor_type: 'admin', actor_id: 'admin-2'
     });
 
     assert.equal(result.success, true);
@@ -280,7 +280,7 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
     assert.equal(result.deleted_count, 1);
 
     const remaining = await store.getLogsByEntity(instance, {
-      scope: '', entity_type: 'user', entity_id: 'my-persist'
+      tenant_id: '', entity_type: 'user', entity_id: 'my-persist'
     });
     assert.equal(remaining.records.length, 1);
 
@@ -335,7 +335,7 @@ runSharedStoreSuite({
 function makeLogRecord (overrides) {
 
   return Object.assign({
-    scope: '',
+    tenant_id: '',
     entity_type: 'user',
     entity_id: 'user-test',
     actor_type: 'admin',
