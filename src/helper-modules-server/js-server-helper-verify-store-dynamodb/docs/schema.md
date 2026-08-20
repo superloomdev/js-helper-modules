@@ -6,7 +6,7 @@ DynamoDB uses a single-table design with composite keys:
 
 | Attribute | DynamoDB Type | Role |
 |-----------|---------------|------|
-| `scope` | String (S) | Partition key (PK) - logical namespace |
+| `namespace` | String (S) | Partition key (PK) - logical namespace |
 | `id` | String (S) | Sort key (SK) - verification key (called `key` in the store contract) |
 | `code` | String (S) | The verification code (hashed or plain) |
 | `fail_count` | Number (N) | Count of failed verify attempts |
@@ -21,11 +21,11 @@ DynamoDB uses a single-table design with composite keys:
 {
   TableName: table_name,
   KeySchema: [
-    { AttributeName: 'scope', KeyType: 'HASH' },
+    { AttributeName: 'namespace', KeyType: 'HASH' },
     { AttributeName: 'id',    KeyType: 'RANGE' }
   ],
   AttributeDefinitions: [
-    { AttributeName: 'scope', AttributeType: 'S' },
+    { AttributeName: 'namespace', AttributeType: 'S' },
     { AttributeName: 'id',    AttributeType: 'S' }
   ],
   BillingMode: 'PAY_PER_REQUEST'
@@ -43,12 +43,12 @@ Properties:
   TableName: verification_codes
   BillingMode: PAY_PER_REQUEST
   KeySchema:
-    - AttributeName: scope
+    - AttributeName: namespace
       KeyType: HASH
     - AttributeName: id
       KeyType: RANGE
   AttributeDefinitions:
-    - AttributeName: scope
+    - AttributeName: namespace
       AttributeType: S
     - AttributeName: id
       AttributeType: S
@@ -73,10 +73,10 @@ aws dynamodb update-time-to-live \
 
 | Operation | DynamoDB call | Key used |
 |-----------|---------------|----------|
-| `getRecord` | `GetItem` | PK=`scope`, SK=`id` |
-| `setRecord` | `PutItem` | PK=`scope`, SK=`id` |
-| `incrementFailCount` | `UpdateItem` | PK=`scope`, SK=`id` |
-| `deleteRecord` | `DeleteItem` | PK=`scope`, SK=`id` |
+| `getRecord` | `GetItem` | PK=`namespace`, SK=`id` |
+| `setRecord` | `PutItem` | PK=`namespace`, SK=`id` |
+| `incrementFailCount` | `UpdateItem` | PK=`namespace`, SK=`id` |
+| `deleteRecord` | `DeleteItem` | PK=`namespace`, SK=`id` |
 | `cleanupExpiredRecords` | `Scan` + `BatchWriteItem` | Full table scan |
 
 All access patterns except cleanup use the primary key - no GSIs are required for the verify store.

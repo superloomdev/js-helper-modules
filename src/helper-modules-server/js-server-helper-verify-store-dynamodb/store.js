@@ -1,6 +1,6 @@
 // Info: DynamoDB store adapter for helper-verify. Fully independent
 // module that owns its own CONFIG, ERRORS, and Validators. Schema:
-//   PK: scope (S)
+//   PK: namespace (S)
 //   SK: id    (S)
 //   Attributes: code (S), fail_count (N), created_at (N), expires_at (N)
 //
@@ -15,10 +15,10 @@
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                      -> { success, error }
-//   - getRecord(instance, scope, key)              -> { success, record, error }
-//   - setRecord(instance, scope, key, record)      -> { success, error }
-//   - incrementFailCount(instance, scope, key)     -> { success, error }
-//   - deleteRecord(instance, scope, key)           -> { success, error }
+//   - getRecord(instance, namespace, key)              -> { success, record, error }
+//   - setRecord(instance, namespace, key, record)      -> { success, error }
+//   - incrementFailCount(instance, namespace, key)     -> { success, error }
+//   - deleteRecord(instance, namespace, key)           -> { success, error }
 //   - cleanupExpiredRecords(instance)              -> { success, deleted_count, error }
 
 'use strict';
@@ -101,14 +101,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     setupNewStore: async function (instance) {
 
-      // Provision the table idempotently with composite key {scope, id}
+      // Provision the table idempotently with composite key {namespace, id}
       const result = await Lib.DynamoDB.createTable(instance, CONFIG.TABLE_NAME, {
         attribute_definitions: [
-          { name: 'scope', type: 'S' },
+          { name: 'namespace', type: 'S' },
           { name: 'id',    type: 'S' }
         ],
         key_schema: [
-          { name: 'scope', type: 'HASH' },
+          { name: 'namespace', type: 'HASH' },
           { name: 'id',    type: 'RANGE' }
         ],
         billing_mode: 'PAY_PER_REQUEST'
@@ -142,18 +142,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Direct GetItem on the composite key. Returns null when absent.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
-    getRecord: async function (instance, scope, key) {
+    getRecord: async function (instance, namespace, key) {
 
       // Direct GetItem on the composite key
       const result = await Lib.DynamoDB.getRecord(
         instance,
         CONFIG.TABLE_NAME,
-        { scope: scope, id: key }
+        { namespace: namespace, id: key }
       );
 
       // Return a service error if the driver call failed
@@ -198,17 +198,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Upsert via PutItem. DynamoDB always overwrites by composite key.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
     @param {Object} record   - { code, fail_count, created_at, expires_at }
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    setRecord: async function (instance, scope, key, record) {
+    setRecord: async function (instance, namespace, key, record) {
 
       // Build the full DynamoDB item with composite key included
       const item = {
-        scope: scope,
+        namespace: namespace,
         id: key,
         code: record.code,
         fail_count: record.fail_count,
@@ -249,18 +249,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Atomic ADD via the helper's increment parameter.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    incrementFailCount: async function (instance, scope, key) {
+    incrementFailCount: async function (instance, namespace, key) {
 
       // Atomic ADD via the helper's increment parameter
       const result = await Lib.DynamoDB.updateRecord(
         instance,
         CONFIG.TABLE_NAME,
-        { scope: scope, id: key },
+        { namespace: namespace, id: key },
         null,
         null,
         { fail_count: 1 }
@@ -292,18 +292,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Idempotent delete.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    deleteRecord: async function (instance, scope, key) {
+    deleteRecord: async function (instance, namespace, key) {
 
       // DeleteItem by composite key - idempotent (missing item is success)
       const result = await Lib.DynamoDB.deleteRecord(
         instance,
         CONFIG.TABLE_NAME,
-        { scope: scope, id: key }
+        { namespace: namespace, id: key }
       );
 
       // Return a service error if the driver call failed
@@ -379,7 +379,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Batch-delete the expired keys in one round-trip
       const keysByTable = {};
       keysByTable[CONFIG.TABLE_NAME] = scan_result.items.map(function (item) {
-        return { scope: item.scope, id: item.id };
+        return { namespace: item.namespace, id: item.id };
       });
 
       const delete_result = await Lib.DynamoDB.batchDeleteRecords(

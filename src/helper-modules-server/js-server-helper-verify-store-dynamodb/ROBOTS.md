@@ -34,19 +34,19 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 | Method | Signature | Returns |
 |---|---|---|
 | `setupNewStore` | `(instance)` | `{ success, error }` |
-| `getRecord` | `(instance, scope, key)` | `{ success, record, error }` |
-| `setRecord` | `(instance, scope, key, record)` | `{ success, error }` |
-| `incrementFailCount` | `(instance, scope, key)` | `{ success, error }` |
-| `deleteRecord` | `(instance, scope, key)` | `{ success, error }` |
+| `getRecord` | `(instance, namespace, key)` | `{ success, record, error }` |
+| `setRecord` | `(instance, namespace, key, record)` | `{ success, error }` |
+| `incrementFailCount` | `(instance, namespace, key)` | `{ success, error }` |
+| `deleteRecord` | `(instance, namespace, key)` | `{ success, error }` |
 | `cleanupExpiredRecords` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`.
+All methods are async. `instance` is the per-request namespace object from `Lib.Instance.initialize()`.
 
 ## Key Schema
 
 | Attribute | DynamoDB type | Role |
 |-----------|---------------|------|
-| `scope` | String (S) | Partition key (PK) |
+| `namespace` | String (S) | Partition key (PK) |
 | `id` | String (S) | Sort key (SK). Called `key` in the store contract; stored as `id`. |
 | `expires_at` | Number (N) | TTL attribute (Unix epoch seconds). Enable TTL out-of-band via AWS Console or IaC. |
 
@@ -56,7 +56,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 2. **`getRecord` returns `record: null` on a miss.** Not an error.
 
-3. **`setRecord` is a full `PutItem`.** Replaces all attributes for the given `(scope, id)` key. There are no partial updates in `setRecord`.
+3. **`setRecord` is a full `PutItem`.** Replaces all attributes for the given `(namespace, id)` key. There are no partial updates in `setRecord`.
 
 4. **`incrementFailCount` uses `UpdateItem` with `SET #fail_count = #fail_count + :one`.** Atomic. Does not read the current value before writing.
 
@@ -90,4 +90,4 @@ This adapter owns its own `store.errors.js`. Only one type:
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`. PK is `scope`, SK is `id`. TTL attribute is `expires_at`.
+The store's source file is `store.js`; the config validator is `store.validators.js`. PK is `namespace`, SK is `id`. TTL attribute is `expires_at`.

@@ -7,7 +7,7 @@ An AWS DynamoDB-backed implementation of the [helper-verify](https://github.com/
 
 ## What This Is
 
-A thin layer between the Verify parent module and a DynamoDB verification table. Uses a single-table design with `scope` as the partition key and `id` as the sort key. The `expires_at` attribute doubles as the DynamoDB TTL attribute, enabling automatic item expiry without application-side scheduling.
+A thin layer between the Verify parent module and a DynamoDB verification table. Uses a single-table design with `namespace` as the partition key and `id` as the sort key. The `expires_at` attribute doubles as the DynamoDB TTL attribute, enabling automatic item expiry without application-side scheduling.
 
 The adapter cannot stand alone. It is always loaded together with the Verify parent and the [`helper-nosql-aws-dynamodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-aws-dynamodb) driver helper.
 

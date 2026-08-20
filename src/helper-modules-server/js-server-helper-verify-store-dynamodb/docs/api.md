@@ -17,7 +17,7 @@ const store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Li
 Provisions the DynamoDB table via `createTable` with the following key schema:
 
 ```
-Partition key (PK): scope  (String)
+Partition key (PK): namespace  (String)
 Sort key (SK):      id     (String)
 Billing:            PAY_PER_REQUEST
 ```
@@ -28,9 +28,9 @@ Billing:            PAY_PER_REQUEST
 
 ---
 
-### `getRecord(instance, scope, key)`
+### `getRecord(instance, namespace, key)`
 
-`GetItem` by composite key `{ scope, id: key }`. Returns `record: null` when the item does not exist.
+`GetItem` by composite key `{ namespace, id: key }`. Returns `record: null` when the item does not exist.
 
 **Return:** `{ success, record, error }`
 
@@ -46,14 +46,14 @@ Billing:            PAY_PER_REQUEST
 
 ---
 
-### `setRecord(instance, scope, key, record)`
+### `setRecord(instance, namespace, key, record)`
 
 Full `PutItem`. Replaces all attributes for the given key in one operation. There are no partial updates.
 
 Item written:
 ```js
 {
-  scope:      scope,
+  namespace:      namespace,
   id:         key,
   code:       record.code,
   fail_count: record.fail_count,
@@ -66,7 +66,7 @@ Item written:
 
 ---
 
-### `incrementFailCount(instance, scope, key)`
+### `incrementFailCount(instance, namespace, key)`
 
 Atomic `UpdateItem`:
 
@@ -80,7 +80,7 @@ Does not read the current value. Safe under concurrent verify attempts.
 
 ---
 
-### `deleteRecord(instance, scope, key)`
+### `deleteRecord(instance, namespace, key)`
 
 `DeleteItem` by composite key. DynamoDB `DeleteItem` on a missing key is a no-op - this is inherently idempotent.
 
