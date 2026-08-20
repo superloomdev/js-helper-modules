@@ -9,7 +9,7 @@ MongoDB does not use DDL. `setupNewStore` creates three indexes; the document sh
 ```js
 {
   _id:          "1715180412345-xqp",          // sort_key - primary deduplication key
-  scope:        "myapp",
+  tenant_id:        "myapp",
   entity_type:  "user",
   entity_id:    "usr_123",
   actor_type:   "user",
@@ -33,7 +33,7 @@ No denormalized compound keys (`entity_pk`, `actor_pk`) are stored. The two quer
 | Field | Type | Nullable | Notes |
 |-------|------|----------|-------|
 | `_id` | String | No | Equals `sort_key`. Unique. MongoDB creates a unique index on `_id` automatically. |
-| `scope` | String | No | Namespace. |
+| `tenant_id` | String | No | Namespace. |
 | `entity_type` | String | No | Entity type. |
 | `entity_id` | String | No | Entity identifier. |
 | `actor_type` | String | No | Actor type. |
@@ -54,11 +54,11 @@ No denormalized compound keys (`entity_pk`, `actor_pk`) are stored. The two quer
 
 ```js
 // Entity query path
-key:     { scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 }
+key:     { tenant_id: 1, entity_type: 1, entity_id: 1, sort_key: -1 }
 name:    'logger_entity_idx'
 
 // Actor query path
-key:     { scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 }
+key:     { tenant_id: 1, actor_type: 1, actor_id: 1, sort_key: -1 }
 name:    'logger_actor_idx'
 
 // Sparse TTL index
@@ -79,7 +79,7 @@ Unlike SQL adapters that serialize `data` to JSON text, this adapter stores `dat
 
 ### Compound Indexes on Canonical Fields
 
-The two query paths use compound indexes directly on `(scope, entity_type, entity_id, sort_key)` and `(scope, actor_type, actor_id, sort_key)`. No denormalized compound key strings are stored on documents - MongoDB's compound-index implementation handles equality matches across multiple fields efficiently.
+The two query paths use compound indexes directly on `(tenant_id, entity_type, entity_id, sort_key)` and `(tenant_id, actor_type, actor_id, sort_key)`. No denormalized compound key strings are stored on documents - MongoDB's compound-index implementation handles equality matches across multiple fields efficiently.
 
 ### Sparse TTL Index
 

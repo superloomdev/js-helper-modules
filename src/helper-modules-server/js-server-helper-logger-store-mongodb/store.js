@@ -1,8 +1,8 @@
 // Info: MongoDB store adapter for helper-logger. Uses sort_key as
 // the document `_id` (guaranteed unique per log event). Two compound indexes
 // serve the two query paths:
-//   - entity_idx: (scope, entity_type, entity_id, sort_key DESC)
-//   - actor_idx:  (scope, actor_type, actor_id, sort_key DESC)
+//   - entity_idx: (tenant_id, entity_type, entity_id, sort_key DESC)
+//   - actor_idx:  (tenant_id, actor_type, actor_id, sort_key DESC)
 //
 // TTL is implemented via a `_ttl` Date field + a sparse TTL index
 // (expireAfterSeconds: 0). Persistent records (expires_at: null) omit `_ttl`
@@ -100,11 +100,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     setupNewStore: async function (instance) {
 
-      // Entity query index: (scope, entity_type, entity_id, sort_key DESC)
+      // Entity query index: (tenant_id, entity_type, entity_id, sort_key DESC)
       const entity_result = await Lib.MongoDB.createIndex(
         instance,
         CONFIG.COLLECTION_NAME,
-        { scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
+        { tenant_id: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
         { name: 'logger_entity_idx' }
       );
 
@@ -120,11 +120,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
-      // Actor query index: (scope, actor_type, actor_id, sort_key DESC)
+      // Actor query index: (tenant_id, actor_type, actor_id, sort_key DESC)
       const actor_result = await Lib.MongoDB.createIndex(
         instance,
         CONFIG.COLLECTION_NAME,
-        { scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
+        { tenant_id: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
         { name: 'logger_actor_idx' }
       );
 
@@ -219,7 +219,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Read ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    List log records for a (scope, entity_type, entity_id) triple.
+    List log records for a (tenant_id, entity_type, entity_id) triple.
     Results are ordered most-recent first by sort_key DESC.
     Supports cursor pagination, action filter, and time range.
 
@@ -236,7 +236,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a (scope, actor_type, actor_id) triple.
+    List log records for a (tenant_id, actor_type, actor_id) triple.
     Same pagination contract as getLogsByEntity.
 
     @param {Object} instance - Request instance
@@ -318,7 +318,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     listByIndex: async function (instance, query, type) {
 
       // Build the base filter from the index key
-      const filter = { scope: query.scope || '' };
+      const filter = { tenant_id: query.tenant_id || '' };
 
       if (type === 'entity') {
         filter.entity_type = query.entity_type;
@@ -412,7 +412,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       const doc = {
         _id: record.sort_key,
-        scope: record.scope,
+        tenant_id: record.tenant_id,
         entity_type: record.entity_type,
         entity_id: record.entity_id,
         actor_type: record.actor_type,
@@ -449,7 +449,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Return only the canonical fields, omitting _id and _ttl
       return {
-        scope: doc.scope,
+        tenant_id: doc.tenant_id,
         entity_type: doc.entity_type,
         entity_id: doc.entity_id,
         actor_type: doc.actor_type,

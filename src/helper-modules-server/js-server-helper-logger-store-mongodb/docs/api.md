@@ -19,13 +19,13 @@ Creates three indexes (idempotent via MongoDB's `createIndex`):
 ```js
 // Entity query index
 createIndex(
-  { scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
+  { tenant_id: 1, entity_type: 1, entity_id: 1, sort_key: -1 },
   { name: 'logger_entity_idx' }
 );
 
 // Actor query index
 createIndex(
-  { scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
+  { tenant_id: 1, actor_type: 1, actor_id: 1, sort_key: -1 },
   { name: 'logger_actor_idx' }
 );
 
@@ -48,7 +48,7 @@ Idempotent upsert via the driver's `writeRecord` (a `replaceOne` with `upsert: t
 
 ```js
 filter:      { _id: record.sort_key }
-replacement: { _id: sort_key, scope, entity_type, entity_id,
+replacement: { _id: sort_key, tenant_id, entity_type, entity_id,
                actor_type, actor_id, action, data, ip, user_agent,
                created_at, created_at_ms, sort_key, expires_at, _ttl? }
 options:     { upsert: true }
@@ -64,11 +64,11 @@ options:     { upsert: true }
 
 ### `getLogsByEntity(instance, query)`
 
-Query filter: `{ scope, entity_type, entity_id }` plus optional `action`, `created_at_ms` range, and `sort_key` cursor. Sort: `{ sort_key: -1 }`. Served by the `logger_entity_idx` compound index.
+Query filter: `{ tenant_id, entity_type, entity_id }` plus optional `action`, `created_at_ms` range, and `sort_key` cursor. Sort: `{ sort_key: -1 }`. Served by the `logger_entity_idx` compound index.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `entity_type` | Yes | Entity type |
 | `entity_id` | Yes | Entity ID |
 | `actions` | No | Array of action strings |
@@ -83,11 +83,11 @@ Fetches `limit + 1` documents to detect next page. `next_cursor` is the `sort_ke
 
 ### `getLogsByActor(instance, query)`
 
-Query filter: `{ scope, actor_type, actor_id }` plus optional `action`, `created_at_ms` range, and `sort_key` cursor. Sort: `{ sort_key: -1 }`. Served by the `logger_actor_idx` compound index.
+Query filter: `{ tenant_id, actor_type, actor_id }` plus optional `action`, `created_at_ms` range, and `sort_key` cursor. Sort: `{ sort_key: -1 }`. Served by the `logger_actor_idx` compound index.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `actor_type` | Yes | Actor type |
 | `actor_id` | Yes | Actor ID |
 | `limit` | No | Page size (default 50) |

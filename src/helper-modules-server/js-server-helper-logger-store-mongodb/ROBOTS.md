@@ -36,13 +36,13 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 3. **`addLog` is idempotent.** Uses `replaceOne` with `upsert: true` on `{ _id: sort_key }`. Re-inserting the same `sort_key` silently replaces the document with identical content.
 
-4. **No denormalized compound keys.** Documents store the canonical fields only (`scope`, `entity_type`, `entity_id`, `actor_type`, `actor_id`, etc.). The two query paths use compound indexes on the individual fields - no `entity_pk`/`actor_pk` strings are computed or stored.
+4. **No denormalized compound keys.** Documents store the canonical fields only (`tenant_id`, `entity_type`, `entity_id`, `actor_type`, `actor_id`, etc.). The two query paths use compound indexes on the individual fields - no `entity_pk`/`actor_pk` strings are computed or stored.
 
 5. **`_ttl` is a `Date` field derived from `expires_at * 1000`.** Drives the sparse TTL index. Absent for persistent (never-expiring) log records (where `expires_at` is null).
 
 6. **`setupNewStore` creates exactly two compound indexes plus one TTL index:**
-   - `{ scope: 1, entity_type: 1, entity_id: 1, sort_key: -1 }` named `logger_entity_idx` for `getLogsByEntity`.
-   - `{ scope: 1, actor_type: 1, actor_id: 1, sort_key: -1 }` named `logger_actor_idx` for `getLogsByActor`.
+   - `{ tenant_id: 1, entity_type: 1, entity_id: 1, sort_key: -1 }` named `logger_entity_idx` for `getLogsByEntity`.
+   - `{ tenant_id: 1, actor_type: 1, actor_id: 1, sort_key: -1 }` named `logger_actor_idx` for `getLogsByActor`.
    - `{ _ttl: 1 }` named `logger_ttl_idx` with `expireAfterSeconds: 0, sparse: true` for automatic TTL.
 
 7. **`cleanupExpiredLogs` is an explicit sweep** on `{ expires_at: { $ne: null, $lte: now } }`. Complements the native TTL sweeper.
