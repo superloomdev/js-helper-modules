@@ -32,11 +32,11 @@ describe('KvMmkv loader', function () {
 
   it('should return the 18 expected exports when loaded', function () {
     const expected = [
-      'getRecord', 'writeRecord', 'deleteRecord', 'hasRecord',
+      'getRecord', 'writeRecord', 'deleteRecord', 'getRecordExists',
       'getAllKeys', 'batchGetRecords', 'batchWriteRecords',
       'batchDeleteRecords', 'clear',
       'getRecordSync', 'writeRecordSync', 'deleteRecordSync',
-      'hasRecordSync', 'getAllKeysSync', 'batchGetRecordsSync',
+      'getRecordExistsSync', 'getAllKeysSync', 'batchGetRecordsSync',
       'batchWriteRecordsSync', 'batchDeleteRecordsSync', 'clearSync'
     ];
     for (let i = 0; i < expected.length; i++) {
@@ -305,28 +305,28 @@ describe('deleteRecordSync', function () {
 
 
 // ============================================================================
-// 5. hasRecordSync
+// 5. getRecordExistsSync
 // ============================================================================
 
-describe('hasRecordSync', function () {
+describe('getRecordExistsSync', function () {
 
   it('should return exists true when key is present', function () {
     Store.writeRecordSync('present', 'val');
-    const result = Store.hasRecordSync('present');
+    const result = Store.getRecordExistsSync('present');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, true);
   });
 
   it('should return exists false when key is absent', function () {
-    const result = Store.hasRecordSync('absent');
+    const result = Store.getRecordExistsSync('absent');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
   });
 
   it('should return INVALID_KEY when key is not a string', function () {
-    const result = Store.hasRecordSync({});
+    const result = Store.getRecordExistsSync({});
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.error.type, 'helper-kv-mmkv/invalid-key');
@@ -461,8 +461,8 @@ describe('batchDeleteRecordsSync', function () {
     const result = Store.batchDeleteRecordsSync(['d1', 'd2']);
 
     assert.strictEqual(result.success, true);
-    assert.strictEqual(Store.hasRecordSync('d1').exists, false);
-    assert.strictEqual(Store.hasRecordSync('d2').exists, false);
+    assert.strictEqual(Store.getRecordExistsSync('d1').exists, false);
+    assert.strictEqual(Store.getRecordExistsSync('d2').exists, false);
   });
 
   it('should return INVALID_KEYS when argument is not an array', function () {
@@ -489,8 +489,8 @@ describe('clearSync', function () {
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.cleared_count, 1);
-    assert.strictEqual(Store.hasRecordSync('keep-mine').exists, false);
-    assert.strictEqual(StoreOther.hasRecordSync('keep-theirs').exists, true);
+    assert.strictEqual(Store.getRecordExistsSync('keep-mine').exists, false);
+    assert.strictEqual(StoreOther.getRecordExistsSync('keep-theirs').exists, true);
   });
 
   it('should clear all keys when namespace is empty', function () {
@@ -569,11 +569,11 @@ describe('sync/async parity', function () {
     assert.deepStrictEqual(syncResult, asyncResult);
   });
 
-  it('should return identical envelopes for hasRecord and hasRecordSync', async function () {
+  it('should return identical envelopes for getRecordExists and getRecordExistsSync', async function () {
     Store.writeRecordSync('parity-h', 1);
 
-    const syncResult = Store.hasRecordSync('parity-h');
-    const asyncResult = await Store.hasRecord('parity-h');
+    const syncResult = Store.getRecordExistsSync('parity-h');
+    const asyncResult = await Store.getRecordExists('parity-h');
 
     assert.deepStrictEqual(syncResult, asyncResult);
   });

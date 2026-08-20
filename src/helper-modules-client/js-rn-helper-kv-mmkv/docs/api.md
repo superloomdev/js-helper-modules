@@ -49,7 +49,7 @@ Deletes a record by key. Idempotent: deleting an absent key returns `success: tr
 
 Returns: `{ success, error }`
 
-### hasRecordSync(key)
+### getRecordExistsSync(key)
 
 Checks whether a key exists. Maps to MMKV's `contains()`.
 
@@ -98,7 +98,7 @@ Each async function wraps its sync sibling in a resolved promise. Use these for 
 | `getRecord(key)` | `getRecordSync` | `{ success, value, found, error }` |
 | `writeRecord(key, value)` | `writeRecordSync` | `{ success, error }` |
 | `deleteRecord(key)` | `deleteRecordSync` | `{ success, error }` |
-| `hasRecord(key)` | `hasRecordSync` | `{ success, exists, error }` |
+| `getRecordExists(key)` | `getRecordExistsSync` | `{ success, exists, error }` |
 | `getAllKeys()` | `getAllKeysSync` | `{ success, keys, count, error }` |
 | `batchGetRecords(keys)` | `batchGetRecordsSync` | `{ success, values, error }` |
 | `batchWriteRecords(pairs)` | `batchWriteRecordsSync` | `{ success, error }` |
