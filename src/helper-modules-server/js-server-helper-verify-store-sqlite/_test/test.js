@@ -132,11 +132,11 @@ describe('Tier 1: setRecord round-trip', function () {
     const store = buildStore();
     const record = { code: '1234', fail_count: 0, created_at: 100, expires_at: 9999 };
 
-    const set = await store.setRecord(buildInstance(100), 'scope-A', 'key-1', record);
+    const set = await store.setRecord(buildInstance(100), 'namespace-A', 'key-1', record);
     assert.equal(set.success, true);
     assert.equal(set.error, null);
 
-    const get = await store.getRecord(buildInstance(100), 'scope-A', 'key-1');
+    const get = await store.getRecord(buildInstance(100), 'namespace-A', 'key-1');
     assert.equal(get.success, true);
     assert.equal(get.error, null);
     assert.ok(get.record !== null);
@@ -153,10 +153,10 @@ describe('Tier 1: setRecord round-trip', function () {
     const r1 = { code: 'AAAA', fail_count: 0, created_at: 100, expires_at: 500 };
     const r2 = { code: 'BBBB', fail_count: 0, created_at: 200, expires_at: 999 };
 
-    await store.setRecord(buildInstance(100), 'scope-A', 'key-upsert', r1);
-    await store.setRecord(buildInstance(200), 'scope-A', 'key-upsert', r2);
+    await store.setRecord(buildInstance(100), 'namespace-A', 'key-upsert', r1);
+    await store.setRecord(buildInstance(200), 'namespace-A', 'key-upsert', r2);
 
-    const get = await store.getRecord(buildInstance(200), 'scope-A', 'key-upsert');
+    const get = await store.getRecord(buildInstance(200), 'namespace-A', 'key-upsert');
     assert.equal(get.record.code, 'BBBB');
     assert.equal(get.record.expires_at, 999);
 
@@ -180,14 +180,14 @@ describe('Tier 1: incrementFailCount', function () {
     const store = buildStore();
     const record = { code: '5678', fail_count: 0, created_at: 100, expires_at: 9999 };
 
-    await store.setRecord(buildInstance(100), 'scope-B', 'key-inc', record);
+    await store.setRecord(buildInstance(100), 'namespace-B', 'key-inc', record);
 
-    await store.incrementFailCount(buildInstance(100), 'scope-B', 'key-inc');
-    const after1 = await store.getRecord(buildInstance(100), 'scope-B', 'key-inc');
+    await store.incrementFailCount(buildInstance(100), 'namespace-B', 'key-inc');
+    const after1 = await store.getRecord(buildInstance(100), 'namespace-B', 'key-inc');
     assert.equal(after1.record.fail_count, 1);
 
-    await store.incrementFailCount(buildInstance(100), 'scope-B', 'key-inc');
-    const after2 = await store.getRecord(buildInstance(100), 'scope-B', 'key-inc');
+    await store.incrementFailCount(buildInstance(100), 'namespace-B', 'key-inc');
+    const after2 = await store.getRecord(buildInstance(100), 'namespace-B', 'key-inc');
     assert.equal(after2.record.fail_count, 2);
 
   });
@@ -195,7 +195,7 @@ describe('Tier 1: incrementFailCount', function () {
   it('incrementFailCount on a missing row is a no-op (success)', async function () {
 
     const store = buildStore();
-    const result = await store.incrementFailCount(buildInstance(100), 'scope-B', 'no-such-key');
+    const result = await store.incrementFailCount(buildInstance(100), 'namespace-B', 'no-such-key');
     assert.equal(result.success, true);
     assert.equal(result.error, null);
 
@@ -219,11 +219,11 @@ describe('Tier 1: deleteRecord', function () {
     const store = buildStore();
     const record = { code: 'DEAD', fail_count: 0, created_at: 100, expires_at: 9999 };
 
-    await store.setRecord(buildInstance(100), 'scope-C', 'key-del', record);
-    const del = await store.deleteRecord(buildInstance(100), 'scope-C', 'key-del');
+    await store.setRecord(buildInstance(100), 'namespace-C', 'key-del', record);
+    const del = await store.deleteRecord(buildInstance(100), 'namespace-C', 'key-del');
     assert.equal(del.success, true);
 
-    const get = await store.getRecord(buildInstance(100), 'scope-C', 'key-del');
+    const get = await store.getRecord(buildInstance(100), 'namespace-C', 'key-del');
     assert.equal(get.success, true);
     assert.equal(get.record, null);
 
@@ -232,7 +232,7 @@ describe('Tier 1: deleteRecord', function () {
   it('deleteRecord on a missing row is a no-op (success)', async function () {
 
     const store = buildStore();
-    const result = await store.deleteRecord(buildInstance(100), 'scope-C', 'no-such-key');
+    const result = await store.deleteRecord(buildInstance(100), 'namespace-C', 'no-such-key');
     assert.equal(result.success, true);
     assert.equal(result.error, null);
 
@@ -255,16 +255,16 @@ describe('Tier 1: cleanupExpiredRecords accuracy', function () {
 
     const store = buildStore();
 
-    await store.setRecord(buildInstance(100), 'scope-D', 'exp1', { code: 'A', fail_count: 0, created_at: 100, expires_at: 200 });
-    await store.setRecord(buildInstance(100), 'scope-D', 'exp2', { code: 'B', fail_count: 0, created_at: 100, expires_at: 300 });
-    await store.setRecord(buildInstance(100), 'scope-D', 'live', { code: 'C', fail_count: 0, created_at: 100, expires_at: 9999 });
+    await store.setRecord(buildInstance(100), 'namespace-D', 'exp1', { code: 'A', fail_count: 0, created_at: 100, expires_at: 200 });
+    await store.setRecord(buildInstance(100), 'namespace-D', 'exp2', { code: 'B', fail_count: 0, created_at: 100, expires_at: 300 });
+    await store.setRecord(buildInstance(100), 'namespace-D', 'live', { code: 'C', fail_count: 0, created_at: 100, expires_at: 9999 });
 
     const result = await store.cleanupExpiredRecords(buildInstance(400));
     assert.equal(result.success, true);
     assert.equal(result.deleted_count, 2);
     assert.equal(result.error, null);
 
-    const survivor = await store.getRecord(buildInstance(400), 'scope-D', 'live');
+    const survivor = await store.getRecord(buildInstance(400), 'namespace-D', 'live');
     assert.ok(survivor.record !== null);
 
   });

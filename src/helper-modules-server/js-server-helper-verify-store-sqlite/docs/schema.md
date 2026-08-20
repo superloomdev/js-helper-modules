@@ -6,13 +6,13 @@
 
 ```sql
 CREATE TABLE IF NOT EXISTS "verification_codes" (
-  "scope"      TEXT    NOT NULL,
+  "namespace"      TEXT    NOT NULL,
   "id"         TEXT    NOT NULL,
   "code"       TEXT    NOT NULL,
   "fail_count" INTEGER NOT NULL DEFAULT 0,
   "created_at" INTEGER NOT NULL,
   "expires_at" INTEGER NOT NULL,
-  PRIMARY KEY ("scope", "id")
+  PRIMARY KEY ("namespace", "id")
 );
 
 CREATE INDEX IF NOT EXISTS "verification_codes_expires_at_idx"
@@ -25,7 +25,7 @@ The table name and index name are derived from `STORE_CONFIG.table_name` at runt
 
 | Column | SQLite Type | Nullable | Notes |
 |--------|-------------|----------|-------|
-| `scope` | `TEXT` | No | Logical namespace (e.g. tenant or app). Part of composite PK. |
+| `namespace` | `TEXT` | No | Logical namespace (e.g. tenant or app). Part of composite PK. |
 | `id` | `TEXT` | No | Specific verification key (e.g. `user:123:email`). Part of composite PK. Called `key` in the store contract; stored as `id`. |
 | `code` | `TEXT` | No | The hashed or plain verification code set by the verify module. |
 | `fail_count` | `INTEGER` | No | Count of failed attempts. Default `0`. Incremented atomically. |
@@ -46,7 +46,7 @@ SQLite has no separate `BIGINT` or `VARCHAR` type enforcement. Columns declared 
 
 ### Primary Key
 
-The composite primary key is `("scope", "id")`. Both columns are part of the table-level `PRIMARY KEY` declaration. SQLite creates a unique B-tree index on this pair automatically.
+The composite primary key is `("namespace", "id")`. Both columns are part of the table-level `PRIMARY KEY` declaration. SQLite creates a unique B-tree index on this pair automatically.
 
 ### UPSERT Semantics
 
@@ -54,16 +54,16 @@ The composite primary key is `("scope", "id")`. Both columns are part of the tab
 
 ```sql
 INSERT INTO "verification_codes"
-  ("scope", "id", "code", "fail_count", "created_at", "expires_at")
+  ("namespace", "id", "code", "fail_count", "created_at", "expires_at")
 VALUES (?, ?, ?, ?, ?, ?)
-ON CONFLICT ("scope", "id") DO UPDATE SET
+ON CONFLICT ("namespace", "id") DO UPDATE SET
   "code"       = excluded."code",
   "fail_count" = excluded."fail_count",
   "created_at" = excluded."created_at",
   "expires_at" = excluded."expires_at"
 ```
 
-`excluded.` refers to the pseudo-table holding the values that would have been inserted. All mutable columns are updated; the primary key columns (`scope`, `id`) are never modified by the `DO UPDATE` clause.
+`excluded.` refers to the pseudo-table holding the values that would have been inserted. All mutable columns are updated; the primary key columns (`namespace`, `id`) are never modified by the `DO UPDATE` clause.
 
 This syntax requires SQLite 3.24+ (2018), which is available everywhere `node:sqlite` ships.
 

@@ -4,7 +4,7 @@
 // so the adapter fails before serving a single request.
 //
 // Singleton pattern: Lib and ERRORS are injected at loader time and
-// close over the module-scope validators object.
+// close over the module-namespace validators object.
 'use strict';
 
 
@@ -14,7 +14,7 @@ let ERRORS; // eslint-disable-line no-unused-vars
 
 
 /********************************************************************
-Loader. Injects Lib and ERRORS into the module-scope validators object.
+Loader. Injects Lib and ERRORS into the module-namespace validators object.
 
 @param {Object} shared_libs - Dependency container (Utils, Debug)
 @param {Object} errors      - Frozen error catalog
@@ -23,7 +23,7 @@ Loader. Injects Lib and ERRORS into the module-scope validators object.
 *********************************************************************/
 module.exports = function loader (shared_libs, errors) {
 
-  // Assign to module-scope vars so validators can close over them
+  // Assign to module-namespace vars so validators can close over them
   Lib = shared_libs;
   ERRORS = errors;
 
