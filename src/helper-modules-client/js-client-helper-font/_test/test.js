@@ -290,9 +290,7 @@ test('isRegistered returns true for System (seeded at construction)', function (
 
   const result = Font.isRegistered('System');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.registered, true);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, true);
 
 });
 
@@ -306,9 +304,7 @@ test('isRegistered returns true for a registered family', function () {
 
   const result = Font.isRegistered('IsRegTestFont');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.registered, true);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, true);
 
 });
 
@@ -316,39 +312,31 @@ test('isRegistered returns false for an unregistered family', function () {
 
   const result = Font.isRegistered('NonExistentFont');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.registered, false);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, false);
 
 });
 
-test('isRegistered rejects empty string', function () {
+test('isRegistered throws TypeError on empty string', function () {
 
-  const result = Font.isRegistered('');
-
-  assert.strictEqual(result.success, false);
-  assert.strictEqual(result.registered, false);
-  assert.strictEqual(result.error.type, 'helper-font/invalid-family-name');
+  assert.throws(function () {
+    Font.isRegistered('');
+  }, TypeError);
 
 });
 
-test('isRegistered rejects non-string input', function () {
+test('isRegistered throws TypeError on non-string input', function () {
 
-  const result = Font.isRegistered(123);
-
-  assert.strictEqual(result.success, false);
-  assert.strictEqual(result.registered, false);
-  assert.strictEqual(result.error.type, 'helper-font/invalid-family-name');
+  assert.throws(function () {
+    Font.isRegistered(123);
+  }, TypeError);
 
 });
 
-test('isRegistered rejects null input', function () {
+test('isRegistered throws TypeError on null input', function () {
 
-  const result = Font.isRegistered(null);
-
-  assert.strictEqual(result.success, false);
-  assert.strictEqual(result.registered, false);
-  assert.strictEqual(result.error.type, 'helper-font/invalid-family-name');
+  assert.throws(function () {
+    Font.isRegistered(null);
+  }, TypeError);
 
 });
 

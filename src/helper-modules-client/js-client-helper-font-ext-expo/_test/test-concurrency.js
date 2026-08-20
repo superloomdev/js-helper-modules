@@ -266,10 +266,10 @@ test('two adapter instances have independent loaded state', async function () {
   await adapterA.loadManifest(manifestA);
   await adapterB.loadManifest(manifestB);
 
-  assert.strictEqual(adapterA.isFamilyLoaded('FamA').loaded, true);
-  assert.strictEqual(adapterA.isFamilyLoaded('FamB').loaded, false);
-  assert.strictEqual(adapterB.isFamilyLoaded('FamA').loaded, false);
-  assert.strictEqual(adapterB.isFamilyLoaded('FamB').loaded, true);
+  assert.strictEqual(adapterA.isFamilyLoaded('FamA'), true);
+  assert.strictEqual(adapterA.isFamilyLoaded('FamB'), false);
+  assert.strictEqual(adapterB.isFamilyLoaded('FamA'), false);
+  assert.strictEqual(adapterB.isFamilyLoaded('FamB'), true);
 
   assert.strictEqual(adapterA.getLoadedCount().count, 1);
   assert.strictEqual(adapterB.getLoadedCount().count, 1);
@@ -281,8 +281,8 @@ test('two adapter instances have independent isReady state', function () {
   const adapterA = createAdapter();
   const adapterB = createAdapter();
 
-  assert.strictEqual(adapterA.isReady().ready, false);
-  assert.strictEqual(adapterB.isReady().ready, false);
+  assert.strictEqual(adapterA.isReady(), false);
+  assert.strictEqual(adapterB.isReady(), false);
 
 });
 

@@ -35,7 +35,7 @@ const { success, error } = await WebFontAdapter.loadManifest(Font.getManifest().
 Returns whether all fonts have been loaded.
 
 ```javascript
-const { success, ready, error } = WebFontAdapter.isReady();
+const ready = WebFontAdapter.isReady();
 ```
 
 ### isFamilyLoaded(familyName)
@@ -43,15 +43,15 @@ const { success, ready, error } = WebFontAdapter.isReady();
 Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
 
 ```javascript
-const { success, loaded, error } = WebFontAdapter.isFamilyLoaded('Poppins');
+const loaded = WebFontAdapter.isFamilyLoaded('Poppins');
 ```
 
-### unload()
+### clearManifest()
 
-Removes the injected `<style>` node from the DOM.
+Removes the injected `<style>` node from the DOM and resets loaded state.
 
 ```javascript
-const { success, error } = WebFontAdapter.unload();
+WebFontAdapter.clearManifest();
 ```
 
 ## Error Catalog

@@ -37,7 +37,7 @@ test('loadManifest injects @font-face CSS into the DOM', async function () {
   assert.ok(styleNode.textContent.indexOf('font-family: \'Lora\'') !== -1);
 
   // Cleanup
-  WebFontAdapter.unload();
+  WebFontAdapter.clearManifest();
 
 });
 
@@ -81,9 +81,7 @@ test('isReady returns false before loadManifest', async function () {
 
   const result = FreshAdapter.isReady();
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.ready, false);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, false);
 
 });
 
@@ -101,17 +99,16 @@ test('isReady returns true after loadManifest', async function () {
 
   const result = FreshAdapter.isReady();
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.ready, true);
+  assert.strictEqual(result, true);
 
-  FreshAdapter.unload();
+  FreshAdapter.clearManifest();
 
 });
 
 
-// ~~~~~~~~~~~~~~~~~~~~ unload ~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~ clearManifest ~~~~~~~~~~~~~~~~~~~~
 
-test('unload removes the style node from the DOM', async function () {
+test('clearManifest removes the style node from the DOM', async function () {
 
   const freshDoc = createDocumentStub();
   const FreshAdapter = require('helper-font-ext-web')({
@@ -125,12 +122,12 @@ test('unload removes the style node from the DOM', async function () {
 
   assert.strictEqual(freshDoc._head.children.length, 1);
 
-  FreshAdapter.unload();
+  FreshAdapter.clearManifest();
 
   assert.strictEqual(freshDoc._head.children.length, 0);
 
   const readyResult = FreshAdapter.isReady();
-  assert.strictEqual(readyResult.ready, false);
+  assert.strictEqual(readyResult, false);
 
 });
 
@@ -165,9 +162,7 @@ test('isFamilyLoaded returns false before loadManifest', function () {
 
   const result = FreshAdapter.isFamilyLoaded('Poppins');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.loaded, false);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, false);
 
 });
 
@@ -185,10 +180,9 @@ test('isFamilyLoaded returns true after loadManifest', async function () {
 
   const result = FreshAdapter.isFamilyLoaded('Poppins');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.loaded, true);
+  assert.strictEqual(result, true);
 
-  FreshAdapter.unload();
+  FreshAdapter.clearManifest();
 
 });
 
@@ -218,9 +212,9 @@ test('loadManifest skips already-loaded families on second call', async function
 
   // isReady should still be true
   const readyResult = FreshAdapter.isReady();
-  assert.strictEqual(readyResult.ready, true);
+  assert.strictEqual(readyResult, true);
 
-  FreshAdapter.unload();
+  FreshAdapter.clearManifest();
 
 });
 
@@ -244,8 +238,8 @@ test('loadManifest with partial manifest loads only new families', async functio
   });
 
   assert.strictEqual(freshDoc._head.children.length, 1);
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('Poppins').loaded, true);
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('Lora').loaded, false);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('Poppins'), true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('Lora'), false);
 
   // Second load with Lora only (new family)
   await FreshAdapter.loadManifest({
@@ -258,9 +252,9 @@ test('loadManifest with partial manifest loads only new families', async functio
 
   // A new style node should be appended for the new family
   assert.strictEqual(freshDoc._head.children.length, 2);
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('Lora').loaded, true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('Lora'), true);
 
-  FreshAdapter.unload();
+  FreshAdapter.clearManifest();
 
 });
 
@@ -301,6 +295,6 @@ test('loadManifest skips entries without url (native/Expo-only)', async function
   assert.ok(styleNode.textContent.indexOf('font-family: \'WebFont\'') !== -1);
   assert.ok(styleNode.textContent.indexOf('NativeOnlyFont') === -1);
 
-  FreshAdapter.unload();
+  FreshAdapter.clearManifest();
 
 });

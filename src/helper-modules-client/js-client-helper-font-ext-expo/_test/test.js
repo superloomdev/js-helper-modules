@@ -168,9 +168,7 @@ test('isReady returns false before loadManifest', function () {
 
   const result = FreshAdapter.isReady();
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.ready, false);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, false);
 
 });
 
@@ -194,8 +192,7 @@ test('isReady returns true after successful loadManifest', async function () {
 
   const result = FreshAdapter.isReady();
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.ready, true);
+  assert.strictEqual(result, true);
 
 });
 
@@ -243,9 +240,7 @@ test('isFamilyLoaded returns false before loadManifest', function () {
 
   const result = FreshAdapter.isFamilyLoaded('TestFont');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.loaded, false);
-  assert.strictEqual(result.error, null);
+  assert.strictEqual(result, false);
 
 });
 
@@ -269,8 +264,7 @@ test('isFamilyLoaded returns true after loadManifest', async function () {
 
   const result = FreshAdapter.isFamilyLoaded('TestFontIsFam');
 
-  assert.strictEqual(result.success, true);
-  assert.strictEqual(result.loaded, true);
+  assert.strictEqual(result, true);
 
 });
 
@@ -296,14 +290,14 @@ test('loadManifest skips already-loaded families on second call', async function
   // First load
   await FreshAdapter.loadManifest(manifest);
 
-  assert.strictEqual(FreshAdapter.isReady().ready, true);
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('IncFont1').loaded, true);
+  assert.strictEqual(FreshAdapter.isReady(), true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('IncFont1'), true);
 
   // Second load with same manifest - should skip
   await FreshAdapter.loadManifest(manifest);
 
   // isReady should still be true
-  assert.strictEqual(FreshAdapter.isReady().ready, true);
+  assert.strictEqual(FreshAdapter.isReady(), true);
 
   // loadedCount should be 0 (nothing new loaded in second call)
   const loadedResult = FreshAdapter.getLoadedCount();
@@ -328,8 +322,8 @@ test('loadManifest with partial manifest loads only new families', async functio
     }
   });
 
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont1').loaded, true);
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont2').loaded, false);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont1'), true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont2'), false);
 
   // Second load with a new family
   await FreshAdapter.loadManifest({
@@ -340,7 +334,7 @@ test('loadManifest with partial manifest loads only new families', async functio
     }
   });
 
-  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont2').loaded, true);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('PartialFont2'), true);
 
   // Only the new family should have been loaded
   const loadedResult = FreshAdapter.getLoadedCount();

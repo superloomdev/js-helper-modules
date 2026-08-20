@@ -416,28 +416,15 @@ const Font = {
 
   @param {String} familyName - The family name to check
 
-  @return {Object} - { success, registered, error }
+  @return {Boolean} - true if the family is registered, false otherwise
   *********************************************************************/
   isRegistered: function (familyName) {
 
-    // Validate the family name
-    const nameError = Validators.validateFamilyName(familyName);
-    if (nameError) {
-
-      return {
-        success: false,
-        registered: false,
-        error: nameError
-      };
-
-    }
+    // Validate the family name (throws TypeError on programmer error)
+    Validators.assertFamilyName(familyName, 'isRegistered');
 
     // Check the registry for the family name
-    return {
-      success: true,
-      registered: Object.prototype.hasOwnProperty.call(registry.families, familyName),
-      error: null
-    };
+    return Object.prototype.hasOwnProperty.call(registry.families, familyName);
 
   }
 

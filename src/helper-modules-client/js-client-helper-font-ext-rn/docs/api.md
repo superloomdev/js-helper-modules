@@ -38,7 +38,7 @@ const { success, error } = await RNFontAdapter.loadManifest(Font.getManifest().m
 Returns whether all fonts have been loaded.
 
 ```javascript
-const { success, ready, error } = RNFontAdapter.isReady();
+const ready = RNFontAdapter.isReady();
 ```
 
 ### isFamilyLoaded(familyName)
@@ -46,7 +46,7 @@ const { success, ready, error } = RNFontAdapter.isReady();
 Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
 
 ```javascript
-const { success, loaded, error } = RNFontAdapter.isFamilyLoaded('Poppins');
+const loaded = RNFontAdapter.isFamilyLoaded('Poppins');
 ```
 
 ### getLoadedCount()

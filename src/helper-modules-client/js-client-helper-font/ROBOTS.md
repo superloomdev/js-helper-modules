@@ -71,7 +71,7 @@ getManifest() -> { success, manifest, error } | async:no
 getRegisteredFamilies() -> { success, families, error } | async:no
   Returns the list of registered family names, including 'System'.
 
-isRegistered(familyName) -> { success, registered, error } | async:no
+isRegistered(familyName) -> Boolean | async:no
   Checks whether a family name is in the registry. Returns true for any
   family added via registerFamilies plus the seeded 'System' family.
 ```
@@ -89,7 +89,7 @@ loadManifest(manifest) -> Promise<{ success, error }>
   - ext-rn: reads `path` → call native font loader (loadFontFromFile) for each local file
   - ext-expo: reads `asset` or `path` on native, `url` on web → call expo-font loadAsync
 
-isReady() -> { success, ready, error }
+isReady() -> Boolean
   Check whether all registered fonts have finished loading.
 ```
 
