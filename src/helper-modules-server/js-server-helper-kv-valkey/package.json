@@ -1,0 +1,38 @@
+{
+  "name": "@superloomdev/js-server-helper-kv-valkey",
+  "description": "Valkey/Redis key-value driver with TTL, hash, scan, and counter operations. Lazy-loaded ioredis client. Single instance.",
+  "version": "1.0.0",
+  "main": "kv-valkey.js",
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "bundleDependencies": false,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0"
+  },
+  "dependencies": {
+    "ioredis": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test _test/test.js"
+  }
+}
