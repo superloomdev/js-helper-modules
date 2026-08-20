@@ -868,11 +868,11 @@ describe('scan', function () {
 // 8. COMMAND BUILDERS (pure, no I/O)
 // ============================================================================
 
-describe('commandBuilderForAddRecord', function () {
+describe('buildAddRecordCommand', function () {
 
   it('should return service params with TableName and Item', function () {
 
-    const params = DynamoDB.commandBuilderForAddRecord('my_table', { pk: 'u1', name: 'Test' });
+    const params = DynamoDB.buildAddRecordCommand('my_table', { pk: 'u1', name: 'Test' });
 
     assert.strictEqual(params.TableName, 'my_table');
     assert.strictEqual(params.Item.pk, 'u1');
@@ -882,7 +882,7 @@ describe('commandBuilderForAddRecord', function () {
 
   it('should preserve all item fields in output', function () {
 
-    const params = DynamoDB.commandBuilderForAddRecord('t', {
+    const params = DynamoDB.buildAddRecordCommand('t', {
       pk: 'x', name: 'Y', age: 10, active: true, tags: ['a']
     });
 
@@ -895,11 +895,11 @@ describe('commandBuilderForAddRecord', function () {
 });
 
 
-describe('commandBuilderForDeleteRecord', function () {
+describe('buildDeleteRecordCommand', function () {
 
   it('should return service params with TableName and Key', function () {
 
-    const params = DynamoDB.commandBuilderForDeleteRecord('my_table', { pk: 'u1' });
+    const params = DynamoDB.buildDeleteRecordCommand('my_table', { pk: 'u1' });
 
     assert.strictEqual(params.TableName, 'my_table');
     assert.strictEqual(params.Key.pk, 'u1');
@@ -908,7 +908,7 @@ describe('commandBuilderForDeleteRecord', function () {
 
   it('should support composite key', function () {
 
-    const params = DynamoDB.commandBuilderForDeleteRecord('t', { pk: 'org', sk: 'item' });
+    const params = DynamoDB.buildDeleteRecordCommand('t', { pk: 'org', sk: 'item' });
 
     assert.strictEqual(params.Key.pk, 'org');
     assert.strictEqual(params.Key.sk, 'item');
@@ -918,11 +918,11 @@ describe('commandBuilderForDeleteRecord', function () {
 });
 
 
-describe('commandBuilderForUpdateRecord', function () {
+describe('buildUpdateRecordCommand', function () {
 
   it('should build SET expression for update_data', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       { name: 'Updated', age: 30 }
     );
@@ -939,7 +939,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should build INCREMENT expression', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       null, null,
       { view_count: 1 }
@@ -953,7 +953,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should build DECREMENT expression', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       null, null, null,
       { credits: 5 }
@@ -967,7 +967,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should build REMOVE expression', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       null, ['temp_field', 'old_field']
     );
@@ -980,7 +980,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should combine SET and REMOVE in one expression', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       { name: 'New' },
       ['old_field']
@@ -993,7 +993,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should override ReturnValues when return_state is provided', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       { name: 'New' },
       null, null, null,
@@ -1006,7 +1006,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should combine all four operations in one expression', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'u1' },
       { name: 'X' },
       ['temp'],
@@ -1027,7 +1027,7 @@ describe('commandBuilderForUpdateRecord', function () {
 
   it('should support composite key', function () {
 
-    const params = DynamoDB.commandBuilderForUpdateRecord(
+    const params = DynamoDB.buildUpdateRecordCommand(
       'my_table', { pk: 'org', sk: 'item' },
       { status: 'done' }
     );
@@ -1399,7 +1399,7 @@ describe('transactWriteRecords', function () {
 
   it('should execute transaction with a single put action', async function () {
 
-    const cmd = DynamoDB.commandBuilderForAddRecord(TEST_TABLE, { pk: 'tx_single_1', name: 'Single Transact' });
+    const cmd = DynamoDB.buildAddRecordCommand(TEST_TABLE, { pk: 'tx_single_1', name: 'Single Transact' });
 
     const result = await DynamoDB.transactWriteRecords(instance, [cmd], null, null);
     assert.strictEqual(result.success, true);
@@ -1412,8 +1412,8 @@ describe('transactWriteRecords', function () {
   it('should execute atomic transaction with put and delete', async function () {
 
     // Build commands using command builders
-    const add_cmd = DynamoDB.commandBuilderForAddRecord(TEST_TABLE, { pk: 'tx_add_1', name: 'Transact Add' });
-    const delete_cmd = DynamoDB.commandBuilderForDeleteRecord(TEST_TABLE, { pk: 'tx_add_1' });
+    const add_cmd = DynamoDB.buildAddRecordCommand(TEST_TABLE, { pk: 'tx_add_1', name: 'Transact Add' });
+    const delete_cmd = DynamoDB.buildDeleteRecordCommand(TEST_TABLE, { pk: 'tx_add_1' });
 
     // First add the item
     const add_result = await DynamoDB.transactWriteRecords(instance, [add_cmd], null, null);
@@ -1435,8 +1435,8 @@ describe('transactWriteRecords', function () {
 
   it('should execute atomic transaction with multiple puts', async function () {
 
-    const cmd1 = DynamoDB.commandBuilderForAddRecord(TEST_TABLE, { pk: 'tx_multi_1', name: 'One' });
-    const cmd2 = DynamoDB.commandBuilderForAddRecord(TEST_TABLE, { pk: 'tx_multi_2', name: 'Two' });
+    const cmd1 = DynamoDB.buildAddRecordCommand(TEST_TABLE, { pk: 'tx_multi_1', name: 'One' });
+    const cmd2 = DynamoDB.buildAddRecordCommand(TEST_TABLE, { pk: 'tx_multi_2', name: 'Two' });
 
     const result = await DynamoDB.transactWriteRecords(instance, [cmd1, cmd2], null, null);
     assert.strictEqual(result.success, true);
@@ -1453,7 +1453,7 @@ describe('transactWriteRecords', function () {
 
     const commands = [];
     for (let i = 0; i < 10; i++) {
-      commands.push(DynamoDB.commandBuilderForAddRecord(TEST_TABLE, {
+      commands.push(DynamoDB.buildAddRecordCommand(TEST_TABLE, {
         pk: 'tx_max_' + i,
         name: 'Max Action ' + i
       }));
@@ -1475,7 +1475,7 @@ describe('transactWriteRecords', function () {
     // Build more than 100 Put commands - AWS TransactWriteItems rejects > 100
     const commands = [];
     for (let i = 0; i < 101; i++) {
-      commands.push(DynamoDB.commandBuilderForAddRecord(TEST_TABLE, {
+      commands.push(DynamoDB.buildAddRecordCommand(TEST_TABLE, {
         pk: 'tx_over_' + i,
         name: 'Over Limit ' + i
       }));
@@ -1494,12 +1494,12 @@ describe('transactWriteRecords', function () {
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_mix_del', name: 'To Delete' });
 
     // Build mixed commands
-    const add_cmd = DynamoDB.commandBuilderForAddRecord(TEST_TABLE, { pk: 'tx_mix_add', name: 'New' });
-    const update_cmd = DynamoDB.commandBuilderForUpdateRecord(
+    const add_cmd = DynamoDB.buildAddRecordCommand(TEST_TABLE, { pk: 'tx_mix_add', name: 'New' });
+    const update_cmd = DynamoDB.buildUpdateRecordCommand(
       TEST_TABLE, { pk: 'tx_mix_upd' },
       { name: 'After Update', status: 'new' }
     );
-    const delete_cmd = DynamoDB.commandBuilderForDeleteRecord(TEST_TABLE, { pk: 'tx_mix_del' });
+    const delete_cmd = DynamoDB.buildDeleteRecordCommand(TEST_TABLE, { pk: 'tx_mix_del' });
 
     const result = await DynamoDB.transactWriteRecords(instance, [add_cmd], [update_cmd], [delete_cmd]);
     assert.strictEqual(result.success, true);
@@ -1524,8 +1524,8 @@ describe('transactWriteRecords', function () {
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_upd_only_1', name: 'Before1' });
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_upd_only_2', name: 'Before2' });
 
-    const upd1 = DynamoDB.commandBuilderForUpdateRecord(TEST_TABLE, { pk: 'tx_upd_only_1' }, { name: 'After1' });
-    const upd2 = DynamoDB.commandBuilderForUpdateRecord(TEST_TABLE, { pk: 'tx_upd_only_2' }, { name: 'After2' });
+    const upd1 = DynamoDB.buildUpdateRecordCommand(TEST_TABLE, { pk: 'tx_upd_only_1' }, { name: 'After1' });
+    const upd2 = DynamoDB.buildUpdateRecordCommand(TEST_TABLE, { pk: 'tx_upd_only_2' }, { name: 'After2' });
 
     const result = await DynamoDB.transactWriteRecords(instance, null, [upd1, upd2], null);
     assert.strictEqual(result.success, true);
@@ -1542,8 +1542,8 @@ describe('transactWriteRecords', function () {
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_del_only_1', name: 'Gone1' });
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_del_only_2', name: 'Gone2' });
 
-    const del1 = DynamoDB.commandBuilderForDeleteRecord(TEST_TABLE, { pk: 'tx_del_only_1' });
-    const del2 = DynamoDB.commandBuilderForDeleteRecord(TEST_TABLE, { pk: 'tx_del_only_2' });
+    const del1 = DynamoDB.buildDeleteRecordCommand(TEST_TABLE, { pk: 'tx_del_only_1' });
+    const del2 = DynamoDB.buildDeleteRecordCommand(TEST_TABLE, { pk: 'tx_del_only_2' });
 
     const result = await DynamoDB.transactWriteRecords(instance, null, null, [del1, del2]);
     assert.strictEqual(result.success, true);
@@ -1557,8 +1557,8 @@ describe('transactWriteRecords', function () {
 
   it('should execute transaction across multiple tables', async function () {
 
-    const add1 = DynamoDB.commandBuilderForAddRecord(TEST_TABLE, { pk: 'tx_cross_1', name: 'CrossTable1' });
-    const add2 = DynamoDB.commandBuilderForAddRecord(TEST_TABLE_COMPOSITE, { pk: 'tx_cross_org', sk: 'tx_cross_sk', name: 'CrossTable2' });
+    const add1 = DynamoDB.buildAddRecordCommand(TEST_TABLE, { pk: 'tx_cross_1', name: 'CrossTable1' });
+    const add2 = DynamoDB.buildAddRecordCommand(TEST_TABLE_COMPOSITE, { pk: 'tx_cross_org', sk: 'tx_cross_sk', name: 'CrossTable2' });
 
     const result = await DynamoDB.transactWriteRecords(instance, [add1, add2], null, null);
     assert.strictEqual(result.success, true);
@@ -1574,7 +1574,7 @@ describe('transactWriteRecords', function () {
 
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_inc', views: 10, name: 'Counter' });
 
-    const upd_cmd = DynamoDB.commandBuilderForUpdateRecord(
+    const upd_cmd = DynamoDB.buildUpdateRecordCommand(
       TEST_TABLE, { pk: 'tx_inc' },
       null, null,
       { views: 5 }
@@ -1592,7 +1592,7 @@ describe('transactWriteRecords', function () {
 
     await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'tx_dec_rm', credits: 100, temp: 'discard', name: 'Mixed' });
 
-    const upd_cmd = DynamoDB.commandBuilderForUpdateRecord(
+    const upd_cmd = DynamoDB.buildUpdateRecordCommand(
       TEST_TABLE, { pk: 'tx_dec_rm' },
       null,
       ['temp'],

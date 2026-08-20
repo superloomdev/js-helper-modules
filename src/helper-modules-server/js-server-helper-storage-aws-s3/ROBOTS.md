@@ -42,31 +42,31 @@ All functions accept `instance` as their first argument for request context and 
 
 ### Builders (pure, no I/O - used by executors and custom orchestration)
 
-commandBuilderForUploadObject(bucket, key, body, content_type?, metadata?, is_public?) → Object | async:no
+buildUploadObjectCommand(bucket, key, body, content_type?, metadata?, is_public?) → Object | async:no
   Build PutObject service params. Attaches Metadata and ACL only when provided.
 
-commandBuilderForGetObject(bucket, key) → Object | async:no
+buildGetObjectCommand(bucket, key) → Object | async:no
   Build GetObject service params. { Bucket, Key }
 
-commandBuilderForDeleteObject(bucket, key) → Object | async:no
+buildDeleteObjectCommand(bucket, key) → Object | async:no
   Build DeleteObject service params. { Bucket, Key }
 
-commandBuilderForCopyObject(source_bucket, source_key, dest_bucket, dest_key, is_public?) → Object | async:no
+buildCopyObjectCommand(source_bucket, source_key, dest_bucket, dest_key, is_public?) → Object | async:no
   Build CopyObject service params. CopySource is URL-encoded "bucket/key".
 
 ### Command Executors (I/O - execute pre-built params)
 
-commandUploadObject(instance, service_params) → { success, etag, error } | async:yes
+runUploadObjectCommand(instance, service_params) → { success, etag, error } | async:yes
   Execute pre-built PutObject command.
 
-commandGetObject(instance, service_params, output_as_string?) → { success, body, content_type, metadata, error } | async:yes
+runGetObjectCommand(instance, service_params, output_as_string?) → { success, body, content_type, metadata, error } | async:yes
   Execute pre-built GetObject command. Drains stream via SDK v3 transformToByteArray/transformToString.
   On NoSuchKey, returns error.type = 'NOT_FOUND' (log suppressed).
 
-commandDeleteObject(instance, service_params) → { success, error } | async:yes
+runDeleteObjectCommand(instance, service_params) → { success, error } | async:yes
   Execute pre-built DeleteObject command.
 
-commandCopyObject(instance, service_params) → { success, error } | async:yes
+runCopyObjectCommand(instance, service_params) → { success, error } | async:yes
   Execute pre-built CopyObject command. NoSuchKey error log suppressed.
 
 ### Convenience (DRY - build + execute internally)
@@ -75,25 +75,25 @@ listObjects(instance, bucket, prefix?) → { success, keys, error } | async:yes
   List up to 1000 keys via ListObjectsV2. Prefix optional.
 
 uploadFile(instance, bucket, key, body, content_type?, metadata?, is_public?) → { success, etag, error } | async:yes
-  Upload single file. Uses commandBuilderForUploadObject + commandUploadObject.
+  Upload single file. Uses buildUploadObjectCommand + runUploadObjectCommand.
 
 uploadFiles(instance, files) → { success, results, error } | async:yes
   Upload multiple files in parallel via Promise.all. files = [{ bucket, key, body, content_type?, metadata?, is_public? }].
   success=true only when every upload succeeded; results has per-file outcomes.
 
 getFile(instance, bucket, key, output_as_string?) → { success, body, content_type, metadata, error } | async:yes
-  Download single file. Uses commandBuilderForGetObject + commandGetObject.
+  Download single file. Uses buildGetObjectCommand + runGetObjectCommand.
   output_as_string=true returns string, otherwise Buffer.
 
 deleteFile(instance, bucket, key) → { success, error } | async:yes
-  Delete single file. Uses commandBuilderForDeleteObject + commandDeleteObject.
+  Delete single file. Uses buildDeleteObjectCommand + runDeleteObjectCommand.
 
 deleteFiles(instance, bucket, keys) → { success, deleted, error } | async:yes
   Delete multiple files with auto 1000-item chunking (AWS DeleteObjects limit).
   Recursive - processes any number of keys.
 
 copyFile(instance, source_bucket, source_key, dest_bucket, dest_key, is_public?) → { success, error } | async:yes
-  Copy file within or across buckets. Uses commandBuilderForCopyObject + commandCopyObject.
+  Copy file within or across buckets. Uses buildCopyObjectCommand + runCopyObjectCommand.
 
 moveFile(instance, source_bucket, source_key, dest_bucket, dest_key, is_public?) → { success, error } | async:yes
   Copy then delete source. Source preserved if copy fails. Delete failure becomes the returned error.

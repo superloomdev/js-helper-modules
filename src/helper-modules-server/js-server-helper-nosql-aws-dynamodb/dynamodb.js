@@ -95,7 +95,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for PutCommand or transactWrite Put
     *********************************************************************/
-    commandBuilderForAddRecord: function (table, data) {
+    buildAddRecordCommand: function (table, data) {
 
       return {
         TableName: table,
@@ -113,7 +113,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for DeleteCommand or transactWrite Delete
     *********************************************************************/
-    commandBuilderForDeleteRecord: function (table, key) {
+    buildDeleteRecordCommand: function (table, key) {
 
       return {
         TableName: table,
@@ -140,7 +140,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for UpdateCommand or transactWrite Update
     *********************************************************************/
-    commandBuilderForUpdateRecord: function (table, key, update_data, remove_keys, increment, decrement, return_state) {
+    buildUpdateRecordCommand: function (table, key, update_data, remove_keys, increment, decrement, return_state) {
 
       // Build update expression, attribute names, and attribute values
       let update_expression = '';
@@ -217,14 +217,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Execute pre-built service params against DynamoDB.
 
     /********************************************************************
-    Execute a pre-built Put command (from commandBuilderForAddRecord).
+    Execute a pre-built Put command (from buildAddRecordCommand).
 
     @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    commandAddRecord: async function (instance, service_params) {
+    runAddRecordCommand: async function (instance, service_params) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
@@ -266,14 +266,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built Delete command (from commandBuilderForDeleteRecord).
+    Execute a pre-built Delete command (from buildDeleteRecordCommand).
 
     @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    commandDeleteRecord: async function (instance, service_params) {
+    runDeleteRecordCommand: async function (instance, service_params) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
@@ -315,14 +315,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built Update command (from commandBuilderForUpdateRecord).
+    Execute a pre-built Update command (from buildUpdateRecordCommand).
 
     @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, attributes, error }
     *********************************************************************/
-    commandUpdateRecord: async function (instance, service_params) {
+    runUpdateRecordCommand: async function (instance, service_params) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
@@ -424,7 +424,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     /********************************************************************
     Write (create or replace) a record. Always upsert - inserts if absent,
-    replaces if present. DRY: uses commandBuilderForAddRecord + commandAddRecord.
+    replaces if present. DRY: uses buildAddRecordCommand + runAddRecordCommand.
 
     @param {Object} instance - Request instance
     @param {String} table - Table name
@@ -435,16 +435,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     writeRecord: async function (instance, table, item) {
 
       // Build service params using builder (DRY)
-      const service_params = DynamoDB.commandBuilderForAddRecord(table, item);
+      const service_params = DynamoDB.buildAddRecordCommand(table, item);
 
       // Execute using command executor (DRY)
-      return DynamoDB.commandAddRecord(instance, service_params);
+      return DynamoDB.runAddRecordCommand(instance, service_params);
 
     },
 
 
     /********************************************************************
-    Delete a single record. DRY: uses commandBuilderForDeleteRecord + commandDeleteRecord.
+    Delete a single record. DRY: uses buildDeleteRecordCommand + runDeleteRecordCommand.
 
     @param {Object} instance - Request instance
     @param {String} table - Table name
@@ -455,17 +455,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     deleteRecord: async function (instance, table, key) {
 
       // Build service params using builder (DRY)
-      const service_params = DynamoDB.commandBuilderForDeleteRecord(table, key);
+      const service_params = DynamoDB.buildDeleteRecordCommand(table, key);
 
       // Execute using command executor (DRY)
-      return DynamoDB.commandDeleteRecord(instance, service_params);
+      return DynamoDB.runDeleteRecordCommand(instance, service_params);
 
     },
 
 
     /********************************************************************
     Update an item using structured builder (SET/REMOVE/INCREMENT/DECREMENT).
-    DRY: uses commandBuilderForUpdateRecord + commandUpdateRecord.
+    DRY: uses buildUpdateRecordCommand + runUpdateRecordCommand.
 
     @param {Object} instance - Request instance
     @param {String} table - Table name
@@ -481,12 +481,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     updateRecord: async function (instance, table, key, update_data, remove_keys, increment, decrement, return_state) {
 
       // Build service params using builder (DRY)
-      const service_params = DynamoDB.commandBuilderForUpdateRecord(
+      const service_params = DynamoDB.buildUpdateRecordCommand(
         table, key, update_data, remove_keys, increment, decrement, return_state
       );
 
       // Execute using command executor (DRY)
-      return DynamoDB.commandUpdateRecord(instance, service_params);
+      return DynamoDB.runUpdateRecordCommand(instance, service_params);
 
     },
 
@@ -1117,8 +1117,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     /********************************************************************
     Atomic write transaction across one or more tables. Groups up to 10 actions.
-    Uses pre-built command objects from commandBuilderForAddRecord, commandBuilderForDeleteRecord,
-    and commandBuilderForUpdateRecord.
+    Uses pre-built command objects from buildAddRecordCommand, buildDeleteRecordCommand,
+    and buildUpdateRecordCommand.
 
     @param {Object} instance - Request instance
     @param {Object[]} [add_records] - Array of Put service params

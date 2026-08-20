@@ -101,7 +101,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for PutObjectCommand
     *********************************************************************/
-    commandBuilderForUploadObject: function (bucket, key, body, content_type, metadata, is_public) {
+    buildUploadObjectCommand: function (bucket, key, body, content_type, metadata, is_public) {
 
       // Base params with default content type
       const service_params = {
@@ -136,7 +136,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for GetObjectCommand
     *********************************************************************/
-    commandBuilderForGetObject: function (bucket, key) {
+    buildGetObjectCommand: function (bucket, key) {
 
       return {
         Bucket: bucket,
@@ -154,7 +154,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for DeleteObjectCommand
     *********************************************************************/
-    commandBuilderForDeleteObject: function (bucket, key) {
+    buildDeleteObjectCommand: function (bucket, key) {
 
       return {
         Bucket: bucket,
@@ -175,7 +175,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - Service params for CopyObjectCommand
     *********************************************************************/
-    commandBuilderForCopyObject: function (source_bucket, source_key, dest_bucket, dest_key, is_public) {
+    buildCopyObjectCommand: function (source_bucket, source_key, dest_bucket, dest_key, is_public) {
 
       // S3 expects CopySource as encoded "bucket/key"
       const service_params = {
@@ -200,14 +200,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // Execute pre-built service params against S3.
 
     /********************************************************************
-    Execute a pre-built PutObject command (from commandBuilderForUploadObject).
+    Execute a pre-built PutObject command (from buildUploadObjectCommand).
 
     @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, etag, error }
     *********************************************************************/
-    commandUploadObject: async function (instance, service_params) {
+    runUploadObjectCommand: async function (instance, service_params) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
@@ -252,7 +252,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built GetObject command (from commandBuilderForGetObject).
+    Execute a pre-built GetObject command (from buildGetObjectCommand).
     Drains the response stream and returns the body as Buffer or string.
 
     @param {Object} instance - Request instance
@@ -261,7 +261,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<Object>} - { success, body, content_type, metadata, error }
     *********************************************************************/
-    commandGetObject: async function (instance, service_params, output_as_string) {
+    runGetObjectCommand: async function (instance, service_params, output_as_string) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
@@ -322,14 +322,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built DeleteObject command (from commandBuilderForDeleteObject).
+    Execute a pre-built DeleteObject command (from buildDeleteObjectCommand).
 
     @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    commandDeleteObject: async function (instance, service_params) {
+    runDeleteObjectCommand: async function (instance, service_params) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
@@ -372,14 +372,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Execute a pre-built CopyObject command (from commandBuilderForCopyObject).
+    Execute a pre-built CopyObject command (from buildCopyObjectCommand).
 
     @param {Object} instance - Request instance
     @param {Object} service_params - Pre-built service params
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    commandCopyObject: async function (instance, service_params) {
+    runCopyObjectCommand: async function (instance, service_params) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();
@@ -494,7 +494,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Upload a single file. DRY: uses commandBuilderForUploadObject + commandUploadObject.
+    Upload a single file. DRY: uses buildUploadObjectCommand + runUploadObjectCommand.
 
     @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
@@ -509,10 +509,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     uploadFile: async function (instance, bucket, key, body, content_type, metadata, is_public) {
 
       // Build service params using builder (DRY)
-      const service_params = S3.commandBuilderForUploadObject(bucket, key, body, content_type, metadata, is_public);
+      const service_params = S3.buildUploadObjectCommand(bucket, key, body, content_type, metadata, is_public);
 
       // Execute using command executor (DRY)
-      return S3.commandUploadObject(instance, service_params);
+      return S3.runUploadObjectCommand(instance, service_params);
 
     },
 
@@ -591,7 +591,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Download a single file. DRY: uses commandBuilderForGetObject + commandGetObject.
+    Download a single file. DRY: uses buildGetObjectCommand + runGetObjectCommand.
 
     @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
@@ -603,16 +603,16 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     getFile: async function (instance, bucket, key, output_as_string) {
 
       // Build service params using builder (DRY)
-      const service_params = S3.commandBuilderForGetObject(bucket, key);
+      const service_params = S3.buildGetObjectCommand(bucket, key);
 
       // Execute using command executor (DRY)
-      return S3.commandGetObject(instance, service_params, output_as_string);
+      return S3.runGetObjectCommand(instance, service_params, output_as_string);
 
     },
 
 
     /********************************************************************
-    Delete a single file. DRY: uses commandBuilderForDeleteObject + commandDeleteObject.
+    Delete a single file. DRY: uses buildDeleteObjectCommand + runDeleteObjectCommand.
 
     @param {Object} instance - Request instance
     @param {String} bucket - S3 bucket name
@@ -623,10 +623,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     deleteFile: async function (instance, bucket, key) {
 
       // Build service params using builder (DRY)
-      const service_params = S3.commandBuilderForDeleteObject(bucket, key);
+      const service_params = S3.buildDeleteObjectCommand(bucket, key);
 
       // Execute using command executor (DRY)
-      return S3.commandDeleteObject(instance, service_params);
+      return S3.runDeleteObjectCommand(instance, service_params);
 
     },
 
@@ -728,7 +728,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Copy a single file. DRY: uses commandBuilderForCopyObject + commandCopyObject.
+    Copy a single file. DRY: uses buildCopyObjectCommand + runCopyObjectCommand.
 
     @param {Object} instance - Request instance
     @param {String} source_bucket - Source bucket name
@@ -742,10 +742,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     copyFile: async function (instance, source_bucket, source_key, dest_bucket, dest_key, is_public) {
 
       // Build service params using builder (DRY)
-      const service_params = S3.commandBuilderForCopyObject(source_bucket, source_key, dest_bucket, dest_key, is_public);
+      const service_params = S3.buildCopyObjectCommand(source_bucket, source_key, dest_bucket, dest_key, is_public);
 
       // Execute using command executor (DRY)
-      return S3.commandCopyObject(instance, service_params);
+      return S3.runCopyObjectCommand(instance, service_params);
 
     },
 
