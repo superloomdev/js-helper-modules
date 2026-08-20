@@ -109,7 +109,7 @@ Partial `$set` update on the mutable per-session fields: `last_active_at`, `expi
 
 **Throws `TypeError` if `updates` contains any identity or adapter-managed field.** The blocked keys are `tenant_id`, `actor_id`, `actor_type`, `token_key`, `token_secret_hash`, `created_at`, `install_id`, `install_platform`, `install_form_factor`, `_id`, and `prefix`. The two MongoDB-specific fields (`_id`, `prefix`) are added to the blocklist because mutating them would break document identity. The throw is intentional; the Auth parent never passes these, and the guard exists so a regression surfaces immediately.
 
-The caller supplies `(tenant_id, actor_id, token_key)` but not the hash. The adapter builds an anchored prefix regex (`new RegExp('^' + escapeRegExp(tenant_id + '#' + actor_id + '#' + token_key + '#'))`) and runs `updateOne` against the matching document. Regex metacharacters in the identifier values are escaped automatically. At most one document matches, since `(tenant_id, actor_id, token_key)` uniquely identifies a session.
+The caller supplies `(tenant_id, actor_id, token_key)` but not the hash. The adapter builds an anchored prefix regex (`new RegExp('^' + escapeRegExp(tenant_id + '\u001F' + actor_id + '\u001F' + token_key + '\u001F'))`) and runs `updateOne` against the matching document. Regex metacharacters in the identifier values are escaped automatically. At most one document matches, since `(tenant_id, actor_id, token_key)` uniquely identifies a session.
 
 ### `deleteSession(instance, tenant_id, actor_id, token_key)`
 
