@@ -33,13 +33,13 @@ The `TABLE_NAME` key is required. The loader throws an `Error` if it is missing,
 | Method | Signature | Returns |
 |---|---|---|
 | `setupNewStore` | `(instance)` | `{ success, error }` |
-| `getRecord` | `(instance, scope, key)` | `{ success, record, error }` |
-| `setRecord` | `(instance, scope, key, record)` | `{ success, error }` |
-| `incrementFailCount` | `(instance, scope, key)` | `{ success, error }` |
-| `deleteRecord` | `(instance, scope, key)` | `{ success, error }` |
+| `getRecord` | `(instance, namespace, key)` | `{ success, record, error }` |
+| `setRecord` | `(instance, namespace, key, record)` | `{ success, error }` |
+| `incrementFailCount` | `(instance, namespace, key)` | `{ success, error }` |
+| `deleteRecord` | `(instance, namespace, key)` | `{ success, error }` |
 | `cleanupExpiredRecords` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` and any data field set to a typed empty value (`null` / `0`).
+All methods are async. `instance` is the per-request namespace object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` and any data field set to a typed empty value (`null` / `0`).
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
@@ -47,7 +47,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 2. **`getRecord` returns `record: null` on a miss.** A missing row is not an error. The verify module checks the returned record before comparing the submitted code.
 
-3. **`setRecord` is a full UPSERT.** Uses `INSERT ... ON CONFLICT ("scope", "id") DO UPDATE SET col = excluded.col`. Re-inserting the same `(scope, id)` composite key replaces all mutable columns (`code`, `fail_count`, `created_at`, `expires_at`) in one round-trip.
+3. **`setRecord` is a full UPSERT.** Uses `INSERT ... ON CONFLICT ("namespace", "id") DO UPDATE SET col = excluded.col`. Re-inserting the same `(namespace, id)` composite key replaces all mutable columns (`code`, `fail_count`, `created_at`, `expires_at`) in one round-trip.
 
 4. **`incrementFailCount` is an atomic in-place UPDATE.** Issues `SET "fail_count" = "fail_count" + 1`. Safe under concurrent verify attempts - each call adds exactly 1.
 
@@ -83,4 +83,4 @@ The adapter owns its own error catalog (`store.errors.js`):
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`. The DDL array and UPSERT template are precomputed once per Store instance at `createInterface` time and cached for all subsequent calls. The composite primary key is `("scope", "id")`.
+The store's source file is `store.js`; the config validator is `store.validators.js`. The DDL array and UPSERT template are precomputed once per Store instance at `createInterface` time and cached for all subsequent calls. The composite primary key is `("namespace", "id")`.

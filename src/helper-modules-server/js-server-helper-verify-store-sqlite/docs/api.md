@@ -27,9 +27,9 @@ Both statements use `IF NOT EXISTS`, making repeated calls on every boot safe. R
 
 ---
 
-### `getRecord(instance, scope, key)`
+### `getRecord(instance, namespace, key)`
 
-Fetches one record by composite primary key `("scope", "id")`. Returns `record: null` when the row does not exist - this is not an error.
+Fetches one record by composite primary key `("namespace", "id")`. Returns `record: null` when the row does not exist - this is not an error.
 
 The query selects only the columns the verify module needs: `code`, `fail_count`, `created_at`, `expires_at`.
 
@@ -47,24 +47,24 @@ The query selects only the columns the verify module needs: `code`, `fail_count`
 
 ---
 
-### `setRecord(instance, scope, key, record)`
+### `setRecord(instance, namespace, key, record)`
 
-Upsert via `INSERT ... ON CONFLICT ("scope", "id") DO UPDATE SET`. A second call with the same `(scope, key)` pair replaces all mutable columns in a single round-trip.
+Upsert via `INSERT ... ON CONFLICT ("namespace", "id") DO UPDATE SET`. A second call with the same `(namespace, key)` pair replaces all mutable columns in a single round-trip.
 
-Parameters bound in order: `scope`, `key` (stored as `id`), `record.code`, `record.fail_count`, `record.created_at`, `record.expires_at`.
+Parameters bound in order: `namespace`, `key` (stored as `id`), `record.code`, `record.fail_count`, `record.created_at`, `record.expires_at`.
 
 **Return:** `{ success, error }`
 
 ---
 
-### `incrementFailCount(instance, scope, key)`
+### `incrementFailCount(instance, namespace, key)`
 
 Atomic in-place increment via:
 
 ```sql
 UPDATE "{table_name}"
 SET "fail_count" = "fail_count" + 1
-WHERE "scope" = ? AND "id" = ?
+WHERE "namespace" = ? AND "id" = ?
 ```
 
 Safe under concurrent verify attempts - each call adds exactly 1. Does not read the current value before writing.
@@ -73,13 +73,13 @@ Safe under concurrent verify attempts - each call adds exactly 1. Does not read 
 
 ---
 
-### `deleteRecord(instance, scope, key)`
+### `deleteRecord(instance, namespace, key)`
 
 Idempotent delete by composite key:
 
 ```sql
 DELETE FROM "{table_name}"
-WHERE "scope" = ? AND "id" = ?
+WHERE "namespace" = ? AND "id" = ?
 ```
 
 A missing row is treated as success. Callers do not need to check existence first.

@@ -21,10 +21,10 @@
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                      -> { success, error }
-//   - getRecord(instance, scope, key)              -> { success, record, error }
-//   - setRecord(instance, scope, key, record)      -> { success, error }
-//   - incrementFailCount(instance, scope, key)     -> { success, error }
-//   - deleteRecord(instance, scope, key)           -> { success, error }
+//   - getRecord(instance, namespace, key)              -> { success, record, error }
+//   - setRecord(instance, namespace, key, record)      -> { success, error }
+//   - incrementFailCount(instance, namespace, key)     -> { success, error }
+//   - deleteRecord(instance, namespace, key)           -> { success, error }
 //   - cleanupExpiredRecords(instance)              -> { success, deleted_count, error }
 //
 // SQLite has no native TTL; cleanupExpiredRecords (a sweep over the
@@ -146,27 +146,27 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     // ~~~~~~~~~~~~~~~~~~~~ CRUD ~~~~~~~~~~~~~~~~~~~~
     // Read and write operations against the composite primary key
-    // (scope, id). setRecord is an upsert; getRecord returns null
+    // (namespace, id). setRecord is an upsert; getRecord returns null
     // on a miss; incrementFailCount is an atomic in-place UPDATE.
 
     /********************************************************************
-    Read by composite primary key (scope, id). Returns null when absent.
+    Read by composite primary key (namespace, id). Returns null when absent.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
-    getRecord: async function (instance, scope, key) {
+    getRecord: async function (instance, namespace, key) {
 
       // Fetch the record row by composite primary key
       const result = await Lib.SQL.getRow(
         instance,
         'SELECT "code", "fail_count", "created_at", "expires_at"' +
         ' FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
-        ' WHERE "scope" = ? AND "id" = ?',
-        [scope, key]
+        ' WHERE "namespace" = ? AND "id" = ?',
+        [namespace, key]
       );
 
       // Return a service error if the driver call failed
@@ -195,23 +195,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Upsert via INSERT ... ON CONFLICT DO UPDATE SET. A second call
-    with the same (scope, id) key replaces the mutable columns in
+    with the same (namespace, id) key replaces the mutable columns in
     a single round-trip.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
     @param {Object} record   - { code, fail_count, created_at, expires_at }
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    setRecord: async function (instance, scope, key, record) {
+    setRecord: async function (instance, namespace, key, record) {
 
       // Run the UPSERT with the precomputed template
       const result = await Lib.SQL.write(
         instance,
         _Store.upsert_sql,
-        [scope, key, record.code, record.fail_count, record.created_at, record.expires_at]
+        [namespace, key, record.code, record.fail_count, record.created_at, record.expires_at]
       );
 
       // Return a service error if the driver call failed
@@ -241,20 +241,20 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     concurrent verify attempts - each call adds exactly 1.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    incrementFailCount: async function (instance, scope, key) {
+    incrementFailCount: async function (instance, namespace, key) {
 
       // Atomically increment the fail_count column for this record
       const result = await Lib.SQL.write(
         instance,
         'UPDATE ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' SET "fail_count" = "fail_count" + 1' +
-        ' WHERE "scope" = ? AND "id" = ?',
-        [scope, key]
+        ' WHERE "namespace" = ? AND "id" = ?',
+        [namespace, key]
       );
 
       // Return a service error if the driver call failed
@@ -284,19 +284,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     success so callers do not need to check existence first.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    deleteRecord: async function (instance, scope, key) {
+    deleteRecord: async function (instance, namespace, key) {
 
       // Remove the record row by composite primary key
       const result = await Lib.SQL.write(
         instance,
         'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
-        ' WHERE "scope" = ? AND "id" = ?',
-        [scope, key]
+        ' WHERE "namespace" = ? AND "id" = ?',
+        [namespace, key]
       );
 
       // Return a service error if the driver call failed
@@ -418,13 +418,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       return [
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
-        '  "scope"      TEXT    NOT NULL,' +
+        '  "namespace"      TEXT    NOT NULL,' +
         '  "id"         TEXT    NOT NULL,' +
         '  "code"       TEXT    NOT NULL,' +
         '  "fail_count" INTEGER NOT NULL DEFAULT 0,' +
         '  "created_at" INTEGER NOT NULL,' +
         '  "expires_at" INTEGER NOT NULL,' +
-        '  PRIMARY KEY ("scope", "id")' +
+        '  PRIMARY KEY ("namespace", "id")' +
         ')',
         'CREATE INDEX IF NOT EXISTS ' + idx + ' ON ' + t + ' ("expires_at")'
       ];
@@ -434,7 +434,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Build the SQLite UPSERT statement. Uses
-    INSERT ... ON CONFLICT (scope, id) DO UPDATE SET col = excluded.col
+    INSERT ... ON CONFLICT (namespace, id) DO UPDATE SET col = excluded.col
     Supported since SQLite 3.24 (2018) and available everywhere
     node:sqlite ships. Called once at createInterface time.
     Closes over CONFIG from createInterface.
@@ -447,9 +447,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const t = _Store.Q(CONFIG.TABLE_NAME);
       return (
         'INSERT INTO ' + t +
-        ' ("scope", "id", "code", "fail_count", "created_at", "expires_at")' +
+        ' ("namespace", "id", "code", "fail_count", "created_at", "expires_at")' +
         ' VALUES (?, ?, ?, ?, ?, ?)' +
-        ' ON CONFLICT ("scope", "id") DO UPDATE SET' +
+        ' ON CONFLICT ("namespace", "id") DO UPDATE SET' +
         ' "code" = excluded."code",' +
         ' "fail_count" = excluded."fail_count",' +
         ' "created_at" = excluded."created_at",' +
