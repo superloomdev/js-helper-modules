@@ -71,7 +71,7 @@ The options argument to `enableTtlIndex`. Validated per call by `validateEnableT
 
 ## Drop-Collection-Options Schema
 
-The options argument to `dropCollection`. Validated per call by `validateDropCollection`.
+The options argument to `deleteCollection`. Validated per call by `validateDeleteCollection`.
 
 | Option | Type | Required | Constraint |
 |---|---|---|---|

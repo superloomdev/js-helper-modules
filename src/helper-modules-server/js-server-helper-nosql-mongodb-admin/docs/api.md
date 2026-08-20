@@ -7,7 +7,7 @@ Every exported function with its signature, parameters, return shape, semantics,
 - [Conventions](#conventions)
 - [Collection Management](#collection-management)
   - [`createCollection`](#createcollection)
-  - [`dropCollection`](#dropcollection)
+  - [`deleteCollection`](#deletecollection)
 - [Index Management](#index-management)
   - [`createIndexes`](#createindexes)
   - [`enableTtlIndex`](#enablettlindex)
@@ -55,18 +55,18 @@ Create a collection. Idempotent: if the collection already exists, returns `data
 
 ---
 
-### `dropCollection`
+### `deleteCollection`
 
 ```javascript
-async dropCollection(instance, options) -> { success, data, error }
+async deleteCollection(instance, options) -> { success, data, error }
 ```
 
-Drop a collection. Idempotent: if the collection does not exist, returns `data.dropped: false`.
+Delete a collection. Idempotent: if the collection does not exist, returns `data.dropped: false`.
 
 | Parameter | Type | Description |
 |---|---|---|
 | `instance` | `Object` | Request instance from `Lib.Instance.initialize()` |
-| `options.collection_name` | `String` | Name of the collection to drop |
+| `options.collection_name` | `String` | Name of the collection to delete |
 
 **Returns:** `{ success: true, data: { dropped: Boolean }, error: null }` or `{ success: false, data: { dropped: false }, error: {...} }`.
 

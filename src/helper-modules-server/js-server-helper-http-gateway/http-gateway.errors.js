@@ -14,7 +14,7 @@ module.exports = Object.freeze({
   }),
 
   NOT_IMPLEMENTED: Object.freeze({
-    type: 'NOT_IMPLEMENTED',
+    type: 'HTTP_GATEWAY_NOT_IMPLEMENTED',
     message: 'This operation is not yet implemented for this adapter'
   })
 
