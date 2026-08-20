@@ -16,39 +16,39 @@ const Time = Lib.Time;
 // 1. DAY AND TIME CALCULATIONS
 // ============================================================================
 
-describe('dayName', function () {
+describe('formatDayName', function () {
 
   it('should return monday when date is 2024-01-01', function () {
 
-    assert.strictEqual(Time.dayName(2024, 1, 1), 'monday');
+    assert.strictEqual(Time.formatDayName(2024, 1, 1), 'monday');
 
   });
 
 
   it('should return sunday when date is 2024-01-07', function () {
 
-    assert.strictEqual(Time.dayName(2024, 1, 7), 'sunday');
+    assert.strictEqual(Time.formatDayName(2024, 1, 7), 'sunday');
 
   });
 
 
   it('should return saturday when date is 2024-01-06', function () {
 
-    assert.strictEqual(Time.dayName(2024, 1, 6), 'saturday');
+    assert.strictEqual(Time.formatDayName(2024, 1, 6), 'saturday');
 
   });
 
 
   it('should return wednesday when date is 2024-07-17', function () {
 
-    assert.strictEqual(Time.dayName(2024, 7, 17), 'wednesday');
+    assert.strictEqual(Time.formatDayName(2024, 7, 17), 'wednesday');
 
   });
 
 
   it('should handle string inputs for year, month, day', function () {
 
-    assert.strictEqual(Time.dayName('2024', '1', '1'), 'monday');
+    assert.strictEqual(Time.formatDayName('2024', '1', '1'), 'monday');
 
   });
 
@@ -56,39 +56,39 @@ describe('dayName', function () {
 
 
 
-describe('epochDay', function () {
+describe('buildEpochDay', function () {
 
   it('should return 0 when time is midnight (0, 0, 0)', function () {
 
-    assert.strictEqual(Time.epochDay(0, 0, 0), 0);
+    assert.strictEqual(Time.buildEpochDay(0, 0, 0), 0);
 
   });
 
 
   it('should return 3600 when time is 1 hour past midnight', function () {
 
-    assert.strictEqual(Time.epochDay(1, 0, 0), 3600);
+    assert.strictEqual(Time.buildEpochDay(1, 0, 0), 3600);
 
   });
 
 
   it('should return 86399 when time is 23:59:59', function () {
 
-    assert.strictEqual(Time.epochDay(23, 59, 59), 86399);
+    assert.strictEqual(Time.buildEpochDay(23, 59, 59), 86399);
 
   });
 
 
   it('should handle string inputs', function () {
 
-    assert.strictEqual(Time.epochDay('2', '30', '0'), 9000);
+    assert.strictEqual(Time.buildEpochDay('2', '30', '0'), 9000);
 
   });
 
 
   it('should return 0 when called with no arguments', function () {
 
-    assert.strictEqual(Time.epochDay(), 0);
+    assert.strictEqual(Time.buildEpochDay(), 0);
 
   });
 
@@ -96,32 +96,32 @@ describe('epochDay', function () {
 
 
 
-describe('reverseEpochDay', function () {
+describe('disjoinEpochDay', function () {
 
   it('should return [0, 0, 0] when input is 0', function () {
 
-    assert.deepStrictEqual(Time.reverseEpochDay(0), [0, 0, 0]);
+    assert.deepStrictEqual(Time.disjoinEpochDay(0), [0, 0, 0]);
 
   });
 
 
   it('should return [1, 1, 1] when input is 3661', function () {
 
-    assert.deepStrictEqual(Time.reverseEpochDay(3661), [1, 1, 1]);
+    assert.deepStrictEqual(Time.disjoinEpochDay(3661), [1, 1, 1]);
 
   });
 
 
   it('should return [23, 59, 59] when input is 86399', function () {
 
-    assert.deepStrictEqual(Time.reverseEpochDay(86399), [23, 59, 59]);
+    assert.deepStrictEqual(Time.disjoinEpochDay(86399), [23, 59, 59]);
 
   });
 
 
   it('should return [12, 0, 0] when input is 43200 (noon)', function () {
 
-    assert.deepStrictEqual(Time.reverseEpochDay(43200), [12, 0, 0]);
+    assert.deepStrictEqual(Time.disjoinEpochDay(43200), [12, 0, 0]);
 
   });
 
@@ -129,32 +129,32 @@ describe('reverseEpochDay', function () {
 
 
 
-describe('time24ToSeconds', function () {
+describe('parseTime24', function () {
 
   it('should return 0 when input is 0000', function () {
 
-    assert.strictEqual(Time.time24ToSeconds('0000'), 0);
+    assert.strictEqual(Time.parseTime24('0000'), 0);
 
   });
 
 
   it('should return 84600 when input is 2330', function () {
 
-    assert.strictEqual(Time.time24ToSeconds('2330'), 84600);
+    assert.strictEqual(Time.parseTime24('2330'), 84600);
 
   });
 
 
   it('should return 3600 when input is 0100', function () {
 
-    assert.strictEqual(Time.time24ToSeconds('0100'), 3600);
+    assert.strictEqual(Time.parseTime24('0100'), 3600);
 
   });
 
 
   it('should return 43200 when input is 1200 (noon)', function () {
 
-    assert.strictEqual(Time.time24ToSeconds('1200'), 43200);
+    assert.strictEqual(Time.parseTime24('1200'), 43200);
 
   });
 
@@ -220,32 +220,32 @@ describe('formatHourMinTo12HourTime', function () {
 
 
 
-describe('secondsToTimeString', function () {
+describe('formatSeconds', function () {
 
   it('should return empty string when input is null', function () {
 
-    assert.strictEqual(Time.secondsToTimeString(null), '');
+    assert.strictEqual(Time.formatSeconds(null), '');
 
   });
 
 
   it('should return empty string when input is undefined', function () {
 
-    assert.strictEqual(Time.secondsToTimeString(undefined), '');
+    assert.strictEqual(Time.formatSeconds(undefined), '');
 
   });
 
 
   it('should return empty string when input is empty string', function () {
 
-    assert.strictEqual(Time.secondsToTimeString(''), '');
+    assert.strictEqual(Time.formatSeconds(''), '');
 
   });
 
 
   it('should return 12:00 AM when input is 0 (midnight epoch)', function () {
 
-    assert.strictEqual(Time.secondsToTimeString(0), '12:00 AM');
+    assert.strictEqual(Time.formatSeconds(0), '12:00 AM');
 
   });
 
@@ -253,7 +253,7 @@ describe('secondsToTimeString', function () {
   it('should return correct time string for a known unixtime', function () {
 
     // 1600241473 = 2020-09-16T07:31:13Z -> 7:31 AM
-    assert.strictEqual(Time.secondsToTimeString(1600241473), '7:31 AM');
+    assert.strictEqual(Time.formatSeconds(1600241473), '7:31 AM');
 
   });
 
@@ -265,11 +265,11 @@ describe('secondsToTimeString', function () {
 // 3. UNIX TIMESTAMP CONVERSIONS
 // ============================================================================
 
-describe('unixtimeToDate', function () {
+describe('parseUnixtimeToDate', function () {
 
   it('should return 1970-01-01T00:00:00.000Z when input is 0', function () {
 
-    const date = Time.unixtimeToDate(0);
+    const date = Time.parseUnixtimeToDate(0);
 
     assert.strictEqual(date.toISOString(), '1970-01-01T00:00:00.000Z');
 
@@ -278,7 +278,7 @@ describe('unixtimeToDate', function () {
 
   it('should return correct Date for 1600000000', function () {
 
-    const date = Time.unixtimeToDate(1600000000);
+    const date = Time.parseUnixtimeToDate(1600000000);
 
     assert.strictEqual(date.toISOString(), '2020-09-13T12:26:40.000Z');
 
@@ -288,21 +288,21 @@ describe('unixtimeToDate', function () {
 
 
 
-describe('dateToUnixtime', function () {
+describe('buildUnixtimeFromDate', function () {
 
   it('should return 0 when input is epoch date', function () {
 
-    assert.strictEqual(Time.dateToUnixtime(new Date('1970-01-01T00:00:00.000Z')), 0);
+    assert.strictEqual(Time.buildUnixtimeFromDate(new Date('1970-01-01T00:00:00.000Z')), 0);
 
   });
 
 
-  it('should round-trip with unixtimeToDate', function () {
+  it('should round-trip with parseUnixtimeToDate', function () {
 
     const unixtime = 1600000000;
-    const date = Time.unixtimeToDate(unixtime);
+    const date = Time.parseUnixtimeToDate(unixtime);
 
-    assert.strictEqual(Time.dateToUnixtime(date), unixtime);
+    assert.strictEqual(Time.buildUnixtimeFromDate(date), unixtime);
 
   });
 
@@ -310,18 +310,18 @@ describe('dateToUnixtime', function () {
 
 
 
-describe('unixtimeToDateString', function () {
+describe('formatUnixtimeToDateString', function () {
 
   it('should return ISO string for epoch 0', function () {
 
-    assert.strictEqual(Time.unixtimeToDateString(0), '1970-01-01T00:00:00.000Z');
+    assert.strictEqual(Time.formatUnixtimeToDateString(0), '1970-01-01T00:00:00.000Z');
 
   });
 
 
   it('should return correct ISO string for 1600000000', function () {
 
-    assert.strictEqual(Time.unixtimeToDateString(1600000000), '2020-09-13T12:26:40.000Z');
+    assert.strictEqual(Time.formatUnixtimeToDateString(1600000000), '2020-09-13T12:26:40.000Z');
 
   });
 
@@ -329,28 +329,28 @@ describe('unixtimeToDateString', function () {
 
 
 
-describe('dateStringToUnixtime', function () {
+describe('parseDateStringToUnixtime', function () {
 
   it('should return 1600241473 when input is 2020-09-16T07:31:13.000Z', function () {
 
-    assert.strictEqual(Time.dateStringToUnixtime('2020-09-16T07:31:13.000Z'), 1600241473);
+    assert.strictEqual(Time.parseDateStringToUnixtime('2020-09-16T07:31:13.000Z'), 1600241473);
 
   });
 
 
   it('should return 0 when input is epoch ISO string', function () {
 
-    assert.strictEqual(Time.dateStringToUnixtime('1970-01-01T00:00:00.000Z'), 0);
+    assert.strictEqual(Time.parseDateStringToUnixtime('1970-01-01T00:00:00.000Z'), 0);
 
   });
 
 
-  it('should round-trip with unixtimeToDateString', function () {
+  it('should round-trip with formatUnixtimeToDateString', function () {
 
     const original = 1700000000;
-    const date_string = Time.unixtimeToDateString(original);
+    const date_string = Time.formatUnixtimeToDateString(original);
 
-    assert.strictEqual(Time.dateStringToUnixtime(date_string), original);
+    assert.strictEqual(Time.parseDateStringToUnixtime(date_string), original);
 
   });
 
@@ -358,18 +358,18 @@ describe('dateStringToUnixtime', function () {
 
 
 
-describe('unixtimeToUtcString', function () {
+describe('formatUnixtimeToUtcString', function () {
 
   it('should return correct UTC string for 1445409480', function () {
 
-    assert.strictEqual(Time.unixtimeToUtcString(1445409480), 'Wed, 21 Oct 2015 06:38:00 GMT');
+    assert.strictEqual(Time.formatUnixtimeToUtcString(1445409480), 'Wed, 21 Oct 2015 06:38:00 GMT');
 
   });
 
 
   it('should return Thu, 01 Jan 1970 00:00:00 GMT for epoch 0', function () {
 
-    assert.strictEqual(Time.unixtimeToUtcString(0), 'Thu, 01 Jan 1970 00:00:00 GMT');
+    assert.strictEqual(Time.formatUnixtimeToUtcString(0), 'Thu, 01 Jan 1970 00:00:00 GMT');
 
   });
 
@@ -377,21 +377,21 @@ describe('unixtimeToUtcString', function () {
 
 
 
-describe('utcStringToUnixtime', function () {
+describe('parseUtcStringToUnixtime', function () {
 
   it('should return 0 when input is epoch UTC string', function () {
 
-    assert.strictEqual(Time.utcStringToUnixtime('Thu, 01 Jan 1970 00:00:00 GMT'), 0);
+    assert.strictEqual(Time.parseUtcStringToUnixtime('Thu, 01 Jan 1970 00:00:00 GMT'), 0);
 
   });
 
 
-  it('should round-trip with unixtimeToUtcString', function () {
+  it('should round-trip with formatUnixtimeToUtcString', function () {
 
     const original = 1600000000;
-    const utc_string = Time.unixtimeToUtcString(original);
+    const utc_string = Time.formatUnixtimeToUtcString(original);
 
-    assert.strictEqual(Time.utcStringToUnixtime(utc_string), original);
+    assert.strictEqual(Time.parseUtcStringToUnixtime(utc_string), original);
 
   });
 
@@ -399,26 +399,26 @@ describe('utcStringToUnixtime', function () {
 
 
 
-describe('unixtimeToUnixDay', function () {
+describe('buildUnixDay', function () {
 
   it('should return start of day for a mid-day timestamp', function () {
 
     // 2020-09-13T12:26:40Z = 1600000000, day start = 2020-09-13T00:00:00Z
-    assert.strictEqual(Time.unixtimeToUnixDay(1600000000), 1599955200);
+    assert.strictEqual(Time.buildUnixDay(1600000000), 1599955200);
 
   });
 
 
   it('should return same value when input is already midnight', function () {
 
-    assert.strictEqual(Time.unixtimeToUnixDay(1599955200), 1599955200);
+    assert.strictEqual(Time.buildUnixDay(1599955200), 1599955200);
 
   });
 
 
   it('should return 0 for epoch 0', function () {
 
-    assert.strictEqual(Time.unixtimeToUnixDay(0), 0);
+    assert.strictEqual(Time.buildUnixDay(0), 0);
 
   });
 
@@ -430,25 +430,25 @@ describe('unixtimeToUnixDay', function () {
 // 4. TIMEZONE OPERATIONS
 // ============================================================================
 
-describe('calcTimeWithOffset', function () {
+describe('buildTimeWithOffset', function () {
 
   it('should return 1500 when adding offset 500 to 1000', function () {
 
-    assert.strictEqual(Time.calcTimeWithOffset(1000, 500), 1500);
+    assert.strictEqual(Time.buildTimeWithOffset(1000, 500), 1500);
 
   });
 
 
   it('should return 800 when adding offset -200 to 1000', function () {
 
-    assert.strictEqual(Time.calcTimeWithOffset(1000, -200), 800);
+    assert.strictEqual(Time.buildTimeWithOffset(1000, -200), 800);
 
   });
 
 
   it('should return same value when offset is 0', function () {
 
-    assert.strictEqual(Time.calcTimeWithOffset(1600000000, 0), 1600000000);
+    assert.strictEqual(Time.buildTimeWithOffset(1600000000, 0), 1600000000);
 
   });
 
@@ -489,11 +489,11 @@ describe('getTimezoneOffset', function () {
 
 
 
-describe('unixtimeToTimezoneTime', function () {
+describe('buildTimezoneTime', function () {
 
   it('should return adjusted unixtime for UTC (offset 0)', function () {
 
-    const result = Time.unixtimeToTimezoneTime(1600000000, 'UTC');
+    const result = Time.buildTimezoneTime(1600000000, 'UTC');
 
     assert.strictEqual(result, 1600000000);
 
@@ -502,7 +502,7 @@ describe('unixtimeToTimezoneTime', function () {
 
   it('should return different value for non-UTC timezone', function () {
 
-    const result = Time.unixtimeToTimezoneTime(1600000000, 'Asia/Tokyo');
+    const result = Time.buildTimezoneTime(1600000000, 'Asia/Tokyo');
 
     assert.notStrictEqual(result, 1600000000);
 
@@ -512,11 +512,11 @@ describe('unixtimeToTimezoneTime', function () {
 
 
 
-describe('unixtimeToTimezoneDate', function () {
+describe('buildTimezoneDate', function () {
 
   it('should return a Date object', function () {
 
-    const result = Time.unixtimeToTimezoneDate(1600000000, 'UTC');
+    const result = Time.buildTimezoneDate(1600000000, 'UTC');
 
     assert.ok(result instanceof Date);
 
@@ -525,7 +525,7 @@ describe('unixtimeToTimezoneDate', function () {
 
   it('should return same date for UTC timezone', function () {
 
-    const result = Time.unixtimeToTimezoneDate(1600000000, 'UTC');
+    const result = Time.buildTimezoneDate(1600000000, 'UTC');
 
     assert.strictEqual(result.toISOString(), '2020-09-13T12:26:40.000Z');
 
@@ -539,11 +539,11 @@ describe('unixtimeToTimezoneDate', function () {
 // 5. DATE DATA SET OPERATIONS
 // ============================================================================
 
-describe('dateDataSet', function () {
+describe('buildDateDataSet', function () {
 
   it('should return object with all date components', function () {
 
-    const result = Time.dateDataSet(2024, 1, 15, 10, 30, 45);
+    const result = Time.buildDateDataSet(2024, 1, 15, 10, 30, 45);
 
     assert.deepStrictEqual(result, {
       year: 2024,
@@ -559,7 +559,7 @@ describe('dateDataSet', function () {
 
   it('should preserve undefined for missing optional params', function () {
 
-    const result = Time.dateDataSet(2024, 6, 1);
+    const result = Time.buildDateDataSet(2024, 6, 1);
 
     assert.strictEqual(result.year, 2024);
     assert.strictEqual(result.month, 6);
@@ -574,11 +574,11 @@ describe('dateDataSet', function () {
 
 
 
-describe('dateStringToDataSet', function () {
+describe('parseDateStringToDataSet', function () {
 
   it('should parse ISO string into data set', function () {
 
-    const result = Time.dateStringToDataSet('2020-09-16T07:31:13.000Z');
+    const result = Time.parseDateStringToDataSet('2020-09-16T07:31:13.000Z');
 
     assert.deepStrictEqual(result, {
       year: '2020',
@@ -594,7 +594,7 @@ describe('dateStringToDataSet', function () {
 
   it('should parse epoch ISO string', function () {
 
-    const result = Time.dateStringToDataSet('1970-01-01T00:00:00.000Z');
+    const result = Time.parseDateStringToDataSet('1970-01-01T00:00:00.000Z');
 
     assert.strictEqual(result.year, '1970');
     assert.strictEqual(result.month, '01');
@@ -609,12 +609,12 @@ describe('dateStringToDataSet', function () {
 
 
 
-describe('dateToDataSet', function () {
+describe('buildDataSetFromDate', function () {
 
   it('should convert Date object to data set', function () {
 
     const date = new Date('2024-06-15T10:30:45.000Z');
-    const result = Time.dateToDataSet(date);
+    const result = Time.buildDataSetFromDate(date);
 
     assert.strictEqual(result.year, '2024');
     assert.strictEqual(result.month, '06');
@@ -629,7 +629,7 @@ describe('dateToDataSet', function () {
   it('should convert epoch Date to data set', function () {
 
     const date = new Date('1970-01-01T00:00:00.000Z');
-    const result = Time.dateToDataSet(date);
+    const result = Time.buildDataSetFromDate(date);
 
     assert.strictEqual(result.year, '1970');
     assert.strictEqual(result.hour, '00');
@@ -640,12 +640,12 @@ describe('dateToDataSet', function () {
 
 
 
-describe('dateDataSetToDate', function () {
+describe('buildDateFromDateDataSet', function () {
 
   it('should convert data set to Date object', function () {
 
     const data_set = { year: 2024, month: 6, day: 15, hours: 10, minutes: 30, seconds: 0 };
-    const date = Time.dateDataSetToDate(data_set);
+    const date = Time.buildDateFromDateDataSet(data_set);
 
     assert.strictEqual(date.toISOString(), '2024-06-15T10:30:00.000Z');
 
@@ -655,7 +655,7 @@ describe('dateDataSetToDate', function () {
   it('should default missing time components to 0', function () {
 
     const data_set = { year: 2024, month: 1, day: 1 };
-    const date = Time.dateDataSetToDate(data_set);
+    const date = Time.buildDateFromDateDataSet(data_set);
 
     assert.strictEqual(date.toISOString(), '2024-01-01T00:00:00.000Z');
 
@@ -665,13 +665,13 @@ describe('dateDataSetToDate', function () {
 
 
 
-describe('dateDataSetToDateString', function () {
+describe('formatDateDataSetToDateString', function () {
 
   it('should convert data set to ISO string', function () {
 
     const data_set = { year: 2024, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0 };
 
-    assert.strictEqual(Time.dateDataSetToDateString(data_set), '2024-01-01T00:00:00.000Z');
+    assert.strictEqual(Time.formatDateDataSetToDateString(data_set), '2024-01-01T00:00:00.000Z');
 
   });
 
@@ -680,7 +680,7 @@ describe('dateDataSetToDateString', function () {
 
     const data_set = { year: 2020, month: 9, day: 16, hours: 7, minutes: 31, seconds: 13 };
 
-    assert.strictEqual(Time.dateDataSetToDateString(data_set), '2020-09-16T07:31:13.000Z');
+    assert.strictEqual(Time.formatDateDataSetToDateString(data_set), '2020-09-16T07:31:13.000Z');
 
   });
 
@@ -688,13 +688,13 @@ describe('dateDataSetToDateString', function () {
 
 
 
-describe('dateDataSetToUnixtime', function () {
+describe('buildUnixtimeFromDateDataSet', function () {
 
   it('should return 0 for epoch data set', function () {
 
     const data_set = { year: 1970, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0 };
 
-    assert.strictEqual(Time.dateDataSetToUnixtime(data_set), 0);
+    assert.strictEqual(Time.buildUnixtimeFromDateDataSet(data_set), 0);
 
   });
 
@@ -703,7 +703,7 @@ describe('dateDataSetToUnixtime', function () {
 
     const data_set = { year: 2020, month: 9, day: 16, hours: 7, minutes: 31, seconds: 13 };
 
-    assert.strictEqual(Time.dateDataSetToUnixtime(data_set), 1600241473);
+    assert.strictEqual(Time.buildUnixtimeFromDateDataSet(data_set), 1600241473);
 
   });
 

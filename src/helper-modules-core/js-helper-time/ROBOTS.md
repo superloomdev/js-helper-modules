@@ -30,41 +30,41 @@ All functions are synchronous. Unixtime values are in **seconds**.
 
 ### Day and Time Calculations
 
-dayName(year, month, day) → String | async:no - 'sunday' | ... | 'saturday'
-epochDay(hours?, minutes?, seconds?) → Integer | async:no - seconds past midnight
-reverseEpochDay(day_in_seconds) → Array | async:no - [hours, minutes, seconds]
-time24ToSeconds(time_24h) → Integer | async:no - '2330' → 84600
+formatDayName(year, month, day) → String | async:no - 'sunday' | ... | 'saturday'
+buildEpochDay(hours?, minutes?, seconds?) → Integer | async:no - seconds past midnight
+disjoinEpochDay(day_in_seconds) → Array | async:no - [hours, minutes, seconds]
+parseTime24(time_24h) → Integer | async:no - '2330' → 84600
 
 ### Unixtime and Date Conversions
 
-unixtimeToDate(unixtime) → Date | async:no
-dateToUnixtime(date) → Integer | async:no - seconds since epoch
-unixtimeToDateString(unixtime) → String | async:no - ISO 8601
-dateStringToUnixtime(date_string) → Integer | async:no
-unixtimeToUtcString(unixtime) → String | async:no - 'Wed, 21 Oct 2015 07:28:00 GMT'
-utcStringToUnixtime(date_string) → Integer | async:no
-unixtimeToUnixDay(unixtime) → Integer | async:no - start of day (00:00:00 UTC) as unixtime
+parseUnixtimeToDate(unixtime) → Date | async:no
+buildUnixtimeFromDate(date) → Integer | async:no - seconds since epoch
+formatUnixtimeToDateString(unixtime) → String | async:no - ISO 8601
+parseDateStringToUnixtime(date_string) → Integer | async:no
+formatUnixtimeToUtcString(unixtime) → String | async:no - 'Wed, 21 Oct 2015 07:28:00 GMT'
+parseUtcStringToUnixtime(date_string) → Integer | async:no
+buildUnixDay(unixtime) → Integer | async:no - start of day (00:00:00 UTC) as unixtime
 
 ### Date Data Set (structured { year, month, day, hh, mm, ss })
 
-dateDataSet(year, month, day, hours?, minutes?, seconds?) → Object | async:no - plural-key build shape
-dateStringToDataSet(date_string) → Object | async:no - singular-key parse shape (String values)
-dateToDataSet(date) → Object | async:no - singular-key parse shape
-dateDataSetToDate(date_data) → Date | async:no - UTC
-dateDataSetToDateString(date_data) → String | async:no - ISO 8601
-dateDataSetToUnixtime(date_data) → Integer | async:no
+buildDateDataSet(year, month, day, hours?, minutes?, seconds?) → Object | async:no - plural-key build shape
+parseDateStringToDataSet(date_string) → Object | async:no - singular-key parse shape (String values)
+buildDataSetFromDate(date) → Object | async:no - singular-key parse shape
+buildDateFromDateDataSet(date_data) → Date | async:no - UTC
+formatDateDataSetToDateString(date_data) → String | async:no - ISO 8601
+buildUnixtimeFromDateDataSet(date_data) → Integer | async:no
 
 ### Time Formatting
 
 formatHourMinTo12HourTime(hours, minutes) → String | async:no - '4:30 PM'
-secondsToTimeString(seconds) → String | async:no - '10:05 AM'; '' for null/undefined/empty
+formatSeconds(seconds) → String | async:no - '10:05 AM'; '' for null/undefined/empty
 
 ### Timezone Operations
 
-calcTimeWithOffset(unixtime, offset) → Integer | async:no
+buildTimeWithOffset(unixtime, offset) → Integer | async:no
 getTimezoneOffset(unixtime, timezone) → Integer | async:no - DST-aware, seconds
-unixtimeToTimezoneTime(unixtime, timezone) → Integer | async:no - wall-clock as unixtime
-unixtimeToTimezoneDate(unixtime, timezone) → Date | async:no - wall-clock Date
+buildTimezoneTime(unixtime, timezone) → Integer | async:no - wall-clock as unixtime
+buildTimezoneDate(unixtime, timezone) → Date | async:no - wall-clock Date
 
 ### Calendar
 
@@ -76,5 +76,5 @@ getLastDayOfMonth(year, month) → String | async:no - '28' / '29' / '30' / '31'
 - **Pure functions:** all operations are deterministic transformations. No I/O, no side effects.
 - **Unixtime in seconds:** every unixtime param and return is in SECONDS (not milliseconds)
 - **Timezone strings:** standard IANA names (`'America/New_York'`, `'UTC'`, `'Asia/Kolkata'`)
-- **Data Set shape variants:** plural keys (`hours`, `minutes`, `seconds`) produced by `dateDataSet()`; singular keys (`hour`, `minute`, `second`) produced by `dateStringToDataSet()` / `dateToDataSet()`. Both consumable by `dateDataSetToDate()`, which uses plural keys and treats missing time components as 0.
-- **Lib.Utils usage:** only `Lib.Utils.isNullOrUndefined` in `secondsToTimeString`. All other functions are self-contained.
+- **Data Set shape variants:** plural keys (`hours`, `minutes`, `seconds`) produced by `buildDateDataSet()`; singular keys (`hour`, `minute`, `second`) produced by `parseDateStringToDataSet()` / `buildDataSetFromDate()`. Both consumable by `buildDateFromDateDataSet()`, which uses plural keys and treats missing time components as 0.
+- **Lib.Utils usage:** only `Lib.Utils.isNullOrUndefined` in `formatSeconds`. All other functions are self-contained.

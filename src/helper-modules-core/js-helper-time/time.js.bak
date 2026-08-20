@@ -82,7 +82,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {String} - Week day name ('sunday'|'monday'|...|'saturday')
     *********************************************************************/
-    formatDayName: function (year, month, day) {
+    dayName: function (year, month, day) {
 
       // Build a UTC date from the input components and look up the day name
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -107,7 +107,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Seconds with midnight 00:00 as reference (0-86399)
     *********************************************************************/
-    buildEpochDay: function (hours, minutes, seconds) {
+    epochDay: function (hours, minutes, seconds) {
 
       // Convert wall-clock components to seconds past midnight
       return (
@@ -121,13 +121,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Convert seconds past midnight to [hours, minutes, seconds] tuple.
-    Inverse of buildEpochDay().
+    Inverse of epochDay().
 
     @param {Integer} day_in_seconds - Seconds in a day (0-86400)
 
     @return {Array} - [hours, minutes, seconds]
     *********************************************************************/
-    disjoinEpochDay: function (day_in_seconds) {
+    reverseEpochDay: function (day_in_seconds) {
 
       // Decompose seconds-past-midnight into hours, minutes, seconds
       const hours = Math.floor(day_in_seconds / 3600);
@@ -141,18 +141,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Convert 24-hour format time string to seconds past midnight.
-    Composes buildEpochDay() from the parsed components.
+    Composes epochDay() from the parsed components.
 
     @param {String} time_24h - 24-hour time string ('0100' | '2330')
 
     @return {Integer} - Seconds since midnight
     *********************************************************************/
-    parseTime24: function (time_24h) {
+    time24ToSeconds: function (time_24h) {
 
       const hours = Number(time_24h.substring(0, 2));
       const mins = Number(time_24h.substring(2, 4));
 
-      return Time.buildEpochDay(hours, mins, 0);
+      return Time.epochDay(hours, mins, 0);
 
     },
 
@@ -171,7 +171,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Date} - Date object
     *********************************************************************/
-    parseUnixtimeToDate: function (unixtime) {
+    unixtimeToDate: function (unixtime) {
 
       // Convert seconds to milliseconds for the Date constructor
       return new Date(unixtime * 1000);
@@ -186,7 +186,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Seconds since Unix epoch (UTC)
     *********************************************************************/
-    buildUnixtimeFromDate: function (date) {
+    dateToUnixtime: function (date) {
 
       return Math.floor(date.getTime() / 1000);
 
@@ -200,9 +200,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {String} - ISO 8601 date string ('2020-09-16T07:31:13.000Z')
     *********************************************************************/
-    formatUnixtimeToDateString: function (unixtime) {
+    unixtimeToDateString: function (unixtime) {
 
-      return Time.parseUnixtimeToDate(unixtime).toISOString();
+      return Time.unixtimeToDate(unixtime).toISOString();
 
     },
 
@@ -214,7 +214,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Seconds since Unix epoch
     *********************************************************************/
-    parseDateStringToUnixtime: function (date_string) {
+    dateStringToUnixtime: function (date_string) {
 
       return Math.floor(new Date(date_string).getTime() / 1000);
 
@@ -228,9 +228,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {String} - UTC date string ('Wed, 21 Oct 2015 07:28:00 GMT')
     *********************************************************************/
-    formatUnixtimeToUtcString: function (unixtime) {
+    unixtimeToUtcString: function (unixtime) {
 
-      return Time.parseUnixtimeToDate(unixtime).toUTCString();
+      return Time.unixtimeToDate(unixtime).toUTCString();
 
     },
 
@@ -242,9 +242,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Seconds since Unix epoch
     *********************************************************************/
-    parseUtcStringToUnixtime: function (date_string) {
+    utcStringToUnixtime: function (date_string) {
 
-      return Time.buildUnixtimeFromDate(new Date(date_string));
+      return Time.dateToUnixtime(new Date(date_string));
 
     },
 
@@ -257,7 +257,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Unixtime at 00:00:00 of that day
     *********************************************************************/
-    buildUnixDay: function (unixtime) {
+    unixtimeToUnixDay: function (unixtime) {
 
       const date = new Date(unixtime * 1000);
 
@@ -277,9 +277,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // seconds/second } representation. Used as an intermediate shape when
     // building or decomposing dates without the Date object overhead.
     //
-    // Note the two shape variants: buildDateDataSet()/buildDateFromDateDataSet() use
+    // Note the two shape variants: dateDataSet()/dateDataSetToDate() use
     // plural keys (hours, minutes, seconds) - this is the "build" shape.
-    // parseDateStringToDataSet()/buildDataSetFromDate() return singular keys (hour,
+    // dateStringToDataSet()/dateToDataSet() return singular keys (hour,
     // minute, second) - this is the "parse" shape produced from ISO input.
 
     /********************************************************************
@@ -294,7 +294,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Object} - { year, month, day, hours, minutes, seconds }
     *********************************************************************/
-    buildDateDataSet: function (year, month, day, hours, minutes, seconds) {
+    dateDataSet: function (year, month, day, hours, minutes, seconds) {
 
       return {
         'year': year,
@@ -315,7 +315,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Object} - { year, month, day, hour, minute, second } (all String)
     *********************************************************************/
-    parseDateStringToDataSet: function (date_string) {
+    dateStringToDataSet: function (date_string) {
 
       return {
         'year': date_string.substring(0, 4),
@@ -331,15 +331,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Split a native Date object into a data set with singular keys.
-    Delegates to parseDateStringToDataSet via ISO serialization.
+    Delegates to dateStringToDataSet via ISO serialization.
 
     @param {Date} date - Date object
 
     @return {Object} - { year, month, day, hour, minute, second }
     *********************************************************************/
-    buildDataSetFromDate: function (date) {
+    dateToDataSet: function (date) {
 
-      return Time.parseDateStringToDataSet(date.toISOString());
+      return Time.dateStringToDataSet(date.toISOString());
 
     },
 
@@ -352,7 +352,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Date} - Date object (UTC)
     *********************************************************************/
-    buildDateFromDateDataSet: function (date_data) {
+    dateDataSetToDate: function (date_data) {
 
       return new Date(Date.UTC(
         Number(date_data['year']),
@@ -373,9 +373,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {String} - ISO 8601 date string
     *********************************************************************/
-    formatDateDataSetToDateString: function (date_data) {
+    dateDataSetToDateString: function (date_data) {
 
-      return Time.buildDateFromDateDataSet(date_data).toISOString();
+      return Time.dateDataSetToDate(date_data).toISOString();
 
     },
 
@@ -387,10 +387,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Seconds since Unix epoch
     *********************************************************************/
-    buildUnixtimeFromDateDataSet: function (date_data) {
+    dateDataSetToUnixtime: function (date_data) {
 
-      return Time.buildUnixtimeFromDate(
-        Time.buildDateFromDateDataSet(date_data)
+      return Time.dateToUnixtime(
+        Time.dateDataSetToDate(date_data)
       );
 
     },
@@ -436,14 +436,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {String} - Formatted time ('10:05 AM'), or '' for empty input
     *********************************************************************/
-    formatSeconds: function (seconds) {
+    secondsToTimeString: function (seconds) {
 
       if (Lib.Utils.isEmpty(seconds)) {
         return '';
       }
 
-      const date_string = Time.formatUnixtimeToDateString(seconds);
-      const date_data = Time.parseDateStringToDataSet(date_string);
+      const date_string = Time.unixtimeToDateString(seconds);
+      const date_data = Time.dateStringToDataSet(date_string);
 
       return Time.formatHourMinTo12HourTime(
         Number(date_data['hour']),
@@ -460,7 +460,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Add a signed offset (in seconds) to a unixtime. Thin arithmetic
-    helper used by buildTimezoneTime and callers doing manual
+    helper used by unixtimeToTimezoneTime and callers doing manual
     offset math.
 
     @param {Integer} unixtime - Seconds since epoch
@@ -468,7 +468,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Adjusted unixtime
     *********************************************************************/
-    buildTimeWithOffset: function (unixtime, offset) {
+    calcTimeWithOffset: function (unixtime, offset) {
 
       return unixtime + offset;
 
@@ -533,9 +533,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Integer} - Offset-adjusted unixtime
     *********************************************************************/
-    buildTimezoneTime: function (unixtime, timezone) {
+    unixtimeToTimezoneTime: function (unixtime, timezone) {
 
-      return Time.buildTimeWithOffset(
+      return Time.calcTimeWithOffset(
         unixtime,
         Time.getTimezoneOffset(unixtime, timezone)
       );
@@ -552,10 +552,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Date} - Wall-clock Date for the timezone
     *********************************************************************/
-    buildTimezoneDate: function (unixtime, timezone) {
+    unixtimeToTimezoneDate: function (unixtime, timezone) {
 
       return new Date(
-        Time.buildTimezoneTime(unixtime, timezone) * 1000
+        Time.unixtimeToTimezoneTime(unixtime, timezone) * 1000
       );
 
     },
@@ -576,15 +576,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     getLastDayOfMonth: function (year, month) {
 
-      const date_set = Time.buildDateDataSet(
+      const date_set = Time.dateDataSet(
         year,
         Number(month) + 1,
         0
       );
 
-      const date = Time.buildDateFromDateDataSet(date_set);
+      const date = Time.dateDataSetToDate(date_set);
 
-      return Time.buildDataSetFromDate(date).day;
+      return Time.dateToDataSet(date).day;
 
     }
 

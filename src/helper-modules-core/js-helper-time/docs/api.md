@@ -23,7 +23,7 @@ Every function in this module is **synchronous, side-effect-free, and platform-a
 |---|---|
 | **Unixtime is in seconds.** | Every parameter and every return value labelled "unixtime" is an integer count of seconds since epoch. Multiply by 1000 to get milliseconds for the `Date` constructor |
 | **Timezones are IANA strings.** | Pass `'UTC'`, `'America/New_York'`, `'Asia/Kolkata'`. Three-letter abbreviations are not supported |
-| **Date-Data-Set has two key conventions.** | Plural keys (`hours`, `minutes`, `seconds`) come from `dateDataSet`; singular keys (`hour`, `minute`, `second`) come from `dateStringToDataSet` and `dateToDataSet`. The shapes are intentionally different and should not be mixed in the same call |
+| **Date-Data-Set has two key conventions.** | Plural keys (`hours`, `minutes`, `seconds`) come from `buildDateDataSet`; singular keys (`hour`, `minute`, `second`) come from `parseDateStringToDataSet` and `buildDataSetFromDate`. The shapes are intentionally different and should not be mixed in the same call |
 | **DST awareness.** | Timezone offset functions return the **actual** offset for the given unixtime, including DST transitions. They do not assume a fixed offset |
 | **Errors.** | Functions that receive an unparseable string return the runtime's default error value (`NaN`, `Invalid Date`, etc.) rather than throwing. Validate inputs upstream when correctness matters |
 
@@ -31,7 +31,7 @@ Every function in this module is **synchronous, side-effect-free, and platform-a
 
 ## Day and Time Calculations
 
-### `dayName(year, month, day)`
+### `formatDayName(year, month, day)`
 
 Returns the lower-cased English day name for a calendar date.
 
@@ -45,7 +45,7 @@ Returns the lower-cased English day name for a calendar date.
 |---|---|
 | `string` | One of `'sunday'`, `'monday'`, `'tuesday'`, `'wednesday'`, `'thursday'`, `'friday'`, `'saturday'` |
 
-### `epochDay(hours?, minutes?, seconds?)`
+### `buildEpochDay(hours?, minutes?, seconds?)`
 
 Seconds elapsed since midnight. Useful when storing "time of day" independent of any specific date.
 
@@ -59,9 +59,9 @@ Seconds elapsed since midnight. Useful when storing "time of day" independent of
 |---|---|
 | `number` | Integer in the range `0` to `86399` |
 
-### `reverseEpochDay(day_in_seconds)`
+### `disjoinEpochDay(day_in_seconds)`
 
-Inverse of `epochDay`. Decomposes a seconds-past-midnight value back to its components.
+Inverse of `buildEpochDay`. Decomposes a seconds-past-midnight value back to its components.
 
 | Param | Type | Description |
 |---|---|---|
@@ -71,7 +71,7 @@ Inverse of `epochDay`. Decomposes a seconds-past-midnight value back to its comp
 |---|---|
 | `[hours, minutes, seconds]` | Three-element array of integers |
 
-### `time24ToSeconds(time_24h)`
+### `parseTime24(time_24h)`
 
 Converts a 24-hour time string (no separator) to seconds-past-midnight. `'2330'` becomes `84600`.
 
@@ -89,13 +89,13 @@ Converts a 24-hour time string (no separator) to seconds-past-midnight. `'2330'`
 
 | Function | Signature | Note |
 |---|---|---|
-| `unixtimeToDate` | `unixtimeToDate(unixtime)` | Returns a `Date`. Multiplies seconds to milliseconds internally |
-| `dateToUnixtime` | `dateToUnixtime(date)` | Returns an integer. Inverse of `unixtimeToDate` |
-| `unixtimeToDateString` | `unixtimeToDateString(unixtime)` | Returns an ISO 8601 string (e.g. `'2026-05-17T01:25:00.000Z'`) |
-| `dateStringToUnixtime` | `dateStringToUnixtime(date_string)` | Parses an ISO 8601 string and returns unixtime in seconds |
-| `unixtimeToUtcString` | `unixtimeToUtcString(unixtime)` | Returns an HTTP-style UTC string (e.g. `'Wed, 21 Oct 2015 07:28:00 GMT'`). Use for `Last-Modified` and `Expires` headers |
-| `utcStringToUnixtime` | `utcStringToUnixtime(date_string)` | Inverse of `unixtimeToUtcString` |
-| `unixtimeToUnixDay` | `unixtimeToUnixDay(unixtime)` | Truncates to the start of the UTC day. Useful for "group by day" aggregations |
+| `parseUnixtimeToDate` | `parseUnixtimeToDate(unixtime)` | Returns a `Date`. Multiplies seconds to milliseconds internally |
+| `buildUnixtimeFromDate` | `buildUnixtimeFromDate(date)` | Returns an integer. Inverse of `parseUnixtimeToDate` |
+| `formatUnixtimeToDateString` | `formatUnixtimeToDateString(unixtime)` | Returns an ISO 8601 string (e.g. `'2026-05-17T01:25:00.000Z'`) |
+| `parseDateStringToUnixtime` | `parseDateStringToUnixtime(date_string)` | Parses an ISO 8601 string and returns unixtime in seconds |
+| `formatUnixtimeToUtcString` | `formatUnixtimeToUtcString(unixtime)` | Returns an HTTP-style UTC string (e.g. `'Wed, 21 Oct 2015 07:28:00 GMT'`). Use for `Last-Modified` and `Expires` headers |
+| `parseUtcStringToUnixtime` | `parseUtcStringToUnixtime(date_string)` | Inverse of `formatUnixtimeToUtcString` |
+| `buildUnixDay` | `buildUnixDay(unixtime)` | Truncates to the start of the UTC day. Useful for "group by day" aggregations |
 
 > **Choose the right string format.** ISO 8601 is right for most application use; JSON serialization, database storage, and machine-readable logs. UTC strings are right for HTTP headers that the spec mandates in that format. Mixing the two leads to round-trip bugs.
 
@@ -107,47 +107,47 @@ A "data set" is a plain object representing a date and time as separate fields. 
 
 ### Builders
 
-#### `dateDataSet(year, month, day, hours?, minutes?, seconds?)`
+#### `buildDateDataSet(year, month, day, hours?, minutes?, seconds?)`
 
 Constructs a date-data-set with **plural** keys. Hours, minutes, seconds default to 0.
 
 ```javascript
-Lib.Time.dateDataSet(2026, 5, 17, 14, 30);
+Lib.Time.buildDateDataSet(2026, 5, 17, 14, 30);
 // { year: 2026, month: 5, day: 17, hours: 14, minutes: 30, seconds: 0 }
 ```
 
 ### Parsers
 
-#### `dateStringToDataSet(date_string)`
+#### `parseDateStringToDataSet(date_string)`
 
 Parses an ISO 8601 string into a data-set with **singular**, **string-typed** keys.
 
 ```javascript
-Lib.Time.dateStringToDataSet('2026-05-17T14:30:00.000Z');
+Lib.Time.parseDateStringToDataSet('2026-05-17T14:30:00.000Z');
 // { year: '2026', month: '05', day: '17', hour: '14', minute: '30', second: '00' }
 ```
 
-> **Singular keys, string values.** This shape preserves zero-padding (`'05'` not `5`) and is intended for cases where the result feeds into a template or query string. For arithmetic, use `dateToDataSet` or convert via `Number()`.
+> **Singular keys, string values.** This shape preserves zero-padding (`'05'` not `5`) and is intended for cases where the result feeds into a template or query string. For arithmetic, use `buildDataSetFromDate` or convert via `Number()`.
 
-#### `dateToDataSet(date)`
+#### `buildDataSetFromDate(date)`
 
 Parses a `Date` instance into a data-set with **singular**, **number-typed** keys.
 
 ### Serializers
 
-#### `dateDataSetToDate(date_data)`
+#### `buildDateFromDateDataSet(date_data)`
 
 Builds a UTC `Date`. Reads **plural** keys; missing time components are treated as 0.
 
-#### `dateDataSetToDateString(date_data)`
+#### `formatDateDataSetToDateString(date_data)`
 
 Builds an ISO 8601 string from a plural-keyed data set.
 
-#### `dateDataSetToUnixtime(date_data)`
+#### `buildUnixtimeFromDateDataSet(date_data)`
 
 Builds a unixtime (seconds) from a plural-keyed data set.
 
-> **Mixing key conventions.** The serializers above expect plural keys. If the data set was parsed with `dateStringToDataSet` (singular keys) and needs to be serialized, either rewrite the keys to plural or go via `dateStringToUnixtime` and `unixtimeToDate*`.
+> **Mixing key conventions.** The serializers above expect plural keys. If the data set was parsed with `parseDateStringToDataSet` (singular keys) and needs to be serialized, either rewrite the keys to plural or go via `parseDateStringToUnixtime` and `parseUnixtimeToDate*`.
 
 ---
 
@@ -162,14 +162,14 @@ Lib.Time.formatHourMinTo12HourTime(16, 30);
 // '4:30 PM'
 ```
 
-### `secondsToTimeString(seconds)`
+### `formatSeconds(seconds)`
 
 Seconds-past-midnight to a 12-hour formatted time. Returns the empty string when the input is null, undefined, or empty.
 
 ```javascript
-Lib.Time.secondsToTimeString(36300);
+Lib.Time.formatSeconds(36300);
 // '10:05 AM'
-Lib.Time.secondsToTimeString(null);
+Lib.Time.formatSeconds(null);
 // ''
 ```
 
@@ -179,7 +179,7 @@ Lib.Time.secondsToTimeString(null);
 
 All four functions are DST-aware. They use the runtime's built-in `Intl.DateTimeFormat` to compute the actual offset for the given unixtime, including DST transitions.
 
-### `calcTimeWithOffset(unixtime, offset)`
+### `buildTimeWithOffset(unixtime, offset)`
 
 Adds an offset (in seconds) to a unixtime. Useful when the caller has a base unixtime and a known offset; it does not look up timezone data.
 
@@ -200,11 +200,11 @@ Lib.Time.getTimezoneOffset(1721102400, 'America/New_York'); // July
 // -14400
 ```
 
-### `unixtimeToTimezoneTime(unixtime, timezone)`
+### `buildTimezoneTime(unixtime, timezone)`
 
 Returns the **wall-clock time** in the target timezone, expressed as a unixtime as if that wall-clock time had occurred in UTC. Useful for "format this UTC moment as it would appear on a clock in Mumbai".
 
-### `unixtimeToTimezoneDate(unixtime, timezone)`
+### `buildTimezoneDate(unixtime, timezone)`
 
 Same as above but returns a `Date` instead of a unixtime. The `Date` is "wrong" in the sense that its UTC components encode the local-wall-clock components of the target timezone; this is the documented and intentional shape for use with formatters that read those components.
 

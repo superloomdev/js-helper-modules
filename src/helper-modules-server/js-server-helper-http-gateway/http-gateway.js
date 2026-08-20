@@ -500,10 +500,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, adapte
     getHttpTime: function (timestamp_seconds) {
 
       if (!Lib.Utils.isNullOrUndefined(timestamp_seconds)) {
-        return Lib.Time.unixtimeToUtcString(timestamp_seconds);
+        return Lib.Time.formatUnixtimeToUtcString(timestamp_seconds);
       }
 
-      return Lib.Time.unixtimeToUtcString(Lib.Utils.getUnixTime());
+      return Lib.Time.formatUnixtimeToUtcString(Lib.Utils.getUnixTime());
 
     },
 
