@@ -18,7 +18,7 @@ Lib.ContactAddress = require('helper-contact-address')(Lib, { Adapter });
 | `sanitizePostalCode` | `sanitizePostalCode(postal_code)` | `String` |
 | `validateSyntax` | `validateSyntax(field_name, value, context)` | `{ success, error }` |
 | `validateAddress` | `validateAddress(data)` | `{ success, errors, error }` |
-| `createAddress` | `createAddress(data)` | `Object` |
+| `buildAddress` | `buildAddress(data)` | `Object` |
 | `listSubdivisions` | `listSubdivisions(country_code)` | `{ success, subdivisions, error }` |
 | `getFieldPolicy` | `getFieldPolicy()` | `Object` |
 
