@@ -28,7 +28,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 | `getLogsByActor` | `(instance, query)` | `{ success, records, next_cursor, error }` |
 | `cleanupExpiredLogs` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`.
+All methods are async. `instance` is the per-request tenant_id object from `Lib.Instance.initialize()`.
 
 ## Behaviors That Must Not Be Violated When Generating Code
 

@@ -6,7 +6,7 @@
 
 ```sql
 CREATE TABLE IF NOT EXISTS "action_log" (
-  "scope"         VARCHAR(128) NOT NULL DEFAULT '',
+  "tenant_id"         VARCHAR(128) NOT NULL DEFAULT '',
   "entity_type"   VARCHAR(64)  NOT NULL,
   "entity_id"     VARCHAR(128) NOT NULL,
   "actor_type"    VARCHAR(64)  NOT NULL,
@@ -23,10 +23,10 @@ CREATE TABLE IF NOT EXISTS "action_log" (
 );
 
 CREATE INDEX IF NOT EXISTS "idx_action_log_entity_sort"
-  ON "action_log" ("scope", "entity_type", "entity_id", "sort_key");
+  ON "action_log" ("tenant_id", "entity_type", "entity_id", "sort_key");
 
 CREATE INDEX IF NOT EXISTS "idx_action_log_actor_sort"
-  ON "action_log" ("scope", "actor_type", "actor_id", "sort_key");
+  ON "action_log" ("tenant_id", "actor_type", "actor_id", "sort_key");
 
 CREATE INDEX IF NOT EXISTS "idx_action_log_expires_at"
   ON "action_log" ("expires_at");
@@ -38,7 +38,7 @@ The table name and index names are derived from `config.table_name` at runtime.
 
 | Column | Postgres Type | Nullable | Notes |
 |--------|---------------|----------|-------|
-| `scope` | `VARCHAR(128)` | No | Namespace. Default `''`. |
+| `tenant_id` | `VARCHAR(128)` | No | Namespace. Default `''`. |
 | `entity_type` | `VARCHAR(64)` | No | Entity type. |
 | `entity_id` | `VARCHAR(128)` | No | Entity identifier. |
 | `actor_type` | `VARCHAR(64)` | No | Actor type. |
@@ -72,8 +72,8 @@ JSON-serialized TEXT. Parsed back on read. `null` for no payload.
 
 ### Index Strategy
 
-- **`idx_<table>_entity_sort`** - compound `(scope, entity_type, entity_id, sort_key)` covering `getLogsByEntity` queries including cursor pagination. Cursor pagination uses `sort_key < ?` with `ORDER BY sort_key DESC`; the planner walks the B-tree backward.
-- **`idx_<table>_actor_sort`** - compound `(scope, actor_type, actor_id, sort_key)` covering `getLogsByActor` queries.
+- **`idx_<table>_entity_sort`** - compound `(tenant_id, entity_type, entity_id, sort_key)` covering `getLogsByEntity` queries including cursor pagination. Cursor pagination uses `sort_key < ?` with `ORDER BY sort_key DESC`; the planner walks the B-tree backward.
+- **`idx_<table>_actor_sort`** - compound `(tenant_id, actor_type, actor_id, sort_key)` covering `getLogsByActor` queries.
 - **`idx_<table>_expires_at`** - single column covering `cleanupExpiredLogs` range scan. Not partial (unlike SQLite) - PostgreSQL handles NULL comparisons efficiently via the planner.
 
 ## Index Names

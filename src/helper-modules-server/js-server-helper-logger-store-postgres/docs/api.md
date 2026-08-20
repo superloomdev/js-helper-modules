@@ -41,11 +41,11 @@ ON CONFLICT ("sort_key") DO NOTHING
 
 ### `getLogsByEntity(instance, query)`
 
-Queries log records for a `(scope, entity_type, entity_id)` triple, most-recent first.
+Queries log records for a `(tenant_id, entity_type, entity_id)` triple, most-recent first.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `entity_type` | Yes | Entity type |
 | `entity_id` | Yes | Entity ID |
 | `actions` | No | Array of action strings |
@@ -60,11 +60,11 @@ Fetches `limit + 1` rows internally. `next_cursor` is non-null when more rows ex
 
 ### `getLogsByActor(instance, query)`
 
-Same contract as `getLogsByEntity` but queries by `(scope, actor_type, actor_id)`.
+Same contract as `getLogsByEntity` but queries by `(tenant_id, actor_type, actor_id)`.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `actor_type` | Yes | Actor type |
 | `actor_id` | Yes | Actor ID |
 | `limit` | No | Page size (default 50) |
