@@ -187,9 +187,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
     // ~~~~~~~~~~~~~~~~~~~~ Validation ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Validate an email address's syntax. Delegates to the adapter for
-    the actual syntax check. The adapter returns { valid, reason }
-    where reason is a stable error type string.
+    Validate an email address's syntax. Length limits are enforced here
+    rather than in the adapter, because RFC 5321 lengths are structural
+    facts that do not vary with adapter depth. Both adapters therefore
+    agree on every length verdict. The adapter is then asked for the
+    format check and returns { valid, reason } where reason is a stable
+    error type string.
 
     @param {String} email - Email address to validate
 
@@ -199,6 +202,38 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
       // Validate input
       Validators.assertString('email', email);
+
+      // Reject a whole address longer than the configured maximum
+      if (email.length > CONFIG.EMAIL_MAX_LENGTH) {
+        return {
+          success: false,
+          error: ERRORS.CONTACT_EMAIL_TOO_LONG
+        };
+      }
+
+      // Split once so each part can be length-checked independently
+      const atIndex = email.indexOf('@');
+
+      // Bound each part only when the address actually has a separator
+      if (atIndex !== -1) {
+
+        // Reject an over-long local part
+        if (atIndex > CONFIG.LOCAL_MAX_LENGTH) {
+          return {
+            success: false,
+            error: ERRORS.CONTACT_EMAIL_LOCAL_TOO_LONG
+          };
+        }
+
+        // Reject an over-long domain part
+        if (email.length - atIndex - 1 > CONFIG.DOMAIN_MAX_LENGTH) {
+          return {
+            success: false,
+            error: ERRORS.CONTACT_EMAIL_DOMAIN_TOO_LONG
+          };
+        }
+
+      }
 
       // Delegate to adapter
       const result = adapter.validateSyntax(email);

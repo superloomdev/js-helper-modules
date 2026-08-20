@@ -5,7 +5,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { Adapter, ContactEmail } = require('./loader');
+const { Adapter, BasicAdapter, ContactEmail, ContactEmailBasic } = require('./loader');
 
 
 
@@ -173,24 +173,79 @@ test('core canonicalize works through extended adapter', function () {
 
 
 // ~~~~~~~~~~~~~~~~~~~~ Swap proof ~~~~~~~~~~~~~~~~~~~~
+// Both adapters are loaded and driven through identical call sites, because
+// asserting only against the extended adapter proves nothing about the pair.
 
-test('swap: valid email accepted by extended adapter', function () {
+test('swap: both adapters expose the identical contract surface', function () {
 
-  const result = Adapter.validateSyntax('user@gmail.com');
-  assert.equal(result.valid, true);
-
-});
-
-
-test('swap: empty rejected with same reason as basic', function () {
-
-  assert.equal(Adapter.validateSyntax('').reason, 'CONTACT_EMAIL_EMPTY');
+  // The three contract method names must match exactly, in both directions
+  assert.deepEqual(Object.keys(Adapter).sort(), Object.keys(BasicAdapter).sort());
 
 });
 
 
-test('swap: no @ rejected with same reason as basic', function () {
+test('swap: both adapters accept the same valid address', function () {
 
-  assert.equal(Adapter.validateSyntax('usergmail.com').reason, 'CONTACT_EMAIL_NO_AT');
+  // A plain address is inside both adapters' competence
+  assert.equal(Adapter.validateSyntax('user@gmail.com').valid, true);
+  assert.equal(BasicAdapter.validateSyntax('user@gmail.com').valid, true);
+
+});
+
+
+test('swap: both adapters agree on every shared structural reason', function () {
+
+  // These four failures are structural, so the reason strings must match
+  const cases = ['', 'usergmail.com', 'user@@gmail.com', '@gmail.com'];
+
+  for (let i = 0; i < cases.length; i++) {
+    const input = cases[i];
+
+    // Same input, both adapters
+    const extended = Adapter.validateSyntax(input);
+    const basic = BasicAdapter.validateSyntax(input);
+
+    assert.equal(extended.valid, false, 'extended accepted ' + JSON.stringify(input));
+    assert.equal(basic.valid, false, 'basic accepted ' + JSON.stringify(input));
+    assert.equal(extended.reason, basic.reason, 'reason disagrees for ' + JSON.stringify(input));
+  }
+
+});
+
+
+test('swap: identical call sites through the core return identical verdicts', function () {
+
+  // The caller's code does not change with the adapter
+  const cases = ['user@gmail.com', '', 'usergmail.com', 'user@@gmail.com'];
+
+  for (let i = 0; i < cases.length; i++) {
+    const input = cases[i];
+
+    assert.equal(
+      ContactEmail.validateSyntax(input).success,
+      ContactEmailBasic.validateSyntax(input).success,
+      'success disagrees for ' + JSON.stringify(input)
+    );
+  }
+
+});
+
+
+test('swap: the core enforces length identically under both adapters', function () {
+
+  // Length is a core concern, so both wirings must reject the same over-long address
+  const too_long = 'a'.repeat(65) + '@gmail.com';
+
+  assert.equal(ContactEmail.validateSyntax(too_long).error.type, 'CONTACT_EMAIL_LOCAL_TOO_LONG');
+  assert.equal(ContactEmailBasic.validateSyntax(too_long).error.type, 'CONTACT_EMAIL_LOCAL_TOO_LONG');
+
+});
+
+
+test('swap: only the extended adapter carries disposable-domain data', function () {
+
+  // The documented depth difference, pinned so it stays deliberate
+  assert.equal(BasicAdapter.isDisposableDomain('mailinator.com'), false);
+  assert.equal(Adapter.isDisposableDomain('mailinator.com'), true);
 
 });

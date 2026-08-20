@@ -5,7 +5,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { Adapter, ContactAddress } = require('./loader');
+const { Adapter, BasicAdapter, ContactAddress, ContactAddressBasic } = require('./loader');
 
 
 
@@ -249,27 +249,86 @@ test('core validateAddress works through extended adapter', function () {
 
 
 // ~~~~~~~~~~~~~~~~~~~~ Swap proof: same results as basic ~~~~~~~~~~~~~~~~~~~~
+// Both adapters are loaded and driven through identical call sites, because
+// asserting only against the extended adapter proves nothing about the pair.
 
-test('swap: valid US postal accepted by both adapters', function () {
+test('swap: both adapters expose the identical contract surface', function () {
 
-  const result = Adapter.validatePostalCode('us', '90210');
-  assert.equal(result.valid, true);
-
-});
-
-
-test('swap: unknown country rejected with same reason as basic', function () {
-
-  const result = Adapter.validatePostalCode('zz', '12345');
-  assert.equal(result.valid, false);
-  assert.equal(result.reason, 'CONTACT_ADDRESS_INVALID_COUNTRY');
+  // The five contract method names must match exactly, in both directions
+  assert.deepEqual(Object.keys(Adapter).sort(), Object.keys(BasicAdapter).sort());
 
 });
 
 
-test('swap: no-postal-system country accepts any value', function () {
+test('swap: both adapters accept the same valid US postal code', function () {
 
-  const result = Adapter.validatePostalCode('ae', 'anything');
-  assert.equal(result.valid, true);
+  // A well-formed code of correct length is inside both adapters' competence
+  assert.equal(Adapter.validatePostalCode('us', '90210').valid, true);
+  assert.equal(BasicAdapter.validatePostalCode('us', '90210').valid, true);
+
+});
+
+
+test('swap: both adapters reject an unknown country with the same reason', function () {
+
+  const extended = Adapter.validatePostalCode('zz', '12345');
+  const basic = BasicAdapter.validatePostalCode('zz', '12345');
+
+  assert.equal(extended.valid, false);
+  assert.equal(basic.valid, false);
+  assert.equal(extended.reason, basic.reason);
+  assert.equal(extended.reason, 'CONTACT_ADDRESS_INVALID_COUNTRY');
+
+});
+
+
+test('swap: both adapters accept any value for a no-postal-system country', function () {
+
+  // Defect B3: the absence of a postal system is modelled, never compared against null
+  assert.equal(Adapter.validatePostalCode('ae', 'anything').valid, true);
+  assert.equal(BasicAdapter.validatePostalCode('ae', 'anything').valid, true);
+
+});
+
+
+test('swap: both adapters agree on the set of countries they serve', function () {
+
+  // A country present in one adapter and absent from the other is silent drift
+  assert.deepEqual(Adapter.listCountries().slice().sort(), BasicAdapter.listCountries().slice().sort());
+
+});
+
+
+test('swap: identical call sites through the core return identical verdicts', function () {
+
+  // Cases both adapters can judge must agree end to end
+  const cases = [
+    ['us', '90210'],
+    ['zz', '12345'],
+    ['ae', 'anything']
+  ];
+
+  for (let i = 0; i < cases.length; i++) {
+    const country = cases[i][0];
+    const postal = cases[i][1];
+
+    const extended = ContactAddress.validateSyntax('postal_code', postal, { country_code: country });
+    const basic = ContactAddressBasic.validateSyntax('postal_code', postal, { country_code: country });
+
+    assert.equal(extended.success, basic.success, 'success disagrees for ' + country + '/' + postal);
+  }
+
+});
+
+
+test('swap: only the extended adapter carries subdivision data', function () {
+
+  // The documented depth difference, pinned so it stays deliberate
+  assert.equal(BasicAdapter.listSubdivisions('us'), null);
+  assert.ok(Array.isArray(Adapter.listSubdivisions('us')));
+
+  // Basic reports every subdivision valid; extended rejects a bogus one
+  assert.equal(BasicAdapter.validateSubdivision('us', 'ZZZ').valid, true);
+  assert.equal(Adapter.validateSubdivision('us', 'ZZZ').valid, false);
 
 });

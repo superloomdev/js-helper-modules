@@ -262,3 +262,99 @@ test('canonicalize returns null for invalid email', function () {
   assert.equal(ContactEmail.canonicalize('invalid'), null);
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Length limits (defect B1 regression) ~~~~~~~~~~~~~~~~~~~~
+// The legacy module guarded its max-length check with isNullOrUndefined(max_length),
+// so the check only ran when no limit was configured and then compared against null.
+// It therefore never rejected anything. These tests pin the limits as enforced.
+
+test('validateSyntax rejects an address over EMAIL_MAX_LENGTH', function () {
+
+  // 246 local + '@' + 'a.com' (5) = 252, under both part limits but over 254 overall
+  const local = 'a'.repeat(246);
+  const result = ContactEmail.validateSyntax(local + '@' + 'b'.repeat(250) + '.com');
+
+  assert.equal(result.success, false);
+  assert.equal(result.error.type, 'CONTACT_EMAIL_TOO_LONG');
+
+});
+
+
+test('validateSyntax rejects a local part over LOCAL_MAX_LENGTH', function () {
+
+  // 65 characters before @, one over the RFC 5321 limit of 64
+  const result = ContactEmail.validateSyntax('a'.repeat(65) + '@gmail.com');
+
+  assert.equal(result.success, false);
+  assert.equal(result.error.type, 'CONTACT_EMAIL_LOCAL_TOO_LONG');
+
+});
+
+
+test('validateSyntax accepts a local part exactly at LOCAL_MAX_LENGTH', function () {
+
+  // 64 characters before @ is the boundary and must be accepted
+  const result = ContactEmail.validateSyntax('a'.repeat(64) + '@gmail.com');
+
+  assert.equal(result.success, true);
+
+});
+
+
+test('validateSyntax accepts an address exactly at EMAIL_MAX_LENGTH', function () {
+
+  // 64 local + '@' + 189 domain = 254 exactly, the boundary
+  const address = 'a'.repeat(64) + '@' + 'b'.repeat(185) + '.com';
+
+  assert.equal(address.length, 254);
+  assert.equal(ContactEmail.validateSyntax(address).success, true);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Verb uniformity ~~~~~~~~~~~~~~~~~~~~
+// Every exported name must begin with a verb taken from the published
+// catalog. This is the guard that keeps construct/deconstruct out: they
+// read naturally, they are what the legacy source used, and they are a
+// second answer to a question create/parse and format/parse already settle.
+
+test('every exported function name begins with an approved verb', function () {
+
+  // The approved set, plus canonicalize as a recorded exception
+  const approved = ['sanitize', 'validate', 'is', 'list', 'get', 'create', 'parse', 'format'];
+  const exceptions = ['canonicalize'];
+
+  // Check each exported name against the set
+  const names = Object.keys(ContactEmail);
+
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i];
+
+    // An explicitly recorded exception is allowed through
+    if (exceptions.indexOf(name) !== -1) {
+      continue;
+    }
+
+    // Match the leading verb
+    const matched = approved.some(function (verb) {
+      return name.startsWith(verb);
+    });
+
+    assert.ok(matched, name + ' does not begin with an approved verb');
+  }
+
+});
+
+
+test('no exported name uses the banned construct or deconstruct verbs', function () {
+
+  // The specific drift this family was drafted with before the audit caught it
+  const names = Object.keys(ContactEmail);
+
+  for (let i = 0; i < names.length; i++) {
+    assert.ok(!names[i].startsWith('construct'), names[i] + ' uses the banned construct verb');
+    assert.ok(!names[i].startsWith('deconstruct'), names[i] + ' uses the banned deconstruct verb');
+  }
+
+});
