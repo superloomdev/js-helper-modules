@@ -347,7 +347,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
       // Resolve the auth_id from explicit option or from instance headers/cookies
       let auth_id = safe_options.auth_id;
       if (Lib.Utils.isNullOrUndefined(auth_id)) {
-        auth_id = TokenSource.readAuthId(instance, {
+        auth_id = TokenSource.getAuthId(instance, {
           cookie_prefix: CONFIG.COOKIE_PREFIX,
           tenant_id: safe_options.tenant_id
         });

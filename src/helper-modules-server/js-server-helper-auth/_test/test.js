@@ -356,7 +356,7 @@ describe('parts/token-source', function () {
       cookies: { sl_user_T: 'cookie-value' }
     };
 
-    const auth_id = TokenSource.readAuthId(instance, {
+    const auth_id = TokenSource.getAuthId(instance, {
       cookie_prefix: 'sl_user_', tenant_id: 'T'
     });
     assert.equal(auth_id, 'bearer-value');
@@ -371,7 +371,7 @@ describe('parts/token-source', function () {
       cookies: { sl_user_T: 'cookie-value' }
     };
 
-    const auth_id = TokenSource.readAuthId(instance, {
+    const auth_id = TokenSource.getAuthId(instance, {
       cookie_prefix: 'sl_user_', tenant_id: 'T'
     });
     assert.equal(auth_id, 'cookie-value');
@@ -382,7 +382,7 @@ describe('parts/token-source', function () {
 
     const instance = buildInstance(0);
     instance.http_request = { headers: {}, cookies: {} };
-    const auth_id = TokenSource.readAuthId(instance, {
+    const auth_id = TokenSource.getAuthId(instance, {
       cookie_prefix: 'sl_user_', tenant_id: 'T'
     });
     assert.equal(auth_id, null);
@@ -396,7 +396,7 @@ describe('parts/token-source', function () {
       headers: { authorization: 'Basic ' + Buffer.from('user:pass').toString('base64') },
       cookies: {}
     };
-    const auth_id = TokenSource.readAuthId(instance, {});
+    const auth_id = TokenSource.getAuthId(instance, {});
     assert.equal(auth_id, null);
 
   });
@@ -405,7 +405,7 @@ describe('parts/token-source', function () {
 
     const instance = buildInstance(0);
     instance.http_request = { headers: {} };
-    const auth_id = TokenSource.readAuthId(instance, {
+    const auth_id = TokenSource.getAuthId(instance, {
       cookie_prefix: 'sl_user_', tenant_id: 'T'
     });
     assert.equal(auth_id, null);

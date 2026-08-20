@@ -298,7 +298,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         const response = await fetch(final_url, init);
 
         // Read body and attempt JSON parse (falls back to raw text)
-        const data = await _Http.readResponseBody(response);
+        const data = await _Http.getResponseBody(response);
 
         // Log performance of completed request
         Lib.Debug.performanceAuditLog('End', 'HTTP ' + method + ' - ' + final_url, start_ms);
@@ -447,7 +447,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @return {Promise<Object|String|null>} - Parsed JSON, raw text, or null
     *********************************************************************/
-    readResponseBody: async function (response) {
+    getResponseBody: async function (response) {
 
       // Empty body (e.g., 204 No Content)
       const text = await response.text();

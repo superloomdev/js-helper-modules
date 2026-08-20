@@ -51,7 +51,7 @@ sendDelayed(instance, queue_name, message, delay_seconds) -> { success, message_
 
 ## Patterns
 - Instance first: every function receives instance for request-level performance tracking
-- Lazy loading: SDK loaded on first function call via ensureAdapter + initIfNot
+- Lazy loading: SDK loaded on first function call via loadAdapter + initIfNot
 - Performance: Lib.Debug.performanceAuditLog('End', routine, start_ms) - per-operation timing with local start_ms
 - Credentials: explicit KEY + SECRET via config, not implicit env chain
 - Queue URL caching: resolved URLs cached in per-instance state

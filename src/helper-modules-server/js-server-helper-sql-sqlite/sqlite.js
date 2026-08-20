@@ -583,7 +583,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       if (Lib.Utils.isNullOrUndefined(SQLiteDriver)) {
         SQLiteDriver = require('node:sqlite');
@@ -610,12 +610,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before handle creation
-      _SQLite.ensureAdapter();
+      _SQLite.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       // Constructor options resolved from the merged CONFIG
       const options = {
+        // eslint-disable-next-line no-restricted-syntax -- native SQLite DatabaseSync option
         readOnly: CONFIG.READONLY === true,
         enableForeignKeyConstraints: CONFIG.ENABLE_FOREIGN_KEYS !== false,
         timeout: CONFIG.TIMEOUT_MS || 0
