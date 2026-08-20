@@ -4544,7 +4544,7 @@ jobs:
   # 53. kv-aws-elasticache (server driver, ElastiCache IAM auth)
   # =========================================================================
   test-kv-aws-elasticache:
-    needs: [detect, publish-kv-valkey]
+    needs: [detect]
     if: |
       always() &&
       !cancelled() &&
