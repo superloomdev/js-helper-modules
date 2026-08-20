@@ -1,0 +1,32 @@
+{
+  "name": "@superloomdev/js-server-helper-cache-store-valkey",
+  "description": "Valkey/Redis store adapter for helper-cache. Implements the 5-method cache store contract backed by helper-kv-valkey.",
+  "version": "1.0.0",
+  "main": "store.js",
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-kv-valkey": "npm:@superloomdev/js-server-helper-kv-valkey@^1.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.0",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  }
+}
