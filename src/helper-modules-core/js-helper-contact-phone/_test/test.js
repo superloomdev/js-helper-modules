@@ -428,3 +428,50 @@ test('E.164 round-trip preserves data', function () {
   assert.deepEqual(parsed, { country_code: country_code, national_number: national_number });
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Verb uniformity ~~~~~~~~~~~~~~~~~~~~
+// Every exported name must begin with a verb taken from the published
+// catalog. This is the guard that keeps construct/deconstruct out: they
+// read naturally, they are what the legacy source used, and they are a
+// second answer to a question create/parse and format/parse already settle.
+
+test('every exported function name begins with an approved verb', function () {
+
+  // The approved set, plus canonicalize as a recorded exception
+  const approved = ['sanitize', 'validate', 'is', 'list', 'get', 'create', 'parse', 'format'];
+  const exceptions = ['canonicalize'];
+
+  // Check each exported name against the set
+  const names = Object.keys(ContactPhone);
+
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i];
+
+    // An explicitly recorded exception is allowed through
+    if (exceptions.indexOf(name) !== -1) {
+      continue;
+    }
+
+    // Match the leading verb
+    const matched = approved.some(function (verb) {
+      return name.startsWith(verb);
+    });
+
+    assert.ok(matched, name + ' does not begin with an approved verb');
+  }
+
+});
+
+
+test('no exported name uses the banned construct or deconstruct verbs', function () {
+
+  // The specific drift this family was drafted with before the audit caught it
+  const names = Object.keys(ContactPhone);
+
+  for (let i = 0; i < names.length; i++) {
+    assert.ok(!names[i].startsWith('construct'), names[i] + ' uses the banned construct verb');
+    assert.ok(!names[i].startsWith('deconstruct'), names[i] + ' uses the banned deconstruct verb');
+  }
+
+});

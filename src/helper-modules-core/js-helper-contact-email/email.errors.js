@@ -36,6 +36,21 @@ module.exports = Object.freeze({
     message: 'Email address format is invalid'
   }),
 
+  CONTACT_EMAIL_TOO_LONG: Object.freeze({
+    type: 'CONTACT_EMAIL_TOO_LONG',
+    message: 'Email address exceeds the maximum permitted length'
+  }),
+
+  CONTACT_EMAIL_LOCAL_TOO_LONG: Object.freeze({
+    type: 'CONTACT_EMAIL_LOCAL_TOO_LONG',
+    message: 'The part before @ exceeds the maximum permitted length'
+  }),
+
+  CONTACT_EMAIL_DOMAIN_TOO_LONG: Object.freeze({
+    type: 'CONTACT_EMAIL_DOMAIN_TOO_LONG',
+    message: 'The part after @ exceeds the maximum permitted length'
+  }),
+
   CONTACT_EMAIL_DISPOSABLE: Object.freeze({
     type: 'CONTACT_EMAIL_DISPOSABLE',
     message: 'Email domain is a known disposable email provider'

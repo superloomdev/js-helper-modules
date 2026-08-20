@@ -65,4 +65,9 @@ All functions are synchronous and client-side safe.
 | `CONTACT_EMAIL_EMPTY_LOCAL` | The part before @ must not be empty | both adapters |
 | `CONTACT_EMAIL_EMPTY_DOMAIN` | The part after @ must not be empty | both adapters |
 | `CONTACT_EMAIL_INVALID_SYNTAX` | Email address format is invalid | both adapters |
+| `CONTACT_EMAIL_TOO_LONG` | Email address exceeds the maximum permitted length | core, before either adapter |
+| `CONTACT_EMAIL_LOCAL_TOO_LONG` | The part before @ exceeds the maximum permitted length | core, before either adapter |
+| `CONTACT_EMAIL_DOMAIN_TOO_LONG` | The part after @ exceeds the maximum permitted length | core, before either adapter |
 | `CONTACT_EMAIL_DISPOSABLE` | Email domain is a known disposable email provider | extended only |
+
+The three length codes are emitted by the core rather than by an adapter. RFC 5321 lengths are structural facts that do not vary with adapter depth, so bounding them once in the core keeps both adapters in agreement on every length verdict and keeps the limits configurable through `EMAIL_MAX_LENGTH`, `LOCAL_MAX_LENGTH`, and `DOMAIN_MAX_LENGTH`.

@@ -7,7 +7,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { Adapter, ContactPhone } = require('./loader');
+const { Adapter, BasicAdapter, ContactPhone, ContactPhoneBasic } = require('./loader');
 
 
 
@@ -220,31 +220,106 @@ test('core parseE164 works through extended adapter', function () {
 
 
 // ~~~~~~~~~~~~~~~~~~~~ Swap proof: same call sites as basic ~~~~~~~~~~~~~~~~~~~~
-// These tests verify that the extended adapter produces the same results
-// for numbers that both adapters can judge (valid numbers, length errors).
+// Both adapters are loaded and driven through identical call sites. The
+// contract Decision D2 protects is that swapping the adapter changes depth,
+// never the call site and never the reason vocabulary a caller branches on.
+// Asserting only against the extended adapter would prove nothing about the
+// pair, so every test below calls both.
 
-test('swap: valid US number accepted by both adapters', function () {
+test('swap: both adapters expose the identical contract surface', function () {
 
-  // Extended adapter
-  const extResult = Adapter.validateSyntax('us', '2345678900');
-  assert.equal(extResult.valid, true);
+  // The four contract method names must match exactly, in both directions
+  const extended_methods = Object.keys(Adapter).sort();
+  const basic_methods = Object.keys(BasicAdapter).sort();
 
-});
-
-
-test('swap: unknown country rejected by both adapters with same reason', function () {
-
-  const result = Adapter.validateSyntax('zz', '9876543210');
-  assert.equal(result.valid, false);
-  assert.equal(result.reason, 'CONTACT_PHONE_UNKNOWN_COUNTRY');
+  assert.deepEqual(extended_methods, basic_methods);
 
 });
 
 
-test('swap: non-numeric rejected by both adapters with same reason', function () {
+test('swap: both adapters accept the same valid US number', function () {
 
-  const result = Adapter.validateSyntax('in', 'abcdefghij');
-  assert.equal(result.valid, false);
-  assert.equal(result.reason, 'CONTACT_PHONE_NOT_A_NUMBER');
+  // A number both adapters can judge must be accepted by both
+  assert.equal(Adapter.validateSyntax('us', '2345678900').valid, true);
+  assert.equal(BasicAdapter.validateSyntax('us', '2345678900').valid, true);
+
+});
+
+
+test('swap: both adapters reject an unknown country with the same reason', function () {
+
+  // Reason strings must agree, not just the valid flag
+  const extended = Adapter.validateSyntax('zz', '9876543210');
+  const basic = BasicAdapter.validateSyntax('zz', '9876543210');
+
+  assert.equal(extended.valid, false);
+  assert.equal(basic.valid, false);
+  assert.equal(extended.reason, basic.reason);
+  assert.equal(extended.reason, 'CONTACT_PHONE_UNKNOWN_COUNTRY');
+
+});
+
+
+test('swap: both adapters reject a non-numeric input with the same reason', function () {
+
+  // Charset rejection is inside both adapters' competence
+  const extended = Adapter.validateSyntax('in', 'abcdefghij');
+  const basic = BasicAdapter.validateSyntax('in', 'abcdefghij');
+
+  assert.equal(extended.valid, false);
+  assert.equal(basic.valid, false);
+  assert.equal(extended.reason, basic.reason);
+  assert.equal(extended.reason, 'CONTACT_PHONE_NOT_A_NUMBER');
+
+});
+
+
+test('swap: both adapters report the same calling code for a country', function () {
+
+  // Metadata that both carry must agree, or a formatted E.164 differs by adapter
+  const countries = ['us', 'in', 'gb', 'de', 'ae'];
+
+  for (let i = 0; i < countries.length; i++) {
+    const code = countries[i];
+
+    assert.equal(
+      Adapter.getMetadata(code).calling_code,
+      BasicAdapter.getMetadata(code).calling_code,
+      'calling_code disagrees for ' + code
+    );
+  }
+
+});
+
+
+test('swap: identical call sites through the core return identical verdicts', function () {
+
+  // The whole point of D2: the caller's code does not change with the adapter
+  const cases = [
+    ['us', '2345678900'],
+    ['in', '9876543210'],
+    ['zz', '9876543210'],
+    ['in', 'abcdefghij']
+  ];
+
+  for (let i = 0; i < cases.length; i++) {
+    const country = cases[i][0];
+    const number = cases[i][1];
+
+    // Same function, same arguments, different wired adapter
+    const extended = ContactPhone.validateSyntax(country, number);
+    const basic = ContactPhoneBasic.validateSyntax(country, number);
+
+    assert.equal(extended.success, basic.success, 'success disagrees for ' + country + '/' + number);
+  }
+
+});
+
+
+test('swap: only the extended adapter can classify number type', function () {
+
+  // The documented depth difference, pinned so it stays deliberate
+  assert.equal(BasicAdapter.getNumberType('us', '2345678900'), null);
+  assert.notEqual(Adapter.getNumberType('us', '2345678900'), null);
 
 });
