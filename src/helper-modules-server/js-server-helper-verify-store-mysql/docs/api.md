@@ -18,13 +18,13 @@ Executes one idempotent DDL statement that creates the table and all indexes inl
 
 ```sql
 CREATE TABLE IF NOT EXISTS `verification_codes` (
-  `scope`      VARCHAR(255) NOT NULL,
+  `namespace`      VARCHAR(255) NOT NULL,
   `id`         VARCHAR(255) NOT NULL,
   `code`       VARCHAR(255) NOT NULL,
   `fail_count` INTEGER      NOT NULL DEFAULT 0,
   `created_at` BIGINT       NOT NULL,
   `expires_at` BIGINT       NOT NULL,
-  PRIMARY KEY (`scope`, `id`),
+  PRIMARY KEY (`namespace`, `id`),
   INDEX `verification_codes_expires_at_idx` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
@@ -35,9 +35,9 @@ MySQL does not support `CREATE INDEX IF NOT EXISTS` as a standalone DDL statemen
 
 ---
 
-### `getRecord(instance, scope, key)`
+### `getRecord(instance, namespace, key)`
 
-Fetches one record by composite primary key `(\`scope\`, \`id\`)`. Returns `record: null` when the row does not exist.
+Fetches one record by composite primary key `(\`namespace\`, \`id\`)`. Returns `record: null` when the row does not exist.
 
 **Return:** `{ success, record, error }`
 
@@ -53,7 +53,7 @@ Fetches one record by composite primary key `(\`scope\`, \`id\`)`. Returns `reco
 
 ---
 
-### `setRecord(instance, scope, key, record)`
+### `setRecord(instance, namespace, key, record)`
 
 Upsert via `INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)`. Replaces all mutable columns on key collision.
 
@@ -61,21 +61,21 @@ Upsert via `INSERT ... ON DUPLICATE KEY UPDATE col = VALUES(col)`. Replaces all 
 
 ---
 
-### `incrementFailCount(instance, scope, key)`
+### `incrementFailCount(instance, namespace, key)`
 
 Atomic in-place increment:
 
 ```sql
 UPDATE `verification_codes`
 SET `fail_count` = `fail_count` + 1
-WHERE `scope` = ? AND `id` = ?
+WHERE `namespace` = ? AND `id` = ?
 ```
 
 **Return:** `{ success, error }`
 
 ---
 
-### `deleteRecord(instance, scope, key)`
+### `deleteRecord(instance, namespace, key)`
 
 Idempotent delete. A missing row is treated as success.
 
