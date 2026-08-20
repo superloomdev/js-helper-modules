@@ -52,7 +52,7 @@ The second argument to `log`. Validated per call by `validateLogOptions`. A viol
 | `actor_type` | `string` | Yes | Non-empty. The kind of agent that acted |
 | `actor_id` | `string` | Yes | Non-empty. The specific actor |
 | `action` | `string` | Yes | Non-empty. Dot-notation event name, application-owned |
-| `scope` | `string` | No | Multi-tenant namespace. Defaults to `''` |
+| `tenant_id` | `string` | No | Multi-tenant namespace. Defaults to `''` |
 | `retention` | `'persistent'` or `object` | No | Defaults to `'persistent'`. When an object, `retention.ttl_seconds` must be a positive integer |
 | `data` | `object` | No | Plain object when present. Stored verbatim |
 | `ip` | `string` | No | String when present. Auto-captured and AES-encrypted when configured |
@@ -71,7 +71,7 @@ The second argument to `listByEntity` and `listByActor`. Validated by `validateL
 |---|---|---|---|
 | `entity_type`, `entity_id` | `string` | `listByEntity` only | Non-empty |
 | `actor_type`, `actor_id` | `string` | `listByActor` only | Non-empty |
-| `scope` | `string` | No | String when present |
+| `tenant_id` | `string` | No | String when present |
 | `actions` | `string[]` | No | Array of non-empty strings when present. Each entry is a literal action or an `'auth.*'` prefix glob |
 | `start_time_ms` | `integer` | No | Inclusive lower bound on `created_at_ms` |
 | `end_time_ms` | `integer` | No | Exclusive upper bound on `created_at_ms` |
@@ -94,7 +94,7 @@ The shape `CONFIG.Store` must satisfy. This is the five-method contract every sh
 | `setupNewStore(instance)` | `{ success, error }` | Idempotent backend provisioning |
 | `cleanupExpiredLogs(instance)` | `{ success, deleted_count, error }` | Bulk-delete records past `expires_at` |
 
-`record` is the canonical log record the module builds internally (see [Data Model](data-model.md)); `query` is the normalized filter object (scope, entity or actor pair, `actions`, time bounds, `cursor`, `limit`).
+`record` is the canonical log record the module builds internally (see [Data Model](data-model.md)); `query` is the normalized filter object (tenant_id, entity or actor pair, `actions`, time bounds, `cursor`, `limit`).
 
 **No construction-time contract check.** Unlike the `auth` and `verify` parents, the logger does not validate the store's methods at construction. The three hot-path methods behave differently from the two maintenance methods when absent:
 

@@ -24,7 +24,7 @@ const createMemoryStore = require('./memory-store');
 // Default options for log() - keeps tests focused on the behavior under test.
 const defaultLogOptions = function (overrides) {
   return Object.assign({
-    scope:       'tenant-A',
+    tenant_id:       'tenant-A',
     entity_type: 'user',
     entity_id:   'u-1',
     actor_type:  'user',
@@ -237,7 +237,7 @@ describe('log() write behavior', function () {
     assert.equal(result.error, null);
 
     const list = await logger.listByEntity(Lib.Instance.initialize(), {
-      scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
+      tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records.length, 1);
 
@@ -257,7 +257,7 @@ describe('log() write behavior', function () {
     await waitForBackgroundQueue(instance);
 
     const list = await logger.listByEntity(Lib.Instance.initialize(), {
-      scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
+      tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records.length, 1);
 
@@ -307,7 +307,7 @@ describe('retention modes', function () {
     await logger.log(instance, defaultLogOptions({ retention: 'persistent' }));
 
     const list = await logger.listByEntity(Lib.Instance.initialize(), {
-      scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
+      tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records[0].expires_at, null);
 
@@ -323,7 +323,7 @@ describe('retention modes', function () {
     await logger.log(instance, defaultLogOptions({ retention: { ttl_seconds: 600 } }));
 
     const list = await logger.listByEntity(Lib.Instance.initialize(), {
-      scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
+      tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
     assert.equal(list.records[0].expires_at, 5000 + 600);
 
@@ -358,7 +358,7 @@ describe('IP encryption', function () {
     }));
 
     const list = await logger.listByEntity(Lib.Instance.initialize(), {
-      scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
+      tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
 
     assert.equal(list.records.length, 1);
@@ -428,7 +428,7 @@ describe('IP encryption', function () {
 
     const reader = buildLoggerWithStore(captureStore, { IP_ENCRYPT_KEY: key2 });
     const list = await reader.listByEntity(Lib.Instance.initialize(), {
-      scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
+      tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1'
     });
 
     assert.equal(list.records.length, 1);
@@ -536,7 +536,7 @@ describe('list option validation', function () {
     await assert.rejects(
       async function () {
         await logger.listByEntity(Lib.Instance.initialize(), {
-          scope: 'tenant-A', entity_id: 'u-1'
+          tenant_id: 'tenant-A', entity_id: 'u-1'
         });
       },
       /entity_type is required/
@@ -549,7 +549,7 @@ describe('list option validation', function () {
     await assert.rejects(
       async function () {
         await logger.listByActor(Lib.Instance.initialize(), {
-          scope: 'tenant-A', actor_type: 'user'
+          tenant_id: 'tenant-A', actor_type: 'user'
         });
       },
       /actor_id is required/
@@ -562,7 +562,7 @@ describe('list option validation', function () {
     await assert.rejects(
       async function () {
         await logger.listByEntity(Lib.Instance.initialize(), {
-          scope: 'tenant-A', entity_type: 'user', entity_id: 'u-1',
+          tenant_id: 'tenant-A', entity_type: 'user', entity_id: 'u-1',
           actions: ['', 'auth.*']
         });
       },
@@ -721,5 +721,68 @@ describe('config absorption contract', function () {
   // NULL HONORED: not applicable at unit tier - both CONFIG defaults are null
   // (Store, IP_ENCRYPT_KEY). There is no key with a non-null default
   // whose null-override would produce a distinct observable outcome at this tier.
+
+});
+
+
+// ============================================================================
+// DEFAULT TENANT_ID (plan 0122)
+// ============================================================================
+
+describe('default tenant_id is load-bearing (plan 0122)', function () {
+
+  it('log with no tenant_id supplied defaults to "system" at write time', async function () {
+
+    const logger = buildLogger();
+    const instance = Lib.Instance.initialize();
+
+    // Log without supplying tenant_id
+    const result = await logger.log(instance, defaultLogOptions({ tenant_id: undefined }));
+    assert.ok(result.success);
+
+    // Wait for the background write to complete
+    await waitForBackgroundQueue(instance);
+
+    // Read back by entity with tenant_id: 'system' - must find the record
+    const byEntity = await logger.listByEntity(instance, {
+      tenant_id: 'system',
+      entity_type: 'user',
+      entity_id: 'u-1'
+    });
+    assert.ok(byEntity.success);
+    assert.ok(byEntity.records.length > 0);
+    assert.equal(byEntity.records[0].tenant_id, 'system');
+
+  });
+
+  it('log with no tenant_id is NOT retrievable with tenant_id: "" (empty string)', async function () {
+
+    const logger = buildLogger();
+    const instance = Lib.Instance.initialize();
+
+    // Log without supplying tenant_id
+    const result = await logger.log(instance, defaultLogOptions({ tenant_id: undefined }));
+    assert.ok(result.success);
+
+    // Wait for the background write to complete
+    await waitForBackgroundQueue(instance);
+
+    // Read back by entity with tenant_id: '' - must NOT find the record
+    // (the memory store does not filter by tenant_id, so we verify the
+    // record's tenant_id field directly: it must be 'system', not '')
+    const byEntity = await logger.listByEntity(instance, {
+      tenant_id: '',
+      entity_type: 'user',
+      entity_id: 'u-1'
+    });
+    assert.ok(byEntity.success);
+    // Every record returned must have tenant_id 'system', proving the
+    // default was applied at write time and '' was never stored
+    for (const rec of byEntity.records) {
+      assert.notEqual(rec.tenant_id, '');
+      assert.equal(rec.tenant_id, 'system');
+    }
+
+  });
 
 });

@@ -47,7 +47,7 @@ Validates options, builds the canonical record, auto-captures `ip` and `user_age
 
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `scope` | `string` | No (default `''`) | Multi-tenant namespace. List queries are scoped to this value; there is no cross-scope query path |
+| `tenant_id` | `string` | No (default `''`) | Multi-tenant namespace. List queries are scoped to this value; there is no cross-tenant_id query path |
 | `entity_type` | `string` | Yes | What kind of thing was affected (`'user'`, `'project'`, `'invoice'`, ...) |
 | `entity_id` | `string` | Yes | The specific instance of that thing |
 | `actor_type` | `string` | Yes | What kind of agent triggered the event (`'user'`, `'admin'`, `'system'`, `'webhook'`, ...) |
@@ -82,7 +82,7 @@ List events recorded against one entity, most-recent first. Pagination via curso
 
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `scope` | `string` | No (default `''`) | Must match the scope used at write time |
+| `tenant_id` | `string` | No (default `''`) | Must match the tenant_id used at write time |
 | `entity_type` | `string` | Yes | Entity discriminator |
 | `entity_id` | `string` | Yes | Entity identifier |
 | `actions` | `string[]` | No | Filter to literal action names or `'auth.*'`-style globs. Glob is prefix-only |
@@ -98,7 +98,7 @@ List events recorded against one entity, most-recent first. Pagination via curso
   success: true,
   records: [
     {
-      scope, entity_type, entity_id, actor_type, actor_id, action,
+      tenant_id, entity_type, entity_id, actor_type, actor_id, action,
       data, ip, user_agent,
       created_at, created_at_ms, sort_key, expires_at
     },
@@ -117,7 +117,7 @@ List events performed by one actor, most-recent first. Same shape, same paginati
 
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `scope` | `string` | No | Same default as `listByEntity` |
+| `tenant_id` | `string` | No | Same default as `listByEntity` |
 | `actor_type` | `string` | Yes | Actor discriminator |
 | `actor_id` | `string` | Yes | Actor identifier |
 | `actions`, `start_time_ms`, `end_time_ms`, `cursor`, `limit` | | | Identical to `listByEntity` |

@@ -5,7 +5,7 @@
 //      parameter, throw TypeError on programmer errors.
 //
 // Singleton: Lib is injected once by the loader. Public and private objects
-// are declared at module scope - Node.js require cache guarantees the same
+// are declared at module tenant_id - Node.js require cache guarantees the same
 // reference is returned on every subsequent require. No factory needed.
 'use strict';
 
@@ -17,7 +17,7 @@ let Lib;
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and ERRORS, returns the module-scope
+Singleton loader. Injects Lib and ERRORS, returns the module-tenant_id
 Validators object. ERRORS is injected per the universal companion rule
 even when validators do not consume it today.
 
@@ -181,8 +181,8 @@ const Validators = {
     if (Lib.Utils.isNullOrUndefined(options) || !Lib.Utils.isObject(options)) {
       throw new TypeError('[helper-logger] list options must be an object');
     }
-    if (!Lib.Utils.isNullOrUndefined(options.scope) && !Lib.Utils.isString(options.scope)) {
-      throw new TypeError('[helper-logger] list options.scope must be a string when present');
+    if (!Lib.Utils.isNullOrUndefined(options.tenant_id) && !Lib.Utils.isString(options.tenant_id)) {
+      throw new TypeError('[helper-logger] list options.tenant_id must be a string when present');
     }
     if (!Lib.Utils.isNullOrUndefined(options.actions)) {
       if (!Array.isArray(options.actions)) {
