@@ -1,6 +1,6 @@
 // Info: MongoDB store adapter for helper-verify. Fully independent
 // module that owns its own CONFIG, ERRORS, and Validators. Uses a compound
-// `_id` of `{ scope, id }` so reads/writes hit the implicit `_id` index
+// `_id` of `{ namespace, id }` so reads/writes hit the implicit `_id` index
 // without any secondary index. Native TTL is implemented via a `_ttl`
 // Date field + a TTL index (`{ _ttl: 1 }, expireAfterSeconds: 0`); the
 // Date mirror is the only field MongoDB's TTL sweeper recognizes.
@@ -13,10 +13,10 @@
 //
 // Store contract (identical shape across all adapters):
 //   - setupNewStore(instance)                        -> { success, error }
-//   - getRecord(instance, scope, key)              -> { success, record, error }
-//   - setRecord(instance, scope, key, record)      -> { success, error }
-//   - incrementFailCount(instance, scope, key)     -> { success, error }
-//   - deleteRecord(instance, scope, key)           -> { success, error }
+//   - getRecord(instance, namespace, key)              -> { success, record, error }
+//   - setRecord(instance, namespace, key, record)      -> { success, error }
+//   - incrementFailCount(instance, namespace, key)     -> { success, error }
+//   - deleteRecord(instance, namespace, key)           -> { success, error }
 //   - cleanupExpiredRecords(instance)              -> { success, deleted_count, error }
 
 'use strict';
@@ -137,18 +137,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Returns null when absent.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, record, error }
     *********************************************************************/
-    getRecord: async function (instance, scope, key) {
+    getRecord: async function (instance, namespace, key) {
 
       // Equality lookup on the compound _id - O(1) via the implicit index
       const result = await Lib.MongoDB.getRecord(
         instance,
         CONFIG.COLLECTION_NAME,
-        { _id: { scope: scope, id: key } }
+        { _id: { namespace: namespace, id: key } }
       );
 
       // Return a service error if the driver call failed
@@ -195,18 +195,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     sweeper and the verify-time expiry check.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
     @param {Object} record   - { code, fail_count, created_at, expires_at }
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    setRecord: async function (instance, scope, key, record) {
+    setRecord: async function (instance, namespace, key, record) {
 
       // Build the filter and full replacement document
-      const filter = { _id: { scope: scope, id: key } };
+      const filter = { _id: { namespace: namespace, id: key } };
       const document = {
-        _id: { scope: scope, id: key },
+        _id: { namespace: namespace, id: key },
         code: record.code,
         fail_count: record.fail_count,
         created_at: record.created_at,
@@ -248,18 +248,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Atomic $inc - safe under concurrent verify attempts.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    incrementFailCount: async function (instance, scope, key) {
+    incrementFailCount: async function (instance, namespace, key) {
 
       // Atomic $inc - safe under concurrent verify attempts
       const result = await Lib.MongoDB.updateRecord(
         instance,
         CONFIG.COLLECTION_NAME,
-        { _id: { scope: scope, id: key } },
+        { _id: { namespace: namespace, id: key } },
         { $inc: { fail_count: 1 } }
       );
 
@@ -289,18 +289,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Idempotent delete (missing _id is treated as success).
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    deleteRecord: async function (instance, scope, key) {
+    deleteRecord: async function (instance, namespace, key) {
 
       // Delete by compound _id - idempotent (missing document is success)
       const result = await Lib.MongoDB.deleteRecord(
         instance,
         CONFIG.COLLECTION_NAME,
-        { _id: { scope: scope, id: key } }
+        { _id: { namespace: namespace, id: key } }
       );
 
       // Return a service error if the driver call failed

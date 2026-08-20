@@ -34,13 +34,13 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 | Method | Signature | Returns |
 |---|---|---|
 | `setupNewStore` | `(instance)` | `{ success, error }` |
-| `getRecord` | `(instance, scope, key)` | `{ success, record, error }` |
-| `setRecord` | `(instance, scope, key, record)` | `{ success, error }` |
-| `incrementFailCount` | `(instance, scope, key)` | `{ success, error }` |
-| `deleteRecord` | `(instance, scope, key)` | `{ success, error }` |
+| `getRecord` | `(instance, namespace, key)` | `{ success, record, error }` |
+| `setRecord` | `(instance, namespace, key, record)` | `{ success, error }` |
+| `incrementFailCount` | `(instance, namespace, key)` | `{ success, error }` |
+| `deleteRecord` | `(instance, namespace, key)` | `{ success, error }` |
 | `cleanupExpiredRecords` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`.
+All methods are async. `instance` is the per-request namespace object from `Lib.Instance.initialize()`.
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
@@ -48,13 +48,13 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 2. **`getRecord` returns `record: null` on a miss.** Not an error.
 
-3. **`setRecord` is a full UPSERT via `replaceOne`.** The filter is `{ _id: { scope, id } }` - the compound `_id` field. A second `setRecord` on the same `(scope, key)` pair replaces the entire document.
+3. **`setRecord` is a full UPSERT via `replaceOne`.** The filter is `{ _id: { namespace, id } }` - the compound `_id` field. A second `setRecord` on the same `(namespace, key)` pair replaces the entire document.
 
 4. **`incrementFailCount` uses `$inc` for atomic increment.** Issues `{ $inc: { fail_count: 1 } }`. Does not read first.
 
 5. **`deleteRecord` is idempotent.** A missing document is treated as success.
 
-6. **`_id` is a compound object `{ scope, id }`.** Not a string, not an ObjectId. The adapter constructs this on every write/read.
+6. **`_id` is a compound object `{ namespace, id }`.** Not a string, not an ObjectId. The adapter constructs this on every write/read.
 
 7. **`_ttl` is a `Date` field derived from `expires_at * 1000`.** The TTL index on `_ttl` (`expireAfterSeconds: 0`) triggers automatic MongoDB background deletion approximately 60 seconds after the Date passes. Verify codes always carry `expires_at`, so every document has `_ttl` - the index is non-sparse.
 
@@ -84,4 +84,4 @@ This adapter owns its own `store.errors.js`. Only one type:
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`. The compound `_id` key is `{ scope, id }`. The `_ttl` field is the TTL index key.
+The store's source file is `store.js`; the config validator is `store.validators.js`. The compound `_id` key is `{ namespace, id }`. The `_ttl` field is the TTL index key.

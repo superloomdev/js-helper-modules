@@ -7,7 +7,7 @@ A MongoDB-backed implementation of the [helper-verify](https://github.com/superl
 
 ## What This Is
 
-A thin layer between the Verify parent module and a MongoDB verification collection. Uses a compound `_id = { scope, id }` for the primary key and a TTL index on a `_ttl` Date field for automatic expiry. Well-suited for projects already running MongoDB that want automatic document expiry without application-side scheduling.
+A thin layer between the Verify parent module and a MongoDB verification collection. Uses a compound `_id = { namespace, id }` for the primary key and a TTL index on a `_ttl` Date field for automatic expiry. Well-suited for projects already running MongoDB that want automatic document expiry without application-side scheduling.
 
 The adapter cannot stand alone. It is always loaded together with the Verify parent and the [`helper-nosql-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-mongodb) driver helper.
 

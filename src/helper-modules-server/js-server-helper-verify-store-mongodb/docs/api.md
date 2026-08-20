@@ -23,18 +23,18 @@ createIndex({ _ttl: 1 }, { name: 'verify_ttl_idx', expireAfterSeconds: 0 })
 
 Every verify record always has a `_ttl` field (verify codes always expire), so the index is non-sparse - there are no persistent records to skip.
 
-The compound `_id` (`{ scope, id }`) is the primary key; MongoDB creates a unique index on `_id` automatically - no separate call needed.
+The compound `_id` (`{ namespace, id }`) is the primary key; MongoDB creates a unique index on `_id` automatically - no separate call needed.
 
 **Return:** `{ success, error }`
 
 ---
 
-### `getRecord(instance, scope, key)`
+### `getRecord(instance, namespace, key)`
 
 Fetches one document by compound `_id`:
 
 ```js
-filter: { _id: { scope: scope, id: key } }
+filter: { _id: { namespace: namespace, id: key } }
 ```
 
 Returns `record: null` when the document does not exist. The returned record omits `_id` and `_ttl`.
@@ -53,12 +53,12 @@ Returns `record: null` when the document does not exist. The returned record omi
 
 ---
 
-### `setRecord(instance, scope, key, record)`
+### `setRecord(instance, namespace, key, record)`
 
 Full document replacement via `replaceOne` with `upsert: true`:
 
 ```js
-filter:      { _id: { scope: scope, id: key } }
+filter:      { _id: { namespace: namespace, id: key } }
 replacement: { _id: ..., code, fail_count, created_at, expires_at, _ttl }
 options:     { upsert: true }
 ```
@@ -69,12 +69,12 @@ The `_ttl` field is set to `new Date(record.expires_at * 1000)` on every write. 
 
 ---
 
-### `incrementFailCount(instance, scope, key)`
+### `incrementFailCount(instance, namespace, key)`
 
 Atomic in-place increment via `$inc`:
 
 ```js
-filter: { _id: { scope: scope, id: key } }
+filter: { _id: { namespace: namespace, id: key } }
 update: { $inc: { fail_count: 1 } }
 ```
 
@@ -84,7 +84,7 @@ Does not read the current value before writing. Safe under concurrent verify att
 
 ---
 
-### `deleteRecord(instance, scope, key)`
+### `deleteRecord(instance, namespace, key)`
 
 Idempotent delete by compound `_id`. A missing document is treated as success.
 
