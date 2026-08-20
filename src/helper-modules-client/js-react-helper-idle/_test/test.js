@@ -107,9 +107,9 @@ describe('pause and resume', function () {
 
   it('should freeze getElapsed while paused', function () {
     Idle.touch();
-    const before = Idle.getElapsed().data.elapsed_ms;
+    const before = Idle.getElapsed();
     Idle.pause();
-    const frozen = Idle.getElapsed().data.elapsed_ms;
+    const frozen = Idle.getElapsed();
     // Advance real time a tiny bit - frozen should not change
     assert.strictEqual(frozen, before);
   });
@@ -117,10 +117,10 @@ describe('pause and resume', function () {
   it('should continue from frozen elapsed on resume', function () {
     Idle.touch();
     Idle.pause();
-    const frozen = Idle.getElapsed().data.elapsed_ms;
+    const frozen = Idle.getElapsed();
     Idle.resume();
     // After resume, elapsed should be at least the frozen value
-    const after = Idle.getElapsed().data.elapsed_ms;
+    const after = Idle.getElapsed();
     assert.ok(after >= frozen, 'elapsed continues from frozen value');
   });
 
@@ -278,15 +278,14 @@ describe('getElapsed', function () {
   it('should return a non-negative number after touch', function () {
     Idle.touch();
     const result = Idle.getElapsed();
-    assert.strictEqual(result.success, true);
-    assert.ok(result.data.elapsed_ms >= 0, 'elapsed is non-negative');
+    assert.ok(result >= 0, 'elapsed is non-negative');
   });
 
   it('should return 0 when no activity has been recorded', function () {
     // Fresh instance has no last_active_ms until touch
     // After beforeEach touch, this should be >= 0
     const result = Idle.getElapsed();
-    assert.ok(result.data.elapsed_ms >= 0);
+    assert.ok(result >= 0);
   });
 
 });
@@ -296,8 +295,7 @@ describe('getLastActive', function () {
   it('should return a timestamp after touch', function () {
     Idle.touch();
     const result = Idle.getLastActive();
-    assert.strictEqual(result.success, true);
-    assert.ok(result.data.last_active_ms !== null, 'last active is set');
+    assert.ok(result !== null, 'last active is set');
   });
 
 });
@@ -306,8 +304,7 @@ describe('getTotalIdle', function () {
 
   it('should return a number', function () {
     const result = Idle.getTotalIdle();
-    assert.strictEqual(result.success, true);
-    assert.strictEqual(typeof result.data.total_idle_ms, 'number');
+    assert.strictEqual(typeof result, 'number');
   });
 
   it('should accumulate idle time after crossing idle_ms', function () {
@@ -316,7 +313,7 @@ describe('getTotalIdle', function () {
     mock.timers.tick(1500);
 
     const result = Idle.getTotalIdle();
-    assert.ok(result.data.total_idle_ms > 0, 'idle time accumulated');
+    assert.ok(result > 0, 'idle time accumulated');
   });
 
 });
@@ -325,8 +322,7 @@ describe('getTotalActive', function () {
 
   it('should return a number', function () {
     const result = Idle.getTotalActive();
-    assert.strictEqual(result.success, true);
-    assert.strictEqual(typeof result.data.total_active_ms, 'number');
+    assert.strictEqual(typeof result, 'number');
   });
 
   it('should accumulate active time while user is active', function () {
@@ -334,7 +330,7 @@ describe('getTotalActive', function () {
     mock.timers.tick(500);
 
     const result = Idle.getTotalActive();
-    assert.ok(result.data.total_active_ms > 0, 'active time accumulated');
+    assert.ok(result > 0, 'active time accumulated');
   });
 
 });
@@ -355,17 +351,17 @@ describe('analytics accumulation', function () {
     const idleResult = Idle.getTotalIdle();
     const activeResult = Idle.getTotalActive();
 
-    assert.ok(activeResult.data.total_active_ms >= 1000, 'active has at least 1000ms');
-    assert.ok(idleResult.data.total_idle_ms > 0, 'idle has accumulated');
+    assert.ok(activeResult >= 1000, 'active has at least 1000ms');
+    assert.ok(idleResult > 0, 'idle has accumulated');
   });
 
   it('should accumulate idle on touch after idle period', function () {
     Idle.touch();
     mock.timers.tick(1500); // 1000 active + 500 idle
 
-    const idleBefore = Idle.getTotalIdle().data.total_idle_ms;
+    const idleBefore = Idle.getTotalIdle();
     Idle.touch(); // closes idle period
-    const idleAfter = Idle.getTotalIdle().data.total_idle_ms;
+    const idleAfter = Idle.getTotalIdle();
 
     assert.ok(idleAfter >= idleBefore, 'idle total preserved after touch');
   });
@@ -373,13 +369,13 @@ describe('analytics accumulation', function () {
   it('should not attribute time while paused', function () {
     Idle.touch();
     mock.timers.tick(500);
-    const activeBefore = Idle.getTotalActive().data.total_active_ms;
+    const activeBefore = Idle.getTotalActive();
 
     Idle.pause();
     mock.timers.tick(2000);
     Idle.resume();
 
-    const activeAfter = Idle.getTotalActive().data.total_active_ms;
+    const activeAfter = Idle.getTotalActive();
     // Paused time should not be added to either total
     assert.ok(activeAfter < activeBefore + 2000, 'paused time not attributed to active');
   });

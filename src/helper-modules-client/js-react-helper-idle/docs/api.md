@@ -92,25 +92,25 @@ Returns: `{ success, data: { removed_count }, error }`
 
 Returns milliseconds elapsed since the last recorded activity. Frozen while paused.
 
-Returns: `{ success, data: { elapsed_ms }, error }`
+Returns: `Number` (elapsed ms)
 
 ### getLastActive()
 
 Returns the timestamp (Unix ms) of the last recorded activity.
 
-Returns: `{ success, data: { last_active_ms }, error }`
+Returns: `Number` (Unix ms timestamp)
 
 ### getTotalIdle()
 
 Returns total milliseconds spent in the idle state, including the in-progress period.
 
-Returns: `{ success, data: { total_idle_ms }, error }`
+Returns: `Number` (total idle ms)
 
 ### getTotalActive()
 
 Returns total milliseconds spent in the active state, including the in-progress period.
 
-Returns: `{ success, data: { total_active_ms }, error }`
+Returns: `Number` (total active ms)
 
 ## Callback Registration
 
