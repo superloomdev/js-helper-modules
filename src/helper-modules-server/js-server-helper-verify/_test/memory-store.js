@@ -1,31 +1,31 @@
 // Info: In-process Map-backed store fixture for Tier-2 verify unit tests.
 // Implements the 6-method store contract so verify.js can be tested
 // without any Docker container or database driver. All data is stored
-// in a plain Map keyed by "scope::key".
+// in a plain Map keyed by "namespace::key".
 //
 // This is intentionally a minimal, correct implementation - it is not
 // a performance store and should never be used in production.
 //
 // Store contract (identical shape across all real stores):
 //   setupNewStore(instance)                      -> { success, error }
-//   getRecord(instance, scope, key)              -> { success, record, error }
-//   setRecord(instance, scope, key, record)      -> { success, error }
-//   incrementFailCount(instance, scope, key)     -> { success, error }
-//   deleteRecord(instance, scope, key)           -> { success, error }
+//   getRecord(instance, namespace, key)              -> { success, record, error }
+//   setRecord(instance, namespace, key, record)      -> { success, error }
+//   incrementFailCount(instance, namespace, key)     -> { success, error }
+//   deleteRecord(instance, namespace, key)           -> { success, error }
 //   cleanupExpiredRecords(instance)              -> { success, deleted_count, error }
 'use strict';
 
 
 /********************************************************************
-Build a composite map key from scope + key.
+Build a composite map key from namespace + key.
 
-@param {String} scope
+@param {String} namespace
 @param {String} key
 
 @return {String}
 *********************************************************************/
-function compositeKey (scope, key) {
-  return scope + '::' + key;
+function compositeKey (namespace, key) {
+  return namespace + '::' + key;
 }
 
 
@@ -56,9 +56,9 @@ module.exports = function createMemoryStore () {
     /******************************************************************
     Read one record by composite key. Returns null when absent.
     ******************************************************************/
-    getRecord: async function (instance, scope, key) { // eslint-disable-line no-unused-vars
+    getRecord: async function (instance, namespace, key) { // eslint-disable-line no-unused-vars
 
-      const stored = _map.get(compositeKey(scope, key));
+      const stored = _map.get(compositeKey(namespace, key));
 
       return {
         success: true,
@@ -72,9 +72,9 @@ module.exports = function createMemoryStore () {
     /******************************************************************
     Upsert - overwrites any existing record at the composite key.
     ******************************************************************/
-    setRecord: async function (instance, scope, key, record) { // eslint-disable-line no-unused-vars
+    setRecord: async function (instance, namespace, key, record) { // eslint-disable-line no-unused-vars
 
-      _map.set(compositeKey(scope, key), Object.assign({}, record));
+      _map.set(compositeKey(namespace, key), Object.assign({}, record));
 
       return {
         success: true,
@@ -88,9 +88,9 @@ module.exports = function createMemoryStore () {
     Atomic in-place increment of fail_count. Returns NOT_FOUND-shaped
     error if the record is absent (mirrors real adapter behavior).
     ******************************************************************/
-    incrementFailCount: async function (instance, scope, key) { // eslint-disable-line no-unused-vars
+    incrementFailCount: async function (instance, namespace, key) { // eslint-disable-line no-unused-vars
 
-      const ck = compositeKey(scope, key);
+      const ck = compositeKey(namespace, key);
       const stored = _map.get(ck);
 
       if (!stored) {
@@ -113,9 +113,9 @@ module.exports = function createMemoryStore () {
     /******************************************************************
     Idempotent delete (missing key reports success).
     ******************************************************************/
-    deleteRecord: async function (instance, scope, key) { // eslint-disable-line no-unused-vars
+    deleteRecord: async function (instance, namespace, key) { // eslint-disable-line no-unused-vars
 
-      _map.delete(compositeKey(scope, key));
+      _map.delete(compositeKey(namespace, key));
 
       return {
         success: true,

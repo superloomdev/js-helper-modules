@@ -9,7 +9,7 @@ One-time verification code lifecycle for Superloom applications. Three create in
 
 The verify module solves the one-time-code problem with three independent defenses against abuse:
 
-- **Cooldown on creation.** A minimum gap between successive codes for the same `(scope, key)`. Prevents an attacker from flooding the delivery channel.
+- **Cooldown on creation.** A minimum gap between successive codes for the same `(namespace, key)`. Prevents an attacker from flooding the delivery channel.
 - **Expiry (TTL).** Codes become useless after `expires_at`, regardless of whether the cleanup sweep has run. The expiry check is enforced at consume time.
 - **Per-record fail counter.** Too many wrong attempts and the code locks out (`VERIFY_MAX_FAILS`). The counter resets on every successful create.
 
@@ -66,7 +66,7 @@ The principles are documented at [superloom.dev](https://superloom.dev) for proj
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, options, lifecycle, and error catalog
 - [Configuration](docs/configuration.md). Loader pattern, every configuration key, charset overrides, per-backend configuration shape, peer dependencies, testing tier
 - [Schemas](docs/schemas.md). The validated input contracts (CONFIG, create options, verify options), the store contract, and the response envelope
-- [Data model](docs/data-model.md). Every record field, core concepts (scope, key, cooldown, fail counter), scope-and-key design guide, design decisions
+- [Data model](docs/data-model.md). Every record field, core concepts (namespace, key, cooldown, fail counter), namespace-and-key design guide, design decisions
 - [Runtime](docs/runtime.md). The runtime-shape differences for the verify module: post-verify background delete caveat in serverless, scheduled cleanup mechanism
 - [Superloom](https://superloom.dev). The framework
 

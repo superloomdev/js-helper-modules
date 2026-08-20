@@ -17,7 +17,7 @@ let Lib;
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib and ERRORS, returns the module-scope
+Singleton loader. Injects Lib and ERRORS, returns the module-namespace
 Validators object.
 
 @param {Object} shared_libs - Dependency container (Utils)
@@ -78,8 +78,8 @@ const Validators = {
     }
 
     // Scope and key form the composite identifier
-    if (Lib.Utils.isEmpty(options.scope)) {
-      throw new TypeError('[helper-verify] options.scope is required');
+    if (Lib.Utils.isEmpty(options.namespace)) {
+      throw new TypeError('[helper-verify] options.namespace is required');
     }
     if (Lib.Utils.isEmpty(options.key)) {
       throw new TypeError('[helper-verify] options.key is required');
@@ -119,8 +119,8 @@ const Validators = {
     }
 
     // Scope and key locate the record
-    if (Lib.Utils.isEmpty(options.scope)) {
-      throw new TypeError('[helper-verify] options.scope is required');
+    if (Lib.Utils.isEmpty(options.namespace)) {
+      throw new TypeError('[helper-verify] options.namespace is required');
     }
     if (Lib.Utils.isEmpty(options.key)) {
       throw new TypeError('[helper-verify] options.key is required');
