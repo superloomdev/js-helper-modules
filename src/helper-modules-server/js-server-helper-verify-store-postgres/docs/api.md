@@ -27,14 +27,14 @@ Both statements use `IF NOT EXISTS`, making repeated calls on every boot safe.
 
 ---
 
-### `getRecord(instance, scope, key)`
+### `getRecord(instance, namespace, key)`
 
-Fetches one record by composite primary key `("scope", "id")`. Returns `record: null` when the row does not exist - this is not an error.
+Fetches one record by composite primary key `("namespace", "id")`. Returns `record: null` when the row does not exist - this is not an error.
 
 ```sql
 SELECT "code", "fail_count", "created_at", "expires_at"
 FROM "{table_name}"
-WHERE "scope" = ? AND "id" = ?
+WHERE "namespace" = ? AND "id" = ?
 ```
 
 **Return:** `{ success, record, error }`
@@ -51,22 +51,22 @@ WHERE "scope" = ? AND "id" = ?
 
 ---
 
-### `setRecord(instance, scope, key, record)`
+### `setRecord(instance, namespace, key, record)`
 
-Upsert via `INSERT ... ON CONFLICT ("scope", "id") DO UPDATE SET col = excluded.col`. A second call with the same `(scope, key)` pair replaces all mutable columns in a single round-trip.
+Upsert via `INSERT ... ON CONFLICT ("namespace", "id") DO UPDATE SET col = excluded.col`. A second call with the same `(namespace, key)` pair replaces all mutable columns in a single round-trip.
 
 **Return:** `{ success, error }`
 
 ---
 
-### `incrementFailCount(instance, scope, key)`
+### `incrementFailCount(instance, namespace, key)`
 
 Atomic in-place increment:
 
 ```sql
 UPDATE "{table_name}"
 SET "fail_count" = "fail_count" + 1
-WHERE "scope" = ? AND "id" = ?
+WHERE "namespace" = ? AND "id" = ?
 ```
 
 Safe under concurrent verify attempts.
@@ -75,7 +75,7 @@ Safe under concurrent verify attempts.
 
 ---
 
-### `deleteRecord(instance, scope, key)`
+### `deleteRecord(instance, namespace, key)`
 
 Idempotent delete by composite key. A missing row is treated as success.
 

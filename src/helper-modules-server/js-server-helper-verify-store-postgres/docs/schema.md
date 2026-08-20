@@ -6,13 +6,13 @@
 
 ```sql
 CREATE TABLE IF NOT EXISTS "verification_codes" (
-  "scope"      VARCHAR(255) NOT NULL,
+  "namespace"      VARCHAR(255) NOT NULL,
   "id"         VARCHAR(255) NOT NULL,
   "code"       VARCHAR(255) NOT NULL,
   "fail_count" INTEGER      NOT NULL DEFAULT 0,
   "created_at" BIGINT       NOT NULL,
   "expires_at" BIGINT       NOT NULL,
-  PRIMARY KEY ("scope", "id")
+  PRIMARY KEY ("namespace", "id")
 );
 
 CREATE INDEX IF NOT EXISTS "verification_codes_expires_at_idx"
@@ -25,7 +25,7 @@ The table name and index name are derived from `CONFIG.table_name` at runtime.
 
 | Column | Postgres Type | Nullable | Notes |
 |--------|---------------|----------|-------|
-| `scope` | `VARCHAR(255)` | No | Logical namespace. Part of composite PK. |
+| `namespace` | `VARCHAR(255)` | No | Logical namespace. Part of composite PK. |
 | `id` | `VARCHAR(255)` | No | Verification key. Part of composite PK. Called `key` in contract; stored as `id`. |
 | `code` | `VARCHAR(255)` | No | Hashed or plain verification code. |
 | `fail_count` | `INTEGER` | No | Failed attempt count. Default `0`. |
@@ -48,16 +48,16 @@ The `pg` driver may return `BIGINT` columns as JavaScript strings. The verify mo
 
 ```sql
 INSERT INTO "verification_codes"
-  ("scope", "id", "code", "fail_count", "created_at", "expires_at")
+  ("namespace", "id", "code", "fail_count", "created_at", "expires_at")
 VALUES (?, ?, ?, ?, ?, ?)
-ON CONFLICT ("scope", "id") DO UPDATE SET
+ON CONFLICT ("namespace", "id") DO UPDATE SET
   "code"       = excluded."code",
   "fail_count" = excluded."fail_count",
   "created_at" = excluded."created_at",
   "expires_at" = excluded."expires_at"
 ```
 
-`excluded.` is the PostgreSQL pseudo-table holding the proposed values. The primary key columns (`scope`, `id`) are never modified.
+`excluded.` is the PostgreSQL pseudo-table holding the proposed values. The primary key columns (`namespace`, `id`) are never modified.
 
 ### Index Strategy
 
