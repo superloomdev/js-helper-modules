@@ -39,7 +39,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   return VerifyStorePostgresFactory(Lib, {
-    table_name: table || TEST_TABLE
+    TABLE_NAME: table || TEST_TABLE
   });
 
 };
@@ -47,7 +47,7 @@ const buildStore = function (table) {
 const buildVerify = function () {
 
   const Store = VerifyStorePostgresFactory(Lib, {
-    table_name: TEST_TABLE
+    TABLE_NAME: TEST_TABLE
   });
 
   return VerifyFactory(Lib, {
@@ -66,8 +66,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is an empty string', function () {
 
     assert.throws(
-      function () { VerifyStorePostgresFactory(Lib, { table_name: '' }); },
-      /config.table_name is required/
+      function () { VerifyStorePostgresFactory(Lib, { TABLE_NAME: '' }); },
+      /config.TABLE_NAME is required/
     );
 
   });
@@ -75,15 +75,15 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { VerifyStorePostgresFactory(Lib, { table_name: null }); },
-      /config.table_name is required/
+      function () { VerifyStorePostgresFactory(Lib, { TABLE_NAME: null }); },
+      /config.TABLE_NAME is required/
     );
 
   });
 
   it('returns a store object when config is valid', function () {
 
-    const store = VerifyStorePostgresFactory(Lib, { table_name: 'x' });
+    const store = VerifyStorePostgresFactory(Lib, { TABLE_NAME: 'x' });
     assert.equal(typeof store.setupNewStore, 'function');
     assert.equal(typeof store.getRecord, 'function');
     assert.equal(typeof store.setRecord, 'function');

@@ -8,7 +8,7 @@ Cloud-native. Uses a single-table design with composite Sort Key. Table provisio
 
 ```js
 const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -19,7 +19,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 | Config key | Type | Notes |
 |---|---|---|
-| `table_name` | String | Required. The DynamoDB table name |
+| `TABLE_NAME` | String | Required. The DynamoDB table name |
 
 The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.DynamoDB` by reference from the injected container. Auth forwards error envelopes transparently.
 
@@ -27,11 +27,11 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.DynamoDB` by reference from
 
 ```js
 {
-  table_name: 'sessions_user'  // required. the DynamoDB table name
+  TABLE_NAME: 'sessions_user'  // required. the DynamoDB table name
 }
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 

@@ -4,7 +4,7 @@
 
 ```js
 const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, {
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 });
 
 Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
@@ -16,7 +16,7 @@ Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
 
 | Key | Type | Required | Description |
 |-----|------|----------|--------------|
-| `table_name` | `String` | Yes | Name of the DynamoDB table. |
+| `TABLE_NAME` | `String` | Yes | Name of the DynamoDB table. |
 
 ## Dependencies
 

@@ -141,7 +141,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Insert the record using upsert - compound _id guarantees uniqueness
       const result = await Lib.MongoDB.writeRecord(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { _id: document._id },
         document
       );
@@ -187,7 +187,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Query by exact tenant_id + resource_id using _id subdocument fields
       const result = await Lib.MongoDB.query(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         { '_id.t': tenant_id, '_id.r': resource_id },
         { sort: { '_id.d': 1 } }
       );
@@ -239,7 +239,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Query with regex prefix match on _id.r
       const result = await Lib.MongoDB.query(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         {
           '_id.t': tenant_id,
           '_id.r': { $regex: '^' + escaped_prefix }
@@ -296,7 +296,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Delete matching records using _id subdocument fields
       const result = await Lib.MongoDB.deleteRecordsByFilter(
         instance,
-        CONFIG.collection_name,
+        CONFIG.COLLECTION_NAME,
         {
           '_id.t': tenant_id,
           '_id.r': resource_id,

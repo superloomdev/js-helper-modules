@@ -159,7 +159,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const result = await Lib.SQL.getRow(
         instance,
         'SELECT `code`, `fail_count`, `created_at`, `expires_at`' +
-        ' FROM ' + _Store.BT(CONFIG.table_name) +
+        ' FROM ' + _Store.BT(CONFIG.TABLE_NAME) +
         ' WHERE `scope` = ? AND `id` = ?',
         [scope, key]
       );
@@ -246,7 +246,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Atomically increment the fail_count column for this record
       const result = await Lib.SQL.write(
         instance,
-        'UPDATE ' + _Store.BT(CONFIG.table_name) +
+        'UPDATE ' + _Store.BT(CONFIG.TABLE_NAME) +
         ' SET `fail_count` = `fail_count` + 1' +
         ' WHERE `scope` = ? AND `id` = ?',
         [scope, key]
@@ -289,7 +289,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Remove the record row by composite primary key
       const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.BT(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.BT(CONFIG.TABLE_NAME) +
         ' WHERE `scope` = ? AND `id` = ?',
         [scope, key]
       );
@@ -336,7 +336,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const now = instance.time;
       const result = await Lib.SQL.write(
         instance,
-        'DELETE FROM ' + _Store.BT(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.BT(CONFIG.TABLE_NAME) +
         ' WHERE `expires_at` < ?',
         [now]
       );
@@ -405,8 +405,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the quoted table name and deterministic index name
       const BT = _Store.BT;
-      const t = BT(CONFIG.table_name);
-      const idx = BT(CONFIG.table_name + '_expires_at_idx');
+      const t = BT(CONFIG.TABLE_NAME);
+      const idx = BT(CONFIG.TABLE_NAME + '_expires_at_idx');
 
       return [
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -435,7 +435,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildUpsertSQL: function () {
 
       // Build the quoted table name then emit the full UPSERT template
-      const t = _Store.BT(CONFIG.table_name);
+      const t = _Store.BT(CONFIG.TABLE_NAME);
       return (
         'INSERT INTO ' + t +
         ' (`scope`, `id`, `code`, `fail_count`, `created_at`, `expires_at`)' +

@@ -8,7 +8,7 @@ Embedded / in-process. Uses Node's built-in `node:sqlite` through the `helper-sq
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
-  table_name: 'action_log'  // required. one table per logger instance
+  TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -16,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver is injected via `shared_libs.SQL`.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver is injected via `shared_libs.SQL`.
 
 ## Store Contract
 
@@ -46,7 +46,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 7. **Three indexes support the query paths.** `entity_sort` (scope, entity_type, entity_id, sort_key), `actor_sort` (scope, actor_type, actor_id, sort_key), and `expires_at` for cleanup.
 
-8. **Identifiers are double-quoted (`"col"`).** The adapter rejects any `table_name` containing a double-quote at quoting time.
+8. **Identifiers are double-quoted (`"col"`).** The adapter rejects any `TABLE_NAME` containing a double-quote at quoting time.
 
 9. **`setupNewStore` is idempotent.** Uses `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
 

@@ -36,13 +36,13 @@ module.exports = function loader (Lib, ERRORS) { // eslint-disable-line no-unuse
     *********************************************************************/
     validateConfig: function (config) {
 
-      // table_name is required and must be a non-empty string
+      // TABLE_NAME is required and must be a non-empty string
       if (
-        Lib.Utils.isNullOrUndefined(config.table_name) ||
-        !Lib.Utils.isString(config.table_name) ||
-        Lib.Utils.isEmptyString(config.table_name)
+        Lib.Utils.isNullOrUndefined(config.TABLE_NAME) ||
+        !Lib.Utils.isString(config.TABLE_NAME) ||
+        Lib.Utils.isEmptyString(config.TABLE_NAME)
       ) {
-        throw new Error('[distinct-queue-store-dynamodb] CONFIG.table_name is required and must be a non-empty string');
+        throw new Error('[distinct-queue-store-dynamodb] CONFIG.TABLE_NAME is required and must be a non-empty string');
       }
 
       // KEY_DELIMITER is required and must be a non-empty string

@@ -49,7 +49,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   return LoggerStoreSQLiteFactory(Lib, {
-    table_name: table || TEST_TABLE
+    TABLE_NAME: table || TEST_TABLE
   });
 
 };
@@ -82,8 +82,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is an empty string', function () {
 
     assert.throws(
-      function () { LoggerStoreSQLiteFactory(Lib, { table_name: '' }); },
-      /config.table_name is required/
+      function () { LoggerStoreSQLiteFactory(Lib, { TABLE_NAME: '' }); },
+      /config.TABLE_NAME is required/
     );
 
   });
@@ -91,15 +91,15 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { LoggerStoreSQLiteFactory(Lib, { table_name: null }); },
-      /config.table_name is required/
+      function () { LoggerStoreSQLiteFactory(Lib, { TABLE_NAME: null }); },
+      /config.TABLE_NAME is required/
     );
 
   });
 
   it('returns a store object when config is valid', function () {
 
-    const store = LoggerStoreSQLiteFactory(Lib, { table_name: 'x' });
+    const store = LoggerStoreSQLiteFactory(Lib, { TABLE_NAME: 'x' });
     assert.equal(typeof store.setupNewStore, 'function');
     assert.equal(typeof store.addLog, 'function');
     assert.equal(typeof store.getLogsByEntity, 'function');
@@ -116,7 +116,7 @@ describe('Tier 1: Q() identifier quoting', function () {
     assert.throws(
       function () {
         // Build a store with a bad table name to trigger Q() on it
-        LoggerStoreSQLiteFactory(Lib, { table_name: 'bad"name' });
+        LoggerStoreSQLiteFactory(Lib, { TABLE_NAME: 'bad"name' });
       },
       Error
     );
@@ -361,7 +361,7 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 const buildLogger = function (overrides) {
 
   const Store = LoggerStoreSQLiteFactory(Lib, {
-    table_name: TEST_TABLE
+    TABLE_NAME: TEST_TABLE
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));

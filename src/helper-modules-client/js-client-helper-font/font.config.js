@@ -12,6 +12,6 @@ module.exports = {
   // Role-to-family mapping. Seeds resolveFamily with theme role tokens
   // (e.g. 'primary' -> 'Poppins_400Regular'). Can be overridden at
   // construction time or extended at runtime via registerRoles().
-  roles: {}
+  ROLES: {}
 
 };

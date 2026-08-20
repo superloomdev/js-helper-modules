@@ -11,7 +11,7 @@
 ```js
 // Load the adapter with Lib injected
 const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'queue_jobs'
+  COLLECTION_NAME: 'queue_jobs'
 });
 
 // Pass the ready-to-use store object to the parent module
@@ -22,7 +22,7 @@ Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
 
 ## Adapter Configuration
 
-- `collection_name` - MongoDB collection name (string, required)
+- `COLLECTION_NAME` - MongoDB collection name (string, required)
 - `Lib.MongoDB` - MongoDB driver injected via `Lib` (not a config key)
 
 ## Store Contract Methods

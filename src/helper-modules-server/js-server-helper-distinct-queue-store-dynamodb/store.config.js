@@ -7,7 +7,7 @@ module.exports = {
 
   // DynamoDB table name for queue records. Required - no default.
   // The table is created idempotently by setupNewStore().
-  table_name: null,
+  TABLE_NAME: null,
 
   // Sort key field separator. '\u001F' is the ASCII Unit Separator (US), a
   // non-printable control character that never appears in caller-supplied

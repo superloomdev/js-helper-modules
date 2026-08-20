@@ -31,7 +31,7 @@ module.exports = {
   // Limit policy. Enforced by the list-then-filter algorithm in parts/policy.js.
   LIMITS: {
     // Hard cap on total active sessions for one actor. Required >= 1.
-    total_max: 20,
+    TOTAL_MAX: 20,
 
     // Per-form_factor cap. null = unlimited per form_factor.
     // Partial maps are allowed: { mobile: 3 } caps mobile only.
@@ -45,7 +45,7 @@ module.exports = {
     //   true  -> evict the LRU session within the violated tier (default)
     //   false -> reject the createSession call with LIMIT_REACHED
     // Same-installation replacement always runs first, regardless of this flag.
-    evict_oldest_on_limit: true
+    EVICT_OLDEST_ON_LIMIT: true
   },
 
   // JWT mode toggle. When false (default), sessions are validated against

@@ -39,7 +39,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (collection) {
 
   return VerifyStoreMongoDBFactory(Lib, {
-    collection_name: collection || TEST_COLLECTION
+    COLLECTION_NAME: collection || TEST_COLLECTION
   });
 
 };
@@ -47,7 +47,7 @@ const buildStore = function (collection) {
 const buildVerify = function () {
 
   const Store = VerifyStoreMongoDBFactory(Lib, {
-    collection_name: TEST_COLLECTION
+    COLLECTION_NAME: TEST_COLLECTION
   });
 
   return VerifyFactory(Lib, {
@@ -66,8 +66,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is an empty string', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory(Lib, { collection_name: '' }); },
-      /config.collection_name is required/
+      function () { VerifyStoreMongoDBFactory(Lib, { COLLECTION_NAME: '' }); },
+      /config.COLLECTION_NAME is required/
     );
 
   });
@@ -75,15 +75,15 @@ describe('Tier 1: store loader validation', function () {
   it('throws when collection_name is null', function () {
 
     assert.throws(
-      function () { VerifyStoreMongoDBFactory(Lib, { collection_name: null }); },
-      /config.collection_name is required/
+      function () { VerifyStoreMongoDBFactory(Lib, { COLLECTION_NAME: null }); },
+      /config.COLLECTION_NAME is required/
     );
 
   });
 
   it('returns a store object when config is valid', function () {
 
-    const store = VerifyStoreMongoDBFactory(Lib, { collection_name: 'x' });
+    const store = VerifyStoreMongoDBFactory(Lib, { COLLECTION_NAME: 'x' });
     assert.equal(typeof store.setupNewStore, 'function');
     assert.equal(typeof store.getRecord, 'function');
     assert.equal(typeof store.setRecord, 'function');

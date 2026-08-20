@@ -143,7 +143,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Write the record via writeRecord (PutItem wrapper)
       const result = await Lib.DynamoDB.writeRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         item
       );
 
@@ -225,7 +225,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Full scan - DynamoDB has no server-side filter on scan without
       // FilterExpression support in this helper, so filter client-side.
-      const scan = await Lib.DynamoDB.scan(instance, CONFIG.table_name);
+      const scan = await Lib.DynamoDB.scan(instance, CONFIG.TABLE_NAME);
       if (scan.success === false) {
         Lib.Debug.debug('Logger dynamodb cleanupExpiredLogs scan failed', {
           type: ERRORS.SERVICE_UNAVAILABLE.type,
@@ -243,7 +243,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       }
 
       const keysByTable = {};
-      keysByTable[CONFIG.table_name] = expired.map(function (item) {
+      keysByTable[CONFIG.TABLE_NAME] = expired.map(function (item) {
         return { pk: item.pk, sort_key: item.sort_key };
       });
 
@@ -313,7 +313,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Execute query via the unified query method (supports indexName for GSI)
       const result = await Lib.DynamoDB.query(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         queryParams
       );
 

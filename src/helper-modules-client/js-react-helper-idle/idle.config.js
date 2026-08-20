@@ -5,6 +5,6 @@
 module.exports = {
 
   // Milliseconds of inactivity before the idle classification flips
-  idle_ms: 300000
+  IDLE_MS: 300000
 
 };

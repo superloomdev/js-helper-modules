@@ -46,7 +46,7 @@ This adapter is installed alongside the Logger parent module and the `nosql-mong
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
-  collection_name: 'action_log'
+  COLLECTION_NAME: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });

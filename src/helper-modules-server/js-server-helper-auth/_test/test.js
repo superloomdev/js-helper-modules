@@ -37,7 +37,7 @@ const validBaseConfig = function () {
     Store:        MemoryStore,
     ACTOR_TYPE:   'user',
     TTL_SECONDS:  3600,
-    LIMITS:       { total_max: 5, evict_oldest_on_limit: true }
+    LIMITS:       { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true }
   };
 };
 
@@ -82,7 +82,7 @@ describe('loader validation', function () {
         ENABLE_JWT: true,
         JWT: null,
         TTL_SECONDS: 3600,
-        LIMITS: { total_max: 5, evict_oldest_on_limit: true }
+        LIMITS: { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true }
       });
     }, /CONFIG\.JWT must be a plain object/);
 
@@ -94,7 +94,7 @@ describe('loader validation', function () {
         ENABLE_JWT: true,
         JWT: { signing_key: 'short', issuer: 'test', audience: 'test' },
         TTL_SECONDS: 3600,
-        LIMITS: { total_max: 5, evict_oldest_on_limit: true }
+        LIMITS: { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true }
       });
     }, /CONFIG\.JWT\.signing_key must be a string of at least 32 chars/);
 
@@ -426,7 +426,7 @@ describe('createSession / removeSession cookie descriptor', function () {
     Store: MemoryStore._createNew(),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
-    LIMITS: { total_max: 5, evict_oldest_on_limit: true }
+    LIMITS: { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true }
   };
 
   it('createSession returns cookies: null when COOKIE_PREFIX is not set', async function () {
@@ -541,7 +541,7 @@ describe('parts/policy', function () {
       install_id: null,
       install_form_factor: 'desktop',
       install_platform: 'web',
-      limits: { total_max: 5, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: true }
+      limits: { TOTAL_MAX: 5, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null, EVICT_OLDEST_ON_LIMIT: true }
     });
     assert.equal(result.decision, 'allow');
     assert.equal(result.to_delete.length, 0);
@@ -559,7 +559,7 @@ describe('parts/policy', function () {
       install_id: null,
       install_form_factor: 'desktop',
       install_platform: 'web',
-      limits: { total_max: 1, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: false }
+      limits: { TOTAL_MAX: 1, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null, EVICT_OLDEST_ON_LIMIT: false }
     });
     // active count = 1 (k2). total_max = 1. k2 already at the cap, so the
     // new session is rejected. The expired k1 is NOT in to_delete - the
@@ -579,7 +579,7 @@ describe('parts/policy', function () {
       install_id: 'install-X',
       install_form_factor: 'desktop',
       install_platform: 'web',
-      limits: { total_max: 5, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: true }
+      limits: { TOTAL_MAX: 5, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null, EVICT_OLDEST_ON_LIMIT: true }
     });
     assert.equal(result.decision, 'allow');
     assert.equal(result.to_delete.length, 1);
@@ -599,7 +599,7 @@ describe('parts/policy', function () {
       install_id: null,
       install_form_factor: 'desktop',
       install_platform: 'web',
-      limits: { total_max: 3, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: true }
+      limits: { TOTAL_MAX: 3, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null, EVICT_OLDEST_ON_LIMIT: true }
     });
     // 3 active sessions, cap = 3, so adding one more requires LRU eviction
     assert.equal(result.decision, 'allow');
@@ -620,7 +620,7 @@ describe('parts/policy', function () {
       install_id: null,
       install_form_factor: 'desktop',
       install_platform: 'web',
-      limits: { total_max: 3, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: false }
+      limits: { TOTAL_MAX: 3, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null, EVICT_OLDEST_ON_LIMIT: false }
     });
     assert.equal(result.decision, 'reject');
     assert.equal(result.tier, 'total');
@@ -640,10 +640,10 @@ describe('parts/policy', function () {
       install_form_factor: 'mobile',
       install_platform: 'web',
       limits: {
-        total_max: 10,
-        by_form_factor_max: { mobile: 2 },
-        by_platform_max: null,
-        evict_oldest_on_limit: true
+        TOTAL_MAX: 10,
+        BY_FORM_FACTOR_MAX: { mobile: 2 },
+        BY_PLATFORM_MAX: null,
+        EVICT_OLDEST_ON_LIMIT: true
       }
     });
     assert.equal(result.decision, 'allow');
@@ -665,10 +665,10 @@ describe('parts/policy', function () {
       install_form_factor: 'mobile',
       install_platform: 'ios',
       limits: {
-        total_max: 10,
-        by_form_factor_max: null,
-        by_platform_max: { ios: 2 },
-        evict_oldest_on_limit: false
+        TOTAL_MAX: 10,
+        BY_FORM_FACTOR_MAX: null,
+        BY_PLATFORM_MAX: { ios: 2 },
+        EVICT_OLDEST_ON_LIMIT: false
       }
     });
     assert.equal(result.decision, 'reject');
@@ -691,10 +691,10 @@ describe('parts/policy', function () {
       install_form_factor: 'mobile',
       install_platform: 'web',
       limits: {
-        total_max: 10,
-        by_form_factor_max: { mobile: 2 },
-        by_platform_max: null,
-        evict_oldest_on_limit: false       // would otherwise reject
+        TOTAL_MAX: 10,
+        BY_FORM_FACTOR_MAX: { mobile: 2 },
+        BY_PLATFORM_MAX: null,
+        EVICT_OLDEST_ON_LIMIT: false       // would otherwise reject
       }
     });
     assert.equal(result.decision, 'allow');
@@ -717,7 +717,7 @@ describe('createSession wire-format validation (plan 0042)', function () {
     Store: MemoryStore._createNew(),
     ACTOR_TYPE: 'user',
     TTL_SECONDS: 3600,
-    LIMITS: { total_max: 5, evict_oldest_on_limit: true }
+    LIMITS: { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true }
   };
 
   it('rejects actor_id containing "-" with TypeError before store I/O', async function () {

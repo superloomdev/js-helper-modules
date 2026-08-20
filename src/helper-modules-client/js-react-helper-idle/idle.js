@@ -128,7 +128,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       React.useEffect(function () {
 
         // Register a threshold at idle_ms to update isIdle
-        const idleReg = Idle.registerIdleHandler(CONFIG.idle_ms, function () {
+        const idleReg = Idle.registerIdleHandler(CONFIG.IDLE_MS, function () {
           setIsIdle(true);
         });
 
@@ -286,7 +286,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       state.paused = false;
       state.last_active_ms = now - state.pause_elapsed_ms;
       state.period_start_ms = now;
-      state.period_is_idle = state.pause_elapsed_ms >= CONFIG.idle_ms;
+      state.period_is_idle = state.pause_elapsed_ms >= CONFIG.IDLE_MS;
 
       // Reschedule thresholds for their remaining delta
       _Idle.rescheduleThresholds();
@@ -705,11 +705,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       const now = Lib.Utils.getUnixTimeInMilliSeconds();
       const elapsed = now - state.last_active_ms;
 
-      if (elapsed >= CONFIG.idle_ms) {
+      if (elapsed >= CONFIG.IDLE_MS) {
 
         // Close the active period and open an idle period
-        state.total_active_ms += CONFIG.idle_ms;
-        state.period_start_ms = state.last_active_ms + CONFIG.idle_ms;
+        state.total_active_ms += CONFIG.IDLE_MS;
+        state.period_start_ms = state.last_active_ms + CONFIG.IDLE_MS;
         state.period_is_idle = true;
 
       }

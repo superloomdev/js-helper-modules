@@ -276,7 +276,7 @@ test('constructor throws on invalid roles type', function () {
     require('helper-font')({
       Utils: require('helper-utils')()
     }, {
-      roles: 'not-an-object'
+      ROLES: 'not-an-object'
     });
 
   }, /roles must be a plain object/);
@@ -511,7 +511,7 @@ test('constructor seeds roles from config', function () {
   const ConfigFont = require('helper-font')({
     Utils: require('helper-utils')()
   }, {
-    roles: { primary: 'Inter', secondary: 'Inter' }
+    ROLES: { primary: 'Inter', secondary: 'Inter' }
   });
 
   const result = ConfigFont.resolveFamily('primary');

@@ -35,7 +35,7 @@ Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, config_dynamodb);
 
 // Load the store adapter with Lib injected
 const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
-  table_name: TEST_TABLE
+  TABLE_NAME: TEST_TABLE
 });
 
 

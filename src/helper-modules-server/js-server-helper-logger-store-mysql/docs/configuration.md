@@ -6,7 +6,7 @@ Construct this adapter before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, {
-  table_name: 'action_log'
+  TABLE_NAME: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -19,7 +19,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 | Key | Type | Required | Description |
 |-----|------|----------|-------------|
-| `table_name` | `String` | Yes | Name of the log table. Must not contain a backtick. |
+| `TABLE_NAME` | `String` | Yes | Name of the log table. Must not contain a backtick. |
 
 ## Dependencies
 

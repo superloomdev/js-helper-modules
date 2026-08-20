@@ -31,7 +31,7 @@ let Validators; // validators module, initialized with Lib
 // Mutable registry state (module-scope).
 // families: { [familyName]: { styles: { [styleKey]: { url, path, asset, weight, style } } } }
 // tokenMap: { [token]: familyName }  (direct family-name lookups)
-// roles: { [role]: familyName }     (role-to-family mapping for resolveFamily)
+// ROLES: { [role]: familyName }     (role-to-family mapping for resolveFamily)
 const registry = {
   families: {},
   tokenMap: {},
@@ -69,10 +69,10 @@ module.exports = function loader (shared_libs, config) {
   registry.tokenMap['System'] = 'System';
 
   // Seed role mappings from config (if provided)
-  if (CONFIG.roles && Lib.Utils.isObject(CONFIG.roles)) {
-    const roleKeys = Object.keys(CONFIG.roles);
+  if (CONFIG.ROLES && Lib.Utils.isObject(CONFIG.ROLES)) {
+    const roleKeys = Object.keys(CONFIG.ROLES);
     for (let r = 0; r < roleKeys.length; r++) {
-      registry.roles[roleKeys[r]] = CONFIG.roles[roleKeys[r]];
+      registry.roles[roleKeys[r]] = CONFIG.ROLES[roleKeys[r]];
     }
   }
 

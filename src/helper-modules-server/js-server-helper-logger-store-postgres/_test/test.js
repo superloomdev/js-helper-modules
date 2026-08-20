@@ -49,7 +49,7 @@ const buildInstance = function (time_seconds) {
 const buildStore = function (table) {
 
   return LoggerStorePostgresFactory(Lib, {
-    table_name: table || TEST_TABLE
+    TABLE_NAME: table || TEST_TABLE
   });
 
 };
@@ -84,8 +84,8 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is empty string', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory(Lib, { table_name: '' }); },
-      /table_name is required/
+      function () { LoggerStorePostgresFactory(Lib, { TABLE_NAME: '' }); },
+      /TABLE_NAME is required/
     );
 
   });
@@ -93,15 +93,15 @@ describe('Tier 1: store loader validation', function () {
   it('throws when table_name is null', function () {
 
     assert.throws(
-      function () { LoggerStorePostgresFactory(Lib, { table_name: null }); },
-      /table_name is required/
+      function () { LoggerStorePostgresFactory(Lib, { TABLE_NAME: null }); },
+      /TABLE_NAME is required/
     );
 
   });
 
   it('returns a store object for valid config', function () {
 
-    const store = LoggerStorePostgresFactory(Lib, { table_name: 'x' });
+    const store = LoggerStorePostgresFactory(Lib, { TABLE_NAME: 'x' });
     assert.equal(typeof store.setupNewStore, 'function');
     assert.equal(typeof store.addLog, 'function');
 
@@ -330,7 +330,7 @@ describe('Tier 1: cleanupExpiredLogs', { concurrency: false }, function () {
 const buildLogger = function (overrides) {
 
   const Store = LoggerStorePostgresFactory(Lib, {
-    table_name: TEST_TABLE
+    TABLE_NAME: TEST_TABLE
   });
 
   return LoggerFactory(Lib, Object.assign({ Store: Store }, overrides || {}));

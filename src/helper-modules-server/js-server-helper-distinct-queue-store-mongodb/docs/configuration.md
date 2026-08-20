@@ -10,7 +10,7 @@ you provide to the parent module's `CONFIG.Store` key.
 ```javascript
 // Load the adapter with Lib injected and its own config
 const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'distinct_queue_jobs'
+  COLLECTION_NAME: 'distinct_queue_jobs'
 });
 
 // Pass the ready-to-use store to the parent module
@@ -21,7 +21,7 @@ Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
 
 ## Configuration Keys
 
-### `collection_name`
+### `COLLECTION_NAME`
 
 **Type:** `string`  
 **Required:** Yes
@@ -30,7 +30,7 @@ The MongoDB collection name for queue records. MongoDB creates the collection
 and implicit `_id` index automatically on first write.
 
 ```javascript
-collection_name: 'myapp_queue_jobs'
+COLLECTION_NAME: 'myapp_queue_jobs'
 ```
 
 ## Injected Dependencies
@@ -66,7 +66,7 @@ Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
 
 // 3. Load the store adapter (Lib injected), then the parent module
 const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
-  collection_name: 'queue_jobs'
+  COLLECTION_NAME: 'queue_jobs'
 });
 Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
   Store: Store
@@ -91,7 +91,7 @@ See the `_test/` directory for a complete Docker Compose setup with MongoDB.
 
 The adapter validates configuration at load time and throws if:
 
-- `collection_name` is missing or empty
+- `COLLECTION_NAME` is missing or empty
 - `Lib.MongoDB` is not injected
 
 ```

@@ -8,6 +8,6 @@ module.exports = {
 
   // Collection name for verification codes. Must be a valid MongoDB
   // collection name. The adapter does not quote or escape this.
-  collection_name: 'verification_codes'
+  COLLECTION_NAME: 'verification_codes'
 
 };

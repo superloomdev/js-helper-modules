@@ -3,5 +3,5 @@
 
 
 module.exports = {
-  collection_name: null  // Required. One collection per Logger instance. No safe default.
+  COLLECTION_NAME: null  // Required. One collection per Logger instance. No safe default.
 };

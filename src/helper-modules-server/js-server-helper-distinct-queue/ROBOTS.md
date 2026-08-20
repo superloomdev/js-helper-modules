@@ -22,7 +22,7 @@ module.exports = function loader (shared_libs, config) {
 ```js
 Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
   Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
-    table_name: 'distinct_queue'
+    TABLE_NAME: 'distinct_queue'
   })
 });
 ```

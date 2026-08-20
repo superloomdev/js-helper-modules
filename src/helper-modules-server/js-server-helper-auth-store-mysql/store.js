@@ -640,8 +640,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the quoted table and index identifiers then emit full DDL
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
-      const idx_name = 'idx_' + CONFIG.table_name + '_expires_at';
+      const t = Q(CONFIG.TABLE_NAME);
+      const idx_name = 'idx_' + CONFIG.TABLE_NAME + '_expires_at';
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -696,7 +696,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
       const UPSERT_IMMUTABLE_COLUMNS = _Store.UPSERT_IMMUTABLE_COLUMNS;
-      const tq = Q(CONFIG.table_name);
+      const tq = Q(CONFIG.TABLE_NAME);
       const cols_quoted = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';
@@ -855,7 +855,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
   // instance. Both depend only on table_name (not per-request input)
   // and appear in every write - computing them once at load time is a
   // free runtime optimization for the common path.
-  _Store.t = _Store.Q(CONFIG.table_name);
+  _Store.t = _Store.Q(CONFIG.TABLE_NAME);
   _Store.upsert_sql = _Store.buildUpsertSQL();
 
   return Store;

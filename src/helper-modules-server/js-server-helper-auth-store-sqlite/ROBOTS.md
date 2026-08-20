@@ -10,7 +10,7 @@ Embedded / in-process. Uses Node's built-in `node:sqlite` through the `js-server
 Lib.SQL = Lib.SQLite;  // alias so the adapter picks Lib.SQL
 
 const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -21,7 +21,7 @@ Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
 
 | Config key | Type | Notes |
 |---|---|---|
-| `table_name` | String | Required. One table per actor_type |
+| `TABLE_NAME` | String | Required. One table per actor_type |
 
 The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the injected container. Auth forwards error envelopes transparently.
 
@@ -29,11 +29,11 @@ The adapter picks `Lib.Utils`, `Lib.Debug`, and `Lib.SQL` by reference from the 
 
 ```js
 {
-  table_name: 'sessions_user'  // required. one table per actor_type
+  TABLE_NAME: 'sessions_user'  // required. one table per actor_type
 }
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Store Contract
 
@@ -68,7 +68,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 8. **`custom_data` is JSON-encoded into a TEXT column.** On read the JSON is parsed back to an object. Corrupt stored values surface as `null`, not as throws.
 
-9. **`table_name` cannot contain a double-quote.** The adapter throws at quoting time. The loader does not reject this at config-validation time; a malformed `table_name` surfaces on first call.
+9. **`TABLE_NAME` cannot contain a double-quote.** The adapter throws at quoting time. The loader does not reject this at config-validation time; a malformed `TABLE_NAME` surfaces on first call.
 
 10. **`setupNewStore` is idempotent and safe to call on every boot.** Uses `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`. Both are supported by SQLite without ceremony.
 

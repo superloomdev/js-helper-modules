@@ -36,7 +36,7 @@ const StoreFactory = require('helper-distinct-queue-store-mongodb');
 
 // Load the store adapter with Lib injected
 const Store = StoreFactory(Lib, {
-  collection_name: TEST_COLLECTION
+  COLLECTION_NAME: TEST_COLLECTION
 });
 
 

@@ -6,7 +6,7 @@ This adapter is fully independent - it owns its own Lib and ERRORS. Construct it
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
-  collection_name: 'action_log'
+  COLLECTION_NAME: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -19,7 +19,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 
 | Key | Type | Required | Description |
 |-----|------|----------|--------------|
-| `collection_name` | `String` | Yes | Name of the log collection. One collection per Logger instance. |
+| `COLLECTION_NAME` | `String` | Yes | Name of the log collection. One collection per Logger instance. |
 
 ## Dependencies
 

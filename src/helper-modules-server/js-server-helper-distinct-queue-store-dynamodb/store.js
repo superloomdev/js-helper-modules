@@ -100,7 +100,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     setupNewStore: async function (instance) {
 
       // Provision the table idempotently with composite key {p, id}
-      const result = await Lib.DynamoDB.createTable(instance, CONFIG.table_name, {
+      const result = await Lib.DynamoDB.createTable(instance, CONFIG.TABLE_NAME, {
         attribute_definitions: [
           { name: 'p',  type: 'S' },
           { name: 'id', type: 'S' }
@@ -168,7 +168,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Write the record using PutItem
       const result = await Lib.DynamoDB.writeRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         item
       );
 
@@ -336,7 +336,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Step 3: Batch delete the matching keys
       const keysByTable = {};
-      keysByTable[CONFIG.table_name] = keys_to_delete;
+      keysByTable[CONFIG.TABLE_NAME] = keys_to_delete;
 
       const delete_result = await Lib.DynamoDB.batchDeleteRecords(
         instance,
@@ -441,7 +441,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     runPrefixQuery: function (instance, tenant_id, prefix_value) {
       return Lib.DynamoDB.query(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         {
           pk: tenant_id,
           pkName: 'p',

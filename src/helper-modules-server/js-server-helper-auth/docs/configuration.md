@@ -25,7 +25,7 @@ Lib.AuthUser = require('helper-auth')(Lib, {
   Store:        require('helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
-  LIMITS:       { total_max: 20, evict_oldest_on_limit: true },
+  LIMITS:       { TOTAL_MAX: 20, EVICT_OLDEST_ON_LIMIT: true },
   COOKIE_PREFIX: 'sl_user_'
 });
 ```
@@ -56,7 +56,7 @@ All keys are merged over `auth.config.js` defaults. Keys with a `null` default a
 | `ACTOR_TYPE` | `string` | `null` | Yes | Non-empty string naming the kind of actor (`'user'`, `'admin'`, `'merchant'`, ...). Stamped on every record and verified on every read |
 | `TTL_SECONDS` | `number` | `2592000` (30 days) | No | Session lifetime in seconds. `expires_at` rolls forward by `TTL_SECONDS` on each throttled activity refresh |
 | `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | `number` | `600` (10 min) | No | Minimum gap between `last_active_at` write-backs. Prevents one DB write per request on busy actors |
-| `LIMITS` | `object` | `{ total_max: 20, by_form_factor_max: null, by_platform_max: null, evict_oldest_on_limit: true }` | No | Session-limit policy. See [Limit Policy](#limit-policy) |
+| `LIMITS` | `object` | `{ TOTAL_MAX: 20, by_form_factor_max: null, by_platform_max: null, EVICT_OLDEST_ON_LIMIT: true }` | No | Session-limit policy. See [Limit Policy](#limit-policy) |
 | `ENABLE_JWT` | `boolean` | `false` | No | Enable JWT mode. When `true`, `JWT.signing_key`, `JWT.issuer`, and `JWT.audience` become required |
 | `JWT` | `object` | See [JWT Mode](#jwt-mode) | When `ENABLE_JWT: true` | JWT signing and lifetime settings |
 | `COOKIE_PREFIX` | `string` | `null` | When using cookies | Cookie name prefix. Full cookie name is `${COOKIE_PREFIX}${tenant_id}`. Required for any flow that reads or writes cookies. Cookie attributes (httpOnly, secure, sameSite, path) are applied by the gateway's `buildCookie` defaults, not configurable here |
@@ -121,17 +121,17 @@ Enable with `ENABLE_JWT: true`. When enabled, `createSession` additionally retur
 
 | `LIMITS.*` key | Type | Default | Description |
 |---|---|---|---|
-| `total_max` | `number` | `20` | Hard cap on total active sessions per actor per tenant |
+| `TOTAL_MAX` | `number` | `20` | Hard cap on total active sessions per actor per tenant |
 | `by_form_factor_max` | `object \| null` | `null` | Per-form-factor cap map, e.g. `{ mobile: 3 }`. `null` means unlimited. Partial maps cap only listed keys |
 | `by_platform_max` | `object \| null` | `null` | Per-platform cap map, e.g. `{ ios: 2, android: 2 }` |
-| `evict_oldest_on_limit` | `boolean` | `true` | When a cap is hit: `true` evicts the LRU session within the violated tier; `false` returns `LIMIT_REACHED` |
+| `EVICT_OLDEST_ON_LIMIT` | `boolean` | `true` | When a cap is hit: `true` evicts the LRU session within the violated tier; `false` returns `LIMIT_REACHED` |
 
 The policy algorithm:
 
 1. Load all existing sessions for `(tenant_id, actor_id)`. One indexed read.
 2. Filter out expired sessions (they count for nothing).
 3. **Same-installation replacement.** If `install_id` is provided and matches an active session's `install_id`, that session is queued for deletion regardless of caps.
-4. Check `total_max`. If hit, evict LRU across all sessions, or return `LIMIT_REACHED`.
+4. Check `TOTAL_MAX`. If hit, evict LRU across all sessions, or return `LIMIT_REACHED`.
 5. Check `by_form_factor_max[install_form_factor]` if configured. Same evict-or-reject logic within the form-factor bucket.
 6. Check `by_platform_max[install_platform]` if configured. Same logic within the platform bucket.
 7. Batch-delete all queued evictions in one round-trip, then insert the new session.
@@ -182,7 +182,7 @@ Coverage:
 
 - Loader validation. Every required config key. `Store` must be a ready-to-use object. JWT-mode required keys
 - Pure helpers. `auth-id`, `record-shape`, `token-source` (reads `instance.http_request.cookies`)
-- Pure policy. Every cap tier. LRU eviction. `evict_oldest_on_limit: false` path. Same-installation replacement priority
+- Pure policy. Every cap tier. LRU eviction. `EVICT_OLDEST_ON_LIMIT: false` path. Same-installation replacement priority
 - Session lifecycle cookie descriptor. `createSession` returns `cookies` descriptor when `COOKIE_PREFIX` is set. `removeSession` + `removeAllSessions` return clear-cookie descriptor (`ttl: 0`)
 - JWT mode. `createSession` issuance. `verifyJwt`. `refreshSessionJwt` rotation and single-use enforcement. Expiry. Cross-actor-type rejection
 

@@ -271,7 +271,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // ordering but cleanup must use the real clock so TTL rows expire on schedule.
       const now_sec = Lib.Utils.getUnixTime();
       const sql = (
-        'DELETE FROM ' + _Store.Q(CONFIG.table_name) +
+        'DELETE FROM ' + _Store.Q(CONFIG.TABLE_NAME) +
         ' WHERE ' + _Store.Q('expires_at') + ' IS NOT NULL' +
         '   AND ' + _Store.Q('expires_at') + ' <= ?'
       );
@@ -358,7 +358,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateTableSQL: function () {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
@@ -393,12 +393,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildCreateIndexSQL: function (suffix, columns) {
 
       const Q = _Store.Q;
-      const idx_name = 'idx_' + CONFIG.table_name + '_' + suffix;
+      const idx_name = 'idx_' + CONFIG.TABLE_NAME + '_' + suffix;
       const cols = columns.map(Q).join(', ');
 
       return (
         'CREATE INDEX IF NOT EXISTS ' + Q(idx_name) +
-        ' ON ' + Q(CONFIG.table_name) + ' (' + cols + ')'
+        ' ON ' + Q(CONFIG.TABLE_NAME) + ' (' + cols + ')'
       );
 
     },
@@ -414,7 +414,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       const Q = _Store.Q;
       const COLUMNS = _Store.COLUMNS;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const cols = COLUMNS.map(Q).join(', ');
       const placeholders = COLUMNS.map(function () {
         return '?';
@@ -439,7 +439,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildEntityQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 
@@ -480,7 +480,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     buildActorQuery: function (query) {
 
       const Q = _Store.Q;
-      const t = Q(CONFIG.table_name);
+      const t = Q(CONFIG.TABLE_NAME);
       const limit = (query.limit || _Store.DEFAULT_LIMIT) + 1;
       const values = [];
 

@@ -8,14 +8,14 @@ Requires a running MySQL or MariaDB instance. Uses `helper-sql-mysql` (pooled `m
 
 ```js
 const Store = require('@superloomdev/js-server-helper-verify-store-mysql')(Lib, {
-  table_name: 'verification_codes'
+  TABLE_NAME: 'verification_codes'
 });
 ```
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
 | `shared_libs` | Object | Yes | Dependency container (Utils, Debug, SQL) |
-| `table_name` | String | Yes | Name of the verification table |
+| `TABLE_NAME` | String | Yes | Name of the verification table |
 
 Returns a ready-to-use Store interface. The Verify parent receives this object and calls the contract methods to satisfy its persistence needs.
 
@@ -23,11 +23,11 @@ Returns a ready-to-use Store interface. The Verify parent receives this object a
 
 ```js
 {
-  table_name: 'verification_codes'  // required. one table per verify instance
+  TABLE_NAME: 'verification_codes'  // required. one table per verify instance
 }
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver is injected via `shared_libs.SQL`.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty. The SQL driver is injected via `shared_libs.SQL`.
 
 ## Store Contract
 
@@ -56,7 +56,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 6. **`cleanupExpiredRecords` uses `instance.time`.** The bound parameter is the request-instance unix epoch seconds. Not `Lib.Utils.getUnixTime()`.
 
-7. **Identifiers are backtick-quoted (`` `col` ``).** The adapter rejects any `table_name` containing a backtick at quoting time.
+7. **Identifiers are backtick-quoted (`` `col` ``).** The adapter rejects any `TABLE_NAME` containing a backtick at quoting time.
 
 8. **MySQL does not support `CREATE INDEX IF NOT EXISTS` as a standalone statement.** All indexes are inlined inside `CREATE TABLE IF NOT EXISTS`, making `setupNewStore` fully idempotent in a single statement.
 

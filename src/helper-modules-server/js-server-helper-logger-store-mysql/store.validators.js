@@ -15,11 +15,11 @@ const Validators = {
   validateConfig: function (config) {
 
     if (
-      Lib.Utils.isNullOrUndefined(config.table_name) ||
-      !Lib.Utils.isString(config.table_name) ||
-      Lib.Utils.isEmptyString(config.table_name)
+      Lib.Utils.isNullOrUndefined(config.TABLE_NAME) ||
+      !Lib.Utils.isString(config.TABLE_NAME) ||
+      Lib.Utils.isEmptyString(config.TABLE_NAME)
     ) {
-      throw new Error('[helper-logger-store-mysql] config.table_name is required');
+      throw new Error('[helper-logger-store-mysql] config.TABLE_NAME is required');
     }
 
   }

@@ -8,7 +8,7 @@ Requires a DynamoDB table provisioned **out-of-band** (CloudFormation, CDK, Terr
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-dynamodb')(Lib, {
-  table_name: 'action_log'  // required. one table per logger instance
+  TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
@@ -16,7 +16,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 });
 ```
 
-`table_name` is required. The loader throws an `Error` if it is missing, null, or empty. `Lib.DynamoDB` must be present on the injected `shared_libs` container.
+`TABLE_NAME` is required. The loader throws an `Error` if it is missing, null, or empty. `Lib.DynamoDB` must be present on the injected `shared_libs` container.
 
 ## Table Design
 

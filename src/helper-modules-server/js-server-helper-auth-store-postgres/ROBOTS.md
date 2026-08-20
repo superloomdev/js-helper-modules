@@ -24,7 +24,7 @@ None. The adapter owns no runtime dependencies of its own.
 Lib.SQL = Lib.Postgres;  // alias so the adapter picks Lib.SQL
 
 const Store = require('@superloomdev/js-server-helper-auth-store-postgres')(Lib, {
-  table_name: 'sessions_user'
+  TABLE_NAME: 'sessions_user'
 });
 
 Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
@@ -55,7 +55,7 @@ The adapter implements the 8-method session store contract defined by the Auth p
 
 7. **`custom_data` is JSON-encoded into a `TEXT` column.** On read the JSON is parsed back to an object. Corrupt stored values surface as `null`, not as throws.
 
-8. **`table_name` cannot contain a double-quote.** The adapter throws at quoting time. The loader does not reject this at config-validation time; a malformed `table_name` surfaces on first call.
+8. **`TABLE_NAME` cannot contain a double-quote.** The adapter throws at quoting time. The loader does not reject this at config-validation time; a malformed `TABLE_NAME` surfaces on first call.
 
 9. **`setupNewStore` is idempotent and safe to call on every boot.** Uses `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
 
@@ -67,7 +67,7 @@ The adapter implements the 8-method session store contract defined by the Auth p
 |---|---|---|---|
 | table_name | String | - | yes |
 
-`table_name` is the only config key. One table per actor_type. The loader throws an `Error` if it is missing, null, or empty.
+`TABLE_NAME` is the only config key. One table per actor_type. The loader throws an `Error` if it is missing, null, or empty.
 
 ## Exported Functions (8 total)
 

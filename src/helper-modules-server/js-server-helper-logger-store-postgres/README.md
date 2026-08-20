@@ -46,7 +46,7 @@ This adapter is installed alongside the Logger parent module and the `sql-postgr
 
 ```js
 const Store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, {
-  table_name: 'action_log'
+  TABLE_NAME: 'action_log'
 });
 
 Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });

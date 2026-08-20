@@ -102,7 +102,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     setupNewStore: async function (instance) {
 
       // Provision the table idempotently with composite key {scope, id}
-      const result = await Lib.DynamoDB.createTable(instance, CONFIG.table_name, {
+      const result = await Lib.DynamoDB.createTable(instance, CONFIG.TABLE_NAME, {
         attribute_definitions: [
           { name: 'scope', type: 'S' },
           { name: 'id',    type: 'S' }
@@ -152,7 +152,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Direct GetItem on the composite key
       const result = await Lib.DynamoDB.getRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         { scope: scope, id: key }
       );
 
@@ -219,7 +219,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // PutItem - DynamoDB always overwrites by composite key
       const result = await Lib.DynamoDB.writeRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         item
       );
 
@@ -259,7 +259,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Atomic ADD via the helper's increment parameter
       const result = await Lib.DynamoDB.updateRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         { scope: scope, id: key },
         null,
         null,
@@ -302,7 +302,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // DeleteItem by composite key - idempotent (missing item is success)
       const result = await Lib.DynamoDB.deleteRecord(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         { scope: scope, id: key }
       );
 
@@ -345,7 +345,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const now = instance.time;
       const scan_result = await Lib.DynamoDB.scan(
         instance,
-        CONFIG.table_name,
+        CONFIG.TABLE_NAME,
         {
           expression: '#ea < :now',
           names: { '#ea': 'expires_at' },
@@ -378,7 +378,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Batch-delete the expired keys in one round-trip
       const keysByTable = {};
-      keysByTable[CONFIG.table_name] = scan_result.items.map(function (item) {
+      keysByTable[CONFIG.TABLE_NAME] = scan_result.items.map(function (item) {
         return { scope: item.scope, id: item.id };
       });
 
