@@ -4,7 +4,7 @@
 // a unified KV interface identical to helper-kv-mmkv for platform
 // interchangeability. Values are JSON round-tripped. Keys are namespaced.
 //
-// Provides: getRecord, writeRecord, deleteRecord, hasRecord, getAllKeys,
+// Provides: getRecord, writeRecord, deleteRecord, getRecordExists, getAllKeys,
 //           batchGetRecords, batchWriteRecords, batchDeleteRecords, clear
 //           (async) and their Sync counterparts.
 //
@@ -367,7 +367,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Object} - { success, exists, error }
     *********************************************************************/
-    hasRecordSync: function (key) {
+    getRecordExistsSync: function (key) {
 
       // Validate key
       const keyError = _KvLocalstorage.validateKey(key);
@@ -408,7 +408,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       } catch (engineError) {
 
-        Lib.Debug.debug('helper-kv-localstorage hasRecordSync failed', {
+        Lib.Debug.debug('helper-kv-localstorage getRecordExistsSync failed', {
           type: ERRORS.STORAGE_READ_FAILED.type,
           message: engineError.message,
           stack: engineError.stack
@@ -774,15 +774,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Async version of hasRecordSync.
+    Async version of getRecordExistsSync.
 
     @param {String} key - Non-empty string without the namespace separator
 
     @return {Promise<Object>} - { success, exists, error }
     *********************************************************************/
-    hasRecord: async function (key) {
+    getRecordExists: async function (key) {
 
-      return KvLocalstorage.hasRecordSync(key);
+      return KvLocalstorage.getRecordExistsSync(key);
 
     },
 

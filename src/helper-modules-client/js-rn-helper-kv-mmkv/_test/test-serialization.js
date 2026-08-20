@@ -246,10 +246,10 @@ describe('namespace isolation edge cases', function () {
     assert.strictEqual(StoreOther.getRecordSync('b1').value, 3);
   });
 
-  it('should not see keys from another namespace via hasRecordSync', function () {
+  it('should not see keys from another namespace via getRecordExistsSync', function () {
     StoreOther.writeRecordSync('private', 'secret');
 
-    const result = Store.hasRecordSync('private');
+    const result = Store.getRecordExistsSync('private');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
@@ -272,8 +272,8 @@ describe('namespace isolation edge cases', function () {
 
     Store.deleteRecordSync('shared');
 
-    assert.strictEqual(Store.hasRecordSync('shared').exists, false);
-    assert.strictEqual(StoreOther.hasRecordSync('shared').exists, true);
+    assert.strictEqual(Store.getRecordExistsSync('shared').exists, false);
+    assert.strictEqual(StoreOther.getRecordExistsSync('shared').exists, true);
     assert.strictEqual(StoreOther.getRecordSync('shared').value, 'theirs');
   });
 
@@ -283,8 +283,8 @@ describe('namespace isolation edge cases', function () {
 
     Store.batchDeleteRecordsSync(['d']);
 
-    assert.strictEqual(Store.hasRecordSync('d').exists, false);
-    assert.strictEqual(StoreOther.hasRecordSync('d').exists, true);
+    assert.strictEqual(Store.getRecordExistsSync('d').exists, false);
+    assert.strictEqual(StoreOther.getRecordExistsSync('d').exists, true);
   });
 
 });
@@ -306,11 +306,11 @@ describe('engine error paths', function () {
     assert.strictEqual(result.error.type, 'helper-kv-mmkv/storage-delete-failed');
   });
 
-  it('should return STORAGE_READ_FAILED when engine throws on contains in hasRecordSync', function () {
+  it('should return STORAGE_READ_FAILED when engine throws on contains in getRecordExistsSync', function () {
     const fresh = createFreshStore('throwcontains');
     fresh.MmkvStub._setThrowOnRead(true);
 
-    const result = fresh.store.hasRecordSync('key');
+    const result = fresh.store.getRecordExistsSync('key');
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.error.type, 'helper-kv-mmkv/storage-read-failed');

@@ -57,7 +57,7 @@ writeRecordSync(key, value) -> { success, error } | async:no
 deleteRecordSync(key) -> { success, error } | async:no
   Idempotent. Deleting absent key is success:true.
 
-hasRecordSync(key) -> { success, exists, error } | async:no
+getRecordExistsSync(key) -> { success, exists, error } | async:no
   Checks key existence via getItem !== null.
 
 getAllKeysSync() -> { success, keys, count, error } | async:no
@@ -82,7 +82,7 @@ clearSync() -> { success, cleared_count, error } | async:no
 getRecord(key) -> Promise<{ success, value, found, error }> | async:yes
 writeRecord(key, value) -> Promise<{ success, error }> | async:yes
 deleteRecord(key) -> Promise<{ success, error }> | async:yes
-hasRecord(key) -> Promise<{ success, exists, error }> | async:yes
+getRecordExists(key) -> Promise<{ success, exists, error }> | async:yes
 getAllKeys() -> Promise<{ success, keys, count, error }> | async:yes
 batchGetRecords(keys) -> Promise<{ success, values, error }> | async:yes
 batchWriteRecords(pairs) -> Promise<{ success, error }> | async:yes
