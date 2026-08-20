@@ -9,15 +9,38 @@
 // with its own Lib, CONFIG, and per-instance ioredis client.
 //
 // When IAM_USER_ID is configured, the module generates SigV4-signed auth
-// tokens using @smithy/signature-v4 and injects them as the ioredis
-// password. Tokens are cached and refreshed before expiry. When
-// ENDPOINT is set (local testing), IAM auth is skipped and a plain
-// ioredis connection is used.
+// tokens and injects them as the ioredis password. Tokens are cached and
+// refreshed before expiry. When ENDPOINT is set (local testing), IAM auth
+// is skipped and a plain ioredis connection is used.
+//
+// Why @smithy/signature-v4 and not @aws-sdk/client-elasticache:
+//   @aws-sdk/client-elasticache is the ElastiCache control-plane client
+//   (create/delete clusters, manage users). It does NOT connect to the
+//   cache for data operations and does NOT generate IAM auth tokens.
+//   ElastiCache's data plane is the Redis protocol (RESP), accessed via
+//   a standard Redis client (ioredis), not the AWS SDK.
+//
+//   AWS's own documentation (auth-iam.html) shows the same two-step
+//   approach: (1) generate a SigV4 presigned token, (2) pass it as the
+//   password to a Redis client. Their Java example uses the SDK's
+//   internal SigV4 signer + Lettuce (a Redis client). Our module uses
+//   the same pattern: @smithy/signature-v4 + ioredis.
+//
+//   @smithy/signature-v4 is published by AWS as part of the AWS SDK v3
+//   monorepo (github.com/aws/aws-sdk-js-v3). It is the same signing
+//   engine that @aws-sdk/client-elasticache uses internally to sign
+//   its own control-plane requests. We use it directly for query-string
+//   presigning because AWS never shipped a higher-level ElastiCache
+//   token generator (unlike RDS, which has @aws-sdk/rds-signer).
+//
+//   @aws-crypto/sha256-js is also published by AWS as part of the
+//   AWS SDK v3 monorepo. SigV4 signing requires a SHA-256 hash
+//   implementation; this is the same one the SDK uses internally.
 //
 // Lazy-loaded drivers (stateless, shared across instances):
 //   - 'ioredis' -> Redis class, used to build the database client
-//   - '@smithy/signature-v4' -> SignatureV4 class, used to sign tokens
-//   - '@aws-crypto/sha256-js' -> Sha256 hash, used by the signer
+//   - '@smithy/signature-v4' -> SignatureV4 class, AWS SDK v3 SigV4 signer
+//   - '@aws-crypto/sha256-js' -> Sha256 hash, AWS SDK v3 crypto primitive
 'use strict';
 
 // Shared stateless drivers (module-level - require() is cached anyway).
@@ -1255,17 +1278,23 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     loadAdapter: function () {
 
-      // Redis class (shared across instances)
+      // Redis class - standard Valkey/Redis client (not AWS-specific)
       if (Lib.Utils.isNullOrUndefined(Redis)) {
         Redis = require('ioredis');
       }
 
-      // SignatureV4 signer class (shared across instances)
+      // AWS SDK v3 SigV4 signer - published by AWS (github.com/aws/aws-sdk-js-v3).
+      // This is the same signing engine @aws-sdk/client-elasticache uses internally
+      // to sign its own control-plane requests. We use it directly to presign
+      // IAM auth tokens because AWS never shipped a higher-level ElastiCache
+      // token generator (unlike RDS, which has @aws-sdk/rds-signer).
       if (Lib.Utils.isNullOrUndefined(SignatureV4)) {
         SignatureV4 = require('@smithy/signature-v4').SignatureV4;
       }
 
-      // Sha256 hash class (shared across instances)
+      // AWS SDK v3 SHA-256 hash - published by AWS (github.com/aws/aws-sdk-js-v3).
+      // Required by SignatureV4 for SigV4 signing. This is the same hash
+      // implementation the SDK uses internally across all @aws-sdk/client-* packages.
       if (Lib.Utils.isNullOrUndefined(Sha256)) {
         Sha256 = require('@aws-crypto/sha256-js').Sha256;
       }
