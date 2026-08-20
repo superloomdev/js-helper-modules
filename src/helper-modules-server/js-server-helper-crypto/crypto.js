@@ -28,7 +28,8 @@ module.exports = function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
-    Utils: shared_libs.Utils
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug
   };
 
   // Merge overrides over defaults
@@ -365,6 +366,116 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       return str
         .replace(/_/g, '/')
         .replace(/-/g, '+');
+
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Password Hashing ~~~~~~~~~~~~~~~~~~~~
+    // scrypt-based password hashing with self-describing output format.
+
+    /********************************************************************
+    Generate a self-describing password hash using scrypt.
+
+    The output format is:
+      scrypt$<N>$<r>$<p>$<salt_base64>$<digest_base64>
+
+    The parameters are embedded in the hash so checkPassword can
+    re-derive with the original parameters even after CONFIG is
+    raised. This makes the format upgradeable: old hashes still
+    verify after N is increased.
+
+    @param {String} password - The plaintext password to hash
+
+    @return {String} - Self-describing scrypt hash string
+    *********************************************************************/
+    generatePasswordHash: function (password) {
+
+      // Validate input type - programmer error throws TypeError
+      if (!Lib.Utils.isString(password)) {
+        throw new TypeError('[helper-crypto] generatePasswordHash requires a string password');
+      }
+
+      // Generate a per-password random salt - never fixed, never config-supplied
+      const salt = NodeCrypto.randomBytes(CONFIG.PASSWORD_HASH_SALT_LENGTH_BYTES);
+
+      // Derive the key with scryptSync. Pass an explicit maxmem so a
+      // project that raises N in config does not hit an opaque failure.
+      const N = CONFIG.PASSWORD_HASH_COST_N;
+      const r = CONFIG.PASSWORD_HASH_BLOCK_SIZE_R;
+      const p = CONFIG.PASSWORD_HASH_PARALLELIZATION_P;
+      const key_length = CONFIG.PASSWORD_HASH_KEY_LENGTH_BYTES;
+      const maxmem = 256 * N * r;
+
+      const derived = NodeCrypto.scryptSync(password, salt, key_length, {
+        N: N,
+        r: r,
+        p: p,
+        maxmem: maxmem
+      });
+
+      // Encode salt and digest as base64 and compose the self-describing string
+      const salt_b64 = salt.toString('base64');
+      const digest_b64 = derived.toString('base64');
+
+      return 'scrypt$' + N + '$' + r + '$' + p + '$' + salt_b64 + '$' + digest_b64;
+
+    },
+
+
+    /********************************************************************
+    Check a plaintext password against a stored scrypt hash.
+
+    Parses the parameters out of the stored string, re-derives the
+    key with those parameters, and compares with
+    NodeCrypto.timingSafeEqual (never ===).
+
+    Returns false for a malformed stored hash and logs at debug.
+    Does not throw, because a corrupt stored value is not a
+    programmer error at the call site.
+
+    @param {String} password     - The plaintext password to check
+    @param {String} stored_hash  - The stored self-describing hash
+
+    @return {Boolean} - true if the password matches, false otherwise
+    *********************************************************************/
+    checkPassword: function (password, stored_hash) {
+
+      // Validate input types - programmer error throws TypeError
+      if (!Lib.Utils.isString(password)) {
+        throw new TypeError('[helper-crypto] checkPassword requires a string password');
+      }
+      if (!Lib.Utils.isString(stored_hash)) {
+        throw new TypeError('[helper-crypto] checkPassword requires a string stored_hash');
+      }
+
+      // Parse the self-describing format. A malformed stored hash is
+      // not a programmer error at the call site - return false and log.
+      const parts = stored_hash.split('$');
+      if (parts.length !== 6 || parts[0] !== 'scrypt') {
+        Lib.Debug.debug('checkPassword: malformed stored hash', { format: stored_hash.substring(0, 20) });
+        return false;
+      }
+
+      const N = parseInt(parts[1], 10);
+      const r = parseInt(parts[2], 10);
+      const p = parseInt(parts[3], 10);
+      const salt = Buffer.from(parts[4], 'base64');
+      const expected = Buffer.from(parts[5], 'base64');
+
+      // Re-derive with the stored parameters, not CONFIG, so old hashes
+      // still verify after a parameter upgrade
+      const maxmem = 256 * N * r;
+      const derived = NodeCrypto.scryptSync(password, salt, expected.length, {
+        N: N,
+        r: r,
+        p: p,
+        maxmem: maxmem
+      });
+
+      // Constant-time comparison - never ===
+      // Both buffers are the same length (derived from expected.length),
+      // so timingSafeEqual is safe to call directly.
+      return NodeCrypto.timingSafeEqual(derived, expected);
 
     }
 

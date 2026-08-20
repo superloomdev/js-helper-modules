@@ -510,4 +510,128 @@ describe('config absorption: BASE36_CHARSET override', function () {
 });
 
 
+// ============================================================================
+// PASSWORD HASHING (plan 0122)
+// ============================================================================
+
+describe('generatePasswordHash / checkPassword (plan 0122)', function () {
+
+  it('1. round trip: checkPassword(p, generatePasswordHash(p)) is true', function () {
+
+    const password = 'correct horse battery staple';
+    const hash = Crypto.generatePasswordHash(password);
+
+    assert.ok(Crypto.checkPassword(password, hash));
+
+  });
+
+  it('2. negative: a different password is false, not an error', function () {
+
+    const hash = Crypto.generatePasswordHash('my-secret-password');
+
+    assert.equal(Crypto.checkPassword('wrong-password', hash), false);
+
+  });
+
+  it('3. salt uniqueness: same password hashed twice yields different strings, both verify', function () {
+
+    const password = 'duplicate-test';
+    const hash1 = Crypto.generatePasswordHash(password);
+    const hash2 = Crypto.generatePasswordHash(password);
+
+    // Two different strings (salt is per-call random)
+    assert.notEqual(hash1, hash2);
+
+    // Both verify against the same password
+    assert.ok(Crypto.checkPassword(password, hash1));
+    assert.ok(Crypto.checkPassword(password, hash2));
+
+  });
+
+  it('4. tamper: one altered character in the digest yields false and does not throw', function () {
+
+    const password = 'tamper-test';
+    const hash = Crypto.generatePasswordHash(password);
+
+    // Flip a character in the middle of the digest portion (not the last
+    // character, which may only affect base64 padding bits)
+    const parts = hash.split('$');
+    const digest = parts[5];
+    const mid = Math.floor(digest.length / 2);
+    const flipped = digest.slice(0, mid) + (digest[mid] === 'A' ? 'B' : 'A') + digest.slice(mid + 1);
+    const tampered = parts.slice(0, 5).join('$') + '$' + flipped;
+
+    assert.equal(Crypto.checkPassword(password, tampered), false);
+
+  });
+
+  it('5. malformed: checkPassword(p, "not-a-hash") returns false and does not throw', function () {
+
+    assert.equal(Crypto.checkPassword('any-password', 'not-a-hash'), false);
+
+  });
+
+  it('6. parameter upgrade: a hash produced at low N still verifies after CONFIG is raised', function () {
+
+    // Build a crypto instance with low N
+    const lowNCrypto = require('helper-crypto')(Lib, {
+      PASSWORD_HASH_COST_N: 2048
+    });
+
+    // Hash at low N
+    const password = 'upgrade-test';
+    const hash = lowNCrypto.generatePasswordHash(password);
+
+    // Build a crypto instance with high N (the default 16384)
+    const highNCrypto = require('helper-crypto')(Lib, {});
+
+    // The hash produced at low N must still verify under the high-N instance,
+    // because the format is self-describing: checkPassword reads N from the
+    // stored hash, not from CONFIG
+    assert.ok(highNCrypto.checkPassword(password, hash));
+
+  });
+
+  it('7. constant-time comparison: two hashes of equal length are compared through timingSafeEqual', function () {
+
+    // A timing assertion is nondeterministic and the Assertions Pin Exact
+    // Values rule forbids it. Instead, assert by construction: the derived
+    // and expected buffers are always the same length (derived from
+    // expected.length in checkPassword), so NodeCrypto.timingSafeEqual is
+    // safe to call directly. We verify the round-trip succeeds, which
+    // exercises the timingSafeEqual path.
+    const password = 'constant-time-test';
+    const hash = Crypto.generatePasswordHash(password);
+
+    // This exercises the timingSafeEqual comparison path
+    assert.ok(Crypto.checkPassword(password, hash));
+
+    // And a mismatch also exercises timingSafeEqual (returns false)
+    assert.equal(Crypto.checkPassword('wrong', hash), false);
+
+  });
+
+  it('8. bad input: a non-string password throws TypeError', function () {
+
+    assert.throws(function () {
+      Crypto.generatePasswordHash(12345);
+    }, TypeError);
+
+    assert.throws(function () {
+      Crypto.generatePasswordHash(null);
+    }, TypeError);
+
+    assert.throws(function () {
+      Crypto.checkPassword(12345, 'scrypt$1$1$1$abc$def');
+    }, TypeError);
+
+    assert.throws(function () {
+      Crypto.checkPassword('password', null);
+    }, TypeError);
+
+  });
+
+});
+
+
 

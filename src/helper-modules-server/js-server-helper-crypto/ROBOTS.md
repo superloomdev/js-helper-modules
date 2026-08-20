@@ -22,6 +22,11 @@ Companion files: `crypto.config.js`, `crypto.errors.js` (empty frozen catalog), 
 | Key | Type | Default | Description |
 |---|---|---|---|
 | BASE36_CHARSET | String | `'0123456789abcdefghijklmnopqrstuvwxyz'` | Alphabet for base-36 conversion |
+| PASSWORD_HASH_COST_N | Number | `16384` | scrypt CPU/memory cost parameter |
+| PASSWORD_HASH_BLOCK_SIZE_R | Number | `8` | scrypt block size parameter |
+| PASSWORD_HASH_PARALLELIZATION_P | Number | `1` | scrypt parallelization parameter |
+| PASSWORD_HASH_KEY_LENGTH_BYTES | Number | `64` | scrypt output key length in bytes |
+| PASSWORD_HASH_SALT_LENGTH_BYTES | Number | `16` | scrypt salt length in bytes |
 
 ## Exported Functions
 
@@ -34,6 +39,10 @@ generateCompactUUID() → String | async:no - UUID in base36 (25 chars)
 ### Hashing
 md5String(str) → String | async:no - 32-char hex MD5 (use only for checksums, NOT security)
 sha256String(str, secret?) → String | async:no - 64-char hex HMAC-SHA256
+
+### Password Hashing
+generatePasswordHash(password) → String | async:no - self-describing scrypt hash (`scrypt$N$r$p$salt$digest`)
+checkPassword(password, stored_hash) → Boolean | async:no - verify password against stored hash; false on malformed
 
 ### AES Encryption (AES-128-CBC)
 aesEncrypt(str, secret) → String | async:no - returns hex ciphertext
@@ -55,4 +64,5 @@ urlDecodeBase64(str) → String | async:no
 - **AES key derivation:** Uses MD5 of secret for key, MD5 of key+secret for IV - consistent with legacy encryption contracts
 - **MD5 warning:** MD5 is cryptographically broken. Only use `md5String` for checksums/legacy compatibility, never for passwords or security
 - **HMAC-SHA256:** Use `sha256String(str, secret)` for secure hashing with a secret
+- **Password hashing:** `generatePasswordHash` is the only correct choice for password storage. `md5String` and `sha256String` are NOT password hashes. The output format is self-describing (`scrypt$N$r$p$salt$digest`) so parameters can be raised later and old hashes still verify
 - **Uses Lib.Utils:** For input validation (e.g., `Lib.Utils.isEmpty`, `Lib.Utils.isNullOrUndefined`)

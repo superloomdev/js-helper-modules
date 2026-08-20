@@ -97,7 +97,7 @@ Returns a 25-character base-36 identifier. Internally generates a UUID v4, strip
 |---|---|
 | `string` | 32-character lowercase hex MD5 |
 
-> **MD5 is cryptographically broken.** Use `md5String` only for non-security purposes such as cache keys, content checksums, and legacy-protocol compatibility. **Never** use it for password hashing, authentication tokens, or anything where collision resistance matters. Use `sha256String` with a secret for those cases.
+> **MD5 is cryptographically broken.** Use `md5String` only for non-security purposes such as cache keys, content checksums, and legacy-protocol compatibility. **Never** use it for password hashing, authentication tokens, or anything where collision resistance matters. Use `sha256String` with a secret for those cases, or `generatePasswordHash` for password storage.
 
 ### `sha256String(str, secret?)`
 
@@ -116,6 +116,61 @@ HMAC-SHA256. When `secret` is omitted, an empty-string key is used (so the resul
 Lib.Crypto.sha256String('hello world', 'shared-secret');
 // '734cc62f32841568f45ea0aa1cf48e791d68a8d5f3...'
 ```
+
+---
+
+## Password Hashing
+
+### `generatePasswordHash(password)`
+
+Hashes a password using scrypt with a per-password random salt. The output is a self-describing string:
+
+```
+scrypt$<N>$<r>$<p>$<salt_base64>$<digest_base64>
+```
+
+The parameters are embedded in the hash so `checkPassword` can re-derive with the original parameters even after `CONFIG` is raised. This makes the format upgradeable: old hashes still verify after `N` is increased.
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `password` | `string` | Yes | The plaintext password to hash |
+
+| Returns | Description |
+|---|---|
+| `string` | Self-describing scrypt hash string |
+
+**Throws `TypeError`** if `password` is not a string.
+
+```javascript
+const hash = Lib.Crypto.generatePasswordHash('my-password');
+// 'scrypt$16384$8$1$YWJjZGVmZ2hpamtsbW4=$dGhpcyBpcyB0aGUgZGlnZXN0...'
+
+// Store `hash` in your database. Never store the plaintext password.
+```
+
+### `checkPassword(password, stored_hash)`
+
+Verifies a plaintext password against a stored scrypt hash. Parses the parameters from the stored string, re-derives the key, and compares with `timingSafeEqual` (never `===`).
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `password` | `string` | Yes | The plaintext password to check |
+| `stored_hash` | `string` | Yes | The stored self-describing hash |
+
+| Returns | Description |
+|---|---|
+| `boolean` | `true` if the password matches, `false` otherwise |
+
+Returns `false` (does not throw) for a malformed stored hash. **Throws `TypeError`** if either argument is not a string.
+
+```javascript
+const ok = Lib.Crypto.checkPassword('my-password', stored_hash);
+if (!ok) {
+  // reject login
+}
+```
+
+> **`md5String` and `sha256String` are NOT password hashes.** `generatePasswordHash` is the only correct choice for password storage. It uses scrypt with a per-password salt and a self-describing format that supports parameter upgrades.
 
 ---
 
