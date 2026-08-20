@@ -220,14 +220,14 @@ custom_data                                      // project-owned envelope
 auth_id = "{actor_id}-{token_key}-{token_secret}"
 ```
 
-Reserved characters: `-` (segment separator) and `#` (composite-key separator inside DynamoDB sort key and MongoDB `_id`). Forbidden in any user-supplied identifier; validated at `createAuthId` and `createSession`.
+Reserved characters: `-` (wire segment separator, parsed by fixed-width right-anchored technique so `actor_id` may contain `-`) and `\u001F` (ASCII Unit Separator, composite-key separator inside DynamoDB sort key and MongoDB `_id`). `\u001F` is a non-printable control character that cannot appear in any human-readable identifier; the constraint is vacuous in practice but enforced as belt-and-braces. Validated at `createAuthId` and `createSession`.
 
 ## Storage Internals
 
 | Backend | Primary key | Operator-provisioned indexes | Native TTL |
 |---|---|---|---|
-| DynamoDB | PK=tenant_id, SK={actor_id}#{token_key} | None | Optional: enable TTL on `expires_at` out-of-band |
-| MongoDB | `_id = {tenant_id}#{actor_id}#{token_key}#{hash}` | `prefix` (equality), `expires_at` (range) | None (the module stores integer seconds, not Date) |
+| DynamoDB | PK=tenant_id, SK={actor_id}\u001F{token_key} | None | Optional: enable TTL on `expires_at` out-of-band |
+| MongoDB | `_id = {tenant_id}\u001F{actor_id}\u001F{token_key}\u001F{hash}` | `prefix` (equality), `expires_at` (range) | None (the module stores integer seconds, not Date) |
 | Postgres | (tenant_id, actor_id, token_key) | (expires_at) - created by `setupNewStore` | None (cron) |
 | MySQL | (tenant_id, actor_id, token_key) | (expires_at) - created by `setupNewStore` | None (cron) |
 | SQLite | (tenant_id, actor_id, token_key) | (expires_at) - created by `setupNewStore` | None (cron, embedded) |
