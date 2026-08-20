@@ -21,11 +21,11 @@ DynamoDB tables are typically provisioned via IaC (CloudFormation, CDK, Terrafor
 The expected layout (provision out-of-band):
 ```
 Base table:
-  PK:  pk        (String) - written as "{scope}#{entity_type}#{entity_id}"
+  PK:  pk        (String) - written as "{tenant_id}#{entity_type}#{entity_id}"
   SK:  sort_key  (String)
 
 GSI (actor_pk-sort_key-index):
-  PK:  actor_pk  (String) - written as "{scope}#{actor_type}#{actor_id}"
+  PK:  actor_pk  (String) - written as "{tenant_id}#{actor_type}#{actor_id}"
   SK:  sort_key  (String)
   Projection: ALL
 
@@ -46,8 +46,8 @@ Enable TTL on `expires_at` out-of-band; the adapter does not call `UpdateTimeToL
 Item written:
 ```js
 Object.assign({}, record, {
-  pk:       (record.scope || '') + '#' + record.entity_type + '#' + record.entity_id,
-  actor_pk: (record.scope || '') + '#' + record.actor_type  + '#' + record.actor_id
+  pk:       (record.tenant_id || '') + '#' + record.entity_type + '#' + record.entity_id,
+  actor_pk: (record.tenant_id || '') + '#' + record.actor_type  + '#' + record.actor_id
 });
 ```
 
@@ -59,11 +59,11 @@ Object.assign({}, record, {
 
 ### `getLogsByEntity(instance, query)`
 
-`Query` on the base table with `pkName: 'pk'`, `pk = "{scope}#{entity_type}#{entity_id}"`, sort key descending. Cursor pagination is implemented via `skCondition: 'sort_key < :cursor'` on the previous page's last `sort_key`.
+`Query` on the base table with `pkName: 'pk'`, `pk = "{tenant_id}#{entity_type}#{entity_id}"`, sort key descending. Cursor pagination is implemented via `skCondition: 'sort_key < :cursor'` on the previous page's last `sort_key`.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Used to compute the partition key |
+| `tenant_id` | Yes | Used to compute the partition key |
 | `entity_type` | Yes | Used to compute the partition key |
 | `entity_id` | Yes | Used to compute the partition key |
 | `actions` | No | Client-side filter by action |
@@ -77,11 +77,11 @@ Object.assign({}, record, {
 
 ### `getLogsByActor(instance, query)`
 
-`Query` on the `actor_pk-sort_key-index` GSI with `pkName: 'actor_pk'`, `pk = "{scope}#{actor_type}#{actor_id}"`, sort key descending.
+`Query` on the `actor_pk-sort_key-index` GSI with `pkName: 'actor_pk'`, `pk = "{tenant_id}#{actor_type}#{actor_id}"`, sort key descending.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Used to compute the partition key |
+| `tenant_id` | Yes | Used to compute the partition key |
 | `actor_type` | Yes | Used to compute the partition key |
 | `actor_id` | Yes | Used to compute the partition key |
 | `actions` | No | Client-side filter by action |

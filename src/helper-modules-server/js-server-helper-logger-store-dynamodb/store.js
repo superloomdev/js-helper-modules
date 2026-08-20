@@ -1,9 +1,9 @@
 // Info: DynamoDB store adapter for helper-logger.
 //
 // Uses a single-table design with composite keys:
-//   - pk: "{scope}#{entity_type}#{entity_id}" for entity lookups
+//   - pk: "{tenant_id}#{entity_type}#{entity_id}" for entity lookups
 //   - sk: sort_key (timestamp-based, descending)
-//   - actor_pk: "{scope}#{actor_type}#{actor_id}" for actor lookups (GSI)
+//   - actor_pk: "{tenant_id}#{actor_type}#{actor_id}" for actor lookups (GSI)
 //
 // Query patterns:
 //   - listByEntity: Query on base table (pk prefix)
@@ -136,8 +136,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Inject DynamoDB composite keys that logger.js does not build.
       // pk is the entity partition key; actor_pk drives the actor GSI.
       const item = Object.assign({}, record, {
-        pk:       (record.scope || '') + '#' + record.entity_type + '#' + record.entity_id,
-        actor_pk: (record.scope || '') + '#' + record.actor_type  + '#' + record.actor_id
+        pk:       (record.tenant_id || '') + '#' + record.entity_type + '#' + record.entity_id,
+        actor_pk: (record.tenant_id || '') + '#' + record.actor_type  + '#' + record.actor_id
       });
 
       // Write the record via writeRecord (PutItem wrapper)
@@ -177,7 +177,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Supports action filtering, time range, and cursor pagination.
 
     @param {Object} instance - Request instance
-    @param {Object} query    - Query parameters (scope, entity_type, entity_id, etc.)
+    @param {Object} query    - Query parameters (tenant_id, entity_type, entity_id, etc.)
 
     @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
@@ -193,7 +193,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     Supports action filtering, time range, and cursor pagination.
 
     @param {Object} instance - Request instance
-    @param {Object} query    - Query parameters (scope, actor_type, actor_id, etc.)
+    @param {Object} query    - Query parameters (tenant_id, actor_type, actor_id, etc.)
 
     @return {Promise<Object>} - { success, records, next_cursor, error }
     *********************************************************************/
@@ -283,8 +283,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build the key prefix based on type
       const prefix = type === 'entity'
-        ? query.scope + '#' + query.entity_type + '#' + query.entity_id
-        : query.scope + '#' + query.actor_type + '#' + query.actor_id;
+        ? query.tenant_id + '#' + query.entity_type + '#' + query.entity_id
+        : query.tenant_id + '#' + query.actor_type + '#' + query.actor_id;
 
       // Determine which index to query
       const useGsi = type === 'actor';
