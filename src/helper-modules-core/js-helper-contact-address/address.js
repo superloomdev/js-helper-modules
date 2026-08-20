@@ -373,7 +373,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
 
     @return {Object} - Normalized address data
     *********************************************************************/
-    createAddress: function (data) {
+    buildAddress: function (data) {
 
       // Validate input
       if (!Lib.Utils.isObject(data)) {

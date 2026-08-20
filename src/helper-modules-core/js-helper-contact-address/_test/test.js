@@ -256,11 +256,11 @@ test('validateAddress returns all errors', function () {
 
 
 
-// ~~~~~~~~~~~~~~~~~~~~ createAddress ~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~ buildAddress ~~~~~~~~~~~~~~~~~~~~
 
-test('createAddress normalizes country code', function () {
+test('buildAddress normalizes country code', function () {
 
-  const result = ContactAddress.createAddress({
+  const result = ContactAddress.buildAddress({
     line_1: '123 Main St',
     country: 'US'
   });
@@ -270,9 +270,9 @@ test('createAddress normalizes country code', function () {
 });
 
 
-test('createAddress trims string fields', function () {
+test('buildAddress trims string fields', function () {
 
-  const result = ContactAddress.createAddress({
+  const result = ContactAddress.buildAddress({
     line_1: '  123 Main St  ',
     locality: '  Springfield  '
   });
@@ -283,10 +283,10 @@ test('createAddress trims string fields', function () {
 });
 
 
-test('createAddress returns empty object for non-object input', function () {
+test('buildAddress returns empty object for non-object input', function () {
 
-  assert.deepEqual(ContactAddress.createAddress(null), {});
-  assert.deepEqual(ContactAddress.createAddress('string'), {});
+  assert.deepEqual(ContactAddress.buildAddress(null), {});
+  assert.deepEqual(ContactAddress.buildAddress('string'), {});
 
 });
 
@@ -337,7 +337,7 @@ test('getFieldPolicy returns a copy', function () {
 test('every exported function name begins with an approved verb', function () {
 
   // The approved set, plus canonicalize as a recorded exception
-  const approved = ['sanitize', 'validate', 'is', 'list', 'get', 'create', 'parse', 'format'];
+  const approved = ['sanitize', 'validate', 'is', 'list', 'get', 'create', 'build', 'parse', 'format'];
   const exceptions = ['canonicalize'];
 
   // Check each exported name against the set
