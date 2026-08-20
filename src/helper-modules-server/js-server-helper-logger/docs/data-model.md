@@ -35,15 +35,17 @@ actor_type: 'api_key'     actor_id: 'key_abc123'   // machine-to-machine call
 
 The entity and actor are often different. For example, an admin (`actor`) deleting another user's account (`entity`). They can be the same. For example, a user updating their own profile.
 
-**Scope.** A multi-tenant namespace that isolates log rows between tenants. All queries must match a scope; there is no cross-scope query.
+**Tenant.** A multi-tenant namespace that isolates log rows between tenants. All queries must match a tenant_id; there is no cross-tenant_id query.
 
 ```
-scope: 'tenant.42'        // SaaS tenant ID
-scope: 'org.acme'         // organization slug
-scope: ''                 // single-tenant / no isolation needed (default)
+tenant_id: 'tenant.42'        // SaaS tenant ID
+tenant_id: 'org.acme'         // organization slug
+tenant_id: 'system'           // single-tenant / no isolation needed (default)
 ```
 
-The grain matches the tenancy model: a SaaS product uses the tenant or organization ID; a single-tenant deployment leaves it empty. Scope is **not** a security boundary on its own. The application must ensure the caller's scope is authoritative before it is passed in.
+The grain matches the tenancy model: a SaaS product uses the tenant or organization ID; a single-tenant deployment uses the default `'system'`. The tenant_id is **not** a security boundary on its own. The application must ensure the caller's tenant_id is authoritative before it is passed in.
+
+**Why `'system'` instead of `''`.** An empty string is trivially passed by accident (a missing field, an unconfigured variable), which disqualifies it as an isolation boundary. A composite key built by concatenation on the document and wide-column adapters cannot be constructed from an empty segment without producing an ambiguous key. The default `'system'` is an explicit, intentional sentinel that is never produced by accident.
 
 **Action.** A dot-notation string that names the event. The logger treats this as an opaque string; the application owns the namespace.
 
@@ -64,7 +66,7 @@ Convention: `[domain].[noun].[verb]` or `[domain].[verb]`. Past tense or present
 
 | Field | Type | Set by | Description |
 |-------|------|--------|-------------|
-| `scope` | String | caller | Multi-tenant namespace. Default `''`. All list queries are scoped to this value. |
+| `tenant_id` | String | caller | Multi-tenant namespace. Default `'system'`. All list queries are scoped to this value. |
 | `entity_type` | String | caller | What kind of thing was affected (`'user'`, `'project'`, `'invoice'`). |
 | `entity_id` | String | caller | The specific instance of that thing that was affected. |
 | `actor_type` | String | caller | What kind of agent triggered this event (`'user'`, `'admin'`, `'system'`, `'webhook'`). |

@@ -37,7 +37,7 @@ Lib.Logger = require('helper-logger')(Lib, {
 
 Records one event. Background by default; `options.await: true` for durable compliance writes.
 
-- **options.scope**: String, optional, default `''`. Multi-tenant namespace.
+- **options.tenant_id**: String, optional, default `''`. Multi-tenant namespace.
 - **options.entity_type**: String, required.
 - **options.entity_id**: String, required.
 - **options.actor_type**: String, required.
@@ -56,7 +56,7 @@ Programmer errors (missing required option, wrong type, invalid `retention`) thr
 
 Lists events recorded against one entity, most-recent first.
 
-- **options.scope**, **options.entity_type**, **options.entity_id**: required.
+- **options.tenant_id**, **options.entity_type**, **options.entity_id**: required.
 - **options.actions**: String[], optional. Literal action names or `'auth.*'`-style glob prefixes.
 - **options.start_time_ms**: Integer, optional. Inclusive lower bound on `created_at_ms`.
 - **options.end_time_ms**: Integer, optional. Exclusive upper bound on `created_at_ms`.

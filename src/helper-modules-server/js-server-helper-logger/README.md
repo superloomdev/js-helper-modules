@@ -19,7 +19,7 @@ The logger solves three problems every audit-logging surface faces, in one modul
 - **No string-dispatched backends.** The chosen storage adapter is constructed independently and passed as a ready-to-use object via `CONFIG.Store`. Unused backends never get loaded, never pull their npm dependencies, and the module has no internal `switch` block to maintain.
 - **One factory call. One independent instance.** No singletons. Multiple Logger instances run in the same process when genuinely needed (rare; one suffices for almost every project).
 - **No correctness dependency on cleanup.** List queries return whatever rows exist. If the cleanup cron is paused for a week, queries still work; expired rows are just included until the next sweep.
-- **Out-of-scope by design.** The logger is not a metrics system, not a structured request logger, not a notification dispatcher. It records audit-trail events. [`Lib.Debug`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-core/js-helper-debug), Datadog / Prometheus, and a separate notification surface handle the rest.
+- **Out-of-tenant_id by design.** The logger is not a metrics system, not a structured request logger, not a notification dispatcher. It records audit-trail events. [`Lib.Debug`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-core/js-helper-debug), Datadog / Prometheus, and a separate notification surface handle the rest.
 
 ## Architecture Overview
 
@@ -63,7 +63,7 @@ The principles are documented at [superloom.dev](https://superloom.dev) for proj
 - [API reference](docs/api.md). Every exported function with its signature, parameters, return shape, options, and error catalog
 - [Configuration](docs/configuration.md). Loader pattern, every configuration key, adapter integration pattern, IP-encryption key handling, peer dependencies, testing tier
 - [Schemas](docs/schemas.md). The validated input contracts (CONFIG, log options, list options), the five-method store contract, and the response envelope
-- [Data model](docs/data-model.md). Every record field, core concepts (entity, actor, scope, action), the `sort_key` design, retention quick reference, design decisions
+- [Data model](docs/data-model.md). Every record field, core concepts (entity, actor, tenant_id, action), the `sort_key` design, retention quick reference, design decisions
 - [Runtime](docs/runtime.md). The runtime-shape differences for the logger: background-write lifecycle in serverless versus persistent server, scheduled cleanup mechanism
 - [Superloom](https://superloom.dev). The framework
 

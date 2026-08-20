@@ -110,7 +110,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     @param {Object} instance - Request instance (for time, lifecycle, and
                                http_request auto-capture).
     @param {Object} options  - Log entry fields.
-    @param {String} [options.scope]        - Multi-tenant namespace (default '').
+    @param {String} [options.tenant_id]        - Multi-tenant namespace (default 'system').
     @param {String} options.entity_type    - Type of the affected entity
                                              (e.g. 'user', 'project', 'invoice').
     @param {String} options.entity_id      - ID of the affected entity.
@@ -152,7 +152,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         const write_result = await store.addLog(instance, record);
         if (write_result.success === false) {
           Lib.Debug.debug('Logger addLog failed', {
-            scope: record.scope,
+            tenant_id: record.tenant_id,
             entity_type: record.entity_type,
             entity_id: record.entity_id,
             action: record.action,
@@ -179,7 +179,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         .then(function (write_result) {
           if (write_result.success === false) {
             Lib.Debug.debug('Logger addLog failed (background)', {
-              scope: record.scope,
+              tenant_id: record.tenant_id,
               entity_type: record.entity_type,
               entity_id: record.entity_id,
               action: record.action,
@@ -211,7 +211,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     @param {Object} instance - Request instance.
     @param {Object} options - Query options.
-    @param {String} [options.scope]          - Multi-tenant namespace (default '').
+    @param {String} [options.tenant_id]          - Multi-tenant namespace (default 'system').
     @param {String} options.entity_type      - Entity type filter.
     @param {String} options.entity_id        - Entity id filter.
     @param {String[]} [options.actions]      - Optional action filter. Each
@@ -422,7 +422,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       const sort_key = created_at_ms + '-' + Lib.Crypto.generateRandomString('abcdefghijklmnopqrstuvwxyz', 3);
 
       return {
-        scope: options.scope || '',
+        tenant_id: options.tenant_id || 'system',
         entity_type: options.entity_type,
         entity_id: options.entity_id,
         actor_type: options.actor_type,
@@ -447,7 +447,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     buildQuery: function (options) {
 
       return {
-        scope: options.scope || '',
+        tenant_id: options.tenant_id || 'system',
         entity_type: options.entity_type || null,
         entity_id: options.entity_id || null,
         actor_type: options.actor_type || null,
