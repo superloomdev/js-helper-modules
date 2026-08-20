@@ -16,7 +16,7 @@ const crypto = require('crypto');
 
 
 // Charset for refresh tokens. Controlled so the token is URL-safe and
-// contains neither '-' nor '#' (our module's reserved characters).
+// contains neither '-' nor '\u001F' (our module's reserved characters).
 const REFRESH_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const REFRESH_LENGTH = 48;
 
@@ -94,8 +94,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         // jti: unique token identifier for revocation / audit trails.
         //   Derived from the session's composite key so the same (tenant,
         //   actor, token_key) triple always produces the same jti.
-        jti: options.session.tenant_id + '#' +
-             options.session.actor_id + '#' +
+        jti: options.session.tenant_id + '\u001F' +
+             options.session.actor_id + '\u001F' +
              options.session.token_key,
         sub: options.session.actor_id,
         atp: options.session.actor_type,

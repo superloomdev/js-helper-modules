@@ -228,19 +228,23 @@ describe('parts/auth-id', function () {
 
   const AuthId = AuthIdFactory(Lib, CONFIG_STUB, ERRORS);
 
+  // Fixed-width token constants matching parts/auth-id.js
+  const K16 = 'abcdefghijklmnop';
+  const S48 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV';
+
   it('createAuthId joins parts with "-"', function () {
 
     const auth_id = AuthId.createAuthId({
-      actor_id: 'a1', token_key: 'k1', token_secret: 's1'
+      actor_id: 'a1', token_key: K16, token_secret: S48
     });
-    assert.equal(auth_id, 'a1-k1-s1');
+    assert.equal(auth_id, 'a1-' + K16 + '-' + S48);
 
   });
 
   it('parseAuthId returns three parts on a well-formed string', function () {
 
-    const parts = AuthId.parseAuthId('a1-k1-s1');
-    assert.deepEqual(parts, { actor_id: 'a1', token_key: 'k1', token_secret: 's1' });
+    const parts = AuthId.parseAuthId('a1-' + K16 + '-' + S48);
+    assert.deepEqual(parts, { actor_id: 'a1', token_key: K16, token_secret: S48 });
 
   });
 
@@ -248,20 +252,46 @@ describe('parts/auth-id', function () {
 
     assert.equal(AuthId.parseAuthId(''), null);
     assert.equal(AuthId.parseAuthId(null), null);
-    assert.equal(AuthId.parseAuthId('a1-k1'), null);
-    assert.equal(AuthId.parseAuthId('a1-k1-s1-extra'), null);
-    assert.equal(AuthId.parseAuthId('a1--s1'), null);
+    assert.equal(AuthId.parseAuthId('a1-' + K16), null);
+    // Extra chars after the fixed-width secret means the secret contains
+    // a non-charset char, so the parse rejects it
+    assert.equal(AuthId.parseAuthId('a1-' + K16 + '-' + S48 + 'X'), null);
+    // Missing the second '-' separator
+    assert.equal(AuthId.parseAuthId('a1' + K16 + '-' + S48), null);
 
   });
 
-  it('createAuthId rejects "-" or "#" inside actor_id', function () {
+  it('createAuthId accepts "-" inside actor_id (UUIDs work)', function () {
+
+    // A hyphenated actor_id is accepted and round-trips
+    const uuid = '550e8400-e29b-41d4-a716-446655440000';
+    const id = AuthId.createAuthId({ actor_id: uuid, token_key: K16, token_secret: S48 });
+    assert.deepStrictEqual(AuthId.parseAuthId(id), { actor_id: uuid, token_key: K16, token_secret: S48 });
+
+  });
+
+  it('createAuthId accepts "#" inside actor_id (no longer reserved)', function () {
+
+    // '#' is a printable character that is no longer reserved; it round-trips
+    const actor = 'bad#id';
+    const id = AuthId.createAuthId({ actor_id: actor, token_key: K16, token_secret: S48 });
+    assert.deepStrictEqual(AuthId.parseAuthId(id), { actor_id: actor, token_key: K16, token_secret: S48 });
+
+  });
+
+  it('createAuthId rejects "\\u001F" inside actor_id (the constraint that is KEPT)', function () {
 
     assert.throws(function () {
-      AuthId.createAuthId({ actor_id: 'bad-id', token_key: 'k', token_secret: 's' });
-    }, /must not contain "-"/);
-    assert.throws(function () {
-      AuthId.createAuthId({ actor_id: 'bad#id', token_key: 'k', token_secret: 's' });
-    }, /must not contain "#"/);
+      AuthId.createAuthId({ actor_id: 'bad\u001Fid', token_key: K16, token_secret: S48 });
+    }, /must not contain "\\u001F"/);
+
+  });
+
+  it('a hyphen-heavy actor_id parses back to exactly itself', function () {
+
+    const actor = 'a-b-c-d-e-f-g-h';
+    const id = AuthId.createAuthId({ actor_id: actor, token_key: K16, token_secret: S48 });
+    assert.deepStrictEqual(AuthId.parseAuthId(id), { actor_id: actor, token_key: K16, token_secret: S48 });
 
   });
 
@@ -275,20 +305,20 @@ describe('parts/auth-id', function () {
 
   });
 
-  it('composeSessionKey joins with "#"', function () {
+  it('composeSessionKey joins with "\\u001F"', function () {
 
     assert.equal(
       AuthId.composeSessionKey('a1', 'k1', 'h1'),
-      'a1#k1#h1'
+      'a1\u001Fk1\u001Fh1'
     );
 
   });
 
-  it('composeMongoId prepends tenant_id with "#"', function () {
+  it('composeMongoId prepends tenant_id with "\\u001F"', function () {
 
     assert.equal(
       AuthId.composeMongoId('t1', 'a1', 'k1', 'h1'),
-      't1#a1#k1#h1'
+      't1\u001Fa1\u001Fk1\u001Fh1'
     );
 
   });
@@ -720,58 +750,67 @@ describe('createSession wire-format validation (plan 0042)', function () {
     LIMITS: { TOTAL_MAX: 5, EVICT_OLDEST_ON_LIMIT: true }
   };
 
-  it('rejects actor_id containing "-" with TypeError before store I/O', async function () {
+  it('accepts actor_id containing "-" (UUIDs are valid)', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    // A hyphenated actor_id is now accepted; createSession succeeds
+    const result = await auth.createSession(instance, {
+      tenant_id: 'T', actor_id: '550e8400-e29b-41d4-a716-446655440000',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+    assert.ok(result.success);
+
+  });
+
+  it('accepts actor_id containing "#" (no longer reserved)', async function () {
+
+    const auth = AuthFactory(Lib, valid_base_config);
+    const instance = buildInstance(1000);
+
+    // '#' is a printable character that is no longer reserved
+    const result = await auth.createSession(instance, {
+      tenant_id: 'T', actor_id: 'bad#id',
+      install_platform: 'web', install_form_factor: 'desktop'
+    });
+    assert.ok(result.success);
+
+  });
+
+  it('rejects actor_id containing "\\u001F" with TypeError before store I/O', async function () {
 
     const auth = AuthFactory(Lib, valid_base_config);
     const instance = buildInstance(1000);
 
     await assert.rejects(
       auth.createSession(instance, {
-        tenant_id: 'T', actor_id: 'bad-id',
+        tenant_id: 'T', actor_id: 'bad\u001Fid',
         install_platform: 'web', install_form_factor: 'desktop'
       }),
       function (err) {
         return err instanceof TypeError &&
           /options\.actor_id/.test(err.message) &&
-          /must not contain "-" or "#"/.test(err.message);
+          /must not contain "\\u001F"/.test(err.message);
       }
     );
 
   });
 
-  it('rejects actor_id containing "#" with TypeError before store I/O', async function () {
+  it('rejects tenant_id containing "\\u001F" with TypeError before store I/O', async function () {
 
     const auth = AuthFactory(Lib, valid_base_config);
     const instance = buildInstance(1000);
 
     await assert.rejects(
       auth.createSession(instance, {
-        tenant_id: 'T', actor_id: 'bad#id',
-        install_platform: 'web', install_form_factor: 'desktop'
-      }),
-      function (err) {
-        return err instanceof TypeError &&
-          /options\.actor_id/.test(err.message) &&
-          /must not contain "-" or "#"/.test(err.message);
-      }
-    );
-
-  });
-
-  it('rejects tenant_id containing "#" with TypeError before store I/O', async function () {
-
-    const auth = AuthFactory(Lib, valid_base_config);
-    const instance = buildInstance(1000);
-
-    await assert.rejects(
-      auth.createSession(instance, {
-        tenant_id: 'bad#tenant', actor_id: 'A1',
+        tenant_id: 'bad\u001Ftenant', actor_id: 'A1',
         install_platform: 'web', install_form_factor: 'desktop'
       }),
       function (err) {
         return err instanceof TypeError &&
           /options\.tenant_id/.test(err.message) &&
-          /must not contain "#"/.test(err.message);
+          /must not contain "\\u001F"/.test(err.message);
       }
     );
 
@@ -800,7 +839,7 @@ describe('createSession wire-format validation (plan 0042)', function () {
     // Attempt createSession with a bad actor_id - must throw
     await assert.rejects(
       auth.createSession(instance, {
-        tenant_id: 'T', actor_id: 'orphan-test',
+        tenant_id: 'T', actor_id: 'orphan\u001Ftest',
         install_platform: 'web', install_form_factor: 'desktop'
       }),
       TypeError
@@ -808,7 +847,7 @@ describe('createSession wire-format validation (plan 0042)', function () {
 
     // Verify no session was persisted for this actor
     const list_result = await auth.listSessions(instance, {
-      tenant_id: 'T', actor_id: 'orphan-test'
+      tenant_id: 'T', actor_id: 'orphan\u001Ftest'
     });
 
     assert.equal(list_result.success, true);

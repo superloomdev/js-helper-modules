@@ -5,16 +5,25 @@
 //   auth_id = "{actor_id}-{token_key}-{token_secret}"
 //
 // Composite session key (used inside DynamoDB sort key and MongoDB _id):
-//   session_key = "{actor_id}#{token_key}#{token_secret_hash}"
+//   session_key = "{actor_id}\u001F{token_key}\u001F{token_secret_hash}"
 //
 // Reserved characters:
-//   '-' separates auth_id parts on the wire (forbidden in any part)
-//   '#' separates composite key parts (forbidden in any part)
+//   '\u001F' (ASCII Unit Separator) separates composite key parts.
+//     It is a non-printable control character that cannot appear in any
+//     human-readable identifier, so the constraint on actor_id and
+//     tenant_id is vacuous in practice but enforced as belt-and-braces.
+//     This follows the precedent set by helper-distinct-queue-store-dynamodb.
+//   '-' separates auth_id parts on the wire, but actor_id may contain '-'
+//   (e.g. a standard UUID). parseAuthId uses fixed-width right-anchored
+//   parsing: token_secret is the last 48 chars, token_key is the 16 chars
+//   before that, and actor_id is everything remaining. Both token segments
+//   are drawn from TOKEN_CHARSET (alphanumeric only), so the parse is
+//   unambiguous regardless of what actor_id contains.
 'use strict';
 
 
 // Charset for token_key and token_secret. Drawn from a controlled set so
-// neither '-' nor '#' can ever appear in a generated token.
+// neither '-' nor '\u001F' can ever appear in a generated token.
 const TOKEN_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 // Length of the random portion of a session credential. The total wire
@@ -82,7 +91,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
       _AuthId.assertNonEmptyString(parts.actor_id, 'actor_id');
       _AuthId.assertNonEmptyString(parts.token_key, 'token_key');
       _AuthId.assertNonEmptyString(parts.token_secret, 'token_secret');
-      _AuthId.assertNoReservedChars(parts.actor_id, 'actor_id');
+      _AuthId.assertNoUnitSeparator(parts.actor_id, 'actor_id');
 
       // Compose and return the wire-format string
       return parts.actor_id + '-' + parts.token_key + '-' + parts.token_secret;
@@ -108,28 +117,52 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         return null;
       }
 
-      // Find the first and last separators. We allow no '-' inside the
-      // three parts, so split() returning more than 3 parts means a bad
-      // auth_id - reject it. (Belt-and-braces: we also reject reserved
-      // chars inside actor_id at createAuthId time.)
-      // Expect exactly 3 segments; more means the input is malformed
-      const segments = auth_id.split('-');
-      if (segments.length !== 3) {
+      // Minimum length: 1 char actor_id + '-' + TOKEN_KEY_LENGTH + '-' + TOKEN_SECRET_LENGTH
+      if (auth_id.length < TOKEN_KEY_LENGTH + TOKEN_SECRET_LENGTH + 3) {
         return null;
       }
 
-      // Unpack the three segments
-      const actor_id = segments[0];
-      const token_key = segments[1];
-      const token_secret = segments[2];
+      // Parse from the right using fixed-width segments.
+      // token_secret is the last TOKEN_SECRET_LENGTH chars.
+      const secret_end = auth_id.length;
+      const secret_start = secret_end - TOKEN_SECRET_LENGTH;
+      const token_secret = auth_id.slice(secret_start, secret_end);
 
-      // Reject if any segment came out empty
-      if (
-        Lib.Utils.isEmptyString(actor_id) ||
-        Lib.Utils.isEmptyString(token_key) ||
-        Lib.Utils.isEmptyString(token_secret)
-      ) {
+      // The char before token_secret must be '-'
+      if (auth_id[secret_start - 1] !== '-') {
         return null;
+      }
+
+      // token_key is the TOKEN_KEY_LENGTH chars before that '-'
+      const key_end = secret_start - 1;
+      const key_start = key_end - TOKEN_KEY_LENGTH;
+      const token_key = auth_id.slice(key_start, key_end);
+
+      // The char before token_key must be '-'
+      if (auth_id[key_start - 1] !== '-') {
+        return null;
+      }
+
+      // actor_id is everything remaining before that '-'
+      const actor_id = auth_id.slice(0, key_start - 1);
+
+      // Reject if actor_id is empty
+      if (Lib.Utils.isEmptyString(actor_id)) {
+        return null;
+      }
+
+      // Reject if token_key or token_secret contains any character
+      // outside TOKEN_CHARSET. This is what makes the parse unambiguous
+      // rather than merely positional.
+      for (let i = 0; i < token_key.length; i++) {
+        if (TOKEN_CHARSET.indexOf(token_key[i]) === -1) {
+          return null;
+        }
+      }
+      for (let i = 0; i < token_secret.length; i++) {
+        if (TOKEN_CHARSET.indexOf(token_secret[i]) === -1) {
+          return null;
+        }
       }
 
       // Return the parsed parts
@@ -144,7 +177,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     /********************************************************************
     Generate a fresh random token_key. Uses the controlled charset so
-    neither '-' nor '#' ever appears.
+    neither '-' nor '\u001F' ever appears.
 
     @return {String} - Random token_key of TOKEN_KEY_LENGTH chars
     *********************************************************************/
@@ -198,7 +231,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     @param {String} token_key
     @param {String} token_secret_hash
 
-    @return {String} - "{actor_id}#{token_key}#{token_secret_hash}"
+    @return {String} - "{actor_id}\u001F{token_key}\u001F{token_secret_hash}"
     *********************************************************************/
     composeSessionKey: function (actor_id, token_key, token_secret_hash) {
 
@@ -206,31 +239,31 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
       _AuthId.assertNonEmptyString(actor_id, 'actor_id');
       _AuthId.assertNonEmptyString(token_key, 'token_key');
       _AuthId.assertNonEmptyString(token_secret_hash, 'token_secret_hash');
-      _AuthId.assertNoReservedChars(actor_id, 'actor_id');
+      _AuthId.assertNoUnitSeparator(actor_id, 'actor_id');
 
       // Compose and return the composite session key
-      return actor_id + '#' + token_key + '#' + token_secret_hash;
+      return actor_id + '\u001F' + token_key + '\u001F' + token_secret_hash;
 
     },
 
 
     /********************************************************************
     The actor-prefix used for begins_with / anchored-regex queries.
-    Returns "{actor_id}#" - the prefix that all session_keys for this
+    Returns "{actor_id}\u001F" - the prefix that all session_keys for this
     actor share.
 
     @param {String} actor_id
 
-    @return {String} - "{actor_id}#"
+    @return {String} - "{actor_id}\u001F"
     *********************************************************************/
     composeActorPrefix: function (actor_id) {
 
       // Validate actor_id before composing the prefix
       _AuthId.assertNonEmptyString(actor_id, 'actor_id');
-      _AuthId.assertNoReservedChars(actor_id, 'actor_id');
+      _AuthId.assertNoUnitSeparator(actor_id, 'actor_id');
 
-      // Append the '#' separator to create the actor-scoped prefix
-      return actor_id + '#';
+      // Append the '\u001F' separator to create the actor-scoped prefix
+      return actor_id + '\u001F';
 
     },
 
@@ -245,16 +278,16 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     @param {String} token_key
     @param {String} token_secret_hash
 
-    @return {String} - "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
+    @return {String} - "{tenant_id}\u001F{actor_id}\u001F{token_key}\u001F{token_secret_hash}"
     *********************************************************************/
     composeMongoId: function (tenant_id, actor_id, token_key, token_secret_hash) {
 
-      // Validate tenant_id separately (may contain '-' but not '#')
+      // Validate tenant_id separately (may contain '-' but not '\u001F')
       _AuthId.assertNonEmptyString(tenant_id, 'tenant_id');
-      _AuthId.assertNoHashChar(tenant_id, 'tenant_id');
+      _AuthId.assertNoUnitSeparator(tenant_id, 'tenant_id');
 
       // Prepend tenant_id to the standard session key
-      return tenant_id + '#' + AuthId.composeSessionKey(actor_id, token_key, token_secret_hash);
+      return tenant_id + '\u001F' + AuthId.composeSessionKey(actor_id, token_key, token_secret_hash);
 
     },
 
@@ -265,16 +298,16 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     @param {String} tenant_id
     @param {String} actor_id
 
-    @return {String} - "{tenant_id}#{actor_id}#"
+    @return {String} - "{tenant_id}\u001F{actor_id}\u001F"
     *********************************************************************/
     composeMongoActorPrefix: function (tenant_id, actor_id) {
 
-      // Validate tenant_id separately (may contain '-' but not '#')
+      // Validate tenant_id separately (may contain '-' but not '\u001F')
       _AuthId.assertNonEmptyString(tenant_id, 'tenant_id');
-      _AuthId.assertNoHashChar(tenant_id, 'tenant_id');
+      _AuthId.assertNoUnitSeparator(tenant_id, 'tenant_id');
 
       // Prepend tenant_id to the standard actor prefix
-      return tenant_id + '#' + AuthId.composeActorPrefix(actor_id);
+      return tenant_id + '\u001F' + AuthId.composeActorPrefix(actor_id);
 
     }
 
@@ -309,44 +342,26 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
 
     /********************************************************************
-    Throw TypeError if the value contains either reserved separator
-    character ('-' or '#'). Used for fields that end up in the WIRE
-    auth_id (actor_id), where both separators would break parsing.
+    Throw TypeError if the value contains the '\u001F' (ASCII Unit
+    Separator) composite-key separator. Used for tenant_id and actor_id,
+    both of which may contain '-' but must not contain '\u001F' because
+    that would break the MongoDB _id composite and the DynamoDB sort-key
+    composite. For actor_id, '\u001F' would also break prefix-query
+    isolation: the prefix for actor `a` would also match actor `a\u001Fb`.
+    The constraint is vacuous in practice because '\u001F' is a
+    non-printable control character that cannot appear in any
+    human-readable identifier, but it is enforced as belt-and-braces.
 
     @param {String} value - Value to check
     @param {String} name - Field name (for error message)
 
     @return {void}
     *********************************************************************/
-    assertNoReservedChars: function (value, name) {
+    assertNoUnitSeparator: function (value, name) {
 
-      // Throw if the value contains the '-' wire-format separator
-      if (value.indexOf('-') !== -1) {
-        throw new TypeError('[helper-auth] ' + name + ' must not contain "-" (reserved as auth_id separator)');
-      }
-
-      // Also check for the '#' composite-key separator
-      _AuthId.assertNoHashChar(value, name);
-
-    },
-
-
-    /********************************************************************
-    Throw TypeError if the value contains the '#' composite-key separator.
-    Used for tenant_id, which is allowed to contain '-' (it never appears
-    in the wire auth_id) but still must not contain '#' because that would
-    break the MongoDB _id composite and the DynamoDB sort-key composite.
-
-    @param {String} value - Value to check
-    @param {String} name - Field name (for error message)
-
-    @return {void}
-    *********************************************************************/
-    assertNoHashChar: function (value, name) {
-
-      // Throw if the value contains the '#' composite-key separator
-      if (value.indexOf('#') !== -1) {
-        throw new TypeError('[helper-auth] ' + name + ' must not contain "#" (reserved as composite key separator)');
+      // Throw if the value contains the '\u001F' composite-key separator
+      if (value.indexOf('\u001F') !== -1) {
+        throw new TypeError('[helper-auth] ' + name + ' must not contain "\\u001F" (reserved as composite key separator)');
       }
 
     }

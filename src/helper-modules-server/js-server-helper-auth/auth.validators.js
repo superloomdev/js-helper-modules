@@ -580,9 +580,13 @@ const _Validators = {
 
 
   /********************************************************************
-  Throw TypeError if value contains either reserved separator character
-  ('-' or '#'). Used for actor_id which enters both the wire auth_id
-  and the composite store key.
+  Throw TypeError if value contains the '\u001F' (ASCII Unit Separator)
+  composite-key separator. Used for actor_id which enters the composite
+  store key. The '-' wire-format separator is no longer forbidden in
+  actor_id because parseAuthId uses fixed-width right-anchored parsing.
+  The '\u001F' constraint is vacuous in practice (the character is
+  non-printable and cannot appear in any human-readable identifier) but
+  is enforced as belt-and-braces.
 
   @param {String} value   - Value to check (already validated as non-empty string)
   @param {String} field   - Field name
@@ -592,19 +596,11 @@ const _Validators = {
   *********************************************************************/
   assertNoWireSeparators: function (value, field, fn_name) {
 
-    // Reject '-' (wire auth_id separator)
-    if (value.indexOf('-') !== -1) {
+    // Reject '\u001F' (composite store key separator)
+    if (value.indexOf('\u001F') !== -1) {
       throw new TypeError(
         '[helper-auth] ' + fn_name + ' options.' + field +
-        ' must not contain "-" or "#" (reserved auth_id / composite-key separators)'
-      );
-    }
-
-    // Reject '#' (composite store key separator)
-    if (value.indexOf('#') !== -1) {
-      throw new TypeError(
-        '[helper-auth] ' + fn_name + ' options.' + field +
-        ' must not contain "-" or "#" (reserved auth_id / composite-key separators)'
+        ' must not contain "\\u001F" (reserved composite-key separator)'
       );
     }
 
@@ -612,9 +608,12 @@ const _Validators = {
 
 
   /********************************************************************
-  Throw TypeError if value contains the '#' composite-key separator.
-  Used for tenant_id which enters the composite store key but NOT the
-  wire auth_id (so '-' is allowed).
+  Throw TypeError if value contains the '\u001F' (ASCII Unit Separator)
+  composite-key separator. Used for tenant_id which enters the composite
+  store key but NOT the wire auth_id (so '-' is allowed). The constraint
+  is vacuous in practice (the character is non-printable and cannot
+  appear in any human-readable identifier) but is enforced as
+  belt-and-braces.
 
   @param {String} value   - Value to check (already validated as non-empty string)
   @param {String} field   - Field name
@@ -624,11 +623,11 @@ const _Validators = {
   *********************************************************************/
   assertNoHashSeparator: function (value, field, fn_name) {
 
-    // Reject '#' (composite store key separator)
-    if (value.indexOf('#') !== -1) {
+    // Reject '\u001F' (composite store key separator)
+    if (value.indexOf('\u001F') !== -1) {
       throw new TypeError(
         '[helper-auth] ' + fn_name + ' options.' + field +
-        ' must not contain "#" (reserved composite-key separator)'
+        ' must not contain "\\u001F" (reserved composite-key separator)'
       );
     }
 
