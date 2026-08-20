@@ -6,7 +6,7 @@
 
 ```sql
 CREATE TABLE IF NOT EXISTS "action_log" (
-  "scope"         TEXT    NOT NULL DEFAULT '',
+  "tenant_id"         TEXT    NOT NULL DEFAULT '',
   "entity_type"   TEXT    NOT NULL,
   "entity_id"     TEXT    NOT NULL,
   "actor_type"    TEXT    NOT NULL,
@@ -23,10 +23,10 @@ CREATE TABLE IF NOT EXISTS "action_log" (
 );
 
 CREATE INDEX IF NOT EXISTS "idx_action_log_entity"
-  ON "action_log" ("scope", "entity_type", "entity_id", "sort_key" DESC);
+  ON "action_log" ("tenant_id", "entity_type", "entity_id", "sort_key" DESC);
 
 CREATE INDEX IF NOT EXISTS "idx_action_log_actor"
-  ON "action_log" ("scope", "actor_type", "actor_id", "sort_key" DESC);
+  ON "action_log" ("tenant_id", "actor_type", "actor_id", "sort_key" DESC);
 
 CREATE INDEX IF NOT EXISTS "idx_action_log_expires_at"
   ON "action_log" ("expires_at");
@@ -38,7 +38,7 @@ The table name and index names are derived from `config.table_name` at runtime.
 
 | Column | SQLite Type | Nullable | Notes |
 |--------|-------------|----------|-------|
-| `scope` | `TEXT` | No | Logical namespace. Default `''`. |
+| `tenant_id` | `TEXT` | No | Logical namespace. Default `''`. |
 | `entity_type` | `TEXT` | No | Entity type (e.g. `'user'`). |
 | `entity_id` | `TEXT` | No | Entity identifier. |
 | `actor_type` | `TEXT` | No | Actor type (e.g. `'user'`, `'system'`). |
@@ -76,8 +76,8 @@ The sole primary key is `"sort_key"`. Unlike the SQL adapters in the `auth-store
 
 ### Index Strategy
 
-- **`idx_<table>_entity`** - covers `getLogsByEntity` (scope + entity_type + entity_id + sort_key DESC).
-- **`idx_<table>_actor`** - covers `getLogsByActor` (scope + actor_type + actor_id + sort_key DESC).
+- **`idx_<table>_entity`** - covers `getLogsByEntity` (tenant_id + entity_type + entity_id + sort_key DESC).
+- **`idx_<table>_actor`** - covers `getLogsByActor` (tenant_id + actor_type + actor_id + sort_key DESC).
 - **`idx_<table>_expires_at`** - single-column index covering the `cleanupExpiredLogs` range scan.
 
 ## Index Names

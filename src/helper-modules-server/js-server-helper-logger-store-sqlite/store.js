@@ -122,7 +122,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
-      // Create entity index (scope + entity_type + entity_id + sort_key)
+      // Create entity index (tenant_id + entity_type + entity_id + sort_key)
       const entity_idx = _Store.buildCreateEntityIndexSQL();
       const entity_result = await Lib.SQL.write(instance, entity_idx);
 
@@ -138,7 +138,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
-      // Create actor index (scope + actor_type + actor_id + sort_key)
+      // Create actor index (tenant_id + actor_type + actor_id + sort_key)
       const actor_idx = _Store.buildCreateActorIndexSQL();
       const actor_result = await Lib.SQL.write(instance, actor_idx);
 
@@ -219,7 +219,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     // ~~~~~~~~~~~~~~~~~~~~ Read ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    List log records for a (scope, entity_type, entity_id) triple.
+    List log records for a (tenant_id, entity_type, entity_id) triple.
     Results are ordered most-recent first by sort_key DESC.
     Supports cursor pagination, action filter, and time range.
 
@@ -268,7 +268,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
 
     /********************************************************************
-    List log records for a (scope, actor_type, actor_id) triple.
+    List log records for a (tenant_id, actor_type, actor_id) triple.
     Same pagination contract as getLogsByEntity.
 
     @param {Object} instance - Request instance
@@ -376,7 +376,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     CREATE TABLE column order.
     *********************************************************************/
     COLUMNS: [
-      'scope',
+      'tenant_id',
       'entity_type',
       'entity_id',
       'actor_type',
@@ -425,7 +425,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       return (
         'CREATE TABLE IF NOT EXISTS ' + t + ' (' +
-          '  ' + Q('scope')         + ' TEXT NOT NULL DEFAULT \'\',' +
+          '  ' + Q('tenant_id')         + ' TEXT NOT NULL DEFAULT \'\',' +
           '  ' + Q('entity_type')   + ' TEXT NOT NULL,' +
           '  ' + Q('entity_id')     + ' TEXT NOT NULL,' +
           '  ' + Q('actor_type')    + ' TEXT NOT NULL,' +
@@ -447,7 +447,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Build the entity covering index for getLogsByEntity queries.
-    Columns: scope + entity_type + entity_id + sort_key DESC.
+    Columns: tenant_id + entity_type + entity_id + sort_key DESC.
 
     @return {String} - DDL statement
     *********************************************************************/
@@ -460,7 +460,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       return (
         'CREATE INDEX IF NOT EXISTS ' + idx +
         ' ON ' + Q(t) + ' (' +
-          Q('scope') + ', ' +
+          Q('tenant_id') + ', ' +
           Q('entity_type') + ', ' +
           Q('entity_id') + ', ' +
           Q('sort_key') + ' DESC' +
@@ -472,7 +472,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Build the actor covering index for getLogsByActor queries.
-    Columns: scope + actor_type + actor_id + sort_key DESC.
+    Columns: tenant_id + actor_type + actor_id + sort_key DESC.
 
     @return {String} - DDL statement
     *********************************************************************/
@@ -485,7 +485,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       return (
         'CREATE INDEX IF NOT EXISTS ' + idx +
         ' ON ' + Q(t) + ' (' +
-          Q('scope') + ', ' +
+          Q('tenant_id') + ', ' +
           Q('actor_type') + ', ' +
           Q('actor_id') + ', ' +
           Q('sort_key') + ' DESC' +
@@ -550,9 +550,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const parts = [];
       const params = [];
 
-      // Always filter by scope
-      parts.push(Q('scope') + ' = ?');
-      params.push(query.scope || '');
+      // Always filter by tenant_id
+      parts.push(Q('tenant_id') + ' = ?');
+      params.push(query.tenant_id || '');
 
       // Key filter depends on mode
       if (mode === 'entity') {
