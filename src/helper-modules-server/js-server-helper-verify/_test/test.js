@@ -84,7 +84,7 @@ const waitForBackgroundQueue = async function (instance) {
 // Default options helpers - keep tests focused on the behavior under test.
 const defaultCreateOptions = function (overrides) {
   return Object.assign({
-    scope: 'user.123',
+    namespace: 'user.123',
     key: 'login-phone.+12345',
     length: 6,
     ttl_seconds: 300,
@@ -94,7 +94,7 @@ const defaultCreateOptions = function (overrides) {
 
 const defaultVerifyOptions = function (overrides) {
   return Object.assign({
-    scope: 'user.123',
+    namespace: 'user.123',
     key: 'login-phone.+12345',
     value: '000000',
     max_fail_count: 3
@@ -267,7 +267,7 @@ describe('createCode', function () {
     for (let i = 0; i < 50; i++) {
       const instance = Lib.Instance.initialize();
       const result = await Verify.createCode(instance, defaultCreateOptions({
-        scope: 'sweep',
+        namespace: 'sweep',
         key: 'iter.' + i,
         length: 12
       }));
@@ -411,7 +411,7 @@ describe('verify - happy path', function () {
 
 describe('verify - rejection paths', function () {
 
-  it('should return NOT_FOUND error when no record exists for scope+key', async function () {
+  it('should return NOT_FOUND error when no record exists for namespace+key', async function () {
     const Verify = buildVerify(createMemoryStore());
     const instance = Lib.Instance.initialize();
 
@@ -566,13 +566,13 @@ describe('Adapter error propagation', function () {
 
 describe('Input validation (programmer errors throw, never returned as envelope)', function () {
 
-  it('should throw TypeError on createPin when scope is missing', async function () {
+  it('should throw TypeError on createPin when namespace is missing', async function () {
     const Verify = buildVerify(createMemoryStore());
     const instance = Lib.Instance.initialize();
 
     await assert.rejects(
-      Verify.createPin(instance, defaultCreateOptions({ scope: '' })),
-      { name: 'TypeError', message: /scope is required/ }
+      Verify.createPin(instance, defaultCreateOptions({ namespace: '' })),
+      { name: 'TypeError', message: /namespace is required/ }
     );
   });
 
@@ -741,8 +741,8 @@ describe('Factory pattern', function () {
 
     const instance = Lib.Instance.initialize();
 
-    await Verify_A.createPin(instance, defaultCreateOptions({ scope: 'tenant.a' }));
-    await Verify_B.createPin(instance, defaultCreateOptions({ scope: 'tenant.b' }));
+    await Verify_A.createPin(instance, defaultCreateOptions({ namespace: 'tenant.a' }));
+    await Verify_B.createPin(instance, defaultCreateOptions({ namespace: 'tenant.b' }));
 
     assert.strictEqual(store_a._records.size, 1);
     assert.strictEqual(store_b._records.size, 1);

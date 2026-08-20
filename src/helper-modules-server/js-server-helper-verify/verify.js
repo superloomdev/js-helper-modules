@@ -101,11 +101,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     @param {Object} instance - Request instance for time and lifecycle
     @param {Object} options - Per-call parameters
-    @param {String} options.scope - Logical owner namespace
+    @param {String} options.namespace - Logical owner namespace
     @param {String} options.key - Specific verification purpose
     @param {Integer} options.length - Number of characters in the PIN
     @param {Integer} options.ttl_seconds - Lifetime before expiry
-    @param {Integer} options.cooldown_seconds - Min gap before next pin for same scope+key
+    @param {Integer} options.cooldown_seconds - Min gap before next pin for same namespace+key
 
     @return {Promise<Object>} - { success, code, expires_at, error }
     *********************************************************************/
@@ -157,13 +157,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     // Consume a previously created code; one-time use.
 
     /********************************************************************
-    Validate a submitted value against the stored record for scope+key.
+    Validate a submitted value against the stored record for namespace+key.
     On match, the record is deleted in the background (one-time use).
     On mismatch, the fail count is atomically incremented.
 
     @param {Object} instance - Request instance for time and lifecycle
     @param {Object} options - Per-call parameters
-    @param {String} options.scope - Logical owner namespace
+    @param {String} options.namespace - Logical owner namespace
     @param {String} options.key - Specific verification purpose
     @param {String} options.value - Value submitted by the caller
     @param {Integer} options.max_fail_count - Reject after this many failed attempts
@@ -254,9 +254,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       Validators.validateCreateOptions(options);
 
       // Look up any existing record so we can apply the cooldown rule
-      const existing = await store.getRecord(instance, options.scope, options.key);
+      const existing = await store.getRecord(instance, options.namespace, options.key);
       if (existing.success === false) {
-        Lib.Debug.debug('Verify cooldown lookup failed', { scope: options.scope, key: options.key, error: existing.error });
+        Lib.Debug.debug('Verify cooldown lookup failed', { namespace: options.namespace, key: options.key, error: existing.error });
         return {
           success: false,
           code: null,
@@ -297,9 +297,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       };
 
       // Write the record (overwrites any prior record now outside cooldown)
-      const write_result = await store.setRecord(instance, options.scope, options.key, record);
+      const write_result = await store.setRecord(instance, options.namespace, options.key, record);
       if (write_result.success === false) {
-        Lib.Debug.debug('Verify store write failed', { scope: options.scope, key: options.key, error: write_result.error });
+        Lib.Debug.debug('Verify store write failed', { namespace: options.namespace, key: options.key, error: write_result.error });
         return {
           success: false,
           code: null,
@@ -336,17 +336,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // Programmer errors (bad args) throw synchronously - never returned as envelope
       Validators.validateVerifyOptions(options);
 
-      // Pull the stored record for this scope+key
-      const lookup = await store.getRecord(instance, options.scope, options.key);
+      // Pull the stored record for this namespace+key
+      const lookup = await store.getRecord(instance, options.namespace, options.key);
       if (lookup.success === false) {
-        Lib.Debug.debug('Verify consume lookup failed', { scope: options.scope, key: options.key, error: lookup.error });
+        Lib.Debug.debug('Verify consume lookup failed', { namespace: options.namespace, key: options.key, error: lookup.error });
         return {
           success: false,
           error: ERRORS.SERVICE_UNAVAILABLE
         };
       }
 
-      // No record means the caller never created a code for this scope+key
+      // No record means the caller never created a code for this namespace+key
       if (Lib.Utils.isNullOrUndefined(lookup.record)) {
         return {
           success: false,
@@ -372,9 +372,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Wrong value: bump the fail counter (best-effort) and reject
       if (lookup.record.code !== options.value) {
-        const inc_result = await store.incrementFailCount(instance, options.scope, options.key);
+        const inc_result = await store.incrementFailCount(instance, options.namespace, options.key);
         if (inc_result.success === false) {
-          Lib.Debug.debug('Verify increment fail count failed (ignored)', { scope: options.scope, key: options.key, error: inc_result.error });
+          Lib.Debug.debug('Verify increment fail count failed (ignored)', { namespace: options.namespace, key: options.key, error: inc_result.error });
         }
         return {
           success: false,
@@ -383,7 +383,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       }
 
       // Match: schedule a background delete so the same code cannot be reused
-      _Verify.scheduleBackgroundDelete(instance, options.scope, options.key);
+      _Verify.scheduleBackgroundDelete(instance, options.namespace, options.key);
 
       return {
         success: true,
@@ -441,28 +441,28 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     createInterface.
 
     @param {Object} instance - Request instance
-    @param {String} scope    - Logical owner namespace
+    @param {String} namespace    - Logical owner namespace
     @param {String} key      - Specific verification purpose
 
     @return {void}
     *********************************************************************/
-    scheduleBackgroundDelete: function (instance, scope, key) {
+    scheduleBackgroundDelete: function (instance, namespace, key) {
 
       // Tell the instance lifecycle that a parallel routine is starting
       const completeBackgroundRoutine = Lib.Instance.backgroundRoutine(instance);
 
       // Run the delete in the background; signal completion in finally
-      store.deleteRecord(instance, scope, key)
+      store.deleteRecord(instance, namespace, key)
         .then(function (delete_result) {
 
           if (delete_result.success === false) {
-            Lib.Debug.debug('Verify background delete failed (ignored)', { scope: scope, key: key, error: delete_result.error });
+            Lib.Debug.debug('Verify background delete failed (ignored)', { namespace: namespace, key: key, error: delete_result.error });
           }
 
         })
         .catch(function (error) {
 
-          Lib.Debug.debug('Verify background delete threw (ignored)', { scope: scope, key: key, error: error.message });
+          Lib.Debug.debug('Verify background delete threw (ignored)', { namespace: namespace, key: key, error: error.message });
 
         })
         .finally(function () {

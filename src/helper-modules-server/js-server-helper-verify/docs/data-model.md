@@ -6,7 +6,7 @@ Every verification attempt is represented as a single flat record. This document
 
 - [Core Concepts](#core-concepts)
 - [Record Fields](#record-fields)
-- [Scope and Key Design Guide](#scope-and-key-design-guide)
+- [Scope and Key Design Guide](#namespace-and-key-design-guide)
 - [Cleanup and Expiry](#cleanup-and-expiry)
 - [Design Decisions](#design-decisions)
 
@@ -14,22 +14,22 @@ Every verification attempt is represented as a single flat record. This document
 
 ## Core Concepts
 
-**Scope.** The logical owner of the verification code. It acts as a namespace that groups all codes belonging to the same context. All store queries are keyed on `(scope, key)` together.
+**Scope.** The logical owner of the verification code. It acts as a namespace that groups all codes belonging to the same context. All store queries are keyed on `(namespace, key)` together.
 
 ```
-scope: 'user.usr_9f2a'          // one user's verifications
-scope: 'tenant.42'              // tenant-level namespace
-scope: ''                       // single-tenant / no isolation needed (default)
+namespace: 'user.usr_9f2a'          // one user's verifications
+namespace: 'tenant.42'              // tenant-level namespace
+namespace: ''                       // single-tenant / no isolation needed (default)
 ```
 
-Scope is **not** a security boundary on its own. The application must establish that the caller's scope is authoritative before passing it in. Two callers with different scopes cannot see each other's codes; two callers with the same scope can (assuming they also know the key).
+Scope is **not** a security boundary on its own. The application must establish that the caller's namespace is authoritative before passing it in. Two callers with different scopes cannot see each other's codes; two callers with the same namespace can (assuming they also know the key).
 
-**Key.** The specific purpose or channel within the scope. Together with `scope` it forms the composite primary key. One `(scope, key)` pair holds at most one active code at a time. A new `createPin` / `createCode` / `createToken` call replaces the previous record.
+**Key.** The specific purpose or channel within the namespace. Together with `namespace` it forms the composite primary key. One `(namespace, key)` pair holds at most one active code at a time. A new `createPin` / `createCode` / `createToken` call replaces the previous record.
 
 ```
 key: 'login-phone.+919999912345'    // phone OTP for a specific number
 key: 'email-verify.user@example.com' // email confirmation link
-key: 'password-reset'               // password reset token (one per user, under user scope)
+key: 'password-reset'               // password reset token (one per user, under user namespace)
 key: 'totp-setup'                   // TOTP enrollment confirmation
 ```
 
@@ -45,7 +45,7 @@ Convention: `[purpose].[channel-identifier]`. The key is opaque to the module. A
 
 All three write the same record shape and are verified by the same `verify` function.
 
-**Cooldown.** The minimum gap in seconds before another code can be issued for the same `(scope, key)`. Prevents an attacker from flooding the channel. The cooldown window is checked against `instance.time - record.created_at`.
+**Cooldown.** The minimum gap in seconds before another code can be issued for the same `(namespace, key)`. Prevents an attacker from flooding the channel. The cooldown window is checked against `instance.time - record.created_at`.
 
 ```
 cooldown_seconds: 60     // at most one SMS per minute
@@ -60,8 +60,8 @@ cooldown_seconds: 0      // no cooldown (e.g. for test environments)
 
 | Field | Type | Set by | Description |
 |-------|------|--------|-------------|
-| `scope` | String | caller | Logical owner namespace. Part of the composite primary key. Default `''`. |
-| `key` | String | caller | Specific verification purpose within the scope. Part of the composite primary key. |
+| `namespace` | String | caller | Logical owner namespace. Part of the composite primary key. Default `''`. |
+| `key` | String | caller | Specific verification purpose within the namespace. Part of the composite primary key. |
 | `code` | String | verify module | The generated value the recipient must submit. Derived from `Lib.Crypto.generateRandomString`. |
 | `fail_count` | Number | verify module | Number of consecutive failed `verify` attempts since this record was last created. Starts at `0`. Incremented atomically by the store. |
 | `created_at` | Number | verify module | Unix epoch seconds when this record was written. Used to enforce `cooldown_seconds`. Derived from `instance.time`. |
@@ -75,23 +75,23 @@ The two keys together answer "what is this code for and who owns it?" They are d
 
 ```javascript
 // Phone OTP. Scope is the user, key identifies the phone number.
-scope: 'user.' + user.id
+namespace: 'user.' + user.id
 key:   'login-phone.' + normalized_phone
 
 // Email confirmation. Scope is the tenant, key identifies the email address.
-scope: 'tenant.' + tenant_id
+namespace: 'tenant.' + tenant_id
 key:   'email-confirm.' + email_address
 
 // Password reset. Scope is the user, key is the action (one per user at a time).
-scope: 'user.' + user.id
+namespace: 'user.' + user.id
 key:   'password-reset'
 
 // Two-factor setup. Scope is the user, key includes the method.
-scope: 'user.' + user.id
+namespace: 'user.' + user.id
 key:   'totp-setup'
 ```
 
-A new `create*` call for the same `(scope, key)` **replaces** the previous record. There is no accumulation. A flow that needs two simultaneous codes for the same user (for example, phone plus email) uses distinct keys.
+A new `create*` call for the same `(namespace, key)` **replaces** the previous record. There is no accumulation. A flow that needs two simultaneous codes for the same user (for example, phone plus email) uses distinct keys.
 
 ---
 
@@ -105,7 +105,7 @@ Whether `cleanupExpiredRecords` needs to be scheduled, and at what cadence, depe
 
 ## Design Decisions
 
-### Why single record per `(scope, key)`?
+### Why single record per `(namespace, key)`?
 
 Only one active code per purpose. If a user requests a new OTP, the old one is immediately invalidated. This prevents confusion (which code works?) and limits the attack surface.
 

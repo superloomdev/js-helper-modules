@@ -47,11 +47,11 @@ The second argument to `createPin`, `createCode`, and `createToken`. Identical a
 
 | Option | Type | Required | Constraint |
 |---|---|---|---|
-| `scope` | `string` | Yes | Non-empty. The logical owner namespace; part of the composite key |
-| `key` | `string` | Yes | Non-empty. The specific verification purpose within the scope; part of the composite key |
+| `namespace` | `string` | Yes | Non-empty. The logical owner namespace; part of the composite key |
+| `key` | `string` | Yes | Non-empty. The specific verification purpose within the namespace; part of the composite key |
 | `length` | `integer` | Yes | Greater than `0`. Number of characters in the generated code |
 | `ttl_seconds` | `integer` | Yes | Greater than `0`. Lifetime in seconds before the code expires |
-| `cooldown_seconds` | `integer` | Yes | Zero or greater. Minimum gap before the next create for the same `(scope, key)`. `0` disables the cooldown |
+| `cooldown_seconds` | `integer` | Yes | Zero or greater. Minimum gap before the next create for the same `(namespace, key)`. `0` disables the cooldown |
 
 All five are required. `cooldown_seconds` is the only one that accepts `0`; `length` and `ttl_seconds` must be strictly positive. The options object itself must be present; a `null` or `undefined` argument throws.
 
@@ -63,7 +63,7 @@ The second argument to `verify`. Validated per call by `validateVerifyOptions`. 
 
 | Option | Type | Required | Constraint |
 |---|---|---|---|
-| `scope` | `string` | Yes | Non-empty. Must match the scope used at creation |
+| `namespace` | `string` | Yes | Non-empty. Must match the namespace used at creation |
 | `key` | `string` | Yes | Non-empty. Must match the key used at creation |
 | `value` | `string` | Yes | Non-empty string. The value the recipient submitted |
 | `max_fail_count` | `integer` | Yes | Greater than `0`. Failed attempts allowed before the record locks out |
@@ -78,10 +78,10 @@ The shape `CONFIG.Store` must satisfy. This is the six-method contract every shi
 
 | Method | Returns | Purpose |
 |---|---|---|
-| `getRecord(instance, scope, key)` | `{ success, record, error }` | Read the record for a `(scope, key)` pair. `record` is `null` when absent |
-| `setRecord(instance, scope, key, record)` | `{ success, error }` | Write or replace the record for a `(scope, key)` pair |
-| `incrementFailCount(instance, scope, key)` | `{ success, error }` | Atomically increment the record's `fail_count` |
-| `deleteRecord(instance, scope, key)` | `{ success, error }` | Remove the record for a `(scope, key)` pair |
+| `getRecord(instance, namespace, key)` | `{ success, record, error }` | Read the record for a `(namespace, key)` pair. `record` is `null` when absent |
+| `setRecord(instance, namespace, key, record)` | `{ success, error }` | Write or replace the record for a `(namespace, key)` pair |
+| `incrementFailCount(instance, namespace, key)` | `{ success, error }` | Atomically increment the record's `fail_count` |
+| `deleteRecord(instance, namespace, key)` | `{ success, error }` | Remove the record for a `(namespace, key)` pair |
 | `setupNewStore(instance)` | `{ success, error }` | Idempotent backend provisioning (table or index creation) |
 | `cleanupExpiredRecords(instance)` | `{ success, deleted_count, error }` | Bulk-delete records past `expires_at` |
 

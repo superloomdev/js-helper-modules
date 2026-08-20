@@ -15,7 +15,7 @@ For the function reference see [API Reference](api.md). For configuration keys s
 
 ## Post-Verify Background Delete in Serverless
 
-On a successful `verify(...)` call, the module schedules a background `deleteRecord(scope, key)` via `Lib.Instance.backgroundRoutine` and returns `{ success: true }` immediately. The background delete is what enforces the strict one-time guarantee for the code: a second submission of the same value finds no record and returns `VERIFY_NOT_FOUND`.
+On a successful `verify(...)` call, the module schedules a background `deleteRecord(namespace, key)` via `Lib.Instance.backgroundRoutine` and returns `{ success: true }` immediately. The background delete is what enforces the strict one-time guarantee for the code: a second submission of the same value finds no record and returns `VERIFY_NOT_FOUND`.
 
 **Persistent server.** The Node process keeps running between requests. A backgrounded delete that has not completed before the response is sent continues on the same event loop. The window between "verify success" and "record deleted" is typically a few milliseconds. No special care is required; this is the normal case.
 
