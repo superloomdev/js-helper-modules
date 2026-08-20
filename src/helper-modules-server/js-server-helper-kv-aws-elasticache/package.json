@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-kv-aws-elasticache",
-  "description": "AWS ElastiCache key-value driver with IAM authentication. Wraps kv-valkey with SigV4 token generation and auto-refresh. Single instance, cluster mode disabled.",
+  "description": "AWS ElastiCache key-value driver with IAM authentication. Standalone module using ioredis and AWS SDK v3 SigV4 signing. Single instance, cluster mode disabled.",
   "version": "1.0.0",
   "main": "kv-aws-elasticache.js",
   "private": false,
@@ -20,12 +20,12 @@
   "peerDependencies": {
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
-    "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0",
-    "helper-kv-valkey": "npm:@superloomdev/js-server-helper-kv-valkey@^1.0.0"
+    "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0"
   },
   "dependencies": {
-    "aws4": "^1.13.0",
-    "ioredis": "^5.0.0"
+    "ioredis": "^5.0.0",
+    "@smithy/signature-v4": "^4.0.0",
+    "@aws-crypto/sha256-js": "^5.0.0"
   },
   "devDependencies": {
     "eslint": "^10.2.0",

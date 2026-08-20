@@ -1,5 +1,5 @@
 // Info: Test loader for js-server-helper-kv-aws-elasticache.
-// Mirrors the kv-valkey test loader but loads the ElastiCache wrapper.
+// Standalone module - no kv-valkey dependency.
 // IAM auth is tested with mocked credentials - no real AWS calls.
 'use strict';
 
@@ -34,7 +34,7 @@ module.exports = function loader () {
   Lib.Debug = require('helper-debug')(Lib, {});
   Lib.Instance = require('helper-instance')(Lib, {});
 
-  // Server helper modules - load the ElastiCache wrapper
+  // Server helper module - load the standalone ElastiCache driver
   Lib.KV = require('helper-kv-aws-elasticache')(Lib, config_kv);
 
   // Return runtime objects

@@ -1,5 +1,6 @@
 // Tests for js-server-helper-kv-aws-elasticache
-// Tests both passthrough mode (no IAM) and IAM token generation logic.
+// Standalone module - no kv-valkey dependency.
+// Tests both local mode (no IAM, ENDPOINT set) and IAM token generation logic.
 // IAM token generation uses mocked credentials - no real AWS calls.
 // All function tests run against a local Valkey container.
 'use strict';
@@ -56,7 +57,7 @@ after(async function () {
 
 describe('Factory Pattern', function () {
 
-  it('should expose all 17 public functions (same as kv-valkey)', function () {
+  it('should expose all 17 public functions', function () {
 
     const expected = [
       'close', 'ping',
@@ -96,10 +97,10 @@ describe('Config Validation', function () {
     }, TypeError);
   });
 
-  it('should throw TypeError on wrong AWS_REGION type', function () {
+  it('should throw TypeError on wrong REGION type', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, { AWS_REGION: 123 });
+      require('../kv-aws-elasticache')(Lib, { REGION: 123 });
     }, TypeError);
   });
 
@@ -115,33 +116,33 @@ describe('Config Validation', function () {
     assert.throws(function () {
       require('../kv-aws-elasticache')(Lib, {
         IAM_USER_ID: 'my-user',
-        AWS_KEY: 'AKIATEST',
-        AWS_SECRET: 'secrettest'
+        KEY: 'AKIATEST',
+        SECRET: 'secrettest'
         // CACHE_NAME missing
       });
     }, TypeError);
   });
 
-  it('should throw TypeError when IAM_USER_ID is set without AWS_KEY', function () {
+  it('should throw TypeError when IAM_USER_ID is set without KEY', function () {
 
     assert.throws(function () {
       require('../kv-aws-elasticache')(Lib, {
         IAM_USER_ID: 'my-user',
         CACHE_NAME: 'my-cache',
-        AWS_SECRET: 'secrettest'
-        // AWS_KEY missing
+        SECRET: 'secrettest'
+        // KEY missing
       });
     }, TypeError);
   });
 
-  it('should throw TypeError when IAM_USER_ID is set without AWS_SECRET', function () {
+  it('should throw TypeError when IAM_USER_ID is set without SECRET', function () {
 
     assert.throws(function () {
       require('../kv-aws-elasticache')(Lib, {
         IAM_USER_ID: 'my-user',
         CACHE_NAME: 'my-cache',
-        AWS_KEY: 'AKIATEST'
-        // AWS_SECRET missing
+        KEY: 'AKIATEST'
+        // SECRET missing
       });
     }, TypeError);
   });
@@ -155,9 +156,9 @@ describe('Config Validation', function () {
       TLS: false,
       IAM_USER_ID: 'my-user',
       CACHE_NAME: 'my-cache',
-      AWS_KEY: 'AKIATEST',
-      AWS_SECRET: 'secrettest',
-      AWS_REGION: 'us-east-1'
+      KEY: 'AKIATEST',
+      SECRET: 'secrettest',
+      REGION: 'us-east-1'
     });
 
     assert.strictEqual(typeof kv.set, 'function');
@@ -168,10 +169,10 @@ describe('Config Validation', function () {
 
 
 // ============================================================================
-// 3. PASSTHROUGH MODE (no IAM auth - delegates to kv-valkey)
+// 3. LOCAL MODE (no IAM auth - standalone ioredis connection)
 // ============================================================================
 
-describe('Passthrough Mode (no IAM)', function () {
+describe('Local Mode (no IAM)', function () {
 
   it('should ping successfully', async function () {
 
@@ -183,9 +184,9 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should set and get a value', async function () {
 
-    await KV.set(instance, 'passthrough_key', { name: 'alice' });
+    await KV.set(instance, 'local_key', { name: 'alice' });
 
-    const result = await KV.get(instance, 'passthrough_key');
+    const result = await KV.get(instance, 'local_key');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, { name: 'alice' });
@@ -193,7 +194,7 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should return null for absent key', async function () {
 
-    const result = await KV.get(instance, 'nonexistent_passthrough');
+    const result = await KV.get(instance, 'nonexistent_local');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, null);
@@ -201,9 +202,9 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should delete a key', async function () {
 
-    await KV.set(instance, 'del_passthrough', 'value');
+    await KV.set(instance, 'del_local', 'value');
 
-    const result = await KV.delete(instance, 'del_passthrough');
+    const result = await KV.delete(instance, 'del_local');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 1);
@@ -211,9 +212,9 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should check key existence', async function () {
 
-    await KV.set(instance, 'exists_passthrough', 'value');
+    await KV.set(instance, 'exists_local', 'value');
 
-    const result = await KV.getKeyExists(instance, 'exists_passthrough');
+    const result = await KV.getKeyExists(instance, 'exists_local');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, true);
@@ -261,9 +262,9 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should set and get hash field', async function () {
 
-    await KV.setHashField(instance, 'hash_pt', 'field1', { data: 'v1' });
+    await KV.setHashField(instance, 'hash_local', 'field1', { data: 'v1' });
 
-    const result = await KV.getHashField(instance, 'hash_pt', 'field1');
+    const result = await KV.getHashField(instance, 'hash_local', 'field1');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, { data: 'v1' });
@@ -271,10 +272,10 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should get all hash fields', async function () {
 
-    await KV.setHashField(instance, 'hashall_pt', 'f1', 'v1');
-    await KV.setHashField(instance, 'hashall_pt', 'f2', 'v2');
+    await KV.setHashField(instance, 'hashall_local', 'f1', 'v1');
+    await KV.setHashField(instance, 'hashall_local', 'f2', 'v2');
 
-    const result = await KV.getHashFields(instance, 'hashall_pt');
+    const result = await KV.getHashFields(instance, 'hashall_local');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(Object.keys(result.fields).length, 2);
@@ -284,9 +285,9 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should delete hash field', async function () {
 
-    await KV.setHashField(instance, 'hashdel_pt', 'field1', 'v1');
+    await KV.setHashField(instance, 'hashdel_local', 'field1', 'v1');
 
-    const result = await KV.deleteHashField(instance, 'hashdel_pt', 'field1');
+    const result = await KV.deleteHashField(instance, 'hashdel_local', 'field1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 1);
@@ -294,10 +295,10 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should set expire and get TTL', async function () {
 
-    await KV.set(instance, 'ttl_pt', 'value');
-    await KV.setExpire(instance, 'ttl_pt', 60);
+    await KV.set(instance, 'ttl_local', 'value');
+    await KV.setExpire(instance, 'ttl_local', 60);
 
-    const result = await KV.getTtl(instance, 'ttl_pt');
+    const result = await KV.getTtl(instance, 'ttl_local');
 
     assert.strictEqual(result.success, true);
     assert.ok(result.ttl_seconds > 0 && result.ttl_seconds <= 60);
@@ -305,9 +306,9 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should return null TTL for no-expiry key', async function () {
 
-    await KV.set(instance, 'no_ttl_pt', 'value');
+    await KV.set(instance, 'no_ttl_local', 'value');
 
-    const result = await KV.getTtl(instance, 'no_ttl_pt');
+    const result = await KV.getTtl(instance, 'no_ttl_local');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.ttl_seconds, null);
@@ -315,7 +316,7 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should increment a key', async function () {
 
-    const result = await KV.increment(instance, 'counter_pt');
+    const result = await KV.increment(instance, 'counter_local');
 
     assert.strictEqual(result.success, true);
     assert.ok(result.value >= 1);
@@ -323,7 +324,7 @@ describe('Passthrough Mode (no IAM)', function () {
 
   it('should increment by a given amount', async function () {
 
-    const result = await KV.increment(instance, 'counter_by_pt', 5);
+    const result = await KV.increment(instance, 'counter_by_local', 5);
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, 5);
@@ -354,38 +355,41 @@ describe('Passthrough Mode (no IAM)', function () {
 
 describe('IAM Token Generation', function () {
 
-  it('should generate a valid SigV4 token with mocked credentials', function () {
+  it('should generate a valid SigV4 token with mocked credentials', async function () {
 
-    // Build a kv-elasticache instance with IAM config
-    const kv = require('../kv-aws-elasticache')(Lib, {
-      HOST: Config.valkey_host,
-      PORT: Config.valkey_port,
-      TLS: false,
-      IAM_USER_ID: 'test-iam-user',
-      CACHE_NAME: 'test-cache-cluster',
-      AWS_KEY: 'AKIATESTKEY123',
-      AWS_SECRET: 'secrettestkey123',
-      AWS_REGION: 'us-east-1'
-    });
+    // Use the official AWS SDK v3 SignatureV4 to verify token structure
+    const { SignatureV4 } = require('@smithy/signature-v4');
+    const { Sha256 } = require('@aws-crypto/sha256-js');
 
-    // Access the private _KV via the module's internal state
-    // We test token generation directly by requiring aws4 and comparing
-    const aws4 = require('aws4');
-    const signed = aws4.sign({
-      service: 'elasticache',
+    const signer = new SignatureV4({
+      credentials: {
+        accessKeyId: 'AKIATESTKEY123',
+        secretAccessKey: 'secrettestkey123'
+      },
       region: 'us-east-1',
-      method: 'GET',
-      host: 'test-cache-cluster',
-      path: '/?Action=connect&User=test-iam-user&X-Amz-Expires=900',
-      protocol: 'http',
-      signQuery: true,
-      body: ''
-    }, {
-      accessKeyId: 'AKIATESTKEY123',
-      secretAccessKey: 'secrettestkey123'
+      service: 'elasticache',
+      sha256: Sha256
     });
 
-    const token = signed.host + signed.path;
+    const request = {
+      method: 'GET',
+      protocol: 'http:',
+      hostname: 'test-cache-cluster',
+      path: '/',
+      query: {
+        Action: 'connect',
+        User: 'test-iam-user',
+        'X-Amz-Expires': '900'
+      },
+      headers: {
+        host: 'test-cache-cluster'
+      }
+    };
+
+    const presigned = await signer.presign(request, { expiresIn: 900 });
+
+    const queryStr = new URLSearchParams(presigned.query).toString();
+    const token = presigned.hostname + presigned.path + '?' + queryStr;
 
     // Verify the token structure
     assert.ok(token.includes('Action=connect'), 'token should contain Action=connect');
@@ -394,6 +398,45 @@ describe('IAM Token Generation', function () {
     assert.ok(token.includes('X-Amz-Expires=900'), 'token should contain expiry');
     assert.ok(token.includes('X-Amz-Credential='), 'token should contain credentials');
     assert.ok(token.startsWith('test-cache-cluster/'), 'token should start with cache name');
+  });
+
+  it('should add ResourceType=ServerlessCache for serverless caches', async function () {
+
+    const { SignatureV4 } = require('@smithy/signature-v4');
+    const { Sha256 } = require('@aws-crypto/sha256-js');
+
+    const signer = new SignatureV4({
+      credentials: {
+        accessKeyId: 'AKIATEST',
+        secretAccessKey: 'secrettest'
+      },
+      region: 'us-east-1',
+      service: 'elasticache',
+      sha256: Sha256
+    });
+
+    const request = {
+      method: 'GET',
+      protocol: 'http:',
+      hostname: 'serverless-cache',
+      path: '/',
+      query: {
+        Action: 'connect',
+        User: 'my-user',
+        'X-Amz-Expires': '900',
+        ResourceType: 'ServerlessCache'
+      },
+      headers: {
+        host: 'serverless-cache'
+      }
+    };
+
+    const presigned = await signer.presign(request, { expiresIn: 900 });
+
+    const queryStr = new URLSearchParams(presigned.query).toString();
+    const token = presigned.hostname + presigned.path + '?' + queryStr;
+
+    assert.ok(token.includes('ResourceType=ServerlessCache'), 'token should contain ResourceType for serverless');
   });
 
   it('should not make real AWS calls - all credentials are mocked', function () {
@@ -406,13 +449,12 @@ describe('IAM Token Generation', function () {
       TLS: false,
       IAM_USER_ID: 'test-user',
       CACHE_NAME: 'test-cache',
-      AWS_KEY: 'AKIATEST',
-      AWS_SECRET: 'secrettest',
-      AWS_REGION: 'us-west-2'
+      KEY: 'AKIATEST',
+      SECRET: 'secrettest',
+      REGION: 'us-west-2'
     });
 
     // If we got here without throwing or hanging, construction succeeded
-    // The module should not have made any network calls during construction
     assert.strictEqual(typeof kv.set, 'function');
     assert.strictEqual(typeof kv.get, 'function');
   });
@@ -427,12 +469,14 @@ describe('IAM Token Generation', function () {
 
 describe('Wrapper Purity', function () {
 
-  it('should never include ioredis or AWS wording in error objects', function () {
+  it('should never include ioredis or AWS SDK wording in error objects', function () {
 
     // Verify error catalog messages
     assert.ok(ERRORS.KV_ELASTICACHE_IAM_TOKEN_FAILED.message.indexOf('ioredis') === -1);
+    assert.ok(ERRORS.KV_ELASTICACHE_IAM_TOKEN_FAILED.message.indexOf('smithy') === -1);
     assert.ok(ERRORS.KV_ELASTICACHE_IAM_TOKEN_FAILED.message.indexOf('aws4') === -1);
     assert.ok(ERRORS.KV_ELASTICACHE_IAM_TOKEN_EXPIRED.message.indexOf('ioredis') === -1);
+    assert.ok(ERRORS.KV_ELASTICACHE_IAM_TOKEN_EXPIRED.message.indexOf('smithy') === -1);
     assert.ok(ERRORS.KV_ELASTICACHE_IAM_TOKEN_EXPIRED.message.indexOf('aws4') === -1);
   });
 
@@ -440,6 +484,14 @@ describe('Wrapper Purity', function () {
 
     assert.strictEqual(ERRORS.KV_ELASTICACHE_IAM_TOKEN_FAILED.type, 'KV_ELASTICACHE_IAM_TOKEN_FAILED');
     assert.strictEqual(ERRORS.KV_ELASTICACHE_IAM_TOKEN_EXPIRED.type, 'KV_ELASTICACHE_IAM_TOKEN_EXPIRED');
+  });
+
+  it('should have the base KV error types in the catalog', function () {
+
+    assert.strictEqual(ERRORS.KV_CONNECTION_FAILED.type, 'KV_CONNECTION_FAILED');
+    assert.strictEqual(ERRORS.KV_COMMAND_FAILED.type, 'KV_COMMAND_FAILED');
+    assert.strictEqual(ERRORS.KV_TIMEOUT.type, 'KV_TIMEOUT');
+    assert.strictEqual(ERRORS.KV_SERIALIZATION_FAILED.type, 'KV_SERIALIZATION_FAILED');
   });
 
 });
