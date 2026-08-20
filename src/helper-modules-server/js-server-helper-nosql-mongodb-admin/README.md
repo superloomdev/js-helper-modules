@@ -55,7 +55,7 @@ The peer-dependency / loader pattern, including the full `Lib` container shape, 
 
 This module bundles one runtime npm package:
 
-- **`mongodb`** (mongodb). MongoDB driver for admin commands (createCollection, createIndex, listIndexes, dropCollection). Used because the MongoDB wire protocol is proprietary and undocumented; the driver encodes connection pooling and replica-set topology awareness that cannot be reimplemented in-house
+- **`mongodb`** (mongodb). MongoDB driver for admin commands (createCollection, createIndex, listIndexes, deleteCollection). Used because the MongoDB wire protocol is proprietary and undocumented; the driver encodes connection pooling and replica-set topology awareness that cannot be reimplemented in-house
 
 It expects three peer modules in the `Lib` container (Utils, Debug, Instance). For the full dependency breakdown, see [`docs/configuration.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-nosql-mongodb-admin/docs/configuration.md).
 

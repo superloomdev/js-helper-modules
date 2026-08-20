@@ -171,11 +171,11 @@ A small framework for validating the shape of incoming data (typically request b
 - **Dependent keys.** Keys whose presence requires another key to also be present.
 - **Validation rules.** A map of `key → check function`. The check function receives the value and a context, and returns truthy on valid.
 
-#### `absenteeKeysCheckObject(obj, context, required_config, required_keys, dependent_keys)`
+#### `checkAbsenteeKeys(obj, context, required_config, required_keys, dependent_keys)`
 
 Returns `false` if all required keys are present and valid. Returns `Error[]` if any required keys are missing or null. The `context` argument is forwarded to error construction.
 
-#### `invalidKeysCheckObject(obj, context, validation_config, invalidation_config)`
+#### `checkInvalidKeys(obj, context, validation_config, invalidation_config)`
 
 Returns `false` if all validations pass. Returns `Error[]` if any validation or invalidation rule fails.
 

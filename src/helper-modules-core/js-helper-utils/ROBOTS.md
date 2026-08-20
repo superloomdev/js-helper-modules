@@ -77,8 +77,8 @@ sanitizeBoolean(bool) → Boolean | async:no
 validateString(str, min_length, max_length) → Boolean | async:no
 validateStringRegx(str, regx, min_length, max_length) → Boolean | async:no
 validateNumber(num, min_value, max_value) → Boolean | async:no
-absenteeKeysCheckObject(obj, required_keys, ...) → Boolean | async:no
-invalidKeysCheckObject(obj, allowed_keys, ...) → Boolean | async:no
+checkAbsenteeKeys(obj, required_keys, ...) → Boolean | async:no
+checkInvalidKeys(obj, allowed_keys, ...) → Boolean | async:no
 checkObjectData(obj, validators, ...) → Boolean | async:no
 checkNewObjectsList(list, validators, ...) → Boolean | async:no
 checkEditObjectsList(list, validators, ...) → Boolean | async:no

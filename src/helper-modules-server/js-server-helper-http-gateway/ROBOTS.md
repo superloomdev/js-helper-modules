@@ -197,7 +197,7 @@ adapter.getCountryCode(headers);
     message: 'One or more required request parameters are missing or invalid'
   },
   NOT_IMPLEMENTED: {
-    type: 'NOT_IMPLEMENTED',
+    type: 'HTTP_GATEWAY_NOT_IMPLEMENTED',
     message: 'This operation is not yet implemented for this adapter'
   }
 }

@@ -43,7 +43,7 @@ createCollection(instance, options) -> { success, data: { created }, error } | a
   Create a collection. Idempotent: already-exists returns created: false.
   options: { collection_name: String, collection_options?: Object }
 
-dropCollection(instance, options) -> { success, data: { dropped }, error } | async:yes
+deleteCollection(instance, options) -> { success, data: { dropped }, error } | async:yes
   Drop a collection. Idempotent: missing collection returns dropped: false.
   options: { collection_name: String }
 

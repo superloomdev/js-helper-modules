@@ -160,19 +160,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Drop a collection. Idempotent: if the collection does not exist,
+    Delete a collection. Idempotent: if the collection does not exist,
     returns success with data.dropped set to false.
 
     @param {Object} instance - Request instance
     @param {Object} options - Function options
-    @param {String} options.collection_name - Name of the collection to drop
+    @param {String} options.collection_name - Name of the collection to delete
 
     @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
-    dropCollection: async function (instance, options) {
+    deleteCollection: async function (instance, options) {
 
       // Validate options (throws TypeError on programmer error)
-      Validators.validateDropCollection(options);
+      Validators.validateDeleteCollection(options);
 
       // Ensure MongoDB admin client is initialized
       await _MongoDBAdmin.initIfNot();
@@ -181,14 +181,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       try {
 
-        // Check if collection exists before attempting to drop
+        // Check if collection exists before attempting to delete
         const collections = await state.db.listCollections({ name: options.collection_name }).toArray();
 
         if (collections.length === 0) {
 
-          Lib.Debug.performanceAuditLog('End', 'MongoDBAdmin dropCollection', start_ms);
+          Lib.Debug.performanceAuditLog('End', 'MongoDBAdmin deleteCollection', start_ms);
 
-          // Collection does not exist - idempotent success without dropping
+          // Collection does not exist - idempotent success without deleting
           return {
             success: true,
             data: { dropped: false },
@@ -197,10 +197,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         }
 
-        // Execute dropCollection command
+        // Execute dropCollection command via native driver
         await state.db.dropCollection(options.collection_name);
 
-        Lib.Debug.performanceAuditLog('End', 'MongoDBAdmin dropCollection', start_ms);
+        Lib.Debug.performanceAuditLog('End', 'MongoDBAdmin deleteCollection', start_ms);
 
         // Return successful response with dropped flag
         return {
@@ -211,7 +211,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       } catch (error) {
 
-        Lib.Debug.debug('MongoDBAdmin dropCollection failed', {
+        Lib.Debug.debug('MongoDBAdmin deleteCollection failed', {
           type: ERRORS.ADMIN_OPERATION_FAILED.type,
           collection: options.collection_name,
           message: error.message,

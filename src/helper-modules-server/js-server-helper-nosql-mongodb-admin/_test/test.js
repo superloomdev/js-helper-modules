@@ -84,7 +84,7 @@ describe('Factory Pattern', function () {
       'createCollection',
       'createIndexes',
       'enableTtlIndex',
-      'dropCollection',
+      'deleteCollection',
       'listIndexes',
       'ping',
       'close'
@@ -335,20 +335,20 @@ describe('listIndexes', function () {
 
 
 // ============================================================================
-// 7. DROP COLLECTION
+// 7. DELETE COLLECTION
 // ============================================================================
 
-describe('dropCollection', function () {
+describe('deleteCollection', function () {
 
-  it('should drop an existing collection', async function () {
+  it('should delete an existing collection', async function () {
 
-    // Create a collection to drop
+    // Create a collection to delete
     const drop_name = 'test_admin_drop_target';
     await MongoDBAdmin.createCollection(instance, {
       collection_name: drop_name
     });
 
-    const result = await MongoDBAdmin.dropCollection(instance, {
+    const result = await MongoDBAdmin.deleteCollection(instance, {
       collection_name: drop_name
     });
 
@@ -357,9 +357,9 @@ describe('dropCollection', function () {
     assert.strictEqual(result.error, null);
   });
 
-  it('should be idempotent - dropping missing collection returns dropped: false', async function () {
+  it('should be idempotent - deleting missing collection returns dropped: false', async function () {
 
-    const result = await MongoDBAdmin.dropCollection(instance, {
+    const result = await MongoDBAdmin.deleteCollection(instance, {
       collection_name: 'test_admin_nonexistent_collection'
     });
 
@@ -371,7 +371,7 @@ describe('dropCollection', function () {
   it('should reject with TypeError when collection_name is missing', async function () {
 
     await assert.rejects(
-      MongoDBAdmin.dropCollection(instance, {}),
+      MongoDBAdmin.deleteCollection(instance, {}),
       TypeError
     );
   });

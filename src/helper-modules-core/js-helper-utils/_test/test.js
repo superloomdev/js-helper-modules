@@ -1135,7 +1135,7 @@ describe('validateStringRegx', function () {
 // 9. ABSENTEE AND INVALID KEY CHECKS
 // ============================================================================
 
-describe('absenteeKeysCheckObject', function () {
+describe('checkAbsenteeKeys', function () {
 
   const err = { code: 123, message: 'field missing' };
   const config = {
@@ -1147,20 +1147,20 @@ describe('absenteeKeysCheckObject', function () {
 
   it('should return errors when required keys are missing or null', function () {
     const obj = { k1: 'a', k2: 10, k3: null, k5: 'b' };
-    const result = Utils.absenteeKeysCheckObject(obj, 'ctx', config, ['k1', 'k3', 'k4']);
+    const result = Utils.checkAbsenteeKeys(obj, 'ctx', config, ['k1', 'k3', 'k4']);
     assert.strictEqual(Array.isArray(result), true);
     assert.strictEqual(result.length, 2);
   });
 
   it('should return false when all required keys are present and valid', function () {
     const obj = { k1: 'a', k5: 'b' };
-    const result = Utils.absenteeKeysCheckObject(obj, null, config, ['k1', 'k5']);
+    const result = Utils.checkAbsenteeKeys(obj, null, config, ['k1', 'k5']);
     assert.strictEqual(result, false);
   });
 
   it('should add dependent keys when parent key has matching value', function () {
     const obj = { k1: 'a', k2: 10, k3: null, k5: 'b' };
-    const result = Utils.absenteeKeysCheckObject(obj, null, config, ['k1'], {
+    const result = Utils.checkAbsenteeKeys(obj, null, config, ['k1'], {
       k2: [{ keys: ['k5'], values: [10, 15] }]
     });
     assert.strictEqual(result, false);
@@ -1169,7 +1169,7 @@ describe('absenteeKeysCheckObject', function () {
 });
 
 
-describe('invalidKeysCheckObject', function () {
+describe('checkInvalidKeys', function () {
 
   const err = { code: 123, message: 'invalid' };
   const obj = { k1: 'a', k2: 10 };
@@ -1178,7 +1178,7 @@ describe('invalidKeysCheckObject', function () {
     const validation_config = [
       { func: function (k1, k2) { return false; }, params: ['k1', 'k2'], error: err }
     ];
-    const result = Utils.invalidKeysCheckObject(obj, 'ctx', validation_config);
+    const result = Utils.checkInvalidKeys(obj, 'ctx', validation_config);
     assert.strictEqual(Array.isArray(result), true);
     assert.strictEqual(result.length, 1);
   });
@@ -1188,7 +1188,7 @@ describe('invalidKeysCheckObject', function () {
       { func: function (k1) { return k1 === 'a'; }, params: ['k1'], error: err },
       { func: function (k2) { return k2 === 10; }, params: ['k2'], error: err }
     ];
-    const result = Utils.invalidKeysCheckObject(obj, null, validation_config);
+    const result = Utils.checkInvalidKeys(obj, null, validation_config);
     assert.strictEqual(result, false);
   });
 
@@ -1199,11 +1199,11 @@ describe('invalidKeysCheckObject', function () {
     const deep_obj = { obj_data: obj };
     const invalidation_config = [
       {
-        func: function (inner) { return Utils.invalidKeysCheckObject(inner, null, inner_config); },
+        func: function (inner) { return Utils.checkInvalidKeys(inner, null, inner_config); },
         params: ['obj_data']
       }
     ];
-    const result = Utils.invalidKeysCheckObject(deep_obj, 'ctx', null, invalidation_config);
+    const result = Utils.checkInvalidKeys(deep_obj, 'ctx', null, invalidation_config);
     assert.strictEqual(result, false);
   });
 
@@ -1216,7 +1216,7 @@ describe('checkObjectData', function () {
     const err = { code: 1, message: 'missing' };
     const config = { name: { error: err } };
     const require_func = function (obj, keys) {
-      return Utils.absenteeKeysCheckObject(obj, null, config, keys);
+      return Utils.checkAbsenteeKeys(obj, null, config, keys);
     };
     const invalidate_func = function () { return false; };
     const result = Utils.checkObjectData({ age: 10 }, ['name'], {}, require_func, invalidate_func);
@@ -1235,7 +1235,7 @@ describe('checkObjectData', function () {
     const err = { code: 2, message: 'invalid' };
     const require_func = function () { return false; };
     const invalidate_func = function (obj) {
-      return Utils.invalidKeysCheckObject(obj, null, [
+      return Utils.checkInvalidKeys(obj, null, [
         { func: function (name) { return name.length > 5; }, params: ['name'], error: err }
       ]);
     };
@@ -1259,7 +1259,7 @@ describe('checkNewObjectsList', function () {
     const err = { code: 1, message: 'fail' };
     const config = { a: { error: err } };
     const check_func = function (obj) {
-      return Utils.absenteeKeysCheckObject(obj, null, config, ['a']);
+      return Utils.checkAbsenteeKeys(obj, null, config, ['a']);
     };
     const result = Utils.checkNewObjectsList([{ a: 1 }, { b: 2 }], check_func);
     assert.strictEqual(Array.isArray(result), true);
@@ -1299,7 +1299,7 @@ describe('checkEditObjectsList', function () {
     const err = { code: 1, message: 'new fail' };
     const config = { b: { error: err } };
     const new_func = function (obj) {
-      return Utils.absenteeKeysCheckObject(obj, null, config, ['b']);
+      return Utils.checkAbsenteeKeys(obj, null, config, ['b']);
     };
     const edit_func = function () { return false; };
     const list = [{ command: 'new', a: 1 }];
@@ -1313,7 +1313,7 @@ describe('checkEditObjectsList', function () {
     const config = { b: { error: err } };
     const new_func = function () { return false; };
     const edit_func = function (obj) {
-      return Utils.absenteeKeysCheckObject(obj, null, config, ['b']);
+      return Utils.checkAbsenteeKeys(obj, null, config, ['b']);
     };
     const list = [{ command: 'edit', a: 1 }];
     const result = Utils.checkEditObjectsList(list, new_func, edit_func);

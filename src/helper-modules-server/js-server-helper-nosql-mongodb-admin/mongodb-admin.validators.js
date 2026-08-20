@@ -153,20 +153,20 @@ const Validators = {
 
 
   /********************************************************************
-  Validate options for dropCollection.
+  Validate options for deleteCollection.
 
   @param {Object} options - Function options
 
   @return {void}
   *********************************************************************/
-  validateDropCollection: function (options) {
+  validateDeleteCollection: function (options) {
 
     if (Lib.Utils.isNullOrUndefined(options)) {
-      throw new TypeError('mongodb-admin: dropCollection requires options');
+      throw new TypeError('mongodb-admin: deleteCollection requires options');
     }
 
     if (Lib.Utils.isNullOrUndefined(options.collection_name) || options.collection_name === '') {
-      throw new TypeError('mongodb-admin: dropCollection requires options.collection_name');
+      throw new TypeError('mongodb-admin: deleteCollection requires options.collection_name');
     }
 
     if (typeof options.collection_name !== 'string') {

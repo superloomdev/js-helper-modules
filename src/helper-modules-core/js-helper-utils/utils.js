@@ -1084,7 +1084,7 @@ const Utils = {
   @return {Error[]} response - Array of Error-Objects if required fields not sent
   @return {Boolean} response - false if valid data
   *********************************************************************/
-  absenteeKeysCheckObject: function (
+  checkAbsenteeKeys: function (
     obj, context, required_config,
     required_keys, dependent_keys = {}
   ) {
@@ -1160,7 +1160,7 @@ const Utils = {
   @return {Error[]} response - Array of Error-Objects if required fields not sent
   @return {Boolean} response - false if valid data
   *********************************************************************/
-  invalidKeysCheckObject: function (
+  checkInvalidKeys: function (
     obj, context,
     validation_config, invalidation_config
   ) {

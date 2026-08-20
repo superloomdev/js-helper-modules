@@ -116,7 +116,7 @@ The admin connection string must authenticate as a user with one of the followin
 
 | Role | Scope | Sufficient for |
 |---|---|---|
-| `dbAdmin` | Single database | `createCollection`, `dropCollection`, `createIndexes`, `enableTtlIndex`, `listIndexes`, `ping` |
+| `dbAdmin` | Single database | `createCollection`, `deleteCollection`, `createIndexes`, `enableTtlIndex`, `listIndexes`, `ping` |
 | `root` | All databases | All admin operations (use only when a single-database role is insufficient) |
 
 For MongoDB Atlas, assign the `dbAdmin` built-in role to a dedicated user. For self-hosted MongoDB, create a user with `dbAdmin` on the target database:
