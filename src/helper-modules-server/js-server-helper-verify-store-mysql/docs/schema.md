@@ -6,13 +6,13 @@
 
 ```sql
 CREATE TABLE IF NOT EXISTS `verification_codes` (
-  `scope`      VARCHAR(255) NOT NULL,
+  `namespace`      VARCHAR(255) NOT NULL,
   `id`         VARCHAR(255) NOT NULL,
   `code`       VARCHAR(255) NOT NULL,
   `fail_count` INTEGER      NOT NULL DEFAULT 0,
   `created_at` BIGINT       NOT NULL,
   `expires_at` BIGINT       NOT NULL,
-  PRIMARY KEY (`scope`, `id`),
+  PRIMARY KEY (`namespace`, `id`),
   INDEX `verification_codes_expires_at_idx` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
@@ -23,7 +23,7 @@ The table name and index name are derived from `CONFIG.table_name` at runtime.
 
 | Column | MySQL Type | Nullable | Notes |
 |--------|------------|----------|-------|
-| `scope` | `VARCHAR(255)` | No | Logical namespace. Part of composite PK. |
+| `namespace` | `VARCHAR(255)` | No | Logical namespace. Part of composite PK. |
 | `id` | `VARCHAR(255)` | No | Verification key. Part of composite PK. Called `key` in contract; stored as `id`. |
 | `code` | `VARCHAR(255)` | No | Hashed or plain verification code. |
 | `fail_count` | `INTEGER` | No | Failed attempt count. Default `0`. |
@@ -50,7 +50,7 @@ The `mysql2` driver may return `BIGINT` columns as JavaScript strings. The verif
 
 ```sql
 INSERT INTO `verification_codes`
-  (`scope`, `id`, `code`, `fail_count`, `created_at`, `expires_at`)
+  (`namespace`, `id`, `code`, `fail_count`, `created_at`, `expires_at`)
 VALUES (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   `code`       = VALUES(`code`),
@@ -59,7 +59,7 @@ ON DUPLICATE KEY UPDATE
   `expires_at` = VALUES(`expires_at`)
 ```
 
-`VALUES(col)` refers to the value that would have been inserted. The primary key columns (`scope`, `id`) are never part of the `ON DUPLICATE KEY UPDATE` clause.
+`VALUES(col)` refers to the value that would have been inserted. The primary key columns (`namespace`, `id`) are never part of the `ON DUPLICATE KEY UPDATE` clause.
 
 ### Engine and Charset
 

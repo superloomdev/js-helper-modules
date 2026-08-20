@@ -50,7 +50,7 @@ module.exports = function runSharedStoreSuite (args) {
 
   const createOptions = function (override) {
     return Object.assign({
-      scope: 'tenant-A',
+      namespace: 'tenant-A',
       key: 'will-be-replaced',
       length: 6,
       ttl_seconds: 60,
@@ -60,7 +60,7 @@ module.exports = function runSharedStoreSuite (args) {
 
   const verifyOptions = function (override) {
     return Object.assign({
-      scope: 'tenant-A',
+      namespace: 'tenant-A',
       key: 'will-be-replaced',
       value: '000000',
       max_fail_count: 5
@@ -323,24 +323,24 @@ module.exports = function runSharedStoreSuite (args) {
 
   // ----- multi-tenant / isolation -----------------------------------------
 
-  describe(label + ': scope isolation', function () {
+  describe(label + ': namespace isolation', function () {
 
-    it('records in one scope are invisible to another scope', async function () {
+    it('records in one namespace are invisible to another namespace', async function () {
 
       const Verify = buildVerify();
       const instance = buildInstance();
       const key_a = uniqueKey('iso');
       const key_b = uniqueKey('iso');
 
-      const created = await Verify.createPin(instance, createOptions({ scope: 'tenant-A', key: key_a }));
+      const created = await Verify.createPin(instance, createOptions({ namespace: 'tenant-A', key: key_a }));
       assert.equal(created.success, true);
 
-      // Same key, different scope -> NOT_FOUND
-      const cross = await Verify.verify(instance, verifyOptions({ scope: 'tenant-B', key: key_a, value: created.code }));
+      // Same key, different namespace -> NOT_FOUND
+      const cross = await Verify.verify(instance, verifyOptions({ namespace: 'tenant-B', key: key_a, value: created.code }));
       assert.strictEqual(cross.error.type, 'VERIFY_NOT_FOUND');
 
-      // Same scope, different key -> NOT_FOUND
-      const wrong_key = await Verify.verify(instance, verifyOptions({ scope: 'tenant-A', key: key_b, value: created.code }));
+      // Same namespace, different key -> NOT_FOUND
+      const wrong_key = await Verify.verify(instance, verifyOptions({ namespace: 'tenant-A', key: key_b, value: created.code }));
       assert.strictEqual(wrong_key.error.type, 'VERIFY_NOT_FOUND');
 
     });
