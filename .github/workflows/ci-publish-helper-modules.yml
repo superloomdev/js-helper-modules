@@ -87,6 +87,8 @@
 #   50. test-client-font-ext-rn → publish-client-font-ext-rn
 #   50a. test-client-font-ext-expo → publish-client-font-ext-expo
 #   51. test-rnw-device → publish-rnw-device
+#   52. test-kv-valkey → publish-kv-valkey
+#   53. test-kv-aws-elasticache → publish-kv-aws-elasticache
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -4463,6 +4465,134 @@ jobs:
         run: npm install -g npm@10
       - name: Publish
         working-directory: src/helper-modules-client/js-rnw-helper-device
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+  # =========================================================================
+  # 52. kv-valkey (server driver, Valkey/Redis)
+  # =========================================================================
+  test-kv-valkey:
+    needs: [detect, publish-rnw-device]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-kv-valkey')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VALKEY_HOST: localhost
+      VALKEY_PORT: 6379
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-kv-valkey
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-kv-valkey:
+    needs: [detect, test-kv-valkey]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-kv-valkey'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-kv-valkey')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-kv-valkey
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+  # =========================================================================
+  # 53. kv-aws-elasticache (server driver, ElastiCache IAM auth)
+  # =========================================================================
+  test-kv-aws-elasticache:
+    needs: [detect, publish-kv-valkey]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-kv-aws-elasticache')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VALKEY_HOST: localhost
+      VALKEY_PORT: 6379
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-kv-aws-elasticache
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-kv-aws-elasticache:
+    needs: [detect, test-kv-aws-elasticache]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-kv-aws-elasticache'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-kv-aws-elasticache')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-kv-aws-elasticache
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
