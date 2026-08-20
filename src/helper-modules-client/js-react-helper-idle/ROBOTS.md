@@ -84,16 +84,16 @@ clearIdleHandlers() → { success, data: { removed_count }, error } | async:no
 ### Query
 
 ```
-getElapsed() → { success, data: { elapsed_ms }, error } | async:no
+getElapsed() → Number | async:no
   Ms since last activity. Frozen while paused.
 
-getLastActive() → { success, data: { last_active_ms }, error } | async:no
+getLastActive() → Number | async:no
   Unix ms timestamp of last activity.
 
-getTotalIdle() → { success, data: { total_idle_ms }, error } | async:no
+getTotalIdle() → Number | async:no
   Total ms spent in idle state, including in-progress period.
 
-getTotalActive() → { success, data: { total_active_ms }, error } | async:no
+getTotalActive() → Number | async:no
   Total ms spent in active state, including in-progress period.
 ```
 

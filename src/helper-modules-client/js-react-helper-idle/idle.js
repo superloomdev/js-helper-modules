@@ -441,25 +441,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get milliseconds elapsed since the last activity. Frozen while
     paused.
 
-    @return {Object} - { success, data, error }
+    @return {Number} - Elapsed milliseconds
     *********************************************************************/
     getElapsed: function () {
 
       // Return frozen value while paused
       if (state.paused) {
-        return {
-          success: true,
-          data: { elapsed_ms: state.pause_elapsed_ms },
-          error: null
-        };
+        return state.pause_elapsed_ms;
       }
 
       // Calculate elapsed time since last activity
-      return {
-        success: true,
-        data: { elapsed_ms: _Idle.getElapsedMs() },
-        error: null
-      };
+      return _Idle.getElapsedMs();
 
     },
 
@@ -467,16 +459,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get the timestamp of the last recorded activity.
 
-    @return {Object} - { success, data, error }
+    @return {Number} - Last active timestamp in milliseconds
     *********************************************************************/
     getLastActive: function () {
 
       // Return last active timestamp
-      return {
-        success: true,
-        data: { last_active_ms: state.last_active_ms },
-        error: null
-      };
+      return state.last_active_ms;
 
     },
 
@@ -485,7 +473,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get total milliseconds spent in the idle state, including the
     in-progress period.
 
-    @return {Object} - { success, data, error }
+    @return {Number} - Total idle milliseconds
     *********************************************************************/
     getTotalIdle: function () {
 
@@ -499,11 +487,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Return total idle time
-      return {
-        success: true,
-        data: { total_idle_ms: total },
-        error: null
-      };
+      return total;
 
     },
 
@@ -512,7 +496,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Get total milliseconds spent in the active state, including the
     in-progress period.
 
-    @return {Object} - { success, data, error }
+    @return {Number} - Total active milliseconds
     *********************************************************************/
     getTotalActive: function () {
 
@@ -526,11 +510,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Return total active time
-      return {
-        success: true,
-        data: { total_active_ms: total },
-        error: null
-      };
+      return total;
 
     }
 
