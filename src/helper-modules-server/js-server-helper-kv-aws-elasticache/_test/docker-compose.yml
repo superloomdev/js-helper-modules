@@ -1,0 +1,18 @@
+# Valkey for module testing (same as kv-valkey tests)
+# IAM auth is tested with mocked credentials - no real AWS calls
+
+name: superloom-test-valkey-elasticache
+
+services:
+
+  valkey:
+    container_name: superloom-test-valkey-elasticache
+    image: valkey/valkey:latest
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 2s
