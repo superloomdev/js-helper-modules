@@ -603,10 +603,10 @@ const buildAuth = function (overrides) {
     TTL_SECONDS: 3600,
     LAST_ACTIVE_UPDATE_INTERVAL_SECONDS: 600,
     LIMITS: {
-      total_max: 5,
-      by_form_factor_max: null,
-      by_platform_max: null,
-      evict_oldest_on_limit: true
+      TOTAL_MAX: 5,
+      BY_FORM_FACTOR_MAX: null,
+      BY_PLATFORM_MAX: null,
+      EVICT_OLDEST_ON_LIMIT: true
     },
     ENABLE_JWT: false,
     COOKIE_PREFIX: 'sl_user_'

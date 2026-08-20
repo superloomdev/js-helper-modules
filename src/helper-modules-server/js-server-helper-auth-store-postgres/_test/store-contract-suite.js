@@ -256,8 +256,8 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 2, by_form_factor_max: null, by_platform_max: null,
-          evict_oldest_on_limit: true
+          TOTAL_MAX: 2, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null,
+          EVICT_OLDEST_ON_LIMIT: true
         }
       });
 
@@ -280,8 +280,8 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 1, by_form_factor_max: null, by_platform_max: null,
-          evict_oldest_on_limit: false
+          TOTAL_MAX: 1, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null,
+          EVICT_OLDEST_ON_LIMIT: false
         }
       });
 
@@ -298,10 +298,10 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 10,
-          by_form_factor_max: { mobile: 2 },
-          by_platform_max: null,
-          evict_oldest_on_limit: true
+          TOTAL_MAX: 10,
+          BY_FORM_FACTOR_MAX: { mobile: 2 },
+          BY_PLATFORM_MAX: null,
+          EVICT_OLDEST_ON_LIMIT: true
         }
       });
 
@@ -599,8 +599,8 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 3, by_form_factor_max: null, by_platform_max: null,
-          evict_oldest_on_limit: true
+          TOTAL_MAX: 3, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null,
+          EVICT_OLDEST_ON_LIMIT: true
         }
       });
 
@@ -636,10 +636,10 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 20,
-          by_form_factor_max: null,
-          by_platform_max: { ios: 2 },
-          evict_oldest_on_limit: true
+          TOTAL_MAX: 20,
+          BY_FORM_FACTOR_MAX: null,
+          BY_PLATFORM_MAX: { ios: 2 },
+          EVICT_OLDEST_ON_LIMIT: true
         }
       });
 
@@ -686,10 +686,10 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 20,
-          by_form_factor_max: null,
-          by_platform_max: { ios: 1 },
-          evict_oldest_on_limit: false
+          TOTAL_MAX: 20,
+          BY_FORM_FACTOR_MAX: null,
+          BY_PLATFORM_MAX: { ios: 1 },
+          EVICT_OLDEST_ON_LIMIT: false
         }
       });
 
@@ -716,8 +716,8 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 10, by_form_factor_max: null, by_platform_max: null,
-          evict_oldest_on_limit: false
+          TOTAL_MAX: 10, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null,
+          EVICT_OLDEST_ON_LIMIT: false
         },
         TTL_SECONDS: 3600
       });
@@ -769,8 +769,8 @@ module.exports = function runSharedStoreSuite (args) {
       await cleanupBetweenTests();
       const auth = buildAuth({
         LIMITS: {
-          total_max: 10, by_form_factor_max: null, by_platform_max: null,
-          evict_oldest_on_limit: false
+          TOTAL_MAX: 10, BY_FORM_FACTOR_MAX: null, BY_PLATFORM_MAX: null,
+          EVICT_OLDEST_ON_LIMIT: false
         }
       });
 
