@@ -16,7 +16,7 @@ Executes one idempotent DDL statement with all indexes inlined:
 
 ```sql
 CREATE TABLE IF NOT EXISTS `action_log` (
-  `scope`         VARCHAR(128) NOT NULL DEFAULT '',
+  `tenant_id`         VARCHAR(128) NOT NULL DEFAULT '',
   `entity_type`   VARCHAR(64)  NOT NULL,
   `entity_id`     VARCHAR(128) NOT NULL,
   `actor_type`    VARCHAR(64)  NOT NULL,
@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS `action_log` (
   `sort_key`      VARCHAR(64)  NOT NULL,
   `expires_at`    BIGINT,
   PRIMARY KEY (`sort_key`),
-  INDEX `idx_action_log_entity_sort` (`scope`, `entity_type`, `entity_id`, `sort_key`),
-  INDEX `idx_action_log_actor_sort` (`scope`, `actor_type`, `actor_id`, `sort_key`),
+  INDEX `idx_action_log_entity_sort` (`tenant_id`, `entity_type`, `entity_id`, `sort_key`),
+  INDEX `idx_action_log_actor_sort` (`tenant_id`, `actor_type`, `actor_id`, `sort_key`),
   INDEX `idx_action_log_expires_at` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
@@ -60,11 +60,11 @@ A `sort_key` collision results in a no-op update - the existing row is unchanged
 
 ### `getLogsByEntity(instance, query)`
 
-Queries records by `(scope, entity_type, entity_id)`, most-recent first.
+Queries records by `(tenant_id, entity_type, entity_id)`, most-recent first.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `entity_type` | Yes | Entity type |
 | `entity_id` | Yes | Entity ID |
 | `actions` | No | Array of action strings |
@@ -79,7 +79,7 @@ Fetches `limit + 1` rows to detect next page.
 
 ### `getLogsByActor(instance, query)`
 
-Same as `getLogsByEntity` but queries by `(scope, actor_type, actor_id)`.
+Same as `getLogsByEntity` but queries by `(tenant_id, actor_type, actor_id)`.
 
 **Return:** `{ success, records, next_cursor, error }`
 
