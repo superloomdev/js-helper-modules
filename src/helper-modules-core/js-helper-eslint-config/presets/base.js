@@ -132,23 +132,40 @@ const RULES = {
   'no-self-compare': 'error',
 
   // Naming conventions - banned verbs. Use create/parse (row 9), format/parse
-  // (row 10), disjoin (row 11), or build (row 20) instead. See conventions-registry.md.
+  // (row 10), disjoin (row 11), or build (row 20) instead. See conventions-registry.md
+  // and function-naming.md - Banned Verbs.
   'no-restricted-syntax': ['error',
     {
       selector: 'FunctionDeclaration[id.name=/^(construct|deconstruct)[A-Z]/]',
-      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See function-naming.md - Banned Verbs.'
     },
     {
       selector: 'VariableDeclarator[id.name=/^(construct|deconstruct)[A-Z]/]',
-      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See function-naming.md - Banned Verbs.'
     },
     {
       selector: 'Property[key.name=/^(construct|deconstruct)[A-Z]/]',
-      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See function-naming.md - Banned Verbs.'
     },
     {
       selector: 'MethodDefinition[key.name=/^(construct|deconstruct)[A-Z]/]',
-      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See function-naming.md - Banned Verbs.'
+    },
+    {
+      selector: 'FunctionDeclaration[id.name=/^(read|ensure|transform)[A-Z]/]',
+      message: 'Use get or load instead of read, create or assert instead of ensure, format or parse instead of transform. See function-naming.md - Banned Verbs.'
+    },
+    {
+      selector: 'VariableDeclarator[id.name=/^(read|ensure|transform)[A-Z]/]',
+      message: 'Use get or load instead of read, create or assert instead of ensure, format or parse instead of transform. See function-naming.md - Banned Verbs.'
+    },
+    {
+      selector: 'Property[key.name=/^(read|ensure|transform)[A-Z]/]',
+      message: 'Use get or load instead of read, create or assert instead of ensure, format or parse instead of transform. See function-naming.md - Banned Verbs.'
+    },
+    {
+      selector: 'MethodDefinition[key.name=/^(read|ensure|transform)[A-Z]/]',
+      message: 'Use get or load instead of read, create or assert instead of ensure, format or parse instead of transform. See function-naming.md - Banned Verbs.'
     }
   ]
 };
