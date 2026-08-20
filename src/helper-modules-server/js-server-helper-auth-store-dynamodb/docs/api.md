@@ -68,7 +68,7 @@ Performs a `GetItem` by composite primary key, then verifies the secret hash bef
 
 **Wrong secret is intentionally indistinguishable from missing row.** The Auth module checks `record === null` and surfaces a generic authentication failure either way, which prevents timing-based enumeration of valid `token_key` values.
 
-The Sort Key is computed as `` `${actor_id}#${token_key}` `` (stored as the `session_key` attribute). This is internal to the adapter; the returned record strips `session_key` so callers receive a clean canonical record.
+The Sort Key is computed as `` `${actor_id}\u001F${token_key}` `` (stored as the `session_key` attribute). This is internal to the adapter; the returned record strips `session_key` so callers receive a clean canonical record.
 
 ### `listSessionsByActor(instance, tenant_id, actor_id)`
 
@@ -81,7 +81,7 @@ Returns every session for a `(tenant_id, actor_id)` pair using a `Query` with `b
 
 Returns an empty array, not `null`, when no sessions exist.
 
-The `begins_with` condition targets the Sort Key's prefix (`` `${actor_id}#` ``), so all sessions for the actor are returned in a single Query with no GSI required.
+The `begins_with` condition targets the Sort Key's prefix (`` `${actor_id}\u001F` ``), so all sessions for the actor are returned in a single Query with no GSI required.
 
 ### `setSession(instance, record)`
 

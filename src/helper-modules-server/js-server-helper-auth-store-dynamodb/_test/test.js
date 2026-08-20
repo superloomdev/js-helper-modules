@@ -184,7 +184,7 @@ describe('Tier 1: updateSessionActivity guards', { concurrency: false }, functio
     const store = buildStore();
     await assert.rejects(
       store.updateSessionActivity(buildInstance(1000), 'tenant-A', 'actor1', 'guardkey', {
-        session_key: 'actor1#bad'
+        session_key: 'actor1\u001Fbad'
       }),
       TypeError
     );

@@ -60,7 +60,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 5. **`setSession` uses `PutItem` (full replace).** Not a conditional update. The same `(tenant_id, actor_id, token_key)` triple overwrites the existing item entirely. The `recordToItem` helper adds the computed `session_key` Sort Key attribute; this is the only DynamoDB-specific field in the stored item.
 
-6. **The Sort Key attribute is `session_key`.** The adapter computes it as `` `${actor_id}#${token_key}` ``. This is a DynamoDB-only implementation detail; the canonical record shape never exposes `session_key`. It is stripped by `itemToRecord` on read.
+6. **The Sort Key attribute is `session_key`.** The adapter computes it as `` `${actor_id}\u001F${token_key}` ``. This is a DynamoDB-only implementation detail; the canonical record shape never exposes `session_key`. It is stripped by `itemToRecord` on read.
 
 7. **`custom_data` is stored as a native Map (`M`) attribute.** Unlike the SQL adapters which JSON-encode to TEXT, DynamoDB stores `custom_data` as a first-class Map attribute. `null` values are omitted entirely. The driver helper handles DynamoDB's type system; the adapter passes the canonical record through.
 
@@ -96,4 +96,4 @@ The adapter defines its own error catalog in `store.errors.js`. Auth forwards er
 
 ## Single Source of Truth
 
-The store's source file is `store.js`; the config validator is `store.validators.js`. Table design (PK/SK strategy), item encoding helpers (`recordToItem`, `itemToRecord`), identity blocklist, and DynamoDB operation calls live in `store.js`. The Sort Key construction (`` `${actor_id}#${token_key}` ``) is computed by `_Store.sortKey` and used consistently across all methods.
+The store's source file is `store.js`; the config validator is `store.validators.js`. Table design (PK/SK strategy), item encoding helpers (`recordToItem`, `itemToRecord`), identity blocklist, and DynamoDB operation calls live in `store.js`. The Sort Key construction (`` `${actor_id}\u001F${token_key}` ``) is computed by `_Store.sortKey` and used consistently across all methods.
