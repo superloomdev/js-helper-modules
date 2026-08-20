@@ -129,7 +129,28 @@ const RULES = {
   'no-async-promise-executor': 'error',
   'no-constant-binary-expression': 'error',
   'no-duplicate-imports': 'error',
-  'no-self-compare': 'error'
+  'no-self-compare': 'error',
+
+  // Naming conventions - banned verbs. Use create/parse (row 9), format/parse
+  // (row 10), disjoin (row 11), or build (row 20) instead. See conventions-registry.md.
+  'no-restricted-syntax': ['error',
+    {
+      selector: 'FunctionDeclaration[id.name=/^(construct|deconstruct)[A-Z]/]',
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+    },
+    {
+      selector: 'VariableDeclarator[id.name=/^(construct|deconstruct)[A-Z]/]',
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+    },
+    {
+      selector: 'Property[key.name=/^(construct|deconstruct)[A-Z]/]',
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+    },
+    {
+      selector: 'MethodDefinition[key.name=/^(construct|deconstruct)[A-Z]/]',
+      message: 'Use create/parse, format/parse, disjoin, or build instead of construct/deconstruct. See conventions-registry.md row 12.'
+    }
+  ]
 };
 
 //////////////////////////////// Rules END //////////////////////////////////////
