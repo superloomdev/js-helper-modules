@@ -49,13 +49,13 @@ This makes `addLog` idempotent - re-sending the same `sort_key` is not an error.
 
 ### `getLogsByEntity(instance, query)`
 
-Retrieves log records for a `(scope, entity_type, entity_id)` triple, most-recent first.
+Retrieves log records for a `(tenant_id, entity_type, entity_id)` triple, most-recent first.
 
 Query parameters:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `entity_type` | Yes | Entity type filter |
 | `entity_id` | Yes | Entity ID filter |
 | `actions` | No | Array of action strings to filter by |
@@ -70,13 +70,13 @@ The adapter fetches `limit + 1` rows internally to detect whether a next page ex
 
 ### `getLogsByActor(instance, query)`
 
-Same pagination contract as `getLogsByEntity` but queries by `(scope, actor_type, actor_id)`.
+Same pagination contract as `getLogsByEntity` but queries by `(tenant_id, actor_type, actor_id)`.
 
 Query parameters:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `scope` | Yes | Namespace filter |
+| `tenant_id` | Yes | Namespace filter |
 | `actor_type` | Yes | Actor type filter |
 | `actor_id` | Yes | Actor ID filter |
 | `limit` | No | Page size (default 50) |

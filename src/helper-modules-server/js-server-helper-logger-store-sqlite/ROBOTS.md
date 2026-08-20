@@ -28,7 +28,7 @@ Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
 | `getLogsByActor` | `(instance, query)` | `{ success, records, next_cursor, error }` |
 | `cleanupExpiredLogs` | `(instance)` | `{ success, deleted_count, error }` |
 
-All methods are async. `instance` is the per-request scope object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` and data fields set to typed empty values (`[]` / `null` / `0`).
+All methods are async. `instance` is the per-request tenant_id object from `Lib.Instance.initialize()`. Methods return either `success: true` with the requested data, or `success: false` with `error: ERRORS.SERVICE_UNAVAILABLE` and data fields set to typed empty values (`[]` / `null` / `0`).
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
@@ -44,7 +44,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 6. **`data` column is JSON-serialized TEXT.** Stored as `JSON.stringify(record.data)` on write; parsed back to an object on read. Corrupt stored values surface as `null`, not throws.
 
-7. **Three indexes support the query paths.** `entity_sort` (scope, entity_type, entity_id, sort_key), `actor_sort` (scope, actor_type, actor_id, sort_key), and `expires_at` for cleanup.
+7. **Three indexes support the query paths.** `entity_sort` (tenant_id, entity_type, entity_id, sort_key), `actor_sort` (tenant_id, actor_type, actor_id, sort_key), and `expires_at` for cleanup.
 
 8. **Identifiers are double-quoted (`"col"`).** The adapter rejects any `TABLE_NAME` containing a double-quote at quoting time.
 
