@@ -1,6 +1,6 @@
 // Info: MongoDB session store adapter for helper-auth.
 // Uses the composite
-//   "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
+//   "{tenant_id}\u001F{actor_id}\u001F{token_key}\u001F{token_secret_hash}"
 // as the document _id so:
 //   - Direct reads (getSession) are O(1) against the default _id index
 //   - Wrong-secret probes return "not found" without any extra read
@@ -376,7 +376,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       // Build an anchored prefix regex to locate the target document via _id.
       // The hash is baked into _id so we match on the tenant+actor+token_key
       // prefix - at most one document matches since the triple is unique.
-      const prefix = tenant_id + '#' + actor_id + '#' + token_key + '#';
+      const prefix = tenant_id + '\u001F' + actor_id + '\u001F' + token_key + '\u001F';
       const anchored = new RegExp('^' + _Store.escapeRegExp(prefix));
 
       // Run the partial $set update against the matched document
@@ -429,7 +429,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     deleteSession: async function (instance, tenant_id, actor_id, token_key) {
 
       // Build an anchored prefix regex for the target document
-      const prefix = tenant_id + '#' + actor_id + '#' + token_key + '#';
+      const prefix = tenant_id + '\u001F' + actor_id + '\u001F' + token_key + '\u001F';
       const anchored = new RegExp('^' + _Store.escapeRegExp(prefix));
 
       // Delete the matched document by prefix regex on _id
@@ -483,7 +483,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
       // Build an $or clause with one anchored prefix regex per key
       const or_clauses = keys.map(function (k) {
-        const prefix = tenant_id + '#' + k.actor_id + '#' + k.token_key + '#';
+        const prefix = tenant_id + '\u001F' + k.actor_id + '\u001F' + k.token_key + '\u001F';
         return { _id: new RegExp('^' + _Store.escapeRegExp(prefix)) };
       });
 
@@ -603,7 +603,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Build the MongoDB _id for a session document. Composite key:
-    "{tenant_id}#{actor_id}#{token_key}#{token_secret_hash}"
+    "{tenant_id}\u001F{actor_id}\u001F{token_key}\u001F{token_secret_hash}"
 
     Including the hash in _id means a wrong-secret getSession probe
     produces a different _id and MongoDB returns null without reading
@@ -618,15 +618,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     composeMongoId: function (tenant_id, actor_id, token_key, token_secret_hash) {
 
-      // Concatenate all four segments with the '#' composite-key separator
-      return tenant_id + '#' + actor_id + '#' + token_key + '#' + token_secret_hash;
+      // Concatenate all four segments with the '\u001F' composite-key separator
+      return tenant_id + '\u001F' + actor_id + '\u001F' + token_key + '\u001F' + token_secret_hash;
 
     },
 
 
     /********************************************************************
     Build the indexed `prefix` field stored on every document. Format:
-    "{tenant_id}#{actor_id}#"
+    "{tenant_id}\u001F{actor_id}\u001F"
 
     Equality queries on this field (via a btree index) replace the
     anchored-regex scan on _id for listSessionsByActor.
@@ -639,7 +639,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     composeMongoActorPrefix: function (tenant_id, actor_id) {
 
       // Concatenate tenant and actor segments with trailing separator
-      return tenant_id + '#' + actor_id + '#';
+      return tenant_id + '\u001F' + actor_id + '\u001F';
 
     },
 
