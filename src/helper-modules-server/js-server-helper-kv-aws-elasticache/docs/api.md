@@ -2,9 +2,7 @@
 
 ## Overview
 
-This module exposes the same 17 functions as `js-server-helper-kv-valkey`. The function signatures, return shapes, and error handling are identical. The only difference is that this module generates IAM auth tokens internally and injects them into the connection.
-
-For the full function reference, see [kv-valkey's API reference](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-kv-valkey/docs/api.md).
+This module exposes 17 key-value functions, the same set as `js-server-helper-kv-valkey`. The function signatures, return shapes, and error handling are identical. This is a standalone module - it does not depend on `kv-valkey` and owns its full implementation.
 
 ## Functions
 
@@ -48,8 +46,6 @@ For the full function reference, see [kv-valkey's API reference](https://github.
 
 ## Error Catalog
 
-All errors from `kv-valkey` plus:
-
 | Error type | When |
 |---|---|
 | `KV_CONNECTION_FAILED` | Server unreachable |
@@ -61,12 +57,11 @@ All errors from `kv-valkey` plus:
 
 ## IAM Auth Behavior
 
-When `IAM_USER_ID` is configured:
-- The module generates a SigV4-signed token on first connection
+When `IAM_USER_ID` is configured and `ENDPOINT` is not set:
+- The module generates a SigV4-signed token using `@smithy/signature-v4` on first connection
 - The token is cached and refreshed `TOKEN_REFRESH_MARGIN_SECONDS` before expiry
-- The token is passed as the `PASSWORD` to `ioredis`
+- The token is passed as the `password` to `ioredis`
 - On reconnect, a fresh token is generated
 
-When `IAM_USER_ID` is not configured:
-- The module falls through to `kv-valkey`'s standard connection
-- `PASSWORD` and `USERNAME` are not set (use `kv-valkey` directly for password auth)
+When `ENDPOINT` is set (local testing) or `IAM_USER_ID` is not configured:
+- The module connects with a plain `ioredis` client (no IAM auth)

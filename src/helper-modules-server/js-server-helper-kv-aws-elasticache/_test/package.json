@@ -1,6 +1,6 @@
 {
   "name": "js-server-helper-kv-aws-elasticache-test",
-  "description": "Test suite for js-server-helper-kv-aws-elasticache",
+  "description": "Test suite for js-server-helper-kv-aws-elasticache (standalone, no kv-valkey dependency)",
   "version": "1.0.0",
   "main": "test.js",
   "private": true,
@@ -12,7 +12,6 @@
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
     "helper-instance": "npm:@superloomdev/js-server-helper-instance@^1.0.0",
-    "helper-kv-valkey": "npm:@superloomdev/js-server-helper-kv-valkey@^1.0.0",
     "helper-kv-aws-elasticache": "file:../"
   },
   "scripts": {

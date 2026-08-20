@@ -1,20 +1,29 @@
 // Info: AWS ElastiCache key-value driver with IAM authentication.
-// Server-only: wraps kv-valkey with SigV4 token generation for ElastiCache IAM auth.
+// Server-only: standalone module using ioredis directly with AWS SDK v3
+// SigV4 signing for ElastiCache IAM auth tokens.
 //
-// Compatibility: Node.js 24+. Targets ElastiCache with Valkey 7.2+ or Redis OSS 7.0+,
-// cluster mode disabled, TLS enabled, IAM authentication configured.
+// Compatibility: Node.js 24+. Targets ElastiCache with Valkey 7.2+ or
+// Redis OSS 7.0+, cluster mode disabled, TLS enabled, IAM authentication.
 //
 // Factory pattern: each loader call returns an independent KV interface
-// with its own Lib, CONFIG, and per-instance ioredis client (via kv-valkey).
+// with its own Lib, CONFIG, and per-instance ioredis client.
 //
-// When IAM_USER_ID is configured, the module generates SigV4-signed auth tokens
-// using the aws4 library and injects them as the ioredis PASSWORD. Tokens are
-// cached and refreshed before expiry. When IAM_USER_ID is not configured, the
-// module falls through to kv-valkey's standard password auth.
+// When IAM_USER_ID is configured, the module generates SigV4-signed auth
+// tokens using @smithy/signature-v4 and injects them as the ioredis
+// password. Tokens are cached and refreshed before expiry. When
+// ENDPOINT is set (local testing), IAM auth is skipped and a plain
+// ioredis connection is used.
+//
+// Lazy-loaded drivers (stateless, shared across instances):
+//   - 'ioredis' -> Redis class, used to build the database client
+//   - '@smithy/signature-v4' -> SignatureV4 class, used to sign tokens
+//   - '@aws-crypto/sha256-js' -> Sha256 hash, used by the signer
 'use strict';
 
-// Shared stateless aws4 signer (module-level - require() is cached anyway).
-let aws4 = null;
+// Shared stateless drivers (module-level - require() is cached anyway).
+let Redis = null;
+let SignatureV4 = null;
+let Sha256 = null;
 
 
 
@@ -22,9 +31,9 @@ let aws4 = null;
 
 /********************************************************************
 Factory loader. One call = one independent instance with its own
-Lib, CONFIG, and kv-valkey-backed ioredis client.
+Lib, CONFIG, and ioredis client.
 
-@param {Object} shared_libs - Lib container with Utils, Debug, Instance, KV
+@param {Object} shared_libs - Lib container with Utils, Debug, Instance
 @param {Object} config - Overrides merged over module config defaults
 
 @return {Object} - Public interface for this module
@@ -54,11 +63,9 @@ module.exports = function loader (shared_libs, config) {
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
-  // Mutable per-instance state
+  // Mutable per-instance state (ioredis client + IAM token cache)
   const state = {
-    // The underlying kv-valkey instance
-    kvValkey: null,
-    // Cached IAM token and its expiry time (epoch milliseconds)
+    client: null,
     iamToken: null,
     iamTokenExpiresAt: 0
   };
@@ -71,17 +78,16 @@ module.exports = function loader (shared_libs, config) {
 
 /////////////////////////// createInterface START //////////////////////////////
 
-/********************************************************************
-Builds the public interface for one instance. Delegates all 17 kv-valkey
-functions through to the underlying kv-valkey instance, but overrides
-the connection to inject IAM auth tokens.
+/*********************************************************************
+Builds the public interface for one instance. Public and private
+functions close over the provided Lib, CONFIG, ERRORS, Validators,
+and state.
 
-@param {Object} Lib - Dependency container
-@param {Object} CONFIG - Merged configuration
-@param {Object} ERRORS - Frozen error catalog
-@param {Object} Validators - Validators singleton
-@param {Object} state - Mutable state holder
-@param {Object} shared_libs - Original shared_libs (for kv-valkey construction)
+@param {Object} Lib - Dependency container (Utils, Debug, Instance)
+@param {Object} CONFIG - Merged configuration for this instance
+@param {Object} ERRORS - Frozen error catalog for this module
+@param {Object} Validators - Validators singleton (Lib + ERRORS injected)
+@param {Object} state - Mutable state holder (ioredis client + token cache)
 
 @return {Object} - Public interface for this module
 *********************************************************************/
@@ -93,43 +99,94 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Lifecycle ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Close the connection. Delegates to kv-valkey.close.
+    Close the ElastiCache connection for this instance. Idempotent:
+    returns success if already closed or never connected.
 
     @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    close: async function (instance) {
+    close: async function (instance) { // eslint-disable-line no-unused-vars
 
-      // Delegate to kv-valkey if initialized
-      if (state.kvValkey) {
-        return state.kvValkey.close(instance);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Close ioredis client if it exists
+        if (!Lib.Utils.isNullOrUndefined(state.client)) {
+          await state.client.quit();
+          state.client = null;
+        }
+
+        Lib.Debug.performanceAuditLog('End', 'KV close', start_ms);
+
+        // Return successful response
+        return {
+          success: true,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV close failed', {
+          type: ERRORS.KV_CONNECTION_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          error: ERRORS.KV_CONNECTION_FAILED
+        };
+
       }
-
-      // Not yet connected - return success (idempotent, matching kv-valkey)
-      return {
-        success: true,
-        error: null
-      };
 
     },
 
 
     /********************************************************************
-    Ping the server. Ensures the kv-valkey instance is initialized with
-    a fresh IAM token, then delegates to kv-valkey.ping.
+    Ping the ElastiCache server. Triggers lazy connect on first call.
 
     @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    ping: async function (instance) {
+    ping: async function (instance) { // eslint-disable-line no-unused-vars
 
-      // Ensure kv-valkey is initialized with IAM auth
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
 
-      // Delegate to kv-valkey
-      return state.kvValkey.ping(instance);
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Execute PING command
+        await state.client.ping();
+
+        Lib.Debug.performanceAuditLog('End', 'KV ping', start_ms);
+
+        // Return successful response
+        return {
+          success: true,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV ping failed', {
+          type: ERRORS.KV_CONNECTION_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          error: ERRORS.KV_CONNECTION_FAILED
+        };
+
+      }
 
     },
 
@@ -141,15 +198,70 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @param {Object} instance - Request instance
     @param {String} key - Key name (without prefix)
-    @param {*} value - Value to store
+    @param {*} value - Value to store (JSON-serialized when SERIALIZE_JSON is true)
     @param {Number} [ttl_seconds] - Optional TTL in seconds
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     set: async function (instance, key, value, ttl_seconds) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.set(instance, key, value, ttl_seconds);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Serialize value if JSON mode is enabled
+        let stored = value;
+        if (CONFIG.SERIALIZE_JSON) {
+          try {
+            stored = JSON.stringify(value);
+          } catch (serializeError) {
+            Lib.Debug.debug('KV set serialization failed', {
+              type: ERRORS.KV_SERIALIZATION_FAILED.type,
+              message: serializeError.message
+            });
+            return {
+              success: false,
+              error: ERRORS.KV_SERIALIZATION_FAILED
+            };
+          }
+        }
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute SET with optional expiry in a single command
+        if (ttl_seconds !== undefined && ttl_seconds !== null) {
+          await state.client.set(prefixedKey, stored, 'EX', ttl_seconds);
+        } else {
+          await state.client.set(prefixedKey, stored);
+        }
+
+        Lib.Debug.performanceAuditLog('End', 'KV set', start_ms);
+
+        // Return successful response
+        return {
+          success: true,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV set failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -164,8 +276,71 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     get: async function (instance, key) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.get(instance, key);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute GET command
+        const raw = await state.client.get(prefixedKey);
+
+        Lib.Debug.performanceAuditLog('End', 'KV get', start_ms);
+
+        // Key absent - return null
+        if (raw === null) {
+          return {
+            success: true,
+            value: null,
+            error: null
+          };
+        }
+
+        // Deserialize value if JSON mode is enabled
+        let value = raw;
+        if (CONFIG.SERIALIZE_JSON) {
+          try {
+            value = JSON.parse(raw);
+          } catch (parseError) {
+            Lib.Debug.debug('KV get deserialization failed', {
+              type: ERRORS.KV_SERIALIZATION_FAILED.type,
+              message: parseError.message
+            });
+            return {
+              success: false,
+              value: null,
+              error: ERRORS.KV_SERIALIZATION_FAILED
+            };
+          }
+        }
+
+        // Return successful response with value
+        return {
+          success: true,
+          value: value,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV get failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -180,8 +355,44 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     delete: async function (instance, key) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.delete(instance, key);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute DEL command
+        const deleted_count = await state.client.del(prefixedKey);
+
+        Lib.Debug.performanceAuditLog('End', 'KV delete', start_ms);
+
+        // Return successful response with count
+        return {
+          success: true,
+          deleted_count: deleted_count,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV delete failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          deleted_count: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -196,8 +407,44 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     getKeyExists: async function (instance, key) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.getKeyExists(instance, key);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute EXISTS command
+        const count = await state.client.exists(prefixedKey);
+
+        Lib.Debug.performanceAuditLog('End', 'KV getKeyExists', start_ms);
+
+        // Return successful response with exists boolean
+        return {
+          success: true,
+          exists: count === 1,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV getKeyExists failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          exists: false,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -205,50 +452,244 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Multiple Keys ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Set multiple key-value pairs atomically.
+    Set multiple key-value pairs atomically (MSET on a single instance).
+    Takes an object { key: value, ... }. Optional TTL applies to all keys.
 
     @param {Object} instance - Request instance
     @param {Object} entries - Object of { key: value } pairs
-    @param {Number} [ttl_seconds] - Optional TTL for all keys
+    @param {Number} [ttl_seconds] - Optional TTL in seconds for all keys
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setMany: async function (instance, entries, ttl_seconds) {
 
+      // Empty input is a no-op success without contacting the engine
+      const keys = Object.keys(entries || {});
+      if (keys.length === 0) {
+        return {
+          success: true,
+          error: null
+        };
+      }
+
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.setMany(instance, entries, ttl_seconds);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Serialize all values first - if any fails, write nothing
+        const pairs = [];
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          let stored = entries[key];
+          if (CONFIG.SERIALIZE_JSON) {
+            try {
+              stored = JSON.stringify(entries[key]);
+            } catch (serializeError) {
+              Lib.Debug.debug('KV setMany serialization failed', {
+                type: ERRORS.KV_SERIALIZATION_FAILED.type,
+                message: serializeError.message,
+                key: key
+              });
+              return {
+                success: false,
+                error: ERRORS.KV_SERIALIZATION_FAILED
+              };
+            }
+          }
+          pairs.push(_KV.prefixKey(key), stored);
+        }
+
+        // Execute MSET (atomic on a single instance) or SET with TTL per key
+        if (ttl_seconds !== undefined && ttl_seconds !== null) {
+          // MSET does not support EX, so use pipeline of SET commands
+          const pipeline = state.client.pipeline();
+          for (let i = 0; i < pairs.length; i += 2) {
+            pipeline.set(pairs[i], pairs[i + 1], 'EX', ttl_seconds);
+          }
+          await pipeline.exec();
+        } else {
+          await state.client.mset.apply(state.client, pairs);
+        }
+
+        Lib.Debug.performanceAuditLog('End', 'KV setMany', start_ms);
+
+        // Return successful response
+        return {
+          success: true,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV setMany failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
 
     /********************************************************************
-    Get values for multiple keys.
+    Get values for multiple keys. Returns an array with null in the
+    position of each absent key. values.length === keys.length always.
 
     @param {Object} instance - Request instance
-    @param {Array} keys - Array of key names
+    @param {Array} keys - Array of key names (without prefix)
 
     @return {Promise<Object>} - { success, values, error }
     *********************************************************************/
     getMany: async function (instance, keys) {
 
+      // Empty input is a no-op success without contacting the engine
+      if (!keys || keys.length === 0) {
+        return {
+          success: true,
+          values: [],
+          error: null
+        };
+      }
+
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.getMany(instance, keys);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build prefixed keys
+        const prefixedKeys = keys.map(_KV.prefixKey);
+
+        // Execute MGET command
+        const rawValues = await state.client.mget.apply(state.client, prefixedKeys);
+
+        Lib.Debug.performanceAuditLog('End', 'KV getMany', start_ms);
+
+        // Deserialize values if JSON mode is enabled
+        // If any one element fails to parse, the whole call fails
+        const values = new Array(rawValues.length);
+        if (CONFIG.SERIALIZE_JSON) {
+          for (let i = 0; i < rawValues.length; i++) {
+            if (rawValues[i] === null) {
+              values[i] = null;
+            } else {
+              try {
+                values[i] = JSON.parse(rawValues[i]);
+              } catch (parseError) {
+                Lib.Debug.debug('KV getMany deserialization failed', {
+                  type: ERRORS.KV_SERIALIZATION_FAILED.type,
+                  message: parseError.message,
+                  index: i
+                });
+                return {
+                  success: false,
+                  values: null,
+                  error: ERRORS.KV_SERIALIZATION_FAILED
+                };
+              }
+            }
+          }
+        } else {
+          for (let i = 0; i < rawValues.length; i++) {
+            values[i] = rawValues[i];
+          }
+        }
+
+        // Return successful response with values
+        return {
+          success: true,
+          values: values,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV getMany failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          values: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
 
     /********************************************************************
-    Delete multiple keys.
+    Delete multiple keys. Returns exact deleted_count.
 
     @param {Object} instance - Request instance
-    @param {Array} keys - Array of key names
+    @param {Array} keys - Array of key names (without prefix)
 
     @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     deleteMany: async function (instance, keys) {
 
+      // Empty input is a no-op success without contacting the engine
+      if (!keys || keys.length === 0) {
+        return {
+          success: true,
+          deleted_count: 0,
+          error: null
+        };
+      }
+
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.deleteMany(instance, keys);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build prefixed keys
+        const prefixedKeys = keys.map(_KV.prefixKey);
+
+        // Execute DEL command with all keys
+        const deleted_count = await state.client.del.apply(state.client, prefixedKeys);
+
+        Lib.Debug.performanceAuditLog('End', 'KV deleteMany', start_ms);
+
+        // Return successful response with count
+        return {
+          success: true,
+          deleted_count: deleted_count,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV deleteMany failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          deleted_count: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -256,18 +697,75 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Scan ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Scan all keys matching a glob pattern.
+    Scan all keys matching a glob pattern. Collects all results across
+    cursor pages and returns them in one call. O(N) over the keyspace.
+    Maintenance tool, not a request-path operation.
 
     @param {Object} instance - Request instance
-    @param {String} pattern - Redis glob pattern
+    @param {String} pattern - Redis glob pattern (e.g. 'user:*')
     @param {Object} [options] - Optional settings
 
     @return {Promise<Object>} - { success, keys, error }
     *********************************************************************/
-    scan: async function (instance, pattern, options) {
+    scan: async function (instance, pattern, options) { // eslint-disable-line no-unused-vars
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.scan(instance, pattern, options);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed pattern for matching
+        const prefixedPattern = _KV.prefixKey(pattern);
+
+        // Page through SCAN until cursor returns 0
+        const allKeys = [];
+        let cursor = '0';
+
+        do {
+
+          // Execute SCAN command with COUNT hint
+          const [nextCursor, pageKeys] = await state.client.scan(
+            cursor,
+            'MATCH', prefixedPattern,
+            'COUNT', CONFIG.SCAN_PAGE_SIZE
+          );
+
+          // Collect keys from this page
+          allKeys.push.apply(allKeys, pageKeys);
+          cursor = nextCursor;
+
+        } while (cursor !== '0');
+
+        Lib.Debug.performanceAuditLog('End', 'KV scan', start_ms);
+
+        // Strip prefix from every returned key
+        const keys = allKeys.map(_KV.stripPrefix);
+
+        // Return successful response with keys
+        return {
+          success: true,
+          keys: keys,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV scan failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          keys: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -275,69 +773,292 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Hash ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Set a field in a hash.
+    Set a single field in a hash.
 
     @param {Object} instance - Request instance
-    @param {String} key - Hash key name
-    @param {String} field - Field name
-    @param {*} value - Value to store
+    @param {String} key - Hash key name (without prefix)
+    @param {String} field - Field name within the hash (never prefixed)
+    @param {*} value - Value to store (JSON-serialized when SERIALIZE_JSON is true)
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     setHashField: async function (instance, key, field, value) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.setHashField(instance, key, field, value);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Serialize value if JSON mode is enabled
+        let stored = value;
+        if (CONFIG.SERIALIZE_JSON) {
+          try {
+            stored = JSON.stringify(value);
+          } catch (serializeError) {
+            Lib.Debug.debug('KV setHashField serialization failed', {
+              type: ERRORS.KV_SERIALIZATION_FAILED.type,
+              message: serializeError.message
+            });
+            return {
+              success: false,
+              error: ERRORS.KV_SERIALIZATION_FAILED
+            };
+          }
+        }
+
+        // Build the prefixed key (field is never prefixed)
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute HSET command
+        await state.client.hset(prefixedKey, field, stored);
+
+        Lib.Debug.performanceAuditLog('End', 'KV setHashField', start_ms);
+
+        // Return successful response
+        return {
+          success: true,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV setHashField failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
 
     /********************************************************************
-    Get a field from a hash.
+    Get a single field from a hash. Returns null for absent key or field.
 
     @param {Object} instance - Request instance
-    @param {String} key - Hash key name
-    @param {String} field - Field name
+    @param {String} key - Hash key name (without prefix)
+    @param {String} field - Field name within the hash (never prefixed)
 
     @return {Promise<Object>} - { success, value, error }
     *********************************************************************/
     getHashField: async function (instance, key, field) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.getHashField(instance, key, field);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key (field is never prefixed)
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute HGET command
+        const raw = await state.client.hget(prefixedKey, field);
+
+        Lib.Debug.performanceAuditLog('End', 'KV getHashField', start_ms);
+
+        // Key or field absent - return null
+        if (raw === null) {
+          return {
+            success: true,
+            value: null,
+            error: null
+          };
+        }
+
+        // Deserialize value if JSON mode is enabled
+        let value = raw;
+        if (CONFIG.SERIALIZE_JSON) {
+          try {
+            value = JSON.parse(raw);
+          } catch (parseError) {
+            Lib.Debug.debug('KV getHashField deserialization failed', {
+              type: ERRORS.KV_SERIALIZATION_FAILED.type,
+              message: parseError.message
+            });
+            return {
+              success: false,
+              value: null,
+              error: ERRORS.KV_SERIALIZATION_FAILED
+            };
+          }
+        }
+
+        // Return successful response with value
+        return {
+          success: true,
+          value: value,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV getHashField failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
 
     /********************************************************************
-    Get all fields from a hash.
+    Get all fields and values from a hash. Returns empty object for
+    absent key.
 
     @param {Object} instance - Request instance
-    @param {String} key - Hash key name
+    @param {String} key - Hash key name (without prefix)
 
     @return {Promise<Object>} - { success, fields, error }
     *********************************************************************/
     getHashFields: async function (instance, key) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.getHashFields(instance, key);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute HGETALL command
+        const rawFields = await state.client.hgetall(prefixedKey);
+
+        Lib.Debug.performanceAuditLog('End', 'KV getHashFields', start_ms);
+
+        // Key absent - return empty object
+        if (!rawFields || Object.keys(rawFields).length === 0) {
+          return {
+            success: true,
+            fields: {},
+            error: null
+          };
+        }
+
+        // Deserialize field values if JSON mode is enabled
+        // If any one field fails to parse, the whole call fails
+        const fields = {};
+        if (CONFIG.SERIALIZE_JSON) {
+          const fieldNames = Object.keys(rawFields);
+          for (let i = 0; i < fieldNames.length; i++) {
+            const fieldName = fieldNames[i];
+            try {
+              fields[fieldName] = JSON.parse(rawFields[fieldName]);
+            } catch (parseError) {
+              Lib.Debug.debug('KV getHashFields deserialization failed', {
+                type: ERRORS.KV_SERIALIZATION_FAILED.type,
+                message: parseError.message,
+                field: fieldName
+              });
+              return {
+                success: false,
+                fields: null,
+                error: ERRORS.KV_SERIALIZATION_FAILED
+              };
+            }
+          }
+        } else {
+          Object.assign(fields, rawFields);
+        }
+
+        // Return successful response with fields
+        return {
+          success: true,
+          fields: fields,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV getHashFields failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          fields: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
 
     /********************************************************************
-    Delete a field from a hash.
+    Delete a single field from a hash. Returns deleted_count (0 if
+    key or field was absent).
 
     @param {Object} instance - Request instance
-    @param {String} key - Hash key name
-    @param {String} field - Field name
+    @param {String} key - Hash key name (without prefix)
+    @param {String} field - Field name within the hash (never prefixed)
 
     @return {Promise<Object>} - { success, deleted_count, error }
     *********************************************************************/
     deleteHashField: async function (instance, key, field) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.deleteHashField(instance, key, field);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key (field is never prefixed)
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute HDEL command
+        const deleted_count = await state.client.hdel(prefixedKey, field);
+
+        Lib.Debug.performanceAuditLog('End', 'KV deleteHashField', start_ms);
+
+        // Return successful response with count
+        return {
+          success: true,
+          deleted_count: deleted_count,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV deleteHashField failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          deleted_count: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -345,34 +1066,115 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ TTL ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Set an expiry on a key.
+    Set an expiry on a key. Returns applied: true if the key exists and
+    the expiry was set, applied: false if the key was absent.
 
     @param {Object} instance - Request instance
-    @param {String} key - Key name
+    @param {String} key - Key name (without prefix)
     @param {Number} ttl_seconds - TTL in seconds
 
     @return {Promise<Object>} - { success, applied, error }
     *********************************************************************/
     setExpire: async function (instance, key, ttl_seconds) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.setExpire(instance, key, ttl_seconds);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute EXPIRE command (returns 1 if applied, 0 if key absent)
+        const result = await state.client.expire(prefixedKey, ttl_seconds);
+
+        Lib.Debug.performanceAuditLog('End', 'KV setExpire', start_ms);
+
+        // Return successful response with applied flag
+        return {
+          success: true,
+          applied: result === 1,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV setExpire failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          applied: false,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
 
     /********************************************************************
-    Get the TTL of a key in seconds. Returns null for no-expiry and absent keys.
+    Get the TTL of a key in seconds. Returns null for keys with no
+    expiry and for absent keys (engine sentinels -1 and -2 both map
+    to null, never leaked to the caller).
 
     @param {Object} instance - Request instance
-    @param {String} key - Key name
+    @param {String} key - Key name (without prefix)
 
     @return {Promise<Object>} - { success, ttl_seconds, error }
     *********************************************************************/
     getTtl: async function (instance, key) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.getTtl(instance, key);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute TTL command (returns seconds, -1 for no expiry, -2 for absent)
+        const rawTtl = await state.client.ttl(prefixedKey);
+
+        Lib.Debug.performanceAuditLog('End', 'KV getTtl', start_ms);
+
+        // Map engine sentinels to null - never return -1 or -2
+        let ttl_seconds = rawTtl;
+        if (rawTtl === -1 || rawTtl === -2) {
+          ttl_seconds = null;
+        }
+
+        // Return successful response with ttl_seconds
+        return {
+          success: true,
+          ttl_seconds: ttl_seconds,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV getTtl failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          ttl_seconds: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     },
 
@@ -380,18 +1182,60 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // ~~~~~~~~~~~~~~~~~~~~ Counter ~~~~~~~~~~~~~~~~~~~~
 
     /********************************************************************
-    Increment a key by 1 (default) or by the given amount.
+    Increment a key by 1 (default) or by the given amount. Atomic on
+    a single instance. An absent key is treated as 0 by the engine.
 
     @param {Object} instance - Request instance
-    @param {String} key - Key name
-    @param {Number} [by] - Amount to increment by
+    @param {String} key - Key name (without prefix)
+    @param {Number} [by] - Amount to increment by (default 1)
 
     @return {Promise<Object>} - { success, value, error }
     *********************************************************************/
     increment: async function (instance, key, by) {
 
+      // Ensure ioredis client is initialized
       await _KV.initIfNot();
-      return state.kvValkey.increment(instance, key, by);
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute INCR or INCRBY depending on the amount
+        let value;
+        if (by === undefined || by === 1) {
+          value = await state.client.incr(prefixedKey);
+        } else {
+          value = await state.client.incrby(prefixedKey, by);
+        }
+
+        Lib.Debug.performanceAuditLog('End', 'KV increment', start_ms);
+
+        // Return successful response with value
+        return {
+          success: true,
+          value: value,
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV increment failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
 
     }
 
@@ -403,54 +1247,88 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
   const _KV = {
 
     /********************************************************************
-    Lazy-load the aws4 signing library.
+    Lazy-load the ioredis driver and AWS SDK v3 signing libraries.
+    Shared across every instance because the modules themselves are
+    stateless - only the ioredis client holds per-instance state.
 
     @return {void}
     *********************************************************************/
-    loadAws4: function () {
+    loadAdapter: function () {
 
-      if (Lib.Utils.isNullOrUndefined(aws4)) {
-        aws4 = require('aws4');
+      // Redis class (shared across instances)
+      if (Lib.Utils.isNullOrUndefined(Redis)) {
+        Redis = require('ioredis');
+      }
+
+      // SignatureV4 signer class (shared across instances)
+      if (Lib.Utils.isNullOrUndefined(SignatureV4)) {
+        SignatureV4 = require('@smithy/signature-v4').SignatureV4;
+      }
+
+      // Sha256 hash class (shared across instances)
+      if (Lib.Utils.isNullOrUndefined(Sha256)) {
+        Sha256 = require('@aws-crypto/sha256-js').Sha256;
       }
 
     },
 
 
     /********************************************************************
-    Generate a SigV4-signed IAM auth token for ElastiCache.
+    Generate a SigV4-signed IAM auth token for ElastiCache using the
+    official AWS SDK v3 SignatureV4 presign method.
 
-    The token is a signed URL: <cache-name>/?Action=connect&User=<userId>&X-Amz-Expires=900&...
-    It is passed as the PASSWORD to ioredis AUTH.
+    The token is a presigned URL: hostname + path + signed query string.
+    It is passed as the password to ioredis AUTH.
 
-    @return {Object} result
+    @return {Promise<Object>} result
     @return {String} result.token - The signed token
     @return {Number} result.expiresAt - Epoch milliseconds when the token expires
     *********************************************************************/
-    generateIamToken: function () {
-
-      // Load aws4 if not already loaded
-      _KV.loadAws4();
+    generateIamToken: async function () {
 
       // Token TTL (max 900 seconds per AWS)
       const tokenTtlSeconds = 900;
 
-      // Build the SigV4 signing request
-      const signed = aws4.sign({
+      // Build the SigV4 signer with explicit credentials
+      const signer = new SignatureV4({
+        credentials: {
+          accessKeyId: CONFIG.KEY,
+          secretAccessKey: CONFIG.SECRET
+        },
+        region: CONFIG.REGION,
         service: 'elasticache',
-        region: CONFIG.AWS_REGION,
-        method: 'GET',
-        host: CONFIG.CACHE_NAME,
-        path: '/?Action=connect&User=' + encodeURIComponent(CONFIG.IAM_USER_ID) + '&X-Amz-Expires=' + tokenTtlSeconds,
-        protocol: 'http',
-        signQuery: true,
-        body: ''
-      }, {
-        accessKeyId: CONFIG.AWS_KEY,
-        secretAccessKey: CONFIG.AWS_SECRET
+        sha256: Sha256
       });
 
-      // The token is the host + signed path (without the http:// prefix)
-      const token = signed.host + signed.path;
+      // Build the request to presign
+      const query = {
+        Action: 'connect',
+        User: CONFIG.IAM_USER_ID,
+        'X-Amz-Expires': String(tokenTtlSeconds)
+      };
+
+      // Add ResourceType for serverless caches
+      if (CONFIG.SERVERLESS) {
+        query.ResourceType = 'ServerlessCache';
+      }
+
+      const request = {
+        method: 'GET',
+        protocol: 'http:',
+        hostname: CONFIG.CACHE_NAME,
+        path: '/',
+        query: query,
+        headers: {
+          host: CONFIG.CACHE_NAME
+        }
+      };
+
+      // Presign the request
+      const presigned = await signer.presign(request, { expiresIn: tokenTtlSeconds });
+
+      // Build the token string: hostname + path + query string
+      const queryStr = new URLSearchParams(presigned.query).toString();
+      const token = presigned.hostname + presigned.path + '?' + queryStr;
 
       // Calculate expiry time (subtract the refresh margin)
       const now = Date.now();
@@ -459,7 +1337,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Lib.Debug.info('KV ElastiCache IAM token generated', {
         cacheName: CONFIG.CACHE_NAME,
         userId: CONFIG.IAM_USER_ID,
-        region: CONFIG.AWS_REGION,
+        region: CONFIG.REGION,
         expiresAt: new Date(expiresAt).toISOString()
       });
 
@@ -474,11 +1352,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Get a valid IAM auth token, refreshing if the cached one is near expiry.
 
-    @return {Object} result
+    @return {Promise<Object>} result
     @return {String} result.token - A valid (non-expired) token
     @return {Number} result.expiresAt - When this token expires
     *********************************************************************/
-    getIamToken: function () {
+    getIamToken: async function () {
 
       // Check if the cached token is still valid
       const now = Date.now();
@@ -490,7 +1368,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Generate a fresh token
-      const result = _KV.generateIamToken();
+      const result = await _KV.generateIamToken();
 
       // Cache it
       state.iamToken = result.token;
@@ -502,76 +1380,110 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
-    Create the underlying kv-valkey instance on first use. When IAM auth
-    is configured, generates a fresh IAM token and passes it as PASSWORD.
-    When IAM auth is not configured, passes through to kv-valkey with
-    standard password auth.
+    Create this instance's ioredis client on first use. When IAM auth
+    is configured, generates a SigV4 token and passes it as the password.
+    When ENDPOINT is set (local testing), connects without IAM auth.
 
     @return {Promise<void>}
     *********************************************************************/
     initIfNot: async function () {
 
-      // Already initialized
-      if (state.kvValkey) {
+      // Already built
+      if (!Lib.Utils.isNullOrUndefined(state.client)) {
         return;
       }
 
-      // Build the kv-valkey config
-      const kvConfig = {
-        HOST: CONFIG.HOST,
-        PORT: CONFIG.PORT,
-        DB: CONFIG.DB,
-        TLS: CONFIG.TLS,
-        KEY_PREFIX: CONFIG.KEY_PREFIX,
-        SERIALIZE_JSON: CONFIG.SERIALIZE_JSON,
-        SCAN_PAGE_SIZE: CONFIG.SCAN_PAGE_SIZE,
-        CONNECT_TIMEOUT_MS: CONFIG.CONNECT_TIMEOUT_MS,
-        COMMAND_TIMEOUT_MS: CONFIG.COMMAND_TIMEOUT_MS
+      // Adapters must be loaded before client creation
+      _KV.loadAdapter();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      // Build ioredis client options
+      const options = {
+        host: CONFIG.HOST,
+        port: CONFIG.PORT,
+        db: CONFIG.DB,
+        connectTimeout: CONFIG.CONNECT_TIMEOUT_MS,
+        commandTimeout: CONFIG.COMMAND_TIMEOUT_MS,
+        lazyConnect: true
       };
 
-      // Add TLS_CONFIG if present
-      if (CONFIG.TLS_CONFIG) {
-        kvConfig.TLS_CONFIG = CONFIG.TLS_CONFIG;
+      // Add TLS if enabled (required for ElastiCache)
+      if (CONFIG.TLS) {
+        options.tls = CONFIG.TLS_CONFIG || {};
       }
 
-      // If IAM auth is configured, generate a token and use it as PASSWORD
-      if (CONFIG.IAM_USER_ID) {
+      // If IAM auth is configured, generate a token and use it as password
+      if (CONFIG.IAM_USER_ID && !CONFIG.ENDPOINT) {
 
-        const tokenResult = _KV.getIamToken();
+        const tokenResult = await _KV.getIamToken();
 
-        kvConfig.PASSWORD = tokenResult.token;
-        kvConfig.USERNAME = CONFIG.IAM_USER_ID;
+        options.password = tokenResult.token;
+        options.username = CONFIG.IAM_USER_ID;
 
         Lib.Debug.info('KV ElastiCache initializing with IAM auth', {
           host: CONFIG.HOST,
           port: CONFIG.PORT,
-          iamUserId: CONFIG.IAM_USER_ID
+          iamUserId: CONFIG.IAM_USER_ID,
+          cacheName: CONFIG.CACHE_NAME
         });
 
       } else {
 
-        // Fall through to standard password auth (no IAM)
-        // PASSWORD and USERNAME are not set here - they come from the caller
-        // via the kv-valkey config if needed
-        Lib.Debug.info('KV ElastiCache initializing without IAM auth (passthrough)', {
+        // Local testing mode (ENDPOINT set) or no IAM auth
+        Lib.Debug.info('KV ElastiCache initializing (no IAM auth)', {
           host: CONFIG.HOST,
           port: CONFIG.PORT
         });
 
       }
 
-      // Create the kv-valkey instance
-      // Use the bare alias - the consumer's package.json maps it to the scoped name
-      const kvValkeyModule = require('helper-kv-valkey');
+      // Create the client
+      state.client = new Redis(options);
 
-      // Build the Lib container for kv-valkey (it needs Utils, Debug, Instance)
-      const kvLib = {
-        Utils: Lib.Utils,
-        Debug: Lib.Debug,
-        Instance: Lib.Instance
-      };
+      // Establish connection
+      await state.client.connect();
 
-      state.kvValkey = kvValkeyModule(kvLib, kvConfig);
+      Lib.Debug.performanceAuditLog('End', 'KV Client', start_ms);
+
+    },
+
+
+    /********************************************************************
+    Apply KEY_PREFIX to a key. Returns the prefixed key, or the
+    key unchanged if no prefix is configured.
+
+    @param {String} key - Key name without prefix
+
+    @return {String} - Prefixed key
+    *********************************************************************/
+    prefixKey: function (key) {
+
+      if (CONFIG.KEY_PREFIX) {
+        return CONFIG.KEY_PREFIX + key;
+      }
+
+      return key;
+
+    },
+
+
+    /********************************************************************
+    Strip KEY_PREFIX from a key. Returns the unprefixed key, or the
+    key unchanged if no prefix is configured. Used on read paths
+    including scan results.
+
+    @param {String} prefixedKey - Key name with prefix
+
+    @return {String} - Key without prefix
+    *********************************************************************/
+    stripPrefix: function (prefixedKey) {
+
+      if (CONFIG.KEY_PREFIX && prefixedKey.startsWith(CONFIG.KEY_PREFIX)) {
+        return prefixedKey.slice(CONFIG.KEY_PREFIX.length);
+      }
+
+      return prefixedKey;
 
     }
 

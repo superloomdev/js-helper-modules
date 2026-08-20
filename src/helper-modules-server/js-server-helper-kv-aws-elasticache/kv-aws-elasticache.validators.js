@@ -1,5 +1,5 @@
 // Info: Config validator for js-server-helper-kv-aws-elasticache.
-// Validates both the passthrough kv-valkey config keys and the IAM auth keys.
+// Validates all config keys including AWS credentials and IAM auth settings.
 // Throws TypeError on misconfiguration so the module fails before serving.
 'use strict';
 
@@ -49,10 +49,10 @@ const Validators = {
     // Known keys
     const knownKeys = new Set([
       'HOST', 'PORT', 'DB', 'TLS', 'TLS_CONFIG',
+      'REGION', 'KEY', 'SECRET', 'ENDPOINT',
+      'IAM_USER_ID', 'CACHE_NAME', 'SERVERLESS', 'TOKEN_REFRESH_MARGIN_SECONDS',
       'KEY_PREFIX', 'SERIALIZE_JSON', 'SCAN_PAGE_SIZE',
-      'CONNECT_TIMEOUT_MS', 'COMMAND_TIMEOUT_MS',
-      'AWS_REGION', 'AWS_KEY', 'AWS_SECRET',
-      'IAM_USER_ID', 'CACHE_NAME', 'TOKEN_REFRESH_MARGIN_SECONDS'
+      'CONNECT_TIMEOUT_MS', 'COMMAND_TIMEOUT_MS'
     ]);
 
     // Check for unknown keys
@@ -91,6 +91,48 @@ const Validators = {
       throw new TypeError('TLS_CONFIG must be an Object');
     }
 
+    // REGION must be a String if present
+    if (config.REGION !== undefined && !Lib.Utils.isString(config.REGION)) {
+      throw new TypeError('REGION must be a String');
+    }
+
+    // KEY must be a String if present
+    if (config.KEY !== undefined && config.KEY !== null && !Lib.Utils.isString(config.KEY)) {
+      throw new TypeError('KEY must be a String');
+    }
+
+    // SECRET must be a String if present
+    if (config.SECRET !== undefined && config.SECRET !== null && !Lib.Utils.isString(config.SECRET)) {
+      throw new TypeError('SECRET must be a String');
+    }
+
+    // ENDPOINT must be a String if present
+    if (config.ENDPOINT !== undefined && config.ENDPOINT !== null && !Lib.Utils.isString(config.ENDPOINT)) {
+      throw new TypeError('ENDPOINT must be a String');
+    }
+
+    // IAM_USER_ID must be a String if present
+    if (config.IAM_USER_ID !== undefined && config.IAM_USER_ID !== null && !Lib.Utils.isString(config.IAM_USER_ID)) {
+      throw new TypeError('IAM_USER_ID must be a String');
+    }
+
+    // CACHE_NAME must be a String if present
+    if (config.CACHE_NAME !== undefined && config.CACHE_NAME !== null && !Lib.Utils.isString(config.CACHE_NAME)) {
+      throw new TypeError('CACHE_NAME must be a String');
+    }
+
+    // SERVERLESS must be a Boolean if present
+    if (config.SERVERLESS !== undefined && !Lib.Utils.isBoolean(config.SERVERLESS)) {
+      throw new TypeError('SERVERLESS must be a Boolean');
+    }
+
+    // TOKEN_REFRESH_MARGIN_SECONDS must be a positive Number if present
+    if (config.TOKEN_REFRESH_MARGIN_SECONDS !== undefined) {
+      if (!Lib.Utils.isNumber(config.TOKEN_REFRESH_MARGIN_SECONDS) || config.TOKEN_REFRESH_MARGIN_SECONDS <= 0) {
+        throw new TypeError('TOKEN_REFRESH_MARGIN_SECONDS must be a positive Number');
+      }
+    }
+
     // KEY_PREFIX must be a String if present
     if (config.KEY_PREFIX !== undefined && !Lib.Utils.isString(config.KEY_PREFIX)) {
       throw new TypeError('KEY_PREFIX must be a String');
@@ -122,45 +164,13 @@ const Validators = {
       }
     }
 
-    // AWS_REGION must be a String if present
-    if (config.AWS_REGION !== undefined && !Lib.Utils.isString(config.AWS_REGION)) {
-      throw new TypeError('AWS_REGION must be a String');
-    }
-
-    // AWS_KEY must be a String if present
-    if (config.AWS_KEY !== undefined && config.AWS_KEY !== null && !Lib.Utils.isString(config.AWS_KEY)) {
-      throw new TypeError('AWS_KEY must be a String');
-    }
-
-    // AWS_SECRET must be a String if present
-    if (config.AWS_SECRET !== undefined && config.AWS_SECRET !== null && !Lib.Utils.isString(config.AWS_SECRET)) {
-      throw new TypeError('AWS_SECRET must be a String');
-    }
-
-    // IAM_USER_ID must be a String if present
-    if (config.IAM_USER_ID !== undefined && config.IAM_USER_ID !== null && !Lib.Utils.isString(config.IAM_USER_ID)) {
-      throw new TypeError('IAM_USER_ID must be a String');
-    }
-
-    // CACHE_NAME must be a String if present
-    if (config.CACHE_NAME !== undefined && config.CACHE_NAME !== null && !Lib.Utils.isString(config.CACHE_NAME)) {
-      throw new TypeError('CACHE_NAME must be a String');
-    }
-
-    // TOKEN_REFRESH_MARGIN_SECONDS must be a positive Number if present
-    if (config.TOKEN_REFRESH_MARGIN_SECONDS !== undefined) {
-      if (!Lib.Utils.isNumber(config.TOKEN_REFRESH_MARGIN_SECONDS) || config.TOKEN_REFRESH_MARGIN_SECONDS <= 0) {
-        throw new TypeError('TOKEN_REFRESH_MARGIN_SECONDS must be a positive Number');
-      }
-    }
-
-    // If IAM_USER_ID is set, CACHE_NAME and AWS_KEY and AWS_SECRET must also be set
+    // If IAM_USER_ID is set, CACHE_NAME and KEY and SECRET must also be set
     if (config.IAM_USER_ID) {
       if (!config.CACHE_NAME) {
         throw new TypeError('CACHE_NAME is required when IAM_USER_ID is set (used in SigV4 token signing)');
       }
-      if (!config.AWS_KEY || !config.AWS_SECRET) {
-        throw new TypeError('AWS_KEY and AWS_SECRET are required when IAM_USER_ID is set');
+      if (!config.KEY || !config.SECRET) {
+        throw new TypeError('KEY and SECRET are required when IAM_USER_ID is set');
       }
     }
 
