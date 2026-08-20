@@ -108,6 +108,7 @@ Enable with `ENABLE_JWT: true`. When enabled, `createSession` additionally retur
 | `access_token_ttl_seconds` | `number` | `900` (15 min) | No | Access token lifetime |
 | `refresh_token_ttl_seconds` | `number` | `2592000` (30 days) | No | Refresh token lifetime. Also drives `expires_at` on the session record in JWT mode |
 | `rotate_refresh_token` | `boolean` | `true` | No | Rotate the refresh token on every `refreshSessionJwt` call. RFC 6819 best practice |
+| `claims_max_bytes` | `number` | `1024` | No | Maximum byte size of the `slc` claim payload (measured as `Buffer.byteLength(JSON.stringify(claims), 'utf8')`). Exceeding this returns `JWT_CLAIMS_TOO_LARGE` |
 
 **Revocation latency.** Access tokens remain valid until `JWT.access_token_ttl_seconds` elapses after logout. This is inherent to stateless JWTs. A lower `access_token_ttl_seconds` tightens the window; `ENABLE_JWT: false` eliminates it entirely.
 

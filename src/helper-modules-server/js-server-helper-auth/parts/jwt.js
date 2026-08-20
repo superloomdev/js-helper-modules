@@ -77,6 +77,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
     @param {String} options.audience - aud claim
     @param {Integer} options.access_token_ttl_seconds - lifetime in seconds
     @param {Integer} options.now - current epoch seconds (from instance.time)
+    @param {Object} [options.claims] - Caller-supplied claims, nested under 'slc'
 
     @return {String} - Compact JWS (three base64url segments joined by '.')
     *********************************************************************/
@@ -103,6 +104,13 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         ikd: options.session.install_id,
         tkk: options.session.token_key
       };
+
+      // Nest caller-supplied claims under the reserved 'slc' key so they
+      // can never shadow a registered claim. The caller's claims object is
+      // already validated by the auth layer (plain object, no 'slc' key).
+      if (!Lib.Utils.isNullOrUndefined(options.claims)) {
+        claims.slc = options.claims;
+      }
 
       // Encode header and payload as base64url segments
       const header_segment  = Jwt.base64UrlEncode(JSON.stringify(header));

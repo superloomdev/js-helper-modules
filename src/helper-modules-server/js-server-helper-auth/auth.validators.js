@@ -266,6 +266,24 @@ const Validators = {
 
     }
 
+    // claims is optional but must be a plain JSON-serializable object when present.
+    // The claims are nested under the 'slc' key in the JWT payload so they
+    // can never shadow a registered claim. The key 'slc' itself is rejected
+    // to prevent double-nesting.
+    if (!Lib.Utils.isNullOrUndefined(options.claims)) {
+
+      // Reject non-object values (arrays, strings, etc.)
+      if (!Lib.Utils.isObject(options.claims)) {
+        throw new TypeError('[helper-auth] createSession options.claims must be a plain object');
+      }
+
+      // Reject if the caller tries to nest 'slc' inside claims
+      if (Object.prototype.hasOwnProperty.call(options.claims, 'slc')) {
+        throw new TypeError('[helper-auth] createSession options.claims must not contain the key "slc" (reserved for claims nesting)');
+      }
+
+    }
+
   },
 
 
