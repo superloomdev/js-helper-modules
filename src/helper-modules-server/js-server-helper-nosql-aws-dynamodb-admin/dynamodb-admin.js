@@ -686,7 +686,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       // DynamoDBClient class (shared across instances)
       if (Lib.Utils.isNullOrUndefined(DynamoDBClient)) {
@@ -720,7 +720,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before client creation
-      _DynamoDBAdmin.ensureAdapter();
+      _DynamoDBAdmin.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

@@ -393,7 +393,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     buildQuery: function (sql, params) {
 
-      _MySQL.ensureAdapter();
+      _MySQL.loadAdapter();
       return MySQLDriver.format(sql, params);
 
     },
@@ -418,7 +418,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     buildRawText: function (str) {
 
-      _MySQL.ensureAdapter();
+      _MySQL.loadAdapter();
       return MySQLDriver.raw(str);
 
     },
@@ -435,7 +435,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     buildMultiCondition: function (data, multi_operator) {
 
-      _MySQL.ensureAdapter();
+      _MySQL.loadAdapter();
 
       const operator = multi_operator || 'AND';
 
@@ -597,7 +597,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       // Synchronous utilities (format, raw)
       if (Lib.Utils.isNullOrUndefined(MySQLDriver)) {
@@ -626,7 +626,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before pool creation
-      _MySQL.ensureAdapter();
+      _MySQL.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

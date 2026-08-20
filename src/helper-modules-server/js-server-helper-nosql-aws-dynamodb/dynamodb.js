@@ -1251,7 +1251,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       // DynamoDBClient class (base client constructor)
       if (Lib.Utils.isNullOrUndefined(DynamoDBBaseClient)) {
@@ -1281,7 +1281,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before client creation
-      _DynamoDB.ensureAdapter();
+      _DynamoDB.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

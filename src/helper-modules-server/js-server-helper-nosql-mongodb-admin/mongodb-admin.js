@@ -637,7 +637,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       // MongoClient class (shared across instances)
       if (Lib.Utils.isNullOrUndefined(MongoClient)) {
@@ -662,7 +662,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before client creation
-      _MongoDBAdmin.ensureAdapter();
+      _MongoDBAdmin.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

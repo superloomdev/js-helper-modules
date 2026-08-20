@@ -60,13 +60,13 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     @return {String|null} - The raw auth_id value or null if not found
     *********************************************************************/
-    readAuthId: function (instance, options) {
+    getAuthId: function (instance, options) {
 
       // Normalize request headers once before consulting each source in order
       const headers = TokenSource.getRequestHeaders(instance);
 
       // Priority 1: Authorization: Bearer <token>
-      const bearer = TokenSource.readBearerToken(headers);
+      const bearer = TokenSource.getBearerToken(headers);
       if (bearer !== null) {
         return bearer;
       }
@@ -78,7 +78,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
         !Lib.Utils.isEmptyString(options.custom_header_name)
       ) {
 
-        const custom = TokenSource.readCustomHeader(headers, options.custom_header_name);
+        const custom = TokenSource.getCustomHeader(headers, options.custom_header_name);
         if (custom !== null) {
           return custom;
         }
@@ -92,7 +92,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
       ) {
 
         const cookie_name = options.cookie_prefix + options.tenant_id;
-        const cookie_value = TokenSource.readCookie(instance, cookie_name);
+        const cookie_value = TokenSource.getCookie(instance, cookie_name);
         if (cookie_value !== null) {
           return cookie_value;
         }
@@ -112,7 +112,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     @return {String|null} - The bearer token or null
     *********************************************************************/
-    readBearerToken: function (headers) {
+    getBearerToken: function (headers) {
 
       // Return null early if the Authorization header is absent or empty
       const auth_header = headers['authorization'];
@@ -159,7 +159,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     @return {String|null} - The header value or null
     *********************************************************************/
-    readCustomHeader: function (headers, header_name) {
+    getCustomHeader: function (headers, header_name) {
 
       // Look up the header case-insensitively; return null if absent or empty
       const value = headers[header_name.toLowerCase()];
@@ -187,7 +187,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) { // eslint-disable-line 
 
     @return {String|null} - The cookie value or null
     *********************************************************************/
-    readCookie: function (instance, cookie_name) {
+    getCookie: function (instance, cookie_name) {
 
       // Return null if the cookies map is missing or the name is not present
       if (

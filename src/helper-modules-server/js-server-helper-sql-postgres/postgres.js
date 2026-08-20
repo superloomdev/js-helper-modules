@@ -593,7 +593,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       if (Lib.Utils.isNullOrUndefined(PG)) {
         PG = require('pg');
@@ -616,7 +616,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before pool creation
-      _Postgres.ensureAdapter();
+      _Postgres.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

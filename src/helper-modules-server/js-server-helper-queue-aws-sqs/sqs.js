@@ -341,7 +341,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       // Load SQS client and commands into module-level cache
       if (Lib.Utils.isNullOrUndefined(SQSAdapter)) {
@@ -366,7 +366,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before client creation
-      _SQS.ensureAdapter();
+      _SQS.loadAdapter();
 
       // Record init start time for performance logging
       const init_start_ms = Lib.Utils.getUnixTimeInMilliSeconds();

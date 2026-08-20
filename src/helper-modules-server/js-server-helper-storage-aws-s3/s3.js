@@ -796,7 +796,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    ensureAdapter: function () {
+    loadAdapter: function () {
 
       // S3 client class and command constructors (single reference; commands accessed as S3Lib.CommandName)
       if (Lib.Utils.isNullOrUndefined(S3Lib)) {
@@ -822,7 +822,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Adapter must be loaded before client creation
-      _S3.ensureAdapter();
+      _S3.loadAdapter();
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

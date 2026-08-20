@@ -153,7 +153,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
       // Serve a cached derivation when this instance has produced it already
       const key = _Themer.resolveKey(state, template, layers, options);
-      const cached = _Themer.readCache(state, key);
+      const cached = _Themer.getCache(state, key);
 
       if (cached) {
         return cached;
@@ -191,7 +191,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
       // Serve a cached projection when this resolved object was emitted before
       const key = _Themer.emitKey(state, resolved, platform);
-      const cached = _Themer.readCache(state, key);
+      const cached = _Themer.getCache(state, key);
 
       if (cached) {
         return cached;
@@ -523,7 +523,7 @@ const _Themer = {
 
   @return {*} - The cached value, or undefined on a miss
   *********************************************************************/
-  readCache: function (state, key) {
+  getCache: function (state, key) {
 
     // Count the miss and let the caller derive
     if (!state.cache.has(key)) {

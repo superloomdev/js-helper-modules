@@ -112,7 +112,7 @@ close() → Promise<void> | async:yes
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own pool. No module-level singletons.
-- **Lazy adapter load:** `pg` is `require()`-d on first use via `ensureAdapter()`. Cached at module scope and shared across every instance because the driver is stateless.
+- **Lazy adapter load:** `pg` is `require()`-d on first use via `loadAdapter()`. Cached at module scope and shared across every instance because the driver is stateless.
 - **Lazy pool init:** pool is created on the first query, not at loader time. Friendly to serverless functions.
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholder translation:** `?`/`??` in source SQL → `$N` / inlined identifier before pool.query.

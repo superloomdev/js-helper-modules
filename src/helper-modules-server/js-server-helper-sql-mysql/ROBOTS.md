@@ -100,7 +100,7 @@ close() → Promise<void> | async:yes
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own pool. No module-level singletons.
-- **Lazy adapter load:** `mysql2` and `mysql2/promise` are `require()`-d on first use via `ensureAdapter()`. The adapter modules are cached at module scope and shared across every instance because they are stateless.
+- **Lazy adapter load:** `mysql2` and `mysql2/promise` are `require()`-d on first use via `loadAdapter()`. The adapter modules are cached at module scope and shared across every instance because they are stateless.
 - **Lazy pool init:** pool is created on the first query, not at loader time. Friendly to serverless functions.
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholders:** `?` for values, `??` for identifiers. MySQL native, no translation needed.
