@@ -43,26 +43,26 @@ All functions accept `instance` as their first argument for request context and 
 
 ### Builders (pure, no I/O - used by executors, transactWriteRecords, and updateRecord)
 
-commandBuilderForAddRecord(table, data) → Object | async:no
+buildAddRecordCommand(table, data) → Object | async:no
   Build Put service params. { TableName, Item }
 
-commandBuilderForDeleteRecord(table, key) → Object | async:no
+buildDeleteRecordCommand(table, key) → Object | async:no
   Build Delete service params. { TableName, Key }
 
-commandBuilderForUpdateRecord(table, key, update_data?, remove_keys?, increment?, decrement?, return_state?) → Object | async:no
+buildUpdateRecordCommand(table, key, update_data?, remove_keys?, increment?, decrement?, return_state?) → Object | async:no
   Build Update service params with SET/REMOVE/INCREMENT/DECREMENT.
   Uses ExpressionAttributeNames (#n1) to avoid DynamoDB reserved word conflicts.
   Note: list_append, if_not_exists, ADD/DELETE on sets, and ConditionExpression will be added as needed.
 
 ### Command Executors (I/O - execute pre-built params)
 
-commandAddRecord(instance, service_params) → { success, error } | async:yes
+runAddRecordCommand(instance, service_params) → { success, error } | async:yes
   Execute pre-built Put command.
 
-commandDeleteRecord(instance, service_params) → { success, error } | async:yes
+runDeleteRecordCommand(instance, service_params) → { success, error } | async:yes
   Execute pre-built Delete command.
 
-commandUpdateRecord(instance, service_params) → { success, attributes, error } | async:yes
+runUpdateRecordCommand(instance, service_params) → { success, attributes, error } | async:yes
   Execute pre-built Update command.
 
 ### Convenience (DRY - build + execute internally)
@@ -71,10 +71,10 @@ getRecord(instance, table, key) → { success, item, error } | async:yes
   Get single record by primary key.
 
 writeRecord(instance, table, item) → { success, error } | async:yes
-  Write (create or replace) a record. Always upsert. Uses commandBuilderForAddRecord + commandAddRecord.
+  Write (create or replace) a record. Always upsert. Uses buildAddRecordCommand + runAddRecordCommand.
 
 deleteRecord(instance, table, key) → { success, error } | async:yes
-  Delete a single record. Uses commandBuilderForDeleteRecord + commandDeleteRecord.
+  Delete a single record. Uses buildDeleteRecordCommand + runDeleteRecordCommand.
 
 updateRecord(instance, table, key, update_data?, remove_keys?, increment?, decrement?, return_state?) → { success, attributes, error } | async:yes
   Update with structured builder. SET/REMOVE/INCREMENT/DECREMENT.
@@ -130,9 +130,9 @@ await DynamoDB.deleteRecord(instance, table, key);
 
 ### 2. Transaction (build commands, pass arrays to transactWriteRecords)
 ```javascript
-const add_cmd = DynamoDB.commandBuilderForAddRecord(table, item);
-const upd_cmd = DynamoDB.commandBuilderForUpdateRecord(table, key, { status: 'paid' });
-const del_cmd = DynamoDB.commandBuilderForDeleteRecord(table, key);
+const add_cmd = DynamoDB.buildAddRecordCommand(table, item);
+const upd_cmd = DynamoDB.buildUpdateRecordCommand(table, key, { status: 'paid' });
+const del_cmd = DynamoDB.buildDeleteRecordCommand(table, key);
 await DynamoDB.transactWriteRecords(instance, [add_cmd], [upd_cmd], [del_cmd]);
 ```
 

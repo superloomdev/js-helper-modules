@@ -476,11 +476,11 @@ describe('moveFile', function () {
 // 9. COMMAND BUILDERS
 // ============================================================================
 
-describe('commandBuilderForUploadObject', function () {
+describe('buildUploadObjectCommand', function () {
 
   it('should return service params with Bucket, Key, Body, and default ContentType', function () {
 
-    const params = S3.commandBuilderForUploadObject('my-bucket', 'file.txt', 'content');
+    const params = S3.buildUploadObjectCommand('my-bucket', 'file.txt', 'content');
 
     assert.strictEqual(params.Bucket, 'my-bucket');
     assert.strictEqual(params.Key, 'file.txt');
@@ -492,7 +492,7 @@ describe('commandBuilderForUploadObject', function () {
 
   it('should attach Metadata when provided', function () {
 
-    const params = S3.commandBuilderForUploadObject('my-bucket', 'file.txt', 'x', 'text/plain', { foo: 'bar' });
+    const params = S3.buildUploadObjectCommand('my-bucket', 'file.txt', 'x', 'text/plain', { foo: 'bar' });
 
     assert.deepStrictEqual(params.Metadata, { foo: 'bar' });
 
@@ -501,7 +501,7 @@ describe('commandBuilderForUploadObject', function () {
 
   it('should attach ACL public-read when is_public is true', function () {
 
-    const params = S3.commandBuilderForUploadObject('my-bucket', 'file.txt', 'x', 'text/plain', null, true);
+    const params = S3.buildUploadObjectCommand('my-bucket', 'file.txt', 'x', 'text/plain', null, true);
 
     assert.strictEqual(params.ACL, 'public-read');
 
@@ -510,7 +510,7 @@ describe('commandBuilderForUploadObject', function () {
 
   it('should attach ACL private when is_public is false', function () {
 
-    const params = S3.commandBuilderForUploadObject('my-bucket', 'file.txt', 'x', 'text/plain', null, false);
+    const params = S3.buildUploadObjectCommand('my-bucket', 'file.txt', 'x', 'text/plain', null, false);
 
     assert.strictEqual(params.ACL, 'private');
 
@@ -519,7 +519,7 @@ describe('commandBuilderForUploadObject', function () {
 
   it('should omit ACL when is_public is null/undefined', function () {
 
-    const params = S3.commandBuilderForUploadObject('my-bucket', 'file.txt', 'x');
+    const params = S3.buildUploadObjectCommand('my-bucket', 'file.txt', 'x');
 
     assert.strictEqual(params.ACL, undefined);
 
@@ -528,11 +528,11 @@ describe('commandBuilderForUploadObject', function () {
 });
 
 
-describe('commandBuilderForGetObject', function () {
+describe('buildGetObjectCommand', function () {
 
   it('should return service params with Bucket and Key only', function () {
 
-    const params = S3.commandBuilderForGetObject('my-bucket', 'file.txt');
+    const params = S3.buildGetObjectCommand('my-bucket', 'file.txt');
 
     assert.deepStrictEqual(params, { Bucket: 'my-bucket', Key: 'file.txt' });
 
@@ -541,11 +541,11 @@ describe('commandBuilderForGetObject', function () {
 });
 
 
-describe('commandBuilderForDeleteObject', function () {
+describe('buildDeleteObjectCommand', function () {
 
   it('should return service params with Bucket and Key only', function () {
 
-    const params = S3.commandBuilderForDeleteObject('my-bucket', 'file.txt');
+    const params = S3.buildDeleteObjectCommand('my-bucket', 'file.txt');
 
     assert.deepStrictEqual(params, { Bucket: 'my-bucket', Key: 'file.txt' });
 
@@ -554,11 +554,11 @@ describe('commandBuilderForDeleteObject', function () {
 });
 
 
-describe('commandBuilderForCopyObject', function () {
+describe('buildCopyObjectCommand', function () {
 
   it('should return service params with encoded CopySource', function () {
 
-    const params = S3.commandBuilderForCopyObject('src-bucket', 'a/b c.txt', 'dest-bucket', 'x/y.txt');
+    const params = S3.buildCopyObjectCommand('src-bucket', 'a/b c.txt', 'dest-bucket', 'x/y.txt');
 
     assert.strictEqual(params.Bucket, 'dest-bucket');
     assert.strictEqual(params.Key, 'x/y.txt');
@@ -569,8 +569,8 @@ describe('commandBuilderForCopyObject', function () {
 
   it('should attach ACL when is_public is provided', function () {
 
-    const params_public = S3.commandBuilderForCopyObject('s', 'k', 'd', 'k2', true);
-    const params_private = S3.commandBuilderForCopyObject('s', 'k', 'd', 'k2', false);
+    const params_public = S3.buildCopyObjectCommand('s', 'k', 'd', 'k2', true);
+    const params_private = S3.buildCopyObjectCommand('s', 'k', 'd', 'k2', false);
 
     assert.strictEqual(params_public.ACL, 'public-read');
     assert.strictEqual(params_private.ACL, 'private');

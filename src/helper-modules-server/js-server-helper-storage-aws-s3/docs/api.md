@@ -7,15 +7,15 @@ Every exported function with its signature, parameters, return shape, semantics,
 - [Conventions](#conventions)
 - [Three-Layer Pattern](#three-layer-pattern)
 - [Command Builders](#command-builders) *(pure, no I/O)*
-  - [`commandBuilderForUploadObject`](#commandbuilderforuploadobject)
-  - [`commandBuilderForGetObject`](#commandbuilderforgetobject)
-  - [`commandBuilderForDeleteObject`](#commandbuilderfordeleteobject)
-  - [`commandBuilderForCopyObject`](#commandbuilderforcopyobject)
+  - [`buildUploadObjectCommand`](#commandbuilderforuploadobject)
+  - [`buildGetObjectCommand`](#commandbuilderforgetobject)
+  - [`buildDeleteObjectCommand`](#commandbuilderfordeleteobject)
+  - [`buildCopyObjectCommand`](#commandbuilderforcopyobject)
 - [Command Executors](#command-executors) *(async I/O)*
-  - [`commandUploadObject`](#commanduploadobject)
-  - [`commandGetObject`](#commandgetobject)
-  - [`commandDeleteObject`](#commanddeleteobject)
-  - [`commandCopyObject`](#commandcopyobject)
+  - [`runUploadObjectCommand`](#commanduploadobject)
+  - [`runGetObjectCommand`](#commandgetobject)
+  - [`runDeleteObjectCommand`](#commanddeleteobject)
+  - [`runCopyObjectCommand`](#commandcopyobject)
 - [File Operations](#file-operations) *(convenience)*
   - [`listObjects`](#listobjects)
   - [`uploadFile`](#uploadfile)
@@ -51,8 +51,8 @@ This module exposes its single-object operations through three layers, each usef
 
 | Layer | Functions | When to use |
 |---|---|---|
-| **Builder** (pure) | `commandBuilderForUploadObject`, `commandBuilderForGetObject`, `commandBuilderForDeleteObject`, `commandBuilderForCopyObject` | Build a command object ahead of time. Useful if you want to inspect or modify the SDK params before they go out. |
-| **Executor** (async) | `commandUploadObject`, `commandGetObject`, `commandDeleteObject`, `commandCopyObject` | Execute a pre-built command. Pair with a builder when you need fine-grained control. |
+| **Builder** (pure) | `buildUploadObjectCommand`, `buildGetObjectCommand`, `buildDeleteObjectCommand`, `buildCopyObjectCommand` | Build a command object ahead of time. Useful if you want to inspect or modify the SDK params before they go out. |
+| **Executor** (async) | `runUploadObjectCommand`, `runGetObjectCommand`, `runDeleteObjectCommand`, `runCopyObjectCommand` | Execute a pre-built command. Pair with a builder when you need fine-grained control. |
 | **Convenience** (async) | `listObjects`, `uploadFile`, `uploadFiles`, `getFile`, `deleteFile`, `deleteFiles`, `copyFile`, `moveFile` | Build + execute in one call. Use for ordinary application code. |
 
 Most application code uses the **Convenience** layer. The **Builder + Executor** layers are exposed for advanced workflows that want to compose commands before dispatch.
@@ -63,10 +63,10 @@ Most application code uses the **Convenience** layer. The **Builder + Executor**
 
 Builders are **pure functions** that produce S3 service-parameter objects. They do not call AWS. They prepare arguments that an executor will send.
 
-### `commandBuilderForUploadObject`
+### `buildUploadObjectCommand`
 
 ```javascript
-commandBuilderForUploadObject(bucket, key, body, content_type, metadata, is_public) → Object
+buildUploadObjectCommand(bucket, key, body, content_type, metadata, is_public) → Object
 ```
 
 Build a `PutObject` service-params object. `Metadata` and `ACL` are attached only when provided.
@@ -80,26 +80,26 @@ Build a `PutObject` service-params object. `Metadata` and `ACL` are attached onl
 | `metadata` | `Object<String, String>` *(optional)* | Custom user-defined metadata (S3 metadata keys are case-folded) |
 | `is_public` | `Boolean` *(optional)* | When `true`, sets `ACL: 'public-read'`. Default leaves ACL unset (bucket policy decides) |
 
-### `commandBuilderForGetObject`
+### `buildGetObjectCommand`
 
 ```javascript
-commandBuilderForGetObject(bucket, key) → Object
+buildGetObjectCommand(bucket, key) → Object
 ```
 
 Build a `GetObject` service-params object. Returns `{ Bucket, Key }`.
 
-### `commandBuilderForDeleteObject`
+### `buildDeleteObjectCommand`
 
 ```javascript
-commandBuilderForDeleteObject(bucket, key) → Object
+buildDeleteObjectCommand(bucket, key) → Object
 ```
 
 Build a `DeleteObject` service-params object. Returns `{ Bucket, Key }`.
 
-### `commandBuilderForCopyObject`
+### `buildCopyObjectCommand`
 
 ```javascript
-commandBuilderForCopyObject(source_bucket, source_key, dest_bucket, dest_key, is_public) → Object
+buildCopyObjectCommand(source_bucket, source_key, dest_bucket, dest_key, is_public) → Object
 ```
 
 Build a `CopyObject` service-params object. `CopySource` is URL-encoded `bucket/key` per the SDK requirement. `is_public` sets `ACL: 'public-read'` when `true`.
@@ -110,18 +110,18 @@ Build a `CopyObject` service-params object. `CopySource` is URL-encoded `bucket/
 
 Executors are **async** and accept a pre-built `service_params` object from a builder.
 
-### `commandUploadObject`
+### `runUploadObjectCommand`
 
 ```javascript
-async commandUploadObject(instance, service_params) → { success, etag, error }
+async runUploadObjectCommand(instance, service_params) → { success, etag, error }
 ```
 
 Execute a pre-built `PutObject` command. `etag` is the S3-assigned entity tag (useful for client-side caching).
 
-### `commandGetObject`
+### `runGetObjectCommand`
 
 ```javascript
-async commandGetObject(instance, service_params, output_as_string) → { success, body, content_type, metadata, error }
+async runGetObjectCommand(instance, service_params, output_as_string) → { success, body, content_type, metadata, error }
 ```
 
 Execute a pre-built `GetObject` command. The streamed response body is drained automatically via the SDK's `transformToByteArray()` / `transformToString()`. No manual chunking needed.
@@ -133,18 +133,18 @@ Execute a pre-built `GetObject` command. The streamed response body is drained a
 
 On a missing key, returns `{ success: false, body: null, content_type: null, metadata: null, error: { type: 'NOT_FOUND', ... } }`.
 
-### `commandDeleteObject`
+### `runDeleteObjectCommand`
 
 ```javascript
-async commandDeleteObject(instance, service_params) → { success, error }
+async runDeleteObjectCommand(instance, service_params) → { success, error }
 ```
 
 Execute a pre-built `DeleteObject` command. S3's `DeleteObject` is idempotent. Deleting a non-existent key still returns `success: true`.
 
-### `commandCopyObject`
+### `runCopyObjectCommand`
 
 ```javascript
-async commandCopyObject(instance, service_params) → { success, error }
+async runCopyObjectCommand(instance, service_params) → { success, error }
 ```
 
 Execute a pre-built `CopyObject` command. `NoSuchKey` (missing source) returns `error.type: 'NOT_FOUND'` with the log entry suppressed.

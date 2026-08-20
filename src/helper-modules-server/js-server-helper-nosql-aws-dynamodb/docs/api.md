@@ -7,13 +7,13 @@ Every exported function with its signature, parameters, return shape, semantics,
 - [Conventions](#conventions)
 - [Three-Layer Pattern](#three-layer-pattern)
 - [Command Builders](#command-builders) *(pure, no I/O)*
-  - [`commandBuilderForAddRecord`](#commandbuilderforaddrecord)
-  - [`commandBuilderForUpdateRecord`](#commandbuilderforupdaterecord)
-  - [`commandBuilderForDeleteRecord`](#commandbuilderfordeleterecord)
+  - [`buildAddRecordCommand`](#commandbuilderforaddrecord)
+  - [`buildUpdateRecordCommand`](#commandbuilderforupdaterecord)
+  - [`buildDeleteRecordCommand`](#commandbuilderfordeleterecord)
 - [Command Executors](#command-executors) *(async I/O)*
-  - [`commandAddRecord`](#commandaddrecord)
-  - [`commandUpdateRecord`](#commandupdaterecord)
-  - [`commandDeleteRecord`](#commanddeleterecord)
+  - [`runAddRecordCommand`](#commandaddrecord)
+  - [`runUpdateRecordCommand`](#commandupdaterecord)
+  - [`runDeleteRecordCommand`](#commanddeleterecord)
 - [Single-Record CRUD](#single-record-crud)
   - [`getRecord`](#getrecord)
   - [`writeRecord`](#writerecord)
@@ -57,8 +57,8 @@ This module exposes its single-record operations through three layers, each usef
 
 | Layer | Functions | When to use |
 |---|---|---|
-| **Builder** (pure) | `commandBuilderForAddRecord`, `commandBuilderForUpdateRecord`, `commandBuilderForDeleteRecord` | Build a command object for use inside `transactWriteRecords`. Or compose commands ahead of time and execute later. |
-| **Executor** (async) | `commandAddRecord`, `commandUpdateRecord`, `commandDeleteRecord` | Execute a pre-built command. Pair with the builders when you need fine-grained control. |
+| **Builder** (pure) | `buildAddRecordCommand`, `buildUpdateRecordCommand`, `buildDeleteRecordCommand` | Build a command object for use inside `transactWriteRecords`. Or compose commands ahead of time and execute later. |
+| **Executor** (async) | `runAddRecordCommand`, `runUpdateRecordCommand`, `runDeleteRecordCommand` | Execute a pre-built command. Pair with the builders when you need fine-grained control. |
 | **Convenience** (async) | `getRecord`, `writeRecord`, `updateRecord`, `deleteRecord` | Build + execute in one call. Use for straightforward single-record operations. |
 
 Most application code uses the **Convenience** layer. The **Builder + Executor** layers exist primarily so that `transactWriteRecords` can accept pre-built command arrays.
@@ -69,25 +69,25 @@ Most application code uses the **Convenience** layer. The **Builder + Executor**
 
 Builders are **pure functions** that produce DynamoDB service-parameter objects. They do not call AWS. They prepare arguments that an executor or transaction will send.
 
-### `commandBuilderForAddRecord`
+### `buildAddRecordCommand`
 
 ```javascript
-commandBuilderForAddRecord(table, item) → Object
+buildAddRecordCommand(table, item) → Object
 ```
 
-Build a `Put` service-params object. Returns `{ TableName, Item }`. Pair with `commandAddRecord` or pass into `transactWriteRecords`.
+Build a `Put` service-params object. Returns `{ TableName, Item }`. Pair with `runAddRecordCommand` or pass into `transactWriteRecords`.
 
 ```javascript
-const add_cmd = Lib.DynamoDB.commandBuilderForAddRecord(
+const add_cmd = Lib.DynamoDB.buildAddRecordCommand(
   'audit_log',
   { pk: 'log_1', action: 'ship', timestamp: Date.now() }
 );
 ```
 
-### `commandBuilderForUpdateRecord`
+### `buildUpdateRecordCommand`
 
 ```javascript
-commandBuilderForUpdateRecord(table, key, update_data, remove_keys, increment, decrement, return_state) → Object
+buildUpdateRecordCommand(table, key, update_data, remove_keys, increment, decrement, return_state) → Object
 ```
 
 Build an `Update` service-params object with `SET` / `REMOVE` / `INCREMENT` / `DECREMENT` operations. All operations after `table` and `key` are optional. Pass `null` or `undefined` to skip.
@@ -103,7 +103,7 @@ Build an `Update` service-params object with `SET` / `REMOVE` / `INCREMENT` / `D
 Uses `ExpressionAttributeNames` (`#n1`, `#n2`, …) under the hood to avoid DynamoDB reserved-word conflicts on arbitrary field names.
 
 ```javascript
-const upd_cmd = Lib.DynamoDB.commandBuilderForUpdateRecord(
+const upd_cmd = Lib.DynamoDB.buildUpdateRecordCommand(
   'orders',
   { pk: 'ord_1' },
   { status: 'shipped', shipped_at: Date.now() },   // SET
@@ -116,16 +116,16 @@ const upd_cmd = Lib.DynamoDB.commandBuilderForUpdateRecord(
 
 > *Note:* `list_append`, `if_not_exists`, set-type operations, and `ConditionExpression` are not yet covered by the builder. They will be added as production demand surfaces.
 
-### `commandBuilderForDeleteRecord`
+### `buildDeleteRecordCommand`
 
 ```javascript
-commandBuilderForDeleteRecord(table, key) → Object
+buildDeleteRecordCommand(table, key) → Object
 ```
 
 Build a `Delete` service-params object. Returns `{ TableName, Key }`.
 
 ```javascript
-const del_cmd = Lib.DynamoDB.commandBuilderForDeleteRecord(
+const del_cmd = Lib.DynamoDB.buildDeleteRecordCommand(
   'pending_orders',
   { pk: 'ord_1' }
 );
@@ -137,26 +137,26 @@ const del_cmd = Lib.DynamoDB.commandBuilderForDeleteRecord(
 
 Executors are **async** and accept a pre-built `service_params` object from a builder. Use these when you have built commands ahead of time and want to execute one at a time (without using `transactWriteRecords`).
 
-### `commandAddRecord`
+### `runAddRecordCommand`
 
 ```javascript
-async commandAddRecord(instance, service_params) → { success, error }
+async runAddRecordCommand(instance, service_params) → { success, error }
 ```
 
 Execute a pre-built `Put` command.
 
-### `commandUpdateRecord`
+### `runUpdateRecordCommand`
 
 ```javascript
-async commandUpdateRecord(instance, service_params) → { success, attributes, error }
+async runUpdateRecordCommand(instance, service_params) → { success, attributes, error }
 ```
 
 Execute a pre-built `Update` command. `attributes` reflects whatever was requested in `return_state` (empty unless `return_state` was non-`NONE`).
 
-### `commandDeleteRecord`
+### `runDeleteRecordCommand`
 
 ```javascript
-async commandDeleteRecord(instance, service_params) → { success, error }
+async runDeleteRecordCommand(instance, service_params) → { success, error }
 ```
 
 Execute a pre-built `Delete` command.
@@ -186,7 +186,7 @@ if (res.item === null) { /* not found */ }
 async writeRecord(instance, table, item) → { success, error }
 ```
 
-Write (create or replace) a record. **Always upsert.** There is no separate insert vs update path at the API surface. Uses `commandBuilderForAddRecord` + `commandAddRecord` internally.
+Write (create or replace) a record. **Always upsert.** There is no separate insert vs update path at the API surface. Uses `buildAddRecordCommand` + `runAddRecordCommand` internally.
 
 ```javascript
 await Lib.DynamoDB.writeRecord(
@@ -202,7 +202,7 @@ await Lib.DynamoDB.writeRecord(
 async updateRecord(instance, table, key, update_data, remove_keys, increment, decrement, return_state) → { success, attributes, error }
 ```
 
-Update a record with the same structured parameters as `commandBuilderForUpdateRecord`. Internally calls the builder and the executor.
+Update a record with the same structured parameters as `buildUpdateRecordCommand`. Internally calls the builder and the executor.
 
 ```javascript
 await Lib.DynamoDB.updateRecord(
@@ -221,7 +221,7 @@ await Lib.DynamoDB.updateRecord(
 async deleteRecord(instance, table, key) → { success, error }
 ```
 
-Delete a single record. Uses `commandBuilderForDeleteRecord` + `commandDeleteRecord` internally.
+Delete a single record. Uses `buildDeleteRecordCommand` + `runDeleteRecordCommand` internally.
 
 ---
 
@@ -350,9 +350,9 @@ Atomic multi-table write. Up to 100 actions per call (AWS limit). All three arra
 Each entry is a pre-built command object from one of the builders:
 
 ```javascript
-const add_cmd = Lib.DynamoDB.commandBuilderForAddRecord('audit_log', { pk: 'log_1', action: 'ship' });
-const upd_cmd = Lib.DynamoDB.commandBuilderForUpdateRecord('orders', { pk: 'ord_1' }, { status: 'shipped' });
-const del_cmd = Lib.DynamoDB.commandBuilderForDeleteRecord('pending', { pk: 'ord_1' });
+const add_cmd = Lib.DynamoDB.buildAddRecordCommand('audit_log', { pk: 'log_1', action: 'ship' });
+const upd_cmd = Lib.DynamoDB.buildUpdateRecordCommand('orders', { pk: 'ord_1' }, { status: 'shipped' });
+const del_cmd = Lib.DynamoDB.buildDeleteRecordCommand('pending', { pk: 'ord_1' });
 
 await Lib.DynamoDB.transactWriteRecords(
   instance,
