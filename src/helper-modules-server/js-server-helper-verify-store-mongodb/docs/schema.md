@@ -8,7 +8,7 @@ MongoDB does not use DDL. `setupNewStore` creates one index; the schema is enfor
 
 ```js
 {
-  _id: { scope: "email_verify", id: "user:123" },  // compound primary key
+  _id: { namespace: "email_verify", id: "user:123" },  // compound primary key
   code:       "742856",                             // hashed or plain code
   fail_count: 0,                                    // integer, default 0
   created_at: 1715180412,                           // Unix epoch seconds
@@ -21,7 +21,7 @@ MongoDB does not use DDL. `setupNewStore` creates one index; the schema is enfor
 
 | Field | Type | Nullable | Notes |
 |-------|------|----------|-------|
-| `_id` | Object `{ scope, id }` | No | Compound primary key. Unique index created automatically by MongoDB. |
+| `_id` | Object `{ namespace, id }` | No | Compound primary key. Unique index created automatically by MongoDB. |
 | `code` | String | No | The verification code (hashed or plain depending on verify config). |
 | `fail_count` | Number | No | Count of failed verify attempts. Incremented atomically by `$inc`. |
 | `created_at` | Number | No | Unix epoch seconds. |
@@ -45,7 +45,7 @@ The compound `_id` is the primary access path for all record operations. No seco
 
 ### Compound `_id`
 
-The `_id` field is a plain JavaScript object `{ scope, id }`. MongoDB stores it as a sub-document and builds a unique B-tree index on it automatically. The adapter constructs this object on every read and write.
+The `_id` field is a plain JavaScript object `{ namespace, id }`. MongoDB stores it as a sub-document and builds a unique B-tree index on it automatically. The adapter constructs this object on every read and write.
 
 ### UPSERT via `replaceOne`
 
