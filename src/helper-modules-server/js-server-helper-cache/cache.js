@@ -559,7 +559,33 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
           if (lock_result.applied) {
 
-            // We now hold the lock - become the fetcher
+            // We now hold the lock - but the previous lock holder may have
+            // stored the value between our cache check and our lock acquisition.
+            // Double-check the cache before becoming the fetcher to avoid a
+            // redundant fetch (double-check locking pattern).
+            try {
+              const recheck = await store.get(instance, namespace, cache_code);
+
+              if (recheck.success === true && recheck.value !== null && !Lib.Utils.isNullOrUndefined(recheck.value)) {
+
+                // Value appeared - release the lock and return it
+                try {
+                  await store.releaseLock(instance, namespace, cache_code);
+                } catch (err) {
+                  Lib.Debug.debug('Cache store releaseLock (getOrFetch recheck) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+                }
+
+                return {
+                  success: true,
+                  value: recheck.value,
+                  error: null
+                };
+              }
+            } catch (err) {
+              Lib.Debug.debug('Cache store get (getOrFetch recheck) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+            }
+
+            // Still a miss - become the fetcher
             try {
               return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
             } finally {

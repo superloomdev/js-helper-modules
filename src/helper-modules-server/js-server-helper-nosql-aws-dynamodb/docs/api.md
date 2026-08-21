@@ -17,6 +17,7 @@ Every exported function with its signature, parameters, return shape, semantics,
 - [Single-Record CRUD](#single-record-crud)
   - [`getRecord`](#getrecord)
   - [`writeRecord`](#writerecord)
+  - [`writeRecordIfNotExists`](#writerecordifnotexists)
   - [`updateRecord`](#updaterecord)
   - [`deleteRecord`](#deleterecord)
 - [Query / Count / Scan](#query--count--scan)
@@ -59,7 +60,7 @@ This module exposes its single-record operations through three layers, each usef
 |---|---|---|
 | **Builder** (pure) | `buildAddRecordCommand`, `buildUpdateRecordCommand`, `buildDeleteRecordCommand` | Build a command object for use inside `transactWriteRecords`. Or compose commands ahead of time and execute later. |
 | **Executor** (async) | `runAddRecordCommand`, `runUpdateRecordCommand`, `runDeleteRecordCommand` | Execute a pre-built command. Pair with the builders when you need fine-grained control. |
-| **Convenience** (async) | `getRecord`, `writeRecord`, `updateRecord`, `deleteRecord` | Build + execute in one call. Use for straightforward single-record operations. |
+| **Convenience** (async) | `getRecord`, `writeRecord`, `writeRecordIfNotExists`, `updateRecord`, `deleteRecord` | Build + execute in one call. Use for straightforward single-record operations. |
 
 Most application code uses the **Convenience** layer. The **Builder + Executor** layers exist primarily so that `transactWriteRecords` can accept pre-built command arrays.
 
@@ -170,14 +171,17 @@ The convenience layer. Builds and executes in a single call. Use these for ordin
 ### `getRecord`
 
 ```javascript
-async getRecord(instance, table, key) → { success, item, error }
+async getRecord(instance, table, key, options?) → { success, item, error }
 ```
 
-Get a single record by primary key. `key` is the full primary key object (partition key alone for tables without a sort key; partition + sort otherwise). `item` is `null` if no record matches.
+Get a single record by primary key. `key` is the full primary key object (partition key alone for tables without a sort key; partition + sort otherwise). `item` is `null` if no record matches. Optional `options` object supports `{ consistentRead: true }` for strongly consistent reads (needed by cache stores to avoid stale reads after a concurrent write).
 
 ```javascript
 const res = await Lib.DynamoDB.getRecord(instance, 'users', { pk: 'user_001' });
 if (res.item === null) { /* not found */ }
+
+// Strongly consistent read (sees most recent write)
+const cached = await Lib.DynamoDB.getRecord(instance, 'cache', { pk: 'ns', sk: 'key' }, { consistentRead: true });
 ```
 
 ### `writeRecord`
@@ -194,6 +198,29 @@ await Lib.DynamoDB.writeRecord(
   'users',
   { pk: 'user_001', name: 'Alice', status: 'active' }
 );
+```
+
+### `writeRecordIfNotExists`
+
+```javascript
+async writeRecordIfNotExists(instance, table, key, item) → { success, applied, error }
+```
+
+Atomic create-only write. Uses `PutItem` with `ConditionExpression: attribute_not_exists(pk)`. `applied: true` means the item was created; `applied: false` means it already existed (not an error). This is the atomic primitive that distributed locks are built on.
+
+```javascript
+const result = await Lib.DynamoDB.writeRecordIfNotExists(
+  instance,
+  'locks',
+  { pk: 'lock_001' },
+  { pk: 'lock_001', holder: 'worker-a', expires_at: 1700000000 }
+);
+
+if (result.applied) {
+  // this caller won the lock
+} else {
+  // another caller already holds it
+}
 ```
 
 ### `updateRecord`

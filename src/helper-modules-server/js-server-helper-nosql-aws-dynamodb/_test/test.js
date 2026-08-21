@@ -179,6 +179,110 @@ describe('writeRecord', function () {
 
 
 // ============================================================================
+// 1b. WRITE RECORD IF NOT EXISTS
+// ============================================================================
+
+describe('writeRecordIfNotExists', function () {
+
+  it('should apply when the key does not exist', async function () {
+
+    const result = await DynamoDB.writeRecordIfNotExists(
+      instance, TEST_TABLE, { pk: 'winif_001' }, { pk: 'winif_001', name: 'First Write' }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+    assert.strictEqual(result.error, null);
+
+    const get_result = await DynamoDB.getRecord(instance, TEST_TABLE, { pk: 'winif_001' });
+    assert.strictEqual(get_result.item.name, 'First Write');
+
+  });
+
+  it('should not apply when the key already exists', async function () {
+
+    await DynamoDB.writeRecord(instance, TEST_TABLE, { pk: 'winif_002', name: 'Original' });
+
+    const result = await DynamoDB.writeRecordIfNotExists(
+      instance, TEST_TABLE, { pk: 'winif_002' }, { pk: 'winif_002', name: 'Should Not Overwrite' }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, false);
+    assert.strictEqual(result.error, null);
+
+    const get_result = await DynamoDB.getRecord(instance, TEST_TABLE, { pk: 'winif_002' });
+    assert.strictEqual(get_result.item.name, 'Original');
+
+  });
+
+  it('should apply again after the item is deleted', async function () {
+
+    await DynamoDB.writeRecordIfNotExists(
+      instance, TEST_TABLE, { pk: 'winif_003' }, { pk: 'winif_003', name: 'Round One' }
+    );
+
+    await DynamoDB.deleteRecord(instance, TEST_TABLE, { pk: 'winif_003' });
+
+    const result = await DynamoDB.writeRecordIfNotExists(
+      instance, TEST_TABLE, { pk: 'winif_003' }, { pk: 'winif_003', name: 'Round Two' }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+
+    const get_result = await DynamoDB.getRecord(instance, TEST_TABLE, { pk: 'winif_003' });
+    assert.strictEqual(get_result.item.name, 'Round Two');
+
+  });
+
+  it('should work with composite key tables', async function () {
+
+    const key = { pk: 'winif_comp', sk: 'item_1' };
+
+    const result = await DynamoDB.writeRecordIfNotExists(
+      instance, TEST_TABLE_COMPOSITE, key, { pk: 'winif_comp', sk: 'item_1', data: 'composite' }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+
+    const second = await DynamoDB.writeRecordIfNotExists(
+      instance, TEST_TABLE_COMPOSITE, key, { pk: 'winif_comp', sk: 'item_1', data: 'overwritten' }
+    );
+
+    assert.strictEqual(second.success, true);
+    assert.strictEqual(second.applied, false);
+
+    const get_result = await DynamoDB.getRecord(instance, TEST_TABLE_COMPOSITE, key);
+    assert.strictEqual(get_result.item.data, 'composite');
+
+  });
+
+  it('should handle concurrent calls - exactly one applies', async function () {
+
+    const promises = [];
+    for (let i = 0; i < 5; i++) {
+      promises.push(DynamoDB.writeRecordIfNotExists(
+        instance, TEST_TABLE, { pk: 'winif_concurrent' }, { pk: 'winif_concurrent', index: i }
+      ));
+    }
+
+    const results = await Promise.all(promises);
+
+    const applied_count = results.filter(function (r) { return r.applied === true; }).length;
+    assert.strictEqual(applied_count, 1);
+
+    const not_applied_count = results.filter(function (r) { return r.applied === false; }).length;
+    assert.strictEqual(not_applied_count, 4);
+
+  });
+
+});
+
+
+
+// ============================================================================
 // 2. GET RECORD
 // ============================================================================
 

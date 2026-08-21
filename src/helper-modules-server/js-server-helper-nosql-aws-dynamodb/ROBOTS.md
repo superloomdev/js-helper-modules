@@ -37,7 +37,7 @@ Each loader call returns an independent DynamoDB interface with its own `Lib`, `
 | MAX_RETRIES | Number | 3 | no |
 | REMOVE_UNDEFINED_VALUES | Boolean | true | no |
 
-## Exported Functions (19 total)
+## Exported Functions (20 total)
 
 All functions accept `instance` as their first argument for request context and performance logging.
 
@@ -67,11 +67,16 @@ runUpdateRecordCommand(instance, service_params) → { success, attributes, erro
 
 ### Convenience (DRY - build + execute internally)
 
-getRecord(instance, table, key) → { success, item, error } | async:yes
-  Get single record by primary key.
+getRecord(instance, table, key, options?) → { success, item, error } | async:yes
+  Get single record by primary key. Optional options: { consistentRead: true } for strongly consistent reads.
 
 writeRecord(instance, table, item) → { success, error } | async:yes
   Write (create or replace) a record. Always upsert. Uses buildAddRecordCommand + runAddRecordCommand.
+
+writeRecordIfNotExists(instance, table, key, item) → { success, applied, error } | async:yes
+  Atomic create-only write. Uses PutItem with ConditionExpression: attribute_not_exists(pk).
+  applied: true means the item was created; applied: false means it already existed (not an error).
+  This is the atomic primitive that distributed locks are built on.
 
 deleteRecord(instance, table, key) → { success, error } | async:yes
   Delete a single record. Uses buildDeleteRecordCommand + runDeleteRecordCommand.
