@@ -4,7 +4,7 @@ Compact, AI-targeted reference for the public interface. Humans should read `REA
 
 ## Module Overview
 
-Application-level cache with TTL and namespacing. Cache-aside pattern: the application fetches from the source database on a miss and populates the cache; this module never reads the source. Five operations cover the lifecycle of a cached value: `set`, `get`, `delete`, `clear` (mass invalidation by prefix), and `list` (enumerate cache_codes by prefix). Storage backends are standalone Class F adapter packages (`helper-cache-store-*`); the caller passes the ready-to-use store object directly as `CONFIG.Store`.
+Application-level cache with TTL and namespacing. Cache-aside pattern: the application fetches from the source database on a miss and populates the cache; this module never reads the source. Seven operations cover the lifecycle of a cached value: `set`, `get`, `delete`, `clear` (mass invalidation by prefix), `list` (enumerate cache_codes by prefix), `has` (existence check without fetching the value), and `getOrFetch` (cache-aside with optional distributed stampede protection). Storage backends are standalone Class F adapter packages (`helper-cache-store-*`); the caller passes the ready-to-use store object directly as `CONFIG.Store`.
 
 ## Factory Pattern
 
@@ -12,9 +12,10 @@ Application-level cache with TTL and namespacing. Cache-aside pattern: the appli
 module.exports = function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
   // Validates CONFIG at construction (Store must be a ready-to-use object).
-  // Validates the 5-method store contract at construction.
+  // Validates the 6-method store contract at construction.
+  // When GET_OR_FETCH_LOCK_ENABLED is true, validates setLock and releaseLock.
   // Throws synchronously on misconfiguration.
-  return { set, get, delete, clear, list };
+  return { set, get, delete, clear, list, has, getOrFetch };
 };
 ```
 
@@ -34,19 +35,25 @@ Lib.Cache = require('helper-cache')(Lib, {
 
 ### `set(instance, namespace, cache_code, value, ttl_seconds?)` *(async)*
 
-Store a value in the cache with an optional TTL (seconds). Overwrites any existing entry. The value is JSON-serialized before being handed to the store.
+Store a value in the cache with an optional TTL (seconds). Overwrites any existing entry. The value is passed to the store as a raw JavaScript object; the store adapter handles backend-specific serialization.
 
 - **namespace**: String, required. Logical group for the cache entry.
 - **cache_code**: String, required. Specific entry identifier within the namespace.
-- **value**: Any JSON-serializable value, required.
+- **value**: Any value, required. The store adapter serializes it.
 - **ttl_seconds**: Number, optional. Lifetime in seconds. Omit for no expiry.
 - **Returns**: `{ success, error }`.
 
 ### `get(instance, namespace, cache_code)` *(async)*
 
-Read a value from the cache. Returns `value: null` on a cache miss (entry absent or expired). A miss is not an error.
+Read a value from the cache. Returns `value: null` on a cache miss (entry absent or expired). A miss is not an error. The store adapter deserializes the stored value before returning it.
 
-- **Returns**: `{ success, value, error }`. `value` is the parsed JSON on a hit, `null` on a miss.
+- **Returns**: `{ success, value, error }`. `value` is the deserialized object on a hit, `null` on a miss.
+
+### `has(instance, namespace, cache_code)` *(async)*
+
+Check whether a cache entry exists without fetching its value. Returns `exists: true` if the key is present and not expired, `false` otherwise. Useful for marker keys and conditional logic that only needs presence, not the payload.
+
+- **Returns**: `{ success, exists, error }`. Does not include a `value` field.
 
 ### `delete(instance, namespace, cache_code)` *(async)*
 
@@ -66,22 +73,40 @@ List cache_codes in `namespace` whose `cache_code` starts with `cache_code_prefi
 
 - **Returns**: `{ success, cache_codes, error }`.
 
+### `getOrFetch(instance, namespace, cache_code, ttl_seconds, fetcher)` *(async)*
+
+Cache-aside with optional distributed stampede protection. On a cache hit, returns the cached value without calling the fetcher. On a miss, calls the fetcher, caches the result, and returns it. When `GET_OR_FETCH_LOCK_ENABLED` is true, acquires a distributed lock in the store before fetching, so concurrent requests for the same key wait rather than all calling the fetcher.
+
+- **namespace**: String, required.
+- **cache_code**: String, required.
+- **ttl_seconds**: Number, required. TTL for the cached value.
+- **fetcher**: Async function, required. Called on a miss. Returns any value or throws.
+- **Returns**: `{ success, value, error }`. If the fetcher throws, returns `CACHE_FETCHER_FAILED` and nothing is cached.
+
+This is NOT cache-through. The cache module does not know about the source database. The caller provides the fetcher.
+
 ## Configuration
 
-| Key | Type | Required | Notes |
-|---|---|---|---|
-| `Store` | object | Yes | Ready-to-use store object. Configure adapter independently, then pass result |
+| Key | Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `Store` | object | Yes | - | Ready-to-use store object. Configure adapter independently, then pass result |
+| `GET_OR_FETCH_LOCK_ENABLED` | Boolean | No | `false` | Enable distributed stampede protection in `getOrFetch` |
+| `GET_OR_FETCH_LOCK_TIMEOUT_MS` | Number | No | `3000` | Lock auto-expiry in milliseconds. Handles crashed processes |
+| `GET_OR_FETCH_LOCK_RETRY_MS` | Number | No | `50` | Poll interval when waiting for a lock holder to finish |
+| `GET_OR_FETCH_LOCK_RETRY_JITTER_MS` | Number | No | `20` | Random 0-N ms added to each retry to avoid synchronized retry bursts |
 
-`Store` is the only config key. The cache module composes no backend key - it forwards `namespace` and `cache_code` to the store as separate parameters. `KEY_PREFIX` and `KEY_SEPARATOR` belong to the Valkey adapter, not here.
+`Store` is the primary config key. The cache module composes no backend key - it forwards `namespace` and `cache_code` to the store as separate parameters. `KEY_PREFIX` and `KEY_SEPARATOR` belong to the Valkey adapter, not here.
+
+When `GET_OR_FETCH_LOCK_ENABLED` is true, the loader validates that the store implements `setLock` and `releaseLock`. A store without lock support throws at boot.
 
 ## Error Catalog
 
 | `error.type` | Trigger | Surfaces in |
 |---|---|---|
 | `CACHE_STORE_UNAVAILABLE` | Store adapter returned `{ success: false }` or threw | All async functions |
-| `CACHE_SERIALIZATION_FAILED` | `JSON.stringify` or `JSON.parse` threw on the cached value | `set`, `get` |
+| `CACHE_FETCHER_FAILED` | The fetcher function passed to `getOrFetch` threw an error | `getOrFetch` |
 
-Error shape is frozen at module load: `{ type: 'CACHE_STORE_UNAVAILABLE', message: 'Cache store operation failed' }`. The store adapter's own error type and message never leak through.
+Error shape is frozen at module load. The store adapter's own error type and message never leak through. Serialization errors are owned by the store adapter, not this module.
 
 ## Critical Behavior for Code-Generating Tools
 
@@ -89,13 +114,15 @@ Error shape is frozen at module load: `{ type: 'CACHE_STORE_UNAVAILABLE', messag
 - **`Store` is a ready-to-use object, not a factory function.** The loader throws on factory function, string, or missing.
 - **Programmer errors throw, operational errors return.** Missing namespace or cache_code throws `TypeError`; store failures return `{ success: false, error }`.
 - **A cache miss is not an error.** `get` on an absent or expired entry returns `{ success: true, value: null, error: null }`.
-- **The cache module owns JSON serialization.** `set` stringifies before delegating; `get` parses after. The store receives and returns a plain string.
-- **The cache module never reads the source database.** It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache.
+- **The store adapter owns serialization.** `set` passes a raw JavaScript object to the store; `get` receives a raw JavaScript object back. The store adapter handles JSON.stringify/parse. This module does not serialize.
+- **The cache module never reads the source database.** It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache, or uses `getOrFetch` which calls a caller-provided fetcher.
+- **`getOrFetch` is not cache-through.** The cache module does not know about the source database. The caller provides the fetcher function.
+- **Distributed locking is opt-in.** When `GET_OR_FETCH_LOCK_ENABLED` is false (default), `getOrFetch` does plain fetch-and-cache. When true, it uses `setLock`/`releaseLock` on the store for stampede protection.
 - **`clear` and `list` use prefix match only.** Range operators (`gt`, `lt`, `between`) are database queries, not cache operations.
 
 ## Store Contract
 
-Five async methods, each returning a result envelope:
+Six required async methods, each returning a result envelope:
 
 | Method | Signature | Returns |
 |---|---|---|
@@ -104,8 +131,16 @@ Five async methods, each returning a result envelope:
 | `delete` | `(instance, namespace, cache_code)` | `{ success, error }` |
 | `clear` | `(instance, namespace, cache_code_prefix?)` | `{ success, deleted_count, error }` |
 | `list` | `(instance, namespace, cache_code_prefix?)` | `{ success, cache_codes, error }` |
+| `has` | `(instance, namespace, cache_code)` | `{ success, exists, error }` |
 
-Construction hard-validates all five. A missing method throws at boot. The store receives `namespace` and `cache_code` as separate parameters - no adapter ever decomposes a composed key.
+Two optional async methods, required only when `GET_OR_FETCH_LOCK_ENABLED` is true:
+
+| Method | Signature | Returns |
+|---|---|---|
+| `setLock` | `(instance, namespace, cache_code, options)` | `{ success, applied, error }` - `applied: true` if this caller acquired the lock |
+| `releaseLock` | `(instance, namespace, cache_code)` | `{ success, error }` |
+
+Construction hard-validates the six required methods. A missing method throws at boot. Lock methods are validated only when locking is enabled. The store receives `namespace` and `cache_code` as separate parameters - no adapter ever decomposes a composed key. The store owns serialization: `set` receives a raw JavaScript object, `get` returns a raw JavaScript object.
 
 ## Peer Dependencies
 

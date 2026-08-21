@@ -24,6 +24,14 @@ When `ttl_seconds` is provided, a single `SET key value EX seconds` command is u
 
 Non-serializable values (functions, circular objects) return `KV_SERIALIZATION_FAILED` rather than throwing.
 
+### setIfNotExists(instance, key, value, ttl_seconds?) -> { success, applied, error }
+
+Set a key to a value only if the key does not already exist. Issues a single atomic `SET key value NX` command (with `EX seconds` when a TTL is provided). `applied` is `true` if this caller created the key, `false` if the key already existed and nothing was written. `applied: false` is not an error - `success` is still `true`.
+
+This is the primitive distributed locks are built on. The lock caller calls `setIfNotExists` with a TTL; exactly one concurrent caller receives `applied: true` and proceeds. The rest receive `applied: false` and wait. If the lock holder crashes before releasing, the TTL expires the key and the next caller acquires it.
+
+The single-command form is required. A `getKeyExists` followed by `set` is not atomic: two concurrent callers would both observe "absent" and both write, which defeats the mechanism.
+
 ### get(instance, key) -> { success, value, error }
 
 Get the value of a key. Returns `{ success: true, value: null, error: null }` for absent keys. Not-found is not an error.

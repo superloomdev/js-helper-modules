@@ -254,6 +254,95 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
+    Set a key to a value only if the key does not already exist. Atomic
+    single-command SET NX with optional TTL. Returns applied: true if
+    this caller created the key, applied: false if the key already
+    existed and nothing was written. applied: false is not an error.
+
+    This is the primitive distributed locks are built on. The lock
+    caller calls setIfNotExists with a TTL; exactly one concurrent
+    caller receives applied: true and proceeds to fetch. The rest
+    receive applied: false and wait. If the lock holder crashes before
+    releasing, the TTL expires the key and the next caller acquires it.
+
+    @param {Object} instance - Request instance
+    @param {String} key - Key name (without prefix)
+    @param {*} value - Value to store (JSON-serialized when SERIALIZE_JSON is true)
+    @param {Number} [ttl_seconds] - Optional TTL in seconds
+
+    @return {Promise<Object>} - { success, applied, error }
+    *********************************************************************/
+    setIfNotExists: async function (instance, key, value, ttl_seconds) {
+
+      // Ensure ioredis client is initialized
+      await _KV.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Serialize value if JSON mode is enabled
+        let stored = value;
+        if (CONFIG.SERIALIZE_JSON) {
+          try {
+            stored = JSON.stringify(value);
+          } catch (serializeError) {
+            Lib.Debug.debug('KV setIfNotExists serialization failed', {
+              type: ERRORS.KV_SERIALIZATION_FAILED.type,
+              message: serializeError.message
+            });
+            return {
+              success: false,
+              applied: false,
+              error: ERRORS.KV_SERIALIZATION_FAILED
+            };
+          }
+        }
+
+        // Build the prefixed key
+        const prefixedKey = _KV.prefixKey(key);
+
+        // Execute SET NX with optional expiry in a single atomic command.
+        // ioredis returns 'OK' when the key was set, null when NX prevented
+        // the write because the key already existed. null is a normal
+        // outcome, not a thrown error.
+        let reply;
+        if (ttl_seconds !== undefined && ttl_seconds !== null) {
+          reply = await state.client.set(prefixedKey, stored, 'EX', ttl_seconds, 'NX');
+        } else {
+          reply = await state.client.set(prefixedKey, stored, 'NX');
+        }
+
+        Lib.Debug.performanceAuditLog('End', 'KV setIfNotExists', start_ms);
+
+        // Return successful response - applied is true only when the key was set
+        return {
+          success: true,
+          applied: reply === 'OK',
+          error: null
+        };
+
+      } catch (error) {
+
+        Lib.Debug.debug('KV setIfNotExists failed', {
+          type: ERRORS.KV_COMMAND_FAILED.type,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          applied: false,
+          error: ERRORS.KV_COMMAND_FAILED
+        };
+
+      }
+
+    },
+
+
+    /********************************************************************
     Get the value of a key. Returns null for absent keys.
 
     @param {Object} instance - Request instance

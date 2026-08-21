@@ -13,9 +13,9 @@ module.exports = Object.freeze({
     message: 'Cache store operation failed'
   }),
 
-  CACHE_SERIALIZATION_FAILED: Object.freeze({
-    type: 'CACHE_SERIALIZATION_FAILED',
-    message: 'Failed to serialize cache value'
+  CACHE_FETCHER_FAILED: Object.freeze({
+    type: 'CACHE_FETCHER_FAILED',
+    message: 'Cache fetcher function threw an error'
   })
 
 });

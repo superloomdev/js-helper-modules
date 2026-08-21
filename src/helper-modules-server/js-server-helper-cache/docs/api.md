@@ -8,9 +8,11 @@ Every exported function on the public interface, with parameters, return shape, 
 - [The Response Envelope](#the-response-envelope)
 - [set](#setinstance-namespace-cache_code-value-ttl_seconds)
 - [get](#getinstance-namespace-cache_code)
+- [has](#hasinstance-namespace-cache_code)
 - [delete](#deleteinstance-namespace-cache_code)
 - [clear](#clearinstance-namespace-cache_code_prefix)
 - [list](#listinstance-namespace-cache_code_prefix)
+- [getOrFetch](#getorfetchinstance-namespace-cache_code-ttl_seconds-fetcher)
 - [Error Catalog](#error-catalog)
 
 ---
@@ -21,10 +23,10 @@ Every exported function on the public interface, with parameters, return shape, 
 |---|---|
 | **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()` |
 | **Programmer errors throw `TypeError` synchronously** | Missing namespace, missing cache_code, non-string prefix, non-positive TTL throw `TypeError` at the call-site |
-| **Operational errors return `{ success: false, error }`** | Store driver failures and serialization failures come through the response envelope |
+| **Operational errors return `{ success: false, error }`** | Store driver failures and fetcher failures come through the response envelope |
 | **A cache miss is not an error** | `get` on an absent or expired entry returns `{ success: true, value: null, error: null }` |
-| **The cache module owns JSON serialization** | `set` stringifies the value before delegating to the store; `get` parses the string it gets back. The store handles backend-specific encoding only |
-| **The cache module never reads the source database** | It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache |
+| **The store adapter owns serialization** | `set` passes a raw JavaScript object to the store; `get` receives a raw JavaScript object back. The store adapter handles JSON.stringify/parse. This module does not serialize |
+| **The cache module never reads the source database** | It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache, or uses `getOrFetch` with a caller-provided fetcher |
 
 ---
 
@@ -49,7 +51,7 @@ Store a value in the cache with an optional TTL (seconds). Overwrites any existi
 | `instance` | `object` | Yes | Request instance for time and lifecycle |
 | `namespace` | `string` | Yes | Logical group for the cache entry |
 | `cache_code` | `string` | Yes | Specific entry identifier within the namespace |
-| `value` | `*` | Yes | Value to cache (JSON-serializable) |
+| `value` | `*` | Yes | Value to cache. The store adapter serializes it |
 | `ttl_seconds` | `number` | No | Lifetime in seconds. Omit for no expiry |
 
 **Return shape.** `{ success, error }`.
@@ -57,8 +59,7 @@ Store a value in the cache with an optional TTL (seconds). Overwrites any existi
 **Lifecycle.**
 
 1. Validate identifiers and TTL (throws `TypeError` on programmer error).
-2. JSON-serialize `value`. A throw becomes `CACHE_SERIALIZATION_FAILED`.
-3. Delegate to `store.set(instance, namespace, cache_code, serialized, ttl_seconds)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
+2. Delegate to `store.set(instance, namespace, cache_code, value, ttl_seconds)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`. The store adapter owns serialization.
 
 ---
 
@@ -89,8 +90,26 @@ Read a value from the cache. Returns `value: null` on a cache miss (entry absent
 
 1. Validate identifiers (throws `TypeError` on programmer error).
 2. Delegate to `store.get(instance, namespace, cache_code)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
-3. A `null` or undefined store value short-circuits as a miss before any parse.
-4. JSON-parse the store value. A throw becomes `CACHE_SERIALIZATION_FAILED`.
+3. A `null` store value is a miss. Pass the store's value straight through. The store adapter owns deserialization.
+
+---
+
+## `has(instance, namespace, cache_code)`
+
+Check whether a cache entry exists without fetching its value. Returns `exists: true` if the key is present and not expired, `false` if absent or expired. Useful for marker keys and conditional logic that only needs presence, not the payload.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `instance` | `object` | Yes | Request instance for time and lifecycle |
+| `namespace` | `string` | Yes | Logical group for the cache entry |
+| `cache_code` | `string` | Yes | Specific entry identifier within the namespace |
+
+**Return shape.** `{ success, exists, error }`. Does not include a `value` field.
+
+**Lifecycle.**
+
+1. Validate identifiers (throws `TypeError` on programmer error).
+2. Delegate to `store.has(instance, namespace, cache_code)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
 
 ---
 
@@ -150,6 +169,42 @@ List `cache_code`s in `namespace` whose `cache_code` starts with `cache_code_pre
 
 ---
 
+## `getOrFetch(instance, namespace, cache_code, ttl_seconds, fetcher)`
+
+Cache-aside with optional distributed stampede protection. On a cache hit, returns the cached value without calling the fetcher. On a miss, calls the fetcher, caches the result, and returns it.
+
+When `GET_OR_FETCH_LOCK_ENABLED` is `true`, acquires a distributed lock in the store before fetching, so concurrent requests for the same key wait rather than all calling the fetcher. Exactly one concurrent caller fetches; the rest wait and retry the cache read until the value appears or the lock expires and they acquire it themselves.
+
+This is NOT cache-through. The cache module does not know about the source database. The caller provides the fetcher function.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `instance` | `object` | Yes | Request instance for time and lifecycle |
+| `namespace` | `string` | Yes | Logical group for the cache entry |
+| `cache_code` | `string` | Yes | Specific entry identifier within the namespace |
+| `ttl_seconds` | `number` | Yes | TTL for the cached value (seconds) |
+| `fetcher` | `function` | Yes | Async function called on a miss. Returns any value or throws |
+
+**Return shape.**
+
+```js
+// Cache hit or successful fetch
+{ success: true, value: { id: 'laptop-x1', price: 1299 }, error: null }
+
+// Fetcher threw
+{ success: false, value: null, error: { type: 'CACHE_FETCHER_FAILED', message: '...' } }
+```
+
+**Lifecycle.**
+
+1. Validate identifiers, TTL, and fetcher (throws `TypeError` on programmer error).
+2. Check the cache. On a hit, return immediately. The fetcher is never called.
+3. On a miss with lock disabled: call the fetcher, cache the result, return it.
+4. On a miss with lock enabled: acquire the lock via `store.setLock`. If acquired, call the fetcher, cache, release the lock, return. If not acquired, wait and retry the cache read until the value appears or the lock expires and this caller acquires it.
+5. If the fetcher throws, nothing is cached, the lock is released immediately, and `CACHE_FETCHER_FAILED` is returned.
+
+---
+
 ## Error Catalog
 
 All operational errors live in `cache.errors.js`. Every failure path returns a frozen `{ type, message }` object from this catalog.
@@ -157,7 +212,7 @@ All operational errors live in `cache.errors.js`. Every failure path returns a f
 | `error.type` | Trigger |
 |---|---|
 | `CACHE_STORE_UNAVAILABLE` | Any store adapter call returned `success: false` or threw |
-| `CACHE_SERIALIZATION_FAILED` | `JSON.stringify` or `JSON.parse` threw on the cached value |
+| `CACHE_FETCHER_FAILED` | The fetcher function passed to `getOrFetch` threw an error |
 
 Error shape is frozen at module load:
 
@@ -165,4 +220,4 @@ Error shape is frozen at module load:
 { type: 'CACHE_STORE_UNAVAILABLE', message: 'Cache store operation failed' }
 ```
 
-The store adapter's own error type and message never leak through. Driver detail is logged at debug level instead.
+The store adapter's own error type and message never leak through. Driver detail is logged at debug level instead. Serialization errors are owned by the store adapter, not this module.

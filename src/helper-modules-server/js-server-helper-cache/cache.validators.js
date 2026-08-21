@@ -59,11 +59,31 @@ const Validators = {
       throw new Error('[helper-cache] CONFIG.Store is required and must be a ready-to-use store object');
     }
 
+    // GET_OR_FETCH_LOCK_ENABLED must be a Boolean
+    if (!Lib.Utils.isBoolean(config.GET_OR_FETCH_LOCK_ENABLED)) {
+      throw new TypeError('[helper-cache] GET_OR_FETCH_LOCK_ENABLED must be a Boolean');
+    }
+
+    // GET_OR_FETCH_LOCK_TIMEOUT_MS must be a positive Number
+    if (!Lib.Utils.isNumber(config.GET_OR_FETCH_LOCK_TIMEOUT_MS) || config.GET_OR_FETCH_LOCK_TIMEOUT_MS <= 0) {
+      throw new TypeError('[helper-cache] GET_OR_FETCH_LOCK_TIMEOUT_MS must be a positive Number');
+    }
+
+    // GET_OR_FETCH_LOCK_RETRY_MS must be a positive Number
+    if (!Lib.Utils.isNumber(config.GET_OR_FETCH_LOCK_RETRY_MS) || config.GET_OR_FETCH_LOCK_RETRY_MS <= 0) {
+      throw new TypeError('[helper-cache] GET_OR_FETCH_LOCK_RETRY_MS must be a positive Number');
+    }
+
+    // GET_OR_FETCH_LOCK_RETRY_JITTER_MS must be a non-negative Number (zero is valid)
+    if (!Lib.Utils.isNumber(config.GET_OR_FETCH_LOCK_RETRY_JITTER_MS) || config.GET_OR_FETCH_LOCK_RETRY_JITTER_MS < 0) {
+      throw new TypeError('[helper-cache] GET_OR_FETCH_LOCK_RETRY_JITTER_MS must be a non-negative Number');
+    }
+
   },
 
 
   /********************************************************************
-  Validate that an instantiated store exposes the required 5-method
+  Validate that an instantiated store exposes the required 6-method
   contract. Throws at startup when any method is missing so runtime
   requests never hit a partially-implemented store.
 
@@ -78,7 +98,8 @@ const Validators = {
       'set',
       'delete',
       'clear',
-      'list'
+      'list',
+      'has'
     ];
 
     required.forEach(function (name) {
@@ -86,6 +107,35 @@ const Validators = {
       if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
         throw new Error(
           '[helper-cache] Invalid store contract: missing method `' + name + '`'
+        );
+      }
+
+    });
+
+  },
+
+
+  /********************************************************************
+  Validate that the store supports distributed locking. Called only
+  when GET_OR_FETCH_LOCK_ENABLED is true. Throws at startup when
+  setLock or releaseLock is missing.
+
+  @param {Object} store - Instantiated store object
+
+  @return {void}
+  *********************************************************************/
+  validateLockSupport: function (store) {
+
+    const lockRequired = [
+      'setLock',
+      'releaseLock'
+    ];
+
+    lockRequired.forEach(function (name) {
+
+      if (Lib.Utils.isNullOrUndefined(store[name]) || !Lib.Utils.isFunction(store[name])) {
+        throw new Error(
+          '[helper-cache] GET_OR_FETCH_LOCK_ENABLED is true but store does not implement `' + name + '`'
         );
       }
 

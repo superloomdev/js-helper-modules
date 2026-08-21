@@ -69,11 +69,11 @@ describe('Factory Pattern', function () {
     assert.strictEqual(typeof KV2.set, 'function');
   });
 
-  it('should expose all 17 public functions', function () {
+  it('should expose all 18 public functions', function () {
 
     const expected = [
       'close', 'ping',
-      'set', 'get', 'delete', 'getKeyExists',
+      'set', 'setIfNotExists', 'get', 'delete', 'getKeyExists',
       'setMany', 'getMany', 'deleteMany',
       'scan',
       'setHashField', 'getHashField', 'getHashFields', 'deleteHashField',
@@ -333,6 +333,118 @@ describe('Single Key', function () {
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.error.type, ERRORS.KV_SERIALIZATION_FAILED.type);
+  });
+
+});
+
+
+
+// ============================================================================
+// 4b. SET IF NOT EXISTS (atomic SET NX)
+// ============================================================================
+
+describe('setIfNotExists', function () {
+
+  it('first call on absent key applies and stores the value', async function () {
+
+    await adminClient.flushdb();
+
+    const result = await KV.setIfNotExists(instance, 'sine:1', { name: 'alice' });
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+    assert.strictEqual(result.error, null);
+
+    const got = await KV.get(instance, 'sine:1');
+    assert.deepStrictEqual(got.value, { name: 'alice' });
+  });
+
+  it('second call on same key does not apply and does not overwrite', async function () {
+
+    const result = await KV.setIfNotExists(instance, 'sine:1', { name: 'bob' });
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, false);
+    assert.strictEqual(result.error, null);
+
+    // Original value survives
+    const got = await KV.get(instance, 'sine:1');
+    assert.deepStrictEqual(got.value, { name: 'alice' });
+  });
+
+  it('TTL is honored on the set key', async function () {
+
+    await adminClient.flushdb();
+
+    const result = await KV.setIfNotExists(instance, 'sine:ttl', 'temp', 1);
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+
+    const ttl = await KV.getTtl(instance, 'sine:ttl');
+    assert.strictEqual(ttl.success, true);
+    assert.ok(ttl.ttl_seconds > 0, 'TTL should be positive');
+
+    // Wait for expiry
+    await new Promise(function (resolve) { setTimeout(resolve, 1500); });
+
+    const exists = await KV.getKeyExists(instance, 'sine:ttl');
+    assert.strictEqual(exists.success, true);
+    assert.strictEqual(exists.exists, false);
+  });
+
+  it('no TTL means no expiry', async function () {
+
+    await adminClient.flushdb();
+
+    const result = await KV.setIfNotExists(instance, 'sine:nottl', 'persist');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+
+    const ttl = await KV.getTtl(instance, 'sine:nottl');
+    assert.strictEqual(ttl.success, true);
+    assert.strictEqual(ttl.ttl_seconds, null);
+  });
+
+  it('applies again after the key expires', async function () {
+
+    await adminClient.flushdb();
+
+    // Set with 1 second TTL
+    await KV.setIfNotExists(instance, 'sine:reapply', 'first', 1);
+
+    // Wait for expiry
+    await new Promise(function (resolve) { setTimeout(resolve, 1500); });
+
+    // Should apply again - this is the crash-recovery path the lock depends on
+    const result = await KV.setIfNotExists(instance, 'sine:reapply', 'second');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.applied, true);
+
+    const got = await KV.get(instance, 'sine:reapply');
+    assert.strictEqual(got.value, 'second');
+  });
+
+  it('concurrent callers - exactly one applies', async function () {
+
+    await adminClient.flushdb();
+
+    // Fire 5 concurrent setIfNotExists for the same absent key
+    const results = await Promise.all([
+      KV.setIfNotExists(instance, 'sine:concurrent', 'winner', 10),
+      KV.setIfNotExists(instance, 'sine:concurrent', 'winner', 10),
+      KV.setIfNotExists(instance, 'sine:concurrent', 'winner', 10),
+      KV.setIfNotExists(instance, 'sine:concurrent', 'winner', 10),
+      KV.setIfNotExists(instance, 'sine:concurrent', 'winner', 10)
+    ]);
+
+    const appliedCount = results.filter(function (r) { return r.applied === true; }).length;
+    const notAppliedCount = results.filter(function (r) { return r.applied === false; }).length;
+
+    assert.strictEqual(appliedCount, 1, 'exactly one caller should apply');
+    assert.strictEqual(notAppliedCount, 4, 'four callers should not apply');
   });
 
 });

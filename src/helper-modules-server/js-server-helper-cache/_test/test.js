@@ -18,10 +18,8 @@ const createMemoryStore = require('./memory-store');
 
 // Helper - shorthand to construct a cache instance backed by an injected
 // store fixture. The ready-to-use store object is passed directly.
-const buildCache = function (store) {
-  return CacheFactory(Lib, {
-    Store: store
-  });
+const buildCache = function (store, overrides) {
+  return CacheFactory(Lib, Object.assign({ Store: store }, overrides || {}));
 };
 
 
@@ -66,6 +64,14 @@ const createFailingStore = function () {
         success: false,
         cache_codes: [],
         error: { type: 'STORE_LIST_FAILED', message: 'list failed (test fixture)' }
+      };
+    },
+
+    has: async function () {
+      return {
+        success: false,
+        exists: false,
+        error: { type: 'STORE_HAS_FAILED', message: 'has failed (test fixture)' }
       };
     }
 
@@ -139,11 +145,50 @@ describe('Store contract validation', function () {
   });
 
 
-  it('succeeds when all 5 methods are present', function () {
+  it('throws when store is missing has', function () {
+    const store = createMemoryStore();
+    delete store.has;
+
+    assert.throws(function () {
+      CacheFactory(Lib, { Store: store });
+    }, /missing method `has`/);
+  });
+
+
+  it('succeeds when all 6 methods are present', function () {
     const store = createMemoryStore();
 
     assert.doesNotThrow(function () {
       buildCache(store);
+    });
+  });
+
+
+  it('throws when lock is enabled but store is missing setLock', function () {
+    const store = createMemoryStore();
+    delete store.setLock;
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_ENABLED: true });
+    }, /does not implement `setLock`/);
+  });
+
+
+  it('throws when lock is enabled but store is missing releaseLock', function () {
+    const store = createMemoryStore();
+    delete store.releaseLock;
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_ENABLED: true });
+    }, /does not implement `releaseLock`/);
+  });
+
+
+  it('succeeds when lock is enabled and store has both lock methods', function () {
+    const store = createMemoryStore();
+
+    assert.doesNotThrow(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_ENABLED: true });
     });
   });
 
@@ -535,6 +580,389 @@ describe('Store failure translation', function () {
     assert.strictEqual(result.success, false);
     assert.deepStrictEqual(result.cache_codes, []);
     assert.strictEqual(result.error.type, 'CACHE_STORE_UNAVAILABLE');
+  });
+
+
+  it('has returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+    const cache = buildCache(createFailingStore());
+    const instance = createInstance();
+
+    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.exists, false);
+    assert.strictEqual(result.error.type, 'CACHE_STORE_UNAVAILABLE');
+  });
+
+});
+
+
+// ============================================================================
+// 14. HAS - EXISTENCE CHECK
+// ============================================================================
+
+describe('has - existence check', function () {
+
+  it('returns exists: true for a present entry', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+
+    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.exists, true);
+    assert.strictEqual(result.error, null);
+  });
+
+
+  it('returns exists: false for an absent entry', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    const result = await cache.has(instance, 'ProductCatalog', 'nonexistent');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.exists, false);
+    assert.strictEqual(result.error, null);
+  });
+
+
+  it('returns exists: false for an expired entry', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance(1000000);
+
+    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 60);
+
+    // Advance time past TTL
+    instance.time = 1000000 + 61;
+
+    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.exists, false);
+  });
+
+
+  it('has does not return the value', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+
+    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.exists, true);
+    assert.strictEqual('value' in result, false, 'has should not return a value field');
+  });
+
+});
+
+
+// ============================================================================
+// 15. GET OR FETCH - UNLOCKED (lock disabled, default)
+// ============================================================================
+
+describe('getOrFetch - unlocked (default)', function () {
+
+  it('returns cached value on hit without calling fetcher', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+
+    let fetcherCalled = false;
+    const result = await cache.getOrFetch(
+      instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
+      async function () { fetcherCalled = true; return { price: 999 }; }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.deepStrictEqual(result.value, { price: 1299 });
+    assert.strictEqual(fetcherCalled, false, 'fetcher should not be called on cache hit');
+  });
+
+
+  it('calls fetcher on miss, caches result, returns it', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    let fetcherCalled = false;
+    const result = await cache.getOrFetch(
+      instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
+      async function () {
+        fetcherCalled = true;
+        return { price: 1299 };
+      }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.deepStrictEqual(result.value, { price: 1299 });
+    assert.strictEqual(fetcherCalled, true);
+
+    // Verify the value was cached
+    const cached = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    assert.deepStrictEqual(cached.value, { price: 1299 });
+  });
+
+
+  it('second call hits cache, fetcher not called again', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    let callCount = 0;
+    const fetcher = async function () {
+      callCount = callCount + 1;
+      return 'fetched-value';
+    };
+
+    await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+    await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+
+    assert.strictEqual(callCount, 1, 'fetcher should be called exactly once');
+  });
+
+
+  it('returns CACHE_FETCHER_FAILED when fetcher throws, nothing cached', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    const result = await cache.getOrFetch(
+      instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
+      async function () { throw new Error('database down'); }
+    );
+
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.value, null);
+    assert.strictEqual(result.error.type, 'CACHE_FETCHER_FAILED');
+
+    // Verify nothing was cached
+    const cached = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    assert.strictEqual(cached.value, null);
+  });
+
+
+  it('caches null returned by fetcher', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    let callCount = 0;
+    const fetcher = async function () {
+      callCount = callCount + 1;
+      return null;
+    };
+
+    // First call - fetcher returns null, but null is not cached (miss check uses isNullOrUndefined)
+    // So the second call will also call the fetcher
+    const result1 = await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+    assert.strictEqual(result1.success, true);
+    assert.strictEqual(result1.value, null);
+
+    // fetchAndStore stores null, but the next getOrFetch will see it as a miss
+    // because the miss check is `value === null || isNullOrUndefined(value)`
+    const result2 = await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+    assert.strictEqual(result2.success, true);
+    assert.strictEqual(result2.value, null);
+  });
+
+
+  it('throws TypeError when fetcher is not a function', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await assert.rejects(
+      cache.getOrFetch(instance, 'NS', 'code-1', 3600, 'not a function'),
+      TypeError
+    );
+  });
+
+});
+
+
+// ============================================================================
+// 16. GET OR FETCH - LOCKED (lock enabled)
+// ============================================================================
+
+describe('getOrFetch - locked (stampede protection)', function () {
+
+  // Build a cache with locking enabled and short retry for test speed
+  const buildLockedCache = function (store) {
+    return buildCache(store, {
+      GET_OR_FETCH_LOCK_ENABLED: true,
+      GET_OR_FETCH_LOCK_TIMEOUT_MS: 1000,
+      GET_OR_FETCH_LOCK_RETRY_MS: 10,
+      GET_OR_FETCH_LOCK_RETRY_JITTER_MS: 5
+    });
+  };
+
+
+  it('returns cached value on hit without calling fetcher or acquiring lock', async function () {
+    const store = createMemoryStore();
+    const cache = buildLockedCache(store);
+    const instance = createInstance();
+
+    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+
+    let fetcherCalled = false;
+    const result = await cache.getOrFetch(
+      instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
+      async function () { fetcherCalled = true; return { price: 999 }; }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.deepStrictEqual(result.value, { price: 1299 });
+    assert.strictEqual(fetcherCalled, false);
+    assert.strictEqual(store._locks.size, 0, 'no lock should be acquired on cache hit');
+  });
+
+
+  it('acquires lock, fetches, caches, releases lock on miss', async function () {
+    const store = createMemoryStore();
+    const cache = buildLockedCache(store);
+    const instance = createInstance();
+
+    const result = await cache.getOrFetch(
+      instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
+      async function () { return { price: 1299 }; }
+    );
+
+    assert.strictEqual(result.success, true);
+    assert.deepStrictEqual(result.value, { price: 1299 });
+
+    // Lock should be released after fetch
+    assert.strictEqual(store._locks.size, 0, 'lock should be released after fetch');
+
+    // Value should be cached
+    const cached = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    assert.deepStrictEqual(cached.value, { price: 1299 });
+  });
+
+
+  it('concurrent callers - fetcher called exactly once', async function () {
+    const store = createMemoryStore();
+    const cache = buildLockedCache(store);
+    const instance = createInstance();
+
+    let callCount = 0;
+    const fetcher = async function () {
+      callCount = callCount + 1;
+      // Simulate slow fetch
+      await new Promise(function (resolve) { setTimeout(resolve, 50); });
+      return 'fetched-value';
+    };
+
+    // Fire 3 concurrent getOrFetch for the same absent key
+    const results = await Promise.all([
+      cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher),
+      cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher),
+      cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher)
+    ]);
+
+    // All should return the same value
+    for (let i = 0; i < results.length; i++) {
+      assert.strictEqual(results[i].success, true);
+      assert.strictEqual(results[i].value, 'fetched-value');
+    }
+
+    // Fetcher should be called exactly once
+    assert.strictEqual(callCount, 1, 'fetcher should be called exactly once with stampede protection');
+  });
+
+
+  it('releases lock even when fetcher throws', async function () {
+    const store = createMemoryStore();
+    const cache = buildLockedCache(store);
+    const instance = createInstance();
+
+    const result = await cache.getOrFetch(
+      instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
+      async function () { throw new Error('database down'); }
+    );
+
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.error.type, 'CACHE_FETCHER_FAILED');
+
+    // Lock should be released even though fetcher threw
+    assert.strictEqual(store._locks.size, 0, 'lock should be released after fetcher throws');
+  });
+
+
+  it('expired lock allows re-acquisition (crash recovery)', async function () {
+    const store = createMemoryStore();
+    const cache = buildLockedCache(store);
+    const instance = createInstance();
+
+    // Manually acquire a lock that will expire quickly
+    await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 50 });
+
+    let fetcherCalled = false;
+    const result = await cache.getOrFetch(
+      instance, 'NS', 'code-1', 3600,
+      async function () {
+        fetcherCalled = true;
+        return 'recovered-value';
+      }
+    );
+
+    // After the lock expires, the waiting caller should acquire it and fetch
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.value, 'recovered-value');
+    assert.strictEqual(fetcherCalled, true);
+  });
+
+});
+
+
+// ============================================================================
+// 17. LOCK CONFIG VALIDATION
+// ============================================================================
+
+describe('Lock config validation', function () {
+
+  it('throws TypeError when GET_OR_FETCH_LOCK_ENABLED is not a Boolean', function () {
+    const store = createMemoryStore();
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_ENABLED: 'yes' });
+    }, TypeError);
+  });
+
+
+  it('throws TypeError when GET_OR_FETCH_LOCK_TIMEOUT_MS is not positive', function () {
+    const store = createMemoryStore();
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_TIMEOUT_MS: -1 });
+    }, TypeError);
+  });
+
+
+  it('throws TypeError when GET_OR_FETCH_LOCK_RETRY_MS is not positive', function () {
+    const store = createMemoryStore();
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_RETRY_MS: 0 });
+    }, TypeError);
+  });
+
+
+  it('throws TypeError when GET_OR_FETCH_LOCK_RETRY_JITTER_MS is negative', function () {
+    const store = createMemoryStore();
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_RETRY_JITTER_MS: -1 });
+    }, TypeError);
+  });
+
+
+  it('accepts zero jitter (no randomness)', function () {
+    const store = createMemoryStore();
+
+    assert.doesNotThrow(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_RETRY_JITTER_MS: 0 });
+    });
   });
 
 });

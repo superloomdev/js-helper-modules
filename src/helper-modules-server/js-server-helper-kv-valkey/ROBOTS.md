@@ -53,7 +53,7 @@ Each loader call returns an independent KV interface with its own `Lib`, `CONFIG
 | `SERIALIZE_JSON` | Boolean | `true` | no |
 | `SCAN_PAGE_SIZE` | Number | `100` | no |
 
-## Exported Functions (17 total)
+## Exported Functions (18 total)
 
 All functions accept `instance` as their first argument for request context and performance logging.
 
@@ -69,6 +69,9 @@ ping(instance) -> { success, error } | async:yes
 
 set(instance, key, value, ttl_seconds?) -> { success, error } | async:yes
   Set a key to a value. Optional TTL in seconds. Single SET command with EX option when TTL is provided.
+
+setIfNotExists(instance, key, value, ttl_seconds?) -> { success, applied, error } | async:yes
+  Atomic set-if-not-exists. Single SET NX command with optional EX. applied: true if this caller created the key, false if it already existed. applied: false is not an error. This is the primitive distributed locks are built on.
 
 get(instance, key) -> { success, value, error } | async:yes
   Get the value of a key. Returns null for absent keys. Not-found is never an error.

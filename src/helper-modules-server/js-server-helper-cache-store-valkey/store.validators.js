@@ -64,6 +64,15 @@ const Validators = {
       throw new Error('[helper-cache-store-valkey] config.KEY_SEPARATOR is required (non-empty string)');
     }
 
+    // LOCK_KEY_PREFIX is required and must be a non-empty string
+    if (
+      Lib.Utils.isNullOrUndefined(config.LOCK_KEY_PREFIX) ||
+      !Lib.Utils.isString(config.LOCK_KEY_PREFIX) ||
+      config.LOCK_KEY_PREFIX === ''
+    ) {
+      throw new Error('[helper-cache-store-valkey] config.LOCK_KEY_PREFIX is required (non-empty string)');
+    }
+
   }
 
 

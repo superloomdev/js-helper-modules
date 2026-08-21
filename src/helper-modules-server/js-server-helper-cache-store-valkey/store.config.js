@@ -17,6 +17,12 @@ module.exports = {
   // The adapter strips a known-length prefix (it does not split on this
   // character), so a cache_code containing the separator round-trips
   // correctly.
-  KEY_SEPARATOR: ':'
+  KEY_SEPARATOR: ':',
+
+  // Prefix for distributed lock keys. Locks are stored as separate keys
+  // from the cache entries so that deleting a cache entry never releases
+  // a lock, and a lock's TTL is independent of the cached value's TTL.
+  // The composed lock key is: LOCK_KEY_PREFIX + namespace + KEY_SEPARATOR + cache_code
+  LOCK_KEY_PREFIX: 'cache:lock:'
 
 };

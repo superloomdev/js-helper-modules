@@ -23,6 +23,17 @@
 //   - delete(instance, namespace, cache_code)                    -> { success, error }
 //   - clear(instance, namespace, cache_code_prefix?)             -> { success, deleted_count, error }
 //   - list(instance, namespace, cache_code_prefix?)              -> { success, cache_codes, error }
+//   - has(instance, namespace, cache_code)                       -> { success, exists, error }
+//   - setLock(instance, namespace, cache_code, options)          -> { success, applied, error }
+//   - releaseLock(instance, namespace, cache_code)               -> { success, error }
+//
+// Serialization: this adapter owns JSON.stringify on set and JSON.parse on
+// get. The cache module passes raw JavaScript objects; the adapter serializes
+// before handing to Lib.KV and deserializes before returning to the cache.
+//
+// Lock keys are separate from cache entry keys (LOCK_KEY_PREFIX instead of
+// KEY_PREFIX), so deleting a cache entry never releases a lock, and a lock's
+// TTL is independent of the cached value's TTL.
 
 'use strict';
 
@@ -39,7 +50,7 @@ Store instance.
 @param {Object} shared_libs - Dependency container (Utils, Debug, KV)
 @param {Object} config      - Overrides merged over adapter config defaults
 
-@return {Object} - Store interface (5 methods: get, set, delete, clear, list)
+@return {Object} - Store interface (8 methods: get, set, delete, clear, list, has, setLock, releaseLock)
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
@@ -84,7 +95,7 @@ close over the same Lib, CONFIG, and ERRORS.
 @param {Object} ERRORS     - Frozen error catalog
 @param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
-@return {Object} - Store interface (5 methods: get, set, delete, clear, list)
+@return {Object} - Store interface (8 methods: get, set, delete, clear, list, has, setLock, releaseLock)
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
 
@@ -115,6 +126,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     ******************************************************************/
     composeKey: function (namespace, cache_code) {
       return _Store.keyBase(namespace) + cache_code;
+    },
+
+
+    /******************************************************************
+    Compose the full Valkey key for a distributed lock. Lock keys use
+    LOCK_KEY_PREFIX instead of KEY_PREFIX so they are separate from
+    cache entry keys. This means deleting a cache entry never releases
+    a lock, and a lock's TTL is independent of the cached value's TTL.
+
+    @param {String} namespace
+    @param {String} cache_code
+
+    @return {String}
+    ******************************************************************/
+    composeLockKey: function (namespace, cache_code) {
+      return CONFIG.LOCK_KEY_PREFIX + namespace + CONFIG.KEY_SEPARATOR + cache_code;
     },
 
 
@@ -177,8 +204,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     /********************************************************************
     Read one cached value by composite key. Returns value: null on a
-    miss (key absent or expired via native Valkey TTL). Delegates to
-    Lib.KV.get.
+    miss (key absent or expired via native Valkey TTL). The stored JSON
+    string is deserialized to a JavaScript object before being returned
+    to the cache module. Delegates to Lib.KV.get.
 
     @param {Object} instance   - Request instance
     @param {String} namespace  - Logical group for the cache entry
@@ -201,33 +229,74 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
-      // Pass the driver's value straight through - null means miss
-      return {
-        success: true,
-        value: result.value,
-        error: null
-      };
+      // A miss is not an error - pass null straight through
+      if (result.value === null) {
+        return {
+          success: true,
+          value: null,
+          error: null
+        };
+      }
+
+      // Deserialize the stored JSON string - this adapter owns deserialization
+      try {
+        return {
+          success: true,
+          value: JSON.parse(result.value),
+          error: null
+        };
+      } catch (err) {
+        Lib.Debug.debug('[helper-cache-store-valkey] get deserialization failed', {
+          namespace: namespace,
+          cache_code: cache_code,
+          error: err && err.message
+        });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.SERIALIZATION_FAILED
+        };
+      }
 
     },
 
 
     /********************************************************************
-    Write one cached value with an optional TTL. ttl_seconds is
-    positional and optional - when absent, the key has no expiry.
-    Delegates to Lib.KV.set.
+    Write one cached value with an optional TTL. The value is a raw
+    JavaScript object from the cache module; this adapter serializes
+    it to JSON before handing it to Lib.KV. ttl_seconds is positional
+    and optional - when absent, the key has no expiry. Delegates to
+    Lib.KV.set.
 
     @param {Object} instance    - Request instance
     @param {String} namespace   - Logical group for the cache entry
     @param {String} cache_code  - Specific entry identifier within the namespace
-    @param {String} value       - JSON-serialized value (from the cache module)
+    @param {*} value            - Raw JavaScript value to cache
     @param {Number} ttl_seconds - Optional lifetime in seconds
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
     set: async function (instance, namespace, cache_code, value, ttl_seconds) {
 
+      // Serialize the value to JSON - this adapter owns serialization
+      let serialized;
+
+      try {
+        serialized = JSON.stringify(value);
+      } catch (err) {
+        Lib.Debug.debug('[helper-cache-store-valkey] set serialization failed', {
+          namespace: namespace,
+          cache_code: cache_code,
+          error: err && err.message
+        });
+        return {
+          success: false,
+          error: ERRORS.SERIALIZATION_FAILED
+        };
+      }
+
       // Compose the flat Valkey key and delegate to the KV driver
-      const result = await Lib.KV.set(instance, _Store.composeKey(namespace, cache_code), value, ttl_seconds);
+      const result = await Lib.KV.set(instance, _Store.composeKey(namespace, cache_code), serialized, ttl_seconds);
 
       // Return a service error if the driver call failed
       if (result.success === false) {
@@ -373,6 +442,125 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       return {
         success: true,
         cache_codes: cache_codes,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Check whether a cache entry exists without fetching its value.
+    Delegates to Lib.KV.getKeyExists. Returns exists: true if the key
+    is present and not expired, false otherwise.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, exists, error }
+    *********************************************************************/
+    has: async function (instance, namespace, cache_code) {
+
+      // Compose the flat Valkey key and delegate to the KV driver
+      const result = await Lib.KV.getKeyExists(instance, _Store.composeKey(namespace, cache_code));
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('has', result.error);
+        return {
+          success: false,
+          exists: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Pass the driver's exists flag straight through
+      return {
+        success: true,
+        exists: result.exists,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Acquire a distributed lock for a cache entry. Uses Lib.KV.setIfNotExists
+    (atomic SET NX) with a TTL derived from options.timeout_ms. The lock
+    key is separate from the cache entry key (LOCK_KEY_PREFIX instead of
+    KEY_PREFIX), so deleting a cache entry never releases a lock.
+
+    Returns applied: true if this caller acquired the lock, false if
+    another caller already holds it. applied: false is not an error.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+    @param {Object} options    - { timeout_ms: Number } lock auto-expiry in milliseconds
+
+    @return {Promise<Object>} - { success, applied, error }
+    *********************************************************************/
+    setLock: async function (instance, namespace, cache_code, options) {
+
+      // Convert milliseconds to seconds for the KV driver (ceil to avoid sub-second rounding to 0)
+      const timeout_ms = (options && options.timeout_ms) || 3000;
+      const ttl_seconds = Math.ceil(timeout_ms / 1000);
+
+      // Compose the lock key and delegate to the KV driver's atomic setIfNotExists
+      const result = await Lib.KV.setIfNotExists(
+        instance,
+        _Store.composeLockKey(namespace, cache_code),
+        '1',
+        ttl_seconds
+      );
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('setLock', result.error);
+        return {
+          success: false,
+          applied: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Pass the driver's applied flag straight through
+      return {
+        success: true,
+        applied: result.applied,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Release a distributed lock. Delegates to Lib.KV.delete. Idempotent:
+    succeeds even if the lock was already released or expired via TTL.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, error }
+    *********************************************************************/
+    releaseLock: async function (instance, namespace, cache_code) {
+
+      // Compose the lock key and delegate to the KV driver
+      const result = await Lib.KV.delete(instance, _Store.composeLockKey(namespace, cache_code));
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('releaseLock', result.error);
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Report success - idempotent, deleted_count of 0 is fine
+      return {
+        success: true,
         error: null
       };
 
