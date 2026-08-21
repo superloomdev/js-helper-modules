@@ -1,21 +1,26 @@
 # API Reference - helper-cache-store-valkey
 
-This adapter implements the 5-method store contract consumed by `helper-cache`. This document focuses on the Valkey-specific semantics.
+This adapter implements the 8-method store contract consumed by `helper-cache` (6 required + 2 lock methods). This document focuses on the Valkey-specific semantics.
 
 ## Adapter Factory
 
 ```js
 const Store = require('@superloomdev/js-server-helper-cache-store-valkey')(Lib, {
   KEY_PREFIX: 'cache:',
-  KEY_SEPARATOR: ':'
+  KEY_SEPARATOR: ':',
+  LOCK_KEY_PREFIX: 'cache:lock:'
 });
 ```
+
+## Serialization
+
+This adapter owns serialization. `set` JSON-stringifies the value before handing it to `Lib.KV.set`; `get` JSON-parses the stored string before returning it to the cache module. The cache module passes raw JavaScript objects. A serialization failure returns `CACHE_VALKEY_SERIALIZATION_FAILED`.
 
 ## Store Contract
 
 ### `get(instance, namespace, cache_code)`
 
-Composes a flat Valkey key `KEY_PREFIX + namespace + KEY_SEPARATOR + cache_code` and delegates to `Lib.KV.get`. Returns `value: null` on a miss (key absent or expired via native Valkey TTL).
+Composes a flat Valkey key `KEY_PREFIX + namespace + KEY_SEPARATOR + cache_code` and delegates to `Lib.KV.get`. Returns `value: null` on a miss (key absent or expired via native Valkey TTL). The stored JSON string is deserialized before being returned.
 
 **Return:** `{ success, value, error }`
 
@@ -23,7 +28,7 @@ Composes a flat Valkey key `KEY_PREFIX + namespace + KEY_SEPARATOR + cache_code`
 
 ### `set(instance, namespace, cache_code, value, ttl_seconds)`
 
-Composes the key and delegates to `Lib.KV.set`. `ttl_seconds` is positional and optional - when absent, the key has no expiry. Valkey handles expiry natively via `SET key value EX ttl_seconds`.
+Composes the key, JSON-serializes the value, and delegates to `Lib.KV.set`. `ttl_seconds` is positional and optional - when absent, the key has no expiry. Valkey handles expiry natively via `SET key value EX ttl_seconds`.
 
 **Return:** `{ success, error }`
 
@@ -57,6 +62,34 @@ SCAN for matching keys, strip the `KEY_PREFIX + namespace + KEY_SEPARATOR` prefi
 
 ---
 
+### `has(instance, namespace, cache_code)`
+
+Composes the key and delegates to `Lib.KV.getKeyExists`. Returns `exists: true` if the key is present and not expired, `false` otherwise. Does not fetch the value.
+
+**Return:** `{ success, exists, error }`
+
+---
+
+### `setLock(instance, namespace, cache_code, options)`
+
+Composes a lock key `LOCK_KEY_PREFIX + namespace + KEY_SEPARATOR + cache_code` and delegates to `Lib.KV.setIfNotExists` (atomic `SET NX`) with a TTL derived from `options.timeout_ms`. Lock keys are separate from cache entry keys, so deleting a cache entry never releases a lock.
+
+Returns `applied: true` if this caller acquired the lock, `false` if another caller already holds it. `applied: false` is not an error.
+
+**Return:** `{ success, applied, error }`
+
+---
+
+### `releaseLock(instance, namespace, cache_code)`
+
+Composes the lock key and delegates to `Lib.KV.delete`. Idempotent: succeeds even if the lock was already released or expired via TTL.
+
+**Return:** `{ success, error }`
+
+---
+
 ## Error Handling
 
 All methods return `{ success: false, error: ERRORS.SERVICE_UNAVAILABLE }` on driver failure. The underlying error is logged via `Lib.Debug.debug`. The driver's own error type and message never leak through.
+
+Serialization failures return `{ success: false, error: ERRORS.SERIALIZATION_FAILED }`.

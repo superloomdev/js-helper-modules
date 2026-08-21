@@ -65,6 +65,11 @@ module.exports = function loader (shared_libs, config) {
   // Validate store contract immediately so missing methods fail at startup
   Validators.validateStoreContract(store);
 
+  // When distributed locking is enabled, validate the store supports it
+  if (CONFIG.GET_OR_FETCH_LOCK_ENABLED === true) {
+    Validators.validateLockSupport(store);
+  }
+
   // Build the public interface, closing over Lib, CONFIG, ERRORS, Validators, and store
   return createInterface(Lib, CONFIG, ERRORS, Validators, store);
 
@@ -96,13 +101,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     /********************************************************************
     Store a value in the cache with an optional TTL (seconds). Overwrites
     any existing entry at the same (namespace, cache_code). The value is
-    JSON-serialized before being handed to the store; the store handles
-    backend-specific encoding.
+    passed to the store as a raw JavaScript object; the store adapter
+    handles backend-specific serialization.
 
     @param {Object} instance     - Request instance for time and lifecycle
     @param {String} namespace    - Logical group for the cache entry
     @param {String} cache_code   - Specific entry identifier within the namespace
-    @param {*} value             - Value to cache (JSON-serializable)
+    @param {*} value             - Value to cache
     @param {Number} [ttl_seconds] - Optional lifetime in seconds. Omit for no expiry
 
     @return {Promise<Object>} - { success, error }
@@ -113,22 +118,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       Validators.validateIdentifiers(namespace, cache_code);
       Validators.validateOptionalTtl(ttl_seconds);
 
-      // Serialize the value to JSON before handing it to the store
-      let serialized;
-
+      // Delegate to the store - no serialization in the cache module
       try {
-        serialized = JSON.stringify(value);
-      } catch (err) {
-        Lib.Debug.debug('Cache serialization failed', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-        return {
-          success: false,
-          error: ERRORS.CACHE_SERIALIZATION_FAILED
-        };
-      }
-
-      // Delegate to the store and translate any driver failure
-      try {
-        const result = await store.set(instance, namespace, cache_code, serialized, ttl_seconds);
+        const result = await store.set(instance, namespace, cache_code, value, ttl_seconds);
 
         if (result.success === false) {
           Lib.Debug.debug('Cache store set failed', { namespace: namespace, cache_code: cache_code, error: result.error });
@@ -155,8 +147,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     /********************************************************************
     Read a value from the cache. Returns value: null on a cache miss
-    (entry absent or expired) - a miss is not an error. The store's
-    raw string is JSON-parsed before being returned.
+    (entry absent or expired) - a miss is not an error. The store
+    returns a raw JavaScript object; the store adapter handled
+    backend-specific deserialization.
 
     @param {Object} instance  - Request instance for time and lifecycle
     @param {String} namespace - Logical group for the cache entry
@@ -169,9 +162,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // Programmer errors (bad args) throw synchronously - never returned as envelope
       Validators.validateIdentifiers(namespace, cache_code);
 
-      // Delegate to the store and translate any driver failure
-      let raw;
-
+      // Delegate to the store - no deserialization in the cache module
       try {
         const result = await store.get(instance, namespace, cache_code);
 
@@ -184,38 +175,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           };
         }
 
-        // A cache miss is not an error - short-circuit before any parse
-        if (result.value === null || Lib.Utils.isNullOrUndefined(result.value)) {
-          return {
-            success: true,
-            value: null,
-            error: null
-          };
-        }
-
-        raw = result.value;
+        // A cache miss is not an error - pass the store's value straight through
+        return {
+          success: true,
+          value: result.value,
+          error: null
+        };
       } catch (err) {
         Lib.Debug.debug('Cache store get threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
         return {
           success: false,
           value: null,
           error: ERRORS.CACHE_STORE_UNAVAILABLE
-        };
-      }
-
-      // Parse the JSON string returned by the store
-      try {
-        return {
-          success: true,
-          value: JSON.parse(raw),
-          error: null
-        };
-      } catch (err) {
-        Lib.Debug.debug('Cache deserialization failed', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-        return {
-          success: false,
-          value: null,
-          error: ERRORS.CACHE_SERIALIZATION_FAILED
         };
       }
 
@@ -361,6 +332,258 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
         };
       }
 
+    },
+
+
+    /********************************************************************
+    Check whether a cache entry exists without fetching its value.
+    Returns exists: true if the key is present and not expired, false
+    if absent or expired. Useful for marker keys and conditional logic
+    that only needs presence, not the payload.
+
+    @param {Object} instance  - Request instance for time and lifecycle
+    @param {String} namespace - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, exists, error }
+    *********************************************************************/
+    has: async function (instance, namespace, cache_code) {
+
+      // Programmer errors (bad args) throw synchronously - never returned as envelope
+      Validators.validateIdentifiers(namespace, cache_code);
+
+      // Delegate to the store and translate any driver failure
+      try {
+        const result = await store.has(instance, namespace, cache_code);
+
+        if (result.success === false) {
+          Lib.Debug.debug('Cache store has failed', { namespace: namespace, cache_code: cache_code, error: result.error });
+          return {
+            success: false,
+            exists: false,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        return {
+          success: true,
+          exists: result.exists,
+          error: null
+        };
+      } catch (err) {
+        Lib.Debug.debug('Cache store has threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          exists: false,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+    },
+
+
+    /********************************************************************
+    Cache-aside with optional distributed stampede protection.
+
+    On a cache hit: returns the cached value. The fetcher is never called.
+    On a cache miss:
+      - If GET_OR_FETCH_LOCK_ENABLED is false: calls the fetcher, caches
+        the result, returns it. Same as manual get-then-set.
+      - If GET_OR_FETCH_LOCK_ENABLED is true: acquires a distributed lock
+        in the store, calls the fetcher, caches the result, releases the
+        lock, returns the value. Concurrent requests for the same key
+        wait and retry the cache read until the value appears or the lock
+        expires and they acquire it themselves.
+
+    The fetcher is a function the caller provides. If it returns a value
+    (including null), that value is cached and returned. If it throws,
+    nothing is cached, the lock is released immediately, and the error is
+    returned as CACHE_FETCHER_FAILED.
+
+    This is NOT cache-through. The cache module does not know about the
+    source database. The caller provides the fetcher; the cache module
+    calls it on a miss.
+
+    @param {Object} instance     - Request instance for time and lifecycle
+    @param {String} namespace    - Logical group for the cache entry
+    @param {String} cache_code   - Specific entry identifier within the namespace
+    @param {Number} ttl_seconds  - TTL for the cached value (seconds)
+    @param {Function} fetcher    - async function() -> returns any value or throws
+
+    @return {Promise<Object>} - { success, value, error }
+    *********************************************************************/
+    getOrFetch: async function (instance, namespace, cache_code, ttl_seconds, fetcher) {
+
+      // Programmer errors (bad args) throw synchronously - never returned as envelope
+      Validators.validateIdentifiers(namespace, cache_code);
+      Validators.validateOptionalTtl(ttl_seconds);
+      if (!Lib.Utils.isFunction(fetcher)) {
+        throw new TypeError('[helper-cache] getOrFetch: fetcher must be a function');
+      }
+
+      // 1. Check the cache first
+      try {
+        const cached = await store.get(instance, namespace, cache_code);
+
+        if (cached.success === false) {
+          Lib.Debug.debug('Cache store get (getOrFetch) failed', { namespace: namespace, cache_code: cache_code, error: cached.error });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // Cache hit - return immediately, fetcher is never called
+        if (cached.value !== null && !Lib.Utils.isNullOrUndefined(cached.value)) {
+          return {
+            success: true,
+            value: cached.value,
+            error: null
+          };
+        }
+      } catch (err) {
+        Lib.Debug.debug('Cache store get (getOrFetch) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+      // 2. Cache miss. If lock is disabled, just fetch and cache.
+      if (CONFIG.GET_OR_FETCH_LOCK_ENABLED === false) {
+        return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
+      }
+
+      // 3. Lock enabled - try to acquire
+      try {
+        const lock_result = await store.setLock(
+          instance, namespace, cache_code,
+          { timeout_ms: CONFIG.GET_OR_FETCH_LOCK_TIMEOUT_MS }
+        );
+
+        if (lock_result.success === false) {
+          Lib.Debug.debug('Cache store setLock (getOrFetch) failed', { namespace: namespace, cache_code: cache_code, error: lock_result.error });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // 3a. We won the lock - fetch, cache, release
+        if (lock_result.applied) {
+          try {
+            return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
+          } finally {
+
+            // Always release the lock, even if the fetcher threw
+            try {
+              await store.releaseLock(instance, namespace, cache_code);
+            } catch (err) {
+              // Lock release failure is not fatal - the lock has a TTL and will expire
+              Lib.Debug.debug('Cache store releaseLock (getOrFetch) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+            }
+
+          }
+        }
+      } catch (err) {
+        Lib.Debug.debug('Cache store setLock (getOrFetch) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+      // 3b. We did not win the lock - wait and retry the cache read.
+      //     No wait timeout: retry indefinitely until the value appears
+      //     or the lock expires and we acquire it ourselves.
+      while (true) {
+
+        // Sleep for retry interval + random jitter
+        const jitter = Math.random() * CONFIG.GET_OR_FETCH_LOCK_RETRY_JITTER_MS;
+        const sleep_ms = CONFIG.GET_OR_FETCH_LOCK_RETRY_MS + jitter;
+        await new Promise(function (resolve) {
+          setTimeout(resolve, sleep_ms);
+        });
+
+        // Check if the value has appeared in the cache
+        try {
+          const retry = await store.get(instance, namespace, cache_code);
+
+          if (retry.success === false) {
+            Lib.Debug.debug('Cache store get (getOrFetch retry) failed', { namespace: namespace, cache_code: cache_code, error: retry.error });
+            return {
+              success: false,
+              value: null,
+              error: ERRORS.CACHE_STORE_UNAVAILABLE
+            };
+          }
+
+          // Value appeared - return it
+          if (retry.value !== null && !Lib.Utils.isNullOrUndefined(retry.value)) {
+            return {
+              success: true,
+              value: retry.value,
+              error: null
+            };
+          }
+        } catch (err) {
+          Lib.Debug.debug('Cache store get (getOrFetch retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // Value not yet available. Try to acquire the lock ourselves.
+        // If the previous lock holder crashed or was too slow, the lock
+        // has expired (its TTL passed) and our setLock will succeed.
+        try {
+          const lock_result = await store.setLock(
+            instance, namespace, cache_code,
+            { timeout_ms: CONFIG.GET_OR_FETCH_LOCK_TIMEOUT_MS }
+          );
+
+          if (lock_result.success === false) {
+            Lib.Debug.debug('Cache store setLock (getOrFetch retry) failed', { namespace: namespace, cache_code: cache_code, error: lock_result.error });
+            return {
+              success: false,
+              value: null,
+              error: ERRORS.CACHE_STORE_UNAVAILABLE
+            };
+          }
+
+          if (lock_result.applied) {
+
+            // We now hold the lock - become the fetcher
+            try {
+              return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
+            } finally {
+
+              try {
+                await store.releaseLock(instance, namespace, cache_code);
+              } catch (err) {
+                Lib.Debug.debug('Cache store releaseLock (getOrFetch retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+              }
+
+            }
+          }
+        } catch (err) {
+          Lib.Debug.debug('Cache store setLock (getOrFetch retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // Lock still held by someone else - keep waiting
+      }
+
     }
 
   };////////////////////////////// Public Functions END ////////////////////////
@@ -368,11 +591,63 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
   ///////////////////////////// Private Functions START ////////////////////////
-  // No private helpers are needed yet. The cache module is a thin delegation
-  // layer over the store contract; every operation is a validate-then-delegate
-  // call. When internal helpers become necessary, they go here following the
-  // same banner and JSDoc conventions as the public functions above.
-  ///////////////////////////// Private Functions END ////////////////////////
+  const _Cache = {
+
+    /********************************************************************
+    Private helper: call the fetcher, store the result, return it.
+    Used by getOrFetch in both the locked and unlocked paths.
+
+    If the fetcher throws, nothing is cached and CACHE_FETCHER_FAILED
+    is returned. The caller (getOrFetch) handles lock release in a
+    finally block.
+
+    If the store set fails after a successful fetch, the value is still
+    returned to the caller. The cache wasn't populated, so the next
+    request will miss and re-fetch. This is the right behavior: the
+    caller gets their data even if the cache is temporarily down.
+
+    @param {Object} instance     - Request instance for time and lifecycle
+    @param {String} namespace    - Logical group for the cache entry
+    @param {String} cache_code   - Specific entry identifier within the namespace
+    @param {Number} ttl_seconds  - TTL for the cached value (seconds)
+    @param {Function} fetcher    - async function() -> returns any value or throws
+
+    @return {Promise<Object>} - { success, value, error }
+    *********************************************************************/
+    fetchAndStore: async function (instance, namespace, cache_code, ttl_seconds, fetcher) {
+
+      // Call the fetcher
+      let value;
+
+      try {
+        value = await fetcher();
+      } catch (err) {
+        Lib.Debug.debug('Cache getOrFetch fetcher threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.CACHE_FETCHER_FAILED
+        };
+      }
+
+      // Cache the result - store set failure is not fatal to the return
+      try {
+        await store.set(instance, namespace, cache_code, value, ttl_seconds);
+      } catch (err) {
+        // Store failure during set is not fatal - we still have the value
+        Lib.Debug.debug('Cache getOrFetch store set threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+      }
+
+      // Return the value to the caller regardless of whether the store set succeeded
+      return {
+        success: true,
+        value: value,
+        error: null
+      };
+
+    }
+
+  };///////////////////////////// Private Functions END ////////////////////////
 
 
   // Return public interface

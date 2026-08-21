@@ -5,7 +5,8 @@
 ```js
 const Store = require('@superloomdev/js-server-helper-cache-store-valkey')(Lib, {
   KEY_PREFIX: 'cache:',
-  KEY_SEPARATOR: ':'
+  KEY_SEPARATOR: ':',
+  LOCK_KEY_PREFIX: 'cache:lock:'
 });
 
 Lib.Cache = require('@superloomdev/js-server-helper-cache')(Lib, {
@@ -19,8 +20,9 @@ Lib.Cache = require('@superloomdev/js-server-helper-cache')(Lib, {
 |-----|------|----------|---------|-------------|
 | `KEY_PREFIX` | `String` | Yes | `'cache:'` | Prefix prepended to every composed Valkey key. Keeps cache entries isolated from non-cache keys in the same instance |
 | `KEY_SEPARATOR` | `String` | Yes | `':'` | Separator between namespace and cache_code in the composed key. The adapter strips a known-length prefix (it does not split on this character), so a cache_code containing the separator round-trips correctly |
+| `LOCK_KEY_PREFIX` | `String` | Yes | `'cache:lock:'` | Prefix for distributed lock keys. Lock keys are separate from cache entry keys so deleting a cache entry never releases a lock, and a lock's TTL is independent of the cached value's TTL |
 
-Both keys live on this adapter, not on the cache module. The cache module composes no backend key - it forwards `namespace` and `cache_code` to the store as separate parameters.
+All three keys live on this adapter, not on the cache module. The cache module composes no backend key - it forwards `namespace` and `cache_code` to the store as separate parameters.
 
 ## Dependencies
 

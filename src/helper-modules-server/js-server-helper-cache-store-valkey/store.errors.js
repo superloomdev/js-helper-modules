@@ -12,6 +12,16 @@ const Errors = {
   SERVICE_UNAVAILABLE: Object.freeze({
     type: 'CACHE_VALKEY_SERVICE_UNAVAILABLE',
     message: 'Valkey service unavailable during cache operation'
+  }),
+
+  /******************************************************************
+  Serialization failure - the value could not be JSON-stringified
+  (on set) or the stored string could not be JSON-parsed (on get).
+  This adapter owns serialization; the cache module does not.
+  ******************************************************************/
+  SERIALIZATION_FAILED: Object.freeze({
+    type: 'CACHE_VALKEY_SERIALIZATION_FAILED',
+    message: 'Failed to serialize or deserialize cache value'
   })
 
 };

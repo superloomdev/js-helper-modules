@@ -25,12 +25,13 @@ Returns a ready-to-use Store interface. The Cache parent receives this object an
 
 ```js
 {
-  KEY_PREFIX: 'cache:',    // required. isolates cache keys from non-cache keys
-  KEY_SEPARATOR: ':'       // required. separator in composed key
+  KEY_PREFIX: 'cache:',        // required. isolates cache keys from non-cache keys
+  KEY_SEPARATOR: ':',          // required. separator in composed key
+  LOCK_KEY_PREFIX: 'cache:lock:' // required. prefix for distributed lock keys
 }
 ```
 
-Both keys live on this adapter, not on the cache module. The cache module composes no backend key.
+All three keys live on this adapter, not on the cache module. The cache module composes no backend key. Lock keys use `LOCK_KEY_PREFIX` instead of `KEY_PREFIX` so they are separate from cache entry keys.
 
 ## Store Contract
 
@@ -41,8 +42,15 @@ Both keys live on this adapter, not on the cache module. The cache module compos
 | `delete` | `(instance, namespace, cache_code)` | `{ success, error }` |
 | `clear` | `(instance, namespace, cache_code_prefix?)` | `{ success, deleted_count, error }` |
 | `list` | `(instance, namespace, cache_code_prefix?)` | `{ success, cache_codes, error }` |
+| `has` | `(instance, namespace, cache_code)` | `{ success, exists, error }` |
+| `setLock` | `(instance, namespace, cache_code, options)` | `{ success, applied, error }` |
+| `releaseLock` | `(instance, namespace, cache_code)` | `{ success, error }` |
 
 All methods are async. `instance` is the per-request lifecycle object from `Lib.Instance.initialize()`.
+
+This adapter owns serialization: `set` JSON-stringifies the value before handing it to `Lib.KV.set`; `get` JSON-parses the stored string before returning it to the cache module. The cache module passes raw JavaScript objects.
+
+`setLock` uses `Lib.KV.setIfNotExists` (atomic `SET NX`) with a TTL derived from `options.timeout_ms`. Lock keys are separate from cache entry keys. `releaseLock` uses `Lib.KV.delete` and is idempotent.
 
 ## Key Composition
 
@@ -84,11 +92,12 @@ All are loaded into `Lib` by the application before the Cache parent is loaded. 
 
 ## Error Catalog
 
-This adapter owns its own `store.errors.js`. Only one type:
+This adapter owns its own `store.errors.js`. Two types:
 
 | Error | When |
 |---|---|
 | `ERRORS.SERVICE_UNAVAILABLE` | Driver-level call failed. Logged via `Lib.Debug.debug`, never surfaced to caller |
+| `ERRORS.SERIALIZATION_FAILED` | `JSON.stringify` or `JSON.parse` threw on the cached value. This adapter owns serialization |
 
 ## Single Source of Truth
 

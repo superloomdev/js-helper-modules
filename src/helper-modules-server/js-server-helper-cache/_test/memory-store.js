@@ -1,5 +1,5 @@
 // Info: In-process Map-backed store fixture for helper-cache unit tests.
-// Implements the 5-method store contract so cache.js can be tested
+// Implements the 8-method store contract so cache.js can be tested
 // without any Docker container or database driver. All data is stored
 // in a plain Map keyed by "namespace\u001Fcache_code".
 //
@@ -7,14 +7,19 @@
 // a performance store and should never be used in production.
 //
 // Store contract (identical shape across all real stores):
-//   get(instance, namespace, cache_code)                  -> { success, value, error }
+//   get(instance, namespace, cache_code)                     -> { success, value, error }
 //   set(instance, namespace, cache_code, value, ttl_seconds) -> { success, error }
-//   delete(instance, namespace, cache_code)               -> { success, error }
-//   clear(instance, namespace, cache_code_prefix?)        -> { success, deleted_count, error }
-//   list(instance, namespace, cache_code_prefix?)         -> { success, cache_codes, error }
+//   delete(instance, namespace, cache_code)                  -> { success, error }
+//   clear(instance, namespace, cache_code_prefix?)           -> { success, deleted_count, error }
+//   list(instance, namespace, cache_code_prefix?)            -> { success, cache_codes, error }
+//   has(instance, namespace, cache_code)                     -> { success, exists, error }
+//   setLock(instance, namespace, cache_code, options)        -> { success, applied, error }
+//   releaseLock(instance, namespace, cache_code)             -> { success, error }
 //
 // Expiry is driven off instance.time (not wall clock) so the TTL test is
 // deterministic: advance instance.time instead of sleeping.
+// Lock expiry uses wall clock (Date.now) because the lock timeout is in
+// milliseconds and instance.time is in seconds.
 'use strict';
 
 
@@ -44,6 +49,7 @@ function produces an independent Map, so tests can run in isolation.
 module.exports = function createMemoryStore () {
 
   const _map = new Map();
+  const _locks = new Map();
 
   const Store = {
 
@@ -177,10 +183,109 @@ module.exports = function createMemoryStore () {
 
 
     /******************************************************************
+    Check whether an entry exists (present and not expired). Does
+    not return the value. Expiry is checked against instance.time.
+    ******************************************************************/
+    has: async function (instance, namespace, cache_code) {
+
+      const stored = _map.get(compositeKey(namespace, cache_code));
+
+      if (!stored) {
+        return {
+          success: true,
+          exists: false,
+          error: null
+        };
+      }
+
+      // Treat expired entries as absent and delete them
+      if (stored.expires_at !== null && stored.expires_at < instance['time']) {
+        _map.delete(compositeKey(namespace, cache_code));
+        return {
+          success: true,
+          exists: false,
+          error: null
+        };
+      }
+
+      return {
+        success: true,
+        exists: true,
+        error: null
+      };
+
+    },
+
+
+    /******************************************************************
+    Acquire a distributed lock. Only one caller can hold the lock for
+    a given (namespace, cache_code) at a time. The lock auto-expires
+    after options.timeout_ms milliseconds (wall clock) to handle
+    crashed processes.
+
+    Returns applied: true if this caller acquired the lock, false if
+    another caller already holds it (and it has not expired).
+    ******************************************************************/
+    setLock: async function (instance, namespace, cache_code, options) {
+
+      const lockKey = compositeKey(namespace, cache_code);
+      const now = Date.now();
+      const timeout_ms = (options && options.timeout_ms) || 3000;
+
+      // Check for an existing lock
+      const existing = _locks.get(lockKey);
+
+      if (existing && existing.expires_at > now) {
+
+        // Lock is held and not expired - this caller does not acquire
+        return {
+          success: true,
+          applied: false,
+          error: null
+        };
+      }
+
+      // No lock, or expired lock - this caller acquires
+      _locks.set(lockKey, {
+        expires_at: now + timeout_ms
+      });
+
+      return {
+        success: true,
+        applied: true,
+        error: null
+      };
+
+    },
+
+
+    /******************************************************************
+    Release a distributed lock. Idempotent: succeeds even if the
+    lock was already released or expired.
+    ******************************************************************/
+    releaseLock: async function (instance, namespace, cache_code) { // eslint-disable-line no-unused-vars
+
+      _locks.delete(compositeKey(namespace, cache_code));
+
+      return {
+        success: true,
+        error: null
+      };
+
+    },
+
+
+    /******************************************************************
     Test helper - expose the raw Map for white-box assertions.
     Not part of the public contract; never used in production code.
     ******************************************************************/
-    _records: _map
+    _records: _map,
+
+    /******************************************************************
+    Test helper - expose the locks Map for white-box assertions.
+    Not part of the public contract; never used in production code.
+    ******************************************************************/
+    _locks: _locks
 
   };
 
