@@ -89,6 +89,8 @@
 #   51. test-rnw-device → publish-rnw-device
 #   52. test-kv-valkey → publish-kv-valkey
 #   53. test-kv-aws-elasticache → publish-kv-aws-elasticache
+#   54. test-cache → publish-cache
+#   55. test-cache-store-valkey → publish-cache-store-valkey (needs publish-kv-valkey + publish-cache)
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -4664,7 +4666,7 @@ jobs:
           fi
 
   test-cache-store-valkey:
-    needs: [detect, publish-cache]
+    needs: [detect, publish-cache, publish-kv-valkey]
     if: |
       always() &&
       !cancelled() &&
