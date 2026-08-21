@@ -370,15 +370,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // High-level functions that build params then execute.
 
     /********************************************************************
-    Get a single record by primary key.
+    Get a single record by primary key. Supports an optional consistentRead
+    option for strongly consistent reads (needed by cache stores to avoid
+    stale reads after a concurrent write).
 
     @param {Object} instance - Request instance
     @param {String} table - Table name
     @param {Object} key - Primary key { pk, sk } or { id }
+    @param {Object} [options] - Optional parameters
+    @param {Boolean} [options.consistentRead=false] - Use strongly consistent read
 
     @return {Promise<Object>} - { success, item, error }
     *********************************************************************/
-    getRecord: async function (instance, table, key) {
+    getRecord: async function (instance, table, key, options) {
 
       // Ensure DynamoDB client is initialized
       _DynamoDB.initIfNot();
@@ -387,8 +391,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       try {
 
-        // Build and send Get command
-        const command = new DynamoDBLib.GetCommand({ TableName: table, Key: key });
+        // Build Get command with optional consistent read
+        const get_params = { TableName: table, Key: key };
+        if (options && options.consistentRead === true) {
+          get_params.ConsistentRead = true;
+        }
+        const command = new DynamoDBLib.GetCommand(get_params);
         const response = await state.client.send(command);
 
         // Log operation performance
@@ -439,6 +447,85 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Execute using command executor (DRY)
       return DynamoDB.runAddRecordCommand(instance, service_params);
+
+    },
+
+
+    /********************************************************************
+    Write a record only if no item with the same primary key exists.
+    Uses PutItem with ConditionExpression: attribute_not_exists(pk).
+    applied: true means the item was created; applied: false means it
+    already existed (not an error). This is the atomic primitive that
+    distributed locks are built on.
+
+    @param {Object} instance - Request instance
+    @param {String} table - Table name
+    @param {Object} key - Primary key (used to extract the PK attribute name for the condition)
+    @param {Object} item - Full item to store (must include key attributes)
+
+    @return {Promise<Object>} - { success, applied, error }
+    *********************************************************************/
+    writeRecordIfNotExists: async function (instance, table, key, item) {
+
+      // Ensure DynamoDB client is initialized
+      _DynamoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Extract the partition key attribute name for the condition expression
+        const pk_name = Object.keys(key)[0];
+
+        // Send Put with condition expression - atomic create-only
+        const command = new DynamoDBLib.PutCommand({
+          TableName: table,
+          Item: item,
+          ConditionExpression: 'attribute_not_exists(#pk)',
+          ExpressionAttributeNames: { '#pk': pk_name }
+        });
+
+        await state.client.send(command);
+
+        // Log operation performance
+        Lib.Debug.performanceAuditLog('End', 'DynamoDB writeRecordIfNotExists - ' + table, start_ms);
+
+        return {
+          success: true,
+          applied: true,
+          error: null
+        };
+
+      } catch (error) {
+
+        // ConditionalCheckFailedException means the item already existed - not an error
+        if (error.name === 'ConditionalCheckFailedException') {
+
+          Lib.Debug.performanceAuditLog('End', 'DynamoDB writeRecordIfNotExists - ' + table, start_ms);
+
+          return {
+            success: true,
+            applied: false,
+            error: null
+          };
+
+        }
+
+        Lib.Debug.debug('DynamoDB writeRecordIfNotExists failed', {
+          type: ERRORS.DATABASE_WRITE_FAILED.type,
+          table: table,
+          message: error.message,
+          code: error.code || null,
+          stack: error.stack
+        });
+
+        return {
+          success: false,
+          applied: false,
+          error: ERRORS.DATABASE_WRITE_FAILED
+        };
+
+      }
 
     },
 

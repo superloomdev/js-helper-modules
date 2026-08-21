@@ -91,6 +91,7 @@
 #   53. test-kv-aws-elasticache → publish-kv-aws-elasticache
 #   54. test-cache → publish-cache
 #   55. test-cache-store-valkey → publish-cache-store-valkey (needs publish-kv-valkey + publish-cache)
+#   56. test-cache-store-dynamodb → publish-cache-store-dynamodb (needs publish-nosql-aws-dynamodb + publish-cache)
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -4713,6 +4714,70 @@ jobs:
         run: npm install -g npm@10
       - name: Publish
         working-directory: src/helper-modules-server/js-server-helper-cache-store-valkey
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+  # ###########################################################################
+  #   MODULE 56: js-server-helper-cache-store-dynamodb
+  #   (needs nosql-aws-dynamodb + cache published; DynamoDB Local via Docker)
+  # ###########################################################################
+
+  test-cache-store-dynamodb:
+    needs: [detect, publish-nosql-aws-dynamodb, publish-cache]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-cache-store-dynamodb')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-dynamodb
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-cache-store-dynamodb:
+    needs: [detect, test-cache-store-dynamodb]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-cache-store-dynamodb'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-cache-store-dynamodb')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-dynamodb
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
