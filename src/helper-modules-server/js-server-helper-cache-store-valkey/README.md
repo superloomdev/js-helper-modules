@@ -17,15 +17,15 @@ The adapter cannot stand alone. It is always loaded together with the Cache pare
 
 - **Pre-tested at every release.** A full store-contract and Cache-lifecycle integration suite run against a Dockerized Valkey instance in CI on every push.
 
-- **Native TTL.** Expired cache entries are deleted automatically by Valkey - no application scheduling required. `set` with a `ttl_seconds` value issues `SET key value EX ttl_seconds` under the hood.
+- **Native TTL.** Expired cache entries are deleted automatically by Valkey - no application scheduling required. `setCache` with a `ttl_seconds` value issues `SET key value EX ttl_seconds` under the hood.
 
-- **O(1) single-entry operations.** `get`, `set`, and `delete` are single-key operations with O(1) complexity.
+- **O(1) single-entry operations.** `getCache`, `setCache`, and `deleteCache` are single-key operations with O(1) complexity.
 
-## clear and list Complexity
+## deleteCacheByPrefix, clearCache, and listCacheCodes Complexity
 
-`clear` and `list` use `SCAN MATCH prefix*`, which is **O(N) over the entire keyspace**. Redis and Valkey expose a flat keyspace with no partition or sort key, so no prefix-scoped index exists. On self-hosted Valkey and node-based ElastiCache this costs CPU only; on **serverless ElastiCache** it consumes ECPUs proportional to data scanned and can be expensive. Prefer targeted `delete` calls for routine invalidation and treat `clear` as an administrative operation.
+`deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use `SCAN MATCH prefix*`, which is **O(N) over the entire keyspace**. Redis and Valkey expose a flat keyspace with no partition or sort key, so no prefix-scoped index exists. On self-hosted Valkey and node-based ElastiCache this costs CPU only; on **serverless ElastiCache** it consumes ECPUs proportional to data scanned and can be expensive. Prefer targeted `deleteCache` calls for routine invalidation and treat `deleteCacheByPrefix`/`clearCache` as administrative operations.
 
-See [Configuration](docs/configuration.md#clear-and-list-complexity) for the full cost analysis.
+See [Configuration](docs/configuration.md#deletecachebyprefix-clearcache-and-listcachecodes-complexity) for the full cost analysis.
 
 ## Aligned with Superloom Philosophy
 
@@ -34,7 +34,7 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 ## Extended Documentation
 
 - [API reference](docs/api.md). The store contract this adapter implements and Valkey-specific semantics
-- [Configuration](docs/configuration.md). Configuration keys, peer dependencies, environment variables, clear/list complexity, testing tier
+- [Configuration](docs/configuration.md). Configuration keys, peer dependencies, environment variables, deleteCacheByPrefix/clearCache/listCacheCodes complexity, testing tier
 - [Schema](docs/schema.md). Key structure, value encoding, TTL, no secondary index
 - [Cleanup](docs/cleanup.md). Native TTL, no sweep needed, explicit invalidation
 - [Cache parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-cache). The data model, error catalog, and Cache-side configuration this adapter plugs into

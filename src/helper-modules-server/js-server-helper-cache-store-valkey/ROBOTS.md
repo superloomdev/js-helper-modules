@@ -37,20 +37,21 @@ All three keys live on this adapter, not on the cache module. The cache module c
 
 | Method | Signature | Returns |
 |---|---|---|
-| `get` | `(instance, namespace, cache_code)` | `{ success, value, error }` |
-| `set` | `(instance, namespace, cache_code, value, ttl_seconds)` | `{ success, error }` |
-| `delete` | `(instance, namespace, cache_code)` | `{ success, error }` |
-| `clear` | `(instance, namespace, cache_code_prefix?)` | `{ success, deleted_count, error }` |
-| `list` | `(instance, namespace, cache_code_prefix?)` | `{ success, cache_codes, error }` |
-| `has` | `(instance, namespace, cache_code)` | `{ success, exists, error }` |
-| `setLock` | `(instance, namespace, cache_code, options)` | `{ success, applied, error }` |
-| `releaseLock` | `(instance, namespace, cache_code)` | `{ success, error }` |
+| `getCache` | `(instance, namespace, cache_code)` | `{ success, value, error }` |
+| `setCache` | `(instance, namespace, cache_code, value, ttl_seconds)` | `{ success, error }` |
+| `deleteCache` | `(instance, namespace, cache_code)` | `{ success, error }` |
+| `deleteCacheByPrefix` | `(instance, namespace, cache_code_prefix)` | `{ success, deleted_count, error }` |
+| `clearCache` | `(instance, namespace)` | `{ success, deleted_count, error }` |
+| `listCacheCodes` | `(instance, namespace, cache_code_prefix?)` | `{ success, cache_codes, error }` |
+| `getCacheExists` | `(instance, namespace, cache_code)` | `{ success, exists, error }` |
+| `setCacheLock` | `(instance, namespace, cache_code, options)` | `{ success, applied, error }` |
+| `releaseCacheLock` | `(instance, namespace, cache_code)` | `{ success, error }` |
 
 All methods are async. `instance` is the per-request lifecycle object from `Lib.Instance.initialize()`.
 
-This adapter owns serialization: `set` JSON-stringifies the value before handing it to `Lib.KV.set`; `get` JSON-parses the stored string before returning it to the cache module. The cache module passes raw JavaScript objects.
+This adapter owns serialization: `setCache` JSON-stringifies the value before handing it to `Lib.KV.set`; `getCache` JSON-parses the stored string before returning it to the cache module. The cache module passes raw JavaScript objects.
 
-`setLock` uses `Lib.KV.setIfNotExists` (atomic `SET NX`) with a TTL derived from `options.timeout_ms`. Lock keys are separate from cache entry keys. `releaseLock` uses `Lib.KV.delete` and is idempotent.
+`setCacheLock` uses `Lib.KV.setIfNotExists` (atomic `SET NX`) with a TTL derived from `options.timeout_ms`. Lock keys are separate from cache entry keys. `releaseCacheLock` uses `Lib.KV.delete` and is idempotent.
 
 ## Key Composition
 
@@ -66,19 +67,19 @@ The adapter strips a known-length prefix to recover the cache_code; it does not 
 
 1. **Never call the adapter directly from application code.** Always go through the parent Cache module. The adapter is configured independently and passed as a ready-to-use store object to the Cache parent.
 
-2. **`get` returns `value: null` on a miss.** Not an error. Valkey handles TTL natively, so an expired key is simply absent.
+2. **`getCache` returns `value: null` on a miss.** Not an error. Valkey handles TTL natively, so an expired key is simply absent.
 
-3. **`set` with no `ttl_seconds` means no expiry.** The key persists until explicitly deleted.
+3. **`setCache` with no `ttl_seconds` means no expiry.** The key persists until explicitly deleted.
 
-4. **`delete` is idempotent.** A missing key is treated as success.
+4. **`deleteCache` is idempotent.** A missing key is treated as success.
 
-5. **`clear` short-circuits on zero matches.** No `deleteMany` call is made when `scan` returns an empty key list.
+5. **`deleteCacheByPrefix` and `clearCache` short-circuit on zero matches.** No `deleteMany` call is made when `scan` returns an empty key list.
 
-6. **`clear` and `list` are O(N) over the entire keyspace.** `SCAN` iterates every key in the database and filters after retrieval. Redis and Valkey expose a flat keyspace with no partition or sort key. On node-based ElastiCache this costs CPU only; on serverless ElastiCache it costs ECPUs proportional to data scanned. Prefer targeted `delete` for routine invalidation.
+6. **`deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` are O(N) over the entire keyspace.** `SCAN` iterates every key in the database and filters after retrieval. Redis and Valkey expose a flat keyspace with no partition or sort key. On node-based ElastiCache this costs CPU only; on serverless ElastiCache it costs ECPUs proportional to data scanned. Prefer targeted `deleteCache` for routine invalidation.
 
 7. **The driver slot is named `KV`, never `Valkey` or `Redis`.** The capability name, not the vendor name.
 
-8. **No SET-based secondary index.** Rejected: would add `SADD` to every `set` call and need its own cleanup. O(N) `clear` is the accepted trade.
+8. **No SET-based secondary index.** Rejected: would add `SADD` to every `setCache` call and need its own cleanup. O(N) `deleteCacheByPrefix`/`clearCache` is the accepted trade.
 
 ## Peer Dependencies
 

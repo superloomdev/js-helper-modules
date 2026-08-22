@@ -33,7 +33,7 @@ const Cache = CacheFactory(Lib, {
   Store: store
 });
 
-// Locked cache instance for getOrFetch stampede protection tests
+// Locked cache instance for getOrFetchCache stampede protection tests
 const LockedCache = CacheFactory(Lib, {
   Store: store,
   GET_OR_FETCH_LOCK_ENABLED: true,
@@ -139,13 +139,13 @@ after(async function () {
 // 1. SET + GET ROUND-TRIP (store tier)
 // ============================================================================
 
-describe('Store tier: set + get round-trip', function () {
+describe('Store tier: setCache + getCache round-trip', function () {
 
   it('round-trips an object value through the store (store owns serialization)', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
-    const result = await store.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    const result = await store.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, { price: 1299 });
@@ -155,8 +155,8 @@ describe('Store tier: set + get round-trip', function () {
   it('round-trips a string value through the store', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
-    const result = await store.get(instance, 'FeatureFlags', 'checkout-v2');
+    await store.setCache(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
+    const result = await store.getCache(instance, 'FeatureFlags', 'checkout-v2');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, 'enabled');
@@ -169,14 +169,14 @@ describe('Store tier: set + get round-trip', function () {
 // 2. SET + GET ROUND-TRIP (parent cache tier)
 // ============================================================================
 
-describe('Cache tier: set + get round-trip', function () {
+describe('Cache tier: setCache + getCache round-trip', function () {
 
   it('round-trips an object value through the full cache composition', async function () {
     const instance = createInstance();
 
     const value = { id: 'laptop-x1', price: 1299 };
-    await Cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', value, 3600);
-    const result = await Cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    await Cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', value, 3600);
+    const result = await Cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, value);
@@ -189,12 +189,12 @@ describe('Cache tier: set + get round-trip', function () {
 // 3. GET CACHE MISS
 // ============================================================================
 
-describe('get cache miss', function () {
+describe('getCache cache miss', function () {
 
   it('returns value null for absent cache_code', async function () {
     const instance = createInstance();
 
-    const result = await store.get(instance, 'ProductCatalog', 'nonexistent');
+    const result = await store.getCache(instance, 'ProductCatalog', 'nonexistent');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, null);
@@ -207,15 +207,15 @@ describe('get cache miss', function () {
 // 4. DELETE
 // ============================================================================
 
-describe('delete', function () {
+describe('deleteCache', function () {
 
-  it('deletes an existing entry then get returns null', async function () {
+  it('deletes an existing entry then getCache returns null', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 3600);
-    await store.delete(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 3600);
+    await store.deleteCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
-    const result = await store.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await store.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.value, null);
   });
@@ -224,7 +224,7 @@ describe('delete', function () {
   it('succeeds idempotently on a non-existent entry', async function () {
     const instance = createInstance();
 
-    const result = await store.delete(instance, 'ProductCatalog', 'never-existed');
+    const result = await store.deleteCache(instance, 'ProductCatalog', 'never-existed');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.error, null);
@@ -242,11 +242,11 @@ describe('namespace isolation', function () {
   it('same cache_code in two namespaces holds two distinct values', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'NamespaceA', 'shared-code', 'value-a', 3600);
-    await store.set(instance, 'NamespaceB', 'shared-code', 'value-b', 3600);
+    await store.setCache(instance, 'NamespaceA', 'shared-code', 'value-a', 3600);
+    await store.setCache(instance, 'NamespaceB', 'shared-code', 'value-b', 3600);
 
-    const a = await store.get(instance, 'NamespaceA', 'shared-code');
-    const b = await store.get(instance, 'NamespaceB', 'shared-code');
+    const a = await store.getCache(instance, 'NamespaceA', 'shared-code');
+    const b = await store.getCache(instance, 'NamespaceB', 'shared-code');
 
     assert.strictEqual(a.value, 'value-a');
     assert.strictEqual(b.value, 'value-b');
@@ -256,26 +256,26 @@ describe('namespace isolation', function () {
 
 
 // ============================================================================
-// 6. CLEAR WITH PREFIX
+// 6. DELETE CACHE BY PREFIX
 // ============================================================================
 
-describe('clear with cache_code_prefix', function () {
+describe('deleteCacheByPrefix', function () {
 
   it('removes only matching entries', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await store.set(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
-    await store.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
 
-    const result = await store.clear(instance, 'ProductCatalog', 'electronics:');
+    const result = await store.deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 2);
 
-    const laptop = await store.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
-    const mouse = await store.get(instance, 'ProductCatalog', 'electronics:mouse-z2');
-    const jacket = await store.get(instance, 'ProductCatalog', 'clothing:jacket-m');
+    const laptop = await store.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const mouse = await store.getCache(instance, 'ProductCatalog', 'electronics:mouse-z2');
+    const jacket = await store.getCache(instance, 'ProductCatalog', 'clothing:jacket-m');
 
     assert.strictEqual(laptop.value, null);
     assert.strictEqual(mouse.value, null);
@@ -286,26 +286,41 @@ describe('clear with cache_code_prefix', function () {
 
 
 // ============================================================================
-// 7. CLEAR WITHOUT PREFIX
+// 7. CLEAR CACHE (wipe all in namespace)
 // ============================================================================
 
-describe('clear without cache_code_prefix', function () {
+describe('clearCache', function () {
 
   it('clears every entry in the namespace', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await store.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
 
-    const result = await store.clear(instance, 'ProductCatalog');
+    const result = await store.clearCache(instance, 'ProductCatalog');
 
+    assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 2);
 
-    const laptop = await store.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
-    const jacket = await store.get(instance, 'ProductCatalog', 'clothing:jacket-m');
+    const laptop = await store.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const jacket = await store.getCache(instance, 'ProductCatalog', 'clothing:jacket-m');
 
     assert.strictEqual(laptop.value, null);
     assert.strictEqual(jacket.value, null);
+  });
+
+
+  it('clearing one namespace leaves another untouched', async function () {
+    const instance = createInstance();
+
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await store.setCache(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
+
+    await store.clearCache(instance, 'ProductCatalog');
+
+    const flag = await store.getCache(instance, 'FeatureFlags', 'checkout-v2');
+
+    assert.strictEqual(flag.value, 'enabled');
   });
 
 });
@@ -315,12 +330,12 @@ describe('clear without cache_code_prefix', function () {
 // 8. CLEAR ON EMPTY NAMESPACE
 // ============================================================================
 
-describe('clear on empty namespace', function () {
+describe('clearCache on empty namespace', function () {
 
   it('returns deleted_count 0 without error', async function () {
     const instance = createInstance();
 
-    const result = await store.clear(instance, 'EmptyNamespace', 'some-prefix:');
+    const result = await store.clearCache(instance, 'EmptyNamespace');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 0);
@@ -334,16 +349,16 @@ describe('clear on empty namespace', function () {
 // 9. LIST WITH PREFIX
 // ============================================================================
 
-describe('list with cache_code_prefix', function () {
+describe('listCacheCodes with cache_code_prefix', function () {
 
   it('returns only matching cache_codes', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await store.set(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
-    await store.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
 
-    const result = await store.list(instance, 'ProductCatalog', 'electronics:');
+    const result = await store.listCacheCodes(instance, 'ProductCatalog', 'electronics:');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.cache_codes.sort(), ['electronics:laptop-x1', 'electronics:mouse-z2']);
@@ -356,15 +371,15 @@ describe('list with cache_code_prefix', function () {
 // 10. LIST WITHOUT PREFIX
 // ============================================================================
 
-describe('list without cache_code_prefix', function () {
+describe('listCacheCodes without cache_code_prefix', function () {
 
   it('returns all cache_codes in the namespace', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await store.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
 
-    const result = await store.list(instance, 'ProductCatalog');
+    const result = await store.listCacheCodes(instance, 'ProductCatalog');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.cache_codes.sort(), ['clothing:jacket-m', 'electronics:laptop-x1']);
@@ -382,17 +397,17 @@ describe('TTL expiry (deterministic via instance.time)', function () {
   it('entry expires after ttl_seconds when instance.time advances', async function () {
     const instance = createInstance(1000000);
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 60);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 60);
 
     // Get immediately - value present
-    const before = await store.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const before = await store.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.strictEqual(before.value, 'value');
 
     // Advance instance.time past the TTL - no setTimeout
     instance.time = 1000000 + 61;
 
     // Get again - value is null (expired via application-side check)
-    const after = await store.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const after = await store.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.strictEqual(after.success, true);
     assert.strictEqual(after.value, null);
   });
@@ -401,17 +416,17 @@ describe('TTL expiry (deterministic via instance.time)', function () {
 
 
 // ============================================================================
-// 12. HAS - EXISTENCE CHECK (store tier)
+// 12. GET CACHE EXISTS - EXISTENCE CHECK (store tier)
 // ============================================================================
 
-describe('Store tier: has', function () {
+describe('Store tier: getCacheExists', function () {
 
   it('returns exists: true for a present entry', async function () {
     const instance = createInstance();
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
-    const result = await store.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await store.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, true);
@@ -422,7 +437,7 @@ describe('Store tier: has', function () {
   it('returns exists: false for an absent entry', async function () {
     const instance = createInstance();
 
-    const result = await store.has(instance, 'ProductCatalog', 'nonexistent');
+    const result = await store.getCacheExists(instance, 'ProductCatalog', 'nonexistent');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
@@ -432,12 +447,12 @@ describe('Store tier: has', function () {
   it('returns exists: false after TTL expiry', async function () {
     const instance = createInstance(1000000);
 
-    await store.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 60);
+    await store.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 60);
 
     // Advance instance.time past the TTL - no setTimeout
     instance.time = 1000000 + 61;
 
-    const result = await store.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await store.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
@@ -447,17 +462,17 @@ describe('Store tier: has', function () {
 
 
 // ============================================================================
-// 13. HAS - EXISTENCE CHECK (cache tier)
+// 13. GET CACHE EXISTS - EXISTENCE CHECK (cache tier)
 // ============================================================================
 
-describe('Cache tier: has', function () {
+describe('Cache tier: getCacheExists', function () {
 
   it('returns exists: true for a present entry', async function () {
     const instance = createInstance();
 
-    await Cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await Cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
-    const result = await Cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await Cache.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, true);
@@ -467,7 +482,7 @@ describe('Cache tier: has', function () {
   it('returns exists: false for an absent entry', async function () {
     const instance = createInstance();
 
-    const result = await Cache.has(instance, 'ProductCatalog', 'nonexistent');
+    const result = await Cache.getCacheExists(instance, 'ProductCatalog', 'nonexistent');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
@@ -477,15 +492,15 @@ describe('Cache tier: has', function () {
 
 
 // ============================================================================
-// 14. SET LOCK / RELEASE LOCK (store tier)
+// 14. SET CACHE LOCK / RELEASE CACHE LOCK (store tier)
 // ============================================================================
 
-describe('Store tier: setLock / releaseLock', function () {
+describe('Store tier: setCacheLock / releaseCacheLock', function () {
 
-  it('first setLock on absent key applies', async function () {
+  it('first setCacheLock on absent key applies', async function () {
     const instance = createInstance();
 
-    const result = await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    const result = await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.applied, true);
@@ -493,33 +508,33 @@ describe('Store tier: setLock / releaseLock', function () {
   });
 
 
-  it('second setLock on same key does not apply', async function () {
+  it('second setCacheLock on same key does not apply', async function () {
     const instance = createInstance();
 
-    await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
-    const result = await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    const result = await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.applied, false);
   });
 
 
-  it('releaseLock allows re-acquisition', async function () {
+  it('releaseCacheLock allows re-acquisition', async function () {
     const instance = createInstance();
 
-    await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
-    await store.releaseLock(instance, 'NS', 'code-1');
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    await store.releaseCacheLock(instance, 'NS', 'code-1');
 
-    const result = await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    const result = await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
 
     assert.strictEqual(result.applied, true);
   });
 
 
-  it('releaseLock is idempotent', async function () {
+  it('releaseCacheLock is idempotent', async function () {
     const instance = createInstance();
 
-    const result = await store.releaseLock(instance, 'NS', 'never-locked');
+    const result = await store.releaseCacheLock(instance, 'NS', 'never-locked');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.error, null);
@@ -530,20 +545,20 @@ describe('Store tier: setLock / releaseLock', function () {
     const instance = createInstance();
 
     // Set a cache entry
-    await store.set(instance, 'NS', 'code-1', 'value', 3600);
+    await store.setCache(instance, 'NS', 'code-1', 'value', 3600);
 
     // Acquire a lock for the same namespace+cache_code
-    await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
 
     // Delete the cache entry
-    await store.delete(instance, 'NS', 'code-1');
+    await store.deleteCache(instance, 'NS', 'code-1');
 
     // The lock should still exist - deleting the cache entry did not release the lock
-    const lock_result = await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    const lock_result = await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
     assert.strictEqual(lock_result.applied, false, 'lock should survive cache entry deletion');
 
     // Cleanup
-    await store.releaseLock(instance, 'NS', 'code-1');
+    await store.releaseCacheLock(instance, 'NS', 'code-1');
   });
 
 
@@ -551,36 +566,36 @@ describe('Store tier: setLock / releaseLock', function () {
     const instance = createInstance(1000000);
 
     // Acquire a lock with a 1 second TTL (ceil(1000/1000) = 1 second)
-    await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 1000 });
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 1000 });
 
     // Advance instance.time past the lock TTL - no setTimeout
     instance.time = 1000000 + 2;
 
     // Should be able to acquire again (stale lock reclamation deletes the expired lock)
-    const result = await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
+    const result = await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 3000 });
 
     assert.strictEqual(result.applied, true);
 
     // Cleanup
-    await store.releaseLock(instance, 'NS', 'code-1');
+    await store.releaseCacheLock(instance, 'NS', 'code-1');
   });
 
 });
 
 
 // ============================================================================
-// 15. GET OR FETCH - UNLOCKED (cache tier)
+// 15. GET OR FETCH CACHE - UNLOCKED (cache tier)
 // ============================================================================
 
-describe('Cache tier: getOrFetch - unlocked', function () {
+describe('Cache tier: getOrFetchCache - unlocked', function () {
 
   it('returns cached value on hit without calling fetcher', async function () {
     const instance = createInstance();
 
-    await Cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await Cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
     let fetcherCalled = false;
-    const result = await Cache.getOrFetch(
+    const result = await Cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { fetcherCalled = true; return { price: 999 }; }
     );
@@ -594,7 +609,7 @@ describe('Cache tier: getOrFetch - unlocked', function () {
   it('calls fetcher on miss, caches result, returns it', async function () {
     const instance = createInstance();
 
-    const result = await Cache.getOrFetch(
+    const result = await Cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { return { price: 1299 }; }
     );
@@ -603,7 +618,7 @@ describe('Cache tier: getOrFetch - unlocked', function () {
     assert.deepStrictEqual(result.value, { price: 1299 });
 
     // Verify it was cached
-    const cached = await Cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const cached = await Cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.deepStrictEqual(cached.value, { price: 1299 });
   });
 
@@ -611,7 +626,7 @@ describe('Cache tier: getOrFetch - unlocked', function () {
   it('returns CACHE_FETCHER_FAILED when fetcher throws', async function () {
     const instance = createInstance();
 
-    const result = await Cache.getOrFetch(
+    const result = await Cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { throw new Error('database down'); }
     );
@@ -624,15 +639,15 @@ describe('Cache tier: getOrFetch - unlocked', function () {
 
 
 // ============================================================================
-// 16. GET OR FETCH - LOCKED (cache tier, stampede protection)
+// 16. GET OR FETCH CACHE - LOCKED (cache tier, stampede protection)
 // ============================================================================
 
-describe('Cache tier: getOrFetch - locked (stampede protection)', function () {
+describe('Cache tier: getOrFetchCache - locked (stampede protection)', function () {
 
   it('acquires lock, fetches, caches, releases lock on miss', async function () {
     const instance = createInstance();
 
-    const result = await LockedCache.getOrFetch(
+    const result = await LockedCache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { return { price: 1299 }; }
     );
@@ -641,7 +656,7 @@ describe('Cache tier: getOrFetch - locked (stampede protection)', function () {
     assert.deepStrictEqual(result.value, { price: 1299 });
 
     // Verify it was cached
-    const cached = await LockedCache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const cached = await LockedCache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.deepStrictEqual(cached.value, { price: 1299 });
   });
 
@@ -657,13 +672,13 @@ describe('Cache tier: getOrFetch - locked (stampede protection)', function () {
       return 'fetched-value';
     };
 
-    // Fire 5 concurrent getOrFetch for the same absent key
+    // Fire 5 concurrent getOrFetchCache for the same absent key
     const results = await Promise.all([
-      LockedCache.getOrFetch(instance, 'NS', 'concurrent-1', 3600, fetcher),
-      LockedCache.getOrFetch(instance, 'NS', 'concurrent-1', 3600, fetcher),
-      LockedCache.getOrFetch(instance, 'NS', 'concurrent-1', 3600, fetcher),
-      LockedCache.getOrFetch(instance, 'NS', 'concurrent-1', 3600, fetcher),
-      LockedCache.getOrFetch(instance, 'NS', 'concurrent-1', 3600, fetcher)
+      LockedCache.getOrFetchCache(instance, 'NS', 'concurrent-1', 3600, fetcher),
+      LockedCache.getOrFetchCache(instance, 'NS', 'concurrent-1', 3600, fetcher),
+      LockedCache.getOrFetchCache(instance, 'NS', 'concurrent-1', 3600, fetcher),
+      LockedCache.getOrFetchCache(instance, 'NS', 'concurrent-1', 3600, fetcher),
+      LockedCache.getOrFetchCache(instance, 'NS', 'concurrent-1', 3600, fetcher)
     ]);
 
     // All should return the same value
@@ -680,7 +695,7 @@ describe('Cache tier: getOrFetch - locked (stampede protection)', function () {
   it('releases lock even when fetcher throws', async function () {
     const instance = createInstance();
 
-    const result = await LockedCache.getOrFetch(
+    const result = await LockedCache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { throw new Error('database down'); }
     );
@@ -689,11 +704,11 @@ describe('Cache tier: getOrFetch - locked (stampede protection)', function () {
     assert.strictEqual(result.error.type, 'CACHE_FETCHER_FAILED');
 
     // Verify the lock was released - we can acquire it manually
-    const lock_result = await store.setLock(instance, 'ProductCatalog', 'electronics:laptop-x1', { timeout_ms: 1000 });
+    const lock_result = await store.setCacheLock(instance, 'ProductCatalog', 'electronics:laptop-x1', { timeout_ms: 1000 });
     assert.strictEqual(lock_result.applied, true, 'lock should be released after fetcher throws');
 
     // Cleanup
-    await store.releaseLock(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    await store.releaseCacheLock(instance, 'ProductCatalog', 'electronics:laptop-x1');
   });
 
 });
@@ -705,25 +720,25 @@ describe('Cache tier: getOrFetch - locked (stampede protection)', function () {
 
 describe('Store tier: serialization', function () {
 
-  it('set serializes and get deserializes an object', async function () {
+  it('setCache serializes and getCache deserializes an object', async function () {
     const instance = createInstance();
 
     const value = { nested: { object: true }, array: [1, 2, 3] };
-    await store.set(instance, 'NS', 'code-1', value, 3600);
-    const result = await store.get(instance, 'NS', 'code-1');
+    await store.setCache(instance, 'NS', 'code-1', value, 3600);
+    const result = await store.getCache(instance, 'NS', 'code-1');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, value);
   });
 
 
-  it('set returns SERIALIZATION_FAILED for a circular object', async function () {
+  it('setCache returns SERIALIZATION_FAILED for a circular object', async function () {
     const instance = createInstance();
 
     const circular = { name: 'circular' };
     circular.self = circular;
 
-    const result = await store.set(instance, 'NS', 'code-1', circular, 3600);
+    const result = await store.setCache(instance, 'NS', 'code-1', circular, 3600);
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.error.type, 'CACHE_DYNAMODB_SERIALIZATION_FAILED');

@@ -9,31 +9,34 @@
 // a known-length prefix, so a cache_code containing KEY_SEPARATOR
 // round-trips correctly.
 //
-// clear and list use Lib.KV.scan, which is O(N) over the entire keyspace.
-// Redis and Valkey expose a flat keyspace with no partition or sort key,
-// so no prefix-scoped index exists. See docs/configuration.md for the
-// cost implications on node-based versus serverless ElastiCache.
+// deleteCacheByPrefix, clearCache, and listCacheCodes use Lib.KV.scan,
+// which is O(N) over the entire keyspace. Redis and Valkey expose a flat
+// keyspace with no partition or sort key, so no prefix-scoped index
+// exists. The cost implications on node-based versus serverless
+// ElastiCache are documented in this module's configuration page.
 //
 // Standard factory shape: receives shared_libs, picks KV driver as
 // Lib.KV (capability-named key, not vendor-named).
 //
 // Store contract (identical shape across all adapters):
-//   - get(instance, namespace, cache_code)                       -> { success, value, error }
-//   - set(instance, namespace, cache_code, value, ttl_seconds)   -> { success, error }
-//   - delete(instance, namespace, cache_code)                    -> { success, error }
-//   - clear(instance, namespace, cache_code_prefix?)             -> { success, deleted_count, error }
-//   - list(instance, namespace, cache_code_prefix?)              -> { success, cache_codes, error }
-//   - has(instance, namespace, cache_code)                       -> { success, exists, error }
-//   - setLock(instance, namespace, cache_code, options)          -> { success, applied, error }
-//   - releaseLock(instance, namespace, cache_code)               -> { success, error }
+//   - getCache(instance, namespace, cache_code)                       -> { success, value, error }
+//   - setCache(instance, namespace, cache_code, value, ttl_seconds)   -> { success, error }
+//   - deleteCache(instance, namespace, cache_code)                    -> { success, error }
+//   - deleteCacheByPrefix(instance, namespace, cache_code_prefix)     -> { success, deleted_count, error }
+//   - clearCache(instance, namespace)                                 -> { success, deleted_count, error }
+//   - listCacheCodes(instance, namespace, cache_code_prefix?)         -> { success, cache_codes, error }
+//   - getCacheExists(instance, namespace, cache_code)                 -> { success, exists, error }
+//   - setCacheLock(instance, namespace, cache_code, options)          -> { success, applied, error }
+//   - releaseCacheLock(instance, namespace, cache_code)               -> { success, error }
 //
-// Serialization: this adapter owns JSON.stringify on set and JSON.parse on
-// get. The cache module passes raw JavaScript objects; the adapter serializes
-// before handing to Lib.KV and deserializes before returning to the cache.
+// Serialization: this adapter owns JSON.stringify on setCache and
+// JSON.parse on getCache. The cache module passes raw JavaScript objects;
+// the adapter serializes before handing to Lib.KV and deserializes before
+// returning to the cache.
 //
 // Lock keys are separate from cache entry keys (LOCK_KEY_PREFIX instead of
-// KEY_PREFIX), so deleting a cache entry never releases a lock, and a lock's
-// TTL is independent of the cached value's TTL.
+// KEY_PREFIX), so deleting a cache entry never releases a lock, and a
+// lock's TTL is independent of the cached value's TTL.
 
 'use strict';
 
@@ -50,7 +53,7 @@ Store instance.
 @param {Object} shared_libs - Dependency container (Utils, Debug, KV)
 @param {Object} config      - Overrides merged over adapter config defaults
 
-@return {Object} - Store interface (8 methods: get, set, delete, clear, list, has, setLock, releaseLock)
+@return {Object} - Store interface (9 methods: getCache, setCache, deleteCache, deleteCacheByPrefix, clearCache, listCacheCodes, getCacheExists, setCacheLock, releaseCacheLock)
 *********************************************************************/
 module.exports = function loader (shared_libs, config) {
 
@@ -95,9 +98,442 @@ close over the same Lib, CONFIG, and ERRORS.
 @param {Object} ERRORS     - Frozen error catalog
 @param {Object} Validators - Validators singleton (Lib + ERRORS injected)
 
-@return {Object} - Store interface (8 methods: get, set, delete, clear, list, has, setLock, releaseLock)
+@return {Object} - Store interface (9 methods: getCache, setCache, deleteCache, deleteCacheByPrefix, clearCache, listCacheCodes, getCacheExists, setCacheLock, releaseCacheLock)
 *********************************************************************/
 const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-disable-line no-unused-vars
+
+  ////////////////////////////// Public Functions START ////////////////////////
+  const Store = {
+
+
+    /********************************************************************
+    Read one cached value by composite key. Returns value: null on a
+    miss (key absent or expired via native Valkey TTL). The stored JSON
+    string is deserialized to a JavaScript object before being returned
+    to the cache module. Delegates to Lib.KV.get.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, value, error }
+    *********************************************************************/
+    getCache: async function (instance, namespace, cache_code) {
+
+      // Compose the flat Valkey key and delegate to the KV driver
+      const result = await Lib.KV.get(instance, _Store.composeKey(namespace, cache_code));
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('getCache', result.error);
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // A miss is not an error - pass null straight through
+      if (result.value === null) {
+        return {
+          success: true,
+          value: null,
+          error: null
+        };
+      }
+
+      // Deserialize the stored JSON string - this adapter owns deserialization
+      try {
+        return {
+          success: true,
+          value: JSON.parse(result.value),
+          error: null
+        };
+      } catch (err) {
+        Lib.Debug.debug('[helper-cache-store-valkey] getCache deserialization failed', {
+          namespace: namespace,
+          cache_code: cache_code,
+          error: err && err.message
+        });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.SERIALIZATION_FAILED
+        };
+      }
+
+    },
+
+
+    /********************************************************************
+    Write one cached value with an optional TTL. The value is a raw
+    JavaScript object from the cache module; this adapter serializes
+    it to JSON before handing it to Lib.KV. ttl_seconds is positional
+    and optional - when absent, the key has no expiry. Delegates to
+    Lib.KV.set.
+
+    @param {Object} instance    - Request instance
+    @param {String} namespace   - Logical group for the cache entry
+    @param {String} cache_code  - Specific entry identifier within the namespace
+    @param {*} value            - Raw JavaScript value to cache
+    @param {Number} ttl_seconds - Optional lifetime in seconds
+
+    @return {Promise<Object>} - { success, error }
+    *********************************************************************/
+    setCache: async function (instance, namespace, cache_code, value, ttl_seconds) {
+
+      // Serialize the value to JSON - this adapter owns serialization
+      let serialized;
+
+      try {
+        serialized = JSON.stringify(value);
+      } catch (err) {
+        Lib.Debug.debug('[helper-cache-store-valkey] setCache serialization failed', {
+          namespace: namespace,
+          cache_code: cache_code,
+          error: err && err.message
+        });
+        return {
+          success: false,
+          error: ERRORS.SERIALIZATION_FAILED
+        };
+      }
+
+      // Compose the flat Valkey key and delegate to the KV driver
+      const result = await Lib.KV.set(instance, _Store.composeKey(namespace, cache_code), serialized, ttl_seconds);
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('setCache', result.error);
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Report success
+      return {
+        success: true,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Idempotent delete of one cache entry. Delegates to Lib.KV.delete.
+    A deleted_count of 0 is still success.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, error }
+    *********************************************************************/
+    deleteCache: async function (instance, namespace, cache_code) {
+
+      // Compose the flat Valkey key and delegate to the KV driver
+      const result = await Lib.KV.delete(instance, _Store.composeKey(namespace, cache_code));
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('deleteCache', result.error);
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Report success - idempotent, deleted_count of 0 is fine
+      return {
+        success: true,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Selective mass invalidation. SCAN for keys matching the namespace
+    and cache_code_prefix, then delete them in one deleteMany call.
+    Short-circuits on zero matches to avoid a needless roundtrip.
+    O(N) over the entire keyspace.
+
+    The cache_code_prefix is required. To wipe every entry in a
+    namespace, use clearCache instead.
+
+    @param {Object} instance          - Request instance
+    @param {String} namespace         - Logical group for the cache entries
+    @param {String} cache_code_prefix - Required prefix. Only entries whose cache_code starts with this are deleted
+
+    @return {Promise<Object>} - { success, deleted_count, error }
+    *********************************************************************/
+    deleteCacheByPrefix: async function (instance, namespace, cache_code_prefix) {
+
+      // Scan for every key matching the namespace + prefix
+      const scan_result = await Lib.KV.scan(instance, _Store.composeScanPattern(namespace, cache_code_prefix));
+
+      // Return a service error if the scan failed
+      if (scan_result.success === false) {
+        _Store.logDriverFailure('deleteCacheByPrefix (scan)', scan_result.error);
+        return {
+          success: false,
+          deleted_count: 0,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Short-circuit on zero matches - no delete roundtrip needed
+      if (scan_result.keys.length === 0) {
+        return {
+          success: true,
+          deleted_count: 0,
+          error: null
+        };
+      }
+
+      // Delete all matched keys in one batch call
+      const delete_result = await Lib.KV.deleteMany(instance, scan_result.keys);
+
+      // Return a service error if the delete failed
+      if (delete_result.success === false) {
+        _Store.logDriverFailure('deleteCacheByPrefix (deleteMany)', delete_result.error);
+        return {
+          success: false,
+          deleted_count: 0,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Report success with the count of deleted keys
+      return {
+        success: true,
+        deleted_count: delete_result.deleted_count,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Wipe every cache entry in the namespace. SCAN for all keys under
+    the namespace prefix, then delete them in one deleteMany call.
+    Short-circuits on zero matches. O(N) over the entire keyspace.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entries
+
+    @return {Promise<Object>} - { success, deleted_count, error }
+    *********************************************************************/
+    clearCache: async function (instance, namespace) {
+
+      // Scan for every key matching the namespace (no prefix = all entries)
+      const scan_result = await Lib.KV.scan(instance, _Store.composeScanPattern(namespace, undefined));
+
+      // Return a service error if the scan failed
+      if (scan_result.success === false) {
+        _Store.logDriverFailure('clearCache (scan)', scan_result.error);
+        return {
+          success: false,
+          deleted_count: 0,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Short-circuit on zero matches - no delete roundtrip needed
+      if (scan_result.keys.length === 0) {
+        return {
+          success: true,
+          deleted_count: 0,
+          error: null
+        };
+      }
+
+      // Delete all matched keys in one batch call
+      const delete_result = await Lib.KV.deleteMany(instance, scan_result.keys);
+
+      // Return a service error if the delete failed
+      if (delete_result.success === false) {
+        _Store.logDriverFailure('clearCache (deleteMany)', delete_result.error);
+        return {
+          success: false,
+          deleted_count: 0,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Report success with the count of deleted keys
+      return {
+        success: true,
+        deleted_count: delete_result.deleted_count,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    List cache_codes in the namespace matching the prefix. SCAN for
+    matching keys, strip the namespace prefix from each, return the
+    cache_codes. O(N) over the entire keyspace.
+
+    @param {Object} instance        - Request instance
+    @param {String} namespace       - Logical group for the cache entries
+    @param {String} cache_code_prefix - Optional prefix. Omit to list the whole namespace
+
+    @return {Promise<Object>} - { success, cache_codes, error }
+    *********************************************************************/
+    listCacheCodes: async function (instance, namespace, cache_code_prefix) {
+
+      // Scan for every key matching the namespace prefix
+      const scan_result = await Lib.KV.scan(instance, _Store.composeScanPattern(namespace, cache_code_prefix));
+
+      // Return a service error if the scan failed
+      if (scan_result.success === false) {
+        _Store.logDriverFailure('listCacheCodes (scan)', scan_result.error);
+        return {
+          success: false,
+          cache_codes: [],
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Strip the namespace prefix from each key to recover cache_codes
+      const cache_codes = scan_result.keys.map(function (full_key) {
+        return _Store.stripToCacheCode(namespace, full_key);
+      });
+
+      // Report success with the list of cache_codes
+      return {
+        success: true,
+        cache_codes: cache_codes,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Check whether a cache entry exists without fetching its value.
+    Delegates to Lib.KV.getKeyExists. Returns exists: true if the key
+    is present and not expired, false otherwise.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, exists, error }
+    *********************************************************************/
+    getCacheExists: async function (instance, namespace, cache_code) {
+
+      // Compose the flat Valkey key and delegate to the KV driver
+      const result = await Lib.KV.getKeyExists(instance, _Store.composeKey(namespace, cache_code));
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('getCacheExists', result.error);
+        return {
+          success: false,
+          exists: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Pass the driver's exists flag straight through
+      return {
+        success: true,
+        exists: result.exists,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Acquire a distributed lock for a cache entry. Uses Lib.KV.setIfNotExists
+    (atomic SET NX) with a TTL derived from options.timeout_ms. The lock
+    key is separate from the cache entry key (LOCK_KEY_PREFIX instead of
+    KEY_PREFIX), so deleting a cache entry never releases a lock.
+
+    Returns applied: true if this caller acquired the lock, false if
+    another caller already holds it. applied: false is not an error.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+    @param {Object} options    - { timeout_ms: Number } lock auto-expiry in milliseconds
+
+    @return {Promise<Object>} - { success, applied, error }
+    *********************************************************************/
+    setCacheLock: async function (instance, namespace, cache_code, options) {
+
+      // Convert milliseconds to seconds for the KV driver (ceil to avoid sub-second rounding to 0)
+      const timeout_ms = (options && options.timeout_ms) || 3000;
+      const ttl_seconds = Math.ceil(timeout_ms / 1000);
+
+      // Compose the lock key and delegate to the KV driver's atomic setIfNotExists
+      const result = await Lib.KV.setIfNotExists(
+        instance,
+        _Store.composeLockKey(namespace, cache_code),
+        '1',
+        ttl_seconds
+      );
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('setCacheLock', result.error);
+        return {
+          success: false,
+          applied: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Pass the driver's applied flag straight through
+      return {
+        success: true,
+        applied: result.applied,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Release a distributed lock. Delegates to Lib.KV.delete. Idempotent:
+    succeeds even if the lock was already released or expired via TTL.
+
+    @param {Object} instance   - Request instance
+    @param {String} namespace  - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, error }
+    *********************************************************************/
+    releaseCacheLock: async function (instance, namespace, cache_code) {
+
+      // Compose the lock key and delegate to the KV driver
+      const result = await Lib.KV.delete(instance, _Store.composeLockKey(namespace, cache_code));
+
+      // Return a service error if the driver call failed
+      if (result.success === false) {
+        _Store.logDriverFailure('releaseCacheLock', result.error);
+        return {
+          success: false,
+          error: ERRORS.SERVICE_UNAVAILABLE
+        };
+      }
+
+      // Report success - idempotent, deleted_count of 0 is fine
+      return {
+        success: true,
+        error: null
+      };
+
+    }
+
+  };////////////////////////////// Public Functions END ////////////////////////
+
+
 
   //////////////////////////// Private Functions START //////////////////////////
   const _Store = {
@@ -196,377 +632,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
   };///////////////////////////// Private Functions END ////////////////////////
 
-
-
-  ////////////////////////////// Public Functions START ////////////////////////
-  const Store = {
-
-
-    /********************************************************************
-    Read one cached value by composite key. Returns value: null on a
-    miss (key absent or expired via native Valkey TTL). The stored JSON
-    string is deserialized to a JavaScript object before being returned
-    to the cache module. Delegates to Lib.KV.get.
-
-    @param {Object} instance   - Request instance
-    @param {String} namespace  - Logical group for the cache entry
-    @param {String} cache_code - Specific entry identifier within the namespace
-
-    @return {Promise<Object>} - { success, value, error }
-    *********************************************************************/
-    get: async function (instance, namespace, cache_code) {
-
-      // Compose the flat Valkey key and delegate to the KV driver
-      const result = await Lib.KV.get(instance, _Store.composeKey(namespace, cache_code));
-
-      // Return a service error if the driver call failed
-      if (result.success === false) {
-        _Store.logDriverFailure('get', result.error);
-        return {
-          success: false,
-          value: null,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // A miss is not an error - pass null straight through
-      if (result.value === null) {
-        return {
-          success: true,
-          value: null,
-          error: null
-        };
-      }
-
-      // Deserialize the stored JSON string - this adapter owns deserialization
-      try {
-        return {
-          success: true,
-          value: JSON.parse(result.value),
-          error: null
-        };
-      } catch (err) {
-        Lib.Debug.debug('[helper-cache-store-valkey] get deserialization failed', {
-          namespace: namespace,
-          cache_code: cache_code,
-          error: err && err.message
-        });
-        return {
-          success: false,
-          value: null,
-          error: ERRORS.SERIALIZATION_FAILED
-        };
-      }
-
-    },
-
-
-    /********************************************************************
-    Write one cached value with an optional TTL. The value is a raw
-    JavaScript object from the cache module; this adapter serializes
-    it to JSON before handing it to Lib.KV. ttl_seconds is positional
-    and optional - when absent, the key has no expiry. Delegates to
-    Lib.KV.set.
-
-    @param {Object} instance    - Request instance
-    @param {String} namespace   - Logical group for the cache entry
-    @param {String} cache_code  - Specific entry identifier within the namespace
-    @param {*} value            - Raw JavaScript value to cache
-    @param {Number} ttl_seconds - Optional lifetime in seconds
-
-    @return {Promise<Object>} - { success, error }
-    *********************************************************************/
-    set: async function (instance, namespace, cache_code, value, ttl_seconds) {
-
-      // Serialize the value to JSON - this adapter owns serialization
-      let serialized;
-
-      try {
-        serialized = JSON.stringify(value);
-      } catch (err) {
-        Lib.Debug.debug('[helper-cache-store-valkey] set serialization failed', {
-          namespace: namespace,
-          cache_code: cache_code,
-          error: err && err.message
-        });
-        return {
-          success: false,
-          error: ERRORS.SERIALIZATION_FAILED
-        };
-      }
-
-      // Compose the flat Valkey key and delegate to the KV driver
-      const result = await Lib.KV.set(instance, _Store.composeKey(namespace, cache_code), serialized, ttl_seconds);
-
-      // Return a service error if the driver call failed
-      if (result.success === false) {
-        _Store.logDriverFailure('set', result.error);
-        return {
-          success: false,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Report success
-      return {
-        success: true,
-        error: null
-      };
-
-    },
-
-
-    /********************************************************************
-    Idempotent delete of one cache entry. Delegates to Lib.KV.delete.
-    A deleted_count of 0 is still success.
-
-    @param {Object} instance   - Request instance
-    @param {String} namespace  - Logical group for the cache entry
-    @param {String} cache_code - Specific entry identifier within the namespace
-
-    @return {Promise<Object>} - { success, error }
-    *********************************************************************/
-    delete: async function (instance, namespace, cache_code) {
-
-      // Compose the flat Valkey key and delegate to the KV driver
-      const result = await Lib.KV.delete(instance, _Store.composeKey(namespace, cache_code));
-
-      // Return a service error if the driver call failed
-      if (result.success === false) {
-        _Store.logDriverFailure('delete', result.error);
-        return {
-          success: false,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Report success - idempotent, deleted_count of 0 is fine
-      return {
-        success: true,
-        error: null
-      };
-
-    },
-
-
-    /********************************************************************
-    Mass invalidation. SCAN for matching keys, then delete them in one
-    deleteMany call. Short-circuits on zero matches to avoid a needless
-    roundtrip. O(N) over the entire keyspace - see docs/configuration.md.
-
-    @param {Object} instance        - Request instance
-    @param {String} namespace       - Logical group for the cache entries
-    @param {String} cache_code_prefix - Optional prefix. Omit to clear the whole namespace
-
-    @return {Promise<Object>} - { success, deleted_count, error }
-    *********************************************************************/
-    clear: async function (instance, namespace, cache_code_prefix) {
-
-      // Scan for every key matching the namespace prefix
-      const scan_result = await Lib.KV.scan(instance, _Store.composeScanPattern(namespace, cache_code_prefix));
-
-      // Return a service error if the scan failed
-      if (scan_result.success === false) {
-        _Store.logDriverFailure('clear (scan)', scan_result.error);
-        return {
-          success: false,
-          deleted_count: 0,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Short-circuit on zero matches - no delete roundtrip needed
-      if (scan_result.keys.length === 0) {
-        return {
-          success: true,
-          deleted_count: 0,
-          error: null
-        };
-      }
-
-      // Delete all matched keys in one batch call
-      const delete_result = await Lib.KV.deleteMany(instance, scan_result.keys);
-
-      // Return a service error if the delete failed
-      if (delete_result.success === false) {
-        _Store.logDriverFailure('clear (deleteMany)', delete_result.error);
-        return {
-          success: false,
-          deleted_count: 0,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Report success with the count of deleted keys
-      return {
-        success: true,
-        deleted_count: delete_result.deleted_count,
-        error: null
-      };
-
-    },
-
-
-    /********************************************************************
-    List cache_codes in the namespace matching the prefix. SCAN for
-    matching keys, strip the namespace prefix from each, return the
-    cache_codes. O(N) over the entire keyspace - see docs/configuration.md.
-
-    @param {Object} instance        - Request instance
-    @param {String} namespace       - Logical group for the cache entries
-    @param {String} cache_code_prefix - Optional prefix. Omit to list the whole namespace
-
-    @return {Promise<Object>} - { success, cache_codes, error }
-    *********************************************************************/
-    list: async function (instance, namespace, cache_code_prefix) {
-
-      // Scan for every key matching the namespace prefix
-      const scan_result = await Lib.KV.scan(instance, _Store.composeScanPattern(namespace, cache_code_prefix));
-
-      // Return a service error if the scan failed
-      if (scan_result.success === false) {
-        _Store.logDriverFailure('list (scan)', scan_result.error);
-        return {
-          success: false,
-          cache_codes: [],
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Strip the namespace prefix from each key to recover cache_codes
-      const cache_codes = scan_result.keys.map(function (full_key) {
-        return _Store.stripToCacheCode(namespace, full_key);
-      });
-
-      // Report success with the list of cache_codes
-      return {
-        success: true,
-        cache_codes: cache_codes,
-        error: null
-      };
-
-    },
-
-
-    /********************************************************************
-    Check whether a cache entry exists without fetching its value.
-    Delegates to Lib.KV.getKeyExists. Returns exists: true if the key
-    is present and not expired, false otherwise.
-
-    @param {Object} instance   - Request instance
-    @param {String} namespace  - Logical group for the cache entry
-    @param {String} cache_code - Specific entry identifier within the namespace
-
-    @return {Promise<Object>} - { success, exists, error }
-    *********************************************************************/
-    has: async function (instance, namespace, cache_code) {
-
-      // Compose the flat Valkey key and delegate to the KV driver
-      const result = await Lib.KV.getKeyExists(instance, _Store.composeKey(namespace, cache_code));
-
-      // Return a service error if the driver call failed
-      if (result.success === false) {
-        _Store.logDriverFailure('has', result.error);
-        return {
-          success: false,
-          exists: false,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Pass the driver's exists flag straight through
-      return {
-        success: true,
-        exists: result.exists,
-        error: null
-      };
-
-    },
-
-
-    /********************************************************************
-    Acquire a distributed lock for a cache entry. Uses Lib.KV.setIfNotExists
-    (atomic SET NX) with a TTL derived from options.timeout_ms. The lock
-    key is separate from the cache entry key (LOCK_KEY_PREFIX instead of
-    KEY_PREFIX), so deleting a cache entry never releases a lock.
-
-    Returns applied: true if this caller acquired the lock, false if
-    another caller already holds it. applied: false is not an error.
-
-    @param {Object} instance   - Request instance
-    @param {String} namespace  - Logical group for the cache entry
-    @param {String} cache_code - Specific entry identifier within the namespace
-    @param {Object} options    - { timeout_ms: Number } lock auto-expiry in milliseconds
-
-    @return {Promise<Object>} - { success, applied, error }
-    *********************************************************************/
-    setLock: async function (instance, namespace, cache_code, options) {
-
-      // Convert milliseconds to seconds for the KV driver (ceil to avoid sub-second rounding to 0)
-      const timeout_ms = (options && options.timeout_ms) || 3000;
-      const ttl_seconds = Math.ceil(timeout_ms / 1000);
-
-      // Compose the lock key and delegate to the KV driver's atomic setIfNotExists
-      const result = await Lib.KV.setIfNotExists(
-        instance,
-        _Store.composeLockKey(namespace, cache_code),
-        '1',
-        ttl_seconds
-      );
-
-      // Return a service error if the driver call failed
-      if (result.success === false) {
-        _Store.logDriverFailure('setLock', result.error);
-        return {
-          success: false,
-          applied: false,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Pass the driver's applied flag straight through
-      return {
-        success: true,
-        applied: result.applied,
-        error: null
-      };
-
-    },
-
-
-    /********************************************************************
-    Release a distributed lock. Delegates to Lib.KV.delete. Idempotent:
-    succeeds even if the lock was already released or expired via TTL.
-
-    @param {Object} instance   - Request instance
-    @param {String} namespace  - Logical group for the cache entry
-    @param {String} cache_code - Specific entry identifier within the namespace
-
-    @return {Promise<Object>} - { success, error }
-    *********************************************************************/
-    releaseLock: async function (instance, namespace, cache_code) {
-
-      // Compose the lock key and delegate to the KV driver
-      const result = await Lib.KV.delete(instance, _Store.composeLockKey(namespace, cache_code));
-
-      // Return a service error if the driver call failed
-      if (result.success === false) {
-        _Store.logDriverFailure('releaseLock', result.error);
-        return {
-          success: false,
-          error: ERRORS.SERVICE_UNAVAILABLE
-        };
-      }
-
-      // Report success - idempotent, deleted_count of 0 is fine
-      return {
-        success: true,
-        error: null
-      };
-
-    }
-
-  };////////////////////////////// Public Functions END ////////////////////////
 
 
   return Store;

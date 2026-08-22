@@ -29,7 +29,7 @@ const createFailingStore = function () {
 
   return {
 
-    get: async function () {
+    getCache: async function () {
       return {
         success: false,
         value: null,
@@ -37,21 +37,21 @@ const createFailingStore = function () {
       };
     },
 
-    set: async function () {
+    setCache: async function () {
       return {
         success: false,
         error: { type: 'STORE_WRITE_FAILED', message: 'write failed (test fixture)' }
       };
     },
 
-    delete: async function () {
+    deleteCache: async function () {
       return {
         success: false,
         error: { type: 'STORE_DELETE_FAILED', message: 'delete failed (test fixture)' }
       };
     },
 
-    clear: async function () {
+    deleteCacheByPrefix: async function () {
       return {
         success: false,
         deleted_count: 0,
@@ -59,7 +59,15 @@ const createFailingStore = function () {
       };
     },
 
-    list: async function () {
+    clearCache: async function () {
+      return {
+        success: false,
+        deleted_count: 0,
+        error: { type: 'STORE_CLEAR_FAILED', message: 'clear failed (test fixture)' }
+      };
+    },
+
+    listCacheCodes: async function () {
       return {
         success: false,
         cache_codes: [],
@@ -67,11 +75,26 @@ const createFailingStore = function () {
       };
     },
 
-    has: async function () {
+    getCacheExists: async function () {
       return {
         success: false,
         exists: false,
         error: { type: 'STORE_HAS_FAILED', message: 'has failed (test fixture)' }
+      };
+    },
+
+    setCacheLock: async function () {
+      return {
+        success: false,
+        applied: false,
+        error: { type: 'STORE_LOCK_FAILED', message: 'lock failed (test fixture)' }
+      };
+    },
+
+    releaseCacheLock: async function () {
+      return {
+        success: false,
+        error: { type: 'STORE_LOCK_FAILED', message: 'lock failed (test fixture)' }
       };
     }
 
@@ -95,67 +118,77 @@ const createInstance = function (time) {
 
 describe('Store contract validation', function () {
 
-  it('throws when store is missing get', function () {
+  it('throws when store is missing getCache', function () {
     const store = createMemoryStore();
-    delete store.get;
+    delete store.getCache;
 
     assert.throws(function () {
       CacheFactory(Lib, { Store: store });
-    }, /missing method `get`/);
+    }, /missing method `getCache`/);
   });
 
 
-  it('throws when store is missing set', function () {
+  it('throws when store is missing setCache', function () {
     const store = createMemoryStore();
-    delete store.set;
+    delete store.setCache;
 
     assert.throws(function () {
       CacheFactory(Lib, { Store: store });
-    }, /missing method `set`/);
+    }, /missing method `setCache`/);
   });
 
 
-  it('throws when store is missing delete', function () {
+  it('throws when store is missing deleteCache', function () {
     const store = createMemoryStore();
-    delete store.delete;
+    delete store.deleteCache;
 
     assert.throws(function () {
       CacheFactory(Lib, { Store: store });
-    }, /missing method `delete`/);
+    }, /missing method `deleteCache`/);
   });
 
 
-  it('throws when store is missing clear', function () {
+  it('throws when store is missing deleteCacheByPrefix', function () {
     const store = createMemoryStore();
-    delete store.clear;
+    delete store.deleteCacheByPrefix;
 
     assert.throws(function () {
       CacheFactory(Lib, { Store: store });
-    }, /missing method `clear`/);
+    }, /missing method `deleteCacheByPrefix`/);
   });
 
 
-  it('throws when store is missing list', function () {
+  it('throws when store is missing clearCache', function () {
     const store = createMemoryStore();
-    delete store.list;
+    delete store.clearCache;
 
     assert.throws(function () {
       CacheFactory(Lib, { Store: store });
-    }, /missing method `list`/);
+    }, /missing method `clearCache`/);
   });
 
 
-  it('throws when store is missing has', function () {
+  it('throws when store is missing listCacheCodes', function () {
     const store = createMemoryStore();
-    delete store.has;
+    delete store.listCacheCodes;
 
     assert.throws(function () {
       CacheFactory(Lib, { Store: store });
-    }, /missing method `has`/);
+    }, /missing method `listCacheCodes`/);
   });
 
 
-  it('succeeds when all 6 methods are present', function () {
+  it('throws when store is missing getCacheExists', function () {
+    const store = createMemoryStore();
+    delete store.getCacheExists;
+
+    assert.throws(function () {
+      CacheFactory(Lib, { Store: store });
+    }, /missing method `getCacheExists`/);
+  });
+
+
+  it('succeeds when all 7 methods are present', function () {
     const store = createMemoryStore();
 
     assert.doesNotThrow(function () {
@@ -164,23 +197,23 @@ describe('Store contract validation', function () {
   });
 
 
-  it('throws when lock is enabled but store is missing setLock', function () {
+  it('throws when lock is enabled but store is missing setCacheLock', function () {
     const store = createMemoryStore();
-    delete store.setLock;
+    delete store.setCacheLock;
 
     assert.throws(function () {
       buildCache(store, { GET_OR_FETCH_LOCK_ENABLED: true });
-    }, /does not implement `setLock`/);
+    }, /does not implement `setCacheLock`/);
   });
 
 
-  it('throws when lock is enabled but store is missing releaseLock', function () {
+  it('throws when lock is enabled but store is missing releaseCacheLock', function () {
     const store = createMemoryStore();
-    delete store.releaseLock;
+    delete store.releaseCacheLock;
 
     assert.throws(function () {
       buildCache(store, { GET_OR_FETCH_LOCK_ENABLED: true });
-    }, /does not implement `releaseLock`/);
+    }, /does not implement `releaseCacheLock`/);
   });
 
 
@@ -199,16 +232,16 @@ describe('Store contract validation', function () {
 // 2. SET + GET ROUND-TRIP
 // ============================================================================
 
-describe('set + get round-trip', function () {
+describe('setCache + getCache round-trip', function () {
 
   it('round-trips an object value', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
     const value = { id: 'laptop-x1', price: 1299 };
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', value, 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', value, 3600);
 
-    const result = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, value);
@@ -220,9 +253,9 @@ describe('set + get round-trip', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
+    await cache.setCache(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
 
-    const result = await cache.get(instance, 'FeatureFlags', 'checkout-v2');
+    const result = await cache.getCache(instance, 'FeatureFlags', 'checkout-v2');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, 'enabled');
@@ -233,9 +266,9 @@ describe('set + get round-trip', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 });
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 });
 
-    const result = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.value, { price: 1299 });
@@ -248,13 +281,13 @@ describe('set + get round-trip', function () {
 // 3. GET CACHE MISS
 // ============================================================================
 
-describe('get cache miss', function () {
+describe('getCache cache miss', function () {
 
   it('returns value null for absent cache_code', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    const result = await cache.get(instance, 'ProductCatalog', 'nonexistent');
+    const result = await cache.getCache(instance, 'ProductCatalog', 'nonexistent');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, null);
@@ -266,7 +299,7 @@ describe('get cache miss', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    const result = await cache.get(instance, 'NonexistentNamespace', 'any-code');
+    const result = await cache.getCache(instance, 'NonexistentNamespace', 'any-code');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, null);
@@ -280,16 +313,16 @@ describe('get cache miss', function () {
 // 4. DELETE
 // ============================================================================
 
-describe('delete', function () {
+describe('deleteCache', function () {
 
-  it('deletes an existing entry then get returns null', async function () {
+  it('deletes an existing entry then getCache returns null', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
-    await cache.delete(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await cache.deleteCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
-    const result = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.value, null);
   });
@@ -299,7 +332,7 @@ describe('delete', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    const result = await cache.delete(instance, 'ProductCatalog', 'never-existed');
+    const result = await cache.deleteCache(instance, 'ProductCatalog', 'never-existed');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.error, null);
@@ -318,11 +351,11 @@ describe('namespace isolation', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'NamespaceA', 'shared-code', 'value-a', 3600);
-    await cache.set(instance, 'NamespaceB', 'shared-code', 'value-b', 3600);
+    await cache.setCache(instance, 'NamespaceA', 'shared-code', 'value-a', 3600);
+    await cache.setCache(instance, 'NamespaceB', 'shared-code', 'value-b', 3600);
 
-    const a = await cache.get(instance, 'NamespaceA', 'shared-code');
-    const b = await cache.get(instance, 'NamespaceB', 'shared-code');
+    const a = await cache.getCache(instance, 'NamespaceA', 'shared-code');
+    const b = await cache.getCache(instance, 'NamespaceB', 'shared-code');
 
     assert.strictEqual(a.value, 'value-a');
     assert.strictEqual(b.value, 'value-b');
@@ -333,9 +366,9 @@ describe('namespace isolation', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'NamespaceA', 'code-1', 'value-a', 3600);
+    await cache.setCache(instance, 'NamespaceA', 'code-1', 'value-a', 3600);
 
-    const result = await cache.get(instance, 'NamespaceB', 'code-1');
+    const result = await cache.getCache(instance, 'NamespaceB', 'code-1');
 
     assert.strictEqual(result.value, null);
   });
@@ -344,59 +377,95 @@ describe('namespace isolation', function () {
 
 
 // ============================================================================
-// 6. CLEAR WITH PREFIX
+// 6. DELETE CACHE BY PREFIX
 // ============================================================================
 
-describe('clear with cache_code_prefix', function () {
+describe('deleteCacheByPrefix', function () {
 
   it('removes only matching entries', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await cache.set(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
-    await cache.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
 
-    const result = await cache.clear(instance, 'ProductCatalog', 'electronics:');
+    const result = await cache.deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 2);
     assert.strictEqual(result.error, null);
 
-    const laptop = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
-    const mouse = await cache.get(instance, 'ProductCatalog', 'electronics:mouse-z2');
-    const jacket = await cache.get(instance, 'ProductCatalog', 'clothing:jacket-m');
+    const laptop = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const mouse = await cache.getCache(instance, 'ProductCatalog', 'electronics:mouse-z2');
+    const jacket = await cache.getCache(instance, 'ProductCatalog', 'clothing:jacket-m');
 
     assert.strictEqual(laptop.value, null);
     assert.strictEqual(mouse.value, null);
     assert.strictEqual(jacket.value, 'c');
   });
 
+
+  it('throws TypeError when prefix is omitted', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await assert.rejects(
+      cache.deleteCacheByPrefix(instance, 'ProductCatalog'),
+      TypeError
+    );
+  });
+
+
+  it('throws TypeError when prefix is empty', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await assert.rejects(
+      cache.deleteCacheByPrefix(instance, 'ProductCatalog', ''),
+      TypeError
+    );
+  });
+
 });
 
 
 // ============================================================================
-// 7. CLEAR WITHOUT PREFIX
+// 7. CLEAR CACHE (wipe all in namespace)
 // ============================================================================
 
-describe('clear without cache_code_prefix', function () {
+describe('clearCache', function () {
 
   it('clears every entry in the namespace', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await cache.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
 
-    const result = await cache.clear(instance, 'ProductCatalog');
+    const result = await cache.clearCache(instance, 'ProductCatalog');
 
+    assert.strictEqual(result.success, true);
     assert.strictEqual(result.deleted_count, 2);
+    assert.strictEqual(result.error, null);
 
-    const laptop = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
-    const jacket = await cache.get(instance, 'ProductCatalog', 'clothing:jacket-m');
+    const laptop = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const jacket = await cache.getCache(instance, 'ProductCatalog', 'clothing:jacket-m');
 
     assert.strictEqual(laptop.value, null);
     assert.strictEqual(jacket.value, null);
+  });
+
+
+  it('returns deleted_count 0 on an empty namespace', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    const result = await cache.clearCache(instance, 'EmptyNamespace');
+
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.deleted_count, 0);
+    assert.strictEqual(result.error, null);
   });
 
 });
@@ -406,18 +475,18 @@ describe('clear without cache_code_prefix', function () {
 // 8. CLEAR NAMESPACE ISOLATION
 // ============================================================================
 
-describe('clear namespace isolation', function () {
+describe('clearCache namespace isolation', function () {
 
   it('clearing one namespace leaves another untouched', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await cache.set(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await cache.setCache(instance, 'FeatureFlags', 'checkout-v2', 'enabled', 3600);
 
-    await cache.clear(instance, 'ProductCatalog');
+    await cache.clearCache(instance, 'ProductCatalog');
 
-    const flag = await cache.get(instance, 'FeatureFlags', 'checkout-v2');
+    const flag = await cache.getCache(instance, 'FeatureFlags', 'checkout-v2');
 
     assert.strictEqual(flag.value, 'enabled');
   });
@@ -429,17 +498,17 @@ describe('clear namespace isolation', function () {
 // 9. LIST WITH PREFIX
 // ============================================================================
 
-describe('list with cache_code_prefix', function () {
+describe('listCacheCodes with cache_code_prefix', function () {
 
   it('returns only matching cache_codes without the namespace prefix', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await cache.set(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
-    await cache.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:mouse-z2', 'b', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'c', 3600);
 
-    const result = await cache.list(instance, 'ProductCatalog', 'electronics:');
+    const result = await cache.listCacheCodes(instance, 'ProductCatalog', 'electronics:');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.cache_codes.sort(), ['electronics:laptop-x1', 'electronics:mouse-z2']);
@@ -452,16 +521,16 @@ describe('list with cache_code_prefix', function () {
 // 10. LIST WITHOUT PREFIX
 // ============================================================================
 
-describe('list without cache_code_prefix', function () {
+describe('listCacheCodes without cache_code_prefix', function () {
 
   it('returns all cache_codes in the namespace', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
-    await cache.set(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'a', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'clothing:jacket-m', 'b', 3600);
 
-    const result = await cache.list(instance, 'ProductCatalog');
+    const result = await cache.listCacheCodes(instance, 'ProductCatalog');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.cache_codes.sort(), ['clothing:jacket-m', 'electronics:laptop-x1']);
@@ -474,13 +543,13 @@ describe('list without cache_code_prefix', function () {
 // 11. LIST EMPTY
 // ============================================================================
 
-describe('list empty', function () {
+describe('listCacheCodes empty', function () {
 
   it('unknown namespace returns empty cache_codes array', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    const result = await cache.list(instance, 'NonexistentNamespace');
+    const result = await cache.listCacheCodes(instance, 'NonexistentNamespace');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.cache_codes, []);
@@ -499,10 +568,10 @@ describe('TTL expiry', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance(1000000);
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 60);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 60);
 
     // Get immediately - value present
-    const before = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const before = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.strictEqual(before.success, true);
     assert.deepStrictEqual(before.value, { price: 1299 });
 
@@ -510,7 +579,7 @@ describe('TTL expiry', function () {
     instance.time = 1000000 + 61;
 
     // Get again - value is null (expired)
-    const after = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const after = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.strictEqual(after.success, true);
     assert.strictEqual(after.value, null);
   });
@@ -524,11 +593,11 @@ describe('TTL expiry', function () {
 
 describe('Store failure translation', function () {
 
-  it('set returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+  it('setCache returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
     const cache = buildCache(createFailingStore());
     const instance = createInstance();
 
-    const result = await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 3600);
+    const result = await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', 'value', 3600);
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.error.type, 'CACHE_STORE_UNAVAILABLE');
@@ -536,11 +605,11 @@ describe('Store failure translation', function () {
   });
 
 
-  it('get returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+  it('getCache returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
     const cache = buildCache(createFailingStore());
     const instance = createInstance();
 
-    const result = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.value, null);
@@ -548,22 +617,22 @@ describe('Store failure translation', function () {
   });
 
 
-  it('delete returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+  it('deleteCache returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
     const cache = buildCache(createFailingStore());
     const instance = createInstance();
 
-    const result = await cache.delete(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.deleteCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.error.type, 'CACHE_STORE_UNAVAILABLE');
   });
 
 
-  it('clear returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+  it('deleteCacheByPrefix returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
     const cache = buildCache(createFailingStore());
     const instance = createInstance();
 
-    const result = await cache.clear(instance, 'ProductCatalog', 'electronics:');
+    const result = await cache.deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:');
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.deleted_count, 0);
@@ -571,11 +640,23 @@ describe('Store failure translation', function () {
   });
 
 
-  it('list returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+  it('clearCache returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
     const cache = buildCache(createFailingStore());
     const instance = createInstance();
 
-    const result = await cache.list(instance, 'ProductCatalog', 'electronics:');
+    const result = await cache.clearCache(instance, 'ProductCatalog');
+
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.deleted_count, 0);
+    assert.strictEqual(result.error.type, 'CACHE_STORE_UNAVAILABLE');
+  });
+
+
+  it('listCacheCodes returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+    const cache = buildCache(createFailingStore());
+    const instance = createInstance();
+
+    const result = await cache.listCacheCodes(instance, 'ProductCatalog', 'electronics:');
 
     assert.strictEqual(result.success, false);
     assert.deepStrictEqual(result.cache_codes, []);
@@ -583,11 +664,11 @@ describe('Store failure translation', function () {
   });
 
 
-  it('has returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
+  it('getCacheExists returns CACHE_STORE_UNAVAILABLE and does not leak the fixture error type', async function () {
     const cache = buildCache(createFailingStore());
     const instance = createInstance();
 
-    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, false);
     assert.strictEqual(result.exists, false);
@@ -598,18 +679,18 @@ describe('Store failure translation', function () {
 
 
 // ============================================================================
-// 14. HAS - EXISTENCE CHECK
+// 14. GET CACHE EXISTS - EXISTENCE CHECK
 // ============================================================================
 
-describe('has - existence check', function () {
+describe('getCacheExists - existence check', function () {
 
   it('returns exists: true for a present entry', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
-    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, true);
@@ -621,7 +702,7 @@ describe('has - existence check', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    const result = await cache.has(instance, 'ProductCatalog', 'nonexistent');
+    const result = await cache.getCacheExists(instance, 'ProductCatalog', 'nonexistent');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
@@ -633,48 +714,48 @@ describe('has - existence check', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance(1000000);
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 60);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 60);
 
     // Advance time past TTL
     instance.time = 1000000 + 61;
 
-    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, false);
   });
 
 
-  it('has does not return the value', async function () {
+  it('getCacheExists does not return the value', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
-    const result = await cache.has(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const result = await cache.getCacheExists(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.exists, true);
-    assert.strictEqual('value' in result, false, 'has should not return a value field');
+    assert.strictEqual('value' in result, false, 'getCacheExists should not return a value field');
   });
 
 });
 
 
 // ============================================================================
-// 15. GET OR FETCH - UNLOCKED (lock disabled, default)
+// 15. GET OR FETCH CACHE - UNLOCKED (lock disabled, default)
 // ============================================================================
 
-describe('getOrFetch - unlocked (default)', function () {
+describe('getOrFetchCache - unlocked (default)', function () {
 
   it('returns cached value on hit without calling fetcher', async function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
     let fetcherCalled = false;
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { fetcherCalled = true; return { price: 999 }; }
     );
@@ -690,7 +771,7 @@ describe('getOrFetch - unlocked (default)', function () {
     const instance = createInstance();
 
     let fetcherCalled = false;
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () {
         fetcherCalled = true;
@@ -703,7 +784,7 @@ describe('getOrFetch - unlocked (default)', function () {
     assert.strictEqual(fetcherCalled, true);
 
     // Verify the value was cached
-    const cached = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const cached = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.deepStrictEqual(cached.value, { price: 1299 });
   });
 
@@ -718,8 +799,8 @@ describe('getOrFetch - unlocked (default)', function () {
       return 'fetched-value';
     };
 
-    await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
-    await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+    await cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher);
+    await cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher);
 
     assert.strictEqual(callCount, 1, 'fetcher should be called exactly once');
   });
@@ -729,7 +810,7 @@ describe('getOrFetch - unlocked (default)', function () {
     const cache = buildCache(createMemoryStore());
     const instance = createInstance();
 
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { throw new Error('database down'); }
     );
@@ -739,7 +820,7 @@ describe('getOrFetch - unlocked (default)', function () {
     assert.strictEqual(result.error.type, 'CACHE_FETCHER_FAILED');
 
     // Verify nothing was cached
-    const cached = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const cached = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.strictEqual(cached.value, null);
   });
 
@@ -756,13 +837,13 @@ describe('getOrFetch - unlocked (default)', function () {
 
     // First call - fetcher returns null, but null is not cached (miss check uses isNullOrUndefined)
     // So the second call will also call the fetcher
-    const result1 = await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+    const result1 = await cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher);
     assert.strictEqual(result1.success, true);
     assert.strictEqual(result1.value, null);
 
-    // fetchAndStore stores null, but the next getOrFetch will see it as a miss
+    // fetchAndStore stores null, but the next getOrFetchCache will see it as a miss
     // because the miss check is `value === null || isNullOrUndefined(value)`
-    const result2 = await cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher);
+    const result2 = await cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher);
     assert.strictEqual(result2.success, true);
     assert.strictEqual(result2.value, null);
   });
@@ -773,7 +854,7 @@ describe('getOrFetch - unlocked (default)', function () {
     const instance = createInstance();
 
     await assert.rejects(
-      cache.getOrFetch(instance, 'NS', 'code-1', 3600, 'not a function'),
+      cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, 'not a function'),
       TypeError
     );
   });
@@ -782,10 +863,10 @@ describe('getOrFetch - unlocked (default)', function () {
 
 
 // ============================================================================
-// 16. GET OR FETCH - LOCKED (lock enabled)
+// 16. GET OR FETCH CACHE - LOCKED (lock enabled)
 // ============================================================================
 
-describe('getOrFetch - locked (stampede protection)', function () {
+describe('getOrFetchCache - locked (stampede protection)', function () {
 
   // Build a cache with locking enabled and short retry for test speed
   const buildLockedCache = function (store) {
@@ -803,10 +884,10 @@ describe('getOrFetch - locked (stampede protection)', function () {
     const cache = buildLockedCache(store);
     const instance = createInstance();
 
-    await cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', { price: 1299 }, 3600);
 
     let fetcherCalled = false;
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { fetcherCalled = true; return { price: 999 }; }
     );
@@ -823,7 +904,7 @@ describe('getOrFetch - locked (stampede protection)', function () {
     const cache = buildLockedCache(store);
     const instance = createInstance();
 
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { return { price: 1299 }; }
     );
@@ -835,7 +916,7 @@ describe('getOrFetch - locked (stampede protection)', function () {
     assert.strictEqual(store._locks.size, 0, 'lock should be released after fetch');
 
     // Value should be cached
-    const cached = await cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+    const cached = await cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
     assert.deepStrictEqual(cached.value, { price: 1299 });
   });
 
@@ -853,11 +934,11 @@ describe('getOrFetch - locked (stampede protection)', function () {
       return 'fetched-value';
     };
 
-    // Fire 3 concurrent getOrFetch for the same absent key
+    // Fire 3 concurrent getOrFetchCache for the same absent key
     const results = await Promise.all([
-      cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher),
-      cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher),
-      cache.getOrFetch(instance, 'NS', 'code-1', 3600, fetcher)
+      cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher),
+      cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher),
+      cache.getOrFetchCache(instance, 'NS', 'code-1', 3600, fetcher)
     ]);
 
     // All should return the same value
@@ -876,7 +957,7 @@ describe('getOrFetch - locked (stampede protection)', function () {
     const cache = buildLockedCache(store);
     const instance = createInstance();
 
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'ProductCatalog', 'electronics:laptop-x1', 3600,
       async function () { throw new Error('database down'); }
     );
@@ -895,10 +976,10 @@ describe('getOrFetch - locked (stampede protection)', function () {
     const instance = createInstance();
 
     // Manually acquire a lock that will expire quickly
-    await store.setLock(instance, 'NS', 'code-1', { timeout_ms: 50 });
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 50 });
 
     let fetcherCalled = false;
-    const result = await cache.getOrFetch(
+    const result = await cache.getOrFetchCache(
       instance, 'NS', 'code-1', 3600,
       async function () {
         fetcherCalled = true;

@@ -1,6 +1,6 @@
 {
   "name": "@superloomdev/js-server-helper-cache-store-dynamodb",
-  "description": "DynamoDB store adapter for helper-cache. Implements the 8-method cache store contract backed by helper-nosql-aws-dynamodb.",
+  "description": "DynamoDB store adapter for helper-cache. Implements the 9-method cache store contract backed by helper-nosql-aws-dynamodb.",
   "version": "1.0.0",
   "main": "store.js",
   "private": false,

@@ -16,7 +16,7 @@ const Errors = {
 
   /******************************************************************
   Serialization failure - the value could not be JSON-stringified
-  (on set) or the stored string could not be JSON-parsed (on get).
+  (on setCache) or the stored string could not be JSON-parsed (on getCache).
   This adapter owns serialization; the cache module does not.
   ******************************************************************/
   SERIALIZATION_FAILED: Object.freeze({

@@ -3,7 +3,7 @@
 // The caller passes configuration directly when instantiating the adapter.
 //
 // DynamoDB uses a single-table design with partition key = namespace and
-// sort key = cache_code. This gives O(1) get/set/delete and O(N) clear/list
+// sort key = cache_code. This gives O(1) getCache/setCache/deleteCache and O(N) deleteCacheByPrefix/clearCache/listCacheCodes
 // scoped to one partition (not the entire table).
 //
 // TTL is handled via DynamoDB native TTL on the EXPIRY_FIELD attribute.

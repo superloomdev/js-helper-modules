@@ -1,4 +1,4 @@
-# THOUGHTS.md  -  js-server-helper-cache
+# THOUGHTS.md  -  helper-cache
 
 Engineering decision journal. Documents the thinking process, alternatives
 considered, and dead ends avoided so future contributors do not re-litigate
@@ -13,7 +13,7 @@ all miss the cache and all call the source database. Under load this can
 overwhelm the source - the cache exists to protect it, but the stampede
 defeats that purpose.
 
-**Decision:** `getOrFetch` with opt-in distributed locking. When
+**Decision:** `getOrFetchCache` with opt-in distributed locking. When
 `GET_OR_FETCH_LOCK_ENABLED` is true, only one concurrent caller fetches;
 the rest wait and retry the cache read until the value appears.
 
@@ -57,21 +57,21 @@ value, or a separate key with a different prefix.
 **Decision:** separate key (`LOCK_KEY_PREFIX` instead of `KEY_PREFIX`).
 Reasons:
 
-1. Deleting a cache entry (via `delete` or `clear`) must not release a
-   lock. If they shared a key, `delete` would release the lock.
+1. Deleting a cache entry (via `deleteCache` or `deleteCacheByPrefix`) must not release a
+   lock. If they shared a key, `deleteCache` would release the lock.
 2. The lock's TTL is in milliseconds (short, for crash recovery); the
    cached value's TTL is in seconds (long, for cache freshness). They
    serve different purposes and should not interfere.
-3. `clear` uses SCAN with a glob pattern. If lock keys shared the cache
-   prefix, `clear` would delete active locks, breaking stampede protection
+3. `deleteCacheByPrefix` uses SCAN with a glob pattern. If lock keys shared the cache
+   prefix, `deleteCacheByPrefix` would delete active locks, breaking stampede protection
    mid-fetch.
 
 ---
 
 ## Problem 4  -  Serialization responsibility
 
-Originally the cache module owned JSON serialization: `set` stringified
-before delegating to the store, `get` parsed after. This was changed.
+Originally the cache module owned JSON serialization: `setCache` stringified
+before delegating to the store, `getCache` parsed after. This was changed.
 
 **Decision:** the store adapter owns serialization. The cache module passes
 raw JavaScript objects to the store; the store serializes before handing to
@@ -89,12 +89,18 @@ in the Valkey adapter's catalog. Each adapter owns its own serialization error.
 
 ---
 
-## Problem 5  -  `has` return shape
+## Problem 5  -  `getCacheExists` return shape
 
-`has` could return a bare Boolean (like `is*` functions) or an envelope
-(like `get`).
+`getCacheExists` could return a bare Boolean (like `is*` functions) or an
+envelope (like `getCache`).
 
 **Decision:** envelope `{ success, exists, error }`. The store call can fail
 (driver unavailable), so `success: false` must be distinguishable from
 `exists: false`. A bare Boolean cannot represent a failure. This matches
 `getKeyExists` in the kv-valkey driver, which returns `{ success, exists, error }`.
+
+The function-naming doctrine is explicit: a `has` that checks existence
+against an engine that can be unavailable is not a predicate. It is a `get`
+operation that checks existence, and it keeps its envelope under the name
+`getCacheExists`. The `has` verb is reserved for pure functions that return
+a bare Boolean and cannot fail.

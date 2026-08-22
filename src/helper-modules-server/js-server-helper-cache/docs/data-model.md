@@ -38,14 +38,14 @@ The colon in `electronics:laptop-x1` is part of the cache_code, not a separator 
 
 ```javascript
 // 1. Try cache
-let result = await Lib.Cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+let result = await Lib.Cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
 // 2. Cache miss - fetch from source
 if (result.value === null) {
   result.value = await fetchProductFromDB(instance, 'electronics:laptop-x1');
 
   // 3. Populate cache (1 hour TTL)
-  await Lib.Cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', result.value, 3600);
+  await Lib.Cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', result.value, 3600);
 }
 ```
 
@@ -82,7 +82,7 @@ namespace: 'FeatureFlags'
 cache_code: 'production:checkout-v2'
 ```
 
-The hierarchical structure of `cache_code` enables prefix invalidation. `clear(instance, 'ProductCatalog', 'electronics:')` removes every electronics entry in one call, while `clothing:jacket-m` survives.
+The hierarchical structure of `cache_code` enables prefix invalidation. `deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:')` removes every electronics entry in one call, while `clothing:jacket-m` survives.
 
 ---
 
@@ -111,10 +111,10 @@ The word "key" is overloaded. In Redis it means a string, in DynamoDB it means a
 
 Cache-through (the cache fetches from the source on a miss) couples the cache module to the source database schema. Cache-aside keeps the cache module a dumb store with TTL and namespacing. The application owns the fetch logic, which varies per use case.
 
-### Why prefix match only for clear and list?
+### Why prefix match only for deleteCacheByPrefix, clearCache, and listCacheCodes?
 
 Range operators (`gt`, `lt`, `between`) are database queries, not cache operations. A cache invalidation is always "remove everything under this prefix" - the hierarchical structure of `cache_code` makes prefix match sufficient.
 
-### Why does the cache module own JSON serialization?
+### Why does the store adapter own JSON serialization?
 
-So that every store adapter receives and returns a plain string. The adapter handles only backend-specific encoding (e.g. Valkey stores the string as-is, DynamoDB puts it in a String attribute, MongoDB stores it in a `value` field). Keeping serialization in the cache module means adapters do not repeat the same JSON.parse/stringify logic.
+Each store adapter owns its own serialization. The Valkey and ElastiCache adapters JSON-stringify on setCache and JSON-parse on getCache because the underlying KV drivers store strings. The DynamoDB adapter also JSON-stringifies because it stores the value as a single string attribute. The cache module passes raw JavaScript objects to all adapters and receives raw JavaScript objects back; each adapter handles its own serialization needs. This gives each backend the freedom to choose its encoding (JSON string, native Map, BSON) without forcing every adapter into the same format.

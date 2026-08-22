@@ -7,13 +7,16 @@ Application-level cache with TTL and namespacing for Superloom applications. Cac
 
 ## What It Does
 
-The cache module provides five operations over a namespaced, TTL-aware key-value store:
+The cache module provides eight operations over a namespaced, TTL-aware key-value store:
 
-- **`set`** - Store a value with an optional TTL (seconds). Overwrites if the entry exists.
-- **`get`** - Read a value. Returns `null` on a cache miss (absent or expired). A miss is not an error.
-- **`delete`** - Remove one entry. Idempotent.
-- **`clear`** - Mass invalidation by prefix. Remove all entries in a namespace whose `cache_code` starts with a prefix.
-- **`list`** - Enumerate `cache_code`s in a namespace, optionally filtered by prefix.
+- **`setCache`** - Store a value with an optional TTL (seconds). Overwrites if the entry exists.
+- **`getCache`** - Read a value. Returns `null` on a cache miss (absent or expired). A miss is not an error.
+- **`deleteCache`** - Remove one entry. Idempotent.
+- **`getOrFetchCache`** - Cache-aside with optional distributed stampede protection. On a miss, calls a caller-provided fetcher, caches the result, and returns it.
+- **`getCacheExists`** - Check whether an entry exists without fetching its value.
+- **`deleteCacheByPrefix`** - Selective mass invalidation. Remove all entries in a namespace whose `cache_code` starts with a required prefix.
+- **`clearCache`** - Wipe every entry in a namespace.
+- **`listCacheCodes`** - Enumerate `cache_code`s in a namespace, optionally filtered by prefix.
 
 Two identifier parameters - `namespace` and `cache_code` - locate every entry. The word "key" is avoided because it already means three different things across the target backends (a flat string in Valkey, a partition plus sort pair in DynamoDB, `_id` in MongoDB).
 
@@ -22,7 +25,7 @@ Two identifier parameters - `namespace` and `cache_code` - locate every entry. T
 - **Cache-aside, not cache-through.** The cache module never reads the source database. On a miss, the application fetches from the source and populates the cache. This keeps the cache module a dumb store with TTL and namespacing, decoupled from the source schema.
 - **No string-dispatched backends.** The chosen storage adapter is configured and instantiated independently, then passed as a ready-to-use object via `CONFIG.Store`. Unused backends never get loaded, never pull their npm dependencies, and the module has no internal `switch (STORE) { ... }` block to maintain.
 - **One factory call. One independent instance.** No singletons. Multiple cache instances run in parallel when different categories need different backends or prefixes.
-- **Prefix invalidation.** The hierarchical structure of `cache_code` (e.g. `electronics:laptop-x1`) enables `clear(instance, 'ProductCatalog', 'electronics:')` to remove every electronics entry in one call while `clothing:jacket-m` survives.
+- **Prefix invalidation.** The hierarchical structure of `cache_code` (e.g. `electronics:laptop-x1`) enables `deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:')` to remove every electronics entry in one call while `clothing:jacket-m` survives.
 
 ## Architecture Overview
 
@@ -52,24 +55,27 @@ Each adapter package ships its own README with the backend-specific schema, inde
 
 ```javascript
 // Cache a product for 1 hour
-await Lib.Cache.set(instance, 'ProductCatalog', 'electronics:laptop-x1', productData, 3600);
+await Lib.Cache.setCache(instance, 'ProductCatalog', 'electronics:laptop-x1', productData, 3600);
 
 // Read it back (cache hit)
-const result = await Lib.Cache.get(instance, 'ProductCatalog', 'electronics:laptop-x1');
+const result = await Lib.Cache.getCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 // result.value === productData
 
 // Cache miss - value is null
-const miss = await Lib.Cache.get(instance, 'ProductCatalog', 'clothing:jacket-m');
+const miss = await Lib.Cache.getCache(instance, 'ProductCatalog', 'clothing:jacket-m');
 // miss.value === null
 
 // Invalidate one entry
-await Lib.Cache.delete(instance, 'ProductCatalog', 'electronics:laptop-x1');
+await Lib.Cache.deleteCache(instance, 'ProductCatalog', 'electronics:laptop-x1');
 
-// Mass invalidation: delete all electronics cache entries
-await Lib.Cache.clear(instance, 'ProductCatalog', 'electronics:');
+// Selective mass invalidation: delete all electronics cache entries
+await Lib.Cache.deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:');
+
+// Wipe every entry in a namespace
+await Lib.Cache.clearCache(instance, 'ProductCatalog');
 
 // List all electronics cache_codes
-const list = await Lib.Cache.list(instance, 'ProductCatalog', 'electronics:');
+const list = await Lib.Cache.listCacheCodes(instance, 'ProductCatalog', 'electronics:');
 // list.cache_codes === ['electronics:laptop-x1', 'electronics:mouse-z2', ...]
 ```
 
@@ -104,7 +110,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance) an
 |---|---|---|
 | Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
 
-The cache module's own tests use the in-process memory fixture (`_test/memory-store.js`) which implements the full 5-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-cache-store-*`) and run against real backends.
+The cache module's own tests use the in-process memory fixture (`_test/memory-store.js`) which implements the full 9-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-cache-store-*`) and run against real backends.
 
 ## License
 

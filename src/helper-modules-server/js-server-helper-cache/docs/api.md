@@ -6,13 +6,14 @@ Every exported function on the public interface, with parameters, return shape, 
 
 - [Conventions](#conventions)
 - [The Response Envelope](#the-response-envelope)
-- [set](#setinstance-namespace-cache_code-value-ttl_seconds)
-- [get](#getinstance-namespace-cache_code)
-- [has](#hasinstance-namespace-cache_code)
-- [delete](#deleteinstance-namespace-cache_code)
-- [clear](#clearinstance-namespace-cache_code_prefix)
-- [list](#listinstance-namespace-cache_code_prefix)
-- [getOrFetch](#getorfetchinstance-namespace-cache_code-ttl_seconds-fetcher)
+- [setCache](#setcacheinstance-namespace-cache_code-value-ttl_seconds)
+- [getCache](#getcacheinstance-namespace-cache_code)
+- [getCacheExists](#getcacheexistsinstance-namespace-cache_code)
+- [deleteCache](#deletecacheinstance-namespace-cache_code)
+- [deleteCacheByPrefix](#deletecachebyprefixinstance-namespace-cache_code_prefix)
+- [clearCache](#clearcacheinstance-namespace)
+- [listCacheCodes](#listcachecodesinstance-namespace-cache_code_prefix)
+- [getOrFetchCache](#getorfetchcacheinstance-namespace-cache_code-ttl_seconds-fetcher)
 - [Error Catalog](#error-catalog)
 
 ---
@@ -24,9 +25,9 @@ Every exported function on the public interface, with parameters, return shape, 
 | **`instance` is always the first argument** | Every operation receives the per-request lifecycle object returned by `Lib.Instance.initialize()` |
 | **Programmer errors throw `TypeError` synchronously** | Missing namespace, missing cache_code, non-string prefix, non-positive TTL throw `TypeError` at the call-site |
 | **Operational errors return `{ success: false, error }`** | Store driver failures and fetcher failures come through the response envelope |
-| **A cache miss is not an error** | `get` on an absent or expired entry returns `{ success: true, value: null, error: null }` |
-| **The store adapter owns serialization** | `set` passes a raw JavaScript object to the store; `get` receives a raw JavaScript object back. The store adapter handles JSON.stringify/parse. This module does not serialize |
-| **The cache module never reads the source database** | It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache, or uses `getOrFetch` with a caller-provided fetcher |
+| **A cache miss is not an error** | `getCache` on an absent or expired entry returns `{ success: true, value: null, error: null }` |
+| **The store adapter owns serialization** | `setCache` passes a raw JavaScript object to the store; `getCache` receives a raw JavaScript object back. The store adapter handles JSON.stringify/parse. This module does not serialize |
+| **The cache module never reads the source database** | It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache, or uses `getOrFetchCache` with a caller-provided fetcher |
 
 ---
 
@@ -36,13 +37,13 @@ Every exported function on the public interface, with parameters, return shape, 
 |---|---|---|
 | `success` | `boolean` | `true` on success. `false` on operational failure |
 | `error` | `object \| null` | `{ type, message }` on failure. `null` on success. See [Error Catalog](#error-catalog) |
-| `value` | `* \| null` | The cached value on `get` success. `null` on a miss or failure |
-| `deleted_count` | `number` | Number of entries removed by `clear` |
-| `cache_codes` | `string[]` | Entry identifiers returned by `list`, without the namespace prefix |
+| `value` | `* \| null` | The cached value on `getCache` success. `null` on a miss or failure |
+| `deleted_count` | `number` | Number of entries removed by `deleteCacheByPrefix` or `clearCache` |
+| `cache_codes` | `string[]` | Entry identifiers returned by `listCacheCodes`, without the namespace prefix |
 
 ---
 
-## `set(instance, namespace, cache_code, value, ttl_seconds)`
+## `setCache(instance, namespace, cache_code, value, ttl_seconds)`
 
 Store a value in the cache with an optional TTL (seconds). Overwrites any existing entry at the same `(namespace, cache_code)`.
 
@@ -59,11 +60,11 @@ Store a value in the cache with an optional TTL (seconds). Overwrites any existi
 **Lifecycle.**
 
 1. Validate identifiers and TTL (throws `TypeError` on programmer error).
-2. Delegate to `store.set(instance, namespace, cache_code, value, ttl_seconds)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`. The store adapter owns serialization.
+2. Delegate to `store.setCache(instance, namespace, cache_code, value, ttl_seconds)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`. The store adapter owns serialization.
 
 ---
 
-## `get(instance, namespace, cache_code)`
+## `getCache(instance, namespace, cache_code)`
 
 Read a value from the cache. Returns `value: null` on a cache miss (entry absent or expired). A miss is not an error.
 
@@ -89,12 +90,12 @@ Read a value from the cache. Returns `value: null` on a cache miss (entry absent
 **Lifecycle.**
 
 1. Validate identifiers (throws `TypeError` on programmer error).
-2. Delegate to `store.get(instance, namespace, cache_code)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
+2. Delegate to `store.getCache(instance, namespace, cache_code)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
 3. A `null` store value is a miss. Pass the store's value straight through. The store adapter owns deserialization.
 
 ---
 
-## `has(instance, namespace, cache_code)`
+## `getCacheExists(instance, namespace, cache_code)`
 
 Check whether a cache entry exists without fetching its value. Returns `exists: true` if the key is present and not expired, `false` if absent or expired. Useful for marker keys and conditional logic that only needs presence, not the payload.
 
@@ -109,11 +110,11 @@ Check whether a cache entry exists without fetching its value. Returns `exists: 
 **Lifecycle.**
 
 1. Validate identifiers (throws `TypeError` on programmer error).
-2. Delegate to `store.has(instance, namespace, cache_code)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
+2. Delegate to `store.getCacheExists(instance, namespace, cache_code)`. Store failure becomes `CACHE_STORE_UNAVAILABLE`.
 
 ---
 
-## `delete(instance, namespace, cache_code)`
+## `deleteCache(instance, namespace, cache_code)`
 
 Remove one cache entry. Idempotent: succeeds even if the `cache_code` does not exist.
 
@@ -127,15 +128,15 @@ Remove one cache entry. Idempotent: succeeds even if the `cache_code` does not e
 
 ---
 
-## `clear(instance, namespace, cache_code_prefix)`
+## `deleteCacheByPrefix(instance, namespace, cache_code_prefix)`
 
-Mass invalidation. Remove all entries in `namespace` whose `cache_code` starts with `cache_code_prefix`. When `cache_code_prefix` is omitted, removes every entry in the namespace. Entries in other namespaces are never touched.
+Selective mass invalidation. Remove all entries in `namespace` whose `cache_code` starts with `cache_code_prefix`. The prefix is required - use `clearCache` to wipe every entry in a namespace. Entries in other namespaces are never touched.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `instance` | `object` | Yes | Request instance for time and lifecycle |
 | `namespace` | `string` | Yes | Logical group for the cache entries |
-| `cache_code_prefix` | `string` | No | Prefix filter. Omit to clear the whole namespace |
+| `cache_code_prefix` | `string` | Yes | Prefix filter. Only entries whose cache_code starts with this are removed |
 
 **Return shape.** `{ success, deleted_count, error }`.
 
@@ -143,15 +144,32 @@ Mass invalidation. Remove all entries in `namespace` whose `cache_code` starts w
 
 ```js
 // Remove every electronics entry in ProductCatalog
-await Lib.Cache.clear(instance, 'ProductCatalog', 'electronics:');
-
-// Remove every entry in ProductCatalog
-await Lib.Cache.clear(instance, 'ProductCatalog');
+await Lib.Cache.deleteCacheByPrefix(instance, 'ProductCatalog', 'electronics:');
 ```
 
 ---
 
-## `list(instance, namespace, cache_code_prefix)`
+## `clearCache(instance, namespace)`
+
+Wipe every entry in a namespace. Use `deleteCacheByPrefix` for selective removal by prefix. Entries in other namespaces are never touched.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `instance` | `object` | Yes | Request instance for time and lifecycle |
+| `namespace` | `string` | Yes | Logical group for the cache entries |
+
+**Return shape.** `{ success, deleted_count, error }`.
+
+**Example.**
+
+```js
+// Remove every entry in ProductCatalog
+await Lib.Cache.clearCache(instance, 'ProductCatalog');
+```
+
+---
+
+## `listCacheCodes(instance, namespace, cache_code_prefix)`
 
 List `cache_code`s in `namespace` whose `cache_code` starts with `cache_code_prefix`. When `cache_code_prefix` is omitted, lists every `cache_code` in the namespace. Returns `cache_codes` without the namespace prefix - just the entity identifier portion.
 
@@ -169,7 +187,7 @@ List `cache_code`s in `namespace` whose `cache_code` starts with `cache_code_pre
 
 ---
 
-## `getOrFetch(instance, namespace, cache_code, ttl_seconds, fetcher)`
+## `getOrFetchCache(instance, namespace, cache_code, ttl_seconds, fetcher)`
 
 Cache-aside with optional distributed stampede protection. On a cache hit, returns the cached value without calling the fetcher. On a miss, calls the fetcher, caches the result, and returns it.
 
@@ -200,7 +218,7 @@ This is NOT cache-through. The cache module does not know about the source datab
 1. Validate identifiers, TTL, and fetcher (throws `TypeError` on programmer error).
 2. Check the cache. On a hit, return immediately. The fetcher is never called.
 3. On a miss with lock disabled: call the fetcher, cache the result, return it.
-4. On a miss with lock enabled: acquire the lock via `store.setLock`. If acquired, call the fetcher, cache, release the lock, return. If not acquired, wait and retry the cache read until the value appears or the lock expires and this caller acquires it.
+4. On a miss with lock enabled: acquire the lock via `store.setCacheLock`. If acquired, call the fetcher, cache, release the lock, return. If not acquired, wait and retry the cache read until the value appears or the lock expires and this caller acquires it.
 5. If the fetcher throws, nothing is cached, the lock is released immediately, and `CACHE_FETCHER_FAILED` is returned.
 
 ---
@@ -212,7 +230,7 @@ All operational errors live in `cache.errors.js`. Every failure path returns a f
 | `error.type` | Trigger |
 |---|---|
 | `CACHE_STORE_UNAVAILABLE` | Any store adapter call returned `success: false` or threw |
-| `CACHE_FETCHER_FAILED` | The fetcher function passed to `getOrFetch` threw an error |
+| `CACHE_FETCHER_FAILED` | The fetcher function passed to `getOrFetchCache` threw an error |
 
 Error shape is frozen at module load:
 

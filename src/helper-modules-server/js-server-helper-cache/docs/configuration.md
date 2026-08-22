@@ -37,14 +37,14 @@ The factory validates `CONFIG` at construction time. Misconfiguration fails at b
 | Key | Type | Default | Required | Notes |
 |---|---|---|---|---|
 | `Store` | `object` | `null` | Yes | Ready-to-use store object. Configure adapter independently, then pass result |
-| `GET_OR_FETCH_LOCK_ENABLED` | `Boolean` | `false` | No | Enable distributed stampede protection in `getOrFetch` |
+| `GET_OR_FETCH_LOCK_ENABLED` | `Boolean` | `false` | No | Enable distributed stampede protection in `getOrFetchCache` |
 | `GET_OR_FETCH_LOCK_TIMEOUT_MS` | `Number` | `3000` | No | Lock auto-expiry in milliseconds. Handles crashed processes |
 | `GET_OR_FETCH_LOCK_RETRY_MS` | `Number` | `50` | No | Poll interval when waiting for a lock holder to finish |
 | `GET_OR_FETCH_LOCK_RETRY_JITTER_MS` | `Number` | `20` | No | Random 0-N ms added to each retry to avoid synchronized retry bursts |
 
 `Store` is the primary config key. The cache module composes no backend key - it forwards `namespace` and `cache_code` to the store as separate parameters, so every separator and prefix concern belongs to the adapter that actually builds a backend key. Do not add `KEY_PREFIX` or `KEY_SEPARATOR` here; both live on the Valkey adapter.
 
-The four `GET_OR_FETCH_LOCK_*` keys control distributed stampede protection in `getOrFetch`. When `GET_OR_FETCH_LOCK_ENABLED` is `false` (default), `getOrFetch` does plain fetch-and-cache with no lock. When `true`, the loader validates that the store implements `setLock` and `releaseLock`; a store without lock support throws at boot.
+The four `GET_OR_FETCH_LOCK_*` keys control distributed stampede protection in `getOrFetchCache`. When `GET_OR_FETCH_LOCK_ENABLED` is `false` (default), `getOrFetchCache` does plain fetch-and-cache with no lock. When `true`, the loader validates that the store implements `setCacheLock` and `releaseCacheLock`; a store without lock support throws at boot.
 
 ---
 
@@ -72,8 +72,8 @@ The storage adapter (`CONFIG.Store`) is a fully independent module that owns its
 
 | Tier | Runtime | Backend |
 |---|---|---|
-| Unit | Node.js `node --test` | In-process memory store (`_test/memory-store.js`) implementing the full 8-method store contract |
+| Unit | Node.js `node --test` | In-process memory store (`_test/memory-store.js`) implementing the full 9-method store contract |
 
-The cache module's own tests use an in-process memory store implementing the same 8-method contract every real adapter satisfies (6 required + 2 lock methods). There is no Docker dependency in this package and no database driver is required.
+The cache module's own tests use an in-process memory store implementing the same 9-method contract every real adapter satisfies (7 required + 2 lock methods). There is no Docker dependency in this package and no database driver is required.
 
 Integration tests for each storage backend live in the corresponding adapter package (`helper-cache-store-*`) and run against real backends.
