@@ -86,6 +86,11 @@ after(async function () {
   // Close the admin client
   await adminClient.close();
 
+  // Close the adapter's own connection pool. Without this the driver
+  // keeps a live socket open, the Node process never exits, and the
+  // test run hangs after the last assertion passes.
+  await Lib.MongoDB.close(createInstance());
+
 });
 
 
