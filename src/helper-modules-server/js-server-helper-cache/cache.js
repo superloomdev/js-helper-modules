@@ -669,14 +669,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     waitForLockAndFetch: async function (instance, namespace, cache_code, ttl_seconds, fetcher) {
 
       // Track total elapsed wait time to bound the retry loop
-      const wait_start = Date.now();
+      const wait_start = Lib.Utils.getUnixTimeInMilliSeconds();
       const wait_timeout_ms = CONFIG.GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS;
 
       // Retry loop: poll the cache, try to acquire the lock, or time out
       while (true) {
 
         // Check if the wait timeout has been exceeded
-        if (Date.now() - wait_start >= wait_timeout_ms) {
+        if (Lib.Utils.getUnixTimeInMilliSeconds() - wait_start >= wait_timeout_ms) {
 
           // Wait timeout exceeded - return failure
           Lib.Debug.debug('Cache getOrFetchCache lock wait timed out', { namespace: namespace, cache_code: cache_code, wait_timeout_ms: wait_timeout_ms });
