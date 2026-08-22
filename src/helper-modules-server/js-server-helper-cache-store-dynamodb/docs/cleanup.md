@@ -23,3 +23,9 @@ There is no `cleanupExpiredRecords` method in the store contract and no schedule
 | `clearCache(instance, namespace)` | All entries in namespace | O(N) over partition |
 
 Prefer targeted `deleteCache` calls for routine invalidation. Use `deleteCacheByPrefix` and `clearCache` for administrative mass invalidation (deployments, cache warmups, namespace resets).
+
+### What deleted_count counts
+
+`deleted_count` is the number of items physically removed from the table, which can exceed the number of entries a caller would have considered live. DynamoDB's TTL sweeper may lag by up to 48 hours, so a prefix delete can remove items whose TTL had already passed and which `getCache` would already have reported as misses.
+
+This is deliberate. The count reports work actually done against the table, not a logical live-entry count. `listCacheCodes` takes the opposite view and filters expired items, because its answer is consumed as "what is in the cache" rather than "what was removed".

@@ -385,6 +385,23 @@ describe('listCacheCodes without cache_code_prefix', function () {
     assert.deepStrictEqual(result.cache_codes.sort(), ['clothing:jacket-m', 'electronics:laptop-x1']);
   });
 
+
+  it('omits entries whose TTL has passed', async function () {
+    const instance = createInstance();
+
+    await store.setCache(instance, 'ProductCatalog', 'keep', 'a', 3600);
+    await store.setCache(instance, 'ProductCatalog', 'expire-me', 'b', 60);
+
+    // Advance past the short TTL only - the DynamoDB sweeper has not run
+    instance.time = 1000000 + 61;
+
+    const result = await store.listCacheCodes(instance, 'ProductCatalog');
+
+    // list must agree with get - the expired code is not reported
+    assert.strictEqual(result.success, true);
+    assert.deepStrictEqual(result.cache_codes, ['keep']);
+  });
+
 });
 
 
