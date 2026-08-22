@@ -204,6 +204,86 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
 
     /********************************************************************
+    Insert a document only if no document with the same _id (or unique
+    index key) already exists. Uses insertOne, which throws error code
+    11000 on duplicate. Returns applied: true when this caller created
+    the document, applied: false when a duplicate prevented the insert.
+    applied: false is not an error.
+
+    This is the primitive distributed locks are built on. The lock
+    caller calls insertRecordIfNotExists with a lock document; exactly
+    one concurrent caller receives applied: true and proceeds. The rest
+    receive applied: false and wait. If the lock holder crashes before
+    releasing, the TTL index expires the document and the next caller
+    acquires it.
+
+    @param {Object} instance - Request instance
+    @param {String} collection - Collection name
+    @param {Object} document - Document to insert (must include _id)
+
+    @return {Promise<Object>} - { success, applied, insertedId, error }
+    *********************************************************************/
+    insertRecordIfNotExists: async function (instance, collection, document) {
+
+      // Ensure MongoDB client is initialized
+      await _MongoDB.initIfNot();
+
+      const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
+
+      try {
+
+        // Execute insertOne - throws E11000 on duplicate _id
+        const result = await state.db.collection(collection).insertOne(document);
+
+        Lib.Debug.performanceAuditLog('End', 'MongoDB insertRecordIfNotExists', start_ms);
+
+        // Return successful response - the document was inserted
+        return {
+          success: true,
+          applied: true,
+          insertedId: result.insertedId,
+          error: null
+        };
+
+      } catch (error) {
+
+        // Duplicate key error (E11000) - the document already exists.
+        // This is a normal outcome, not a driver failure.
+        if (error.code === 11000) {
+
+          Lib.Debug.performanceAuditLog('End', 'MongoDB insertRecordIfNotExists', start_ms);
+
+          return {
+            success: true,
+            applied: false,
+            insertedId: null,
+            error: null
+          };
+        }
+
+        // Any other error is a real driver failure
+        Lib.Debug.debug('MongoDB insertRecordIfNotExists failed', {
+          type: ERRORS.DATABASE_WRITE_FAILED.type,
+          collection: collection,
+          message: error.message,
+          code: error.code || null,
+          stack: error.stack
+        });
+
+        // Return error response
+        return {
+          success: false,
+          applied: false,
+          insertedId: null,
+          error: ERRORS.DATABASE_WRITE_FAILED
+        };
+
+      }
+
+    },
+
+
+    /********************************************************************
     Delete a single record from a collection.
 
     @param {Object} instance - Request instance

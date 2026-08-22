@@ -34,7 +34,7 @@ Each loader call returns an independent MongoDB interface with its own `Lib`, `C
 | MAX_POOL_SIZE | Number | 10 | no |
 | SERVER_SELECTION_TIMEOUT | Number | 5000 | no |
 
-## Exported Functions (15 total)
+## Exported Functions (16 total)
 
 All functions accept `instance` as their first argument for request context and performance logging.
 
@@ -46,6 +46,10 @@ getRecord(instance, collection, filter, options?) → { success, document, error
 writeRecord(instance, collection, filter, document) → { success, matchedCount, modifiedCount, upsertedId, error } | async:yes
   Write (create or replace) a single record. Always upsert.
   Filter identifies the record (typically `{ _id: ... }`). Document is full replacement (no `$` operators).
+
+insertRecordIfNotExists(instance, collection, document) → { success, applied, insertedId, error } | async:yes
+  Insert a document only if no document with the same _id exists. Returns `applied: true` on insert, `applied: false` on duplicate (not an error).
+  Document must include `_id`. Uses insertOne; catches E11000 duplicate key error.
 
 deleteRecord(instance, collection, filter) → { success, deletedCount, error } | async:yes
   Delete a single record.
