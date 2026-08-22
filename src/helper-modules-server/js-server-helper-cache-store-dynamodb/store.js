@@ -536,10 +536,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
-      // Extract the sort key (cache_code) from each item, excluding lock items
+      // Extract the sort key (cache_code) from each item, excluding lock
+      // items and entries whose TTL has passed but which the DynamoDB
+      // sweeper has not yet removed, so list agrees with get
       const cache_codes = query_result.items
         .filter(function (item) {
           return item[CONFIG.SORT_KEY].indexOf(CONFIG.LOCK_SORT_KEY_PREFIX) !== 0;
+        })
+        .filter(function (item) {
+          return !_Store.isExpired(item, instance);
         })
         .map(function (item) {
           return item[CONFIG.SORT_KEY];
