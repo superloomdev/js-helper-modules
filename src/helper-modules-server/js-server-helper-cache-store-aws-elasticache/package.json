@@ -1,0 +1,33 @@
+{
+  "name": "@superloomdev/js-server-helper-cache-store-aws-elasticache",
+  "description": "AWS ElastiCache store adapter for helper-cache. Implements the 9-method cache store contract using the Redis-compatible ElastiCache engine with SCAN-based prefix matching and native per-key TTL.",
+  "version": "1.0.0",
+  "main": "store.js",
+  "private": false,
+  "license": "MIT",
+  "author": { "name": "sj00" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "engines": { "node": ">=24" },
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-kv-aws-elasticache": "npm:@superloomdev/js-server-helper-kv-aws-elasticache@^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "helper-utils": { "optional": false },
+    "helper-debug": { "optional": false },
+    "helper-kv-aws-elasticache": { "optional": false }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.0",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  }
+}
