@@ -61,6 +61,11 @@ module.exports = Object.freeze({
   DATABASE_QUERY_FAILED: Object.freeze({
     type: 'DATABASE_QUERY_FAILED',
     message: 'Database query operation failed'
+  }),
+
+  DOCUMENT_ALREADY_EXISTS: Object.freeze({
+    type: 'DOCUMENT_ALREADY_EXISTS',
+    message: 'Document with this _id or unique key already exists'
   })
 
 });
