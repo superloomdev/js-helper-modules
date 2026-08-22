@@ -17,10 +17,11 @@
 //   setCacheLock(instance, namespace, cache_code, options)        -> { success, applied, error }
 //   releaseCacheLock(instance, namespace, cache_code)             -> { success, error }
 //
-// Expiry is driven off instance.time (not wall clock) so the TTL test is
-// deterministic: advance instance.time instead of sleeping.
-// Lock expiry uses wall clock (Date.now) because the lock timeout is in
-// milliseconds and instance.time is in seconds.
+// Every expiry timestamp - entry TTL and lock TTL alike - is derived from
+// instance.time, matching the DynamoDB adapter. Lock timeouts arrive in
+// milliseconds and are converted to seconds, because instance.time is in
+// seconds. Tests advance instance.time instead of sleeping, so expiry is
+// deterministic and the fake mirrors production semantics exactly.
 'use strict';
 
 
@@ -185,17 +186,27 @@ module.exports = function createMemoryStore () {
     List cache_codes in namespace whose cache_code starts with
     cache_code_prefix. When omitted, lists every cache_code in the
     namespace. Returns cache_codes without the namespace prefix.
+    Expired entries are filtered so list agrees with get.
     ******************************************************************/
-    listCacheCodes: async function (instance, namespace, cache_code_prefix) { // eslint-disable-line no-unused-vars
+    listCacheCodes: async function (instance, namespace, cache_code_prefix) {
 
       const prefix = namespace + '\u001F' + (cache_code_prefix || '');
       const cache_codes = [];
 
-      for (const key of _map.keys()) {
-        if (key.startsWith(prefix)) {
-          // Strip the namespace + '\u001F' prefix
-          cache_codes.push(key.substring(namespace.length + 1));
+      for (const [key, stored] of _map.entries()) {
+
+        // Skip keys outside the requested namespace and prefix
+        if (!key.startsWith(prefix)) {
+          continue;
         }
+
+        // Skip expired entries so list agrees with get
+        if (stored.expires_at !== null && stored.expires_at < instance['time']) {
+          continue;
+        }
+
+        // Strip the namespace + '\u001F' prefix
+        cache_codes.push(key.substring(namespace.length + 1));
       }
 
       return {
@@ -251,16 +262,20 @@ module.exports = function createMemoryStore () {
     Returns applied: true if this caller acquired the lock, false if
     another caller already holds it (and it has not expired).
     ******************************************************************/
-    setCacheLock: async function (instance, namespace, cache_code, options) { // eslint-disable-line no-unused-vars
+    setCacheLock: async function (instance, namespace, cache_code, options) {
 
       const lockKey = compositeKey(namespace, cache_code);
-      const now = Date.now();
       const timeout_ms = (options && options.timeout_ms) || 3000;
+
+      // Lock expiry is an absolute timestamp derived from instance.time,
+      // matching the DynamoDB adapter. Milliseconds convert to seconds
+      // because instance.time is in seconds.
+      const ttl_seconds = Math.max(1, Math.ceil(timeout_ms / 1000));
 
       // Check for an existing lock
       const existing = _locks.get(lockKey);
 
-      if (existing && existing.expires_at > now) {
+      if (existing && existing.expires_at > instance['time']) {
 
         // Lock is held and not expired - this caller does not acquire
         return {
@@ -272,7 +287,7 @@ module.exports = function createMemoryStore () {
 
       // No lock, or expired lock - this caller acquires
       _locks.set(lockKey, {
-        expires_at: now + timeout_ms
+        expires_at: instance['time'] + ttl_seconds
       });
 
       return {

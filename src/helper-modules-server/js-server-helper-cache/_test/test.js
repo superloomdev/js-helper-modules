@@ -536,6 +536,24 @@ describe('listCacheCodes without cache_code_prefix', function () {
     assert.deepStrictEqual(result.cache_codes.sort(), ['clothing:jacket-m', 'electronics:laptop-x1']);
   });
 
+
+  it('omits entries whose TTL has passed', async function () {
+    const cache = buildCache(createMemoryStore());
+    const instance = createInstance();
+
+    await cache.setCache(instance, 'ProductCatalog', 'keep', 'a', 3600);
+    await cache.setCache(instance, 'ProductCatalog', 'expire-me', 'b', 60);
+
+    // Advance past the short TTL only
+    instance.time = instance.time + 61;
+
+    const result = await cache.listCacheCodes(instance, 'ProductCatalog');
+
+    // list must agree with get - the expired code is not reported
+    assert.strictEqual(result.success, true);
+    assert.deepStrictEqual(result.cache_codes, ['keep']);
+  });
+
 });
 
 
@@ -970,13 +988,14 @@ describe('getOrFetchCache - locked (stampede protection)', function () {
   });
 
 
-  it('expired lock allows re-acquisition (crash recovery)', async function () {
+  it('already-expired lock is acquired on the first attempt', async function () {
     const store = createMemoryStore();
     const cache = buildLockedCache(store);
     const instance = createInstance();
 
-    // Manually acquire a lock that will expire quickly
-    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 50 });
+    // Hold a lock, then advance instance.time past its TTL
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 1000 });
+    instance.time = instance.time + 2;
 
     let fetcherCalled = false;
     const result = await cache.getOrFetchCache(
@@ -987,7 +1006,38 @@ describe('getOrFetchCache - locked (stampede protection)', function () {
       }
     );
 
-    // After the lock expires, the waiting caller should acquire it and fetch
+    // The stale lock is ignored, so this caller fetches without waiting
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.value, 'recovered-value');
+    assert.strictEqual(fetcherCalled, true);
+  });
+
+
+  it('lock expiring mid-wait allows re-acquisition (crash recovery)', async function () {
+    const store = createMemoryStore();
+    const cache = buildLockedCache(store);
+    const instance = createInstance();
+
+    // Hold a lock that is live when getOrFetchCache starts
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 1000 });
+
+    // Expire it while the caller is inside the retry loop. The loop polls
+    // every ~10-15 ms and the wait timeout is 5000 ms, so 30 ms lands well
+    // inside the waiting window with a wide margin.
+    setTimeout(function () {
+      instance.time = instance.time + 2;
+    }, 30);
+
+    let fetcherCalled = false;
+    const result = await cache.getOrFetchCache(
+      instance, 'NS', 'code-1', 3600,
+      async function () {
+        fetcherCalled = true;
+        return 'recovered-value';
+      }
+    );
+
+    // Once the lock expires the waiting caller acquires it and fetches
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, 'recovered-value');
     assert.strictEqual(fetcherCalled, true);
