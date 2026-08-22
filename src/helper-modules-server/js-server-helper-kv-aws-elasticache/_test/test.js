@@ -57,11 +57,11 @@ after(async function () {
 
 describe('Factory Pattern', function () {
 
-  it('should expose all 17 public functions', function () {
+  it('should expose all 18 public functions', function () {
 
     const expected = [
       'close', 'ping',
-      'set', 'get', 'delete', 'getKeyExists',
+      'set', 'setIfNotExists', 'get', 'delete', 'getKeyExists',
       'setMany', 'getMany', 'deleteMany',
       'scan',
       'setHashField', 'getHashField', 'getHashFields', 'deleteHashField',
@@ -198,6 +198,53 @@ describe('Local Mode (no IAM)', function () {
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.value, null);
+  });
+
+
+  it('setIfNotExists: first call applies, second call does not', async function () {
+
+    // First call creates the key
+    const first = await KV.setIfNotExists(instance, 'sne_local', 'first-value', 60);
+
+    assert.strictEqual(first.success, true);
+    assert.strictEqual(first.applied, true);
+    assert.strictEqual(first.error, null);
+
+    // Second call is blocked - key already exists
+    const second = await KV.setIfNotExists(instance, 'sne_local', 'second-value', 60);
+
+    assert.strictEqual(second.success, true);
+    assert.strictEqual(second.applied, false);
+    assert.strictEqual(second.error, null);
+
+    // Verify the original value was not overwritten
+    const get = await KV.get(instance, 'sne_local');
+    assert.strictEqual(get.value, 'first-value');
+
+    // Clean up
+    await KV.delete(instance, 'sne_local');
+  });
+
+
+  it('setIfNotExists: expired key allows re-acquisition', async function () {
+
+    // Set a key with a 1-second TTL
+    const first = await KV.setIfNotExists(instance, 'sne_expire', 'first', 1);
+    assert.strictEqual(first.applied, true);
+
+    // Wait for it to expire
+    await new Promise(function (resolve) { setTimeout(resolve, 1500); });
+
+    // The key is gone, so a new setIfNotExists succeeds
+    const second = await KV.setIfNotExists(instance, 'sne_expire', 'second', 60);
+    assert.strictEqual(second.applied, true);
+
+    // Verify
+    const get = await KV.get(instance, 'sne_expire');
+    assert.strictEqual(get.value, 'second');
+
+    // Clean up
+    await KV.delete(instance, 'sne_expire');
   });
 
   it('should delete a key', async function () {

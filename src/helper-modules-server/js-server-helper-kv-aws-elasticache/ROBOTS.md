@@ -72,7 +72,7 @@ const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
 | `CONNECT_TIMEOUT_MS` | Number | `5000` | no | Connection timeout |
 | `COMMAND_TIMEOUT_MS` | Number | `3000` | no | Command timeout |
 
-## Exported Functions (17 total)
+## Exported Functions (18 total)
 
 All functions are async and return an envelope. Same signatures and return shapes as kv-valkey.
 
@@ -82,6 +82,8 @@ ping(instance) -> { success, error }
 
 ### Single Key
 set(instance, key, value, ttl_seconds?) -> { success, error }
+setIfNotExists(instance, key, value, ttl_seconds?) -> { success, applied, error }
+  Atomic SET NX. Returns `applied: true` on insert, `applied: false` on duplicate (not an error).
 get(instance, key) -> { success, value, error }
 delete(instance, key) -> { success, deleted_count, error }
 getKeyExists(instance, key) -> { success, exists, error }
