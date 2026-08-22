@@ -43,11 +43,11 @@ Consumed only by `_test/loader.js` - never read by the adapter itself.
 | `VALKEY_HOST` | `localhost` | Valkey host |
 | `VALKEY_PORT` | `6381` | Valkey port (6381 to avoid collision with kv-valkey tests on 6379) |
 
-## clear and list Complexity
+## deleteCacheByPrefix, clearCache, and listCacheCodes Complexity
 
-`clear` and `list` use `Lib.KV.scan`, which wraps Valkey's `SCAN` command with a `MATCH` glob pattern. **`SCAN` is O(N) over the entire keyspace.** It iterates every key in the database and filters after retrieval; the `MATCH` pattern does not narrow the scan scope.
+`deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use `Lib.KV.scan`, which wraps Valkey's `SCAN` command with a `MATCH` glob pattern. **`SCAN` is O(N) over the entire keyspace.** It iterates every key in the database and filters after retrieval; the `MATCH` pattern does not narrow the scan scope.
 
-Redis and Valkey expose a flat keyspace with no partition or sort key concept, so no prefix-scoped index exists. A SET-based secondary index was considered and rejected: it would add a `SADD` to every `set` call and need its own cleanup. O(N) `clear` is the accepted trade.
+Redis and Valkey expose a flat keyspace with no partition or sort key concept, so no prefix-scoped index exists. A SET-based secondary index was considered and rejected: it would add a `SADD` to every `setCache` call and need its own cleanup. O(N) `deleteCacheByPrefix`/`clearCache` is the accepted trade.
 
 ### Cost by deployment model
 
@@ -59,7 +59,7 @@ Redis and Valkey expose a flat keyspace with no partition or sort key concept, s
 
 ### Recommendation
 
-Prefer targeted `delete` calls for routine invalidation. Treat `clear` as an administrative operation used during deployments, cache warmups, or namespace resets - not on the request path.
+Prefer targeted `deleteCache` calls for routine invalidation. Treat `deleteCacheByPrefix` and `clearCache` as administrative operations used during deployments, cache warmups, or namespace resets - not on the request path.
 
 ## Testing Tier
 

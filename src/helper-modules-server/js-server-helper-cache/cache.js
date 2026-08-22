@@ -1,8 +1,11 @@
 // Info: Application-level cache with TTL and namespacing.
 // Cache-aside pattern: the application fetches from the source database on a
-// miss and populates the cache; this module never reads the source. Five
-// operations cover the lifecycle of a cached value: set, get, delete, clear
-// (mass invalidation by prefix), and list (enumerate cache_codes by prefix).
+// miss and populates the cache; this module never reads the source. Eight
+// operations cover the lifecycle of a cached value: setCache, getCache,
+// deleteCache, getOrFetchCache (cache-aside with optional stampede
+// protection), getCacheExists (existence check), deleteCacheByPrefix
+// (selective mass invalidation by prefix), clearCache (wipe all entries in
+// a namespace), and listCacheCodes (enumerate cache_codes by prefix).
 //
 // Two identifier parameters - namespace and cache_code - locate every entry.
 // The word "key" is avoided because it already means three different things
@@ -112,7 +115,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    set: async function (instance, namespace, cache_code, value, ttl_seconds) {
+    setCache: async function (instance, namespace, cache_code, value, ttl_seconds) {
 
       // Programmer errors (bad args) throw synchronously - never returned as envelope
       Validators.validateIdentifiers(namespace, cache_code);
@@ -120,10 +123,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Delegate to the store - no serialization in the cache module
       try {
-        const result = await store.set(instance, namespace, cache_code, value, ttl_seconds);
+        const result = await store.setCache(instance, namespace, cache_code, value, ttl_seconds);
 
         if (result.success === false) {
-          Lib.Debug.debug('Cache store set failed', { namespace: namespace, cache_code: cache_code, error: result.error });
+          Lib.Debug.debug('Cache store setCache failed', { namespace: namespace, cache_code: cache_code, error: result.error });
           return {
             success: false,
             error: ERRORS.CACHE_STORE_UNAVAILABLE
@@ -135,7 +138,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           error: null
         };
       } catch (err) {
-        Lib.Debug.debug('Cache store set threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        Lib.Debug.debug('Cache store setCache threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
         return {
           success: false,
           error: ERRORS.CACHE_STORE_UNAVAILABLE
@@ -157,17 +160,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     @return {Promise<Object>} - { success, value, error }
     *********************************************************************/
-    get: async function (instance, namespace, cache_code) {
+    getCache: async function (instance, namespace, cache_code) {
 
       // Programmer errors (bad args) throw synchronously - never returned as envelope
       Validators.validateIdentifiers(namespace, cache_code);
 
       // Delegate to the store - no deserialization in the cache module
       try {
-        const result = await store.get(instance, namespace, cache_code);
+        const result = await store.getCache(instance, namespace, cache_code);
 
         if (result.success === false) {
-          Lib.Debug.debug('Cache store get failed', { namespace: namespace, cache_code: cache_code, error: result.error });
+          Lib.Debug.debug('Cache store getCache failed', { namespace: namespace, cache_code: cache_code, error: result.error });
           return {
             success: false,
             value: null,
@@ -182,7 +185,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           error: null
         };
       } catch (err) {
-        Lib.Debug.debug('Cache store get threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        Lib.Debug.debug('Cache store getCache threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
         return {
           success: false,
           value: null,
@@ -203,17 +206,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    delete: async function (instance, namespace, cache_code) {
+    deleteCache: async function (instance, namespace, cache_code) {
 
       // Programmer errors (bad args) throw synchronously - never returned as envelope
       Validators.validateIdentifiers(namespace, cache_code);
 
       // Delegate to the store and translate any driver failure
       try {
-        const result = await store.delete(instance, namespace, cache_code);
+        const result = await store.deleteCache(instance, namespace, cache_code);
 
         if (result.success === false) {
-          Lib.Debug.debug('Cache store delete failed', { namespace: namespace, cache_code: cache_code, error: result.error });
+          Lib.Debug.debug('Cache store deleteCache failed', { namespace: namespace, cache_code: cache_code, error: result.error });
           return {
             success: false,
             error: ERRORS.CACHE_STORE_UNAVAILABLE
@@ -225,7 +228,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           error: null
         };
       } catch (err) {
-        Lib.Debug.debug('Cache store delete threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        Lib.Debug.debug('Cache store deleteCache threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
         return {
           success: false,
           error: ERRORS.CACHE_STORE_UNAVAILABLE
@@ -236,31 +239,307 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
 
     /********************************************************************
-    Mass invalidation. Remove all entries in namespace whose cache_code
-    starts with cache_code_prefix. When cache_code_prefix is omitted,
-    removes every entry in the namespace. Entries in other namespaces
-    are never touched.
+    Cache-aside with optional distributed stampede protection.
 
-    @param {Object} instance       - Request instance for time and lifecycle
-    @param {String} namespace      - Logical group for the cache entries
-    @param {String} [cache_code_prefix] - Optional prefix. Omit to clear the whole namespace
+    On a cache hit: returns the cached value. The fetcher is never called.
+    On a cache miss:
+    - If GET_OR_FETCH_LOCK_ENABLED is false: calls the fetcher, caches
+    the result, returns it. Same as manual get-then-set.
+    - If GET_OR_FETCH_LOCK_ENABLED is true: acquires a distributed lock
+    in the store, calls the fetcher, caches the result, releases the
+    lock, returns the value. Concurrent requests for the same key
+    wait and retry the cache read until the value appears or the lock
+    expires and they acquire it themselves.
 
-    @return {Promise<Object>} - { success, deleted_count, error }
+    The fetcher is a function the caller provides. If it returns a value
+    (including null), that value is cached and returned. If it throws,
+    nothing is cached, the lock is released immediately, and the error is
+    returned as CACHE_FETCHER_FAILED.
+
+    This is NOT cache-through. The cache module does not know about the
+    source database. The caller provides the fetcher; the cache module
+    calls it on a miss.
+
+    @param {Object} instance     - Request instance for time and lifecycle
+    @param {String} namespace    - Logical group for the cache entry
+    @param {String} cache_code   - Specific entry identifier within the namespace
+    @param {Number} ttl_seconds  - TTL for the cached value (seconds)
+    @param {Function} fetcher    - async function() -> returns any value or throws
+
+    @return {Promise<Object>} - { success, value, error }
     *********************************************************************/
-    clear: async function (instance, namespace, cache_code_prefix) {
+    getOrFetchCache: async function (instance, namespace, cache_code, ttl_seconds, fetcher) {
 
       // Programmer errors (bad args) throw synchronously - never returned as envelope
-      if (!Lib.Utils.isString(namespace) || namespace === '') {
-        throw new TypeError('[helper-cache] namespace is required (non-empty string)');
+      Validators.validateIdentifiers(namespace, cache_code);
+      Validators.validateOptionalTtl(ttl_seconds);
+      if (!Lib.Utils.isFunction(fetcher)) {
+        throw new TypeError('[helper-cache] getOrFetchCache: fetcher must be a function');
       }
-      Validators.validateOptionalPrefix(cache_code_prefix);
+
+      // 1. Check the cache first
+      try {
+        const cached = await store.getCache(instance, namespace, cache_code);
+
+        if (cached.success === false) {
+          Lib.Debug.debug('Cache store getCache (getOrFetchCache) failed', { namespace: namespace, cache_code: cache_code, error: cached.error });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // Cache hit - return immediately, fetcher is never called
+        if (cached.value !== null && !Lib.Utils.isNullOrUndefined(cached.value)) {
+          return {
+            success: true,
+            value: cached.value,
+            error: null
+          };
+        }
+      } catch (err) {
+        Lib.Debug.debug('Cache store getCache (getOrFetchCache) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+      // 2. Cache miss. If lock is disabled, just fetch and cache.
+      if (CONFIG.GET_OR_FETCH_LOCK_ENABLED === false) {
+        return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
+      }
+
+      // 3. Lock enabled - try to acquire
+      try {
+        const lock_result = await _Cache.setCacheLock(
+          instance, namespace, cache_code,
+          { timeout_ms: CONFIG.GET_OR_FETCH_LOCK_TIMEOUT_MS }
+        );
+
+        if (lock_result.success === false) {
+          Lib.Debug.debug('Cache store setCacheLock (getOrFetchCache) failed', { namespace: namespace, cache_code: cache_code, error: lock_result.error });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // 3a. We won the lock - fetch, cache, release
+        if (lock_result.applied) {
+          try {
+            return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
+          } finally {
+
+            // Always release the lock, even if the fetcher threw
+            try {
+              await _Cache.releaseCacheLock(instance, namespace, cache_code);
+            } catch (err) {
+              // Lock release failure is not fatal - the lock has a TTL and will expire
+              Lib.Debug.debug('Cache store releaseCacheLock (getOrFetchCache) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+            }
+
+          }
+        }
+      } catch (err) {
+        Lib.Debug.debug('Cache store setCacheLock (getOrFetchCache) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          value: null,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+      // 3b. We did not win the lock - wait and retry the cache read.
+      //     No wait timeout: retry indefinitely until the value appears
+      //     or the lock expires and we acquire it ourselves.
+      while (true) {
+
+        // Sleep for retry interval + random jitter
+        const jitter = Math.random() * CONFIG.GET_OR_FETCH_LOCK_RETRY_JITTER_MS;
+        const sleep_ms = CONFIG.GET_OR_FETCH_LOCK_RETRY_MS + jitter;
+        await new Promise(function (resolve) {
+          setTimeout(resolve, sleep_ms);
+        });
+
+        // Check if the value has appeared in the cache
+        try {
+          const retry = await store.getCache(instance, namespace, cache_code);
+
+          if (retry.success === false) {
+            Lib.Debug.debug('Cache store getCache (getOrFetchCache retry) failed', { namespace: namespace, cache_code: cache_code, error: retry.error });
+            return {
+              success: false,
+              value: null,
+              error: ERRORS.CACHE_STORE_UNAVAILABLE
+            };
+          }
+
+          // Value appeared - return it
+          if (retry.value !== null && !Lib.Utils.isNullOrUndefined(retry.value)) {
+            return {
+              success: true,
+              value: retry.value,
+              error: null
+            };
+          }
+        } catch (err) {
+          Lib.Debug.debug('Cache store getCache (getOrFetchCache retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // Value not yet available. Try to acquire the lock ourselves.
+        // If the previous lock holder crashed or was too slow, the lock
+        // has expired (its TTL passed) and our setCacheLock will succeed.
+        try {
+          const lock_result = await _Cache.setCacheLock(
+            instance, namespace, cache_code,
+            { timeout_ms: CONFIG.GET_OR_FETCH_LOCK_TIMEOUT_MS }
+          );
+
+          if (lock_result.success === false) {
+            Lib.Debug.debug('Cache store setCacheLock (getOrFetchCache retry) failed', { namespace: namespace, cache_code: cache_code, error: lock_result.error });
+            return {
+              success: false,
+              value: null,
+              error: ERRORS.CACHE_STORE_UNAVAILABLE
+            };
+          }
+
+          if (lock_result.applied) {
+
+            // We now hold the lock - but the previous lock holder may have
+            // stored the value between our cache check and our lock acquisition.
+            // Double-check the cache before becoming the fetcher to avoid a
+            // redundant fetch (double-check locking pattern).
+            try {
+              const recheck = await store.getCache(instance, namespace, cache_code);
+
+              if (recheck.success === true && recheck.value !== null && !Lib.Utils.isNullOrUndefined(recheck.value)) {
+
+                // Value appeared - release the lock and return it
+                try {
+                  await _Cache.releaseCacheLock(instance, namespace, cache_code);
+                } catch (err) {
+                  Lib.Debug.debug('Cache store releaseCacheLock (getOrFetchCache recheck) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+                }
+
+                return {
+                  success: true,
+                  value: recheck.value,
+                  error: null
+                };
+              }
+            } catch (err) {
+              Lib.Debug.debug('Cache store getCache (getOrFetchCache recheck) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+            }
+
+            // Still a miss - become the fetcher
+            try {
+              return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
+            } finally {
+
+              try {
+                await _Cache.releaseCacheLock(instance, namespace, cache_code);
+              } catch (err) {
+                Lib.Debug.debug('Cache store releaseCacheLock (getOrFetchCache retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+              }
+
+            }
+          }
+        } catch (err) {
+          Lib.Debug.debug('Cache store setCacheLock (getOrFetchCache retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+          return {
+            success: false,
+            value: null,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        // Lock still held by someone else - keep waiting
+      }
+
+    },
+
+
+    /********************************************************************
+    Check whether a cache entry exists without fetching its value.
+    Returns exists: true if the key is present and not expired, false
+    if absent or expired. Useful for marker keys and conditional logic
+    that only needs presence, not the payload.
+
+    @param {Object} instance  - Request instance for time and lifecycle
+    @param {String} namespace - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, exists, error }
+    *********************************************************************/
+    getCacheExists: async function (instance, namespace, cache_code) {
+
+      // Programmer errors (bad args) throw synchronously - never returned as envelope
+      Validators.validateIdentifiers(namespace, cache_code);
 
       // Delegate to the store and translate any driver failure
       try {
-        const result = await store.clear(instance, namespace, cache_code_prefix);
+        const result = await store.getCacheExists(instance, namespace, cache_code);
 
         if (result.success === false) {
-          Lib.Debug.debug('Cache store clear failed', { namespace: namespace, prefix: cache_code_prefix, error: result.error });
+          Lib.Debug.debug('Cache store getCacheExists failed', { namespace: namespace, cache_code: cache_code, error: result.error });
+          return {
+            success: false,
+            exists: false,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        return {
+          success: true,
+          exists: result.exists,
+          error: null
+        };
+      } catch (err) {
+        Lib.Debug.debug('Cache store getCacheExists threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        return {
+          success: false,
+          exists: false,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+    },
+
+
+    /********************************************************************
+    Selective mass invalidation. Remove all entries in namespace whose
+    cache_code starts with cache_code_prefix. The prefix is required -
+    use clearCache to wipe every entry in a namespace. Entries in other
+    namespaces are never touched.
+
+    @param {Object} instance          - Request instance for time and lifecycle
+    @param {String} namespace         - Logical group for the cache entries
+    @param {String} cache_code_prefix - Required prefix. Only entries whose cache_code starts with this are removed
+
+    @return {Promise<Object>} - { success, deleted_count, error }
+    *********************************************************************/
+    deleteCacheByPrefix: async function (instance, namespace, cache_code_prefix) {
+
+      // Programmer errors (bad args) throw synchronously - never returned as envelope
+      Validators.validateNamespace(namespace);
+      Validators.validateRequiredPrefix(cache_code_prefix);
+
+      // Delegate to the store and translate any driver failure
+      try {
+        const result = await store.deleteCacheByPrefix(instance, namespace, cache_code_prefix);
+
+        if (result.success === false) {
+          Lib.Debug.debug('Cache store deleteCacheByPrefix failed', { namespace: namespace, prefix: cache_code_prefix, error: result.error });
           return {
             success: false,
             deleted_count: 0,
@@ -274,7 +553,52 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           error: null
         };
       } catch (err) {
-        Lib.Debug.debug('Cache store clear threw', { namespace: namespace, prefix: cache_code_prefix, error: err && err.message });
+        Lib.Debug.debug('Cache store deleteCacheByPrefix threw', { namespace: namespace, prefix: cache_code_prefix, error: err && err.message });
+        return {
+          success: false,
+          deleted_count: 0,
+          error: ERRORS.CACHE_STORE_UNAVAILABLE
+        };
+      }
+
+    },
+
+
+    /********************************************************************
+    Wipe every entry in a namespace. Use deleteCacheByPrefix for
+    selective removal by prefix. Entries in other namespaces are never
+    touched.
+
+    @param {Object} instance  - Request instance for time and lifecycle
+    @param {String} namespace - Logical group for the cache entries
+
+    @return {Promise<Object>} - { success, deleted_count, error }
+    *********************************************************************/
+    clearCache: async function (instance, namespace) {
+
+      // Programmer errors (bad args) throw synchronously - never returned as envelope
+      Validators.validateNamespace(namespace);
+
+      // Delegate to the store and translate any driver failure
+      try {
+        const result = await store.clearCache(instance, namespace);
+
+        if (result.success === false) {
+          Lib.Debug.debug('Cache store clearCache failed', { namespace: namespace, error: result.error });
+          return {
+            success: false,
+            deleted_count: 0,
+            error: ERRORS.CACHE_STORE_UNAVAILABLE
+          };
+        }
+
+        return {
+          success: true,
+          deleted_count: result.deleted_count,
+          error: null
+        };
+      } catch (err) {
+        Lib.Debug.debug('Cache store clearCache threw', { namespace: namespace, error: err && err.message });
         return {
           success: false,
           deleted_count: 0,
@@ -297,20 +621,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
     @return {Promise<Object>} - { success, cache_codes, error }
     *********************************************************************/
-    list: async function (instance, namespace, cache_code_prefix) {
+    listCacheCodes: async function (instance, namespace, cache_code_prefix) {
 
       // Programmer errors (bad args) throw synchronously - never returned as envelope
-      if (!Lib.Utils.isString(namespace) || namespace === '') {
-        throw new TypeError('[helper-cache] namespace is required (non-empty string)');
-      }
+      Validators.validateNamespace(namespace);
       Validators.validateOptionalPrefix(cache_code_prefix);
 
       // Delegate to the store and translate any driver failure
       try {
-        const result = await store.list(instance, namespace, cache_code_prefix);
+        const result = await store.listCacheCodes(instance, namespace, cache_code_prefix);
 
         if (result.success === false) {
-          Lib.Debug.debug('Cache store list failed', { namespace: namespace, prefix: cache_code_prefix, error: result.error });
+          Lib.Debug.debug('Cache store listCacheCodes failed', { namespace: namespace, prefix: cache_code_prefix, error: result.error });
           return {
             success: false,
             cache_codes: [],
@@ -324,290 +646,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
           error: null
         };
       } catch (err) {
-        Lib.Debug.debug('Cache store list threw', { namespace: namespace, prefix: cache_code_prefix, error: err && err.message });
+        Lib.Debug.debug('Cache store listCacheCodes threw', { namespace: namespace, prefix: cache_code_prefix, error: err && err.message });
         return {
           success: false,
           cache_codes: [],
           error: ERRORS.CACHE_STORE_UNAVAILABLE
         };
-      }
-
-    },
-
-
-    /********************************************************************
-    Check whether a cache entry exists without fetching its value.
-    Returns exists: true if the key is present and not expired, false
-    if absent or expired. Useful for marker keys and conditional logic
-    that only needs presence, not the payload.
-
-    @param {Object} instance  - Request instance for time and lifecycle
-    @param {String} namespace - Logical group for the cache entry
-    @param {String} cache_code - Specific entry identifier within the namespace
-
-    @return {Promise<Object>} - { success, exists, error }
-    *********************************************************************/
-    has: async function (instance, namespace, cache_code) {
-
-      // Programmer errors (bad args) throw synchronously - never returned as envelope
-      Validators.validateIdentifiers(namespace, cache_code);
-
-      // Delegate to the store and translate any driver failure
-      try {
-        const result = await store.has(instance, namespace, cache_code);
-
-        if (result.success === false) {
-          Lib.Debug.debug('Cache store has failed', { namespace: namespace, cache_code: cache_code, error: result.error });
-          return {
-            success: false,
-            exists: false,
-            error: ERRORS.CACHE_STORE_UNAVAILABLE
-          };
-        }
-
-        return {
-          success: true,
-          exists: result.exists,
-          error: null
-        };
-      } catch (err) {
-        Lib.Debug.debug('Cache store has threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-        return {
-          success: false,
-          exists: false,
-          error: ERRORS.CACHE_STORE_UNAVAILABLE
-        };
-      }
-
-    },
-
-
-    /********************************************************************
-    Cache-aside with optional distributed stampede protection.
-
-    On a cache hit: returns the cached value. The fetcher is never called.
-    On a cache miss:
-      - If GET_OR_FETCH_LOCK_ENABLED is false: calls the fetcher, caches
-        the result, returns it. Same as manual get-then-set.
-      - If GET_OR_FETCH_LOCK_ENABLED is true: acquires a distributed lock
-        in the store, calls the fetcher, caches the result, releases the
-        lock, returns the value. Concurrent requests for the same key
-        wait and retry the cache read until the value appears or the lock
-        expires and they acquire it themselves.
-
-    The fetcher is a function the caller provides. If it returns a value
-    (including null), that value is cached and returned. If it throws,
-    nothing is cached, the lock is released immediately, and the error is
-    returned as CACHE_FETCHER_FAILED.
-
-    This is NOT cache-through. The cache module does not know about the
-    source database. The caller provides the fetcher; the cache module
-    calls it on a miss.
-
-    @param {Object} instance     - Request instance for time and lifecycle
-    @param {String} namespace    - Logical group for the cache entry
-    @param {String} cache_code   - Specific entry identifier within the namespace
-    @param {Number} ttl_seconds  - TTL for the cached value (seconds)
-    @param {Function} fetcher    - async function() -> returns any value or throws
-
-    @return {Promise<Object>} - { success, value, error }
-    *********************************************************************/
-    getOrFetch: async function (instance, namespace, cache_code, ttl_seconds, fetcher) {
-
-      // Programmer errors (bad args) throw synchronously - never returned as envelope
-      Validators.validateIdentifiers(namespace, cache_code);
-      Validators.validateOptionalTtl(ttl_seconds);
-      if (!Lib.Utils.isFunction(fetcher)) {
-        throw new TypeError('[helper-cache] getOrFetch: fetcher must be a function');
-      }
-
-      // 1. Check the cache first
-      try {
-        const cached = await store.get(instance, namespace, cache_code);
-
-        if (cached.success === false) {
-          Lib.Debug.debug('Cache store get (getOrFetch) failed', { namespace: namespace, cache_code: cache_code, error: cached.error });
-          return {
-            success: false,
-            value: null,
-            error: ERRORS.CACHE_STORE_UNAVAILABLE
-          };
-        }
-
-        // Cache hit - return immediately, fetcher is never called
-        if (cached.value !== null && !Lib.Utils.isNullOrUndefined(cached.value)) {
-          return {
-            success: true,
-            value: cached.value,
-            error: null
-          };
-        }
-      } catch (err) {
-        Lib.Debug.debug('Cache store get (getOrFetch) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-        return {
-          success: false,
-          value: null,
-          error: ERRORS.CACHE_STORE_UNAVAILABLE
-        };
-      }
-
-      // 2. Cache miss. If lock is disabled, just fetch and cache.
-      if (CONFIG.GET_OR_FETCH_LOCK_ENABLED === false) {
-        return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
-      }
-
-      // 3. Lock enabled - try to acquire
-      try {
-        const lock_result = await store.setLock(
-          instance, namespace, cache_code,
-          { timeout_ms: CONFIG.GET_OR_FETCH_LOCK_TIMEOUT_MS }
-        );
-
-        if (lock_result.success === false) {
-          Lib.Debug.debug('Cache store setLock (getOrFetch) failed', { namespace: namespace, cache_code: cache_code, error: lock_result.error });
-          return {
-            success: false,
-            value: null,
-            error: ERRORS.CACHE_STORE_UNAVAILABLE
-          };
-        }
-
-        // 3a. We won the lock - fetch, cache, release
-        if (lock_result.applied) {
-          try {
-            return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
-          } finally {
-
-            // Always release the lock, even if the fetcher threw
-            try {
-              await store.releaseLock(instance, namespace, cache_code);
-            } catch (err) {
-              // Lock release failure is not fatal - the lock has a TTL and will expire
-              Lib.Debug.debug('Cache store releaseLock (getOrFetch) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-            }
-
-          }
-        }
-      } catch (err) {
-        Lib.Debug.debug('Cache store setLock (getOrFetch) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-        return {
-          success: false,
-          value: null,
-          error: ERRORS.CACHE_STORE_UNAVAILABLE
-        };
-      }
-
-      // 3b. We did not win the lock - wait and retry the cache read.
-      //     No wait timeout: retry indefinitely until the value appears
-      //     or the lock expires and we acquire it ourselves.
-      while (true) {
-
-        // Sleep for retry interval + random jitter
-        const jitter = Math.random() * CONFIG.GET_OR_FETCH_LOCK_RETRY_JITTER_MS;
-        const sleep_ms = CONFIG.GET_OR_FETCH_LOCK_RETRY_MS + jitter;
-        await new Promise(function (resolve) {
-          setTimeout(resolve, sleep_ms);
-        });
-
-        // Check if the value has appeared in the cache
-        try {
-          const retry = await store.get(instance, namespace, cache_code);
-
-          if (retry.success === false) {
-            Lib.Debug.debug('Cache store get (getOrFetch retry) failed', { namespace: namespace, cache_code: cache_code, error: retry.error });
-            return {
-              success: false,
-              value: null,
-              error: ERRORS.CACHE_STORE_UNAVAILABLE
-            };
-          }
-
-          // Value appeared - return it
-          if (retry.value !== null && !Lib.Utils.isNullOrUndefined(retry.value)) {
-            return {
-              success: true,
-              value: retry.value,
-              error: null
-            };
-          }
-        } catch (err) {
-          Lib.Debug.debug('Cache store get (getOrFetch retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-          return {
-            success: false,
-            value: null,
-            error: ERRORS.CACHE_STORE_UNAVAILABLE
-          };
-        }
-
-        // Value not yet available. Try to acquire the lock ourselves.
-        // If the previous lock holder crashed or was too slow, the lock
-        // has expired (its TTL passed) and our setLock will succeed.
-        try {
-          const lock_result = await store.setLock(
-            instance, namespace, cache_code,
-            { timeout_ms: CONFIG.GET_OR_FETCH_LOCK_TIMEOUT_MS }
-          );
-
-          if (lock_result.success === false) {
-            Lib.Debug.debug('Cache store setLock (getOrFetch retry) failed', { namespace: namespace, cache_code: cache_code, error: lock_result.error });
-            return {
-              success: false,
-              value: null,
-              error: ERRORS.CACHE_STORE_UNAVAILABLE
-            };
-          }
-
-          if (lock_result.applied) {
-
-            // We now hold the lock - but the previous lock holder may have
-            // stored the value between our cache check and our lock acquisition.
-            // Double-check the cache before becoming the fetcher to avoid a
-            // redundant fetch (double-check locking pattern).
-            try {
-              const recheck = await store.get(instance, namespace, cache_code);
-
-              if (recheck.success === true && recheck.value !== null && !Lib.Utils.isNullOrUndefined(recheck.value)) {
-
-                // Value appeared - release the lock and return it
-                try {
-                  await store.releaseLock(instance, namespace, cache_code);
-                } catch (err) {
-                  Lib.Debug.debug('Cache store releaseLock (getOrFetch recheck) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-                }
-
-                return {
-                  success: true,
-                  value: recheck.value,
-                  error: null
-                };
-              }
-            } catch (err) {
-              Lib.Debug.debug('Cache store get (getOrFetch recheck) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-            }
-
-            // Still a miss - become the fetcher
-            try {
-              return await _Cache.fetchAndStore(instance, namespace, cache_code, ttl_seconds, fetcher);
-            } finally {
-
-              try {
-                await store.releaseLock(instance, namespace, cache_code);
-              } catch (err) {
-                Lib.Debug.debug('Cache store releaseLock (getOrFetch retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-              }
-
-            }
-          }
-        } catch (err) {
-          Lib.Debug.debug('Cache store setLock (getOrFetch retry) threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
-          return {
-            success: false,
-            value: null,
-            error: ERRORS.CACHE_STORE_UNAVAILABLE
-          };
-        }
-
-        // Lock still held by someone else - keep waiting
       }
 
     }
@@ -620,11 +664,50 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
   const _Cache = {
 
     /********************************************************************
+    Private helper: acquire a distributed lock in the store. Thin
+    wrapper that delegates to store.setCacheLock. Called by
+    getOrFetchCache when locking is enabled. Callers never call this
+    directly - it is not on the public interface.
+
+    @param {Object} instance     - Request instance for time and lifecycle
+    @param {String} namespace    - Logical group for the cache entry
+    @param {String} cache_code   - Specific entry identifier within the namespace
+    @param {Object} options      - { timeout_ms: Number }
+
+    @return {Promise<Object>} - { success, applied, error }
+    *********************************************************************/
+    setCacheLock: async function (instance, namespace, cache_code, options) {
+
+      return store.setCacheLock(instance, namespace, cache_code, options);
+
+    },
+
+
+    /********************************************************************
+    Private helper: release a distributed lock in the store. Thin
+    wrapper that delegates to store.releaseCacheLock. Called by
+    getOrFetchCache when locking is enabled. Callers never call this
+    directly - it is not on the public interface.
+
+    @param {Object} instance  - Request instance for time and lifecycle
+    @param {String} namespace - Logical group for the cache entry
+    @param {String} cache_code - Specific entry identifier within the namespace
+
+    @return {Promise<Object>} - { success, error }
+    *********************************************************************/
+    releaseCacheLock: async function (instance, namespace, cache_code) {
+
+      return store.releaseCacheLock(instance, namespace, cache_code);
+
+    },
+
+
+    /********************************************************************
     Private helper: call the fetcher, store the result, return it.
-    Used by getOrFetch in both the locked and unlocked paths.
+    Used by getOrFetchCache in both the locked and unlocked paths.
 
     If the fetcher throws, nothing is cached and CACHE_FETCHER_FAILED
-    is returned. The caller (getOrFetch) handles lock release in a
+    is returned. The caller (getOrFetchCache) handles lock release in a
     finally block.
 
     If the store set fails after a successful fetch, the value is still
@@ -648,7 +731,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       try {
         value = await fetcher();
       } catch (err) {
-        Lib.Debug.debug('Cache getOrFetch fetcher threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        Lib.Debug.debug('Cache getOrFetchCache fetcher threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
         return {
           success: false,
           value: null,
@@ -658,10 +741,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
 
       // Cache the result - store set failure is not fatal to the return
       try {
-        await store.set(instance, namespace, cache_code, value, ttl_seconds);
+        await store.setCache(instance, namespace, cache_code, value, ttl_seconds);
       } catch (err) {
         // Store failure during set is not fatal - we still have the value
-        Lib.Debug.debug('Cache getOrFetch store set threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
+        Lib.Debug.debug('Cache getOrFetchCache store setCache threw', { namespace: namespace, cache_code: cache_code, error: err && err.message });
       }
 
       // Return the value to the caller regardless of whether the store set succeeded

@@ -2,7 +2,7 @@
 
 ## Native TTL (Automatic)
 
-DynamoDB handles expiry natively via the TTL feature. When `set` is called with a `ttl_seconds` value, the adapter writes a Unix epoch timestamp (seconds) to the `EXPIRY_FIELD` attribute. DynamoDB's background sweeper deletes expired items automatically, typically within 48 hours.
+DynamoDB handles expiry natively via the TTL feature. When `setCache` is called with a `ttl_seconds` value, the adapter writes a Unix epoch timestamp (seconds) to the `EXPIRY_FIELD` attribute. DynamoDB's background sweeper deletes expired items automatically, typically within 48 hours.
 
 DynamoDB native TTL must be enabled on the `EXPIRY_FIELD` attribute at the table level. This is done out-of-band via IaC, AWS Console, or the `helper-nosql-aws-dynamodb-admin` module.
 
@@ -18,8 +18,8 @@ There is no `cleanupExpiredRecords` method in the store contract and no schedule
 
 | Operation | Scope | Complexity |
 |---|---|---|
-| `delete(instance, namespace, cache_code)` | One entry | O(1) |
-| `clear(instance, namespace, cache_code_prefix)` | All entries matching prefix in namespace | O(N) over partition |
-| `clear(instance, namespace)` | All entries in namespace | O(N) over partition |
+| `deleteCache(instance, namespace, cache_code)` | One entry | O(1) |
+| `deleteCacheByPrefix(instance, namespace, cache_code_prefix)` | All entries matching prefix in namespace | O(N) over partition |
+| `clearCache(instance, namespace)` | All entries in namespace | O(N) over partition |
 
-Prefer targeted `delete` calls for routine invalidation. Use `clear` for administrative mass invalidation (deployments, cache warmups, namespace resets).
+Prefer targeted `deleteCache` calls for routine invalidation. Use `deleteCacheByPrefix` and `clearCache` for administrative mass invalidation (deployments, cache warmups, namespace resets).

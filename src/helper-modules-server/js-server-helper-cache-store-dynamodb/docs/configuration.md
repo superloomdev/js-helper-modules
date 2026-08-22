@@ -56,13 +56,13 @@ Consumed only by `_test/loader.js` - never read by the adapter itself.
 | `AWS_ACCESS_KEY_ID` | `local` | AWS access key (use `local` for DynamoDB Local) |
 | `AWS_SECRET_ACCESS_KEY` | `local` | AWS secret key (use `local` for DynamoDB Local) |
 
-## clear and list Complexity
+## deleteCacheByPrefix, clearCache, and listCacheCodes Complexity
 
-`clear` and `list` use `Lib.DynamoDB.query` with `begins_with` on the sort key, scoped to one partition key (namespace). This is **O(N) over the partition**, not the entire table - a significant advantage over the flat-keyspace Valkey adapter where `SCAN` iterates every key in the database.
+`deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use `Lib.DynamoDB.query` with `begins_with` on the sort key, scoped to one partition key (namespace). This is **O(N) over the partition**, not the entire table - a significant advantage over the flat-keyspace Valkey adapter where `SCAN` iterates every key in the database.
 
 ### Recommendation
 
-Prefer targeted `delete` calls for routine invalidation. Use `clear` for administrative mass invalidation (deployments, cache warmups, namespace resets).
+Prefer targeted `deleteCache` calls for routine invalidation. Use `deleteCacheByPrefix` and `clearCache` for administrative mass invalidation (deployments, cache warmups, namespace resets).
 
 ## Testing Tier
 

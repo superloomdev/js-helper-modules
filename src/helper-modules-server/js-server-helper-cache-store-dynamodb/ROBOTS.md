@@ -38,20 +38,21 @@ All keys live on this adapter, not on the cache module. The cache module compose
 
 | Method | Signature | Returns |
 |---|---|---|
-| `get` | `(instance, namespace, cache_code)` | `{ success, value, error }` |
-| `set` | `(instance, namespace, cache_code, value, ttl_seconds)` | `{ success, error }` |
-| `delete` | `(instance, namespace, cache_code)` | `{ success, error }` |
-| `clear` | `(instance, namespace, cache_code_prefix?)` | `{ success, deleted_count, error }` |
-| `list` | `(instance, namespace, cache_code_prefix?)` | `{ success, cache_codes, error }` |
-| `has` | `(instance, namespace, cache_code)` | `{ success, exists, error }` |
-| `setLock` | `(instance, namespace, cache_code, options)` | `{ success, applied, error }` |
-| `releaseLock` | `(instance, namespace, cache_code)` | `{ success, error }` |
+| `getCache` | `(instance, namespace, cache_code)` | `{ success, value, error }` |
+| `setCache` | `(instance, namespace, cache_code, value, ttl_seconds)` | `{ success, error }` |
+| `deleteCache` | `(instance, namespace, cache_code)` | `{ success, error }` |
+| `deleteCacheByPrefix` | `(instance, namespace, cache_code_prefix)` | `{ success, deleted_count, error }` |
+| `clearCache` | `(instance, namespace)` | `{ success, deleted_count, error }` |
+| `listCacheCodes` | `(instance, namespace, cache_code_prefix?)` | `{ success, cache_codes, error }` |
+| `getCacheExists` | `(instance, namespace, cache_code)` | `{ success, exists, error }` |
+| `setCacheLock` | `(instance, namespace, cache_code, options)` | `{ success, applied, error }` |
+| `releaseCacheLock` | `(instance, namespace, cache_code)` | `{ success, error }` |
 
 All methods are async. `instance` is the per-request lifecycle object from `Lib.Instance.initialize()`.
 
-This adapter owns serialization: `set` JSON-stringifies the value before storing it as a string attribute (VALUE_FIELD); `get` JSON-parses the stored string before returning it to the cache module. The cache module passes raw JavaScript objects.
+This adapter owns serialization: `setCache` JSON-stringifies the value before storing it as a string attribute (VALUE_FIELD); `getCache` JSON-parses the stored string before returning it to the cache module. The cache module passes raw JavaScript objects.
 
-`setLock` uses `Lib.DynamoDB.writeRecordIfNotExists` (atomic `PutItem` with `attribute_not_exists` condition) with an expiry timestamp on EXPIRY_FIELD. Lock items use a distinct sort-key prefix. When the atomic write returns `applied: false`, the adapter checks whether the existing lock has expired (DynamoDB TTL sweeper may lag up to 48 hours). If it has, the stale lock is deleted and the write is retried. `releaseLock` uses `Lib.DynamoDB.deleteRecord` and is idempotent.
+`setCacheLock` uses `Lib.DynamoDB.writeRecordIfNotExists` (atomic `PutItem` with `attribute_not_exists` condition) with an expiry timestamp on EXPIRY_FIELD. Lock items use a distinct sort-key prefix. When the atomic write returns `applied: false`, the adapter checks whether the existing lock has expired (DynamoDB TTL sweeper may lag up to 48 hours). If it has, the stale lock is deleted and the write is retried. `releaseCacheLock` uses `Lib.DynamoDB.deleteRecord` and is idempotent.
 
 ## Key Composition
 
@@ -62,21 +63,21 @@ sort key      = cache_code
 
 Example: namespace `ProductCatalog`, cache_code `electronics:laptop-x1`
 
-DynamoDB has a native composite key, so no flattening or separator is needed. `clear` and `list` use `Query` with `begins_with` on the sort key, scoped to one partition - O(N) over the partition, not the entire table.
+DynamoDB has a native composite key, so no flattening or separator is needed. `deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use `Query` with `begins_with` on the sort key, scoped to one partition - O(N) over the partition, not the entire table.
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
 1. **Never call the adapter directly from application code.** Always go through the parent Cache module.
 
-2. **`get` returns `value: null` on a miss.** Not an error. Also returns null when the item exists but has expired (DynamoDB TTL sweeper may lag).
+2. **`getCache` returns `value: null` on a miss.** Not an error. Also returns null when the item exists but has expired (DynamoDB TTL sweeper may lag).
 
-3. **`set` with no `ttl_seconds` means no expiry.** The item persists until explicitly deleted.
+3. **`setCache` with no `ttl_seconds` means no expiry.** The item persists until explicitly deleted.
 
-4. **`delete` is idempotent.** A missing item is treated as success.
+4. **`deleteCache` is idempotent.** A missing item is treated as success.
 
-5. **`clear` short-circuits on zero matches.** No `batchDeleteRecords` call is made when the query returns an empty item list.
+5. **`deleteCacheByPrefix` and `clearCache` short-circuit on zero matches.** No `batchDeleteRecords` call is made when the query returns an empty item list.
 
-6. **`clear` and `list` are partition-scoped.** They use `Query` with `begins_with` on the sort key, scoped to one partition key (namespace). This is O(N) over the partition, not the entire table.
+6. **`deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` are partition-scoped.** They use `Query` with `begins_with` on the sort key, scoped to one partition key (namespace). This is O(N) over the partition, not the entire table.
 
 7. **The driver slot is named `DynamoDB`, never `AWS` or `Dynamo`.** The capability name, not the vendor name.
 

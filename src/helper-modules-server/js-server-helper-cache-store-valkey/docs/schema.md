@@ -20,16 +20,16 @@ The colon inside `electronics:laptop-x1` is part of the cache_code, not a separa
 
 ## Value Encoding
 
-The cache module JSON-serializes every value before handing it to the store. This adapter passes the string straight through to Valkey as-is. No additional encoding or transformation happens at the adapter level.
+This adapter JSON-serializes every value before handing it to Valkey. The cache module passes raw JavaScript objects; the adapter owns serialization. No additional encoding or transformation happens beyond JSON.stringify/parse.
 
 ## TTL
 
-TTL is native to Valkey. `set` with a `ttl_seconds` value issues `SET key value EX ttl_seconds` under the hood (via `Lib.KV.set`). Valkey deletes the key automatically when the TTL expires - no application-side sweep is needed.
+TTL is native to Valkey. `setCache` with a `ttl_seconds` value issues `SET key value EX ttl_seconds` under the hood (via `Lib.KV.set`). Valkey deletes the key automatically when the TTL expires - no application-side sweep is needed.
 
 When `ttl_seconds` is omitted, the key has no expiry and persists until explicitly deleted.
 
 ## No Secondary Index
 
-Valkey has no partition key or sort key concept. The only index is the keyspace itself. `clear` and `list` use `SCAN MATCH prefix*`, which iterates every key in the database and filters after retrieval. See [Configuration](configuration.md#clear-and-list-complexity) for the O(N) cost analysis.
+Valkey has no partition key or sort key concept. The only index is the keyspace itself. `deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use `SCAN MATCH prefix*`, which iterates every key in the database and filters after retrieval. See [Configuration](configuration.md#deletecachebyprefix-clearcache-and-listcachecodes-complexity) for the O(N) cost analysis.
 
-A SET-based secondary index (tracking cache_codes per namespace via `SADD`) was considered and rejected: it would add a `SADD` to every `set` call, need its own cleanup on `delete`, and double the write cost. O(N) `clear` is the accepted trade.
+A SET-based secondary index (tracking cache_codes per namespace via `SADD`) was considered and rejected: it would add a `SADD` to every `setCache` call, need its own cleanup on `deleteCache`, and double the write cost. O(N) `deleteCacheByPrefix`/`clearCache` is the accepted trade.

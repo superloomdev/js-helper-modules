@@ -1,9 +1,10 @@
 // Info: Config and store contract validators for helper-cache.
 // Called once at construction time from the loader: validateConfig (CONFIG
 // shape) and validateStoreContract (instantiated store method checks).
-// Called per-call from the public methods: validateIdentifiers and
-// validateTtl. Throws on the first violation so misconfiguration and
-// programmer errors surface immediately.
+// Called per-call from the public methods: validateIdentifiers,
+// validateNamespace, validateRequiredPrefix, and validateTtl. Throws on
+// the first violation so misconfiguration and programmer errors surface
+// immediately.
 //
 // Singleton: Lib is injected once by the loader. Node.js require
 // cache guarantees the same reference on every subsequent require.
@@ -83,7 +84,7 @@ const Validators = {
 
 
   /********************************************************************
-  Validate that an instantiated store exposes the required 6-method
+  Validate that an instantiated store exposes the required 7-method
   contract. Throws at startup when any method is missing so runtime
   requests never hit a partially-implemented store.
 
@@ -94,12 +95,13 @@ const Validators = {
   validateStoreContract: function (store) {
 
     const required = [
-      'get',
-      'set',
-      'delete',
-      'clear',
-      'list',
-      'has'
+      'getCache',
+      'setCache',
+      'deleteCache',
+      'deleteCacheByPrefix',
+      'clearCache',
+      'listCacheCodes',
+      'getCacheExists'
     ];
 
     required.forEach(function (name) {
@@ -118,7 +120,7 @@ const Validators = {
   /********************************************************************
   Validate that the store supports distributed locking. Called only
   when GET_OR_FETCH_LOCK_ENABLED is true. Throws at startup when
-  setLock or releaseLock is missing.
+  setCacheLock or releaseCacheLock is missing.
 
   @param {Object} store - Instantiated store object
 
@@ -127,8 +129,8 @@ const Validators = {
   validateLockSupport: function (store) {
 
     const lockRequired = [
-      'setLock',
-      'releaseLock'
+      'setCacheLock',
+      'releaseCacheLock'
     ];
 
     lockRequired.forEach(function (name) {
@@ -161,6 +163,42 @@ const Validators = {
 
     if (!Lib.Utils.isString(cache_code) || cache_code === '') {
       throw new TypeError('[helper-cache] cache_code is required (non-empty string)');
+    }
+
+  },
+
+
+  /********************************************************************
+  Validate a namespace argument. Throws TypeError when missing or not
+  a non-empty string. Used by deleteCacheByPrefix, clearCache, and
+  listCacheCodes which take namespace without a cache_code.
+
+  @param {String} namespace
+
+  @return {void}
+  *********************************************************************/
+  validateNamespace: function (namespace) {
+
+    if (!Lib.Utils.isString(namespace) || namespace === '') {
+      throw new TypeError('[helper-cache] namespace is required (non-empty string)');
+    }
+
+  },
+
+
+  /********************************************************************
+  Validate a required cache_code_prefix argument. Throws TypeError
+  when missing, not a string, or empty. Used by deleteCacheByPrefix
+  where the prefix is mandatory.
+
+  @param {String} cache_code_prefix
+
+  @return {void}
+  *********************************************************************/
+  validateRequiredPrefix: function (cache_code_prefix) {
+
+    if (!Lib.Utils.isString(cache_code_prefix) || cache_code_prefix === '') {
+      throw new TypeError('[helper-cache] cache_code_prefix is required (non-empty string)');
     }
 
   },

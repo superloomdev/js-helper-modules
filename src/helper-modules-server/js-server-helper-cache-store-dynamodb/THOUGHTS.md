@@ -6,9 +6,9 @@
 
 The Valkey adapter uses a flat key (`KEY_PREFIX + namespace + KEY_SEPARATOR + cache_code`) because Valkey has a flat keyspace. DynamoDB has a native composite primary key (partition + sort), so the adapter maps `namespace` to the partition key and `cache_code` to the sort key directly. No flattening, no separator, no prefix stripping. A `cache_code` containing any character round-trips correctly.
 
-### Partition-Scoped clear and list
+### Partition-Scoped deleteCacheByPrefix, clearCache, and listCacheCodes
 
-The composite key design gives a significant advantage for `clear` and `list`: they use `Query` with `begins_with` on the sort key, scoped to one partition key (namespace). This is O(N) over the partition, not O(N) over the entire table. The Valkey adapter's `SCAN` is O(N) over every key in the database.
+The composite key design gives a significant advantage for `deleteCacheByPrefix`, `clearCache`, and `listCacheCodes`: they use `Query` with `begins_with` on the sort key, scoped to one partition key (namespace). This is O(N) over the partition, not O(N) over the entire table. The Valkey adapter's `SCAN` is O(N) over every key in the database.
 
 ### TTL: Native + Application-Side Check
 
@@ -22,7 +22,7 @@ Lock items share the same partition key (namespace) as cache entries but use a d
 
 This is preferable to a separate table because:
 - No additional table provisioning
-- `clear` on a namespace can optionally include lock items by adjusting the prefix
+- `clearCache` on a namespace can optionally include lock items by adjusting the prefix
 - Lock items benefit from the same TTL configuration
 
 ### Stale Lock Reclamation
@@ -35,16 +35,16 @@ An alternative would be a conditional `PutItem` with `ConditionExpression: attri
 
 ### Serialization
 
-DynamoDB's Document Client can store native JavaScript objects as nested attributes, but the adapter stores the value as a JSON string in a single `VALUE_FIELD` attribute. This matches the Valkey adapter's approach and keeps the value opaque to the database - no attribute name conflicts, no reserved word issues, no type marshalling surprises. The adapter owns `JSON.stringify` on `set` and `JSON.parse` on `get`.
+DynamoDB's Document Client can store native JavaScript objects as nested attributes, but the adapter stores the value as a JSON string in a single `VALUE_FIELD` attribute. This matches the Valkey adapter's approach and keeps the value opaque to the database - no attribute name conflicts, no reserved word issues, no type marshalling surprises. The adapter owns `JSON.stringify` on `setCache` and `JSON.parse` on `getCache`.
 
-### has Uses getRecord
+### getCacheExists Uses getRecord
 
 DynamoDB does not have a native "exists" check without fetching the item. The adapter uses `getRecord` and checks for item presence and expiry. The value is not deserialized. A projection expression could reduce data transfer, but the driver's `getRecord` does not support projections, and the full item is typically small (one JSON string + one timestamp).
 
 ### Strongly Consistent Reads
 
-DynamoDB `GetItem` defaults to eventually consistent reads. The adapter passes `consistentRead: true` on `get`, `has`, and `setLock`'s stale-lock check. This is required for the cache's double-check locking pattern in `getOrFetch`: when a retrying caller acquires the lock after the previous holder released it, the recheck read must see the value the previous holder just stored. An eventually consistent read might return a stale miss, causing a redundant fetch and breaking the "fetcher called exactly once" stampede protection guarantee.
+DynamoDB `GetItem` defaults to eventually consistent reads. The adapter passes `consistentRead: true` on `getCache`, `getCacheExists`, and `setCacheLock`'s stale-lock check. This is required for the cache's double-check locking pattern in `getOrFetchCache`: when a retrying caller acquires the lock after the previous holder released it, the recheck read must see the value the previous holder just stored. An eventually consistent read might return a stale miss, causing a redundant fetch and breaking the "fetcher called exactly once" stampede protection guarantee.
 
-### clear and list Without Prefix
+### clearCache and listCacheCodes Without Prefix
 
 When `cache_code_prefix` is omitted, the adapter queries by partition key only (no `begins_with` condition on the sort key). DynamoDB rejects empty string values for key attributes in `begins_with`, so the sort key condition is omitted entirely rather than passing an empty string. This returns all items in the partition, which is the intended behavior.

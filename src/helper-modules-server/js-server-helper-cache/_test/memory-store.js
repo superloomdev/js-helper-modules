@@ -1,5 +1,5 @@
 // Info: In-process Map-backed store fixture for helper-cache unit tests.
-// Implements the 8-method store contract so cache.js can be tested
+// Implements the 9-method store contract so cache.js can be tested
 // without any Docker container or database driver. All data is stored
 // in a plain Map keyed by "namespace\u001Fcache_code".
 //
@@ -7,14 +7,15 @@
 // a performance store and should never be used in production.
 //
 // Store contract (identical shape across all real stores):
-//   get(instance, namespace, cache_code)                     -> { success, value, error }
-//   set(instance, namespace, cache_code, value, ttl_seconds) -> { success, error }
-//   delete(instance, namespace, cache_code)                  -> { success, error }
-//   clear(instance, namespace, cache_code_prefix?)           -> { success, deleted_count, error }
-//   list(instance, namespace, cache_code_prefix?)            -> { success, cache_codes, error }
-//   has(instance, namespace, cache_code)                     -> { success, exists, error }
-//   setLock(instance, namespace, cache_code, options)        -> { success, applied, error }
-//   releaseLock(instance, namespace, cache_code)             -> { success, error }
+//   getCache(instance, namespace, cache_code)                     -> { success, value, error }
+//   setCache(instance, namespace, cache_code, value, ttl_seconds) -> { success, error }
+//   deleteCache(instance, namespace, cache_code)                  -> { success, error }
+//   deleteCacheByPrefix(instance, namespace, cache_code_prefix)   -> { success, deleted_count, error }
+//   clearCache(instance, namespace)                               -> { success, deleted_count, error }
+//   listCacheCodes(instance, namespace, cache_code_prefix?)       -> { success, cache_codes, error }
+//   getCacheExists(instance, namespace, cache_code)               -> { success, exists, error }
+//   setCacheLock(instance, namespace, cache_code, options)        -> { success, applied, error }
+//   releaseCacheLock(instance, namespace, cache_code)             -> { success, error }
 //
 // Expiry is driven off instance.time (not wall clock) so the TTL test is
 // deterministic: advance instance.time instead of sleeping.
@@ -41,7 +42,7 @@ function compositeKey (namespace, cache_code) {
 
 /********************************************************************
 Create a new in-process memory store. Returns an object matching the
-5-method store contract consumed by cache.js. Each call to this
+9-method store contract consumed by cache.js. Each call to this
 function produces an independent Map, so tests can run in isolation.
 
 @return {Object} - Store interface (plus _records for white-box assertions)
@@ -58,7 +59,7 @@ module.exports = function createMemoryStore () {
     expired. Expiry is checked against instance.time so the TTL
     test is deterministic.
     ******************************************************************/
-    get: async function (instance, namespace, cache_code) {
+    getCache: async function (instance, namespace, cache_code) {
 
       const stored = _map.get(compositeKey(namespace, cache_code));
 
@@ -93,7 +94,7 @@ module.exports = function createMemoryStore () {
     Upsert - overwrites any existing entry at the composite key.
     ttl_seconds is optional; when absent the entry has no expiry.
     ******************************************************************/
-    set: async function (instance, namespace, cache_code, value, ttl_seconds) { // eslint-disable-line no-unused-vars
+    setCache: async function (instance, namespace, cache_code, value, ttl_seconds) { // eslint-disable-line no-unused-vars
 
       const entry = {
         value: value,
@@ -117,7 +118,7 @@ module.exports = function createMemoryStore () {
     /******************************************************************
     Idempotent delete (missing key reports success).
     ******************************************************************/
-    delete: async function (instance, namespace, cache_code) { // eslint-disable-line no-unused-vars
+    deleteCache: async function (instance, namespace, cache_code) { // eslint-disable-line no-unused-vars
 
       _map.delete(compositeKey(namespace, cache_code));
 
@@ -131,13 +132,37 @@ module.exports = function createMemoryStore () {
 
     /******************************************************************
     Remove all entries in namespace whose cache_code starts with
-    cache_code_prefix. When cache_code_prefix is omitted, removes
-    every entry in the namespace. Returns the count of deleted
+    cache_code_prefix. The prefix is required. Returns the count of
+    deleted entries.
+    ******************************************************************/
+    deleteCacheByPrefix: async function (instance, namespace, cache_code_prefix) { // eslint-disable-line no-unused-vars
+
+      const prefix = namespace + '\u001F' + cache_code_prefix;
+      let count = 0;
+
+      for (const key of Array.from(_map.keys())) {
+        if (key.startsWith(prefix)) {
+          _map.delete(key);
+          count = count + 1;
+        }
+      }
+
+      return {
+        success: true,
+        deleted_count: count,
+        error: null
+      };
+
+    },
+
+
+    /******************************************************************
+    Wipe every entry in the namespace. Returns the count of deleted
     entries.
     ******************************************************************/
-    clear: async function (instance, namespace, cache_code_prefix) { // eslint-disable-line no-unused-vars
+    clearCache: async function (instance, namespace) { // eslint-disable-line no-unused-vars
 
-      const prefix = namespace + '\u001F' + (cache_code_prefix || '');
+      const prefix = namespace + '\u001F';
       let count = 0;
 
       for (const key of Array.from(_map.keys())) {
@@ -161,7 +186,7 @@ module.exports = function createMemoryStore () {
     cache_code_prefix. When omitted, lists every cache_code in the
     namespace. Returns cache_codes without the namespace prefix.
     ******************************************************************/
-    list: async function (instance, namespace, cache_code_prefix) { // eslint-disable-line no-unused-vars
+    listCacheCodes: async function (instance, namespace, cache_code_prefix) { // eslint-disable-line no-unused-vars
 
       const prefix = namespace + '\u001F' + (cache_code_prefix || '');
       const cache_codes = [];
@@ -186,7 +211,7 @@ module.exports = function createMemoryStore () {
     Check whether an entry exists (present and not expired). Does
     not return the value. Expiry is checked against instance.time.
     ******************************************************************/
-    has: async function (instance, namespace, cache_code) {
+    getCacheExists: async function (instance, namespace, cache_code) {
 
       const stored = _map.get(compositeKey(namespace, cache_code));
 
@@ -226,7 +251,7 @@ module.exports = function createMemoryStore () {
     Returns applied: true if this caller acquired the lock, false if
     another caller already holds it (and it has not expired).
     ******************************************************************/
-    setLock: async function (instance, namespace, cache_code, options) {
+    setCacheLock: async function (instance, namespace, cache_code, options) { // eslint-disable-line no-unused-vars
 
       const lockKey = compositeKey(namespace, cache_code);
       const now = Date.now();
@@ -263,7 +288,7 @@ module.exports = function createMemoryStore () {
     Release a distributed lock. Idempotent: succeeds even if the
     lock was already released or expired.
     ******************************************************************/
-    releaseLock: async function (instance, namespace, cache_code) { // eslint-disable-line no-unused-vars
+    releaseCacheLock: async function (instance, namespace, cache_code) { // eslint-disable-line no-unused-vars
 
       _locks.delete(compositeKey(namespace, cache_code));
 

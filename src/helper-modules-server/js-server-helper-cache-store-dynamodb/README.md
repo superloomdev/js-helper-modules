@@ -17,11 +17,11 @@ The adapter cannot stand alone. It is always loaded together with the Cache pare
 
 - **Pre-tested at every release.** A full store-contract and Cache-lifecycle integration suite run against a Dockerized DynamoDB Local instance in CI on every push.
 
-- **Partition-scoped clear and list.** Unlike the flat-keyspace Valkey adapter, `clear` and `list` are scoped to one partition key (namespace), not the entire table. This is O(N) over the partition, not O(N) over all keys.
+- **Partition-scoped deleteCacheByPrefix, clearCache, and listCacheCodes.** Unlike the flat-keyspace Valkey adapter, these operations are scoped to one partition key (namespace), not the entire table. This is O(N) over the partition, not O(N) over all keys.
 
 - **Native TTL.** Expired cache entries are deleted automatically by DynamoDB's TTL sweeper. The adapter also checks expiry on read so stale items are treated as misses before the sweeper runs.
 
-- **Atomic distributed locks.** `setLock` uses `PutItem` with `attribute_not_exists` condition for an atomic create-only write. No check-then-set race.
+- **Atomic distributed locks.** `setCacheLock` uses `PutItem` with `attribute_not_exists` condition for an atomic create-only write. No check-then-set race.
 
 ## Aligned with Superloom Philosophy
 
