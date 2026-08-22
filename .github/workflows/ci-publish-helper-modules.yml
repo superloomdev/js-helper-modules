@@ -92,6 +92,8 @@
 #   54. test-cache → publish-cache
 #   55. test-cache-store-valkey → publish-cache-store-valkey (needs publish-kv-valkey + publish-cache)
 #   56. test-cache-store-dynamodb → publish-cache-store-dynamodb (needs publish-nosql-aws-dynamodb + publish-cache)
+#   57. test-cache-store-mongodb → publish-cache-store-mongodb (needs publish-nosql-mongodb + publish-cache)
+#   58. test-cache-store-aws-elasticache → publish-cache-store-aws-elasticache (needs publish-kv-aws-elasticache + publish-cache)
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -4778,6 +4780,134 @@ jobs:
         run: npm install -g npm@10
       - name: Publish
         working-directory: src/helper-modules-server/js-server-helper-cache-store-dynamodb
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+  # ###########################################################################
+  #   MODULE 57: js-server-helper-cache-store-mongodb
+  #   (needs nosql-mongodb + cache published; MongoDB via Docker)
+  # ###########################################################################
+
+  test-cache-store-mongodb:
+    needs: [detect, publish-nosql-mongodb, publish-cache]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-cache-store-mongodb')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-mongodb
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-cache-store-mongodb:
+    needs: [detect, test-cache-store-mongodb]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-cache-store-mongodb'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-cache-store-mongodb')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-mongodb
+        run: |
+          npm install
+          PKG_NAME=$(jq -r '.name' package.json)
+          PKG_VERSION=$(jq -r '.version' package.json)
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
+            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
+          else
+            echo "Publishing $PKG_NAME@$PKG_VERSION..."
+            npm publish
+          fi
+
+  # ###########################################################################
+  #   MODULE 58: js-server-helper-cache-store-aws-elasticache
+  #   (needs kv-aws-elasticache + cache published; Valkey via Docker)
+  # ###########################################################################
+
+  test-cache-store-aws-elasticache:
+    needs: [detect, publish-kv-aws-elasticache, publish-cache]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-cache-store-aws-elasticache')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-aws-elasticache
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-cache-store-aws-elasticache:
+    needs: [detect, test-cache-store-aws-elasticache]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-cache-store-aws-elasticache'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-cache-store-aws-elasticache')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - name: Publish
+        working-directory: src/helper-modules-server/js-server-helper-cache-store-aws-elasticache
         run: |
           npm install
           PKG_NAME=$(jq -r '.name' package.json)
