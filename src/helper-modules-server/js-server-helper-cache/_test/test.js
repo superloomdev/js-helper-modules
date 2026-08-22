@@ -993,6 +993,36 @@ describe('getOrFetchCache - locked (stampede protection)', function () {
     assert.strictEqual(fetcherCalled, true);
   });
 
+
+  it('returns CACHE_LOCK_WAIT_TIMEOUT when lock holder never releases', async function () {
+    const store = createMemoryStore();
+    const cache = buildCache(store, {
+      GET_OR_FETCH_LOCK_ENABLED: true,
+      GET_OR_FETCH_LOCK_TIMEOUT_MS: 10000,
+      GET_OR_FETCH_LOCK_RETRY_MS: 10,
+      GET_OR_FETCH_LOCK_RETRY_JITTER_MS: 0,
+      GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS: 100
+    });
+    const instance = createInstance();
+
+    // Manually acquire a lock with a long TTL so it never expires during the test
+    await store.setCacheLock(instance, 'NS', 'code-1', { timeout_ms: 60000 });
+
+    let fetcherCalled = false;
+    const result = await cache.getOrFetchCache(
+      instance, 'NS', 'code-1', 3600,
+      async function () { fetcherCalled = true; return 'should-not-reach'; }
+    );
+
+    // Wait timeout exceeded - return failure
+    assert.strictEqual(result.success, false);
+    assert.strictEqual(result.value, null);
+    assert.strictEqual(result.error.type, 'CACHE_LOCK_WAIT_TIMEOUT');
+
+    // Fetcher should never be called - we never acquired the lock
+    assert.strictEqual(fetcherCalled, false);
+  });
+
 });
 
 
@@ -1044,6 +1074,15 @@ describe('Lock config validation', function () {
     assert.doesNotThrow(function () {
       buildCache(store, { GET_OR_FETCH_LOCK_RETRY_JITTER_MS: 0 });
     });
+  });
+
+
+  it('throws TypeError when GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS is not positive', function () {
+    const store = createMemoryStore();
+
+    assert.throws(function () {
+      buildCache(store, { GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS: 0 });
+    }, TypeError);
   });
 
 });

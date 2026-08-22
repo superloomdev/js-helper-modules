@@ -13,7 +13,7 @@ Every exported function on the public interface, with parameters, return shape, 
 - [deleteCacheByPrefix](#deletecachebyprefixinstance-namespace-cache_code_prefix)
 - [clearCache](#clearcacheinstance-namespace)
 - [listCacheCodes](#listcachecodesinstance-namespace-cache_code_prefix)
-- [getOrFetchCache](#getorfetchcacheinstance-namespace-cache_code-ttl_seconds-fetcher)
+- [getOrFetchCache](#getorfetchcacheinstance-namespace-cache_code-ttl_seconds-fetcher-1)
 - [Error Catalog](#error-catalog)
 
 ---
@@ -187,11 +187,11 @@ List `cache_code`s in `namespace` whose `cache_code` starts with `cache_code_pre
 
 ---
 
-## `getOrFetchCache(instance, namespace, cache_code, ttl_seconds, fetcher)`
+## `getOrFetchCache(instance, namespace, cache_code, ttl_seconds?, fetcher)`
 
 Cache-aside with optional distributed stampede protection. On a cache hit, returns the cached value without calling the fetcher. On a miss, calls the fetcher, caches the result, and returns it.
 
-When `GET_OR_FETCH_LOCK_ENABLED` is `true`, acquires a distributed lock in the store before fetching, so concurrent requests for the same key wait rather than all calling the fetcher. Exactly one concurrent caller fetches; the rest wait and retry the cache read until the value appears or the lock expires and they acquire it themselves.
+When `GET_OR_FETCH_LOCK_ENABLED` is `true`, acquires a distributed lock in the store before fetching, so concurrent requests for the same key wait rather than all calling the fetcher. Exactly one concurrent caller fetches; the rest wait and retry the cache read until the value appears, the lock expires and they acquire it themselves, or the wait timeout (`GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS`) is exceeded.
 
 This is NOT cache-through. The cache module does not know about the source database. The caller provides the fetcher function.
 
@@ -200,7 +200,7 @@ This is NOT cache-through. The cache module does not know about the source datab
 | `instance` | `object` | Yes | Request instance for time and lifecycle |
 | `namespace` | `string` | Yes | Logical group for the cache entry |
 | `cache_code` | `string` | Yes | Specific entry identifier within the namespace |
-| `ttl_seconds` | `number` | Yes | TTL for the cached value (seconds) |
+| `ttl_seconds` | `number` | No | TTL for the cached value (seconds). Omit for no expiry |
 | `fetcher` | `function` | Yes | Async function called on a miss. Returns any value or throws |
 
 **Return shape.**
@@ -211,6 +211,9 @@ This is NOT cache-through. The cache module does not know about the source datab
 
 // Fetcher threw
 { success: false, value: null, error: { type: 'CACHE_FETCHER_FAILED', message: '...' } }
+
+// Lock wait timed out
+{ success: false, value: null, error: { type: 'CACHE_LOCK_WAIT_TIMEOUT', message: '...' } }
 ```
 
 **Lifecycle.**
@@ -218,7 +221,7 @@ This is NOT cache-through. The cache module does not know about the source datab
 1. Validate identifiers, TTL, and fetcher (throws `TypeError` on programmer error).
 2. Check the cache. On a hit, return immediately. The fetcher is never called.
 3. On a miss with lock disabled: call the fetcher, cache the result, return it.
-4. On a miss with lock enabled: acquire the lock via `store.setCacheLock`. If acquired, call the fetcher, cache, release the lock, return. If not acquired, wait and retry the cache read until the value appears or the lock expires and this caller acquires it.
+4. On a miss with lock enabled: acquire the lock via `store.setCacheLock`. If acquired, call the fetcher, cache, release the lock, return. If not acquired, wait and retry the cache read until the value appears, the lock expires and this caller acquires it, or `GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS` is exceeded (returns `CACHE_LOCK_WAIT_TIMEOUT`).
 5. If the fetcher throws, nothing is cached, the lock is released immediately, and `CACHE_FETCHER_FAILED` is returned.
 
 ---
@@ -231,6 +234,7 @@ All operational errors live in `cache.errors.js`. Every failure path returns a f
 |---|---|
 | `CACHE_STORE_UNAVAILABLE` | Any store adapter call returned `success: false` or threw |
 | `CACHE_FETCHER_FAILED` | The fetcher function passed to `getOrFetchCache` threw an error |
+| `CACHE_LOCK_WAIT_TIMEOUT` | `getOrFetchCache` waited for a lock holder but the value never appeared within `GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS` |
 
 Error shape is frozen at module load:
 

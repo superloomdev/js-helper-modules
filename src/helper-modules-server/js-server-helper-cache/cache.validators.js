@@ -2,9 +2,9 @@
 // Called once at construction time from the loader: validateConfig (CONFIG
 // shape) and validateStoreContract (instantiated store method checks).
 // Called per-call from the public methods: validateIdentifiers,
-// validateNamespace, validateRequiredPrefix, and validateTtl. Throws on
-// the first violation so misconfiguration and programmer errors surface
-// immediately.
+// validateNamespace, validateRequiredPrefix, validateOptionalPrefix,
+// validateOptionalTtl, and validateLockSupport. Throws on the first
+// violation so misconfiguration and programmer errors surface immediately.
 //
 // Singleton: Lib is injected once by the loader. Node.js require
 // cache guarantees the same reference on every subsequent require.
@@ -78,6 +78,11 @@ const Validators = {
     // GET_OR_FETCH_LOCK_RETRY_JITTER_MS must be a non-negative Number (zero is valid)
     if (!Lib.Utils.isNumber(config.GET_OR_FETCH_LOCK_RETRY_JITTER_MS) || config.GET_OR_FETCH_LOCK_RETRY_JITTER_MS < 0) {
       throw new TypeError('[helper-cache] GET_OR_FETCH_LOCK_RETRY_JITTER_MS must be a non-negative Number');
+    }
+
+    // GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS must be a positive Number
+    if (!Lib.Utils.isNumber(config.GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS) || config.GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS <= 0) {
+      throw new TypeError('[helper-cache] GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS must be a positive Number');
     }
 
   },
@@ -157,9 +162,7 @@ const Validators = {
   *********************************************************************/
   validateIdentifiers: function (namespace, cache_code) {
 
-    if (!Lib.Utils.isString(namespace) || namespace === '') {
-      throw new TypeError('[helper-cache] namespace is required (non-empty string)');
-    }
+    Validators.validateNamespace(namespace);
 
     if (!Lib.Utils.isString(cache_code) || cache_code === '') {
       throw new TypeError('[helper-cache] cache_code is required (non-empty string)');

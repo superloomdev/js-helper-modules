@@ -80,15 +80,15 @@ List cache_codes in `namespace` whose `cache_code` starts with `cache_code_prefi
 
 - **Returns**: `{ success, cache_codes, error }`.
 
-### `getOrFetchCache(instance, namespace, cache_code, ttl_seconds, fetcher)` *(async)*
+### `getOrFetchCache(instance, namespace, cache_code, ttl_seconds?, fetcher)` *(async)*
 
-Cache-aside with optional distributed stampede protection. On a cache hit, returns the cached value without calling the fetcher. On a miss, calls the fetcher, caches the result, and returns it. When `GET_OR_FETCH_LOCK_ENABLED` is true, acquires a distributed lock in the store before fetching, so concurrent requests for the same key wait rather than all calling the fetcher.
+Cache-aside with optional distributed stampede protection. On a cache hit, returns the cached value without calling the fetcher. On a miss, calls the fetcher, caches the result, and returns it. When `GET_OR_FETCH_LOCK_ENABLED` is true, acquires a distributed lock in the store before fetching, so concurrent requests for the same key wait rather than all calling the fetcher. The wait is bounded by `GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS`; when exceeded, returns `CACHE_LOCK_WAIT_TIMEOUT`.
 
 - **namespace**: String, required.
 - **cache_code**: String, required.
-- **ttl_seconds**: Number, required. TTL for the cached value.
+- **ttl_seconds**: Number, optional. TTL for the cached value. Omit for no expiry.
 - **fetcher**: Async function, required. Called on a miss. Returns any value or throws.
-- **Returns**: `{ success, value, error }`. If the fetcher throws, returns `CACHE_FETCHER_FAILED` and nothing is cached.
+- **Returns**: `{ success, value, error }`. If the fetcher throws, returns `CACHE_FETCHER_FAILED` and nothing is cached. If the lock wait times out, returns `CACHE_LOCK_WAIT_TIMEOUT`.
 
 This is NOT cache-through. The cache module does not know about the source database. The caller provides the fetcher.
 
@@ -101,6 +101,7 @@ This is NOT cache-through. The cache module does not know about the source datab
 | `GET_OR_FETCH_LOCK_TIMEOUT_MS` | Number | No | `3000` | Lock auto-expiry in milliseconds. Handles crashed processes |
 | `GET_OR_FETCH_LOCK_RETRY_MS` | Number | No | `50` | Poll interval when waiting for a lock holder to finish |
 | `GET_OR_FETCH_LOCK_RETRY_JITTER_MS` | Number | No | `20` | Random 0-N ms added to each retry to avoid synchronized retry bursts |
+| `GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS` | Number | No | `5000` | Maximum total milliseconds to wait for a lock holder before returning `CACHE_LOCK_WAIT_TIMEOUT` |
 
 `Store` is the primary config key. The cache module composes no backend key - it forwards `namespace` and `cache_code` to the store as separate parameters. `KEY_PREFIX` and `KEY_SEPARATOR` belong to the Valkey adapter, not here.
 
@@ -112,6 +113,7 @@ When `GET_OR_FETCH_LOCK_ENABLED` is true, the loader validates that the store im
 |---|---|---|
 | `CACHE_STORE_UNAVAILABLE` | Store adapter returned `{ success: false }` or threw | All async functions |
 | `CACHE_FETCHER_FAILED` | The fetcher function passed to `getOrFetchCache` threw an error | `getOrFetchCache` |
+| `CACHE_LOCK_WAIT_TIMEOUT` | `getOrFetchCache` waited for a lock holder but the value never appeared within `GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS` | `getOrFetchCache` |
 
 Error shape is frozen at module load. The store adapter's own error type and message never leak through. Serialization errors are owned by the store adapter, not this module.
 
@@ -124,7 +126,7 @@ Error shape is frozen at module load. The store adapter's own error type and mes
 - **The store adapter owns serialization.** `setCache` passes a raw JavaScript object to the store; `getCache` receives a raw JavaScript object back. The store adapter handles JSON.stringify/parse. This module does not serialize.
 - **The cache module never reads the source database.** It uses the cache-aside pattern. On a miss, the application fetches from the source and populates the cache, or uses `getOrFetchCache` which calls a caller-provided fetcher.
 - **`getOrFetchCache` is not cache-through.** The cache module does not know about the source database. The caller provides the fetcher function.
-- **Distributed locking is opt-in.** When `GET_OR_FETCH_LOCK_ENABLED` is false (default), `getOrFetchCache` does plain fetch-and-cache. When true, it uses `setCacheLock`/`releaseCacheLock` on the store for stampede protection.
+- **Distributed locking is opt-in.** When `GET_OR_FETCH_LOCK_ENABLED` is false (default), `getOrFetchCache` does plain fetch-and-cache. When true, it uses `setCacheLock`/`releaseCacheLock` on the store for stampede protection. The wait for a lock holder is bounded by `GET_OR_FETCH_LOCK_WAIT_TIMEOUT_MS`.
 - **`deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use prefix match only.** Range operators (`gt`, `lt`, `between`) are database queries, not cache operations.
 
 ## Store Contract
@@ -156,7 +158,15 @@ Construction hard-validates the seven required methods. A missing method throws 
 |---|---|---|
 | `Lib.Utils` | `helper-utils` | Type checks |
 | `Lib.Debug` | `helper-debug` | Diagnostics for store failures |
-| `Lib.Instance` | `helper-instance` | Request lifecycle object |
+
+`helper-instance` is a peer dependency because the `instance` parameter on every public function must be a `helper-instance` product, but the cache module does not call `Lib.Instance` itself - the caller creates the instance object.
+
+Optional peer dependencies (at least one must be installed and passed as `CONFIG.Store`):
+
+| Package | Backend |
+|---|---|
+| `helper-cache-store-valkey` | Valkey/Redis (via `kv-valkey`) |
+| `helper-cache-store-dynamodb` | DynamoDB (via `nosql-aws-dynamodb`) |
 
 The store adapter (`CONFIG.Store`) is a fully independent module that owns its own driver helper (`Lib.KV` for Valkey, `Lib.NoDB` for DynamoDB, `Lib.MongoDB` for MongoDB). The cache module never imports a database driver helper directly.
 
