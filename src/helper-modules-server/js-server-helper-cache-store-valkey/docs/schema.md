@@ -33,3 +33,11 @@ When `ttl_seconds` is omitted, the key has no expiry and persists until explicit
 Valkey has no partition key or sort key concept. The only index is the keyspace itself. `deleteCacheByPrefix`, `clearCache`, and `listCacheCodes` use `SCAN MATCH prefix*`, which iterates every key in the database and filters after retrieval. See [Configuration](configuration.md#deletecachebyprefix-clearcache-and-listcachecodes-complexity) for the O(N) cost analysis.
 
 A SET-based secondary index (tracking cache_codes per namespace via `SADD`) was considered and rejected: it would add a `SADD` to every `setCache` call, need its own cleanup on `deleteCache`, and double the write cost. O(N) `deleteCacheByPrefix`/`clearCache` is the accepted trade.
+
+### Expiry visibility in listCacheCodes
+
+Valkey deletes an expired key lazily, on access, and `SCAN` may still return a key whose TTL has passed but which has not yet been reclaimed. `listCacheCodes` can therefore report a `cache_code` that a following `getCache` reports as a miss.
+
+This is accepted, not worked around. Filtering would cost one `GET` per scanned key, turning a single `SCAN` pass into N round trips. The window is bounded by Valkey's own reclamation and is small in practice. Callers that need list-then-get to agree must tolerate a miss on the get, which is the normal cache contract anyway.
+
+The DynamoDB adapter does filter, because its query already returns each item's expiry attribute and the filter costs nothing there.

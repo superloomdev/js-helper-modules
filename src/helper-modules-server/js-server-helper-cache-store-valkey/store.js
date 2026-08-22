@@ -467,9 +467,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
     *********************************************************************/
     setCacheLock: async function (instance, namespace, cache_code, options) {
 
-      // Convert milliseconds to seconds for the KV driver (ceil to avoid sub-second rounding to 0)
+      // Convert milliseconds to seconds for the KV driver. Clamped to a
+      // minimum of one second, matching the DynamoDB adapter, so a
+      // sub-second timeout can never round down to a TTL-less lock.
       const timeout_ms = (options && options.timeout_ms) || 3000;
-      const ttl_seconds = Math.ceil(timeout_ms / 1000);
+      const ttl_seconds = Math.max(1, Math.ceil(timeout_ms / 1000));
 
       // Compose the lock key and delegate to the KV driver's atomic setIfNotExists
       const result = await Lib.KV.setIfNotExists(
