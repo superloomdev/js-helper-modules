@@ -17,7 +17,7 @@ defeats that purpose.
 `GET_OR_FETCH_LOCK_ENABLED` is true, only one concurrent caller fetches;
 the rest wait and retry the cache read until the value appears.
 
-**Why opt-in, not default:** locking adds round trips (setLock, releaseLock)
+**Why opt-in, not default:** locking adds round trips (setCacheLock, releaseCacheLock)
 and retry latency. For low-concurrency workloads the stampede is not a
 problem and the extra round trips are pure overhead. The caller decides
 based on their concurrency profile.
