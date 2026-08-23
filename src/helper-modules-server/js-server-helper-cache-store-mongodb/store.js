@@ -307,7 +307,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       }
 
       // Report success with the count of deleted documents
-      // (includes expired-but-unswept items - see docs/cleanup.md)
+      // (includes expired-but-unswept items that the TTL sweeper has not removed yet)
       return {
         success: true,
         deleted_count: result.deletedCount,

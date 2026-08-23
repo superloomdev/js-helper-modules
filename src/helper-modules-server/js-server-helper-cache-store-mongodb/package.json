@@ -16,11 +16,6 @@
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
     "helper-nosql-mongodb": "npm:@superloomdev/js-server-helper-nosql-mongodb@^1.0.0"
   },
-  "peerDependenciesMeta": {
-    "helper-utils": { "optional": false },
-    "helper-debug": { "optional": false },
-    "helper-nosql-mongodb": { "optional": false }
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",

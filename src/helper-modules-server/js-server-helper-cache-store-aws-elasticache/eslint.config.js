@@ -1,4 +1,4 @@
-// Info: ESLint flat config for js-server-helper-cache-store-valkey. Delegates to the shared
+// Info: ESLint flat config for js-server-helper-cache-store-aws-elasticache. Delegates to the shared
 // @superloomdev/js-helper-eslint-config package via the `base` preset.
 // No per-module rule overrides are permitted - if the module cannot pass
 // the shared config, the finding goes to the retrospective, not to a local
