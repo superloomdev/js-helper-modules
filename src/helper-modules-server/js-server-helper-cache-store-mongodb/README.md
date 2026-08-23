@@ -1,15 +1,16 @@
 # helper-cache-store-mongodb
 
+[![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
-A MongoDB-backed implementation of the [helper-cache](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-cache) module's storage contract. Configure and instantiate this adapter independently, then pass the ready-to-use store object to the parent's `Store` config; the Cache module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
+A MongoDB-backed implementation of the [helper-cache](https://github.com/superloomdev/js-helper-modules/tree/main/src/helper-modules-server/js-server-helper-cache) module's storage contract. Configure and instantiate this adapter independently, then pass the ready-to-use store object to the parent's `Store` config; the Cache module's calling shape stays identical regardless of which storage backend is active. Part of [Superloom](https://superloom.dev).
 
 ## What This Is
 
 A thin layer between the Cache parent module and a MongoDB collection. Maps `namespace` and `cache_code` to a composite string `_id` (`namespace + '\u001F' + cache_code`), then delegates to `helper-nosql-mongodb`. TTL is handled via a MongoDB TTL index on the `EXPIRY_FIELD` attribute, with an application-side expiry check on read for immediate correctness.
 
-The adapter cannot stand alone. It is always loaded together with the Cache parent and the [`helper-nosql-mongodb`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-nosql-mongodb) driver helper.
+The adapter cannot stand alone. It is always loaded together with the Cache parent and the [`helper-nosql-mongodb`](https://github.com/superloomdev/js-helper-modules/tree/main/src/helper-modules-server/js-server-helper-nosql-mongodb) driver helper.
 
 ## Why Use This Module
 
@@ -33,7 +34,7 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 - [Configuration](docs/configuration.md). Configuration keys, peer dependencies, environment variables, testing tier
 - [Schema](docs/schema.md). Collection design, key structure, value encoding, TTL, lock keys
 - [Cleanup](docs/cleanup.md). Native TTL, expiry check on read, explicit invalidation
-- [Cache parent module](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-cache). The data model, error catalog, and Cache-side configuration this adapter plugs into
+- [Cache parent module](https://github.com/superloomdev/js-helper-modules/tree/main/src/helper-modules-server/js-server-helper-cache). The data model, error catalog, and Cache-side configuration this adapter plugs into
 
 ## Adding to Your Project
 
@@ -51,7 +52,7 @@ It expects three modules in the `Lib` container supplied by the application (Uti
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Contract + Integration | MongoDB via Docker Compose | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Contract + Integration | MongoDB via Docker Compose | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Docker lifecycle is fully automatic - `npm test` from `_test/` manages `pretest`/`posttest`. Test runtime details live in [Configuration - Testing Tier](docs/configuration.md#testing-tier).
 

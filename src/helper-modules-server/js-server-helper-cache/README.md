@@ -1,5 +1,6 @@
 # helper-cache
 
+[![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
@@ -45,7 +46,7 @@ One storage adapter ships today, with more arriving as consumers need them:
 
 | Adapter | Backend |
 |---|---|
-| [`helper-cache-store-valkey`](https://github.com/superloomdev/superloom/tree/main/src/helper-modules-server/js-server-helper-cache-store-valkey) | Valkey/Redis (via `kv-valkey`) |
+| [`helper-cache-store-valkey`](https://github.com/superloomdev/js-helper-modules/tree/main/src/helper-modules-server/js-server-helper-cache-store-valkey) | Valkey/Redis (via `kv-valkey`) |
 
 **Each application selects the adapter that matches its own cache backend.** The cache module's calling shape is identical across all backends, so the choice is operational, not application-code.
 
@@ -96,7 +97,7 @@ The principles are documented at [superloom.dev](https://superloom.dev) for proj
 
 This module and the one storage adapter it needs are declared as dependencies in the project's `package.json` and loaded through the standard Superloom loader. The published packages are the supported integration path; vendoring the source or using a local file dependency is not.
 
-The adapter is configured and instantiated independently, then passed to the cache loader as a ready-to-use `CONFIG.Store` object. The full wiring and the per-backend configuration shape are in [Configuration](docs/configuration.md). The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). One-time GitHub Packages registry setup is in the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
+The adapter is configured and instantiated independently, then passed to the cache loader as a ready-to-use `CONFIG.Store` object. The full wiring and the per-backend configuration shape are in [Configuration](docs/configuration.md). The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/languages/js/server/server-loader.md). One-time GitHub Packages registry setup is in the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
 
 ## Dependencies
 
@@ -108,7 +109,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance) an
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 The cache module's own tests use the in-process memory fixture (`_test/memory-store.js`) which implements the full 9-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-cache-store-*`) and run against real backends.
 
