@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { describe, it, before, beforeEach } = require('node:test');
+const { describe, it, before, after, beforeEach } = require('node:test');
 
 const { Lib } = require('./loader')();
 const LoggerStorePostgresFactory = require('helper-logger-store-postgres');
@@ -72,6 +72,12 @@ before(async function () {
     }
   }
 
+});
+
+
+// Close the Postgres connection pool so the process exits cleanly after all tests.
+after(async function () {
+  await Lib.Postgres.close();
 });
 
 

@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { describe, it, before, beforeEach } = require('node:test');
+const { describe, it, before, after, beforeEach } = require('node:test');
 
 const { Lib } = require('./loader')();
 const LoggerStoreSQLiteFactory = require('helper-logger-store-sqlite');
@@ -70,6 +70,12 @@ before(async function () {
     }
   }
 
+});
+
+
+// Close the SQLite database handle so the process exits cleanly after all tests.
+after(async function () {
+  await Lib.SQLite.close();
 });
 
 
