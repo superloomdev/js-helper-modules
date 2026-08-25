@@ -1,43 +1,69 @@
-// Info: All validators for helper-instance. Currently empty - Instance has
-// no domain-specific assertions. The validateConfig no-op is wired so that
-// adding the first config key requires only filling in this file.
+// Info: All validators for helper-instance. Validates the single config key
+// that decides whether process-scoped teardown runs per request.
 //
-// Singleton: No Lib dependency - Instance is a lifecycle module.
+// Factory: needs Lib for the Utils type-check primitives.
 'use strict';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Returns the module-scope Validators object.
-Instance validators need no Lib injection - Instance is a lifecycle module.
+Factory loader. Returns a Validators interface closed over Lib.
 
-@param {Object} shared_libs - Lib container (unused - interface uniformity)
-@param {Object} errors - Error catalog (unused - no domain errors yet)
+@param {Object} shared_libs - Lib container (Utils)
+@param {Object} errors - Error catalog (unused - no domain errors)
 
 @return {Object} - Public Validators interface
 *********************************************************************/
 module.exports = function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
 
+  // Dependencies for this instance
+  const Lib = {
+    Utils: shared_libs.Utils
+  };
+
   // Return the Validators interface
-  return Validators;
+  return createValidators(Lib);
 
 };///////////////////////////// Module-Loader END ///////////////////////////////
 
 
 
-///////////////////////////Public Functions START//////////////////////////////
+/////////////////////////// createValidators START /////////////////////////////
 
-const Validators = {
+/********************************************************************
+Builds the Validators interface closed over Lib.
 
+@param {Object} Lib - Dependency container (Utils)
 
-  // No-op config validator. Instance has no config keys to validate.
-  // Replace with real checks when the first config key is added.
-  validateConfig: function (config) { // eslint-disable-line no-unused-vars
+@return {Object} - Public Validators interface
+*********************************************************************/
+const createValidators = function (Lib) {
 
-    // No config keys to validate yet
+  ///////////////////////////Public Functions START//////////////////////////////
+  const Validators = {
 
-  }
+    /********************************************************************
+    Validate merged config at construction. Misconfiguration is a
+    programmer error and throws rather than returning an envelope.
 
+    @param {Object} config - Merged configuration
 
-};////////////////////////////// Public Functions END ////////////////////////////
+    @return {void}
+    *********************************************************************/
+    validateConfig: function (config) {
+
+      // A non-boolean here would make process-scoped teardown silently
+      // pick the wrong queue, so reject anything truthy-but-not-boolean
+      if (!Lib.Utils.isBoolean(config.CLOSE_ON_CLEANUP)) {
+        throw new TypeError('helper-instance: CLOSE_ON_CLEANUP must be a boolean');
+      }
+
+    }
+
+  };////////////////////////////// Public Functions END ///////////////////////////
+
+  // Return public interface
+  return Validators;
+
+};/////////////////////////// createValidators END /////////////////////////////

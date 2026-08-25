@@ -75,7 +75,7 @@ const createFailingStore = function () {
 // Wait until every background routine on the instance has signalled completion.
 // Background deletes are fire-and-forget; this lets a test assert their effect.
 const waitForBackgroundQueue = async function (instance) {
-  while (Lib.Instance.getBackgroundQueueCount(instance) > 0) {
+  while (Lib.Instance.getBackgroundRoutineCount(instance) > 0) {
     await new Promise(function (resolve) { setImmediate(resolve); });
   }
 };

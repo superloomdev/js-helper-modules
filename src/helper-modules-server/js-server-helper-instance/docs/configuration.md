@@ -27,15 +27,38 @@ Loader call semantics:
 
 - **First argument: `Lib`.** A container exposing peer modules. Instance reads `Lib.Utils.getUnixTime` and `Lib.Utils.getUnixTimeInMilliSeconds` to capture timestamps in `initialize`.
 - **Second argument: config overrides.** Merged on top of the built-in defaults from `instance.config.js`. The merged config is validated by `Validators.validateConfig` at startup (currently a no-op). No function reads it at runtime. Pass `{}`.
-- **Multiple loader calls return independent interfaces.** Functions are stateless, so two interfaces are functionally identical. Loading the module multiple times is harmless but wasteful.
+- **Load this module exactly once, from the composition root.** Each loader call carries its own process cleanup queue. Loading it twice splits that registry, so half the registered connections are never closed. This is the one Superloom module where repeat loading is a defect rather than merely wasteful.
 
-> **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. The uniformity is the point.
+> **Why accept a `Lib` argument at all?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. The uniformity is the point.
 
 ---
 
 ## Configuration Keys
 
-None. The module has no configuration keys. The loader accepts a config argument for interface uniformity with other Superloom modules but no function reads it at runtime.
+| Key | Type | Default | Meaning |
+|---|---|---|---|
+| `CLOSE_ON_CLEANUP` | Boolean | `false` | Whether process-scoped teardown runs at the end of every request |
+
+`validateConfig` throws a `TypeError` when this is not a boolean. A truthy string such as `'false'` would otherwise silently select the wrong queue.
+
+### Choosing the value
+
+| Deployment | Value | Consequence |
+|---|---|---|
+| Persistent server (Express in Docker, EC2, a VM) | `false` | A resource registered through `addProcessCleanupRoutine` is held open and shared by every later request, and closes once via `runProcessCleanup()` on SIGTERM |
+| Serverless (AWS Lambda, Cloud Functions) | `true` | The same resource closes with the request that opened it. An open handle keeps such a runtime alive and billable until the function times out, and marks that worker busy so it refuses new requests meanwhile |
+
+The entry point supplies this. **The module never reads the environment to guess it**, because the platform boundary is already expressed structurally: a deployment has a Lambda entry point or a server entry point, and each supplies its own config.
+
+```javascript
+// Lambda composition root
+Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: true });
+
+// Express composition root
+Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: false });
+```
+
+Setting `true` on a persistent server is not a crash, but it destroys connection reuse: every request would open and close its own pool and pay a TCP, TLS, and authentication handshake.
 
 ---
 
@@ -49,8 +72,8 @@ None. The module never reads `process.env`.
 
 | Peer | Why |
 |---|---|
-| `helper-utils` | Used by `initialize` for `getUnixTime` and `getUnixTimeInMilliSeconds`, and by `getAge` for `getUnixTimeInMilliSeconds` |
-| `helper-debug` | Declared in `package.json` for cross-module consistency. Not currently consumed at runtime |
+| `helper-utils` | `initialize` uses `getUnixTime` and `getUnixTimeInMilliSeconds`; `getAge` uses `getUnixTimeInMilliSeconds`; `validateConfig` uses `isBoolean` |
+| `helper-debug` | `Lib.Debug.error` reports a teardown routine that threw, so one failure never strands the routines after it |
 
 The peers are consumed through the standard `Lib` injection in the loader's first argument. The module does not `require()` either peer directly.
 

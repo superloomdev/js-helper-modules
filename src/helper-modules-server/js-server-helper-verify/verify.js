@@ -449,7 +449,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
     scheduleBackgroundDelete: function (instance, namespace, key) {
 
       // Tell the instance lifecycle that a parallel routine is starting
-      const completeBackgroundRoutine = Lib.Instance.backgroundRoutine(instance);
+      const completeBackgroundRoutine = Lib.Instance.addBackgroundRoutine(instance);
 
       // Run the delete in the background; signal completion in finally
       store.deleteRecord(instance, namespace, key)

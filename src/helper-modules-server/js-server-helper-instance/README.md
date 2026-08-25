@@ -7,7 +7,7 @@ A request-lifecycle helper for Node.js servers and serverless handlers that ship
 
 ## What This Is
 
-A small lifecycle module. One call to `initialize()` returns a plain object that travels with a single request: it carries the start timestamps, a counter for in-flight background routines, and a queue of cleanup callbacks. Register cleanup work with `addCleanupRoutine`, fire-and-forget background work with `backgroundRoutine`, and call `cleanup` at the end of the request. The cleanup queue runs only when the background queue reaches zero.
+A small lifecycle module. One call to `initialize()` returns a plain object that travels with a single request: it carries the start timestamps, the background routines still in flight, and a queue of teardown routines. Register per-request teardown with `addInstanceCleanupRoutine`, shared-resource teardown with `addProcessCleanupRoutine`, work that runs alongside the response with `addBackgroundRoutine`, and call `runInstanceCleanup` once the response is sent.
 
 ## Why Use This Module
 
@@ -21,28 +21,63 @@ A small lifecycle module. One call to `initialize()` returns a plain object that
 
 ## Behavior
 
-The module is the contract between a request entry-point (Express middleware, Lambda handler) and the rest of the application. Three concerns:
+The module is the contract between a request entry-point (Express middleware, Lambda handler) and the rest of the application.
 
-- **Per-request scope.** `initialize()` returns a fresh object on every call. Two simultaneous requests get two independent objects. Background and cleanup state lives on the object, not on the module.
+### Instance cleanup versus process cleanup
 
-- **Background routines and cleanup ordering.** Calling `backgroundRoutine(instance)` increments an in-flight counter and returns a completion callback. Calling `cleanup(instance)` only drains the cleanup queue if the in-flight counter is zero; otherwise cleanup is deferred. When the last background completion callback runs, it triggers `cleanup` automatically. The result: registered cleanup callbacks always run after every background routine has finished, regardless of which finishes last.
+This is the distinction the module exists to draw. A request lasts milliseconds. A database connection pool lasts as long as the process. Teardown for the second cannot live on an object that is discarded with the first.
 
-- **Performance audit reference.** `instance.time_ms` is the unix-millisecond timestamp at the start of the request. Pass it to [`Lib.Debug.performanceAuditLog`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/api.md#performanceauditlogaction-routine-reference_time) on every external service boundary, and the resulting log lines reconstruct the full request timeline; not just the duration of the function that emitted the line.
+| | Instance cleanup | Process cleanup |
+|---|---|---|
+| Register with | `addInstanceCleanupRoutine` | `addProcessCleanupRoutine` |
+| Lifetime of the resource | this one request | the whole process |
+| Held on | the instance object | the module's own state, which lives as long as `Lib` |
+| Typical contents | a connection borrowed from a pool, a temp file, a per-request stream | a connection pool, a long-lived client |
+| Runs | end of every request, on every deployment | see below |
 
-The lifecycle is summarized in the diagram below; full mechanics with worked Express and Lambda examples are in [`docs/api.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/api.md).
+Process cleanup is the interesting one, because when it should run depends on the deployment, and the code that opened the resource has no business knowing:
+
+- On a **persistent server**, the pool is shared by every later request. Closing it per request would pay a TCP, TLS, and authentication handshake every time and defeat the point of pooling. It closes **once**, at shutdown.
+- On a **serverless runtime**, an open handle keeps the worker alive and billable until the function times out, and marks it busy so it refuses new requests meanwhile. It closes with **the request that opened it**.
+
+So a driver declares only what kind of resource it holds:
+
+```javascript
+Lib.Instance.addProcessCleanupRoutine(instance, _Postgres.close);
+```
+
+and the single config key `CLOSE_ON_CLEANUP` decides where that lands. The driver code is byte-identical in both deployments.
+
+### Background routines gate teardown
+
+`addBackgroundRoutine(instance)` returns a completion signal for work that runs alongside the response, such as an audit write. `runInstanceCleanup` **waits** for those routines before tearing anything down, rather than checking a count and giving up. That ordering is not cosmetic: closing a connection while an audit write is still in flight loses the row, and on a runtime that freezes after the response the write would never resume.
+
+There is deliberately no timeout on that wait. Abandoning a routine would silently drop data; a routine that never signals is a defect and should surface as a platform timeout instead of being hidden.
+
+### Performance audit reference
+
+`instance.time_ms` is the unix-millisecond timestamp at the start of the request. Pass it to [`Lib.Debug.performanceAuditLog`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-core/js-helper-debug/docs/api.md#performanceauditlogaction-routine-reference_time) on every external service boundary, and the resulting log lines reconstruct the full request timeline; not just the duration of the function that emitted the line.
+
+Full mechanics with worked Express and Lambda examples are in [`docs/api.md`](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/api.md).
 
 ```text
    initialize()
       |
-      |-- addCleanupRoutine(fn)         (queue grows)
-      |-- backgroundRoutine() -> done() (counter ++ then --)
-      |-- addCleanupRoutine(fn)
+      |-- addBackgroundRoutine()     -> signalComplete()   (runs beside the response)
+      |-- addInstanceCleanupRoutine(fn)                    (this request only)
+      |-- addProcessCleanupRoutine(fn)                     (shared resource)
       |
       v
-   cleanup()
+   runInstanceCleanup()          <- called once, after the response is sent
       |
-      |-- if background_queue == 0: drain cleanup_queue (FIFO)
-      |-- else: no-op; cleanup runs when last background done() fires
+      |-- 1. wait for every background routine to finish
+      |-- 2. drain the instance cleanup queue (FIFO)
+      |-- 3. CLOSE_ON_CLEANUP ? runProcessCleanup() : leave shared resources open
+      |
+      v
+   runProcessCleanup()           <- persistent server only, from SIGTERM
+      |
+      |-- drain the process cleanup queue (FIFO)
 ```
 
 ## Aligned with Superloom Philosophy

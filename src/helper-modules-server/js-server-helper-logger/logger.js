@@ -174,7 +174,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, store) {
       // Detach the write from the request lifecycle. Errors are logged but
       // never surface to the caller - the point of background mode is to
       // not block response time on an audit row.
-      const completeBackgroundRoutine = Lib.Instance.backgroundRoutine(instance);
+      const completeBackgroundRoutine = Lib.Instance.addBackgroundRoutine(instance);
       store.addLog(instance, record)
         .then(function (write_result) {
           if (write_result.success === false) {

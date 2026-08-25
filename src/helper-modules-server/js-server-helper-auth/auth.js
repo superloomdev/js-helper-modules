@@ -1339,7 +1339,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, store)
     scheduleBackgroundRefresh: function (instance, record, ttl_seconds, tenant_id) {
 
       // Tell the instance lifecycle that a parallel routine is starting
-      const completeBackgroundRoutine = Lib.Instance.backgroundRoutine(instance);
+      const completeBackgroundRoutine = Lib.Instance.addBackgroundRoutine(instance);
 
       // Build the field updates: slide both timestamps forward by ttl_seconds
       const updates = {

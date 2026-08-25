@@ -1,13 +1,16 @@
 # API Reference. `helper-instance`
 
-Every exported function on the public interface, with parameters, return shape, and notes. For loader and dependency notes see [Configuration](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/configuration.md).
+Request and process lifecycle management for server deployments.
 
 ## On This Page
 
 - [Conventions](#conventions)
 - [The Instance Object](#the-instance-object)
+- [Two Scopes, Three Registries](#two-scopes-three-registries)
 - [Lifecycle Functions](#lifecycle-functions)
 - [Background Routines](#background-routines)
+- [Instance Cleanup](#instance-cleanup)
+- [Process Cleanup](#process-cleanup)
 - [Inspection](#inspection)
 - [Worked Examples](#worked-examples)
 - [Lifecycle Notes](#lifecycle-notes)
@@ -16,33 +19,48 @@ Every exported function on the public interface, with parameters, return shape, 
 
 ## Conventions
 
-Every function in this module is **synchronous, side-effect-free with respect to module state, and never throws**. The only mutable state is on the `instance` object, which is owned by the caller. The module itself holds nothing between calls.
+Every function takes the request instance as its first argument, except `runProcessCleanup` and `getProcessCleanupRoutineCount`, which are process-scoped and take none.
 
-| Pattern | Behavior |
-|---|---|
-| **Instance is owned by the caller.** | The object returned by `initialize()` is a plain JavaScript object. Pass it through your call chain by reference. The module has no internal map of "active instances" |
-| **Cleanup is opt-in.** | An instance with no registered cleanup routines is fine. `cleanup(instance)` then becomes a cheap no-op |
-| **Background completion is signalled by the caller.** | `backgroundRoutine(instance)` returns a function. Call it when the background routine finishes. Failing to call it leaves the cleanup queue waiting forever (the request never "completes" from this module's view) |
-| **Cleanup execution order is FIFO.** | The first routine registered is the first to run during cleanup |
-| **Cleanup runs at most once per `cleanup()` call.** | After the queue drains, it is reset to empty. Calling `cleanup()` again is a no-op until new routines are registered |
+Teardown routines are always awaited. A synchronous routine works, but declare them `async` by convention. A routine receives the instance and may ignore it.
 
 ---
 
 ## The Instance Object
 
-`initialize()` returns a plain object with the following fields:
+`initialize()` returns a plain object. It is passed by reference through every function in a request and is discarded once the response is sent.
 
-| Field | Type | Purpose |
+| Field | Type | Meaning |
 |---|---|---|
-| `time` | `number` | Unix time (seconds) at which `initialize()` was called. Treat as read-only |
-| `time_ms` | `number` | Unix time (milliseconds) at which `initialize()` was called. Pass to `performanceAuditLog` for request-level timing. Treat as read-only |
-| `logger_counter` | `number` | Reserved for use by `helper-logger`. Initialized to 0 |
-| `background_queue` | `number` | Count of in-flight background routines. Managed by `backgroundRoutine` and its returned completion callback. **Do not mutate directly** |
-| `cleanup_queue` | `Array<Function>` | Registered cleanup callbacks. Managed by `addCleanupRoutine` and `cleanup`. **Do not mutate directly** |
+| `time` | Integer | Request start, unix seconds |
+| `time_ms` | Integer | Request start, unix milliseconds. Pass to `performanceAuditLog` |
+| `logger_counter` | Integer | Sequence counter for ordered log lines |
+| `background_routines` | Array | Promises for work still in flight |
+| `cleanup_queue` | Array | Request-scoped teardown routines |
 
-> **Direct mutation discouraged.** Reading `instance.time_ms` is fine and is the canonical pattern. Mutating `background_queue` or `cleanup_queue` from caller code defeats the lifecycle guarantees.
+Nothing else belongs on it. The deployment's teardown policy is config, not request state.
 
-> **Adding application-specific fields is fine.** Many Superloom applications attach `instance.user_id`, `instance.request_id`, `instance.input` etc. on top of the lifecycle fields above. The module only ever reads its own fields.
+---
+
+## Two Scopes, Three Registries
+
+A request lasts milliseconds. A connection pool lasts as long as the process. Teardown for the second cannot live on an object discarded with the first.
+
+| Registry | Scope | Stored on | Drained by |
+|---|---|---|---|
+| Background routines | request | instance object | `runInstanceCleanup` waits for these before anything else |
+| Instance cleanup | request | instance object | `runInstanceCleanup` |
+| Process cleanup | **process** | **module `state`, alongside `CONFIG`** | `runProcessCleanup`, or `runInstanceCleanup` when `CLOSE_ON_CLEANUP` is true |
+
+Background routines are a **gate**, not teardown. They answer "is it safe to tear down yet", not "what needs tearing down".
+
+**What goes where**
+
+| Resource | Registry | Why |
+|---|---|---|
+| Connection pool, long-lived client | process cleanup | Shared by every request |
+| Connection borrowed via `getClient()` | instance cleanup | Belongs to one request; must go back |
+| Temp file, per-request stream | instance cleanup | Created and finished inside one request |
+| Audit write, cache warm, session refresh | background routine | Must land before teardown, but must not delay the response |
 
 ---
 
@@ -50,171 +68,207 @@ Every function in this module is **synchronous, side-effect-free with respect to
 
 ### `initialize()`
 
-Returns a fresh instance object. Captures the current unixtime in seconds and milliseconds. No side effects.
+Create a request instance. No arguments.
 
-| Returns | Description |
-|---|---|
-| `object` | A new instance object as described in [The Instance Object](#the-instance-object) |
-
-### `addCleanupRoutine(instance, cleanup_function)`
-
-Registers a callback to run when the request completes. Cleanup callbacks receive the same `instance` they were registered against. Use this to release database connections, flush logs, close files, or any other deferred work.
-
-| Param | Type | Required | Description |
-|---|---|---|---|
-| `instance` | `object` | Yes | The request's instance object |
-| `cleanup_function` | `Function` | Yes | Signature `fn(instance) -> void`. Receives the same instance for context |
-
-The function is appended to `instance.cleanup_queue`. The queue is FIFO: routines run in registration order during the next `cleanup` call.
-
-### `cleanup(instance)`
-
-Drains `instance.cleanup_queue` if (and only if) `instance.background_queue` is zero.
-
-| Param | Type | Required | Description |
-|---|---|---|---|
-| `instance` | `object` | Yes | The request's instance object |
-
-Behavior matrix:
-
-| `background_queue` | `cleanup_queue` | Effect |
-|---|---|---|
-| 0 | non-empty | All cleanup callbacks run in registration order. Queue is reset to empty |
-| 0 | empty | No-op |
-| > 0 | any | No-op. The last `done()` call from the in-flight background routines will trigger `cleanup` automatically |
-
-> **Why not error when called too early.** The asymmetric "no-op when not ready" behavior is intentional. It lets the request entry-point unconditionally call `cleanup()` at the natural end of the request flow, regardless of how many background routines are still running. The module sorts out the ordering.
+```javascript
+const instance = Lib.Instance.initialize();
+```
 
 ---
 
 ## Background Routines
 
-### `backgroundRoutine(instance)`
+### `addBackgroundRoutine(instance)`
 
-Registers a new in-flight background routine. Returns a completion callback. **The caller must call the returned function exactly once when the routine finishes** (success or failure - see error handling below).
-
-| Param | Type | Required | Description |
-|---|---|---|---|
-| `instance` | `object` | Yes | The request's instance object |
-
-| Returns | Description |
-|---|---|
-| `Function` | A `done()` callback. Calling it decrements `background_queue` and triggers `cleanup(instance)` if the queue is now empty |
+Register work that runs in parallel with the response. Returns a completion signal; call it from a `finally` block so it fires on success and failure alike.
 
 ```javascript
-function send_email_async (instance, payload) {
-  const done = Lib.Instance.backgroundRoutine(instance);
+const signalComplete = Lib.Instance.addBackgroundRoutine(instance);
 
-  emailProvider.send(payload)
-    .then(function () {
-      done();
-    })
-    .catch(function (err) {
-      Lib.Debug.error('Email send failed', err);
-      done();
-    });
-}
+store.addLog(instance, record)
+  .catch(function (error) {
+    Lib.Debug.debug('background write failed', { error: error.message });
+  })
+  .finally(function () {
+    signalComplete();
+  });
 ```
 
-> **Always call `done()` in both success and failure paths.** A `done()` that never fires keeps the cleanup queue parked. The request's database connections, log handles, and other cleanup-managed resources stay open indefinitely. In Lambda this manifests as the function timing out instead of returning.
+The routine is tracked as a promise, so `runInstanceCleanup` **awaits** it. There is no window to miss: a routine that finished before cleanup was called resolves instantly, and one that finishes after parks cleanup until it lands.
+
+A background routine may itself register another. Both are awaited.
+
+**There is no timeout.** Abandoning a routine would silently drop an audit row or leave a consumed one-time code reusable. A routine that never signals is a defect, and surfacing it as a platform timeout is preferable to hiding it.
+
+---
+
+## Instance Cleanup
+
+### `addInstanceCleanupRoutine(instance, cleanup_function)`
+
+Register teardown for a resource belonging to this request alone.
+
+```javascript
+const { client } = await Lib.Postgres.getClient(instance);
+
+// Whatever happens next, this client goes back to the pool
+Lib.Instance.addInstanceCleanupRoutine(instance, async function () {
+  Lib.Postgres.releaseClient(instance, client);
+});
+```
+
+### `runInstanceCleanup(instance)`
+
+Run teardown for this request. Call once, after the response is sent.
+
+```javascript
+await Lib.Instance.runInstanceCleanup(instance);
+```
+
+Order of operations:
+
+1. Wait for every background routine to finish
+2. Drain the instance cleanup queue, in registration order
+3. If `CLOSE_ON_CLEANUP` is true, run process cleanup as well
+
+It never skips while background work is pending; it waits. Nothing re-triggers it.
+
+---
+
+## Process Cleanup
+
+### `addProcessCleanupRoutine(instance, cleanup_function)`
+
+Register teardown for a resource shared by every request in this process. Register once, from whatever opened it.
+
+```javascript
+// Inside the driver, immediately after the pool is created
+state.pool = new PG.Pool(options);
+
+Lib.Instance.addProcessCleanupRoutine(instance, _Postgres.close);
+```
+
+The caller declares **what the resource is** and never decides when it closes. This function files it against the deployment's policy:
+
+| `CLOSE_ON_CLEANUP` | Filed against | Closed by |
+|---|---|---|
+| `true` | the current request | `runInstanceCleanup`, every request |
+| `false` | the process | `runProcessCleanup`, at shutdown |
+
+### `runProcessCleanup()`
+
+Run process-scoped teardown and empty the queue. Takes no instance, because none exists at shutdown; each routine receives `null`.
+
+```javascript
+await Lib.Instance.runProcessCleanup();
+```
+
+A persistent deployment calls this from its SIGTERM handler. A deployment with `CLOSE_ON_CLEANUP` enabled reaches it through `runInstanceCleanup` and never calls it directly.
 
 ---
 
 ## Inspection
 
-The three inspection functions read instance state. They never mutate.
+### `getBackgroundRoutineCount(instance)`
 
-### `getBackgroundQueueCount(instance)`
+Number of background routines still in flight. Drops as each signals completion.
 
-| Returns | Description |
-|---|---|
-| `number` | Current value of `instance.background_queue`. Useful in monitoring and load-shedding decisions |
+### `getInstanceCleanupRoutineCount(instance)`
 
-### `getCleanupQueueCount(instance)`
+Number of registered instance cleanup routines.
 
-| Returns | Description |
-|---|---|
-| `number` | Length of `instance.cleanup_queue`. Useful when verifying that all expected cleanup callbacks have been registered |
+### `getProcessCleanupRoutineCount()`
+
+Number of registered process cleanup routines. Takes no instance.
 
 ### `getAge(instance)`
 
-| Returns | Description |
-|---|---|
-| `number` | Milliseconds elapsed since `initialize()` was called. Equivalent to `Date.now() - instance.time_ms` |
-
-> **Use `instance.time_ms` directly when you need the start timestamp**, and `getAge(instance)` when you need elapsed time. Both are inexpensive; pick the one that reads more naturally at the call site.
+Milliseconds since `initialize()`.
 
 ---
 
 ## Worked Examples
 
-### Express middleware. One instance per request
+### Persistent deployment. Express
 
 ```javascript
-app.use(function (req, res, next) {
-  req.instance = Lib.Instance.initialize();
-  res.on('finish', function () {
-    Lib.Instance.cleanup(req.instance);
-  });
-  next();
-});
+// Composition root, once
+Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: false });
+```
 
-app.get('/users/:id', async function (req, res) {
-  const user = await Lib.Db.getRow(
-    req.instance,
-    'SELECT * FROM users WHERE id = $1',
-    [req.params.id]
-  );
-  res.json(user);
+```javascript
+// Per request
+app.use(async function (req, res, next) {
+
+  const instance = Lib.Instance.initialize();
+  res.locals.instance = instance;
+
+  res.on('finish', async function () {
+    await Lib.Instance.runInstanceCleanup(instance);
+  });
+
+  next();
+
 });
 ```
 
-The framework `js-server-helper-sql-postgres` registers a per-request connection-release cleanup via `addCleanupRoutine` from inside `Lib.Db.getRow`; calling `cleanup(req.instance)` on `res.on('finish')` releases the connection.
+```javascript
+// Once, at shutdown
+process.on('SIGTERM', async function () {
+  server.close();
+  await Lib.Instance.runProcessCleanup();
+  process.exit(0);
+});
+```
 
-### Lambda handler. One instance per invocation
+The pool is opened by the first request and reused by every later one. It closes once, on SIGTERM.
+
+### Serverless deployment. Lambda
+
+```javascript
+// Composition root, once per container
+Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: true });
+```
 
 ```javascript
 exports.handler = async function (event, context) {
+
   const instance = Lib.Instance.initialize();
 
-  try {
-    const result = await businessLogic(instance, event);
-    return result;
-  }
-  finally {
-    Lib.Instance.cleanup(instance);
-  }
+  const response = await Lib.Controller.handle(instance, event);
+
+  // Background writes land, then every connection closes. Leaving a handle
+  // open holds the worker alive and billable until the function times out,
+  // and marks it busy so it refuses new requests meanwhile.
+  await Lib.Instance.runInstanceCleanup(instance);
+
+  return response;
+
 };
 ```
 
-`finally` ensures `cleanup` runs whether the handler succeeded or threw. If business logic registered any background routines whose `done()` callback has not yet fired, `cleanup` defers and runs automatically when the last `done()` is called.
+No SIGTERM handler. The container freezes rather than shutting down, and the next invocation re-opens what it needs.
 
-### Background work after the response is sent
+### The same driver, both deployments
 
 ```javascript
-app.post('/orders', async function (req, res) {
-  const instance = req.instance;
-  const order = await Lib.Db.write(instance, sql, params);
-
-  res.json(order);
-
-  const done = Lib.Instance.backgroundRoutine(instance);
-  send_confirmation_email(order)
-    .catch(function (err) {
-      Lib.Debug.error('Confirmation email failed', err);
-    })
-    .finally(function () {
-      done();
-    });
-});
+// Driver code is identical. It declares the resource and nothing more.
+Lib.Instance.addProcessCleanupRoutine(instance, _Postgres.close);
 ```
 
-The response goes out immediately. The email send runs in the background. When `done()` fires, the cleanup queue (which includes the database connection release) drains.
+| | Express | Lambda |
+|---|---|---|
+| Filed to | process queue | that request's queue |
+| Closed | on SIGTERM | end of every request |
+| Driver code | identical | identical |
 
 ---
 
 ## Lifecycle Notes
 
-There is nothing for the module to clean up at process exit. State lives on caller-owned instance objects; once the caller stops referencing them they are garbage-collected like any other JavaScript object.
-
-For module-level setup details (loader signature, peer-dep notes) see [Configuration → Loader Pattern](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-instance/docs/configuration.md#loader-pattern).
+- Load this module **once**, from the composition root. Each loader call has its own process cleanup queue, so loading twice splits the registry and orphans half of it
+- Every teardown routine is awaited, in registration order, one at a time
+- One failing routine never strands the routines after it. Each is caught individually and logged through `Lib.Debug.error`
+- `runInstanceCleanup` empties the instance queue, so calling it twice does not run a routine twice
+- `runProcessCleanup` empties the process queue. On a serverless deployment the driver re-registers on the next request, because closing nulls its cached handle
+- A process cleanup routine must leave its resource re-creatable. A driver that caches a handle it does not clear on close will never be cleaned up again
