@@ -18,8 +18,8 @@ const config = require('helper-eslint-config');
 
 ////////////////////////////// Shape Tests START ///////////////////////////////
 
-test('exports exactly the keys base, browser, app', () => {
-  assert.deepEqual(Object.keys(config).sort(), ['app', 'base', 'browser']);
+test('exports exactly the keys base, browser, esm, app', () => {
+  assert.deepEqual(Object.keys(config).sort(), ['app', 'base', 'browser', 'esm']);
 });
 
 
@@ -61,6 +61,27 @@ test('base[2].rules indent deep-equals error 2 (guards D6)', () => {
 
 test('base[2].languageOptions.globals.document is exactly undefined', () => {
   assert.equal(config.base[2].languageOptions.globals.document, undefined);
+});
+
+
+test('esm is an array whose length is exactly 3', () => {
+  assert.equal(Array.isArray(config.esm), true);
+  assert.equal(config.esm.length, 3);
+});
+
+
+test('esm[2].languageOptions.sourceType is exactly module', () => {
+  assert.equal(config.esm[2].languageOptions.sourceType, 'module');
+});
+
+
+test('esm[2].languageOptions.globals.document is exactly undefined', () => {
+  assert.equal(config.esm[2].languageOptions.globals.document, undefined);
+});
+
+
+test('esm[2].rules deep-equals base[2].rules', () => {
+  assert.deepEqual(config.esm[2].rules, config.base[2].rules);
 });
 
 
