@@ -15,10 +15,7 @@
 // Lock keys use a separate sort-key prefix (LOCK_SORT_KEY_PREFIX) within
 // the same table and partition, so lock items are distinct from cache
 // entry items.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // DynamoDB table name. One table per cache store instance.
   TABLE_NAME: null,

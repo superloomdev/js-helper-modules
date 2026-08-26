@@ -1,9 +1,8 @@
 // Info: Frozen error catalog for helper-auth-store-dynamodb.
 // Every error object is frozen so callers cannot mutate them.
-'use strict';
 
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   SERVICE_UNAVAILABLE: Object.freeze({
     type: 'AUTH_STORE_DYNAMODB_SERVICE_UNAVAILABLE',

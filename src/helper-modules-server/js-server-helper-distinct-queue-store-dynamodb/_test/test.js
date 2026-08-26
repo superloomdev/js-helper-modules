@@ -6,10 +6,10 @@
 // Tier 3 - Core integration: drives the real distinct-queue enqueue/claim/
 //          listByPrefix lifecycle through the DynamoDB adapter.
 
-'use strict';
+import assert from 'node:assert/strict';
+import { describe, it, before, beforeEach, after } from 'node:test';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, beforeEach, after } = require('node:test');
+import loader from './loader.js';
 
 const {
   Lib,
@@ -18,9 +18,9 @@ const {
   buildQueue,
   cleanTable,
   closeDynamoDB
-} = require('./loader.js');
+} = loader;
 
-const buildContractSuite = require('./store-contract-suite.js');
+import buildContractSuite from './store-contract-suite.js';
 
 
 

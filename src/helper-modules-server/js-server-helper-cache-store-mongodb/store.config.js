@@ -15,10 +15,7 @@
 //
 // Lock keys use a separate _id prefix (LOCK_ID_PREFIX) within the same
 // collection, so lock documents are distinct from cache entry documents.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // MongoDB collection name. One collection per cache store instance.
   COLLECTION_NAME: null,

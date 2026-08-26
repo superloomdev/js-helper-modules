@@ -8,15 +8,17 @@
 // Tier 3 - Verify + adapter integration (via store contract suite):
 //   Full js-server-helper-verify lifecycle driven against the real
 //   MySQL backend. Covers every public Verify API path.
-'use strict';
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
+import loader from './loader.js';
+import verifyStoreMysqlLoader from 'helper-verify-store-mysql';
+import verifyLoader from 'helper-verify';
+import runSharedStoreSuite from './store-contract-suite.js';
 
-const { Lib, ERRORS } = require('./loader')();
-const VerifyStoreMySQLFactory = require('helper-verify-store-mysql');
-const VerifyFactory           = require('helper-verify');
-const runSharedStoreSuite = require('./store-contract-suite');
+const { Lib, ERRORS } = loader();
+const VerifyStoreMySQLFactory = verifyStoreMysqlLoader;
+const VerifyFactory           = verifyLoader;
 
 
 // ============================================================================

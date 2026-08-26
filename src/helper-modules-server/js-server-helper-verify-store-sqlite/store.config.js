@@ -1,10 +1,9 @@
 // Info: Configuration defaults for helper-verify-store-sqlite.
 // This adapter is a fully independent module that owns its own configuration.
 // The caller passes configuration directly when instantiating the adapter.
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Table name for verification codes. Must be a valid SQLite identifier
   // without double quotes. The adapter quotes identifiers internally.

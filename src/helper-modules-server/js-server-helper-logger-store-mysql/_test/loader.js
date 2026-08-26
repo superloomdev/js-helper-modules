@@ -1,12 +1,16 @@
 // Info: Test loader for helper-logger-store-mysql.
-'use strict';
 
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import cryptoLoader from 'helper-crypto';
+import instanceLoader from 'helper-instance';
+import sqlMysqlLoader from 'helper-sql-mysql';
 
 /********************************************************************
 @return {Object} result
 @return {Object} result.Lib - { Utils, Debug, Crypto, Instance, MySQL }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -23,11 +27,11 @@ module.exports = function loader () {
 
   const Lib = {};
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
+  Lib.Crypto = cryptoLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
+  Lib.MySQL = sqlMysqlLoader(Lib, config_mysql);
   Lib.SQL = Lib.MySQL;
 
 

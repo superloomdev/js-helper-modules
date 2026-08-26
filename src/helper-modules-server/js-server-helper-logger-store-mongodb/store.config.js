@@ -1,7 +1,6 @@
 // Info: Default config for helper-logger-store-mongodb.
-'use strict';
 
 
-module.exports = {
+export default {
   COLLECTION_NAME: null  // Required. One collection per Logger instance. No safe default.
 };

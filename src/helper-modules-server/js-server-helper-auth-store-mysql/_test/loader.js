@@ -6,7 +6,6 @@
 //
 // MySQL connection settings are read exclusively from environment
 // variables here - test.js never reads process.env directly.
-'use strict';
 
 
 /********************************************************************
@@ -17,7 +16,12 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result
 @return {Object} result.Lib    - { Utils, Debug, SQL, Crypto, Instance, MySQL }
 *********************************************************************/
-module.exports = function loader () {
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import cryptoLoader from 'helper-crypto';
+import instanceLoader from 'helper-instance';
+import sqlMysqlLoader from 'helper-sql-mysql';
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -37,14 +41,14 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Crypto = cryptoLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
   Lib.HttpGateway = {
     buildCookie: function (existing, name, value, ttl) {
       const descriptor = existing ? Object.assign({}, existing) : {};
@@ -52,7 +56,7 @@ module.exports = function loader () {
       return descriptor;
     }
   };
-  Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
+  Lib.MySQL = sqlMysqlLoader(Lib, config_mysql);
 
 
   // The store factory now picks Lib.SQL from the shared container.

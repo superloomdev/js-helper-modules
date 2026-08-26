@@ -4,11 +4,10 @@
 //
 // Copied from js-server-helper-verify/_test/shared-store-suite.js.
 // Do not edit here - edit the source and re-copy.
-'use strict';
 
 
-const assert = require('node:assert/strict');
-const { describe, it, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, beforeEach } from 'node:test';
 
 
 /********************************************************************
@@ -22,7 +21,7 @@ Run the shared verify-store contract against a backend.
 
 @return {void}
 *********************************************************************/
-module.exports = function runSharedStoreSuite (args) {
+export default function runSharedStoreSuite (args) {
 
   const label = args.label;
   const buildVerify = args.buildVerify;

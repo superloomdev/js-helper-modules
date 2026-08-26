@@ -12,15 +12,18 @@
 // Tier 3 - Auth + adapter integration (via store contract suite):
 //   Full js-server-helper-auth lifecycle driven against the real
 //   Postgres backend. Covers every public Auth API path.
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
 
-const { Lib } = require('./loader')();
-const AuthStorePostgresFactory = require('helper-auth-store-postgres');
-const AuthFactory              = require('helper-auth');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import authStorePostgresLoader from 'helper-auth-store-postgres';
+import authLoader from 'helper-auth';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const AuthStorePostgresFactory = authStorePostgresLoader;
+const AuthFactory              = authLoader;
 
 
 // ============================================================================

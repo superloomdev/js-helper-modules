@@ -5,9 +5,6 @@
 //
 // Singleton: Lib and ERRORS are injected once by the loader. Node.js require
 // cache guarantees the same reference on every subsequent require.
-'use strict';
-
-
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
@@ -19,7 +16,7 @@ object with Lib closed over.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (Lib, ERRORS) { // eslint-disable-line no-unused-vars
+export default function loader (Lib, ERRORS) { // eslint-disable-line no-unused-vars
 
 
   //////////////////////////// Public Functions START ////////////////////////////

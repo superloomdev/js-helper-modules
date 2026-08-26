@@ -6,7 +6,13 @@
 // DynamoDB connection settings are read exclusively from environment variables
 // here - test.js never reads process.env directly.
 
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperCrypto from 'helper-crypto';
+import helperInstance from 'helper-instance';
+import helperNosqlAwsDynamodb from 'helper-nosql-aws-dynamodb';
+import storeFactory from 'helper-distinct-queue-store-dynamodb';
+import helperDistinctQueue from 'helper-distinct-queue';
 
 const TEST_TABLE = 'distinct_queue_test';
 
@@ -26,15 +32,15 @@ const config_dynamodb = {
 
 const Lib = {};
 
-Lib.Utils    = require('helper-utils')(Lib, {});
-Lib.Debug    = require('helper-debug')(Lib, { LOG_LEVEL: 'error' });
-Lib.Crypto   = require('helper-crypto')(Lib, {});
-Lib.Instance = require('helper-instance')(Lib, {});
-Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, config_dynamodb);
+Lib.Utils    = helperUtils(Lib, {});
+Lib.Debug    = helperDebug(Lib, { LOG_LEVEL: 'error' });
+Lib.Crypto   = helperCrypto(Lib, {});
+Lib.Instance = helperInstance(Lib, {});
+Lib.DynamoDB = helperNosqlAwsDynamodb(Lib, config_dynamodb);
 
 
 // Load the store adapter with Lib injected
-const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
+const Store = storeFactory(Lib, {
   TABLE_NAME: TEST_TABLE
 });
 
@@ -77,7 +83,7 @@ The parent uses the store object directly via CONFIG.Store.
 *********************************************************************/
 const buildQueue = function () {
 
-  return require('helper-distinct-queue')(Lib, {
+  return helperDistinctQueue(Lib, {
     Store: Store
   });
 
@@ -115,7 +121,7 @@ const closeDynamoDB = async function () {
 };
 
 
-module.exports = {
+export default {
   Lib,
   TEST_TABLE,
   buildInstance,

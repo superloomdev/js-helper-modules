@@ -2,6 +2,7 @@
   "name": "helper-verify-store-postgres-test",
   "description": "Test suite for helper-verify-store-postgres",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

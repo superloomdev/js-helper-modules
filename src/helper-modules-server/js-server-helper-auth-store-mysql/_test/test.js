@@ -18,15 +18,18 @@
 // Tier 3 - Auth + adapter integration (via store contract suite):
 //   Full js-server-helper-auth lifecycle driven against the real
 //   MySQL backend. Covers every public Auth API path.
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
 
-const { Lib } = require('./loader')();
-const AuthStoreMySQLFactory = require('helper-auth-store-mysql');
-const AuthFactory           = require('helper-auth');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import authStoreMysqlLoader from 'helper-auth-store-mysql';
+import authLoader from 'helper-auth';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const AuthStoreMySQLFactory = authStoreMysqlLoader;
+const AuthFactory           = authLoader;
 
 
 // ============================================================================

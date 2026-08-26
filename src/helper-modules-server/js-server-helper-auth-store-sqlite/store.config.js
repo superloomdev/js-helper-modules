@@ -1,7 +1,6 @@
 // Info: Default config for helper-auth-store-sqlite.
-'use strict';
 
 
-module.exports = {
+export default {
   TABLE_NAME: null  // Required. One table per actor_type. No safe default.
 };

@@ -7,7 +7,6 @@
 // Requires a running Postgres instance. In CI and local testing this
 // is provided by docker-compose.yml managed by the pretest/posttest
 // npm scripts.
-'use strict';
 
 
 /********************************************************************
@@ -18,7 +17,12 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result
 @return {Object} result.Lib    - { Utils, Debug, SQL, Crypto, Instance, Postgres }
 *********************************************************************/
-module.exports = function loader () {
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import cryptoLoader from 'helper-crypto';
+import instanceLoader from 'helper-instance';
+import sqlPostgresLoader from 'helper-sql-postgres';
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -39,14 +43,14 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Crypto = cryptoLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
   Lib.HttpGateway = {
     buildCookie: function (existing, name, value, ttl) {
       const descriptor = existing ? Object.assign({}, existing) : {};
@@ -54,7 +58,7 @@ module.exports = function loader () {
       return descriptor;
     }
   };
-  Lib.Postgres = require('helper-sql-postgres')(Lib, config_postgres);
+  Lib.Postgres = sqlPostgresLoader(Lib, config_postgres);
 
 
   // The store factory now picks Lib.SQL from the shared container.

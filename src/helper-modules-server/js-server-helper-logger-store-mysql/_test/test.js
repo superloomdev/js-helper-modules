@@ -1,13 +1,16 @@
 // Info: Three-tier test suite for helper-logger-store-mysql.
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, beforeEach } from 'node:test';
 
-const { Lib } = require('./loader')();
-const LoggerStoreMySQLFactory = require('helper-logger-store-mysql');
-const LoggerFactory           = require('helper-logger');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import loggerStoreMysqlLoader from 'helper-logger-store-mysql';
+import loggerLoader from 'helper-logger';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const LoggerStoreMySQLFactory = loggerStoreMysqlLoader;
+const LoggerFactory           = loggerLoader;
 
 
 // ============================================================================

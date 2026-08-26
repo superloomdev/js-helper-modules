@@ -20,7 +20,9 @@
 // Plus an idempotent provisioning method (not part of the validated contract):
 //   - setupNewStore(instance)                                           -> { success, error }
 
-'use strict';
+import storeConfig from './store.config.js';
+import storeErrors from './store.errors.js';
+import createValidators from './store.validators.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -35,7 +37,7 @@ misconfiguration fails fast at startup, not on first request.
 
 @return {Object} - Store interface (4 contract methods + setupNewStore)
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -47,15 +49,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./store.config'),
+    storeConfig,
     config || {}
   );
 
   // Load internal error catalog
-  const ERRORS = require('./store.errors');
+  const ERRORS = storeErrors;
 
   // Load the validators singleton and inject Lib + ERRORS
-  const Validators = require('./store.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);

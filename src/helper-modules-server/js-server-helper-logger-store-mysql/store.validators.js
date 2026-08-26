@@ -1,10 +1,9 @@
 // Info: Config validator for helper-logger-store-mysql.
-'use strict';
 
 let Lib;
 let ERRORS; // eslint-disable-line no-unused-vars
 
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
   Lib = shared_libs;
   ERRORS = errors;
   return Validators;

@@ -5,21 +5,17 @@
 // Two tiers are exercised:
 //   1. The store adapter directly (store contract methods)
 //   2. The parent cache module composed with this store (real composition)
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, beforeEach } = require('node:test');
-const { DynamoDBClient, CreateTableCommand, DeleteTableCommand } = require('test-infra-aws-sdk');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, beforeEach } from 'node:test';
+import { DynamoDBClient, CreateTableCommand, DeleteTableCommand } from 'test-infra-aws-sdk';
+
+import loader from './loader.js';
+import StoreFactory from 'helper-cache-store-dynamodb';
+import CacheFactory from 'helper-cache';
 
 // Load all dependencies via test loader (mirrors main project loader pattern)
-const { Lib, Config } = require('./loader')();
-
-// Store adapter under test
-const StoreFactory = require('helper-cache-store-dynamodb');
-
-// Parent cache module - proves the store contract lines up with the real
-// composition the application will use.
-const CacheFactory = require('helper-cache');
+const { Lib, Config } = loader();
 
 // Test table name
 const TEST_TABLE = 'test_cache_store';

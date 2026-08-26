@@ -12,15 +12,18 @@
 //
 // Tier 3 - Logger + adapter integration (via store contract suite):
 //   Full js-server-helper-logger lifecycle driven against real Postgres.
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, beforeEach } from 'node:test';
 
-const { Lib } = require('./loader')();
-const LoggerStorePostgresFactory = require('helper-logger-store-postgres');
-const LoggerFactory              = require('helper-logger');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import loggerStorePostgresLoader from 'helper-logger-store-postgres';
+import loggerLoader from 'helper-logger';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const LoggerStorePostgresFactory = loggerStorePostgresLoader;
+const LoggerFactory              = loggerLoader;
 
 
 // ============================================================================

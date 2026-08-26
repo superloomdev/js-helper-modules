@@ -8,10 +8,8 @@
 //   - queryByResourceIdPrefix
 //   - deleteByDataVersionLte
 
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, beforeEach } from 'node:test';
 
 
 
@@ -25,7 +23,7 @@ Build the contract test suite.
 
 @return {Function} - Async test function that can be called by the test runner
 *********************************************************************/
-module.exports = function buildContractSuite (deps) {
+export default function buildContractSuite (deps) {
 
   const Lib = deps.Lib;
   const buildStore = deps.buildStore;

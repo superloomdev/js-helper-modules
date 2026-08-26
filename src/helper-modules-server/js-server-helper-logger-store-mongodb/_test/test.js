@@ -13,15 +13,18 @@
 // Tier 3 - Logger + adapter integration (via store contract suite):
 //   Full js-server-helper-logger lifecycle driven against MongoDB.
 //
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, afterEach, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, afterEach, beforeEach } from 'node:test';
 
-const { Lib } = require('./loader')();
-const LoggerStoreMongoDBFactory = require('helper-logger-store-mongodb');
-const LoggerFactory             = require('helper-logger');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import loggerStoreMongoDBLoader from 'helper-logger-store-mongodb';
+import loggerLoader from 'helper-logger';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const LoggerStoreMongoDBFactory = loggerStoreMongoDBLoader;
+const LoggerFactory             = loggerLoader;
 
 
 // ============================================================================

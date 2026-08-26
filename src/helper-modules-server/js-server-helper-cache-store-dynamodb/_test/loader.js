@@ -2,7 +2,11 @@
 // Mirrors the main project loader pattern: reads environment variables,
 // builds Lib container, returns { Lib, Config }. Same loader works for
 // both emulated (Docker DynamoDB Local) and integration (real AWS) testing.
-'use strict';
+
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperNosqlAwsDynamodb from 'helper-nosql-aws-dynamodb';
 
 
 /********************************************************************
@@ -14,7 +18,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance, DynamoDB)
 @return {Object} result.Config - Test-wide environment values
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config
   const Config = {
@@ -37,12 +41,12 @@ module.exports = function loader () {
   const Lib = {};
 
   // Helper modules
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Utils = helperUtils(Lib, {});
+  Lib.Debug = helperDebug(Lib, {});
+  Lib.Instance = helperInstance(Lib, {});
 
   // Server helper modules
-  Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, config_dynamodb);
+  Lib.DynamoDB = helperNosqlAwsDynamodb(Lib, config_dynamodb);
 
 
   // Return runtime objects

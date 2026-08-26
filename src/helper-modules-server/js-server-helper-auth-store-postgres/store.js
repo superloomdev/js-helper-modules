@@ -32,8 +32,6 @@
 // the expires_at index) is the garbage-collection path. Apps run it
 // on a cron.
 
-'use strict';
-
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -50,7 +48,10 @@ Store instance.
 
 @return {Object} - Store interface (8 methods: setupNewStore, getSession, listSessionsByActor, setSession, updateSessionActivity, deleteSession, deleteSessions, cleanupExpiredSessions)
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+import CONFIG_DEFAULTS from './store.config.js';
+import ERRORS from './store.errors.js';
+import createValidators from './store.validators.js';
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance - by reference from the shared container
   const Lib = {
@@ -62,15 +63,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
-    require('./store.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Own frozen error catalog
-  const ERRORS = require('./store.errors');
-
   // Load the validators singleton and inject Lib + ERRORS
-  const Validators = require('./store.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);

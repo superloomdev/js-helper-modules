@@ -1,8 +1,7 @@
 // Info: Configuration defaults for helper-logger-store-postgres.
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Table name for log records. Must be a valid PostgreSQL identifier
   // (no double-quote characters). One table per Logger instance.

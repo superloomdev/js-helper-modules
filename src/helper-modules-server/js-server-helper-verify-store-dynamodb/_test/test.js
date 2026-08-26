@@ -8,15 +8,17 @@
 // Tier 3 - Verify + adapter integration (via store contract suite):
 //   Full js-server-helper-verify lifecycle driven against DynamoDB Local.
 //   Covers every public Verify API path.
-'use strict';
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
+import loader from './loader.js';
+import verifyStoreDynamodbLoader from 'helper-verify-store-dynamodb';
+import verifyLoader from 'helper-verify';
+import runSharedStoreSuite from './store-contract-suite.js';
 
-const { Lib, ERRORS } = require('./loader')();
-const VerifyStoreDynamoDBFactory = require('helper-verify-store-dynamodb');
-const VerifyFactory              = require('helper-verify');
-const runSharedStoreSuite = require('./store-contract-suite');
+const { Lib, ERRORS } = loader();
+const VerifyStoreDynamoDBFactory = verifyStoreDynamodbLoader;
+const VerifyFactory              = verifyLoader;
 
 
 // ============================================================================

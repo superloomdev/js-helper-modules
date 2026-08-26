@@ -5,8 +5,11 @@
 //
 // SQLite is offline - no Docker, no network. SQLITE_FILE defaults to
 // :memory: so tests always start from a clean state.
-'use strict';
-
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import cryptoLoader from 'helper-crypto';
+import instanceLoader from 'helper-instance';
+import sqlSqliteLoader from 'helper-sql-sqlite';
 
 /********************************************************************
 Build the dependency container and a minimal ERRORS catalog.
@@ -17,7 +20,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib    - { Utils, Debug, Crypto, Instance, SQLite }
 @return {Object} result.ERRORS - Minimal error catalog (SERVICE_UNAVAILABLE only)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -33,15 +36,15 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.SQL = require('helper-sql-sqlite')(Lib, config_sqlite);
+  Lib.Crypto = cryptoLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
+  Lib.SQL = sqlSqliteLoader(Lib, config_sqlite);
 
 
   // ==================== MINIMAL ERRORS CATALOG ===================== //

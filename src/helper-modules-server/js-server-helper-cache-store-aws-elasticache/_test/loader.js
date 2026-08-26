@@ -3,7 +3,11 @@
 // builds Lib container, returns { Lib, Config }. Same loader works for
 // both emulated (Docker Valkey as ElastiCache stand-in) and integration
 // (real ElastiCache) testing.
-'use strict';
+
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperKvAwsElasticache from 'helper-kv-aws-elasticache';
 
 
 /********************************************************************
@@ -15,7 +19,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance, KV)
 @return {Object} result.Config - Test-wide environment values
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config
   const Config = {
@@ -38,12 +42,12 @@ module.exports = function loader () {
   const Lib = {};
 
   // Helper modules
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Utils = helperUtils(Lib, {});
+  Lib.Debug = helperDebug(Lib, {});
+  Lib.Instance = helperInstance(Lib, {});
 
   // Server helper modules
-  Lib.KV = require('helper-kv-aws-elasticache')(Lib, config_kv);
+  Lib.KV = helperKvAwsElasticache(Lib, config_kv);
 
 
   // Return runtime objects

@@ -5,17 +5,16 @@
 // Two tiers are exercised:
 //   1. The store adapter directly (store contract methods)
 //   2. The parent cache module composed with this store (real composition)
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, beforeEach } = require('node:test');
-const { MongoClient } = require('test-infra-mongodb');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, beforeEach } from 'node:test';
+import { MongoClient } from 'test-infra-mongodb';
+
+import loader from './loader.js';
+import CacheFactory from 'helper-cache';
 
 // Load all dependencies via test loader (mirrors main project loader pattern)
-const { Lib, Config, Store: store, Cache } = require('./loader')();
-
-// Locked cache instance for getOrFetchCache stampede protection tests
-const CacheFactory = require('helper-cache');
+const { Lib, Config, Store: store, Cache } = loader();
 const LockedCache = CacheFactory(Lib, {
   Store: store,
   GET_OR_FETCH_LOCK_ENABLED: true,

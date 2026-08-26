@@ -6,8 +6,6 @@
 // Singleton: Lib and ERRORS are injected once by the loader. Node.js require
 // cache guarantees the same reference on every subsequent require.
 
-'use strict';
-
 
 // Shared dependencies injected by loader
 let Lib;
@@ -25,7 +23,7 @@ Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

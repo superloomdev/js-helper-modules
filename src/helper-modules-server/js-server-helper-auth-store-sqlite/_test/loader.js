@@ -6,7 +6,6 @@
 //
 // SQLite is offline - no Docker, no network. SQLITE_FILE defaults to
 // :memory: so tests always start from a clean state.
-'use strict';
 
 
 /********************************************************************
@@ -17,7 +16,12 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result
 @return {Object} result.Lib    - { Utils, Debug, SQL, Crypto, Instance, SQLite }
 *********************************************************************/
-module.exports = function loader () {
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import cryptoLoader from 'helper-crypto';
+import instanceLoader from 'helper-instance';
+import sqlSqliteLoader from 'helper-sql-sqlite';
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -33,14 +37,14 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Crypto = cryptoLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
   Lib.HttpGateway = {
     buildCookie: function (existing, name, value, ttl) {
       const descriptor = existing ? Object.assign({}, existing) : {};
@@ -48,7 +52,7 @@ module.exports = function loader () {
       return descriptor;
     }
   };
-  Lib.SQLite = require('helper-sql-sqlite')(Lib, config_sqlite);
+  Lib.SQLite = sqlSqliteLoader(Lib, config_sqlite);
 
 
   // The store factory now picks Lib.SQL from the shared container.

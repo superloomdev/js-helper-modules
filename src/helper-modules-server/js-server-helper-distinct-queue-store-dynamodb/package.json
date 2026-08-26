@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-distinct-queue-store-dynamodb",
   "description": "DynamoDB store adapter for helper-distinct-queue. Implements the 4-method store contract backed by helper-nosql-aws-dynamodb.",
   "version": "1.0.0",
-  "main": "store.js",
+  "type": "module",
+  "exports": {
+    ".": "./store.js",
+    "./store.config.js": "./store.config.js",
+    "./store.errors.js": "./store.errors.js",
+    "./store.validators.js": "./store.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

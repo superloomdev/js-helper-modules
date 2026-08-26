@@ -5,8 +5,11 @@
 //
 // MongoDB connection settings are read exclusively from environment
 // variables here - test.js never reads process.env directly.
-'use strict';
-
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import cryptoLoader from 'helper-crypto';
+import instanceLoader from 'helper-instance';
+import nosqlMongodbLoader from 'helper-nosql-mongodb';
 
 /********************************************************************
 Build the dependency container.
@@ -16,7 +19,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result
 @return {Object} result.Lib - { Utils, Debug, Crypto, Instance, MongoDB }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -35,15 +38,15 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
+  Lib.Crypto = cryptoLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
+  Lib.MongoDB = nosqlMongodbLoader(Lib, config_mongodb);
 
 
   return { Lib: Lib };

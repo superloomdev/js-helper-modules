@@ -5,8 +5,6 @@
 //
 // Singleton pattern: Lib and ERRORS are injected at loader time and
 // close over the module-namespace validators object.
-'use strict';
-
 
 // Shared dependencies injected by loader (singleton pattern)
 let Lib;
@@ -21,7 +19,7 @@ Loader. Injects Lib and ERRORS into the module-namespace validators object.
 
 @return {Object} - Validators singleton
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   Lib = shared_libs;
   ERRORS = errors;

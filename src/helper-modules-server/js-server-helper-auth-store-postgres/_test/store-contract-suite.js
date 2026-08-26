@@ -14,10 +14,9 @@
 //   - multi-tenant isolation
 //   - multi-actor-type cross-contamination defense
 //   - long / unicode / edge-case field values
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 
 /********************************************************************
@@ -33,7 +32,7 @@ Run the shared store-backed suite.
                                                persistent backends.
 @return {void}
 *********************************************************************/
-module.exports = function runSharedStoreSuite (args) {
+export default function runSharedStoreSuite (args) {
 
   const label = args.label;
   const buildAuth = args.buildAuth;

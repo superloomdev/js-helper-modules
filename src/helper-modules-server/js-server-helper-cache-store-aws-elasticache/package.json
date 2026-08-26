@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-cache-store-aws-elasticache",
   "description": "AWS ElastiCache store adapter for helper-cache. Implements the 9-method cache store contract using the Redis-compatible ElastiCache engine with SCAN-based prefix matching and native per-key TTL.",
   "version": "1.0.0",
-  "main": "store.js",
+  "type": "module",
+  "exports": {
+    ".": "./store.js",
+    "./store.config.js": "./store.config.js",
+    "./store.errors.js": "./store.errors.js",
+    "./store.validators.js": "./store.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": { "name": "sj00" },

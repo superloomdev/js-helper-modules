@@ -2,6 +2,7 @@
   "name": "helper-verify-store-sqlite-test",
   "description": "Test suite for helper-verify-store-sqlite",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-logger-store-mysql",
   "description": "MySQL store adapter for helper-logger. Implements the 5-method store contract backed by helper-sql-mysql.",
   "version": "1.0.0",
-  "main": "store.js",
+  "type": "module",
+  "exports": {
+    ".": "./store.js",
+    "./store.config.js": "./store.config.js",
+    "./store.errors.js": "./store.errors.js",
+    "./store.validators.js": "./store.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

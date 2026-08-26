@@ -4,10 +4,7 @@
 // Both KEY_PREFIX and KEY_SEPARATOR live here, not on the cache module,
 // because this adapter is what flattens namespace and cache_code into one
 // Valkey key string. The cache module composes no backend key.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // Prefix prepended to every composed Valkey key. Keeps cache entries
   // isolated from non-cache keys in the same Valkey instance.

@@ -1,9 +1,6 @@
 // Info: Configuration defaults for helper-distinct-queue-store-dynamodb.
 // The caller merges overrides over these defaults at loader time.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // DynamoDB table name for queue records. Required - no default.
   // The table is created idempotently by setupNewStore().

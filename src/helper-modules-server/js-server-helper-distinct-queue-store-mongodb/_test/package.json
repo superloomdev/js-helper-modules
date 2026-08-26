@@ -2,6 +2,7 @@
   "name": "js-server-helper-distinct-queue-store-mongodb-test",
   "description": "Test suite for js-server-helper-distinct-queue-store-mongodb",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

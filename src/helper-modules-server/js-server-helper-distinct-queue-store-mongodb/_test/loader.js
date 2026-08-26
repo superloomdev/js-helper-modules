@@ -6,7 +6,13 @@
 // MongoDB connection settings are read exclusively from environment variables
 // here - test.js never reads process.env directly.
 
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperCrypto from 'helper-crypto';
+import helperInstance from 'helper-instance';
+import helperNosqlMongodb from 'helper-nosql-mongodb';
+import storeFactory from 'helper-distinct-queue-store-mongodb';
+import helperDistinctQueue from 'helper-distinct-queue';
 
 const TEST_COLLECTION = 'distinct_queue_test';
 
@@ -25,17 +31,15 @@ const config_mongodb = {
 
 const Lib = {};
 
-Lib.Utils    = require('helper-utils')(Lib, {});
-Lib.Debug    = require('helper-debug')(Lib, { LOG_LEVEL: 'error' });
-Lib.Crypto   = require('helper-crypto')(Lib, {});
-Lib.Instance = require('helper-instance')(Lib, {});
-Lib.MongoDB  = require('helper-nosql-mongodb')(Lib, config_mongodb);
+Lib.Utils    = helperUtils(Lib, {});
+Lib.Debug    = helperDebug(Lib, { LOG_LEVEL: 'error' });
+Lib.Crypto   = helperCrypto(Lib, {});
+Lib.Instance = helperInstance(Lib, {});
+Lib.MongoDB  = helperNosqlMongodb(Lib, config_mongodb);
 
-
-const StoreFactory = require('helper-distinct-queue-store-mongodb');
 
 // Load the store adapter with Lib injected
-const Store = StoreFactory(Lib, {
+const Store = storeFactory(Lib, {
   COLLECTION_NAME: TEST_COLLECTION
 });
 
@@ -76,7 +80,7 @@ The parent uses the store object directly via CONFIG.Store.
 *********************************************************************/
 const buildQueue = function () {
 
-  return require('helper-distinct-queue')(Lib, {
+  return helperDistinctQueue(Lib, {
     Store: Store
   });
 
@@ -111,7 +115,7 @@ const closeMongo = async function () {
 };
 
 
-module.exports = {
+export default {
   Lib,
   TEST_COLLECTION,
   buildInstance,

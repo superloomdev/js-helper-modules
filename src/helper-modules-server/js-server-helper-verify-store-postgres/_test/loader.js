@@ -6,7 +6,12 @@
 // Requires a running Postgres instance. In CI and local testing this
 // is provided by docker-compose.yml managed by the pretest/posttest
 // npm scripts.
-'use strict';
+
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperCrypto from 'helper-crypto';
+import helperInstance from 'helper-instance';
+import helperSqlPostgres from 'helper-sql-postgres';
 
 
 /********************************************************************
@@ -18,7 +23,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib    - { Utils, Debug, Crypto, Instance, Postgres }
 @return {Object} result.ERRORS - Minimal error catalog (SERVICE_UNAVAILABLE only)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -39,15 +44,15 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = helperUtils(Lib, {});
+  Lib.Debug = helperDebug(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.SQL = require('helper-sql-postgres')(Lib, config_postgres);
+  Lib.Crypto = helperCrypto(Lib, {});
+  Lib.Instance = helperInstance(Lib, {});
+  Lib.SQL = helperSqlPostgres(Lib, config_postgres);
   Lib.Postgres = Lib.SQL;
 
 

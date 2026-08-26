@@ -1,2 +1,2 @@
-const { base } = require('@superloomdev/js-helper-eslint-config');
-module.exports = base;
+import { esm } from '@superloomdev/js-helper-eslint-config';
+export default esm;

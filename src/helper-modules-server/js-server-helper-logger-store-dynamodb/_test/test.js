@@ -14,15 +14,18 @@
 //   Full js-server-helper-logger lifecycle driven against DynamoDB Local.
 //   Table is provisioned directly before the suite via Lib.DynamoDB.createTable.
 //
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, beforeEach } from 'node:test';
 
-const { Lib } = require('./loader')();
-const LoggerStoreDynamoDBFactory = require('helper-logger-store-dynamodb');
-const LoggerFactory              = require('helper-logger');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import loggerStoreDynamoDBLoader from 'helper-logger-store-dynamodb';
+import loggerLoader from 'helper-logger';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const LoggerStoreDynamoDBFactory = loggerStoreDynamoDBLoader;
+const LoggerFactory              = loggerLoader;
 
 
 // ============================================================================

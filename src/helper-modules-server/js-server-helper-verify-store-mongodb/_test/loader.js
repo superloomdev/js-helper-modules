@@ -5,7 +5,12 @@
 //
 // MongoDB connection settings are read exclusively from environment
 // variables here - test.js never reads process.env directly.
-'use strict';
+
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperCrypto from 'helper-crypto';
+import helperInstance from 'helper-instance';
+import helperNosqlMongodb from 'helper-nosql-mongodb';
 
 
 /********************************************************************
@@ -17,7 +22,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib    - { Utils, Debug, Crypto, Instance, MongoDB }
 @return {Object} result.ERRORS - Minimal error catalog (SERVICE_UNAVAILABLE only)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   const config_debug = { LOG_LEVEL: 'error' };
 
@@ -36,15 +41,15 @@ module.exports = function loader () {
 
   // ==================== FOUNDATION MODULES ========================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = helperUtils(Lib, {});
+  Lib.Debug = helperDebug(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
-  Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
+  Lib.Crypto = helperCrypto(Lib, {});
+  Lib.Instance = helperInstance(Lib, {});
+  Lib.MongoDB = helperNosqlMongodb(Lib, config_mongodb);
 
 
   // ==================== MINIMAL ERRORS CATALOG ===================== //

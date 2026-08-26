@@ -5,20 +5,16 @@
 // Two tiers are exercised:
 //   1. The store adapter directly (store contract methods)
 //   2. The parent cache module composed with this store (real composition)
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after, beforeEach } from 'node:test';
+
+import loader from './loader.js';
+import StoreFactory from 'helper-cache-store-valkey';
+import CacheFactory from 'helper-cache';
 
 // Load all dependencies via test loader (mirrors main project loader pattern)
-const { Lib } = require('./loader')();
-
-// Store adapter under test
-const StoreFactory = require('helper-cache-store-valkey');
-
-// Parent cache module - proves the store contract lines up with the real
-// composition the application will use.
-const CacheFactory = require('helper-cache');
+const { Lib } = loader();
 
 // Build a store with a test-specific prefix so we never collide with
 // real data if the Valkey instance is shared.

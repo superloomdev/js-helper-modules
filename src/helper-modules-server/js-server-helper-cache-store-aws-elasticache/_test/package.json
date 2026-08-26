@@ -2,6 +2,7 @@
   "name": "helper-cache-store-aws-elasticache-test",
   "description": "Test suite for helper-cache-store-aws-elasticache",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

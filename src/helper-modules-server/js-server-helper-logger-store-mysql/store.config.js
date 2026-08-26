@@ -1,8 +1,7 @@
 // Info: Configuration defaults for helper-logger-store-mysql.
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Table name for log records. Must be a valid MySQL identifier
   // (no backtick characters). One table per Logger instance.

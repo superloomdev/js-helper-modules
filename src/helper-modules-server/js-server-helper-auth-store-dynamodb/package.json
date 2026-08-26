@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-auth-store-dynamodb",
   "description": "DynamoDB session store adapter for helper-auth. Implements the 8-method session store contract backed by DynamoDB via helper-nosql-aws-dynamodb.",
   "version": "1.0.0",
-  "main": "store.js",
+  "type": "module",
+  "exports": {
+    ".": "./store.js",
+    "./store.config.js": "./store.config.js",
+    "./store.errors.js": "./store.errors.js",
+    "./store.validators.js": "./store.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-auth-store-postgres",
   "description": "Postgres store adapter for helper-auth. Implements the 8-method session store contract backed by Postgres via helper-sql-postgres. Part of Superloom.",
   "version": "1.0.0",
-  "main": "store.js",
+  "type": "module",
+  "exports": {
+    ".": "./store.js",
+    "./store.config.js": "./store.config.js",
+    "./store.errors.js": "./store.errors.js",
+    "./store.validators.js": "./store.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

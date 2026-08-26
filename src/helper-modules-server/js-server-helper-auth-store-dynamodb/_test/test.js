@@ -15,15 +15,18 @@
 //   Full js-server-helper-auth lifecycle driven against DynamoDB Local.
 //   Table is provisioned directly before the suite via Lib.DynamoDB.createTable
 //   (setupNewStore() is not yet implemented for this backend).
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
 
-const { Lib } = require('./loader')();
-const AuthStoreDynamoDBFactory = require('helper-auth-store-dynamodb');
-const AuthFactory              = require('helper-auth');
-const runSharedStoreSuite = require('./store-contract-suite');
+import loader from './loader.js';
+import authStoreDynamodbLoader from 'helper-auth-store-dynamodb';
+import authLoader from 'helper-auth';
+import runSharedStoreSuite from './store-contract-suite.js';
+
+const { Lib } = loader();
+const AuthStoreDynamoDBFactory = authStoreDynamodbLoader;
+const AuthFactory              = authLoader;
 
 
 // ============================================================================

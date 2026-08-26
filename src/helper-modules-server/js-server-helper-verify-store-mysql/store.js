@@ -24,7 +24,9 @@
 //   - deleteRecord(instance, namespace, key)           -> { success, error }
 //   - cleanupExpiredRecords(instance)              -> { success, deleted_count, error }
 
-'use strict';
+import storeConfig from './store.config.js';
+import storeErrors from './store.errors.js';
+import createValidators from './store.validators.js';
 
 
 
@@ -41,7 +43,7 @@ Store instance.
 
 @return {Object} - Store interface (6 methods: setupNewStore, getRecord, setRecord, incrementFailCount, deleteRecord, cleanupExpiredRecords)
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance - by reference from the shared container
   const Lib = {
@@ -53,15 +55,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
-    require('./store.config'),
+    storeConfig,
     config || {}
   );
 
   // Own frozen error catalog
-  const ERRORS = require('./store.errors');
+  const ERRORS = storeErrors;
 
   // Load the validators singleton and inject Lib + ERRORS
-  const Validators = require('./store.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);

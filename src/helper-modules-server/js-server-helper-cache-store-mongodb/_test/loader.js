@@ -2,7 +2,13 @@
 // Mirrors the main project loader pattern: reads environment variables,
 // builds Lib container, returns { Lib, Config }. Same loader works for
 // both emulated (Docker MongoDB) and integration (real MongoDB) testing.
-'use strict';
+
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperNosqlMongodb from 'helper-nosql-mongodb';
+import helperCacheStoreMongodb from 'helper-cache-store-mongodb';
+import helperCache from 'helper-cache';
 
 
 /********************************************************************
@@ -14,7 +20,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance, MongoDB)
 @return {Object} result.Config - Test-wide environment values
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config
   const Config = {
@@ -38,18 +44,18 @@ module.exports = function loader () {
   const Lib = {};
 
   // Helper modules
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Utils = helperUtils(Lib, {});
+  Lib.Debug = helperDebug(Lib, {});
+  Lib.Instance = helperInstance(Lib, {});
 
   // Server helper modules
-  Lib.MongoDB = require('helper-nosql-mongodb')(Lib, config_mongodb);
+  Lib.MongoDB = helperNosqlMongodb(Lib, config_mongodb);
 
   // Cache store adapter
-  const Store = require('helper-cache-store-mongodb')(Lib, config_cache_store);
+  const Store = helperCacheStoreMongodb(Lib, config_cache_store);
 
   // Cache parent module
-  const Cache = require('helper-cache')(Lib, { Store: Store });
+  const Cache = helperCache(Lib, { Store: Store });
 
 
   // Return runtime objects

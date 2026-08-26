@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-verify-store-sqlite",
   "description": "SQLite store adapter for the verify module. Implements the 6-method store contract backed by node:sqlite via the sql-sqlite driver helper.",
   "version": "1.0.0",
-  "main": "store.js",
+  "type": "module",
+  "exports": {
+    ".": "./store.js",
+    "./store.config.js": "./store.config.js",
+    "./store.errors.js": "./store.errors.js",
+    "./store.validators.js": "./store.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {
