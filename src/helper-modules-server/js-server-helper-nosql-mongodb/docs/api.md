@@ -327,13 +327,26 @@ await Lib.MongoDB.createIndex(
 async close(instance) → { success, error }
 ```
 
-Close the MongoDB connection for this loader instance. Unlike the DynamoDB sibling (which manages its connections internally via the AWS SDK), MongoDB requires an explicit close to release the pool.
+Close the MongoDB connection for this loader instance. Idempotent: closing an already-closed connection succeeds. Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first client creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
 
-Call once on `SIGTERM`:
+| Parameter | Type | Description |
+|---|---|---|
+| `instance` | `Object` | Request instance from `Lib.Instance.initialize()` |
+
+**Returns:** `{ success: true, error: null }` or `{ success: false, error: {...} }`.
+
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
 
 ```javascript
 process.on('SIGTERM', async () => {
-  await Lib.MongoDB.close(instance);
+  await Lib.Instance.runProcessCleanup();
   process.exit(0);
 });
 ```

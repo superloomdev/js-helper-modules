@@ -108,10 +108,11 @@ createIndex(instance, collection, spec, options?) → { success, index_name, err
   spec: key map (e.g. { field: 1 } ascending, { field: 'text' } text)
   options: { name, unique, sparse, expireAfterSeconds }
 
-### Connection
+### Lifecycle
 
 close(instance) → { success, error } | async:yes
-  Close MongoDB connection for this instance. DynamoDB handles this internally.
+  Close the MongoDB connection for this instance. Idempotent.
+  Teardown is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs: at SIGTERM on a persistent server, or after every request on a serverless runtime. A caller normally never calls close() directly.
 
 ## Error Handling
 All functions return standardized response format:
@@ -123,12 +124,21 @@ All functions return standardized response format:
 }
 ```
 
+## Connection Lifecycle
+
+The MongoClient is created lazily on the first call via `initIfNot(instance)` and shared for the process lifetime. On first creation, the module registers `MongoDB.close` as a process-scoped cleanup routine with `Lib.Instance`. The module never decides when to close the connection. That decision belongs to the deployment:
+
+| Deployment | CLOSE_ON_CLEANUP | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | false | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | true | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
 ## Patterns
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Lazy loading:** MongoDB driver loaded only when first function is called
 - Connection pooling: Configurable pool size (MAX_POOL_SIZE)
 - Instance isolation: Each factory call creates independent connection
-- Automatic cleanup: Use close() to release resources
+- Automatic cleanup: close() is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs
 - Safety nets: query(), count(), deleteRecordsByFilter() throw TypeError on empty filter
 - Intentional scans: scan() permits empty filter for full-collection reads
 - Upsert by default: writeRecord() always uses upsert (insert or replace)

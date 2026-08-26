@@ -29,6 +29,10 @@ Error handling, result reading, and exception expectations are the same in every
 
 - **Built-in safety nets against accidental full-collection writes.** `query()`, `count()`, and `deleteRecordsByFilter()` reject empty filters at runtime. There is no path by which an empty or `null` filter can accidentally read or wipe an entire collection. Full-collection reads go through the explicit `scan()` function so the intent is always visible at the call site.
 
+## Connection Lifecycle
+
+The MongoClient is created lazily on the first call and shared for the process lifetime. Its teardown is registered with `helper-instance` so the deployment decides when it closes: at `SIGTERM` on a persistent server, or after every request on a serverless runtime. The module never decides when to close the connection.
+
 ## Hot-Swappable with Other Backends
 
 This module is part of a NoSQL family of database helpers that share the same calling shape (single-record CRUD, batch, query / count / scan, atomic transactions. Switch by changing the loader line) the rest of your code keeps working for the overlapping surface.

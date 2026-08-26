@@ -10,12 +10,9 @@ const ERRORS = require('../mongodb.errors');
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config } = require('./loader')();
+const { Lib, Config, instance, buildLib } = require('./loader')();
 const MongoDB = Lib.MongoDB;
 const Instance = Lib.Instance;
-
-// Create a test instance (simulates a real request lifecycle)
-const instance = Instance.initialize();
 
 // Test collection names (prefixed with test_ for isolation)
 const TEST_COLLECTION = 'test_crud';
@@ -1227,6 +1224,113 @@ describe('large-scale operations (1000 records)', function () {
   });
 
 });
+
+
+
+});
+
+// ============================================================================
+// 7. Connection lifecycle - registration, persistent vs serverless, background gate
+// ============================================================================
+
+describe('connection lifecycle', function () {
+
+  it('should register the process cleanup routine once, not per call', async function () {
+
+    const { Lib: LibF, instance: instF } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const MongoDBF = LibF.MongoDB;
+    const InstanceF = LibF.Instance;
+
+    await MongoDBF.count(instF, 'test_lifecycle', { _id: 'nonexistent' });
+    await MongoDBF.count(instF, 'test_lifecycle', { _id: 'nonexistent' });
+
+    assert.strictEqual(InstanceF.getProcessCleanupRoutineCount(), 1);
+
+    await InstanceF.runProcessCleanup();
+
+  });
+
+
+  it('should hold the client open on a persistent deployment', async function () {
+
+    const { Lib: LibP, instance: instP } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const MongoDBP = LibP.MongoDB;
+    const InstanceP = LibP.Instance;
+
+    const res1 = await MongoDBP.count(instP, 'test_lifecycle', { _id: 'nonexistent' });
+    assert.strictEqual(res1.success, true);
+
+    await InstanceP.runInstanceCleanup(instP);
+
+    const res2 = await MongoDBP.count(instP, 'test_lifecycle', { _id: 'nonexistent' });
+    assert.strictEqual(res2.success, true);
+
+    await InstanceP.runProcessCleanup();
+
+  });
+
+
+  it('should close the client on a serverless deployment and re-open on next call', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const MongoDBSL = LibSL.MongoDB;
+    const InstanceSL = LibSL.Instance;
+
+    const res1 = await MongoDBSL.count(instSL, 'test_lifecycle', { _id: 'nonexistent' });
+    assert.strictEqual(res1.success, true);
+
+    await InstanceSL.runInstanceCleanup(instSL);
+
+    assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+
+    const res2 = await MongoDBSL.count(instSL, 'test_lifecycle', { _id: 'nonexistent' });
+    assert.strictEqual(res2.success, true);
+
+    await InstanceSL.runInstanceCleanup(instSL);
+
+  });
+
+
+  it('should close and re-register across multiple serverless request cycles', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const MongoDBSL = LibSL.MongoDB;
+    const InstanceSL = LibSL.Instance;
+
+    for (let i = 0; i < 3; i++) {
+      const res = await MongoDBSL.count(instSL, 'test_lifecycle', { _id: 'nonexistent' });
+      assert.strictEqual(res.success, true);
+
+      await InstanceSL.runInstanceCleanup(instSL);
+      assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+    }
+
+  });
+
+
+  it('should run background routines before process cleanup routines', async function () {
+
+    const { Lib: LibBG, instance: instBG } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const InstanceBG = LibBG.Instance;
+
+    const order = [];
+
+    const signal = InstanceBG.addBackgroundRoutine(instBG);
+    setImmediate(function () {
+      order.push('background');
+      signal();
+    });
+
+    InstanceBG.addProcessCleanupRoutine(instBG, function () {
+      order.push('cleanup');
+    });
+
+    await InstanceBG.runInstanceCleanup(instBG);
+
+    assert.strictEqual(order[0], 'background');
+    assert.strictEqual(order[1], 'cleanup');
+
+  });
 
 
 });

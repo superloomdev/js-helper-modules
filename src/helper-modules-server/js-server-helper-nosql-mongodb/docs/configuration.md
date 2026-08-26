@@ -69,13 +69,15 @@ In your application code, set the variables you need and forward them to the loa
 
 ## Peer Dependencies (Injected)
 
-These come from your project's `Lib` container, not from this module's `package.json`. You install them in your project once and inject them into every helper.
+The module receives these through the `Lib` container, not through `dependencies` in `package.json`. The project loader is responsible for loading them and passing them in.
 
-| Package | Purpose |
-|---|---|
-| `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
-| `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-operation timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
+| Peer | Package | Role |
+|---|---|---|
+| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
+| `Lib.Debug` | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-operation timing |
+| `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Process cleanup registration. The module registers its connection teardown with `Lib.Instance.addProcessCleanupRoutine` on first client creation. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` controls when teardown runs, not this module |
+
+The `Lib.Instance` peer is required. The module registers its connection teardown with `Lib.Instance.addProcessCleanupRoutine` on first client creation. The deployment's `CLOSE_ON_CLEANUP` config lives on `helper-instance`, not on this module.
 
 ---
 

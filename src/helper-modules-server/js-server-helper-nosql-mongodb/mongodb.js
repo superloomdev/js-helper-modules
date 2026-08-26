@@ -104,7 +104,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     getRecord: async function (instance, collection, filter, options) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -159,7 +159,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     writeRecord: async function (instance, collection, filter, document) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -226,7 +226,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     insertRecordIfNotExists: async function (instance, collection, document) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -295,7 +295,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     deleteRecord: async function (instance, collection, filter) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -354,7 +354,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     updateRecord: async function (instance, collection, filter, update) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -430,7 +430,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -487,7 +487,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -548,7 +548,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     scan: async function (instance, collection, filter, options) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -617,7 +617,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -677,7 +677,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     batchGetRecords: async function (instance, idsByCollection) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -751,7 +751,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     batchWriteAndDeleteRecords: async function (instance, operationsByCollection) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -835,7 +835,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     batchWriteRecords: async function (instance, documentsByCollection) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -906,7 +906,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     batchDeleteRecords: async function (instance, idsByCollection) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -986,7 +986,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     transactWriteRecords: async function (instance, callback) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1058,7 +1058,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     createIndex: async function (instance, collection, spec, options) {
 
       // Ensure MongoDB client is initialized
-      await _MongoDB.initIfNot();
+      await _MongoDB.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1177,7 +1177,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    initIfNot: async function () {
+    initIfNot: async function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.client)) {
@@ -1200,6 +1200,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Cache the database reference
       state.db = state.client.db(CONFIG.DATABASE_NAME);
+
+      // This client outlives the request that opened it. Instance decides
+      // when to run this: at shutdown on a persistent deployment, after
+      // every request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, MongoDB.close);
 
       Lib.Debug.performanceAuditLog('End', 'MongoDB Client', start_ms);
       Lib.Debug.info('MongoDB Client Initialized', {
