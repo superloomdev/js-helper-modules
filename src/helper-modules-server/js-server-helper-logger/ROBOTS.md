@@ -105,7 +105,7 @@ Error shape is frozen at module load: `{ type: 'LOGGER_SERVICE_UNAVAILABLE', mes
    - Auto-capture `ip` / `user_agent` from `instance.http_request` when `Lib.HttpHandler` is in `Lib` and the option was not provided.
    - AES-encrypt `ip` under `CONFIG.IP_ENCRYPT_KEY` if configured.
 3. If `options.await === true`: `await store.addLog(...)`. Map adapter failure to `LOGGER_SERVICE_UNAVAILABLE`.
-4. Otherwise: register `Lib.Instance.backgroundRoutine(instance)` to get a completion callback, then chain `store.addLog(...)` with `.then()/.catch()/.finally()`. Return `{ success: true }` immediately. Adapter failures during background writes are logged via `Lib.Debug.debug` and never surface to the caller.
+4. Otherwise: register `Lib.Instance.addBackgroundRoutine(instance)` to get a completion callback, then chain `store.addLog(...)` with `.then()/.catch()/.finally()`. Return `{ success: true }` immediately. Adapter failures during background writes are logged via `Lib.Debug.debug` and never surface to the caller.
 
 ## Critical Behavior for Code-Generating Tools
 
