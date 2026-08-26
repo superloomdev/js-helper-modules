@@ -6,7 +6,9 @@
 // Factory pattern: each loader call returns an independent Debug interface
 // with its own Lib, CONFIG, ERRORS, and Validators. shared_libs is accepted
 // for interface uniformity but unused - Debug has no external lib dependencies.
-'use strict';
+import CONFIG_DEFAULTS from './debug.config.js';
+import ERRORS from './debug.errors.js';
+import createValidators from './debug.validators.js';
 
 
 
@@ -22,7 +24,7 @@ uniformity - Lib is built but not consumed by Debug functions.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -32,15 +34,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./debug.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, shared across instances)
-  const ERRORS = require('./debug.errors');
-
   // Validators module (singleton, initialized with Lib, ERRORS)
-  const Validators = require('./debug.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

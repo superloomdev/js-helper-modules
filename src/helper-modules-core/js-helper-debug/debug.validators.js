@@ -3,7 +3,6 @@
 // adding the first config key requires only filling in this file.
 //
 // Singleton: No Lib dependency - Debug is a foundation module.
-'use strict';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -17,7 +16,7 @@ Debug validators need no Lib injection - Debug is a foundation module.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
+export default function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
 
   // Return the Validators interface
   return Validators;

@@ -1,9 +1,8 @@
 // Tests for js-helper-debug
 // Covers all exported functions with automated assertions
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import debugLoader from 'helper-debug';
 
 
 
@@ -14,7 +13,7 @@ function createDebug (config_override) {
 
   const Lib = {};
 
-  return require('helper-debug')(Lib, config_override || {});
+  return debugLoader(Lib, config_override || {});
 
 }
 

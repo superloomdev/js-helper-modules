@@ -1,9 +1,8 @@
 // Info: Configuration file for helper-debug
-'use strict';
 
 
 // Export configuration as key-value Map
-module.exports = {
+export default {
 
   // Log level threshold: 'debug' | 'info' | 'warn' | 'error' | 'none'
   // Only messages at or above this level will be logged

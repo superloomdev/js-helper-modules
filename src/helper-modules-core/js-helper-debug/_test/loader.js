@@ -1,7 +1,7 @@
 // Info: Test loader for js-helper-debug.
 // Mirrors the main project loader pattern: builds Lib container and Config.
 // process.env is not used - this module has no env-dependent values.
-'use strict';
+import debugLoader from 'helper-debug';
 
 
 /********************************************************************
@@ -11,7 +11,7 @@ Load all test dependencies and build the Lib container.
 @return {Object} result.Lib - Dependency container (Debug)
 @return {Object} result.Config - Test-wide config values
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide config - use test-friendly defaults
   const Config = {
@@ -29,10 +29,10 @@ module.exports = function loader () {
 
 
   // Load Debug instance
-  Lib.Debug = require('helper-debug')(Lib, Config);
+  Lib.Debug = debugLoader(Lib, Config);
 
 
   // Return runtime objects
   return { Lib, Config };
 
-};
+}

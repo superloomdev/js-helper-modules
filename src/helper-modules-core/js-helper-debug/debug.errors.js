@@ -3,10 +3,9 @@
 // (wrong type passed) which throw TypeError, not domain errors.
 //
 // Frozen to prevent accidental mutation.
-'use strict';
 
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   // No error definitions yet - Debug has no domain-specific errors.
   // Add error definitions here as the module grows.
