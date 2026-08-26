@@ -35,6 +35,10 @@ Error handling, result reading, and exception expectations are the same in every
 
 - **Key prefix isolation.** `KEY_PREFIX` gives every loader call its own keyspace without separate servers, and the prefix is transparently stripped from all read results including `scan`.
 
+## Connection Lifecycle
+
+The ioredis client is created lazily on the first call and shared for the process lifetime. Its teardown is registered with `helper-instance` so the deployment decides when it closes: at `SIGTERM` on a persistent server, or after every request on a serverless runtime. The module never decides when to close the connection.
+
 ## Hot-Swappable with Other Backends
 
 This module is part of a key-value family. The `Lib.KV` container slot is family-generic: any future `kv-*` sibling with the same API surface satisfies the same slot.

@@ -61,6 +61,7 @@ All functions accept `instance` as their first argument for request context and 
 
 close(instance) -> { success, error } | async:yes
   Close the connection. Idempotent: returns success if already closed or never connected.
+  Teardown is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs: at SIGTERM on a persistent server, or after every request on a serverless runtime. A caller normally never calls close() directly.
 
 ping(instance) -> { success, error } | async:yes
   Ping the server. Triggers lazy connect on first call.
@@ -136,6 +137,15 @@ All functions return standardized response format:
 ```
 Driver error wording (ioredis messages, codes, stacks) is logged at debug level and never returned in the envelope.
 
+## Connection Lifecycle
+
+The ioredis client is created lazily on the first call via `initIfNot(instance)` and shared for the process lifetime. On first creation, the module registers `KV.close` as a process-scoped cleanup routine with `Lib.Instance`. The module never decides when to close the connection. That decision belongs to the deployment:
+
+| Deployment | CLOSE_ON_CLEANUP | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | false | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | true | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
 ## Patterns
 - Performance logging: `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms`. Label pattern: `'KV <function>'`.
 - Lazy loading: ioredis loaded only when first function is called
@@ -144,3 +154,4 @@ Driver error wording (ioredis messages, codes, stacks) is logged at debug level 
 - TTL sentinels: engine -1 (no expiry) and -2 (absent) both map to null, never leaked
 - Single instance: no cluster mode, no fan-out, MSET is atomic
 - Empty inputs: no-op success without contacting the engine
+- Automatic cleanup: close() is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs

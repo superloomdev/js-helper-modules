@@ -139,10 +139,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<Object>} - { success, error }
     *********************************************************************/
-    ping: async function (instance) { // eslint-disable-line no-unused-vars
+    ping: async function (instance) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -193,7 +193,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     set: async function (instance, key, value, ttl_seconds) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -275,7 +275,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     setIfNotExists: async function (instance, key, value, ttl_seconds) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -353,7 +353,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     get: async function (instance, key) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -432,7 +432,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     delete: async function (instance, key) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -484,7 +484,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     getKeyExists: async function (instance, key) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -549,7 +549,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -638,7 +638,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -729,7 +729,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       }
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -786,7 +786,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     scan: async function (instance, pattern, options) { // eslint-disable-line no-unused-vars
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -861,7 +861,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     setHashField: async function (instance, key, field, value) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -929,7 +929,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     getHashField: async function (instance, key, field) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1009,7 +1009,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     getHashFields: async function (instance, key) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1098,7 +1098,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     deleteHashField: async function (instance, key, field) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1154,7 +1154,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     setExpire: async function (instance, key, ttl_seconds) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1208,7 +1208,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     getTtl: async function (instance, key) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1270,7 +1270,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     increment: async function (instance, key, by) {
 
       // Ensure ioredis client is initialized
-      await _KV.initIfNot();
+      await _KV.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1345,7 +1345,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    initIfNot: async function () {
+    initIfNot: async function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.client)) {
@@ -1387,6 +1387,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Establish connection
       await state.client.connect();
+
+      // This client outlives the request that opened it. Instance decides
+      // when to run this: at shutdown on a persistent deployment, after
+      // every request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, KV.close);
 
       Lib.Debug.performanceAuditLog('End', 'KV Client', start_ms);
       Lib.Debug.info('KV Client Initialized', {

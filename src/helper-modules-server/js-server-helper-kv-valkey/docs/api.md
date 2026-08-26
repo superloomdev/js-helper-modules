@@ -8,7 +8,23 @@ All functions are `async`, take `instance` first, and return an envelope `{ succ
 
 ### close(instance) -> { success, error }
 
-Close the connection. Idempotent: returns `{ success: true, error: null }` if already closed or never connected.
+Close the connection. Idempotent: returns `{ success: true, error: null }` if already closed or never connected. Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first client creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
+
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
+
+```javascript
+process.on('SIGTERM', async () => {
+  await Lib.Instance.runProcessCleanup();
+  process.exit(0);
+});
+```
 
 ### ping(instance) -> { success, error }
 
