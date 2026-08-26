@@ -4,12 +4,31 @@
 
 This module exposes 17 key-value functions, the same set as `js-server-helper-kv-valkey`. The function signatures, return shapes, and error handling are identical. This is a standalone module - it does not depend on `kv-valkey` and owns its full implementation.
 
-## Functions
+## Lifecycle
 
-### Lifecycle
+### close(instance) -> { success, error }
 
-- `close(instance)` -> `{ success, error }`
-- `ping(instance)` -> `{ success, error }`
+Close the connection. Idempotent: returns `{ success: true, error: null }` if already closed or never connected. Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first client creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
+
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
+
+```javascript
+process.on('SIGTERM', async () => {
+  await Lib.Instance.runProcessCleanup();
+  process.exit(0);
+});
+```
+
+### ping(instance) -> { success, error }
+
+Ping the server. Triggers lazy connect on first call. Returns `KV_CONNECTION_FAILED` if the server is unreachable.
 
 ### Single Key
 

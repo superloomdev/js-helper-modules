@@ -149,11 +149,15 @@ Long-lived connections auto-disconnect after 12 hours per AWS policy. A reconnec
 
 ## Peer Dependencies
 
-| Injection | Package | Alias |
+The module receives these through the `Lib` container, not through `dependencies` in `package.json`. The project loader is responsible for loading them and passing them in.
+
+| Peer | Package | Role |
 |---|---|---|
-| `Utils` | `@superloomdev/js-helper-utils` | `helper-utils` |
-| `Debug` | `@superloomdev/js-helper-debug` | `helper-debug` |
-| `Instance` | `@superloomdev/js-server-helper-instance` | `helper-instance` |
+| `Lib.Utils` | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
+| `Lib.Debug` | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-operation timing |
+| `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Process cleanup registration. The module registers its connection teardown with `Lib.Instance.addProcessCleanupRoutine` on first client creation. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` controls when teardown runs, not this module |
+
+The `Lib.Instance` peer is required. The module registers its connection teardown with `Lib.Instance.addProcessCleanupRoutine` on first client creation. The deployment's `CLOSE_ON_CLEANUP` config lives on `helper-instance`, not on this module.
 
 ## Direct Dependencies
 

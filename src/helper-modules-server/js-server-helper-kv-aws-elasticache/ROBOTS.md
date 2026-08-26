@@ -77,8 +77,12 @@ const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
 All functions are async and return an envelope. Same signatures and return shapes as kv-valkey.
 
 ### Lifecycle
-close(instance) -> { success, error }
-ping(instance) -> { success, error }
+close(instance) -> { success, error } | async:yes
+  Close the connection. Idempotent: returns success if already closed or never connected.
+  Teardown is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs: at SIGTERM on a persistent server, or after every request on a serverless runtime. A caller normally never calls close() directly.
+
+ping(instance) -> { success, error } | async:yes
+  Ping the server. Triggers lazy connect on first call.
 
 ### Single Key
 set(instance, key, value, ttl_seconds?) -> { success, error }
@@ -127,3 +131,22 @@ increment(instance, key, by?) -> { success, value, error }
 | `KV_SERIALIZATION_FAILED` | JSON serialization fails |
 | `KV_ELASTICACHE_IAM_TOKEN_FAILED` | SigV4 token generation fails |
 | `KV_ELASTICACHE_IAM_TOKEN_EXPIRED` | Token expired and refresh failed |
+
+## Connection Lifecycle
+
+The ioredis client is created lazily on the first call via `initIfNot(instance)` and shared for the process lifetime. On first creation, the module registers `KV.close` as a process-scoped cleanup routine with `Lib.Instance`. The module never decides when to close the connection. That decision belongs to the deployment:
+
+| Deployment | CLOSE_ON_CLEANUP | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | false | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | true | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+## Patterns
+- Performance logging: `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms`
+- Lazy loading: ioredis and AWS SDK packages loaded only when first function is called
+- Key prefix: applied on write, stripped on read including scan results
+- JSON serialization: set runs JSON.stringify, get runs JSON.parse (configurable via SERIALIZE_JSON)
+- IAM auth: SigV4 token generated on first connection, cached, refreshed before expiry
+- Single instance: no cluster mode, no fan-out
+- Empty inputs: no-op success without contacting the engine
+- Automatic cleanup: close() is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs

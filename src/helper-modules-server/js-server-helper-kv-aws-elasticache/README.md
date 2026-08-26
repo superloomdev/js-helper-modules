@@ -18,6 +18,10 @@ The module:
 3. Passes the token as the password to `ioredis`
 4. Exposes 17 key-value functions: set, get, delete, scan, hash operations, TTL, counter
 
+## Connection Lifecycle
+
+The ioredis client is created lazily on the first call and shared for the process lifetime. Its teardown is registered with `helper-instance` so the deployment decides when it closes: at `SIGTERM` on a persistent server, or after every request on a serverless runtime. The module never decides when to close the connection.
+
 ## ElastiCache Requirements
 
 - Valkey 7.2+ or Redis OSS 7.0+
