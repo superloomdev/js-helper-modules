@@ -1,18 +1,17 @@
 // Tests for helper-money
 // Covers all exported functions with automated assertions
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 // Load dependencies via loader (DI pattern)
-const loader = require('./loader');
+import loader from './loader.js';
+import moneyLoader from 'helper-money';
 const { Lib } = loader();
 const Money = Lib.Money;
 
 // Factory required directly for contract tests - money is now a factory pattern
 // so each loader call returns an independent instance with its own CONFIG.
-const MoneyFactory = require('helper-money');
+const MoneyFactory = moneyLoader;
 
 const validBaseConfig = function () {
   return {

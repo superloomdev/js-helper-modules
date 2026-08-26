@@ -4,10 +4,9 @@
 // throwing domain errors.
 //
 // Frozen to prevent accidental mutation.
-'use strict';
 
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   // No error definitions - Time functions return runtime defaults
   // for bad input rather than throwing domain errors.

@@ -1,7 +1,8 @@
 // Info: Test loader for helper-money
 // Mirrors the main project loader pattern: loads dependencies from environment
 // process.env is ONLY read here - nowhere else in test code
-'use strict';
+import utilsLoader from 'helper-utils';
+import moneyLoader from 'helper-money';
 
 
 /********************************************************************
@@ -13,7 +14,7 @@ process.env is ONLY read here - never in test.js.
 @return {Object} result.Lib - Dependency container (Utils, Money)
 @return {Object} result.Config - Test-wide environment values (none for this module)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
@@ -28,15 +29,15 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
+  Lib.Utils = utilsLoader(Lib, {});
 
 
   // ==================== CORE HELPER MODULES ======================== //
 
-  Lib.Money = require('helper-money')(Lib, {});
+  Lib.Money = moneyLoader(Lib, {});
 
 
   // Return runtime objects
   return { Lib, Config };
 
-};
+}

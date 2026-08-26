@@ -1,9 +1,8 @@
 // Info: Error catalog for helper-money.
 // Validation errors returned via validateCurrencyCode.
 // Frozen to prevent accidental mutation.
-'use strict';
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   CURRENCY_CODE_REQUIRED: Object.freeze({
     type: 'MONEY_CURRENCY_CODE_REQUIRED',

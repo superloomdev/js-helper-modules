@@ -1,12 +1,10 @@
 // Tests for helper-time
 // Covers all exported functions with automated assertions
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 // Load dependencies via loader (DI pattern)
-const loader = require('./loader');
+import loader from './loader.js';
 const { Lib } = loader();
 const Time = Lib.Time;
 

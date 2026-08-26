@@ -1,12 +1,11 @@
 // Tests for helper-crypto
 // Covers all exported functions with automated assertions
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 // Load dependencies via loader (DI pattern)
-const loader = require('./loader');
+import loader from './loader.js';
+import cryptoLoader from 'helper-crypto';
 const { Lib } = loader();
 const Crypto = Lib.Crypto;
 
@@ -462,7 +461,7 @@ describe('config absorption: BASE36_CHARSET override', function () {
 
     // Load a second Crypto instance with a custom BASE36_CHARSET
     const custom_charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const CustomCrypto = require('helper-crypto')(Lib, { BASE36_CHARSET: custom_charset });
+    const CustomCrypto = cryptoLoader(Lib, { BASE36_CHARSET: custom_charset });
 
     // generateTimeRandomString: time prefix uses native toString(36) (lowercase),
     // padding uses CONFIG.BASE36_CHARSET. With min_length=20 the padding portion
@@ -489,7 +488,7 @@ describe('config absorption: BASE36_CHARSET override', function () {
   it('should produce different output with custom charset vs default', function () {
 
     const custom_charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const CustomCrypto = require('helper-crypto')(Lib, { BASE36_CHARSET: custom_charset });
+    const CustomCrypto = cryptoLoader(Lib, { BASE36_CHARSET: custom_charset });
 
     const default_result = Crypto.generateCompactUUID();
     const custom_result = CustomCrypto.generateCompactUUID();
@@ -574,7 +573,7 @@ describe('generatePasswordHash / checkPassword (plan 0122)', function () {
   it('6. parameter upgrade: a hash produced at low N still verifies after CONFIG is raised', function () {
 
     // Build a crypto instance with low N
-    const lowNCrypto = require('helper-crypto')(Lib, {
+    const lowNCrypto = cryptoLoader(Lib, {
       PASSWORD_HASH_COST_N: 2048
     });
 
@@ -583,7 +582,7 @@ describe('generatePasswordHash / checkPassword (plan 0122)', function () {
     const hash = lowNCrypto.generatePasswordHash(password);
 
     // Build a crypto instance with high N (the default 16384)
-    const highNCrypto = require('helper-crypto')(Lib, {});
+    const highNCrypto = cryptoLoader(Lib, {});
 
     // The hash produced at low N must still verify under the high-N instance,
     // because the format is self-describing: checkPassword reads N from the

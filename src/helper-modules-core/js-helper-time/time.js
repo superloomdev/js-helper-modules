@@ -6,7 +6,9 @@
 // Factory pattern: each loader call returns an independent Time interface
 // with its own Lib, CONFIG, ERRORS, and Validators. All functions are pure -
 // no shared module-level state between instances.
-'use strict';
+import CONFIG_DEFAULTS from './time.config.js';
+import ERRORS from './time.errors.js';
+import createValidators from './time.validators.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -21,7 +23,7 @@ uniformity - Lib is built but only Utils is consumed by Time functions.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -31,15 +33,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./time.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, shared across instances)
-  const ERRORS = require('./time.errors');
-
   // Validators module (singleton, initialized with Lib, ERRORS)
-  const Validators = require('./time.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

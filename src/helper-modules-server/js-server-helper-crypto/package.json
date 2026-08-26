@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-crypto",
   "description": "Server-side cryptography utilities for Node.js. Hashing, encryption, UUID, random strings, base conversion.",
   "version": "1.0.0",
-  "main": "crypto.js",
+  "type": "module",
+  "exports": {
+    ".": "./crypto.js",
+    "./crypto.config.js": "./crypto.config.js",
+    "./crypto.errors.js": "./crypto.errors.js",
+    "./crypto.validators.js": "./crypto.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

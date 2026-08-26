@@ -5,7 +5,6 @@
 //   4. Pure normalizers - no throws.
 //
 // Singleton: Lib, ERRORS, and CURRENCIES injected once by loader.
-'use strict';
 
 
 // Shared dependencies injected by loader
@@ -26,7 +25,7 @@ module-scope Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors, currencies) {
+export default function loader (shared_libs, errors, currencies) {
 
   // Inject shared dependencies
   Lib = shared_libs;

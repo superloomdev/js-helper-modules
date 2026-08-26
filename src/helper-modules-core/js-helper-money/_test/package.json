@@ -2,6 +2,7 @@
   "name": "js-helper-money-test",
   "description": "Test Cases for helper-money",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

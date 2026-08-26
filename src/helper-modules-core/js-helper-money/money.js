@@ -6,10 +6,14 @@
 // Factory pattern: each loader call returns an independent instance with
 // its own Lib, CONFIG, ERRORS, and Validators. Functions close over these
 // dependencies without module-level globals.
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './money.config.js';
+import ERRORS from './money.errors.js';
+import createValidators from './money.validators.js';
 
+const require = createRequire(import.meta.url);
 
-// Static reference data (loaded once at require time)
+// Static reference data (loaded once at import time)
 const CURRENCIES = require('./data/currencies.json');
 
 
@@ -24,7 +28,7 @@ its own Lib, CONFIG, ERRORS, and Validators closed over the instance.
 
 @return {Object} - Public Money interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -34,15 +38,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./money.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, shared across instances)
-  const ERRORS = require('./money.errors');
-
   // Validators module (singleton, initialized with Lib, ERRORS, CURRENCIES)
-  const Validators = require('./money.validators')(Lib, ERRORS, CURRENCIES);
+  const Validators = createValidators(Lib, ERRORS, CURRENCIES);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
