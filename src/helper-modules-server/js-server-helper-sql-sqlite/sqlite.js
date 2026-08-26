@@ -43,7 +43,8 @@ module.exports = function loader (shared_libs, config) {
   // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils,
-    Debug: shared_libs.Debug
+    Debug: shared_libs.Debug,
+    Instance: shared_libs.Instance
   };
 
   // Merge overrides over defaults
@@ -462,7 +463,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    close: async function () {
+    close: async function (instance) { // eslint-disable-line no-unused-vars
 
       // Nothing to close
       if (Lib.Utils.isNullOrUndefined(state.db)) {
@@ -503,7 +504,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     //   } catch (e) {
     //     client.exec('ROLLBACK');
     //   } finally {
-    //     SQLite.releaseClient(client);   // no-op but keep for API parity
+    //     SQLite.releaseClient(instance, client);   // no-op but keep for API parity
     //   }
 
     /********************************************************************
@@ -511,20 +512,26 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     Must be paired with releaseClient() for API parity with MySQL / Postgres
     (it is a no-op for SQLite but callers should still pair them).
 
-    @param {Object} instance - Request instance (kept for API parity with MySQL/Postgres)
+    @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
-    getClient: async function (instance) { // eslint-disable-line no-unused-vars
+    getClient: async function (instance) {
 
       // Build handle on first call
-      _SQLite.initIfNot();
+      _SQLite.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
       try {
 
-        // SQLite has a single handle per instance - return it directly
+        // SQLite has a single handle per instance - return it directly.
+        // Register for request-scoped release for API parity with MySQL /
+        // Postgres. releaseClient is a no-op for SQLite, so this is harmless.
+        Lib.Instance.addInstanceCleanupRoutine(instance, async function () {
+          SQLite.releaseClient(instance, state.db);
+        });
+
         Lib.Debug.performanceAuditLog('End', 'SQLite getClient', start_ms);
 
         return {
@@ -556,11 +563,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     No-op for SQLite (single handle per instance). Kept for API parity.
 
+    @param {Object} instance - Request instance
     @param {Object} client - Handle from getClient()
 
     @return {void}
     *********************************************************************/
-    releaseClient: function (client) { // eslint-disable-line no-unused-vars
+    releaseClient: function (instance, client) { // eslint-disable-line no-unused-vars
 
       // Nothing to release - the handle stays alive for the instance's lifetime
 
@@ -602,7 +610,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    initIfNot: function () {
+    initIfNot: function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.db)) {
@@ -623,6 +631,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       };
 
       state.db = new SQLiteDriver.DatabaseSync(CONFIG.FILE, options);
+
+      // This handle outlives the request that opened it. Instance decides
+      // when to run this: at shutdown on a persistent deployment, after
+      // every request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, SQLite.close);
 
       // Apply PRAGMAs. WAL makes no sense for :memory: so skip there.
       const is_memory = CONFIG.FILE === ':memory:' || CONFIG.FILE === '';
@@ -1128,7 +1141,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     query: async function (instance, sql, params) {
 
       // Build handle on first call
-      _SQLite.initIfNot();
+      _SQLite.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1269,7 +1282,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     transaction: async function (instance, statements) {
 
       // Build handle on first call
-      _SQLite.initIfNot();
+      _SQLite.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 

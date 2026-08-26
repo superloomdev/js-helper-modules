@@ -94,9 +94,12 @@ write(instance, sql, params?) → { success, affected_rows, insert_id, error } |
 getClient(instance) → { success, client, error } | async:yes
   Returns the underlying `DatabaseSync` handle for manual transaction control.
   Caller is responsible for `BEGIN`/`COMMIT`/`ROLLBACK` (via `client.exec(...)`) and `releaseClient()`.
+  The borrowed handle is registered for request-scoped release via
+  Lib.Instance.addInstanceCleanupRoutine, so a caller that forgets
+  releaseClient() still gets the no-op release when the request ends.
 
-releaseClient(client) → void | async:no
-  No-op for SQLite. Kept for API parity with MySQL / Postgres.
+releaseClient(instance, client) → void | async:no
+  No-op for SQLite. Kept for API parity with MySQL / Postgres. Safe on null and on double call.
 
 ### Query builders (pure, no I/O)
 
@@ -112,8 +115,20 @@ buildMultiCondition(data, operator?) → String | async:no
 
 ### Lifecycle
 
-close() → Promise<void> | async:yes
+close(instance) → Promise<void> | async:yes
   Close the database handle. SQLite's close is synchronous; the async signature is kept for MySQL/Postgres parity. `CLOSE_TIMEOUT_MS` is unused but kept for config parity.
+  Teardown is registered with Lib.Instance.addProcessCleanupRoutine on first handle creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs: at SIGTERM on a persistent server, or after every request on a serverless runtime. A caller normally never calls close() directly.
+
+## Connection Lifecycle
+
+The handle is opened lazily on the first query and shared for the process lifetime. On first creation, the driver registers `SQLite.close` as a process-scoped cleanup routine with `Lib.Instance`. The driver never decides when to close the handle. That decision belongs to the deployment:
+
+| Deployment | CLOSE_ON_CLEANUP | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | false | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | true | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+A borrowed handle from `getClient` is registered for request-scoped release via `Lib.Instance.addInstanceCleanupRoutine`. For SQLite, `releaseClient` is a no-op, so this is harmless and maintains API parity with MySQL and Postgres.
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own handle. No module-level singletons.

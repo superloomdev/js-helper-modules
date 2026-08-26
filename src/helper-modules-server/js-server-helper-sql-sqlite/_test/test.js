@@ -8,12 +8,9 @@ const { describe, it, before, after } = require('node:test');
 const ERRORS = require('../sqlite.errors');
 
 // Load dependencies via test loader - process.env is touched only there.
-const { Lib } = require('./loader')();
+const { Lib, instance, buildLib } = require('./loader')();
 const SQLite = Lib.SQLite;
 const Instance = Lib.Instance;
-
-// Single test instance - represents a "request" for performance timeline.
-const instance = Instance.initialize();
 
 // Test table name - keep simple and unique
 const TEST_TABLE = 'test_table';
@@ -56,7 +53,7 @@ after(async function () {
   const { client } = await SQLite.getClient(instance);
   client.exec('DROP TABLE IF EXISTS ' + TEST_TABLE);
 
-  await SQLite.close();
+  await SQLite.close(instance);
 
 });
 
@@ -364,8 +361,8 @@ describe('getClient / releaseClient', function () {
     assert.strictEqual(row.one, 1);
 
     // releaseClient is a no-op but must be safe to call
-    SQLite.releaseClient(res.client);
-    SQLite.releaseClient(null);
+    SQLite.releaseClient(instance, res.client);
+    SQLite.releaseClient(instance, null);
 
   });
 
@@ -542,8 +539,8 @@ describe('multiple instances', function () {
     assert.strictEqual(existsInA.value, 1);
     assert.strictEqual(existsInB.value, 0);
 
-    await A.close();
-    await B.close();
+    await A.close(instance);
+    await B.close(instance);
 
   });
 
@@ -1257,8 +1254,8 @@ describe('close - edge cases', function () {
     await temp.getValue(instance, 'SELECT 1 AS x');
 
     // Close twice - second call must not throw
-    await temp.close();
-    await temp.close();
+    await temp.close(instance);
+    await temp.close(instance);
 
   });
 
@@ -1268,9 +1265,166 @@ describe('close - edge cases', function () {
     const temp = ModuleFactory(Lib, { FILE: ':memory:' });
 
     // Never ran a query - handle is null
-    await temp.close();
+    await temp.close(instance);
 
   });
+
+});
+
+
+// ============================================================================
+// 7. Connection lifecycle - registration, persistent vs serverless, background gate
+// ============================================================================
+
+describe('connection lifecycle', function () {
+
+  it('should register the process cleanup routine once, not per query', async function () {
+
+    const { Lib: LibF, instance: instF } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const SQLiteF = LibF.SQLite;
+    const InstanceF = LibF.Instance;
+
+    await SQLiteF.getValue(instF, 'SELECT 1 AS x');
+    await SQLiteF.getValue(instF, 'SELECT 2 AS x');
+
+    assert.strictEqual(InstanceF.getProcessCleanupRoutineCount(), 1);
+
+    await InstanceF.runProcessCleanup();
+
+  });
+
+
+  it('should hold the handle open on a persistent deployment', async function () {
+
+    const { Lib: LibP, instance: instP } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const SQLiteP = LibP.SQLite;
+    const InstanceP = LibP.Instance;
+
+    const res1 = await SQLiteP.getValue(instP, 'SELECT 1 AS x');
+    assert.strictEqual(res1.success, true);
+
+    await InstanceP.runInstanceCleanup(instP);
+
+    const res2 = await SQLiteP.getValue(instP, 'SELECT 2 AS x');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(res2.value, 2);
+
+    await InstanceP.runProcessCleanup();
+
+  });
+
+
+  it('should close the handle on a serverless deployment and re-open on next query', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const SQLiteSL = LibSL.SQLite;
+    const InstanceSL = LibSL.Instance;
+
+    const res1 = await SQLiteSL.getValue(instSL, 'SELECT 1 AS x');
+    assert.strictEqual(res1.success, true);
+
+    await InstanceSL.runInstanceCleanup(instSL);
+
+    assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+
+    const res2 = await SQLiteSL.getValue(instSL, 'SELECT 2 AS x');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(res2.value, 2);
+
+    await InstanceSL.runInstanceCleanup(instSL);
+
+  });
+
+
+  it('should close and re-register across multiple serverless request cycles', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const SQLiteSL = LibSL.SQLite;
+    const InstanceSL = LibSL.Instance;
+
+    for (let i = 0; i < 3; i++) {
+      const res = await SQLiteSL.getValue(instSL, 'SELECT ? AS x', [i + 1]);
+      assert.strictEqual(res.success, true);
+      assert.strictEqual(res.value, i + 1);
+
+      await InstanceSL.runInstanceCleanup(instSL);
+      assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+    }
+
+  });
+
+
+  it('should run background routines before process cleanup routines', async function () {
+
+    const { Lib: LibBG, instance: instBG } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const InstanceBG = LibBG.Instance;
+
+    const order = [];
+
+    const signal = InstanceBG.addBackgroundRoutine(instBG);
+    setImmediate(function () {
+      order.push('background');
+      signal();
+    });
+
+    InstanceBG.addProcessCleanupRoutine(instBG, function () {
+      order.push('cleanup');
+    });
+
+    await InstanceBG.runInstanceCleanup(instBG);
+
+    assert.strictEqual(order[0], 'background');
+    assert.strictEqual(order[1], 'cleanup');
+
+  });
+
+
+  it('should register a borrowed client for request-scoped release', async function () {
+
+    const { Lib: LibC, instance: instC } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const SQLiteC = LibC.SQLite;
+    const InstanceC = LibC.Instance;
+
+    const beforeCount = InstanceC.getInstanceCleanupRoutineCount(instC);
+
+    const res = await SQLiteC.getClient(instC);
+    assert.strictEqual(res.success, true);
+    assert.ok(res.client);
+
+    assert.strictEqual(
+      InstanceC.getInstanceCleanupRoutineCount(instC),
+      beforeCount + 1
+    );
+
+    await InstanceC.runInstanceCleanup(instC);
+
+    assert.strictEqual(
+      InstanceC.getInstanceCleanupRoutineCount(instC),
+      beforeCount
+    );
+
+    await InstanceC.runProcessCleanup();
+
+  });
+
+
+  it('should not throw on double release of a borrowed client', async function () {
+
+    const { Lib: LibD, instance: instD } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const SQLiteD = LibD.SQLite;
+    const InstanceD = LibD.Instance;
+
+    const res = await SQLiteD.getClient(instD);
+    assert.strictEqual(res.success, true);
+
+    SQLiteD.releaseClient(instD, res.client);
+
+    await InstanceD.runInstanceCleanup(instD);
+
+    await InstanceD.runProcessCleanup();
+
+  });
+
 
 });
 

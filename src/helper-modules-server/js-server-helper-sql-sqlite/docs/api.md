@@ -259,14 +259,14 @@ try {
   client.exec('ROLLBACK');
   throw e;
 } finally {
-  Lib.SqlDB.releaseClient(client);
+  Lib.SqlDB.releaseClient(instance, client);
 }
 ```
 
 ### `releaseClient`
 
 ```javascript
-releaseClient(client) → void
+releaseClient(instance, client) → void
 ```
 
 No-op for SQLite. There is no pool to return the handle to. Kept for API parity with MySQL / Postgres. Safe to call with `null` or `undefined`.
@@ -342,18 +342,27 @@ const where = Lib.SqlDB.buildMultiCondition(
 ### `close`
 
 ```javascript
-async close() → Promise<void>
+async close(instance) → Promise<void>
 ```
 
 Close the database handle. SQLite's underlying `close` is synchronous. The async signature is kept for API parity with MySQL / Postgres. `CLOSE_TIMEOUT_MS` is unused for SQLite but kept as a config key for parity.
 
-Call once on `SIGTERM` (or in your container shutdown hook):
+Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first handle creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
+
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
 
 ```javascript
 process.on('SIGTERM', async () => {
-  await Lib.SqlDB.close();
+  await Lib.Instance.runProcessCleanup();
   process.exit(0);
 });
 ```
 
-For multi-database setups, call `close()` on **each loader instance** separately. Handles are not shared.
+For multi-database setups, `runProcessCleanup()` closes **each loader instance** whose teardown was registered. Handles are not shared.

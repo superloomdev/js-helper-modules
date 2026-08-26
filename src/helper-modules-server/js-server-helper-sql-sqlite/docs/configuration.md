@@ -81,9 +81,9 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-query timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
+| `@superloomdev/js-server-helper-instance` | Process cleanup registration. The driver registers its handle teardown with `Lib.Instance.addProcessCleanupRoutine` on first handle creation. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` controls when teardown runs, not this driver |
 
-The `Lib.Instance` peer is technically optional. The module accepts `instance` as the first argument to all I/O functions for API parity. But every production deployment should pass a real instance.
+The `Lib.Instance` peer is required. The driver registers its handle teardown with `Lib.Instance.addProcessCleanupRoutine` on first handle creation, and registers borrowed handles for request-scoped release via `Lib.Instance.addInstanceCleanupRoutine`. The deployment's `CLOSE_ON_CLEANUP` config lives on `helper-instance`, not on this driver.
 
 ---
 

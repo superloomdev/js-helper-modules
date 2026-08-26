@@ -29,6 +29,10 @@ Error handling, result reading, and exception expectations are the same in every
 
 - **Runs in-process, with zero infrastructure.** SQLite is embedded. There is no server to provision, no credentials to manage, no network to debug. The same module powers an in-memory test database, a local file-backed cache, an offline-first desktop or edge app, or a per-process analytics store. Switch between in-memory and on-disk by changing one config value.
 
+## Connection Lifecycle
+
+The handle is opened lazily on the first query and shared for the process lifetime. Its teardown is registered with `helper-instance` so the deployment decides when it closes: at `SIGTERM` on a persistent server, or after every request on a serverless runtime. The driver never decides when to close the handle.
+
 ## Hot-Swappable with Other Backends
 
 This module is part of a family of database helpers that share the same calling shape. Switch by changing the loader line. The rest of your code keeps working.
