@@ -1,9 +1,8 @@
 // Info: Error catalog for js-react-helper-timer
-'use strict';
 
 
 // Export frozen error catalog
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_DURATION: {
     type: 'helper-timer/invalid-duration',

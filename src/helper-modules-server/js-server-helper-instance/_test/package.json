@@ -2,6 +2,7 @@
   "name": "js-server-helper-instance-test",
   "description": "Test Cases for js-server-helper-instance",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

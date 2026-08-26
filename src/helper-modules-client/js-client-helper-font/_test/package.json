@@ -2,6 +2,7 @@
   "name": "@superloomdev/js-client-helper-font-test",
   "description": "Unit tests for js-client-helper-font",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js"

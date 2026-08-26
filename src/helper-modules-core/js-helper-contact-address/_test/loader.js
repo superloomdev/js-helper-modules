@@ -1,5 +1,6 @@
 // Info: Test loader for helper-contact-address.
-'use strict';
+import utilsLoader from 'helper-utils';
+import contactAddressLoader from 'helper-contact-address';
 
 
 const STUB_COUNTRIES = ['us', 'in', 'gb', 'de', 'jp', 'ae'];
@@ -46,14 +47,14 @@ const stubAdapter = {
 
 
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
-const ContactAddress = require('helper-contact-address')(Lib, {
+const ContactAddress = contactAddressLoader(Lib, {
   Adapter: stubAdapter
 });
 
 
-module.exports = {
+export default {
   ContactAddress: ContactAddress,
   Lib: Lib,
   stubAdapter: stubAdapter,

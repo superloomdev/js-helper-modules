@@ -8,7 +8,4 @@
 // the loaders) so the loader signature stays uniform and future knobs have a home.
 //
 // Compatibility: Node.js 18+ and React Native (Hermes).
-'use strict';
-
-
-module.exports = {};
+export default {};

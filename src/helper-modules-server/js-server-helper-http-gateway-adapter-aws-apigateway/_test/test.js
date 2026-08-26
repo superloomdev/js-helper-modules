@@ -21,24 +21,22 @@
 //   Group G - Country code from CloudFront-Viewer-Country
 //   Group H - IP/UA/Origin extraction edge cases
 //   Group I - Defensive edge cases (no headers, no requestContext, null body)
-'use strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+import httpGatewayAdapterAwsApiGatewayLoader from 'helper-http-gateway-adapter-aws-apigateway';
 
-
-const fs     = require('node:fs');
-const path   = require('node:path');
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
-
-
-const { Lib, httpGateway } = require('./loader')();
-const HttpGatewayAdapterAwsApiGateway = require('helper-http-gateway-adapter-aws-apigateway');
+import loader from './loader.js';
+const { Lib, httpGateway } = loader();
+const HttpGatewayAdapterAwsApiGateway = httpGatewayAdapterAwsApiGatewayLoader;
 
 
 // ============================================================================
 // FIXTURE LOADERS
 // ============================================================================
 
-const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+const FIXTURES_DIR = path.join(import.meta.dirname, 'fixtures');
 
 
 /********************************************************************

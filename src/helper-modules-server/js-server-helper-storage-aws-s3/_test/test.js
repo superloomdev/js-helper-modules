@@ -1,22 +1,21 @@
 // Tests for js-server-helper-aws-s3
 // Works with both emulated (MinIO) and integration (real AWS) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const {
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import {
   S3Client,
   CreateBucketCommand,
   DeleteBucketCommand,
   ListObjectsV2Command,
   DeleteObjectsCommand
-} = require('@aws-sdk/client-s3');
-const ERRORS = require('../s3.errors');
+} from '@aws-sdk/client-s3';
+import ERRORS from '../s3.errors.js';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config } = loader();
 const S3 = Lib.S3;
 const Instance = Lib.Instance;
 

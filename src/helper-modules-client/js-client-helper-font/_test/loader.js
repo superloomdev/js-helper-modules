@@ -1,14 +1,16 @@
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import fontLoader from 'helper-font';
 
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
 
-const Font = require('helper-font')({
+const Font = fontLoader({
   Utils: Utils,
   Debug: Debug
 });
 
-module.exports = {
+export default {
   Font: Font,
   Utils: Utils,
   Debug: Debug

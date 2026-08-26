@@ -2,13 +2,19 @@
   "name": "@superloomdev/js-react-helper-idle",
   "description": "An idle detection helper for React that ships pre-tested and injects activity sources so it works on web, React Native, and React Native Web. Part of Superloom.",
   "version": "1.0.0",
+  "type": "module",
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "idle.js",
+  "exports": {
+    ".": "./idle.js",
+    "./idle.config.js": "./idle.config.js",
+    "./idle.errors.js": "./idle.errors.js",
+    "./idle.validators.js": "./idle.validators.js"
+  },
   "engines": {
     "node": ">=24"
   },

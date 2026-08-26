@@ -2,6 +2,7 @@
   "name": "@superloomdev/js-rn-helper-kv-mmkv-test",
   "description": "Unit tests for js-rn-helper-kv-mmkv",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js test-serialization.js"

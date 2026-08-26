@@ -1,13 +1,12 @@
 // Info: Test suite for helper-contact-phone.
 // Uses a stub adapter with known data for 5 countries (us, in, gb, de, jp).
 // Covers all 13 public functions, error envelopes, and edge cases.
-'use strict';
 
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const { ContactPhone, Lib, STUB_COUNTRIES, STUB_METADATA } = require('./loader');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import contactPhoneLoader from 'helper-contact-phone';
+import { ContactPhone, Lib, STUB_COUNTRIES, STUB_METADATA } from './loader.js';
 
 
 
@@ -25,7 +24,7 @@ test('construction with valid adapter succeeds', function () {
 test('construction without adapter throws', function () {
 
   assert.throws(function () {
-    require('helper-contact-phone')(Lib, {});
+    contactPhoneLoader(Lib, {});
   }, /CONFIG\.Adapter must be/);
 
 });
@@ -34,7 +33,7 @@ test('construction without adapter throws', function () {
 test('construction with adapter missing methods throws', function () {
 
   assert.throws(function () {
-    require('helper-contact-phone')(Lib, { Adapter: { listCountries: function () {} } });
+    contactPhoneLoader(Lib, { Adapter: { listCountries: function () {} } });
   }, /Invalid adapter contract: missing method/);
 
 });

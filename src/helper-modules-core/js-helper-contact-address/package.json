@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-address",
   "description": "Postal address validation and field policy management. Port module requiring a swappable adapter for postal code and subdivision validation depth.",
   "version": "1.0.0",
-  "main": "address.js",
+  "type": "module",
+  "exports": {
+    ".": "./address.js",
+    "./address.config.js": "./address.config.js",
+    "./address.errors.js": "./address.errors.js",
+    "./address.validators.js": "./address.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": { "name": "sj00" },

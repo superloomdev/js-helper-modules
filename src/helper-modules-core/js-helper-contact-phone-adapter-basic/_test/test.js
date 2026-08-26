@@ -1,13 +1,12 @@
 // Info: Test suite for helper-contact-phone-adapter-basic.
 // Tests the adapter contract directly and through the parent core.
 // Covers 5 countries with different length rules, plus edge cases.
-'use strict';
 
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { Adapter, ContactPhone, COUNTRY_DATA } = require('./loader');
+import { Adapter, ContactPhone, COUNTRY_DATA } from './loader.js';
 
 
 

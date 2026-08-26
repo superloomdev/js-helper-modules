@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-storage-aws-s3",
   "description": "AWS S3 wrapper for cloud file storage. List, upload, download, delete, copy, move. AWS SDK v3.",
   "version": "1.0.0",
-  "main": "s3.js",
+  "type": "module",
+  "exports": {
+    ".": "./s3.js",
+    "./s3.config.js": "./s3.config.js",
+    "./s3.errors.js": "./s3.errors.js",
+    "./s3.validators.js": "./s3.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

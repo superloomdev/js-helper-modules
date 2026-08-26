@@ -14,7 +14,13 @@
 // Factory pattern: each loader call returns an independent instance with its
 // own result cache. A host that renders one theme makes one instance and keeps
 // it; a build tool that sweeps many themes makes one and discards it.
-'use strict';
+import CONFIG_DEFAULTS from './themer.config.js';
+import ERRORS_CATALOG from './themer.errors.js';
+import createValidators from './themer.validators.js';
+import createColor from './parts/color.js';
+import createScale from './parts/scale.js';
+import createEmit from './parts/emit.js';
+import createResolve from './parts/resolve.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -28,7 +34,7 @@ own config and its own result cache.
 
 @return {Object} - Public Themer interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -39,15 +45,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./themer.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./themer.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton - Lib and ERRORS injected here
-  const Validators = require('./themer.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
@@ -317,8 +323,8 @@ const _Themer = {
   buildParts: function (Lib, CONFIG, ERRORS, Validators) {
 
     // Colour and scale depend on nothing but Lib, so they build first
-    const Color = require('./parts/color')(Lib, CONFIG, ERRORS);
-    const Scale = require('./parts/scale')(Lib, CONFIG, ERRORS);
+    const Color = createColor(Lib, CONFIG, ERRORS);
+    const Scale = createScale(Lib, CONFIG, ERRORS);
 
     // Emit needs colour to render shadow layers as rgba
     const emit_libs = Object.assign({}, Lib, { Color: Color });
@@ -333,8 +339,8 @@ const _Themer = {
     return {
       Color: Color,
       Scale: Scale,
-      Emit: require('./parts/emit')(emit_libs, CONFIG, ERRORS),
-      Resolve: require('./parts/resolve')(resolve_libs, CONFIG, ERRORS)
+      Emit: createEmit(emit_libs, CONFIG, ERRORS),
+      Resolve: createResolve(resolve_libs, CONFIG, ERRORS)
     };
 
   },

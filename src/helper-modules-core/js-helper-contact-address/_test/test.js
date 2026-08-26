@@ -1,11 +1,10 @@
 // Info: Test suite for helper-contact-address.
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import contactAddressLoader from 'helper-contact-address';
 
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const { ContactAddress, Lib } = require('./loader');
+import loader from './loader.js';
+const { ContactAddress, Lib } = loader;
 
 
 
@@ -22,7 +21,7 @@ test('construction with valid adapter succeeds', function () {
 test('construction without adapter throws', function () {
 
   assert.throws(function () {
-    require('helper-contact-address')(Lib, {});
+    contactAddressLoader(Lib, {});
   }, /CONFIG\.Adapter must be/);
 
 });

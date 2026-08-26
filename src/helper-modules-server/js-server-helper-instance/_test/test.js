@@ -1,12 +1,11 @@
 // Info: Test Cases for helper-instance
 // Config comes from environment variables via loader.js
-'use strict';
-
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
 // Load all dependencies via test loader (mirrors main project loader pattern)
-const { Lib, buildInstance } = require('./loader')();
+import loader from './loader.js';
+const { Lib, buildInstance } = loader();
 const Instance = Lib.Instance;
 
 // A persistent deployment holds process-scoped resources open between

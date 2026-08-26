@@ -17,8 +17,10 @@
 // Compatibility: Node.js 24+ and any modern browser.
 //
 // Factory pattern: each loader call returns an independent instance.
-'use strict';
 
+import CONFIG_DEFAULTS from './email.config.js';
+import ERRORS from './email.errors.js';
+import createValidators from './email.validators.js';
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
@@ -32,7 +34,7 @@ with its own Lib, CONFIG, ERRORS, and Validators, bound to one adapter.
 
 @return {Object} - Public ContactEmail interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -42,15 +44,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./email.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, shared across instances)
-  const ERRORS = require('./email.errors');
+  // ERRORS is imported at the top of the file
 
   // Validators module (singleton, initialized with Lib, ERRORS)
-  const Validators = require('./email.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

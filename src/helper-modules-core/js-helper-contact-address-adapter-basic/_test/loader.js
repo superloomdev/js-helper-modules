@@ -1,15 +1,17 @@
 // Info: Test loader for helper-contact-address-adapter-basic.
-'use strict';
+import utilsLoader from 'helper-utils';
+import adapterBasicLoader from 'helper-contact-address-adapter-basic';
+import contactAddressLoader from 'helper-contact-address';
 
 
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
-const Adapter = require('helper-contact-address-adapter-basic')(Lib, {});
-const ContactAddress = require('helper-contact-address')(Lib, { Adapter: Adapter });
+const Adapter = adapterBasicLoader(Lib, {});
+const ContactAddress = contactAddressLoader(Lib, { Adapter: Adapter });
 
 
-module.exports = {
+export default {
   Lib: Lib,
   Adapter: Adapter,
   ContactAddress: ContactAddress

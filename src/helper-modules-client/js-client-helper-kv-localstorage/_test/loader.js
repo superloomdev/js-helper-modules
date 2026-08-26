@@ -1,16 +1,17 @@
-'use strict';
-
-const createWebStorageStub = require('./web-storage-stub');
+import createWebStorageStub from './web-storage-stub.js';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import kvLocalstorageLoader from 'helper-kv-localstorage';
 
 // Peer dependencies
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
 
 // Shared storage engine for namespaced tests (two instances share one engine)
 const sharedEngine = createWebStorageStub();
 
 // Module under test - Web Storage stub injected via shared_libs
-const Store = require('helper-kv-localstorage')({
+const Store = kvLocalstorageLoader({
   Utils: Utils,
   Debug: Debug,
   WebStorage: sharedEngine
@@ -20,7 +21,7 @@ const Store = require('helper-kv-localstorage')({
 });
 
 // Second instance with a different namespace sharing the same engine
-const StoreOther = require('helper-kv-localstorage')({
+const StoreOther = kvLocalstorageLoader({
   Utils: Utils,
   Debug: Debug,
   WebStorage: sharedEngine
@@ -30,7 +31,7 @@ const StoreOther = require('helper-kv-localstorage')({
 });
 
 // Instance with empty namespace
-const StoreGlobal = require('helper-kv-localstorage')({
+const StoreGlobal = kvLocalstorageLoader({
   Utils: Utils,
   Debug: Debug,
   WebStorage: createWebStorageStub()
@@ -40,7 +41,7 @@ const StoreGlobal = require('helper-kv-localstorage')({
 });
 
 // Instance with no engine (for STORAGE_UNAVAILABLE tests)
-const StoreNoEngine = require('helper-kv-localstorage')({
+const StoreNoEngine = kvLocalstorageLoader({
   Utils: Utils,
   Debug: Debug
 }, {
@@ -52,7 +53,7 @@ const StoreNoEngine = require('helper-kv-localstorage')({
 function createFreshStore (namespace) {
   const engine = createWebStorageStub();
   return {
-    store: require('helper-kv-localstorage')({
+    store: kvLocalstorageLoader({
       Utils: Utils,
       Debug: Debug,
       WebStorage: engine
@@ -64,7 +65,7 @@ function createFreshStore (namespace) {
   };
 }
 
-module.exports = {
+export default {
   Store: Store,
   StoreOther: StoreOther,
   StoreGlobal: StoreGlobal,

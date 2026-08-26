@@ -1,11 +1,9 @@
 // Info: Test suite for helper-contact-address-adapter-extended.
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const { Adapter, BasicAdapter, ContactAddress, ContactAddressBasic } = require('./loader');
+import loader from './loader.js';
+const { Adapter, BasicAdapter, ContactAddress, ContactAddressBasic } = loader;
 
 
 

@@ -2,7 +2,7 @@
 //
 // All keys can be overridden by passing a config object to the loader.
 
-module.exports = {
+export default {
 
   // Milliseconds of inactivity before the idle classification flips
   IDLE_MS: 300000

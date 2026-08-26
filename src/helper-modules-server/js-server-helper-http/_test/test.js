@@ -1,15 +1,13 @@
 // Info: Test Cases for js-server-helper-http
 // Uses postman-echo.com for real HTTP verification - requires network access.
-'use strict';
-
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import ERRORS from '../http.errors.js';
 
 // Load dependencies via loader (DI pattern)
-const loader = require('./loader');
+import loader from './loader.js';
 const { Lib } = loader();
 const Http = Lib.Http;
-const ERRORS = require('../http.errors');
 
 
 

@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-contact-phone-adapter-extended
-'use strict';
 
 
-module.exports = {
+export default {
 
   // libphonenumber-js metadata variant to use.
   // 'max' includes all available metadata: patterns, types, descriptions.

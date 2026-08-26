@@ -1,7 +1,6 @@
 // Info: Color operations for js-client-helper-styler - the named color primitives a
 // template may reference by `operation`. Pure hex math: blending, luminance,
 // contrast, and interaction states. Singleton part; no per-caller state.
-'use strict';
 
 
 // Shared dependencies injected by loader (uniform parts signature)
@@ -23,7 +22,7 @@ signature uniformity with other parts - none are consumed today.
 
 @return {Object} - Public ColorOps interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Capture injected references so they are available if a future op needs them
   Lib = shared_libs;

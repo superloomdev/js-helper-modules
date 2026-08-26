@@ -2,6 +2,7 @@
   "name": "js-server-helper-http-gateway-adapter-express-test",
   "description": "Test suite for js-server-helper-http-gateway-adapter-express",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

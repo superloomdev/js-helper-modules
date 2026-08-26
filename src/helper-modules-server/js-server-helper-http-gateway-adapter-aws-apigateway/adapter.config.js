@@ -1,9 +1,8 @@
 // Info: Configuration defaults for helper-http-gateway-adapter-aws-apigateway.
 // The caller merges overrides over these defaults at loader time.
-'use strict';
 
 
-module.exports = {
+export default {
 
   // No adapter-specific config keys. The companion file exists per the
   // Universal Companion Files rule. Add keys here as the adapter grows.

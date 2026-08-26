@@ -1,9 +1,7 @@
 // Info: Error catalog for helper-device.
 //
 // Frozen on export. Injected into validators and the public interface.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   PLATFORM_UNAVAILABLE: {
     type: 'helper-device/platform-unavailable',

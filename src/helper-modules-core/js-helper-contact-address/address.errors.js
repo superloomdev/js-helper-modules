@@ -1,9 +1,8 @@
 // Info: Error catalog for helper-contact-address.
 // Key === type. Both use the full prefixed name.
 // Frozen to prevent accidental mutation.
-'use strict';
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   CONTACT_ADDRESS_EMPTY: Object.freeze({
     type: 'CONTACT_ADDRESS_EMPTY',

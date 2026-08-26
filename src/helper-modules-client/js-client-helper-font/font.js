@@ -18,7 +18,9 @@
 // objects live at module scope; the loader injects Lib + config and
 // initializes ERRORS + Validators. Node's require cache guarantees one
 // Font per process.
-'use strict';
+import CONFIG_DEFAULTS from './font.config.js';
+import ERRORS_CATALOG from './font.errors.js';
+import createValidators from './font.validators.js';
 
 
 // Injected dependencies + sibling modules, set by the loader (module-scope).
@@ -51,15 +53,15 @@ Font object.
 
 @return {Object} - Public Font interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Capture injected deps and merge config over module defaults
   Lib = shared_libs || {};
-  CONFIG = Object.assign({}, require('./font.config'), config || {});
-  ERRORS = require('./font.errors');
+  CONFIG = Object.assign({}, CONFIG_DEFAULTS, config || {});
+  ERRORS = ERRORS_CATALOG;
 
   // Build the validators subloader (fails fast on a malformed config)
-  Validators = require('./font.validators')(Lib, ERRORS);
+  Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

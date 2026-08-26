@@ -7,14 +7,14 @@
 // The lab's Carbon source oracle check (parsing /tmp/carbon/...) is omitted
 // because the Carbon source tree is not available in the module test
 // environment. The transcribed tables below are the test data.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import loader from './loader.js';
+import themerLoader from 'helper-themer';
 
-const loader = require('./loader.js');
 const { Lib } = loader();
-const Themer = require('helper-themer')(Lib, {});
+const Themer = themerLoader(Lib, {});
 
 // Scale values from Carbon packages/type/src/scale.ts
 

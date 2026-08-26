@@ -9,7 +9,11 @@
 // Lazy-loaded AWS SDK v3 adapters (stateless, shared across instances):
 //   - '@aws-sdk/client-s3'           -> S3Client, PutObjectCommand, GetObjectCommand
 //   - '@aws-sdk/s3-request-presigner' -> getSignedUrl
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './s3-url-signer.config.js';
+import ERRORS from './s3-url-signer.errors.js';
+import createValidators from './s3-url-signer.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless SDK adapters (module-level - require() is cached anyway).
 let S3Client,
@@ -30,7 +34,7 @@ Lib, CONFIG, and S3 URL signer client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -42,15 +46,14 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./s3-url-signer.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./s3-url-signer.errors');
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./s3-url-signer.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

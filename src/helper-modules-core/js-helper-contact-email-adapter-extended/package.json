@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-email-adapter-extended",
   "description": "Extended email adapter for js-helper-contact-email. validator.isEmail() syntax, disposable domain list (~5K), all-provider canonicalization.",
   "version": "1.0.0",
-  "main": "adapter.js",
+  "type": "module",
+  "exports": {
+    ".": "./adapter.js",
+    "./adapter.config.js": "./adapter.config.js",
+    "./adapter.errors.js": "./adapter.errors.js",
+    "./adapter.validators.js": "./adapter.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": { "name": "sj00" },

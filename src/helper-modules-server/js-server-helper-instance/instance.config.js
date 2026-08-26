@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-instance
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Whether process-scoped teardown runs at the end of every request.
   //

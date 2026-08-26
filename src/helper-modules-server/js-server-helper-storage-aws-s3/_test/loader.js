@@ -1,7 +1,10 @@
 // Info: Test loader for js-server-helper-aws-s3
 // Mirrors the main project loader pattern: loads dependencies, merges config from environment
 // Same loader works for both emulated (dev) and integration testing - env vars control the target
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import instanceLoader from 'helper-instance';
+import s3Loader from 'helper-storage-aws-s3';
 
 
 /********************************************************************
@@ -17,7 +20,7 @@ config_s3 = module-specific config slice, only passed to the S3 module.
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance, S3)
 @return {Object} result.Config - Test-wide environment values for test infrastructure
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config - available to test.js for test infrastructure
   // This is NOT a module config. It holds raw env values that test.js may need
@@ -45,12 +48,12 @@ module.exports = function loader () {
   const Lib = {};
 
   // Helper modules
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
 
   // Server helper modules
-  Lib.S3 = require('helper-storage-aws-s3')(Lib, config_s3);
+  Lib.S3 = s3Loader(Lib, config_s3);
 
 
   // Return runtime objects

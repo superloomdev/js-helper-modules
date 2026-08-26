@@ -1,12 +1,11 @@
 // Info: Test suite for helper-contact-email.
 // Uses a stub adapter with known behavior.
-'use strict';
 
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const { ContactEmail, Lib } = require('./loader');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import contactEmailLoader from 'helper-contact-email';
+import { ContactEmail, Lib } from './loader.js';
 
 
 
@@ -24,7 +23,7 @@ test('construction with valid adapter succeeds', function () {
 test('construction without adapter throws', function () {
 
   assert.throws(function () {
-    require('helper-contact-email')(Lib, {});
+    contactEmailLoader(Lib, {});
   }, /CONFIG\.Adapter must be/);
 
 });
@@ -33,7 +32,7 @@ test('construction without adapter throws', function () {
 test('construction with adapter missing methods throws', function () {
 
   assert.throws(function () {
-    require('helper-contact-email')(Lib, { Adapter: { validateSyntax: function () {} } });
+    contactEmailLoader(Lib, { Adapter: { validateSyntax: function () {} } });
   }, /Invalid adapter contract: missing method/);
 
 });

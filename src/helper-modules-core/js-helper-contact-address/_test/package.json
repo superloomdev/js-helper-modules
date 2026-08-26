@@ -2,6 +2,7 @@
   "name": "js-helper-contact-address-test",
   "description": "Test suite for js-helper-contact-address",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

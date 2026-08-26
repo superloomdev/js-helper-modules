@@ -1,14 +1,15 @@
-'use strict';
-
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
+import React from 'react';
+import ReactTestRenderer from 'react-test-renderer';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import idleLoader from 'helper-idle';
 
 // Peer dependencies
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
 
 // Module under test - React injected via shared_libs, short idle_ms for tests
-const Idle = require('helper-idle')({
+const Idle = idleLoader({
   React: React,
   Utils: Utils,
   Debug: Debug
@@ -17,7 +18,7 @@ const Idle = require('helper-idle')({
 });
 
 // Export everything tests need
-module.exports = {
+export default {
   React: React,
   ReactTestRenderer: ReactTestRenderer,
   Idle: Idle,

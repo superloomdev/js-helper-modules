@@ -2,9 +2,7 @@
 //
 // Receives Lib and ERRORS by injection from the loader.
 // Never self-requires the error catalog or data files.
-'use strict';
-
-module.exports = function (Lib, ERRORS) {
+export default function (Lib, ERRORS) {
 
   const Validators = {
 

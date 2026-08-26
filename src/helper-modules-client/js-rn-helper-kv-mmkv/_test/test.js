@@ -1,11 +1,12 @@
 // Info: Unit tests for js-rn-helper-kv-mmkv
 // Tests the KV store over an MMKV stub in pure Node.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it, beforeEach } = require('node:test');
-const assert = require('node:assert/strict');
+import kvMmkvLoader from 'helper-kv-mmkv';
 
+import loader from './loader.js';
 const {
   Store,
   StoreOther,
@@ -15,7 +16,7 @@ const {
   resetSharedData,
   Utils,
   Debug
-} = require('./loader.js');
+} = loader;
 
 
 // Reset shared data before each test
@@ -46,7 +47,7 @@ describe('KvMmkv loader', function () {
 
   it('should throw when shared_libs.MMKV is missing', function () {
     assert.throws(function () {
-      require('helper-kv-mmkv')({
+      kvMmkvLoader({
         Utils: Utils,
         Debug: Debug
       }, {
@@ -58,7 +59,7 @@ describe('KvMmkv loader', function () {
 
   it('should construct the MMKV instance with id from config', function () {
     const MmkvStub = createMmkvStub();
-    const fresh = require('helper-kv-mmkv')({
+    const fresh = kvMmkvLoader({
       Utils: Utils,
       Debug: Debug,
       MMKV: MmkvStub
@@ -87,7 +88,7 @@ describe('KvMmkv loader', function () {
     CapturingMmkv.prototype.getAllKeys = function () { return Object.keys(this._data); };
     CapturingMmkv.prototype.clearAll = function () { this._data = {}; };
 
-    require('helper-kv-mmkv')({
+    kvMmkvLoader({
       Utils: Utils,
       Debug: Debug,
       MMKV: CapturingMmkv
@@ -116,7 +117,7 @@ describe('KvMmkv loader', function () {
     CapturingMmkv.prototype.getAllKeys = function () { return Object.keys(this._data); };
     CapturingMmkv.prototype.clearAll = function () { this._data = {}; };
 
-    require('helper-kv-mmkv')({
+    kvMmkvLoader({
       Utils: Utils,
       Debug: Debug,
       MMKV: CapturingMmkv

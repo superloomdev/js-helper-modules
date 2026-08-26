@@ -5,14 +5,14 @@
 // with [helper-themer], which is the framework's programmer-error format.
 //
 // Re-keyed from camelCase to snake_case per LD13.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import loader from './loader.js';
+import themerLoader from 'helper-themer';
 
-const loader = require('./loader.js');
 const { Lib } = loader();
-const Themer = require('helper-themer')(Lib, {});
+const Themer = themerLoader(Lib, {});
 
 const PREFIX = /^TypeError: \[helper-themer\] /;
 

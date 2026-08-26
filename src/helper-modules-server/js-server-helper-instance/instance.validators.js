@@ -2,7 +2,6 @@
 // that decides whether process-scoped teardown runs per request.
 //
 // Factory: needs Lib for the Utils type-check primitives.
-'use strict';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -15,7 +14,7 @@ Factory loader. Returns a Validators interface closed over Lib.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
+export default function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
 
   // Dependencies for this instance
   const Lib = {

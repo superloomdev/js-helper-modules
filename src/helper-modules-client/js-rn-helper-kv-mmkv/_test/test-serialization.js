@@ -3,11 +3,12 @@
 // that exercise JSON round-trip fidelity, corruption recovery, cross-
 // namespace safety, and engine throw paths.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it, beforeEach } = require('node:test');
-const assert = require('node:assert/strict');
+import kvMmkvLoader from 'helper-kv-mmkv';
 
+import loader from './loader.js';
 const {
   Store,
   StoreOther,
@@ -16,9 +17,9 @@ const {
   resetSharedData,
   Utils,
   Debug
-} = require('./loader.js');
+} = loader;
 
-const KvMmkvModule = require('helper-kv-mmkv');
+const KvMmkvModule = kvMmkvLoader;
 
 
 // Reset shared data before each test

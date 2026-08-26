@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-email",
   "description": "Email address validation, sanitization, canonicalization, and disposable domain checking. Port module requiring a swappable adapter for validation depth.",
   "version": "1.0.0",
-  "main": "email.js",
+  "type": "module",
+  "exports": {
+    ".": "./email.js",
+    "./email.config.js": "./email.config.js",
+    "./email.errors.js": "./email.errors.js",
+    "./email.validators.js": "./email.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

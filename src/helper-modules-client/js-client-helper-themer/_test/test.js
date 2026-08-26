@@ -2,17 +2,16 @@
 //
 // The engine is pure, so every test is synchronous and needs no fixture
 // server, no container, and no clock control.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-
-const loader = require('./loader.js');
-const buildTemplate = require('./fixtures/template.js');
+import loader from './loader.js';
+import buildTemplate from './fixtures/template.js';
+import themerLoader from 'helper-themer';
 
 const { Lib } = loader();
 
-const Themer = require('helper-themer')(Lib, {});
+const Themer = themerLoader(Lib, {});
 const TEMPLATE = buildTemplate();
 const BASE_LAYER = [{ name: 'base' }];
 
@@ -21,7 +20,7 @@ describe('loader', () => {
 
   it('should return the public interface when loaded with defaults', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     assert.equal(typeof instance.buildTheme, 'function');
     assert.equal(typeof instance.resolve, 'function');
@@ -36,7 +35,7 @@ describe('loader', () => {
   it('should throw when BASE_FONT_SIZE is not a positive number', () => {
 
     assert.throws(
-      () => require('helper-themer')(Lib, { BASE_FONT_SIZE: 0 }),
+      () => themerLoader(Lib, { BASE_FONT_SIZE: 0 }),
       /^TypeError: \[helper-themer\] CONFIG\.BASE_FONT_SIZE must be a number greater than zero$/
     );
 
@@ -45,12 +44,12 @@ describe('loader', () => {
   it('should throw when CACHE_CAPACITY is not a whole number of one or greater', () => {
 
     assert.throws(
-      () => require('helper-themer')(Lib, { CACHE_CAPACITY: 0 }),
+      () => themerLoader(Lib, { CACHE_CAPACITY: 0 }),
       /^TypeError: \[helper-themer\] CONFIG\.CACHE_CAPACITY must be a whole number of 1 or greater$/
     );
 
     assert.throws(
-      () => require('helper-themer')(Lib, { CACHE_CAPACITY: 2.5 }),
+      () => themerLoader(Lib, { CACHE_CAPACITY: 2.5 }),
       /^TypeError: \[helper-themer\] CONFIG\.CACHE_CAPACITY must be a whole number of 1 or greater$/
     );
 
@@ -59,7 +58,7 @@ describe('loader', () => {
   it('should throw when CACHE_ENABLED is not a boolean', () => {
 
     assert.throws(
-      () => require('helper-themer')(Lib, { CACHE_ENABLED: 'yes' }),
+      () => themerLoader(Lib, { CACHE_ENABLED: 'yes' }),
       /^TypeError: \[helper-themer\] CONFIG\.CACHE_ENABLED must be true or false$/
     );
 
@@ -68,7 +67,7 @@ describe('loader', () => {
   it('should throw when MIN_CONTRAST_RATIO is outside the representable range', () => {
 
     assert.throws(
-      () => require('helper-themer')(Lib, { MIN_CONTRAST_RATIO: 22 }),
+      () => themerLoader(Lib, { MIN_CONTRAST_RATIO: 22 }),
       /^TypeError: \[helper-themer\] CONFIG\.MIN_CONTRAST_RATIO must be a number between 1 and 21 inclusive$/
     );
 
@@ -76,8 +75,8 @@ describe('loader', () => {
 
   it('should give each instance its own cache when loaded twice', () => {
 
-    const first = require('helper-themer')(Lib, {});
-    const second = require('helper-themer')(Lib, {});
+    const first = themerLoader(Lib, {});
+    const second = themerLoader(Lib, {});
 
     first.resolve(TEMPLATE, BASE_LAYER);
 
@@ -589,7 +588,7 @@ describe('buildTheme', () => {
 
   it('should equal the two-stage result when called with the same arguments', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
     const combined = instance.buildTheme(TEMPLATE, BASE_LAYER, 'native');
     const resolved = instance.resolve(TEMPLATE, BASE_LAYER);
     const staged = instance.emit(resolved, TEMPLATE, 'native');
@@ -695,7 +694,7 @@ describe('cacheStats', () => {
 
   it('should hit when the same layer content arrives in a fresh array', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(TEMPLATE, [{ name: 'base' }]);
     instance.resolve(TEMPLATE, [{ name: 'base' }]);
@@ -707,7 +706,7 @@ describe('cacheStats', () => {
 
   it('should miss when the layer content differs', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(TEMPLATE, [{ name: 'base' }]);
     instance.resolve(TEMPLATE, [{ name: 'other' }]);
@@ -718,7 +717,7 @@ describe('cacheStats', () => {
 
   it('should keep two templates apart when their layers are identical', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
     const blue = buildTemplate('#0f62fe');
     const red = buildTemplate('#da1e28');
 
@@ -729,7 +728,7 @@ describe('cacheStats', () => {
 
   it('should keep the two platforms apart when emitting one resolved theme', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
     const resolved = instance.resolve(TEMPLATE, BASE_LAYER);
 
     assert.equal(typeof instance.emit(resolved, TEMPLATE, 'web').tokens.spacing03, 'string');
@@ -739,7 +738,7 @@ describe('cacheStats', () => {
 
   it('should keep differing options apart when the template and layers match', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(TEMPLATE, BASE_LAYER, { contrast: 'correct' });
     instance.resolve(TEMPLATE, BASE_LAYER, { contrast: 'report' });
@@ -750,7 +749,7 @@ describe('cacheStats', () => {
 
   it('should evict the oldest entry when capacity is exceeded', () => {
 
-    const instance = require('helper-themer')(Lib, { CACHE_CAPACITY: 3 });
+    const instance = themerLoader(Lib, { CACHE_CAPACITY: 3 });
 
     for (let i = 0; i < 5; i++) {
       instance.resolve(TEMPLATE, [{ name: 'layer' + i }]);
@@ -763,7 +762,7 @@ describe('cacheStats', () => {
 
   it('should keep a re-read entry alive when a later insert forces eviction', () => {
 
-    const instance = require('helper-themer')(Lib, { CACHE_CAPACITY: 3 });
+    const instance = themerLoader(Lib, { CACHE_CAPACITY: 3 });
 
     instance.resolve(TEMPLATE, [{ name: 'a' }]);
     instance.resolve(TEMPLATE, [{ name: 'b' }]);
@@ -785,7 +784,7 @@ describe('cacheStats', () => {
 
   it('should store nothing when caching is disabled', () => {
 
-    const instance = require('helper-themer')(Lib, { CACHE_ENABLED: false });
+    const instance = themerLoader(Lib, { CACHE_ENABLED: false });
 
     instance.resolve(TEMPLATE, BASE_LAYER);
     instance.resolve(TEMPLATE, BASE_LAYER);
@@ -798,8 +797,8 @@ describe('cacheStats', () => {
 
   it('should return an equal result whether or not the cache served it', () => {
 
-    const cached = require('helper-themer')(Lib, {});
-    const uncached = require('helper-themer')(Lib, { CACHE_ENABLED: false });
+    const cached = themerLoader(Lib, {});
+    const uncached = themerLoader(Lib, { CACHE_ENABLED: false });
 
     assert.deepEqual(
       cached.buildTheme(TEMPLATE, BASE_LAYER, 'native'),
@@ -815,7 +814,7 @@ describe('clearCache', () => {
 
   it('should reset the entries and the counters when called', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(TEMPLATE, BASE_LAYER);
     instance.clearCache();
@@ -831,7 +830,7 @@ describe('clearCache', () => {
 
   it('should make a previous hit into a miss after clearing', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(TEMPLATE, BASE_LAYER);
     instance.resolve(TEMPLATE, BASE_LAYER);

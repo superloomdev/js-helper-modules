@@ -11,10 +11,7 @@
 //   font.roles          - ordered family roles (each falls back to the prior)
 //
 // Compatibility: Node.js 18+ and React Native (Hermes). Pure data, no logic.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ~~~~~~~~~~~~~~~~~~~~ Color ~~~~~~~~~~~~~~~~~~~~
   color: {

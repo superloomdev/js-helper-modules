@@ -2,13 +2,19 @@
   "name": "@superloomdev/js-client-helper-font",
   "description": "Pure font family registry and @font-face CSS construction. Zero platform dependencies, framework-agnostic. Adapter contract for -ext-web, -ext-rn, -ext-expo extensions",
   "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./font.js",
+    "./font.config.js": "./font.config.js",
+    "./font.errors.js": "./font.errors.js",
+    "./font.validators.js": "./font.validators.js"
+  },
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "font.js",
   "engines": {
     "node": ">=24"
   },

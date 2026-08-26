@@ -11,7 +11,6 @@
 //
 // Loader pattern: SINGLETON part. Lib, CONFIG, and ERRORS are assigned once
 // from the uniform parts signature; the public object closes over them.
-'use strict';
 
 
 // Shared dependencies injected by loader (uniform parts signature)
@@ -65,7 +64,7 @@ object.
 
 @return {Object} - Public Resolve interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Assign to module-scope vars so the public object can close over them
   Lib = shared_libs;

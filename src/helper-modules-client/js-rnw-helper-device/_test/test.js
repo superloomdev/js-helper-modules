@@ -1,8 +1,9 @@
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
+import deviceLoader from 'helper-device';
 
+import loader from './loader.js';
 const {
   Device,
   DeviceMinimal,
@@ -13,7 +14,7 @@ const {
   Utils,
   createPlatformStub,
   createDimensionsStub
-} = require('./loader');
+} = loader;
 
 
 // ~~~~~~~~~~~~~~~~~~~~ getPlatform ~~~~~~~~~~~~~~~~~~~~
@@ -267,7 +268,7 @@ test('constructor throws when Platform is not injected', function () {
 
   assert.throws(function () {
 
-    require('helper-device')({
+    deviceLoader({
       Utils: Utils,
       Dimensions: createDimensionsStub(375, 812)
     });
@@ -280,7 +281,7 @@ test('constructor throws when Dimensions is not injected', function () {
 
   assert.throws(function () {
 
-    require('helper-device')({
+    deviceLoader({
       Utils: Utils,
       Platform: createPlatformStub('web')
     });
@@ -293,7 +294,7 @@ test('constructor throws on invalid VIEWPORT_DEBOUNCE_MS', function () {
 
   assert.throws(function () {
 
-    require('helper-device')({
+    deviceLoader({
       Utils: Utils,
       Platform: createPlatformStub('web'),
       Dimensions: createDimensionsStub(375, 812)

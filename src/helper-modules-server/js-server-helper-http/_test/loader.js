@@ -1,7 +1,9 @@
 // Info: Test loader for js-server-helper-http
 // Mirrors the main project loader pattern: loads dependencies from environment
 // process.env is ONLY read here - nowhere else in test code
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import httpLoader from 'helper-http';
 
 
 /********************************************************************
@@ -10,7 +12,7 @@ Load all test dependencies, build Lib container
 @return {Object} result - Runtime objects for testing
 @return {Object} result.Lib - Dependency container (Utils, Debug, Http)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
@@ -26,13 +28,13 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Http = require('helper-http')(Lib, {});
+  Lib.Http = httpLoader(Lib, {});
 
 
   // Return runtime objects

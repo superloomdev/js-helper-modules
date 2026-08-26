@@ -6,17 +6,18 @@
 // unknown for an address in the same application. This guard is the thing
 // that stops that going unnoticed. A mirrored copy runs in the address
 // adapter's suite so either package's CI job catches the drift.
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import utilsLoader from 'helper-utils';
+import phoneAdapterBasicLoader from 'helper-contact-phone-adapter-basic';
+import adapterBasicLoader from 'helper-contact-address-adapter-basic';
 
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
 
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
-const PhoneAdapter = require('helper-contact-phone-adapter-basic')(Lib, {});
-const AddressAdapter = require('helper-contact-address-adapter-basic')(Lib, {});
+const PhoneAdapter = phoneAdapterBasicLoader(Lib, {});
+const AddressAdapter = adapterBasicLoader(Lib, {});
 
 
 

@@ -2,6 +2,7 @@
   "name": "js-client-helper-themer-test",
   "description": "Test cases for js-client-helper-themer",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js test-failures.js test-integration.js test-typesets.js test-unified.js test-carbon.js"

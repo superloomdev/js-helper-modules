@@ -17,7 +17,9 @@
 //                               used it, so its teardown cannot live on an
 //                               instance object that is discarded with the
 //                               response. state lives as long as Lib does.
-'use strict';
+import CONFIG_DEFAULTS from './instance.config.js';
+import ERRORS from './instance.errors.js';
+import createValidators from './instance.validators.js';
 
 
 
@@ -32,7 +34,7 @@ Lib, CONFIG, ERRORS, and Validators.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -43,15 +45,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./instance.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, shared across instances)
-  const ERRORS = require('./instance.errors');
-
   // Validators module (initialized with Lib, ERRORS)
-  const Validators = require('./instance.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

@@ -1,13 +1,12 @@
 // Info: Unit tests for js-react-helper-timer
-'use strict';
+import { test, describe, it, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { mock } from 'node:test';
 
-const { test, describe, it, beforeEach, afterEach } = require('node:test');
-const assert = require('node:assert/strict');
-const { mock } = require('node:test');
+import ReactTestRenderer from 'react-test-renderer';
 
-const ReactTestRenderer = require('react-test-renderer');
-
-const { Timer, React } = require('./loader')();
+import loader from './loader.js';
+const { Timer, React } = loader();
 
 
 describe('Timer loader', function () {

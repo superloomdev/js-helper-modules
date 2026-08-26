@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-email-adapter-basic",
   "description": "Basic email adapter for js-helper-contact-email. Own regex syntax validation. No disposable data. Gmail-only canonicalization. Zero runtime dependencies.",
   "version": "1.0.0",
-  "main": "adapter.js",
+  "type": "module",
+  "exports": {
+    ".": "./adapter.js",
+    "./adapter.config.js": "./adapter.config.js",
+    "./adapter.errors.js": "./adapter.errors.js",
+    "./adapter.validators.js": "./adapter.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

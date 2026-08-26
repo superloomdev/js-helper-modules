@@ -19,8 +19,10 @@
 // Factory pattern: each loader call returns an independent instance with
 // its own Lib, CONFIG, ERRORS, and Validators. Functions close over these
 // dependencies without module-level globals.
-'use strict';
 
+import CONFIG_DEFAULTS from './phone.config.js';
+import ERRORS from './phone.errors.js';
+import createValidators from './phone.validators.js';
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
@@ -36,7 +38,7 @@ misconfiguration fails at startup, not on first call.
 
 @return {Object} - Public ContactPhone interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -46,15 +48,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./phone.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, shared across instances)
-  const ERRORS = require('./phone.errors');
+  // ERRORS is imported at the top of the file
 
   // Validators module (singleton, initialized with Lib, ERRORS)
-  const Validators = require('./phone.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

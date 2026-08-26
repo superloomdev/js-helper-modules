@@ -4,16 +4,15 @@
 // (correctForContrast, contrastRatio) and performance measurements are omitted.
 // Lab's validateTemplate returns { code, message } objects; the module returns
 // string arrays, so validation assertions are adapted.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import loader from './loader.js';
+import themerLoader from 'helper-themer';
+import inventory from './fixtures/carbon-inventory.json' with { type: 'json' };
 
-const loader = require('./loader.js');
 const { Lib } = loader();
-const Themer = require('helper-themer')(Lib, {});
-
-const inventory = require('./fixtures/carbon-inventory.json');
+const Themer = themerLoader(Lib, {});
 
 const RAMP = [
   '#ffffff', '#f4f4f4', '#e0e0e0', '#c6c6c6', '#a8a8a8',

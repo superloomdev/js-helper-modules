@@ -1,4 +1,4 @@
 // Info: ESLint flat config for helper-contact-email-adapter-extended.
-const { base } = require('@superloomdev/js-helper-eslint-config');
+import { esm } from '@superloomdev/js-helper-eslint-config';
 
-module.exports = base;
+export default esm;

@@ -3,7 +3,7 @@
 // Receives Lib and ERRORS by injection from the loader.
 // Never self-requires the error catalog or data files.
 
-module.exports = function (Lib, ERRORS) { // eslint-disable-line no-unused-vars -- ERRORS kept for cross-module consistency
+export default function (Lib, ERRORS) { // eslint-disable-line no-unused-vars -- ERRORS kept for cross-module consistency
 
   return {
 

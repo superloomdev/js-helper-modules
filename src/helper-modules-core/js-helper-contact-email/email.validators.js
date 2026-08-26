@@ -4,7 +4,6 @@
 //   3. Programmer-error assertions - called per request. Throw TypeError.
 //
 // Singleton: Lib and ERRORS injected once by loader.
-'use strict';
 
 
 // Shared dependencies injected by loader
@@ -23,7 +22,7 @@ Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

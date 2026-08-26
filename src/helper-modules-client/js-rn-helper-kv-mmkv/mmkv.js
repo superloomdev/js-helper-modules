@@ -19,8 +19,9 @@
 // Factory pattern: each loader call returns an independent instance with
 // its own namespace and MMKV instance.
 //
-'use strict';
-
+import CONFIG_DEFAULTS from './mmkv.config.js';
+import ERRORS from './mmkv.errors.js';
+import createValidators from './mmkv.validators.js';
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
@@ -34,7 +35,7 @@ namespace and MMKV instance.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -46,15 +47,14 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./mmkv.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./mmkv.errors');
 
   // Validators singleton - Lib, ERRORS injected here
-  const Validators = require('./mmkv.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

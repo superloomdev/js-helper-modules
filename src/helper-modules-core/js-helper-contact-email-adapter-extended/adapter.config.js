@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-contact-email-adapter-extended
-'use strict';
 
 
-module.exports = {
+export default {
 
   // validator.isEmail options
   EMAIL_VALIDATION_OPTIONS: {

@@ -2,11 +2,12 @@
 // Covers subscription lifecycles, event propagation, stub state updates,
 // factory independence, and error isolation across subscribers.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
+import deviceLoader from 'helper-device';
 
+import loader from './loader.js';
 const {
   DeviceDebounced,
   dimensionsDebounceStub,
@@ -15,9 +16,9 @@ const {
   createDimensionsStub,
   createAppStateStub,
   createNetInfoStub
-} = require('./loader');
+} = loader;
 
-const DeviceModule = require('helper-device');
+const DeviceModule = deviceLoader;
 
 
 // ~~~~~~~~~~~~~~~~~~~~ Viewport state propagation ~~~~~~~~~~~~~~~~~~~~

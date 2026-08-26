@@ -1,8 +1,7 @@
 // Info: Error catalog for helper-kv-localstorage.
 //
 // Frozen on export. Injected into validators and createInterface.
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_KEY: {
     type: 'helper-kv-localstorage/invalid-key',

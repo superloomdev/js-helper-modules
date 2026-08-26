@@ -1,9 +1,10 @@
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fontLoader from 'helper-font';
+import utilsLoader from 'helper-utils';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const { Font } = require('./loader');
+import loader from './loader.js';
+const { Font } = loader;
 
 
 // ~~~~~~~~~~~~~~~~~~~~ System family (seeded at construction) ~~~~~~~~~~~~~~~~~~~~
@@ -259,8 +260,8 @@ test('constructor throws on invalid DEFAULT_FAMILY', function () {
 
   assert.throws(function () {
 
-    require('helper-font')({
-      Utils: require('helper-utils')()
+    fontLoader({
+      Utils: utilsLoader()
     }, {
       DEFAULT_FAMILY: ''
     });
@@ -273,8 +274,8 @@ test('constructor throws on invalid roles type', function () {
 
   assert.throws(function () {
 
-    require('helper-font')({
-      Utils: require('helper-utils')()
+    fontLoader({
+      Utils: utilsLoader()
     }, {
       ROLES: 'not-an-object'
     });
@@ -508,8 +509,8 @@ test('registerRoles rejects array', function () {
 
 test('constructor seeds roles from config', function () {
 
-  const ConfigFont = require('helper-font')({
-    Utils: require('helper-utils')()
+  const ConfigFont = fontLoader({
+    Utils: utilsLoader()
   }, {
     ROLES: { primary: 'Inter', secondary: 'Inter' }
   });

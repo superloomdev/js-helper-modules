@@ -1,16 +1,18 @@
 // Info: Test loader for helper-contact-email-adapter-basic.
-'use strict';
 
+import utilsLoader from 'helper-utils';
+import adapterBasicLoader from 'helper-contact-email-adapter-basic';
+import contactEmailLoader from 'helper-contact-email';
 
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
-const Adapter = require('helper-contact-email-adapter-basic')(Lib, {});
-const ContactEmail = require('helper-contact-email')(Lib, { Adapter: Adapter });
+const Adapter = adapterBasicLoader(Lib, {});
+const ContactEmail = contactEmailLoader(Lib, { Adapter: Adapter });
 
 
-module.exports = {
-  Lib: Lib,
-  Adapter: Adapter,
-  ContactEmail: ContactEmail
+export {
+  Lib,
+  Adapter,
+  ContactEmail
 };

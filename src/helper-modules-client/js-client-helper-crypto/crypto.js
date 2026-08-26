@@ -3,7 +3,9 @@
 //
 // Factory pattern: each loader call returns an independent Crypto interface
 // with its own Lib, CONFIG, ERRORS, and Validators. Stateless - no per-instance resources.
-'use strict';
+import CONFIG_DEFAULTS from './crypto.config.js';
+import ERRORS from './crypto.errors.js';
+import createValidators from './crypto.validators.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -17,7 +19,7 @@ Lib, CONFIG, ERRORS, and Validators.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -27,15 +29,14 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./crypto.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, pure engine - no operational errors)
-  const ERRORS = require('./crypto.errors');
 
   // Validators singleton (Lib and ERRORS injected)
-  const Validators = require('./crypto.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

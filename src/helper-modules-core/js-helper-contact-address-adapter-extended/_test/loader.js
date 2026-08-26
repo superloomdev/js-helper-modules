@@ -1,20 +1,23 @@
 // Info: Test loader for helper-contact-address-adapter-extended.
 // The basic adapter and a second core instance are also built so the
 // swap proof can drive both adapters through identical call sites.
-'use strict';
+import utilsLoader from 'helper-utils';
+import adapterExtendedLoader from 'helper-contact-address-adapter-extended';
+import adapterBasicLoader from 'helper-contact-address-adapter-basic';
+import contactAddressLoader from 'helper-contact-address';
 
 
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
-const Adapter = require('helper-contact-address-adapter-extended')(Lib, {});
-const BasicAdapter = require('helper-contact-address-adapter-basic')(Lib, {});
+const Adapter = adapterExtendedLoader(Lib, {});
+const BasicAdapter = adapterBasicLoader(Lib, {});
 
-const ContactAddress = require('helper-contact-address')(Lib, { Adapter: Adapter });
-const ContactAddressBasic = require('helper-contact-address')(Lib, { Adapter: BasicAdapter });
+const ContactAddress = contactAddressLoader(Lib, { Adapter: Adapter });
+const ContactAddressBasic = contactAddressLoader(Lib, { Adapter: BasicAdapter });
 
 
-module.exports = {
+export default {
   Lib: Lib,
   Adapter: Adapter,
   BasicAdapter: BasicAdapter,

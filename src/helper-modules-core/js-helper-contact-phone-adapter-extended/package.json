@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-phone-adapter-extended",
   "description": "Extended phone adapter for js-helper-contact-phone. Wraps libphonenumber-js with max metadata. Pattern validation, number type classification.",
   "version": "1.0.0",
-  "main": "adapter.js",
+  "type": "module",
+  "exports": {
+    ".": "./adapter.js",
+    "./adapter.config.js": "./adapter.config.js",
+    "./adapter.errors.js": "./adapter.errors.js",
+    "./adapter.validators.js": "./adapter.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

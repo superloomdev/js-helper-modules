@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-contact-email-adapter-basic
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Email syntax regex for the basic adapter.
   // Validates: local@domain.tld

@@ -1,7 +1,6 @@
 // Info: Scale builders for js-client-helper-styler - turn a small numeric seed into a
 // full named scale. Modular (geometric) scales drive typography; linear
 // (arithmetic) scales drive spacing and radius. Singleton part; no state.
-'use strict';
 
 
 // Shared dependencies injected by loader (uniform parts signature)
@@ -23,7 +22,7 @@ signature uniformity with other parts - none are consumed today.
 
 @return {Object} - Public Scale interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Capture injected references so they are available if a future builder needs them
   Lib = shared_libs;

@@ -11,9 +11,7 @@
 // per-instance state - and run at authoring/startup time, so the loader simply
 // returns the shared module-scope Validators object. The shared_libs param is
 // accepted for loader-signature uniformity but unused.
-'use strict';
-
-const ERRORS = require('./styler.errors');
+import ERRORS from './styler.errors.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -27,7 +25,7 @@ are pure and use no injected dependencies or config.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs) { // eslint-disable-line no-unused-vars
+export default function loader (shared_libs) { // eslint-disable-line no-unused-vars
 
   return Validators;
 

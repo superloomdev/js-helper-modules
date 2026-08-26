@@ -14,15 +14,15 @@
 //   Group E - Parameter extraction (full pipeline through gateway)
 //   Group F - Edge cases (unicode, large body, multi-value query, IP/UA)
 //   Group G - Graceful error handling (malformed body, wrong content-type)
-'use strict';
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import httpGatewayAdapterExpressLoader from 'helper-http-gateway-adapter-express';
 
+import loader from './loader.js';
+import serverHelper from './server-helper.js';
 
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-
-
-const { Lib, httpGateway } = require('./loader')();
-const { startTestServer, startBareTestServer, makeRequest } = require('./server-helper');
+const { Lib, httpGateway } = loader();
+const { startTestServer, startBareTestServer, makeRequest } = serverHelper;
 
 
 // Shared user-agent that supports SameSite=None
@@ -842,7 +842,7 @@ describe('Group G - graceful error handling', function () {
 
 describe('Group H - adapter direct unit tests', function () {
 
-  const HttpGatewayAdapterExpressHttp = require('helper-http-gateway-adapter-express')(Lib, null, null);
+  const HttpGatewayAdapterExpressHttp = httpGatewayAdapterExpressLoader(Lib, null, null);
 
   it('extractRequest returns normalized structure for minimal req', function () {
     const minimalReq = {

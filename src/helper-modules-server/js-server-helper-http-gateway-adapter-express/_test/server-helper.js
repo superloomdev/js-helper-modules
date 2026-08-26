@@ -4,11 +4,8 @@
 // of this module is to exercise the adapter against the real Express runtime
 // (real req/res/middleware) instead of stubbed objects - that is the only way
 // to verify wire-level compatibility with Express version upgrades.
-'use strict';
-
-
-const express      = require('express');
-const cookieParser = require('cookie-parser');
+import express from 'express';
+import cookieParser from 'cookie-parser';
 
 
 /********************************************************************
@@ -202,7 +199,7 @@ function listenOnRandomPort (app) {
 }
 
 
-module.exports = {
+export default {
   startTestServer    : startTestServer,
   startBareTestServer: startBareTestServer,
   makeRequest        : makeRequest

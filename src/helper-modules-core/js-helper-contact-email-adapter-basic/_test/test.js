@@ -1,11 +1,10 @@
 // Info: Test suite for helper-contact-email-adapter-basic.
-'use strict';
 
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { Adapter, ContactEmail } = require('./loader');
+import { Adapter, ContactEmail } from './loader.js';
 
 
 

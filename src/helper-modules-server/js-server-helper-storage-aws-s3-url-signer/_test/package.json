@@ -1,6 +1,7 @@
 {
   "name": "js-server-helper-storage-aws-s3-url-signer-test",
   "version": "1.0.0",
+  "type": "module",
   "description": "Test suite for js-server-helper-storage-aws-s3-url-signer",
   "private": true,
   "dependencies": {

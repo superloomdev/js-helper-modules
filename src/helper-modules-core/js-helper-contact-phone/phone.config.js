@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-contact-phone
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Phone ID separator between country code and reversed national number.
   // A dot is safe because auth reserves '-' and '#' and forbids both in

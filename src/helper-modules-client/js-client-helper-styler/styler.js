@@ -16,7 +16,13 @@
 // their interfaces to the public object. Node's require cache guarantees one
 // Styler per process. Only Lib.Debug is used - for assembly logging at DEBUG
 // level (verbosity is the logger's own level threshold, not a flag).
-'use strict';
+import CONFIG_DEFAULTS from './styler.config.js';
+import ERRORS_CATALOG from './styler.errors.js';
+import createValidators from './styler.validators.js';
+import createColorOps from './parts/color-ops.js';
+import createScale from './parts/scale.js';
+import createUtilities from './parts/utilities.js';
+import defaultTemplate from './styler.template.js';
 
 
 // Injected dependencies + sibling modules, set by the loader (module-scope).
@@ -41,23 +47,23 @@ module-scope Styler object with the part interfaces attached.
 
 @return {Object} - Public Styler interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Capture injected deps and merge config over module defaults
   Lib = shared_libs || {};
-  CONFIG = Object.assign({}, require('./styler.config'), config || {});
-  ERRORS = require('./styler.errors');
+  CONFIG = Object.assign({}, CONFIG_DEFAULTS, config || {});
+  ERRORS = ERRORS_CATALOG;
 
   // Build the validators subloader (fails fast on a malformed template)
-  Validators = require('./styler.validators')(Lib);
+  Validators = createValidators(Lib);
 
   // Build the pure parts with the uniform (Lib, CONFIG, ERRORS) signature
-  Parts.colorOps = require('./parts/color-ops')(Lib, CONFIG, ERRORS);
-  Parts.scale = require('./parts/scale')(Lib, CONFIG, ERRORS);
-  Parts.utilities = require('./parts/utilities')(Lib, CONFIG, ERRORS);
+  Parts.colorOps = createColorOps(Lib, CONFIG, ERRORS);
+  Parts.scale = createScale(Lib, CONFIG, ERRORS);
+  Parts.utilities = createUtilities(Lib, CONFIG, ERRORS);
 
   // Attach the default template so consumers can use Styler.defaultTemplate directly
-  Styler.defaultTemplate = require('./styler.template.js');
+  Styler.defaultTemplate = defaultTemplate;
 
   // Expose generateUtilities from the utilities part
   Styler.generateUtilities = Parts.utilities.generateUtilities;

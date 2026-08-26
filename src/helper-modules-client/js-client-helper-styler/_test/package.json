@@ -2,6 +2,7 @@
   "name": "js-client-helper-styler-test",
   "description": "Test cases for js-client-helper-styler",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js"

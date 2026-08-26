@@ -13,18 +13,21 @@
 //   canonicalize(email) -> String | null
 //
 // Compatibility: Node.js 24+ and any modern browser.
-'use strict';
 
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
-// Runtime dependency: validator
-const validator = require('validator');
+import validator from 'validator';
+import CONFIG_DEFAULTS from './adapter.config.js';
+import ERRORS from './adapter.errors.js';
+import createValidators from './adapter.validators.js';
 
 // Generated disposable domain list (committed JSON, Set constructed at runtime)
 const DISPOSABLE_DOMAINS = new Set(require('./data/disposable-domains.json'));
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance - by reference from the shared container
   const Lib = {
@@ -34,15 +37,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
-    require('./adapter.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Own frozen error catalog
-  const ERRORS = require('./adapter.errors');
+  // ERRORS is imported at the top of the file
 
   // Load the validators singleton and inject Lib + ERRORS
-  const Validators = require('./adapter.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);

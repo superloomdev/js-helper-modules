@@ -12,7 +12,11 @@
 // Local emulation: set CONFIG.ENDPOINT to a MinIO/S3-compatible server and
 // CONFIG.FORCE_PATH_STYLE to true. Real AWS leaves ENDPOINT undefined and
 // FORCE_PATH_STYLE false.
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './s3.config.js';
+import ERRORS from './s3.errors.js';
+import createValidators from './s3.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless SDK adapter (module-level - require() is cached anyway).
 let S3Lib = null;
@@ -30,7 +34,7 @@ Lib, CONFIG, and S3 client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -42,15 +46,14 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./s3.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./s3.errors');
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./s3.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

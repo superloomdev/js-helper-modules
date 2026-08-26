@@ -1,16 +1,17 @@
-'use strict';
-
-const createMmkvStub = require('./mmkv-stub');
+import createMmkvStub from './mmkv-stub.js';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import kvMmkvLoader from 'helper-kv-mmkv';
 
 // Peer dependencies
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
 
 // Shared MMKV class for namespaced tests (two instances share one data store)
 const SharedMmkv = createMmkvStub();
 
 // Module under test - MMKV stub injected via shared_libs
-const Store = require('helper-kv-mmkv')({
+const Store = kvMmkvLoader({
   Utils: Utils,
   Debug: Debug,
   MMKV: SharedMmkv
@@ -20,7 +21,7 @@ const Store = require('helper-kv-mmkv')({
 });
 
 // Second instance with a different namespace sharing the same MMKV class
-const StoreOther = require('helper-kv-mmkv')({
+const StoreOther = kvMmkvLoader({
   Utils: Utils,
   Debug: Debug,
   MMKV: SharedMmkv
@@ -30,7 +31,7 @@ const StoreOther = require('helper-kv-mmkv')({
 });
 
 // Instance with empty namespace
-const StoreGlobal = require('helper-kv-mmkv')({
+const StoreGlobal = kvMmkvLoader({
   Utils: Utils,
   Debug: Debug,
   MMKV: createMmkvStub()
@@ -43,7 +44,7 @@ const StoreGlobal = require('helper-kv-mmkv')({
 function createFreshStore (namespace) {
   const MmkvStub = createMmkvStub();
   return {
-    store: require('helper-kv-mmkv')({
+    store: kvMmkvLoader({
       Utils: Utils,
       Debug: Debug,
       MMKV: MmkvStub
@@ -60,7 +61,7 @@ function resetSharedData () {
   SharedMmkv._reset();
 }
 
-module.exports = {
+export default {
   Store: Store,
   StoreOther: StoreOther,
   StoreGlobal: StoreGlobal,

@@ -1,9 +1,7 @@
 // Info: Error catalog for helper-kv-mmkv.
 //
 // Frozen on export. Injected into validators and createInterface.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_KEY: {
     type: 'helper-kv-mmkv/invalid-key',

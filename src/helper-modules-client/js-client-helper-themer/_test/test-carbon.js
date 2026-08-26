@@ -5,16 +5,15 @@
 //
 // Re-keyed from camelCase to snake_case per LD13. Lab's internal functions
 // (contrastRatio) and performance measurements are omitted.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import loader from './loader.js';
+import themerLoader from 'helper-themer';
+import inventory from './fixtures/carbon-inventory.json' with { type: 'json' };
 
-const loader = require('./loader.js');
 const { Lib } = loader();
-const Themer = require('helper-themer')(Lib, {});
-
-const inventory = require('./fixtures/carbon-inventory.json');
+const Themer = themerLoader(Lib, {});
 const THEMES = ['white', 'g10', 'g90', 'g100'];
 const PRODUCT_GROUPS = ['syntax', 'ai', 'chat'];
 

@@ -8,9 +8,7 @@
 // Each entry is the expected-shape clause of the programmer-error message
 // format. The thrower composes the prefix and the field path around it, so
 // the format stays in one place and every message reads alike.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   // ~~~~~~~~~~~~~~~~~~~~ Argument Shape ~~~~~~~~~~~~~~~~~~~~
 

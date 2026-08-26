@@ -1,6 +1,3 @@
-'use strict';
-
-
 // In-memory Web Storage stub for testing.
 // Implements the Storage interface: getItem, setItem, removeItem, key, length, clear.
 // Supports a configurable throw mode to simulate quota exceeded and read errors.
@@ -63,4 +60,4 @@ function createWebStorageStub (options) {
 
 }
 
-module.exports = createWebStorageStub;
+export default createWebStorageStub;

@@ -2,13 +2,19 @@
   "name": "@superloomdev/js-react-helper-timer",
   "description": "A keyed count-down and count-up timer helper for React with drift-corrected remaining and elapsed, pause/resume/reset, and useTimer/useCountdown hooks. Part of Superloom.",
   "version": "1.0.0",
+  "type": "module",
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "timer.js",
+  "exports": {
+    ".": "./timer.js",
+    "./timer.config.js": "./timer.config.js",
+    "./timer.errors.js": "./timer.errors.js",
+    "./timer.validators.js": "./timer.validators.js"
+  },
   "engines": {
     "node": ">=24"
   },

@@ -17,8 +17,9 @@
 // Factory pattern: each loader call returns an independent instance with
 // its own state and config.
 //
-'use strict';
-
+import CONFIG_DEFAULTS from './timer.config.js';
+import ERRORS from './timer.errors.js';
+import createValidators from './timer.validators.js';
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
@@ -36,7 +37,7 @@ in pure Node with no Metro and no emulator.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance (React picked off the injected container)
   const Lib = {
@@ -48,15 +49,14 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./timer.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./timer.errors');
 
   // Validators singleton - Lib, ERRORS injected here
-  const Validators = require('./timer.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

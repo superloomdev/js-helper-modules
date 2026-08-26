@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for js-server-helper-http.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   NETWORK_REQUEST_FAILED: Object.freeze({
     type: 'NETWORK_REQUEST_FAILED',

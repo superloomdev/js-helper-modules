@@ -1,6 +1,8 @@
 // Info: Test loader for helper-contact-email.
 // Builds a Lib container with Utils and a stub adapter.
-'use strict';
+
+import utilsLoader from 'helper-utils';
+import contactEmailLoader from 'helper-contact-email';
 
 
 // Stub adapter with known behavior for testing
@@ -50,17 +52,17 @@ const stubAdapter = {
 
 // Build Lib container
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
 
 // Load the module under test
-const ContactEmail = require('helper-contact-email')(Lib, {
+const ContactEmail = contactEmailLoader(Lib, {
   Adapter: stubAdapter
 });
 
 
-module.exports = {
-  ContactEmail: ContactEmail,
-  Lib: Lib,
-  stubAdapter: stubAdapter
+export {
+  ContactEmail,
+  Lib,
+  stubAdapter
 };

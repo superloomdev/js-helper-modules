@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-address-adapter-extended",
   "description": "Extended address adapter for js-helper-contact-address. Postal code regex patterns and ISO 3166-2 subdivision lists.",
   "version": "1.0.0",
-  "main": "adapter.js",
+  "type": "module",
+  "exports": {
+    ".": "./adapter.js",
+    "./adapter.config.js": "./adapter.config.js",
+    "./adapter.errors.js": "./adapter.errors.js",
+    "./adapter.validators.js": "./adapter.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": { "name": "sj00" },

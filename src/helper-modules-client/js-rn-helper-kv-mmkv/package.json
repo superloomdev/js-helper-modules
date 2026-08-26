@@ -2,13 +2,19 @@
   "name": "@superloomdev/js-rn-helper-kv-mmkv",
   "description": "Key-value store over react-native-mmkv with namespaced keys, JSON values, and sync + async API",
   "version": "1.0.0",
+  "type": "module",
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "mmkv.js",
+  "exports": {
+    ".": "./mmkv.js",
+    "./mmkv.config.js": "./mmkv.config.js",
+    "./mmkv.errors.js": "./mmkv.errors.js",
+    "./mmkv.validators.js": "./mmkv.validators.js"
+  },
   "engines": {
     "node": ">=24"
   },

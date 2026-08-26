@@ -14,7 +14,9 @@
 // Reference: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
 //
 // Compatibility: Node.js 24+
-'use strict';
+import CONFIG_DEFAULTS from './adapter.config.js';
+import ERRORS from './adapter.errors.js';
+import createValidators from './adapter.validators.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -31,7 +33,7 @@ Adapter instance.
 
 @return {Object} - Adapter interface (the parent's adapter contract)
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance - by reference from the shared container
   const Lib = {
@@ -42,15 +44,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over adapter config defaults
   const CONFIG = Object.assign(
     {},
-    require('./adapter.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Own frozen error catalog
-  const ERRORS = require('./adapter.errors');
-
   // Load the validators singleton and inject Lib + ERRORS
-  const Validators = require('./adapter.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config - throws on misconfiguration
   Validators.validateConfig(CONFIG);

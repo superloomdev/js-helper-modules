@@ -1,9 +1,7 @@
 // Info: Error catalog for helper-font.
 //
 // Frozen on export. Injected into validators and the public interface.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_MANIFEST: {
     type: 'helper-font/invalid-manifest',

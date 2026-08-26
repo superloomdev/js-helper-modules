@@ -1,7 +1,9 @@
 // Info: Test loader for js-client-helper-styler
 // Mirrors the main project loader pattern: loads dependencies from environment
 // process.env is ONLY read here - nowhere else in test code
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import stylerLoader from 'helper-styler';
 
 
 /********************************************************************
@@ -13,7 +15,7 @@ process.env is ONLY read here - never in test files.
 @return {Object} result.Lib - Dependency container (Styler, Utils, Debug)
 @return {Object} result.Config - Test-wide environment values
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
@@ -28,16 +30,16 @@ module.exports = function loader () {
   // ==================== HELPER MODULES ============================= //
 
   // Utils - peer dependency for type checking and validation
-  Lib.Utils = require('helper-utils')(Lib, {});
+  Lib.Utils = utilsLoader(Lib, {});
 
   // Debug - peer dependency for logging during tests
-  Lib.Debug = require('helper-debug')(Lib, {});
+  Lib.Debug = debugLoader(Lib, {});
 
 
   // ==================== STYLER MODULE =============================== //
 
   // Styler - the module under test, loaded through npm alias
-  Lib.Styler = require('helper-styler')(Lib);
+  Lib.Styler = stylerLoader(Lib);
 
 
   // Return runtime objects

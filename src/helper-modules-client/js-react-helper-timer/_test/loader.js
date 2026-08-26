@@ -1,12 +1,14 @@
 // Info: Test loader for js-react-helper-timer
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import React from 'react';
+import timerLoader from 'helper-timer';
 
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
-const React = require('react');
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
 
 // Load the module under test
-const Timer = require('helper-timer')({
+const Timer = timerLoader({
   React: React,
   Utils: Utils,
   Debug: Debug
@@ -20,7 +22,7 @@ Export the loaded module and its dependencies for test files.
 @return {Object} result.Utils - The Utils dependency instance
 @return {Object} result.React - The React instance
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   return {
     Timer: Timer,

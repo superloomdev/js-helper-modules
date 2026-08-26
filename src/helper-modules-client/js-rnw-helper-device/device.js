@@ -17,8 +17,9 @@
 //
 // Factory pattern: each loader call returns an independent instance with
 // its own subscription state.
-'use strict';
-
+import CONFIG_DEFAULTS from './device.config.js';
+import ERRORS from './device.errors.js';
+import createValidators from './device.validators.js';
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
@@ -33,7 +34,7 @@ subscription state and injected platform APIs.
 
 @return {Object} - Public Device interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -49,15 +50,14 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./device.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./device.errors');
 
   // Validators singleton - Lib, ERRORS injected here
-  const Validators = require('./device.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

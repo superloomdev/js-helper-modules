@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-contact-phone",
   "description": "Phone number validation, formatting, and ID management. Port module requiring a swappable adapter for country data and validation depth.",
   "version": "1.0.0",
-  "main": "phone.js",
+  "type": "module",
+  "exports": {
+    ".": "./phone.js",
+    "./phone.config.js": "./phone.config.js",
+    "./phone.errors.js": "./phone.errors.js",
+    "./phone.validators.js": "./phone.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

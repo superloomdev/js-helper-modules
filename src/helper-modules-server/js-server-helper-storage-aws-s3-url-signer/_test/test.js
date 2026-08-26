@@ -1,10 +1,9 @@
 // Test suite for js-server-helper-storage-aws-s3-url-signer
-'use strict';
+import { describe, it } from 'node:test';
+import { strictEqual } from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const { strictEqual } = require('node:assert/strict');
-
-const { Lib } = require('./loader.js')();
+import loader from './loader.js';
+const { Lib } = loader();
 const S3UrlSigner = Lib.S3UrlSigner;
 
 describe('S3UrlSigner', { concurrency: false }, function () {

@@ -2,6 +2,7 @@
   "name": "js-helper-contact-address-adapter-extended-test",
   "description": "Test suite for js-helper-contact-address-adapter-extended",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

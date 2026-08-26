@@ -2,6 +2,7 @@
   "name": "@superloomdev/js-react-helper-timer-test",
   "description": "Unit tests for js-react-helper-timer",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js"

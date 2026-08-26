@@ -7,7 +7,6 @@
 // returning an error object: a malformed template or a bad argument can only
 // reach the engine through a caller bug. A host that accepts a theme document
 // from a network response validates it before handing it here.
-'use strict';
 
 
 // Shared dependency injected by loader
@@ -34,7 +33,7 @@ catalog to module scope and returns the shared Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Assign injected dependencies so the public object can close over them
   Lib = shared_libs;

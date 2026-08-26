@@ -1,8 +1,7 @@
 // Info: Configuration file for js-server-helper-http
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Default timeout for HTTP requests (seconds)
   TIMEOUT: 30,

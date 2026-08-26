@@ -1,4 +1,4 @@
-'use strict';
+
 
 
 // In-memory MMKV stub for testing.
@@ -77,4 +77,4 @@ function createMmkvStub (options) {
 
 }
 
-module.exports = createMmkvStub;
+export default createMmkvStub;

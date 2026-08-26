@@ -17,11 +17,13 @@
 //   Lib.ContactAddress = require('helper-contact-address')(Lib, { Adapter });
 //
 // Compatibility: Node.js 24+ and any modern browser.
-'use strict';
+import CONFIG_DEFAULTS from './address.config.js';
+import ERRORS from './address.errors.js';
+import createValidators from './address.validators.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -31,13 +33,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./address.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog and validators
-  const ERRORS = require('./address.errors');
-  const Validators = require('./address.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

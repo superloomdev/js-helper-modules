@@ -3,7 +3,6 @@
 // catalog is tamper-proof at runtime.
 //
 // Compatibility: Node.js 18+ and React Native (Hermes).
-'use strict';
 
 
 const ERRORS = {
@@ -51,4 +50,4 @@ Object.keys(ERRORS).forEach(function (key) {
   Object.freeze(ERRORS[key]);
 });
 
-module.exports = Object.freeze(ERRORS);
+export default Object.freeze(ERRORS);

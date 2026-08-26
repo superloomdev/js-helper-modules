@@ -2,7 +2,14 @@
   "name": "@superloomdev/js-helper-contact-phone-adapter-basic",
   "description": "Lean phone adapter for js-helper-contact-phone. Country calling codes and length bounds. No pattern validation, no number type. ~20 KB generated data.",
   "version": "1.0.0",
-  "main": "adapter.js",
+  "type": "module",
+  "exports": {
+    ".": "./adapter.js",
+    "./adapter.config.js": "./adapter.config.js",
+    "./adapter.errors.js": "./adapter.errors.js",
+    "./adapter.validators.js": "./adapter.validators.js",
+    "./data/basic.country-data.json": "./data/basic.country-data.json"
+  },
   "private": false,
   "license": "MIT",
   "author": {

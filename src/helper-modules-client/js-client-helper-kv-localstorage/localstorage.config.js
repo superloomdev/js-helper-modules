@@ -1,8 +1,7 @@
 // Info: Default configuration for helper-kv-localstorage.
 //
 // All keys can be overridden by passing a config object to the loader.
-
-module.exports = {
+export default {
 
   // Key prefix. Stored key is [NAMESPACE]:[key] when non-empty, bare [key] when empty
   NAMESPACE: '',

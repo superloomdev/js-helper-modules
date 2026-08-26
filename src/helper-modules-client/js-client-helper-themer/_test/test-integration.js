@@ -3,14 +3,14 @@
 //
 // Re-keyed from camelCase to snake_case per LD13. Lab's createResolver()
 // is replaced by the module's built-in per-instance cache.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import loader from './loader.js';
+import themerLoader from 'helper-themer';
 
-const loader = require('./loader.js');
 const { Lib } = loader();
-const Themer = require('helper-themer')(Lib, {});
+const Themer = themerLoader(Lib, {});
 
 
 function makeTemplate (accentHex) {
@@ -108,7 +108,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should hit when a fresh array with equal content arrives', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(t, [{ name: 'base' }]);
     instance.resolve(t, [{ name: 'base' }]);
@@ -120,7 +120,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should miss when the layer content differs', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(t, [{ name: 'base' }]);
     instance.resolve(t, [{ name: 'other' }]);
@@ -131,7 +131,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should not collide when a different template has identical layers', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
     const blue = makeTemplate('#0f62fe');
     const red = makeTemplate('#da1e28');
 
@@ -145,7 +145,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should not collide when options differ', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(t, LAYERS, { min_contrast_ratio: 4.5 });
     instance.resolve(t, LAYERS, { min_contrast_ratio: 7 });
@@ -156,8 +156,8 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should return an equal result whether or not the cache served it', () => {
 
-    const cached = require('helper-themer')(Lib, {});
-    const uncached = require('helper-themer')(Lib, { CACHE_ENABLED: false });
+    const cached = themerLoader(Lib, {});
+    const uncached = themerLoader(Lib, { CACHE_ENABLED: false });
 
     assert.deepEqual(
       cached.buildTheme(t, LAYERS, 'native'),
@@ -168,7 +168,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should keep web and native emit apart', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
     const rr = instance.resolve(t, LAYERS);
     const w = instance.emit(rr, t, 'web');
     const n = instance.emit(rr, t, 'native');
@@ -181,7 +181,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
 
   it('should hit on a repeat emit of the same resolved result', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
     const rr = instance.resolve(t, LAYERS);
 
     instance.emit(rr, t, 'native');
@@ -200,7 +200,7 @@ describe('LRU bound', () => {
 
   it('should respect capacity and evict the oldest entry', () => {
 
-    const instance = require('helper-themer')(Lib, { CACHE_CAPACITY: 3 });
+    const instance = themerLoader(Lib, { CACHE_CAPACITY: 3 });
 
     for (let i = 0; i < 5; i++) {
       instance.resolve(t, [{ name: 'layer' + i }]);
@@ -213,7 +213,7 @@ describe('LRU bound', () => {
 
   it('should refresh recency on read, so an LRU is not a FIFO queue', () => {
 
-    const instance = require('helper-themer')(Lib, { CACHE_CAPACITY: 3 });
+    const instance = themerLoader(Lib, { CACHE_CAPACITY: 3 });
 
     instance.resolve(t, [{ name: 'a' }]);
     instance.resolve(t, [{ name: 'b' }]);
@@ -237,7 +237,7 @@ describe('LRU bound', () => {
 
   it('should reset both entries and counters on clear', () => {
 
-    const instance = require('helper-themer')(Lib, {});
+    const instance = themerLoader(Lib, {});
 
     instance.resolve(t, LAYERS);
     instance.clearCache();

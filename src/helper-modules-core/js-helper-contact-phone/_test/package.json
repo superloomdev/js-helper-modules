@@ -2,6 +2,7 @@
   "name": "js-helper-contact-phone-test",
   "description": "Test suite for js-helper-contact-phone",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

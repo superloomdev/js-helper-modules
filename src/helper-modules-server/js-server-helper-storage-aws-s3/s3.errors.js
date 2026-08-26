@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for js-server-helper-storage-aws-s3.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   STORAGE_UPLOAD_FAILED: Object.freeze({
     type: 'STORAGE_UPLOAD_FAILED',

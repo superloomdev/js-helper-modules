@@ -1,4 +1,6 @@
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import deviceLoader from 'helper-device';
 
 
 // --- Stubs for injected platform APIs ---
@@ -127,8 +129,8 @@ function createSafeAreaStub (insets) {
 
 // --- Build the Device module with stubs ---
 
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
 
 const platformStub = createPlatformStub('web');
 const dimensionsStub = createDimensionsStub(375, 812);
@@ -136,7 +138,7 @@ const appStateStub = createAppStateStub();
 const netInfoStub = createNetInfoStub(true, 'wifi');
 const safeAreaStub = createSafeAreaStub({ top: 47, bottom: 34, left: 0, right: 0 });
 
-const Device = require('helper-device')({
+const Device = deviceLoader({
   Utils: Utils,
   Debug: Debug,
   Platform: platformStub,
@@ -149,7 +151,7 @@ const Device = require('helper-device')({
 
 // --- Device with only required injections (no optional APIs) ---
 
-const DeviceMinimal = require('helper-device')({
+const DeviceMinimal = deviceLoader({
   Utils: Utils,
   Debug: Debug,
   Platform: createPlatformStub('ios'),
@@ -161,7 +163,7 @@ const DeviceMinimal = require('helper-device')({
 
 const dimensionsDebounceStub = createDimensionsStub(375, 812);
 
-const DeviceDebounced = require('helper-device')({
+const DeviceDebounced = deviceLoader({
   Utils: Utils,
   Debug: Debug,
   Platform: createPlatformStub('android'),
@@ -171,7 +173,7 @@ const DeviceDebounced = require('helper-device')({
 });
 
 
-module.exports = {
+export default {
   Device: Device,
   DeviceMinimal: DeviceMinimal,
   DeviceDebounced: DeviceDebounced,

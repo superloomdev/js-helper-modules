@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Error catalog for helper-instance.
  * This module has no operational errors - programmer errors throw TypeError.
@@ -7,7 +5,7 @@
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
   // No operational errors defined
   // All failures are programmer errors that throw synchronously
 });

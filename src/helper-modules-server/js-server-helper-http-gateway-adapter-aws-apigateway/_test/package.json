@@ -2,6 +2,7 @@
   "name": "js-server-helper-http-gateway-adapter-aws-apigateway-test",
   "description": "Test suite for helper-http-gateway-adapter-aws-apigateway",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

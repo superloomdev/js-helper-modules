@@ -2,13 +2,23 @@
   "name": "@superloomdev/js-client-helper-styler",
   "description": "Pure JavaScript styling engine. Theme derivation from template + base + variant. Zero runtime dependencies, framework-agnostic.",
   "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./styler.js",
+    "./styler.config.js": "./styler.config.js",
+    "./styler.errors.js": "./styler.errors.js",
+    "./styler.validators.js": "./styler.validators.js",
+    "./styler.template.js": "./styler.template.js",
+    "./parts/color-ops.js": "./parts/color-ops.js",
+    "./parts/scale.js": "./parts/scale.js",
+    "./parts/utilities.js": "./parts/utilities.js"
+  },
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "styler.js",
   "engines": {
     "node": ">=24"
   },

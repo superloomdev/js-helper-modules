@@ -2,9 +2,8 @@
 // Validation errors returned via validateSyntax and validateDisposable.
 // Key === type. Both use the full prefixed name.
 // Frozen to prevent accidental mutation.
-'use strict';
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   CONTACT_EMAIL_EMPTY: Object.freeze({
     type: 'CONTACT_EMAIL_EMPTY',

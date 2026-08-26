@@ -1,7 +1,9 @@
 // Info: Test loader for helper-instance
 // Mirrors the main project loader pattern: loads dependencies from environment
 // process.env is ONLY read here - nowhere else in test code
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import instanceLoader from 'helper-instance';
 
 
 /********************************************************************
@@ -17,7 +19,7 @@ cleanup queue, so tests cannot leak state into one another.
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance)
 @return {Function} result.buildInstance - (config) => Instance interface
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
@@ -34,15 +36,15 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
   // Default: persistent deployment. Process-scoped teardown waits for
   // an explicit runProcessCleanup() call.
-  Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: false });
+  Lib.Instance = instanceLoader(Lib, { CLOSE_ON_CLEANUP: false });
 
 
   // ==================== TEST BUILDERS ============================== //
@@ -50,7 +52,7 @@ module.exports = function loader () {
   // Build an independent Instance module with its own process cleanup
   // queue, so a test can exercise either deployment shape in isolation
   const buildInstance = function (config) {
-    return require('helper-instance')(Lib, config);
+    return instanceLoader(Lib, config);
   };
 
 

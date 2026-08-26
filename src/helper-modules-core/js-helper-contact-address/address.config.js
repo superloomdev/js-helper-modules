@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-contact-address
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Default field policy. Two states only: 'required' and 'optional'.
   // No 'hidden' state - UI visibility is an application concern.

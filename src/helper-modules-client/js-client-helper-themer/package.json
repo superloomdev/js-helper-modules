@@ -2,13 +2,23 @@
   "name": "@superloomdev/js-client-helper-themer",
   "description": "Pure JavaScript token engine. Derives a complete design-token theme from a template plus cascading layers, and emits it for web and native from one source. Zero runtime dependencies.",
   "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./themer.js",
+    "./themer.config.js": "./themer.config.js",
+    "./themer.errors.js": "./themer.errors.js",
+    "./themer.validators.js": "./themer.validators.js",
+    "./parts/color.js": "./parts/color.js",
+    "./parts/scale.js": "./parts/scale.js",
+    "./parts/emit.js": "./parts/emit.js",
+    "./parts/resolve.js": "./parts/resolve.js"
+  },
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "themer.js",
   "engines": {
     "node": ">=24"
   },

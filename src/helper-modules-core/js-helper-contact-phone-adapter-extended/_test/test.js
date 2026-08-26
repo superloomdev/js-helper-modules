@@ -1,13 +1,12 @@
 // Info: Test suite for helper-contact-phone-adapter-extended.
 // Tests the adapter contract directly and through the parent core.
 // Covers pattern validation (which basic cannot do) and number type.
-'use strict';
 
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { Adapter, BasicAdapter, ContactPhone, ContactPhoneBasic } = require('./loader');
+import { Adapter, BasicAdapter, ContactPhone, ContactPhoneBasic } from './loader.js';
 
 
 

@@ -1,12 +1,11 @@
 // Info: Unit tests for js-react-helper-idle
 // Tests the idle threshold registry and React hook using mock timers.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { describe, it, beforeEach, afterEach, mock } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it, beforeEach, afterEach, mock } = require('node:test');
-const assert = require('node:assert/strict');
-
-const { React, ReactTestRenderer, Idle } = require('./loader.js');
+import loader from './loader.js';
+const { React, ReactTestRenderer, Idle } = loader;
 
 
 // Reset state before each test

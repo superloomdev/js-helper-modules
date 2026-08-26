@@ -1,7 +1,6 @@
 // Info: Utility-style generation for js-client-helper-styler. Turns an assembled theme
 // ({ Color, Dimension, Font }) into a flat map of atomic style objects (plain
 // objects, not StyleSheet). Spacing is LOGICAL (start/end) for RTL. Singleton.
-'use strict';
 
 
 // Shared dependencies injected by loader (uniform parts signature)
@@ -41,7 +40,7 @@ signature uniformity with other parts - none are consumed today.
 
 @return {Object} - Public Utilities interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Capture injected references so they are available if a future helper needs them
   Lib = shared_libs;

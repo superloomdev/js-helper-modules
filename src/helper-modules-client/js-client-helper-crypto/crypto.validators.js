@@ -2,7 +2,6 @@
 // Validates CONFIG.BASE36_CHARSET at loader time.
 //
 // Singleton: Lib and ERRORS injected once by loader. No factory needed.
-'use strict';
 
 
 // Shared dependencies injected by loader - never self-required
@@ -22,7 +21,7 @@ validated; per-call validators receive CONFIG as an argument.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

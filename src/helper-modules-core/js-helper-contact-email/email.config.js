@@ -1,8 +1,7 @@
 // Info: Configuration file for helper-contact-email
-'use strict';
 
 
-module.exports = {
+export default {
 
   // Characters stripped from sanitized email input
   // Strips everything except letters, digits, @, ., +, -, _

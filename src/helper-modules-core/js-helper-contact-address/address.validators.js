@@ -1,5 +1,4 @@
 // Info: All validators for helper-contact-address.
-'use strict';
 
 
 let Lib;
@@ -7,7 +6,7 @@ let ERRORS; // eslint-disable-line no-unused-vars
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

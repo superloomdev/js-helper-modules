@@ -1,5 +1,4 @@
 // Info: Validators for js-react-helper-timer
-'use strict';
 
 
 /********************************************************************
@@ -12,7 +11,7 @@ loader (single-require rule).
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (Lib, ERRORS) { // eslint-disable-line no-unused-vars
+export default function loader (Lib, ERRORS) { // eslint-disable-line no-unused-vars
 
   const Validators = {
 

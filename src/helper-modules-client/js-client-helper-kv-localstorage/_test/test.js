@@ -1,11 +1,10 @@
 // Info: Unit tests for js-client-helper-kv-localstorage
 // Tests the KV store over a Web Storage stub in pure Node.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { describe, it, beforeEach } = require('node:test');
-const assert = require('node:assert/strict');
-
+import loader from './loader.js';
 const {
   Store,
   StoreOther,
@@ -16,7 +15,7 @@ const {
   createWebStorageStub,
   Utils,
   Debug
-} = require('./loader.js');
+} = loader;
 
 
 // Reset shared engine before each test

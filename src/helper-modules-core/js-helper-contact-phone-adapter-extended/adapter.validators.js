@@ -1,6 +1,5 @@
 // Info: All validators for helper-contact-phone-adapter-extended.
 // Single role: config validation at construction time. Throw Error.
-'use strict';
 
 
 // Shared dependencies injected by loader
@@ -19,7 +18,7 @@ Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

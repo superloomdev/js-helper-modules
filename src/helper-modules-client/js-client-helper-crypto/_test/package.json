@@ -2,6 +2,7 @@
   "name": "js-client-helper-crypto-test",
   "description": "Test Cases for js-client-helper-crypto",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",

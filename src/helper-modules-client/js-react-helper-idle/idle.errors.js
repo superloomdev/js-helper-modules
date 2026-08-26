@@ -2,7 +2,7 @@
 //
 // Frozen on export. Injected into validators and createInterface.
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_CALLBACK: {
     type: 'helper-idle/invalid-callback',

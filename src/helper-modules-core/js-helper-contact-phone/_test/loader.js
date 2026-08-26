@@ -1,7 +1,9 @@
 // Info: Test loader for helper-contact-phone.
 // Builds a Lib container with Utils and a stub adapter that implements
 // the 4-method contract with known test data.
-'use strict';
+
+import utilsLoader from 'helper-utils';
+import contactPhoneLoader from 'helper-contact-phone';
 
 
 // Stub adapter with known test data for 5 countries.
@@ -49,19 +51,19 @@ const stubAdapter = {
 
 // Build Lib container
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
 
 // Load the module under test
-const ContactPhone = require('helper-contact-phone')(Lib, {
+const ContactPhone = contactPhoneLoader(Lib, {
   Adapter: stubAdapter
 });
 
 
-module.exports = {
-  ContactPhone: ContactPhone,
-  Lib: Lib,
-  stubAdapter: stubAdapter,
-  STUB_COUNTRIES: STUB_COUNTRIES,
-  STUB_METADATA: STUB_METADATA
+export {
+  ContactPhone,
+  Lib,
+  stubAdapter,
+  STUB_COUNTRIES,
+  STUB_METADATA
 };

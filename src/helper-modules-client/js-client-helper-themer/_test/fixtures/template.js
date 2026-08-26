@@ -2,7 +2,6 @@
 //
 // Small enough to reason about, but exercises every resolution route and
 // every token group the engine emits.
-'use strict';
 
 
 /********************************************************************
@@ -16,7 +15,7 @@ template objects are available for cache-identity checks.
 
 @return {Object} - A complete template
 *********************************************************************/
-module.exports = function buildTemplate (accent) {
+export default function buildTemplate (accent) {
 
   return {
 

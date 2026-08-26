@@ -3,11 +3,12 @@
 // http-gateway with this Express adapter injected. Returns both Lib and a
 // ready-to-use gateway instance so tests can register Express routes that
 // flow through the real adapter pipeline end-to-end.
-'use strict';
-
-
-const HttpGateway                   = require('helper-http-gateway');
-const HttpGatewayAdapterExpressHttp = require('helper-http-gateway-adapter-express');
+import httpGatewayLoader from 'helper-http-gateway';
+import httpGatewayAdapterExpressLoader from 'helper-http-gateway-adapter-express';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import timeLoader from 'helper-time';
+import instanceLoader from 'helper-instance';
 
 
 /********************************************************************
@@ -17,22 +18,22 @@ route handlers can invoke gateway methods directly.
 
 @return {Object} - { Lib, httpGateway }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Dependencies for this instance
   const Lib = {};
 
   // Foundation modules
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
-  Lib.Time = require('helper-time')(Lib, {});
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, {});
+  Lib.Time = timeLoader(Lib, {});
 
   // Server helper modules
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
 
   // HTTP Gateway (with this Express adapter injected)
-  const ExpressAdapter = HttpGatewayAdapterExpressHttp(Lib, {});
-  const httpGateway = HttpGateway(Lib, { Adapter: ExpressAdapter });
+  const ExpressAdapter = httpGatewayAdapterExpressLoader(Lib, {});
+  const httpGateway = httpGatewayLoader(Lib, { Adapter: ExpressAdapter });
 
   return { Lib: Lib, httpGateway: httpGateway };
 

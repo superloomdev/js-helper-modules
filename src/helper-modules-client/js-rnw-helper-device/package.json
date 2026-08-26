@@ -2,13 +2,19 @@
   "name": "@superloomdev/js-rnw-helper-device",
   "description": "Device and platform helper for the RNW pipeline. Platform, viewport, network, app-state, and safe-area APIs injected, testable in pure Node with stubs",
   "version": "1.0.0",
+  "type": "module",
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "device.js",
+  "exports": {
+    ".": "./device.js",
+    "./device.config.js": "./device.config.js",
+    "./device.errors.js": "./device.errors.js",
+    "./device.validators.js": "./device.validators.js"
+  },
   "engines": {
     "node": ">=24"
   },

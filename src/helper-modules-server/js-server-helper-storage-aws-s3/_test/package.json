@@ -2,6 +2,7 @@
   "name": "js-server-helper-aws-s3-test",
   "description": "Test Cases for js-server-helper-aws-s3",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

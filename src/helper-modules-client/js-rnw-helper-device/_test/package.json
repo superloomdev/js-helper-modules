@@ -2,6 +2,7 @@
   "name": "@superloomdev/js-rnw-helper-device-test",
   "description": "Unit tests for js-rnw-helper-device",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js test-events.js"

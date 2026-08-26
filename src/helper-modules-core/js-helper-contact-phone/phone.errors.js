@@ -2,9 +2,8 @@
 // Validation errors returned via validateSyntax and other public functions.
 // Key === type. Both use the full prefixed name.
 // Frozen to prevent accidental mutation.
-'use strict';
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   CONTACT_PHONE_UNKNOWN_COUNTRY: Object.freeze({
     type: 'CONTACT_PHONE_UNKNOWN_COUNTRY',

@@ -1,18 +1,24 @@
 // Info: Test loader for helper-contact-phone-adapter-basic.
 // Builds a Lib container with Utils, loads the adapter, and loads
 // the parent core with this adapter wired in.
-'use strict';
+
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+
+import utilsLoader from 'helper-utils';
+import adapterBasicLoader from 'helper-contact-phone-adapter-basic';
+import contactPhoneLoader from 'helper-contact-phone';
 
 
 // Build Lib container
 const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
+Lib.Utils = utilsLoader(Lib, {});
 
 // Load the adapter under test
-const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
+const Adapter = adapterBasicLoader(Lib, {});
 
 // Load the parent core with this adapter
-const ContactPhone = require('helper-contact-phone')(Lib, {
+const ContactPhone = contactPhoneLoader(Lib, {
   Adapter: Adapter
 });
 
@@ -20,9 +26,9 @@ const ContactPhone = require('helper-contact-phone')(Lib, {
 const COUNTRY_DATA = require('helper-contact-phone-adapter-basic/data/basic.country-data.json');
 
 
-module.exports = {
-  Lib: Lib,
-  Adapter: Adapter,
-  ContactPhone: ContactPhone,
-  COUNTRY_DATA: COUNTRY_DATA
+export {
+  Lib,
+  Adapter,
+  ContactPhone,
+  COUNTRY_DATA
 };

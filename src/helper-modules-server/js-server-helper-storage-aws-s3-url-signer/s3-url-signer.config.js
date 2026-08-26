@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-storage-aws-s3-url-signer.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // AWS Region for S3
   REGION: 'us-east-1',
