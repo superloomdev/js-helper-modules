@@ -161,10 +161,26 @@ Round-trip check with admin credentials. Verifies the connection is alive and th
 async close(instance) -> { success, error }
 ```
 
-Close the MongoDB admin connection for this instance. Idempotent: closing an already-closed connection succeeds.
+Close the MongoDB admin connection for this instance. Idempotent: closing an already-closed connection succeeds. Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first client creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
 
 | Parameter | Type | Description |
 |---|---|---|
 | `instance` | `Object` | Request instance from `Lib.Instance.initialize()` |
 
 **Returns:** `{ success: true, error: null }` or `{ success: false, error: {...} }`.
+
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
+
+```javascript
+process.on('SIGTERM', async () => {
+  await Lib.Instance.runProcessCleanup();
+  process.exit(0);
+});
+```

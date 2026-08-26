@@ -69,6 +69,7 @@ ping(instance) -> { success, data: { ok }, error } | async:yes
 
 close(instance) -> { success, error } | async:yes
   Close the MongoDB admin connection for this instance. Idempotent.
+  Teardown is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs: at SIGTERM on a persistent server, or after every request on a serverless runtime. A caller normally never calls close() directly.
 
 ## Error Handling
 All functions return standardized response format:
@@ -81,6 +82,15 @@ All functions return standardized response format:
 ```
 Programmer errors (missing required options, wrong types) throw TypeError. Operational failures (connection lost, permission denied, driver error) return error envelopes.
 
+## Connection Lifecycle
+
+The MongoClient is created lazily on the first call via `initIfNot(instance)` and shared for the process lifetime. On first creation, the module registers `MongoDBAdmin.close` as a process-scoped cleanup routine with `Lib.Instance`. The module never decides when to close the connection. That decision belongs to the deployment:
+
+| Deployment | CLOSE_ON_CLEANUP | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | false | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | true | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
 ## Patterns
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry
 - **Lazy loading:** MongoDB driver loaded only when first function is called
@@ -88,4 +98,4 @@ Programmer errors (missing required options, wrong types) throw TypeError. Opera
 - **Idempotent provisioning:** All create/enable operations are safe to call repeatedly
 - **TTL conflict detection:** enableTtlIndex checks existing indexes before creating
 - **Credential separation:** Admin connection string is distinct from data-plane module
-- **Automatic cleanup:** Use close() to release resources
+- **Automatic cleanup:** close() is registered with Lib.Instance.addProcessCleanupRoutine on first client creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs

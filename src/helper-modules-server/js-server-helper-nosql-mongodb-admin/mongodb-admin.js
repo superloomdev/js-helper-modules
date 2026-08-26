@@ -103,7 +103,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateCreateCollection(options);
 
       // Ensure MongoDB admin client is initialized
-      await _MongoDBAdmin.initIfNot();
+      await _MongoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -175,7 +175,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateDeleteCollection(options);
 
       // Ensure MongoDB admin client is initialized
-      await _MongoDBAdmin.initIfNot();
+      await _MongoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -253,7 +253,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateCreateIndexes(options);
 
       // Ensure MongoDB admin client is initialized
-      await _MongoDBAdmin.initIfNot();
+      await _MongoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -355,7 +355,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateEnableTtlIndex(options);
 
       // Ensure MongoDB admin client is initialized
-      await _MongoDBAdmin.initIfNot();
+      await _MongoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -478,7 +478,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateListIndexes(options);
 
       // Ensure MongoDB admin client is initialized
-      await _MongoDBAdmin.initIfNot();
+      await _MongoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -529,7 +529,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
-    ping: async function (instance) { // eslint-disable-line no-unused-vars
+    ping: async function (instance) {
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -537,7 +537,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         // Initialize inside try: a failed connection is an operational
         // outcome for a health check, not an exception to propagate
-        await _MongoDBAdmin.initIfNot();
+        await _MongoDBAdmin.initIfNot(instance);
 
         // Execute ping command against the admin-bound database
         await state.db.command({ ping: 1 });
@@ -654,7 +654,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    initIfNot: async function () {
+    initIfNot: async function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.client)) {
@@ -677,6 +677,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Cache the database reference
       state.db = state.client.db(CONFIG.DATABASE_NAME);
+
+      // This client outlives the request that opened it. Instance decides
+      // when to run this: at shutdown on a persistent deployment, after
+      // every request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, MongoDBAdmin.close);
 
       Lib.Debug.performanceAuditLog('End', 'MongoDBAdmin Client', start_ms);
       Lib.Debug.info('MongoDBAdmin Client Initialized', {

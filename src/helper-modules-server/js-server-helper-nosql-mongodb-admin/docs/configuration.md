@@ -72,7 +72,9 @@ The module receives these through the `Lib` container, not through `dependencies
 |---|---|---|
 | `Lib.Utils` | `@superloomdev/js-helper-utils` | Utility functions (`isNullOrUndefined`, `isEmpty`, `getUnixTimeInMilliSeconds`) |
 | `Lib.Debug` | `@superloomdev/js-helper-debug` | Logging and performance audit |
-| `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Request instance factory |
+| `Lib.Instance` | `@superloomdev/js-server-helper-instance` | Process cleanup registration. The module registers its connection teardown with `Lib.Instance.addProcessCleanupRoutine` on first client creation. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` controls when teardown runs, not this module |
+
+The `Lib.Instance` peer is required. The module registers its connection teardown with `Lib.Instance.addProcessCleanupRoutine` on first client creation. The deployment's `CLOSE_ON_CLEANUP` config lives on `helper-instance`, not on this module.
 
 ---
 
