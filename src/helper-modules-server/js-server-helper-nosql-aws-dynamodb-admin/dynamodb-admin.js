@@ -107,7 +107,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateCreateTable(options);
 
       // Ensure DynamoDB admin client is initialized
-      await _DynamoDBAdmin.initIfNot();
+      await _DynamoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -227,7 +227,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateWaitForTableActive(options);
 
       // Ensure DynamoDB admin client is initialized
-      await _DynamoDBAdmin.initIfNot();
+      await _DynamoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -332,7 +332,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateEnableTtl(options);
 
       // Ensure DynamoDB admin client is initialized
-      await _DynamoDBAdmin.initIfNot();
+      await _DynamoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -437,7 +437,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateDeleteTable(options);
 
       // Ensure DynamoDB admin client is initialized
-      await _DynamoDBAdmin.initIfNot();
+      await _DynamoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -508,7 +508,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validateDescribeTable(options);
 
       // Ensure DynamoDB admin client is initialized
-      await _DynamoDBAdmin.initIfNot();
+      await _DynamoDBAdmin.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -576,7 +576,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<Object>} - { success, data, error }
     *********************************************************************/
-    ping: async function (instance) { // eslint-disable-line no-unused-vars
+    ping: async function (instance) {
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -584,7 +584,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         // Initialize inside try: a failed connection is an operational
         // outcome for a health check, not an exception to propagate
-        await _DynamoDBAdmin.initIfNot();
+        await _DynamoDBAdmin.initIfNot(instance);
 
         // Execute ListTables command with limit 1 to verify connectivity
         const command = new DynamoDBCommands.ListTablesCommand({ Limit: 1 });
@@ -712,7 +712,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    initIfNot: async function () {
+    initIfNot: async function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.client)) {
@@ -748,6 +748,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Build DynamoDB client with admin credentials
       state.client = new DynamoDBClient(client_options);
+
+      // This client outlives the request that opened it. Instance decides
+      // when to run this: at shutdown on a persistent deployment, after
+      // every request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, DynamoDBAdmin.close);
 
       Lib.Debug.performanceAuditLog('End', 'DynamoDBAdmin Client', start_ms);
       Lib.Debug.info('DynamoDBAdmin Client Initialized', {

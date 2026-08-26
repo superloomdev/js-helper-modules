@@ -31,6 +31,10 @@ All provisioning functions are idempotent. Creating a table that already exists 
 
 - **Idempotent provisioning.** Every function is safe to call repeatedly. Already-exists is a success with `created: false`, never an error. This means provisioning scripts can run on every boot without conditional checks.
 
+## Connection Lifecycle
+
+The DynamoDBClient is created lazily on the first call and shared for the process lifetime. Its teardown is registered with `helper-instance` so the deployment decides when it closes: at `SIGTERM` on a persistent server, or after every request on a serverless runtime. The module never decides when to close the connection.
+
 ## Aligned with Superloom Philosophy
 
 If your project is built on Superloom conventions (the same loader pattern, the same response envelope, the same testing model), this module slots in without you needing to learn anything new. It is written using the same opinionated principles, so adopting it does not introduce inconsistency into your codebase.
