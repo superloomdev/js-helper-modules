@@ -38,6 +38,12 @@ module.exports = {
   // How long close() waits for active queries to finish before force-destroying
   // the pool. Raise for long-running analytics queries; lower for snappy
   // container shutdown.
-  CLOSE_TIMEOUT_MS: 5000
+  CLOSE_TIMEOUT_MS: 5000,
+
+  // Whether an idle pool lets the Node process exit on its own. false keeps
+  // the current behaviour, where a socket reference holds the event loop open
+  // until the pool is closed. true lets the process exit once every client is
+  // idle, which is what a test runner and a short-lived script need.
+  ALLOW_EXIT_ON_IDLE: false
 
 };

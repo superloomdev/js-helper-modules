@@ -62,6 +62,7 @@ Loader call semantics:
 | `STATEMENT_TIMEOUT_MS` | `Number` | No | `0` | Postgres `statement_timeout` (`0` = disabled). Useful guardrail for long-running queries |
 | `APPLICATION_NAME` | `String` | No | `'superloom'` | Surfaces in `pg_stat_activity.application_name`. Override to identify multiple services in the same DB |
 | `CLOSE_TIMEOUT_MS` | `Number` | No | `5000` | Max ms `close()` waits for active queries before force-destroying the pool |
+| `ALLOW_EXIT_ON_IDLE` | `Boolean` | No | `false` | Whether an idle pool lets the Node process exit on its own. `true` lets the process exit once every client is idle, which is what a test runner and a short-lived script need. `false` keeps the socket reference holding the event loop open until the pool is closed |
 
 "Required (override)" means the default exists but is unlikely to match a real deployment. Practically every project must override it. Every other key has a usable default for most cases.
 
@@ -91,9 +92,9 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-query timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
+| `@superloomdev/js-server-helper-instance` | Process cleanup registration. The driver registers its pool teardown with `Lib.Instance.addProcessCleanupRoutine` on first pool creation. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` controls when teardown runs, not this driver |
 
-The `Lib.Instance` peer is technically optional. The module accepts `instance` as the first argument to all I/O functions for API parity. But every production deployment should pass a real instance.
+The `Lib.Instance` peer is required. The driver registers its pool teardown with `Lib.Instance.addProcessCleanupRoutine` on first pool creation, and registers borrowed clients for request-scoped release via `Lib.Instance.addInstanceCleanupRoutine`. The deployment's `CLOSE_ON_CLEANUP` config lives on `helper-instance`, not on this driver.
 
 ---
 

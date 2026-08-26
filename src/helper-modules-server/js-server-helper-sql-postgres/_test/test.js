@@ -9,12 +9,9 @@ const { Client } = require('pg');
 const ERRORS = require('../postgres.errors');
 
 // Load dependencies via test loader - process.env is touched only there.
-const { Lib, Config } = require('./loader')();
+const { Lib, Config, instance, buildLib } = require('./loader')();
 const Postgres = Lib.Postgres;
 const Instance = Lib.Instance;
-
-// Single test instance - represents a "request" for performance timeline.
-const instance = Instance.initialize();
 
 // Admin connection for schema setup/teardown. Not part of the module under test.
 const ADMIN_OPTIONS = {
@@ -67,7 +64,7 @@ after(async function () {
   await admin.query('DROP TABLE IF EXISTS ' + TEST_TABLE);
   await admin.end();
 
-  await Postgres.close();
+  await Postgres.close(instance);
 
 });
 
@@ -373,7 +370,7 @@ describe('getClient / releaseClient', function () {
     const out = await res.client.query('SELECT 1 AS one');
     assert.strictEqual(out.rows[0].one, 1);
 
-    Postgres.releaseClient(res.client);
+    Postgres.releaseClient(instance, res.client);
 
   });
 
@@ -585,6 +582,193 @@ describe('placeholder translator', function () {
     assert.strictEqual(res.value, 1);
 
   });
+
+});
+
+
+// ============================================================================
+// 7. Connection lifecycle - registration, persistent vs serverless, background gate
+// ============================================================================
+
+describe('connection lifecycle', function () {
+
+  it('should register the process cleanup routine once, not per query', async function () {
+
+    // Use a fresh Lib so no prior test has registered a routine.
+    const { Lib: LibF, instance: instF } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const PostgresF = LibF.Postgres;
+    const InstanceF = LibF.Instance;
+
+    // Two queries on the same instance share one pool, so the process
+    // cleanup routine must be registered exactly once.
+    await PostgresF.getValue(instF, 'SELECT 1 AS x');
+    await PostgresF.getValue(instF, 'SELECT 2 AS x');
+
+    assert.strictEqual(InstanceF.getProcessCleanupRoutineCount(), 1);
+
+    // Clean up.
+    await InstanceF.runProcessCleanup();
+
+  });
+
+
+  it('should hold the pool open on a persistent deployment', async function () {
+
+    // CLOSE_ON_CLEANUP: false means runInstanceCleanup only runs
+    // instance-scoped routines. The pool must survive.
+    const { Lib: LibP, instance: instP } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const PostgresP = LibP.Postgres;
+    const InstanceP = LibP.Instance;
+
+    const res1 = await PostgresP.getValue(instP, 'SELECT 1 AS x');
+    assert.strictEqual(res1.success, true);
+
+    await InstanceP.runInstanceCleanup(instP);
+
+    // Pool must still work after instance cleanup on a persistent deployment.
+    const res2 = await PostgresP.getValue(instP, 'SELECT 2 AS x');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(res2.value, 2);
+
+    // Clean up.
+    await InstanceP.runProcessCleanup();
+
+  });
+
+
+  it('should close the pool on a serverless deployment and re-open on next query', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const PostgresSL = LibSL.Postgres;
+    const InstanceSL = LibSL.Instance;
+
+    // Run a query to open the pool and register the cleanup routine.
+    const res1 = await PostgresSL.getValue(instSL, 'SELECT 1 AS x');
+    assert.strictEqual(res1.success, true);
+
+    // On a serverless deployment, runInstanceCleanup also runs the
+    // process-scoped routine, which closes the pool.
+    await InstanceSL.runInstanceCleanup(instSL);
+
+    // The pool must be gone after cleanup.
+    assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+
+    // A new query must re-open the pool and re-register the routine.
+    const res2 = await PostgresSL.getValue(instSL, 'SELECT 2 AS x');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(res2.value, 2);
+
+    // Clean up the serverless Lib.
+    await InstanceSL.runInstanceCleanup(instSL);
+
+  });
+
+
+  it('should close and re-register across multiple serverless request cycles', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const PostgresSL = LibSL.Postgres;
+    const InstanceSL = LibSL.Instance;
+
+    // Three independent request cycles: open, close, re-open.
+    for (let i = 0; i < 3; i++) {
+      const res = await PostgresSL.getValue(instSL, 'SELECT ?::int AS x', [i + 1]);
+      assert.strictEqual(res.success, true);
+      assert.strictEqual(res.value, i + 1);
+
+      await InstanceSL.runInstanceCleanup(instSL);
+      assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+    }
+
+  });
+
+
+  it('should run background routines before process cleanup routines', async function () {
+
+    const { Lib: LibBG, instance: instBG } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const InstanceBG = LibBG.Instance;
+
+    const order = [];
+
+    // Register a background routine that resolves on a later tick.
+    const signal = InstanceBG.addBackgroundRoutine(instBG);
+    setImmediate(function () {
+      order.push('background');
+      signal();
+    });
+
+    // Register a process cleanup routine that records its execution.
+    InstanceBG.addProcessCleanupRoutine(instBG, function () {
+      order.push('cleanup');
+    });
+
+    // runInstanceCleanup must await the background signal before
+    // running the process cleanup routine.
+    await InstanceBG.runInstanceCleanup(instBG);
+
+    assert.strictEqual(order[0], 'background');
+    assert.strictEqual(order[1], 'cleanup');
+
+  });
+
+
+  it('should return a borrowed client via instance cleanup without explicit release', async function () {
+
+    // Use a fresh Lib so instance cleanup state is clean.
+    const { Lib: LibC, instance: instC } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const PostgresC = LibC.Postgres;
+    const InstanceC = LibC.Instance;
+
+    // getClient registers an instance cleanup routine that releases
+    // the client. If the caller forgets, runInstanceCleanup must
+    // still return it.
+    const beforeCount = InstanceC.getInstanceCleanupRoutineCount(instC);
+
+    const res = await PostgresC.getClient(instC);
+    assert.strictEqual(res.success, true);
+    assert.ok(res.client);
+
+    // A cleanup routine must have been registered.
+    assert.strictEqual(
+      InstanceC.getInstanceCleanupRoutineCount(instC),
+      beforeCount + 1
+    );
+
+    // Run instance cleanup - this must release the client back.
+    await InstanceC.runInstanceCleanup(instC);
+
+    // The cleanup routine must have been consumed.
+    assert.strictEqual(
+      InstanceC.getInstanceCleanupRoutineCount(instC),
+      beforeCount
+    );
+
+    // Clean up the pool.
+    await InstanceC.runProcessCleanup();
+
+  });
+
+
+  it('should not throw on double release of a borrowed client', async function () {
+
+    const { Lib: LibD, instance: instD } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const PostgresD = LibD.Postgres;
+    const InstanceD = LibD.Instance;
+
+    const res = await PostgresD.getClient(instD);
+    assert.strictEqual(res.success, true);
+
+    // Explicit release.
+    PostgresD.releaseClient(instD, res.client);
+
+    // Instance cleanup tries to release again - must not throw.
+    await InstanceD.runInstanceCleanup(instD);
+
+    // Clean up the pool.
+    await InstanceD.runProcessCleanup();
+
+  });
+
 
 });
 

@@ -35,7 +35,8 @@ module.exports = function loader (shared_libs, config) {
   // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils,
-    Debug: shared_libs.Debug
+    Debug: shared_libs.Debug,
+    Instance: shared_libs.Instance
   };
 
   // Merge overrides over defaults
@@ -458,7 +459,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    close: async function () {
+    close: async function (instance) { // eslint-disable-line no-unused-vars
 
       // Nothing to close
       if (Lib.Utils.isNullOrUndefined(state.pool)) {
@@ -510,21 +511,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     //   } catch (e) {
     //     await client.query('ROLLBACK');
     //   } finally {
-    //     Postgres.releaseClient(client);   // ALWAYS release or the pool leaks
+    //     Postgres.releaseClient(instance, client);   // ALWAYS release or the pool leaks
     //   }
 
     /********************************************************************
     Check out a dedicated pool connection for manual transaction control.
     Must be paired with releaseClient() or the pool will leak.
 
-    @param {Object} instance - Request instance (kept for API parity with MySQL/SQLite)
+    @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
-    getClient: async function (instance) { // eslint-disable-line no-unused-vars
+    getClient: async function (instance) {
 
       // Build pool on first call
-      _Postgres.initIfNot();
+      _Postgres.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -532,6 +533,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         // Pull a connection out of the pool. Caller must release() it later.
         const client = await state.pool.connect();
+
+        // A borrowed connection belongs to this request. Register its return so
+        // a caller that forgets still gives the slot back when the response ends.
+        Lib.Instance.addInstanceCleanupRoutine(instance, async function () {
+          Postgres.releaseClient(instance, client);
+        });
 
         Lib.Debug.performanceAuditLog('End', 'Postgres getClient', start_ms);
 
@@ -564,14 +571,25 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     /********************************************************************
     Return a client from getClient() back to the pool. No-op if null.
 
+    @param {Object} instance - Request instance
     @param {Object} client - Connection from getClient()
 
     @return {void}
     *********************************************************************/
-    releaseClient: function (client) {
+    releaseClient: function (instance, client) {
 
-      if (client && Lib.Utils.isFunction(client.release)) {
+      // Guard: no client, or client without a release handle.
+      if (!client || !Lib.Utils.isFunction(client.release)) {
+        return;
+      }
+
+      // pg throws on double release. The instance cleanup guard and an
+      // explicit release can both fire for the same client, so swallow
+      // the error rather than crashing the teardown queue.
+      try {
         client.release();
+      } catch {
+        // Already released - nothing to do.
       }
 
     }
@@ -608,7 +626,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    initIfNot: function () {
+    initIfNot: function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.pool)) {
@@ -634,7 +652,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         statement_timeout: CONFIG.STATEMENT_TIMEOUT_MS,
         application_name: CONFIG.APPLICATION_NAME,
         keepAlive: true,
-        keepAliveInitialDelayMillis: CONFIG.KEEP_ALIVE_INITIAL_DELAY_MS
+        keepAliveInitialDelayMillis: CONFIG.KEEP_ALIVE_INITIAL_DELAY_MS,
+        allowExitOnIdle: CONFIG.ALLOW_EXIT_ON_IDLE
       };
 
       // SSL for managed databases. Pass `true` for defaults or an object for custom options.
@@ -646,6 +665,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Pool is lazy - TCP connections open on the first real query
       state.pool = new PG.Pool(options);
+
+      // This pool outlives the request that opened it. Instance decides when
+      // to run this: at shutdown on a persistent deployment, after every
+      // request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, Postgres.close);
 
       // Swallow idle client errors so the whole process does not die
       state.pool.on('error', function (err) {
@@ -1056,7 +1080,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     query: async function (instance, sql, params) {
 
       // Build pool on first call
-      _Postgres.initIfNot();
+      _Postgres.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -1157,7 +1181,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     transaction: async function (instance, statements) {
 
       // Build pool on first call
-      _Postgres.initIfNot();
+      _Postgres.initIfNot(instance);
 
       // Holds the checked-out connection so both success and error paths can release it
       let client = null;

@@ -16,7 +16,7 @@ Class C. Server helper. Service-dependent (needs Docker for emulated, real Postg
 - `pg` - Node.js Postgres driver (lazy-loaded)
 
 ## Companion Files
-- `postgres.config.js` - default config (HOST, PORT, DATABASE, USER, PASSWORD, SSL, POOL_MAX, POOL_MIN, POOL_IDLE_TIMEOUT_MS, KEEP_ALIVE_INITIAL_DELAY_MS, CONNECT_TIMEOUT_MS, STATEMENT_TIMEOUT_MS, APPLICATION_NAME, CLOSE_TIMEOUT_MS)
+- `postgres.config.js` - default config (HOST, PORT, DATABASE, USER, PASSWORD, SSL, POOL_MAX, POOL_MIN, POOL_IDLE_TIMEOUT_MS, KEEP_ALIVE_INITIAL_DELAY_MS, CONNECT_TIMEOUT_MS, STATEMENT_TIMEOUT_MS, APPLICATION_NAME, CLOSE_TIMEOUT_MS, ALLOW_EXIT_ON_IDLE)
 - `postgres.errors.js` - frozen error catalog (DATABASE_CONNECTION_FAILED, DATABASE_QUERY_FAILED, DATABASE_TRANSACTION_FAILED)
 - `postgres.validators.js` - config validators singleton
 
@@ -54,6 +54,7 @@ Postgres has no `LAST_INSERT_ID()`. Append `RETURNING id` to your INSERT - the m
 | CONNECT_TIMEOUT_MS | Number | 10000 | no |
 | STATEMENT_TIMEOUT_MS | Number | 0 | no (0 = disabled) |
 | APPLICATION_NAME | String | 'superloom' | no |
+| ALLOW_EXIT_ON_IDLE | Boolean | false | no (true for test runners and short-lived scripts) |
 
 ## Exported Functions (12 total)
 
@@ -89,9 +90,12 @@ getClient(instance) → { success, client, error } | async:yes
   Dedicated pool client for manual transaction control.
   Use when you need to interleave business logic between SQL statements.
   Caller is responsible for BEGIN/COMMIT/ROLLBACK and releaseClient().
+  The borrowed client is registered for request-scoped release via
+  Lib.Instance.addInstanceCleanupRoutine, so a caller that forgets
+  releaseClient() still returns the client when the request ends.
 
-releaseClient(client) → void | async:no
-  Return client to pool. Safe on null.
+releaseClient(instance, client) → void | async:no
+  Return client to pool. Safe on null and on double release.
 
 ### Query builders (pure, no I/O)
 
@@ -107,8 +111,20 @@ buildMultiCondition(data, operator?) → String | async:no
 
 ### Lifecycle
 
-close() → Promise<void> | async:yes
-  Close the pool gracefully. Waits up to CONFIG.CLOSE_TIMEOUT_MS (default 5000 ms) for active queries to finish, then force-destroys any remaining connections. Call on SIGTERM.
+close(instance) → Promise<void> | async:yes
+  Close the pool gracefully. Waits up to CONFIG.CLOSE_TIMEOUT_MS (default 5000 ms) for active queries to finish, then force-destroys any remaining connections.
+  Teardown is registered with Lib.Instance.addProcessCleanupRoutine on first pool creation. The deployment's CLOSE_ON_CLEANUP config on helper-instance decides when it runs: at SIGTERM on a persistent server, or after every request on a serverless runtime. A caller normally never calls close() directly.
+
+## Connection Lifecycle
+
+The pool is opened lazily on the first query and shared for the process lifetime. On first creation, the driver registers `Postgres.close` as a process-scoped cleanup routine with `Lib.Instance`. The driver never decides when to close the pool. That decision belongs to the deployment:
+
+| Deployment | CLOSE_ON_CLEANUP | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | false | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | true | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+A borrowed client from `getClient` is registered for request-scoped release via `Lib.Instance.addInstanceCleanupRoutine`, so a caller that forgets `releaseClient` still returns the client when the request ends.
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own pool. No module-level singletons.

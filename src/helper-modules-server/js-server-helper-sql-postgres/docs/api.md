@@ -268,7 +268,7 @@ The `client` is a raw `pg.PoolClient`. You can call `client.query(...)` directly
 Return the client to the pool. Safe on `null` (no-op).
 
 ```javascript
-releaseClient(client) -> void
+releaseClient(instance, client) -> void
 ```
 
 **Pattern:**
@@ -288,7 +288,7 @@ try {
   await client.query('ROLLBACK');
   throw err;
 } finally {
-  Lib.SqlDB.releaseClient(client);
+  Lib.SqlDB.releaseClient(instance, client);
 }
 ```
 
@@ -373,10 +373,10 @@ const where = Lib.SqlDB.buildMultiCondition({ status: 'active', role: 'admin' })
 
 ### `close`
 
-Gracefully drain and close the connection pool. Call on `SIGTERM` to ensure in-flight queries finish before the process exits.
+Gracefully drain and close the connection pool. Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first pool creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
 
 ```javascript
-close() -> Promise<void>
+close(instance) -> Promise<void>
 ```
 
 Behavior:
@@ -385,11 +385,18 @@ Behavior:
 2. Force-destroys any remaining connections after the timeout.
 3. Resolves once the pool is fully closed.
 
-**Example:**
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
 
 ```javascript
 process.on('SIGTERM', async () => {
-  await Lib.SqlDB.close();
+  await Lib.Instance.runProcessCleanup();
   process.exit(0);
 });
 ```
