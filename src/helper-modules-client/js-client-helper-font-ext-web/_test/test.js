@@ -1,16 +1,15 @@
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import webFontExtWebLoader from 'helper-font-ext-web';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const {
+import {
   WebFontAdapter,
   Font,
   Utils,
   Debug,
   docStub,
   createDocumentStub
-} = require('./loader');
+} from './loader.js';
 
 
 // ~~~~~~~~~~~~~~~~~~~~ loadManifest ~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +52,7 @@ test('loadManifest rejects invalid manifest', async function () {
 test('loadManifest returns error when document is unavailable', async function () {
 
   // Build an adapter with no document and no global document
-  const AdapterNoDoc = require('helper-font-ext-web')({
+  const AdapterNoDoc = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -72,7 +71,7 @@ test('loadManifest returns error when document is unavailable', async function (
 test('isReady returns false before loadManifest', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -88,7 +87,7 @@ test('isReady returns false before loadManifest', async function () {
 test('isReady returns true after loadManifest', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -111,7 +110,7 @@ test('isReady returns true after loadManifest', async function () {
 test('clearManifest removes the style node from the DOM', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -138,7 +137,7 @@ test('constructor throws when Font core is not injected', function () {
 
   assert.throws(function () {
 
-    require('helper-font-ext-web')({
+    webFontExtWebLoader({
       Utils: Utils,
       Debug: Debug
     });
@@ -153,7 +152,7 @@ test('constructor throws when Font core is not injected', function () {
 test('isFamilyLoaded returns false before loadManifest', function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -169,7 +168,7 @@ test('isFamilyLoaded returns false before loadManifest', function () {
 test('isFamilyLoaded returns true after loadManifest', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -192,7 +191,7 @@ test('isFamilyLoaded returns true after loadManifest', async function () {
 test('loadManifest skips already-loaded families on second call', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -221,7 +220,7 @@ test('loadManifest skips already-loaded families on second call', async function
 test('loadManifest with partial manifest loads only new families', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,
@@ -264,7 +263,7 @@ test('loadManifest with partial manifest loads only new families', async functio
 test('loadManifest skips entries without url (native/Expo-only)', async function () {
 
   const freshDoc = createDocumentStub();
-  const FreshAdapter = require('helper-font-ext-web')({
+  const FreshAdapter = webFontExtWebLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font,

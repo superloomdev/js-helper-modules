@@ -4,7 +4,6 @@
 // Uses Lib.Utils type-check primitives, never raw typeof.
 // All failures throw TypeError synchronously - this module has no
 // operational errors because it performs no I/O.
-'use strict';
 
 let Lib;
 let ERRORS;
@@ -21,7 +20,7 @@ main module loader.
 
 @return {Object} - Validators object
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   Lib = shared_libs;
   ERRORS = errors;

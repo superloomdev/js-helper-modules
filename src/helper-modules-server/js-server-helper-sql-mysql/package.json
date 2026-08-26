@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-sql-mysql",
   "description": "MySQL client with connection pooling (MySQL 8+). Async/await API, multi-DB capable.",
   "version": "1.0.0",
-  "main": "mysql.js",
+  "type": "module",
+  "exports": {
+    ".": "./mysql.js",
+    "./mysql.config.js": "./mysql.config.js",
+    "./mysql.errors.js": "./mysql.errors.js",
+    "./mysql.validators.js": "./mysql.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

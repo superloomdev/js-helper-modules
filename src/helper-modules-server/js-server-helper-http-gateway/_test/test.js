@@ -23,18 +23,20 @@
 // NOTE: Body parsing edge cases (malformed JSON, wrong content-type, etc.) are
 // the adapter's responsibility (parts/params reads pre-parsed instance.http_request.body).
 // Those tests live in each adapter's _test/test.js, not here.
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-const { Lib } = require('./loader')();
+import loader from './loader.js';
+import httpGatewayLoader from 'helper-http-gateway';
+import HttpGatewayAdapterStub from './stub-adapter.js';
+import CookiesFactory from '../parts/cookies.js';
+import ParamsFactory from '../parts/params.js';
+import UrlPartsFactory from '../parts/url-parts.js';
 
-const HttpGateway              = require('helper-http-gateway');
-const HttpGatewayAdapterStub   = require('./stub-adapter.js');
-const CookiesFactory   = require('../parts/cookies.js');
-const ParamsFactory    = require('../parts/params.js');
-const UrlPartsFactory  = require('../parts/url-parts.js');
+const { Lib } = loader();
+
+const HttpGateway              = httpGatewayLoader;
 
 
 // ============================================================================

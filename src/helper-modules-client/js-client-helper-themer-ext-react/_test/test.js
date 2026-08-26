@@ -3,12 +3,11 @@
 // Tests the provider, hooks, transform seam, loader validation, and
 // factory isolation using react-test-renderer. Tests use ONLY public
 // API exports.
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import themerExtReactLoader from 'helper-themer-ext-react';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-
-const {
+import {
   React,
   ReactTestRenderer,
   Extension,
@@ -16,7 +15,7 @@ const {
   Utils,
   Debug,
   buildTemplate
-} = require('./loader.js');
+} from './loader.js';
 
 const { ThemeProvider, useThemeController, useTheme, useTokens, ThemeContext } = Extension;
 
@@ -41,7 +40,7 @@ describe('loader', () => {
 
     assert.throws(
       function () {
-        require('helper-themer-ext-react')({ Themer: Themer, Utils: Utils });
+        themerExtReactLoader({ Themer: Themer, Utils: Utils });
       },
       /^TypeError: \[helper-themer-ext-react\] shared_libs\.React is required/
     );
@@ -52,7 +51,7 @@ describe('loader', () => {
 
     assert.throws(
       function () {
-        require('helper-themer-ext-react')({ React: React, Utils: Utils });
+        themerExtReactLoader({ React: React, Utils: Utils });
       },
       /^TypeError: \[helper-themer-ext-react\] shared_libs\.Themer is required/
     );
@@ -384,7 +383,7 @@ describe('factory isolation', () => {
     const t = buildTemplate();
 
     // Create a second factory instance
-    const Extension2 = require('helper-themer-ext-react')({
+    const Extension2 = themerExtReactLoader({
       React: React,
       Themer: Themer,
       Utils: Utils,

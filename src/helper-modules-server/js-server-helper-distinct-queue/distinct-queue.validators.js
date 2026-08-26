@@ -8,7 +8,7 @@
 //
 // Singleton: Lib is injected once by the loader. Node.js require
 // cache guarantees the same reference on every subsequent require.
-'use strict';
+
 
 
 // Shared dependency injected by loader
@@ -26,7 +26,7 @@ Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, ERRORS) { // eslint-disable-line no-unused-vars
+export default function loader (shared_libs, ERRORS) { // eslint-disable-line no-unused-vars
 
   // Inject shared dependency
   Lib = shared_libs;

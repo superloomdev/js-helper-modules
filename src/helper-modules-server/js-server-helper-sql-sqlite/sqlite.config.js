@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-sqlite.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- Database location ----
   // Path to the SQLite database file, or ':memory:' for an in-memory DB.

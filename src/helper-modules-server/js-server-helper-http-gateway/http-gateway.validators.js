@@ -4,7 +4,7 @@
 //      as a parameter, throw Error on misconfiguration.
 //   2. Adapter contract validators - called once after adapter instantiation,
 //      take the adapter object as a parameter, throw Error on missing methods.
-'use strict';
+
 
 
 // Shared dependencies injected by loader
@@ -24,7 +24,7 @@ run before CONFIG is validated.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

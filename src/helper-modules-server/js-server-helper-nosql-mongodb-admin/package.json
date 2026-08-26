@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-nosql-mongodb-admin",
   "description": "MongoDB control-plane helper for collection, index, and TTL provisioning with admin credentials. Part of Superloom.",
   "version": "1.0.0",
-  "main": "mongodb-admin.js",
+  "type": "module",
+  "exports": {
+    ".": "./mongodb-admin.js",
+    "./mongodb-admin.config.js": "./mongodb-admin.config.js",
+    "./mongodb-admin.errors.js": "./mongodb-admin.errors.js",
+    "./mongodb-admin.validators.js": "./mongodb-admin.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

@@ -11,11 +11,10 @@
 //   - getLogsByEntity(instance, query)             -> { success, records, next_cursor, error }
 //   - getLogsByActor(instance, query)              -> { success, records, next_cursor, error }
 //   - cleanupExpiredLogs(instance)                 -> { success, deleted_count, error }
-'use strict';
 
 
-const assert = require('node:assert/strict');
-const { describe, it, beforeEach } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, beforeEach } from 'node:test';
 
 
 /********************************************************************
@@ -29,7 +28,7 @@ Run the shared logger-store contract against a backend.
 
 @return {void}
 *********************************************************************/
-module.exports = function runSharedStoreSuite (args) {
+export default function runSharedStoreSuite (args) {
 
   const label = args.label;
   const buildLogger = args.buildLogger;

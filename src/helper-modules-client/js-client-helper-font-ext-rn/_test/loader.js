@@ -1,8 +1,11 @@
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import fontLoader from 'helper-font';
+import fontExtRnLoader from 'helper-font-ext-rn';
 
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
-const Font = require('helper-font')({ Utils: Utils, Debug: Debug });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
+const Font = fontLoader({ Utils: Utils, Debug: Debug });
 
 // Register example families with path (native extensions require local files)
 Font.registerFamilies({
@@ -23,17 +26,16 @@ Font.registerFamilies({
 // scope — no injection needed.
 
 // Build the adapter — no NativeFontLoader injection needed
-const RNFontAdapter = require('helper-font-ext-rn')({
+const RNFontAdapter = fontExtRnLoader({
   Utils: Utils,
   Debug: Debug,
   Font: Font
 });
 
 
-module.exports = {
-  RNFontAdapter: RNFontAdapter,
-  Font: Font,
-  Utils: Utils,
-  Debug: Debug
+export {
+  RNFontAdapter,
+  Font,
+  Utils,
+  Debug
 };
-

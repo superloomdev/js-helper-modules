@@ -22,7 +22,6 @@
 // milliseconds and are converted to seconds, because instance.time is in
 // seconds. Tests advance instance.time instead of sleeping, so expiry is
 // deterministic and the fake mirrors production semantics exactly.
-'use strict';
 
 
 /********************************************************************
@@ -48,7 +47,7 @@ function produces an independent Map, so tests can run in isolation.
 
 @return {Object} - Store interface (plus _records for white-box assertions)
 *********************************************************************/
-module.exports = function createMemoryStore () {
+export default function createMemoryStore () {
 
   const _map = new Map();
   const _locks = new Map();

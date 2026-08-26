@@ -5,11 +5,11 @@
 // Singleton: pure URL-string transformation with no per-caller state or
 // config. Node.js require cache guarantees the same UrlParts object is
 // returned on every subsequent require. No factory needed.
-'use strict';
+
 
 
 // URL parsing library (npm: tldts). Module-scope const, loaded once.
-const UrlParser = require('tldts');
+import UrlParser from 'tldts';
 
 // Shared dependencies injected by loader (uniform parts signature)
 let Lib; // eslint-disable-line no-unused-vars
@@ -30,7 +30,7 @@ signature uniformity with other parts. None are consumed today.
 
 @return {Object} - Public UrlParts interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Assign to module-scope vars so public and private objects can close over them
   Lib = shared_libs;

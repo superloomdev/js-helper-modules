@@ -41,7 +41,11 @@
 //   - 'ioredis' -> Redis class, used to build the database client
 //   - '@smithy/signature-v4' -> SignatureV4 class, AWS SDK v3 SigV4 signer
 //   - '@aws-crypto/sha256-js' -> Sha256 hash, AWS SDK v3 crypto primitive
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './kv-aws-elasticache.config.js';
+import ERRORS_CATALOG from './kv-aws-elasticache.errors.js';
+import createValidators from './kv-aws-elasticache.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless drivers (module-level - require() is cached anyway).
 let Redis = null;
@@ -61,7 +65,7 @@ Lib, CONFIG, and ioredis client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -73,15 +77,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./kv-aws-elasticache.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./kv-aws-elasticache.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton
-  const Validators = require('./kv-aws-elasticache.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

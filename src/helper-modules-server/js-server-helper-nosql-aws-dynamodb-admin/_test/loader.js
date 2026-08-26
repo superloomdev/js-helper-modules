@@ -1,7 +1,10 @@
 // Info: Test loader for js-server-helper-nosql-aws-dynamodb-admin
 // Mirrors the main project loader pattern: loads dependencies, merges config from environment
 // Same loader works for both emulated (dev) and integration testing - env vars control the target
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import instanceLoader from 'helper-instance';
+import dynamodbAdminLoader from 'helper-nosql-aws-dynamodb-admin';
 
 
 /********************************************************************
@@ -25,7 +28,7 @@ Instance process cleanup queue and its own DynamoDBAdmin driver state.
 @return {Object} result.instance - Default request instance
 @return {Function} result.buildLib - (instance_config) => { Lib, instance }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config - available to test.js for test infrastructure
   // This is NOT a module config. It holds raw env values that test.js may need
@@ -55,12 +58,12 @@ module.exports = function loader () {
     const Lib = {};
 
     // Helper modules
-    Lib.Utils = require('helper-utils')(Lib, {});
-    Lib.Debug = require('helper-debug')(Lib, {});
-    Lib.Instance = require('helper-instance')(Lib, instance_config);
+    Lib.Utils = utilsLoader(Lib, {});
+    Lib.Debug = debugLoader(Lib, {});
+    Lib.Instance = instanceLoader(Lib, instance_config);
 
     // Server helper modules
-    Lib.DynamoDBAdmin = require('helper-nosql-aws-dynamodb-admin')(Lib, config_dynamodb_admin);
+    Lib.DynamoDBAdmin = dynamodbAdminLoader(Lib, config_dynamodb_admin);
 
     const instance = Lib.Instance.initialize();
 

@@ -9,7 +9,11 @@
 // Lazy-loaded AWS SDK v3 adapters (stateless, shared across instances):
 //   - '@aws-sdk/client-dynamodb' -> DynamoDBClient class, used to build the base client
 //   - '@aws-sdk/lib-dynamodb'    -> DynamoDBDocumentClient + Commands, used throughout
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './dynamodb.config.js';
+import ERRORS from './dynamodb.errors.js';
+import createValidators from './dynamodb.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless SDK adapters (module-level - require() is cached anyway).
 let DynamoDBBaseClient = null;
@@ -28,7 +32,7 @@ Lib, CONFIG, and DynamoDB client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -40,15 +44,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./dynamodb.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./dynamodb.errors');
-
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./dynamodb.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

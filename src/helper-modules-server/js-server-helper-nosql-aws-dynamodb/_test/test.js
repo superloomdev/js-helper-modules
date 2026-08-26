@@ -1,19 +1,18 @@
 // Tests for js-server-helper-nosql-aws-dynamodb
 // Works with both emulated (DynamoDB Local) and integration (real AWS) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
 // NOTE: Direct AWS SDK require needed for test infrastructure setup
 // (CreateTableCommand, DeleteTableCommand). The main module lazy-loads 
 // AWS SDK internally and does not export it. This devDependency must 
 // stay version-matched with ../package.json dependencies.
-const { DynamoDBClient, CreateTableCommand, DeleteTableCommand } = require('test-infra-aws-sdk');
+import { DynamoDBClient, CreateTableCommand, DeleteTableCommand } from 'test-infra-aws-sdk';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config } = loader();
 const DynamoDB = Lib.DynamoDB;
 const Instance = Lib.Instance;
 

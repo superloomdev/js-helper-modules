@@ -1,15 +1,17 @@
-'use strict';
-
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
+import React from 'react';
+import ReactTestRenderer from 'react-test-renderer';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import themerLoader from 'helper-themer';
+import themerExtReactLoader from 'helper-themer-ext-react';
 
 // Peer dependencies
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
-const Themer = require('helper-themer')({ Utils: Utils, Debug: Debug }, {});
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
+const Themer = themerLoader({ Utils: Utils, Debug: Debug }, {});
 
 // Module under test - React and Themer injected via shared_libs
-const Extension = require('helper-themer-ext-react')({
+const Extension = themerExtReactLoader({
   React: React,
   Themer: Themer,
   Utils: Utils,
@@ -47,12 +49,12 @@ function buildTemplate () {
 }
 
 // Export everything tests need
-module.exports = {
-  React: React,
-  ReactTestRenderer: ReactTestRenderer,
-  Extension: Extension,
-  Themer: Themer,
-  Utils: Utils,
-  Debug: Debug,
-  buildTemplate: buildTemplate
+export {
+  React,
+  ReactTestRenderer,
+  Extension,
+  Themer,
+  Utils,
+  Debug,
+  buildTemplate
 };

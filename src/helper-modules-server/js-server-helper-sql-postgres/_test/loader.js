@@ -3,7 +3,10 @@
 // builds Lib container, returns { Lib, Config, buildLib }. Same loader
 // works for both emulated (Docker Postgres) and integration (real
 // database) testing.
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperSqlPostgres from 'helper-sql-postgres';
 
 
 /********************************************************************
@@ -23,7 +26,7 @@ tests cannot leak state into one another.
 @return {Object} result.Config - Test-wide environment values (admin credentials, etc.)
 @return {Function} result.buildLib - (instance_config) => { Lib, instance }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config - available to test.js for AdminClient setup
   const Config = {
@@ -54,12 +57,12 @@ module.exports = function loader () {
     const Lib = {};
 
     // Helper modules
-    Lib.Utils = require('helper-utils')(Lib, {});
-    Lib.Debug = require('helper-debug')(Lib, {});
-    Lib.Instance = require('helper-instance')(Lib, instance_config);
+    Lib.Utils = helperUtils(Lib, {});
+    Lib.Debug = helperDebug(Lib, {});
+    Lib.Instance = helperInstance(Lib, instance_config);
 
     // Server helper modules
-    Lib.Postgres = require('helper-sql-postgres')(Lib, config_postgres);
+    Lib.Postgres = helperSqlPostgres(Lib, config_postgres);
 
     const instance = Lib.Instance.initialize();
 

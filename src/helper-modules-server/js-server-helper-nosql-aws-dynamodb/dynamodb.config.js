@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-nosql-aws-dynamodb.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // AWS Region
   REGION: 'us-east-1',

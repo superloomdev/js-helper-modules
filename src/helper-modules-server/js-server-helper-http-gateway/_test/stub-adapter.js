@@ -9,7 +9,6 @@
 //   extractRequest(raw_request, raw_context, response_callback)
 //   buildResponseEnvelope(status, headers, body)
 //   getCountryCode(headers) -> String | null
-'use strict';
 
 
 /********************************************************************
@@ -23,7 +22,7 @@ so tests can run in isolation.
 adapter {Object} - Ready-to-use adapter with 3-method contract
 sent    {Array}  - Array of { status, headers, body } for each response sent
 *********************************************************************/
-module.exports = function makeStubAdapter () {
+export default function makeStubAdapter () {
 
   const sent = [];
 

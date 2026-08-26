@@ -5,16 +5,15 @@
 // process.env is NEVER accessed in test files - only in loader.js and
 // loader-backend.js. That keeps these unit tests deterministic and
 // independent of CI environment configuration.
-'use strict';
 
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-
-const { Lib } = require('./loader')();
-const LoggerFactory = require('helper-logger');
-const createMemoryStore = require('./memory-store');
+import loader from './loader.js';
+const { Lib } = loader();
+import LoggerFactory from 'helper-logger';
+import createMemoryStore from './memory-store.js';
 
 
 // ============================================================================

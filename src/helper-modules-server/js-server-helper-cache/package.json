@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-cache",
   "description": "Application-level cache with TTL and namespacing. Cache-aside pattern. Store adapter injected via config.",
   "version": "1.0.0",
-  "main": "cache.js",
+  "type": "module",
+  "exports": {
+    ".": "./cache.js",
+    "./cache.config.js": "./cache.config.js",
+    "./cache.errors.js": "./cache.errors.js",
+    "./cache.validators.js": "./cache.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

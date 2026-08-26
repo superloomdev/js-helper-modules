@@ -9,7 +9,11 @@
 //
 // Lazy-loaded ioredis driver (stateless, shared across instances):
 //   - 'ioredis' -> Redis class, used to build the database client
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './kv-valkey.config.js';
+import ERRORS_CATALOG from './kv-valkey.errors.js';
+import createValidators from './kv-valkey.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless ioredis driver (module-level - require() is cached anyway).
 let Redis = null;
@@ -27,7 +31,7 @@ Lib, CONFIG, and ioredis client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -39,15 +43,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./kv-valkey.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./kv-valkey.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./kv-valkey.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

@@ -17,7 +17,10 @@
 // contention.
 //
 // Compatibility: Node.js 24+
-'use strict';
+
+import CONFIG_DEFAULTS from './distinct-queue.config.js';
+import ERRORS from './distinct-queue.errors.js';
+import createValidators from './distinct-queue.validators.js';
 
 
 
@@ -33,7 +36,7 @@ misconfiguration fails fast at startup, not on first request.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -46,15 +49,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./distinct-queue.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Load internal error catalog
-  const ERRORS = require('./distinct-queue.errors');
+  // ERRORS is imported at top level
 
   // Load the validators singleton and inject Lib + ERRORS
-  const Validators = require('./distinct-queue.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);

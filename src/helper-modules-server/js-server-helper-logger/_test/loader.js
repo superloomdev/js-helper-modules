@@ -2,7 +2,11 @@
 // Mirrors the main project loader pattern. The logger module under test is
 // NOT loaded here - tests construct it per-case with their own STORE adapter
 // so each test owns isolated state.
-'use strict';
+
+import Utils from 'helper-utils';
+import Debug from 'helper-debug';
+import Crypto from 'helper-crypto';
+import Instance from 'helper-instance';
 
 
 /********************************************************************
@@ -13,7 +17,7 @@ adapter so tests stay independent.
 @return {Object} result - Runtime objects for testing
 @return {Object} result.Lib - Dependency container (Utils, Debug, Crypto, Instance)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
@@ -30,14 +34,14 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = Utils(Lib, {});
+  Lib.Debug = Debug(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Crypto = require('helper-crypto')(Lib, {});
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Crypto = Crypto(Lib, {});
+  Lib.Instance = Instance(Lib, {});
 
 
   // Return runtime objects

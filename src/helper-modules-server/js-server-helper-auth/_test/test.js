@@ -2,22 +2,23 @@
 // stateless part (auth-id, record-shape, cookie, token-source, policy)
 // directly via its factory + a small set of loader-validation cases
 // using the in-process memory store (no DB driver required).
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-const { Lib } = require('./loader')();
+import loader from './loader.js';
+import authFactory from 'helper-auth';
+import MemoryStore from './memory-store.js';
+import ERRORS from '../auth.errors.js';
+import PolicyFactory from '../parts/policy.js';
+import RecordShapeFactory from '../parts/record-shape.js';
+import AuthIdFactory from '../parts/auth-id.js';
+import TokenSourceFactory from '../parts/token-source.js';
 
-const AuthFactory   = require('helper-auth');
-const MemoryStore   = require('./memory-store');
-const ERRORS        = require('../auth.errors');
+const { Lib } = loader();
+
+const AuthFactory   = authFactory;
 const CONFIG_STUB   = {};
-
-const PolicyFactory      = require('../parts/policy.js');
-const RecordShapeFactory = require('../parts/record-shape.js');
-const AuthIdFactory      = require('../parts/auth-id.js');
-const TokenSourceFactory = require('../parts/token-source.js');
 
 
 const buildInstance = function (time_seconds) {
@@ -502,7 +503,7 @@ describe('createSession / removeSession cookie descriptor', function () {
     });
     assert.equal(create_result.success, true);
 
-    const { actor_id, token_key } = require('../parts/auth-id')(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
+    const { actor_id, token_key } = AuthIdFactory(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
     const remove_result = await auth.removeSession(instance, {
       tenant_id: 'T', actor_id: actor_id, token_key: token_key
     });
@@ -524,7 +525,7 @@ describe('createSession / removeSession cookie descriptor', function () {
       tenant_id: 'T', actor_id: 'A1',
       install_platform: 'web', install_form_factor: 'desktop'
     });
-    const { actor_id, token_key } = require('../parts/auth-id')(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
+    const { actor_id, token_key } = AuthIdFactory(Lib, {}, ERRORS).parseAuthId(create_result.auth_id);
     const remove_result = await auth.removeSession(instance, {
       tenant_id: 'T', actor_id: actor_id, token_key: token_key
     });

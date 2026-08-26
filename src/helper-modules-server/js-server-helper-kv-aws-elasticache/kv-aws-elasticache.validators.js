@@ -1,7 +1,7 @@
 // Info: Config validator for js-server-helper-kv-aws-elasticache.
 // Validates all config keys including AWS credentials and IAM auth settings.
 // Throws TypeError on misconfiguration so the module fails before serving.
-'use strict';
+
 
 
 // Shared dependencies injected by loader
@@ -20,7 +20,7 @@ Validators object.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors) {
 
   // Inject shared dependencies
   Lib = shared_libs;

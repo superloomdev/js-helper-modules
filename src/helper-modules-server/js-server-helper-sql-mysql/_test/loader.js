@@ -3,7 +3,10 @@
 // builds Lib container, returns { Lib, Config, instance, buildLib }.
 // Same loader works for both emulated (Docker MySQL 8) and integration
 // (real database) testing.
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperSqlMysql from 'helper-sql-mysql';
 
 
 /********************************************************************
@@ -24,7 +27,7 @@ tests cannot leak state into one another.
 @return {Object} result.instance - Default request instance
 @return {Function} result.buildLib - (instance_config) => { Lib, instance }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config - available to test.js for AdminClient setup
   const Config = {
@@ -56,12 +59,12 @@ module.exports = function loader () {
     const Lib = {};
 
     // Helper modules
-    Lib.Utils = require('helper-utils')(Lib, {});
-    Lib.Debug = require('helper-debug')(Lib, {});
-    Lib.Instance = require('helper-instance')(Lib, instance_config);
+    Lib.Utils = helperUtils(Lib, {});
+    Lib.Debug = helperDebug(Lib, {});
+    Lib.Instance = helperInstance(Lib, instance_config);
 
     // Server helper modules
-    Lib.MySQL = require('helper-sql-mysql')(Lib, config_mysql);
+    Lib.MySQL = helperSqlMysql(Lib, config_mysql);
 
     const instance = Lib.Instance.initialize();
 

@@ -16,7 +16,7 @@
 // singletons (stateless, shared identity, no per-caller config). They will
 // be converted in a future plan; this file will require no changes when that
 // happens because Lib is injected once and the reference updates in place.
-'use strict';
+
 
 
 // Shared dependencies injected by loader (uniform parts signature)
@@ -38,7 +38,7 @@ for signature uniformity with other parts. They are not consumed today.
 
 @return {Object} - Public Params interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Assign to module-scope vars so public and private objects can close over them
   Lib = shared_libs;

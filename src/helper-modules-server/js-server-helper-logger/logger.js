@@ -23,7 +23,10 @@
 // Factory pattern: each loader call returns an independent Logger with its
 // own Lib, CONFIG, and store. Adapters are fully independent modules -
 // they own their own Lib, Config, and ERRORS.
-'use strict';
+
+import CONFIG_DEFAULTS from './logger.config.js';
+import ERRORS from './logger.errors.js';
+import createValidators from './logger.validators.js';
 
 
 
@@ -39,7 +42,7 @@ Factory loader. One call = one independent instance.
 
 @return {Object} - Public interface for this module.
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -53,15 +56,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./logger.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Internal error catalog (frozen)
-  const ERRORS = require('./logger.errors');
+  // ERRORS is imported at top level
 
   // Load validators singleton - Lib and ERRORS injected per the universal companion rule
-  const Validators = require('./logger.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate the config shape so misconfiguration fails at boot
   Validators.validateConfig(CONFIG);

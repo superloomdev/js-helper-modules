@@ -12,7 +12,6 @@
 //   getLogsByEntity(instance, query)             -> { success, records, next_cursor, error }
 //   getLogsByActor(instance, query)              -> { success, records, next_cursor, error }
 //   cleanupExpiredLogs(instance)                 -> { success, deleted_count, error }
-'use strict';
 
 
 /********************************************************************
@@ -22,7 +21,7 @@ Each call produces an independent array, so tests stay isolated.
 
 @return {Object} - Ready-to-use store object
 *********************************************************************/
-module.exports = function createMemoryStore () {
+export default function createMemoryStore () {
 
   // Private record storage (isolated per instance)
   const _records = [];

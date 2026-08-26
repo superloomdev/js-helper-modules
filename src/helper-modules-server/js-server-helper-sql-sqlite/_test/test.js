@@ -1,14 +1,14 @@
 // Info: Tests for js-server-helper-sqlite.
 // Runs entirely offline against an in-memory SQLite database
 // (or a file path if SQLITE_FILE is exported). No Docker, no credentials.
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const ERRORS = require('../sqlite.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import ERRORS from '../sqlite.errors.js';
+import helperSqlSqlite from 'helper-sql-sqlite';
 
 // Load dependencies via test loader - process.env is touched only there.
-const { Lib, instance, buildLib } = require('./loader')();
+import loader from './loader.js';
+const { Lib, instance, buildLib } = loader();
 const SQLite = Lib.SQLite;
 const Instance = Lib.Instance;
 
@@ -508,7 +508,7 @@ describe('multiple instances', function () {
 
   it('should allow independent handles via multiple loader calls', async function () {
 
-    const ModuleFactory = require('helper-sql-sqlite');
+    const ModuleFactory = helperSqlSqlite;
 
     // Two separate in-memory databases - truly independent state
     const A = ModuleFactory(Lib, {
@@ -1247,7 +1247,7 @@ describe('close - edge cases', function () {
 
   it('should be safe to call close() on an already closed instance', async function () {
 
-    const ModuleFactory = require('helper-sql-sqlite');
+    const ModuleFactory = helperSqlSqlite;
     const temp = ModuleFactory(Lib, { FILE: ':memory:' });
 
     // Open the handle by running a query
@@ -1261,7 +1261,7 @@ describe('close - edge cases', function () {
 
   it('should be safe to call close() without ever opening', async function () {
 
-    const ModuleFactory = require('helper-sql-sqlite');
+    const ModuleFactory = helperSqlSqlite;
     const temp = ModuleFactory(Lib, { FILE: ':memory:' });
 
     // Never ran a query - handle is null

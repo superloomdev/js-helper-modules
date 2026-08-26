@@ -1,16 +1,16 @@
 // Tests for js-server-helper-kv-valkey
 // Works with both emulated (local Valkey) and integration (real server) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const Redis = require('ioredis');
-const ERRORS = require('../kv-valkey.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import Redis from 'ioredis';
+import ERRORS from '../kv-valkey.errors.js';
+import kvValkey from '../kv-valkey.js';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config, instance, buildLib } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config, instance, buildLib } = loader();
 const KV = Lib.KV;
 const Instance = Lib.Instance;
 
@@ -58,7 +58,7 @@ describe('Factory Pattern', function () {
 
   it('should create independent instances', function () {
 
-    const { Lib: Lib2 } = require('./loader')();
+    const { Lib: Lib2 } = loader();
     const KV2 = Lib2.KV;
 
     assert.notStrictEqual(KV, KV2, 'Instances should be independent');
@@ -96,63 +96,63 @@ describe('Config Validation', function () {
   it('should throw TypeError on unknown config key', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { KEYPREFIX: 'test' });
+      kvValkey(Lib, { KEYPREFIX: 'test' });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong PORT type', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { PORT: 'not a number' });
+      kvValkey(Lib, { PORT: 'not a number' });
     }, TypeError);
   });
 
   it('should throw TypeError on PORT out of range', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { PORT: 99999 });
+      kvValkey(Lib, { PORT: 99999 });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong DB type', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { DB: 'not a number' });
+      kvValkey(Lib, { DB: 'not a number' });
     }, TypeError);
   });
 
   it('should throw TypeError on DB out of range', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { DB: 20 });
+      kvValkey(Lib, { DB: 20 });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong TLS type', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { TLS: 'not a boolean' });
+      kvValkey(Lib, { TLS: 'not a boolean' });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong SERIALIZE_JSON type', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { SERIALIZE_JSON: 'not a boolean' });
+      kvValkey(Lib, { SERIALIZE_JSON: 'not a boolean' });
     }, TypeError);
   });
 
   it('should throw TypeError on negative CONNECT_TIMEOUT_MS', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { CONNECT_TIMEOUT_MS: -1 });
+      kvValkey(Lib, { CONNECT_TIMEOUT_MS: -1 });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong KEY_PREFIX type', function () {
 
     assert.throws(function () {
-      require('../kv-valkey')(Lib, { KEY_PREFIX: 123 });
+      kvValkey(Lib, { KEY_PREFIX: 123 });
     }, TypeError);
   });
 
@@ -176,7 +176,7 @@ describe('Lifecycle', function () {
 
   it('should close idempotently - close twice', async function () {
 
-    const { Lib: Lib2, Config: Config2 } = require('./loader')();
+    const { Lib: Lib2, Config: Config2 } = loader();
     const KV2 = Lib2.KV;
     const inst2 = Lib2.Instance.initialize();
 
@@ -196,7 +196,7 @@ describe('Lifecycle', function () {
 
   it('should close without ever connecting (idempotent)', async function () {
 
-    const { Lib: Lib3 } = require('./loader')();
+    const { Lib: Lib3 } = loader();
     const KV3 = Lib3.KV;
     const inst3 = Lib3.Instance.initialize();
 
@@ -290,9 +290,9 @@ describe('Single Key', function () {
 
   it('should store a string value without JSON wrapping when SERIALIZE_JSON is false', async function () {
 
-    const { Lib: LibRaw } = require('./loader')();
+    const { Lib: LibRaw } = loader();
     // Override config for raw mode
-    const KVRaw = require('../kv-valkey')(LibRaw, {
+    const KVRaw = kvValkey(LibRaw, {
       HOST: Config.valkey_host,
       PORT: Config.valkey_port,
       SERIALIZE_JSON: false
@@ -611,8 +611,8 @@ describe('Scan', function () {
   it('should scan and return unprefixed keys', async function () {
 
     // Use a prefixed instance for this test
-    const { Lib: LibP } = require('./loader')();
-    const KVP = require('../kv-valkey')(LibP, {
+    const { Lib: LibP } = loader();
+    const KVP = kvValkey(LibP, {
       HOST: Config.valkey_host,
       PORT: Config.valkey_port,
       KEY_PREFIX: 'scanprefix:'
@@ -871,17 +871,17 @@ describe('Key Prefix Isolation', function () {
 
   it('two instances with different prefixes cannot see each other keys', async function () {
 
-    const loadA = require('./loader')();
+    const loadA = loader();
     const LibA = loadA.Lib;
-    const loadB = require('./loader')();
+    const loadB = loader();
     const LibB = loadB.Lib;
 
-    const KVA = require('../kv-valkey')(LibA, {
+    const KVA = kvValkey(LibA, {
       HOST: Config.valkey_host,
       PORT: Config.valkey_port,
       KEY_PREFIX: 'appA:'
     });
-    const KVB = require('../kv-valkey')(LibB, {
+    const KVB = kvValkey(LibB, {
       HOST: Config.valkey_host,
       PORT: Config.valkey_port,
       KEY_PREFIX: 'appB:'
@@ -924,8 +924,8 @@ describe('DB Functionality', function () {
 
   it('should connect and operate with non-zero DB', async function () {
 
-    const { Lib: LibDB } = require('./loader')();
-    const KVDB = require('../kv-valkey')(LibDB, {
+    const { Lib: LibDB } = loader();
+    const KVDB = kvValkey(LibDB, {
       HOST: Config.valkey_host,
       PORT: Config.valkey_port,
       DB: 1

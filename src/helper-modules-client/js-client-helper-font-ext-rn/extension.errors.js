@@ -1,9 +1,7 @@
 // Info: Error catalog for helper-font-ext-rn.
 //
 // Frozen on export. Injected into the public interface.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_MANIFEST: {
     type: 'helper-font-ext-rn/invalid-manifest',

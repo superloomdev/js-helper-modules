@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-nosql-mongodb",
   "description": "MongoDB CRUD, batch, query, scan, transactions. Lazy-loaded native driver. Connection pooling.",
   "version": "1.0.0",
-  "main": "mongodb.js",
+  "type": "module",
+  "exports": {
+    ".": "./mongodb.js",
+    "./mongodb.config.js": "./mongodb.config.js",
+    "./mongodb.errors.js": "./mongodb.errors.js",
+    "./mongodb.validators.js": "./mongodb.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

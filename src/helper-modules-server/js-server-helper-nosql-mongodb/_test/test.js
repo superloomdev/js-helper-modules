@@ -1,16 +1,15 @@
 // Tests for js-server-helper-nosql-mongodb
 // Works with both emulated (local MongoDB) and integration (real MongoDB) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const { MongoClient } = require('mongodb');
-const ERRORS = require('../mongodb.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import { MongoClient } from 'mongodb';
+import ERRORS from '../mongodb.errors.js';
+import loader from './loader.js';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config, instance, buildLib } = require('./loader')();
+const { Lib, Config, instance, buildLib } = loader();
 const MongoDB = Lib.MongoDB;
 const Instance = Lib.Instance;
 
@@ -67,7 +66,7 @@ describe('Factory Pattern', function () {
 
   it('should create independent instances', function () {
 
-    const { Lib: Lib2 } = require('./loader')();
+    const { Lib: Lib2 } = loader();
     const MongoDB2 = Lib2.MongoDB;
 
     assert.notStrictEqual(MongoDB, MongoDB2, 'Instances should be independent');
@@ -1055,7 +1054,7 @@ describe('close', function () {
   it('should close without error', async function () {
 
     // Create a separate instance to test close without affecting other tests
-    const { Lib: Lib3 } = require('./loader')();
+    const { Lib: Lib3 } = loader();
     const MongoDB3 = Lib3.MongoDB;
     const instance3 = Lib3.Instance.initialize();
 
@@ -1069,7 +1068,7 @@ describe('close', function () {
 
   it('should handle double-close gracefully', async function () {
 
-    const { Lib: Lib4 } = require('./loader')();
+    const { Lib: Lib4 } = loader();
     const MongoDB4 = Lib4.MongoDB;
     const instance4 = Lib4.Instance.initialize();
 

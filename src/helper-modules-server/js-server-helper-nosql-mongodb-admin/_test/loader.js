@@ -1,6 +1,9 @@
 // Info: Test loader for js-server-helper-nosql-mongodb-admin
 // Mirrors the main project loader pattern: loads dependencies, merges config from environment
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import instanceLoader from 'helper-instance';
+import mongodbAdminLoader from 'helper-nosql-mongodb-admin';
 
 
 /********************************************************************
@@ -20,7 +23,7 @@ Instance process cleanup queue and its own MongoDBAdmin driver state.
 @return {Object} result.instance - Default request instance
 @return {Function} result.buildLib - (instance_config) => { Lib, instance }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   const Config = {
     mongodb_connection_string: process.env.MONGODB_ADMIN_CONNECTION_STRING || 'mongodb://localhost:27018',
@@ -43,12 +46,12 @@ module.exports = function loader () {
     const Lib = {};
 
     // Helper modules
-    Lib.Utils = require('helper-utils')(Lib, {});
-    Lib.Debug = require('helper-debug')(Lib, {});
-    Lib.Instance = require('helper-instance')(Lib, instance_config);
+    Lib.Utils = utilsLoader(Lib, {});
+    Lib.Debug = debugLoader(Lib, {});
+    Lib.Instance = instanceLoader(Lib, instance_config);
 
     // Server helper modules
-    Lib.MongoDBAdmin = require('helper-nosql-mongodb-admin')(Lib, config_mongodb_admin);
+    Lib.MongoDBAdmin = mongodbAdminLoader(Lib, config_mongodb_admin);
 
     const instance = Lib.Instance.initialize();
 

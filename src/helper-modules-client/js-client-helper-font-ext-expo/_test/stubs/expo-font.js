@@ -1,5 +1,3 @@
-'use strict';
-
 // Stub for expo-font in Node tests.
 // Exposes loadAsync(fontDescriptor, source) matching the real API.
 

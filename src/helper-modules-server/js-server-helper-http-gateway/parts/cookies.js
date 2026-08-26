@@ -14,11 +14,11 @@
 //
 // SameSite=None incompatibility reference:
 //   https://www.chromium.org/updates/same-site/incompatible-clients
-'use strict';
+
 
 
 // Third-party cookie string codec (RFC 6265, jshttp/cookie)
-const CookieLib = require('cookie');
+import CookieLib from 'cookie';
 
 // Shared dependencies injected by loader (uniform parts signature)
 let Lib;
@@ -39,7 +39,7 @@ signature uniformity with other parts. None are consumed today.
 
 @return {Object} - Public Cookies interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config, errors) {
+export default function loader (shared_libs, config, errors) {
 
   // Assign to module-scope vars so public and private objects can close over them
   Lib = shared_libs;

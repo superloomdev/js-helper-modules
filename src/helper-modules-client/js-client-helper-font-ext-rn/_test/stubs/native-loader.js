@@ -1,5 +1,3 @@
-'use strict';
-
 // Stub for @vitrion/react-native-load-fonts in Node tests.
 // Exposes loadFontFromFile(name, filePath) matching the real API.
 

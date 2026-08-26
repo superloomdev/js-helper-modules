@@ -15,7 +15,6 @@
 //   deleteSession(instance, t, a, k)                 -> { success, error }
 //   deleteSessions(instance, t, keys)                -> { success, error }
 //   cleanupExpiredSessions(instance)                 -> { success, deleted_count, error }
-'use strict';
 
 
 /********************************************************************
@@ -240,4 +239,4 @@ const MemoryStore = createMemoryStore();
 // Test helper: create a fresh isolated store instance
 MemoryStore._createNew = createMemoryStore;
 
-module.exports = MemoryStore;
+export default MemoryStore;

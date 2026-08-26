@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-kv-valkey",
   "description": "Valkey/Redis key-value driver with TTL, hash, scan, and counter operations. Lazy-loaded ioredis client. Single instance.",
   "version": "1.0.0",
-  "main": "kv-valkey.js",
+  "type": "module",
+  "exports": {
+    ".": "./kv-valkey.js",
+    "./kv-valkey.config.js": "./kv-valkey.config.js",
+    "./kv-valkey.errors.js": "./kv-valkey.errors.js",
+    "./kv-valkey.validators.js": "./kv-valkey.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

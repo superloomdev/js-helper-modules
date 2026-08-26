@@ -1,8 +1,6 @@
 // Info: Error catalog for helper-cache.
 // Operational errors returned via {success: false, error}.
 // Errors are frozen at module load time to prevent accidental mutation.
-'use strict';
-
 const Errors = {
 
   /******************************************************************
@@ -37,4 +35,4 @@ const Errors = {
 };
 
 // Freeze the entire catalog to prevent accidental mutation
-module.exports = Object.freeze(Errors);
+export default Object.freeze(Errors);

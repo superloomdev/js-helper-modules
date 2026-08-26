@@ -1,16 +1,16 @@
 // Tests for js-server-helper-nosql-aws-dynamodb-admin
 // Works with both emulated (DynamoDB Local) and integration (real AWS) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const { DynamoDBClient, ListTablesCommand, DeleteTableCommand } = require('@aws-sdk/client-dynamodb');
-const ERRORS = require('../dynamodb-admin.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import { DynamoDBClient, ListTablesCommand, DeleteTableCommand } from '@aws-sdk/client-dynamodb';
+import ERRORS from '../dynamodb-admin.errors.js';
+import loader from './loader.js';
+import dynamodbAdminLoader from 'helper-nosql-aws-dynamodb-admin';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config, instance, buildLib } = require('./loader')();
+const { Lib, Config, instance, buildLib } = loader();
 const DynamoDBAdmin = Lib.DynamoDBAdmin;
 const Instance = Lib.Instance;
 
@@ -81,7 +81,7 @@ describe('Factory Pattern', function () {
 
   it('should create independent instances', function () {
 
-    const { Lib: Lib2 } = require('./loader')();
+    const { Lib: Lib2 } = loader();
     const DynamoDBAdmin2 = Lib2.DynamoDBAdmin;
 
     assert.notStrictEqual(DynamoDBAdmin, DynamoDBAdmin2, 'Instances should be independent');
@@ -433,7 +433,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when AWS_REGION is null', function () {
 
     assert.throws(function () {
-      require('helper-nosql-aws-dynamodb-admin')(Lib, {
+      dynamodbAdminLoader(Lib, {
         AWS_REGION: null,
         AWS_ACCESS_KEY_ID: 'local',
         AWS_SECRET_ACCESS_KEY: 'local',
@@ -445,7 +445,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when AWS_REGION is empty string', function () {
 
     assert.throws(function () {
-      require('helper-nosql-aws-dynamodb-admin')(Lib, {
+      dynamodbAdminLoader(Lib, {
         AWS_REGION: '',
         AWS_ACCESS_KEY_ID: 'local',
         AWS_SECRET_ACCESS_KEY: 'local',
@@ -457,7 +457,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when AWS_ACCESS_KEY_ID is not a string', function () {
 
     assert.throws(function () {
-      require('helper-nosql-aws-dynamodb-admin')(Lib, {
+      dynamodbAdminLoader(Lib, {
         AWS_REGION: 'us-east-1',
         AWS_ACCESS_KEY_ID: 123,
         AWS_SECRET_ACCESS_KEY: 'local',
@@ -469,7 +469,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when WAIT_TIMEOUT_SECONDS is not a number', function () {
 
     assert.throws(function () {
-      require('helper-nosql-aws-dynamodb-admin')(Lib, {
+      dynamodbAdminLoader(Lib, {
         AWS_REGION: 'us-east-1',
         AWS_ACCESS_KEY_ID: 'local',
         AWS_SECRET_ACCESS_KEY: 'local',
@@ -516,7 +516,7 @@ describe('Operational Failure', function () {
   it('should return error envelope (not throw) when connection fails', async function () {
 
     // Create an instance with a wrong endpoint
-    const badAdmin = require('helper-nosql-aws-dynamodb-admin')(Lib, {
+    const badAdmin = dynamodbAdminLoader(Lib, {
       AWS_REGION: 'us-east-1',
       AWS_ACCESS_KEY_ID: 'local',
       AWS_SECRET_ACCESS_KEY: 'local',

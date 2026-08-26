@@ -2,14 +2,16 @@
 // JWT logic is store-agnostic. We back these tests with the in-process
 // memory store (no DB driver required). The few code paths that need a
 // real store (chiefly refreshSessionJwt) work correctly with it.
-'use strict';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { Lib } = require('./loader')();
-const AuthFactory = require('helper-auth');
-const MemoryStore = require('./memory-store');
+import loader from './loader.js';
+import authFactory from 'helper-auth';
+import MemoryStore from './memory-store.js';
+
+const { Lib } = loader();
+const AuthFactory = authFactory;
 
 
 // Shared store instance so cleanupBetweenTests can call _clear().

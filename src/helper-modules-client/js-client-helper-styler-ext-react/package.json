@@ -2,13 +2,16 @@
   "name": "@superloomdev/js-client-helper-styler-ext-react",
   "description": "React extension for js-client-helper-styler. Provides ThemeProvider, useTheme, useStyles, and useThemeController hooks. Works with React DOM, React Native, and React Native Web.",
   "version": "1.0.0",
+  "type": "module",
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "extension.js",
+  "exports": {
+    ".": "./extension.js"
+  },
   "engines": {
     "node": ">=24"
   },

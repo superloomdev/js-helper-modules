@@ -19,7 +19,11 @@
 //     I/O functions remain async to match the MySQL / Postgres interface.
 //   - insert_id comes for free from SQLite's lastInsertRowid (no RETURNING
 //     clause required, unlike Postgres).
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './sqlite.config.js';
+import ERRORS_CATALOG from './sqlite.errors.js';
+import createValidators from './sqlite.validators.js';
+const require = createRequire(import.meta.url);
 
 
 // 'node:sqlite' is cached once and shared across all instances, since it is
@@ -38,7 +42,7 @@ state and config.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -50,15 +54,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./sqlite.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./sqlite.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./sqlite.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

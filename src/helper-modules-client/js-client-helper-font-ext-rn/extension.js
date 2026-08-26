@@ -14,7 +14,11 @@
 //
 // Factory pattern: each loader call returns an independent instance with
 // its own loaded state.
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './extension.config.js';
+import ERRORS from './extension.errors.js';
+import createValidators from './extension.validators.js';
+const require = createRequire(import.meta.url);
 
 
 // Direct dependency — the native font loader. Required at module scope.
@@ -34,7 +38,7 @@ loaded state.
 
 @return {Object} - Public adapter interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -46,15 +50,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./extension.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./extension.errors');
+  // ERRORS imported at top level
 
   // Validators singleton
-  const Validators = require('./extension.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately
   Validators.validateConfig(CONFIG);

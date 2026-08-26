@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for js-server-helper-queue-aws-sqs.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   QUEUE_SEND_FAILED: Object.freeze({
     type: 'QUEUE_SEND_FAILED',

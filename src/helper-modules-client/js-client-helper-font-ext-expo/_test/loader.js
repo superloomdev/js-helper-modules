@@ -1,8 +1,11 @@
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import fontLoader from 'helper-font';
+import fontExtExpoLoader from 'helper-font-ext-expo';
 
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
-const Font = require('helper-font')({ Utils: Utils, Debug: Debug });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
+const Font = fontLoader({ Utils: Utils, Debug: Debug });
 
 // Register example families with asset, url, and path
 Font.registerFamilies({
@@ -24,16 +27,16 @@ Font.registerFamilies({
 // scope — no injection needed.
 
 // Build the adapter — no expo-font injection needed
-const ExpoFontAdapter = require('helper-font-ext-expo')({
+const ExpoFontAdapter = fontExtExpoLoader({
   Utils: Utils,
   Debug: Debug,
   Font: Font
 });
 
 
-module.exports = {
-  ExpoFontAdapter: ExpoFontAdapter,
-  Font: Font,
-  Utils: Utils,
-  Debug: Debug
+export {
+  ExpoFontAdapter,
+  Font,
+  Utils,
+  Debug
 };

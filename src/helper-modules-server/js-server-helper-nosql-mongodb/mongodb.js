@@ -8,7 +8,11 @@
 //
 // Lazy-loaded MongoDB driver (stateless, shared across instances):
 //   - 'mongodb' -> MongoClient class, used to build the database client
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './mongodb.config.js';
+import ERRORS from './mongodb.errors.js';
+import createValidators from './mongodb.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless MongoDB driver (module-level - require() is cached anyway).
 let MongoClient = null;
@@ -26,7 +30,7 @@ Lib, CONFIG, and MongoDB client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -38,15 +42,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./mongodb.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./mongodb.errors');
-
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./mongodb.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

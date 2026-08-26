@@ -15,7 +15,10 @@
 //   const Store = require('helper-verify-store-dynamodb')(config)
 //
 // Compatibility: Node.js 24+
-'use strict';
+
+import CONFIG_DEFAULTS from './verify.config.js';
+import ERRORS from './verify.errors.js';
+import createValidators from './verify.validators.js';
 
 
 
@@ -31,7 +34,7 @@ misconfiguration fails fast at startup, not on first request.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -44,15 +47,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./verify.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Load internal error catalog
-  const ERRORS = require('./verify.errors');
+  // ERRORS is imported at top level
 
   // Load the validators singleton - Lib and ERRORS injected
-  const Validators = require('./verify.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate CONFIG - throws on misconfiguration
   Validators.validateConfig(CONFIG);

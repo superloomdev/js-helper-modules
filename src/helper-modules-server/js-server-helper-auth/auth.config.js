@@ -2,10 +2,8 @@
 // Most fields are required at construction time and validated by the loader.
 // One actor_type per loader call. Keys with a default of `null` mean "must
 // be supplied by the project" - the loader throws if they are still null.
-'use strict';
 
-
-module.exports = {
+export default {
 
   // Ready-to-use store object from the chosen adapter package, pre-configured
   // with its own Lib and config. Validated at construction. Required.

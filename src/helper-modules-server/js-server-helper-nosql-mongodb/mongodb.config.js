@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-nosql-mongodb.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- Connection ----
   // MongoDB connection string. Override with Atlas URI or replica-set string in production.

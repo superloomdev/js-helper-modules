@@ -8,7 +8,11 @@
 //
 // Lazy-loaded AWS SDK v3 adapter (stateless, shared across instances):
 //   - '@aws-sdk/client-sqs' -> SQSClient class + Commands
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './sqs.config.js';
+import ERRORS_CATALOG from './sqs.errors.js';
+import createValidators from './sqs.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless SDK adapter (module-level - require() is cached anyway).
 let SQSAdapter = null;
@@ -26,7 +30,7 @@ Lib, CONFIG, and SQS client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -38,15 +42,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./sqs.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./sqs.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./sqs.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

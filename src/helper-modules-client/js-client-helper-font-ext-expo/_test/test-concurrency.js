@@ -3,24 +3,21 @@
 // verify parallel loading behavior, source priority (asset > url > path),
 // font descriptor format, factory independence, and config absorption.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import ExpoFontStub from 'expo-font';
+import fontExtExpoLoader from 'helper-font-ext-expo';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const {
+import {
   Font,
   Utils,
   Debug
-} = require('./loader');
-
-const ExpoFontStub = require('expo-font');
-const ExpoFontAdapterModule = require('helper-font-ext-expo');
+} from './loader.js';
 
 
 // Helper: create a fresh adapter for each test
 function createAdapter (config) {
-  return ExpoFontAdapterModule({
+  return fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font

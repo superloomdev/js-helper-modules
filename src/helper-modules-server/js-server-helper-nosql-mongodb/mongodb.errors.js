@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for js-server-helper-nosql-mongodb.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   DATABASE_WRITE_FAILED: Object.freeze({
     type: 'DATABASE_WRITE_FAILED',

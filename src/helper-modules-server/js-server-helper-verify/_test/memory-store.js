@@ -13,7 +13,6 @@
 //   incrementFailCount(instance, namespace, key)     -> { success, error }
 //   deleteRecord(instance, namespace, key)           -> { success, error }
 //   cleanupExpiredRecords(instance)              -> { success, deleted_count, error }
-'use strict';
 
 
 /********************************************************************
@@ -36,7 +35,7 @@ function produces an independent Map, so tests can run in isolation.
 
 @return {Object} - Store interface (plus _records for white-box assertions)
 *********************************************************************/
-module.exports = function createMemoryStore () {
+export default function createMemoryStore () {
 
   const _map = new Map();
 

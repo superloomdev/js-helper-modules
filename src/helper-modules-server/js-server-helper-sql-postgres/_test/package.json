@@ -2,6 +2,7 @@
   "name": "js-server-helper-postgres-test",
   "description": "Test suite for js-server-helper-postgres",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

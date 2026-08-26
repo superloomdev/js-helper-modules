@@ -23,7 +23,7 @@
 // Returns:
 //   { decision: 'allow', to_delete: [...] }   - safe to insert the new session
 //   { decision: 'reject', tier: 'total'|'form_factor'|'platform' } - cap hit
-'use strict';
+
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -39,7 +39,7 @@ nothing to validate and just delegates to createInterface.
 
 @return {Object} - Public Policy interface
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+export default function loader (Lib, CONFIG, ERRORS) {
 
   // No per-instance validation or state for this part.
   return createInterface(Lib, CONFIG, ERRORS);

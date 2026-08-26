@@ -2,10 +2,7 @@
 // Standalone module - does not depend on kv-valkey. Uses ioredis directly
 // with AWS SDK v3 SigV4 signing for IAM authentication.
 // No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- ElastiCache Connection ----
   // ElastiCache primary endpoint hostname.

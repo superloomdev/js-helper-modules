@@ -2,13 +2,19 @@
   "name": "@superloomdev/js-client-helper-font-ext-expo",
   "description": "Expo font loader adapter. Loads fonts via expo-font. No React imports, no hooks, no components",
   "version": "1.0.0",
+  "type": "module",
   "author": {
     "name": "sj00"
   },
   "contributors": [],
   "private": false,
   "license": "MIT",
-  "main": "extension.js",
+  "exports": {
+    ".": "./extension.js",
+    "./extension.config.js": "./extension.config.js",
+    "./extension.errors.js": "./extension.errors.js",
+    "./extension.validators.js": "./extension.validators.js"
+  },
   "engines": {
     "node": ">=24"
   },
@@ -27,7 +33,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
-    "expo-font": "file:./_test/stubs/expo-font.js",
+    "expo-font": "file:./_test/stubs",
     "@superloomdev/js-helper-eslint-config": "^1.0.0"
   },
   "publishConfig": {

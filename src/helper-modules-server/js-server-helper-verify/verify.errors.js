@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for helper-verify.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   COOLDOWN_ACTIVE: Object.freeze({
     type: 'VERIFY_COOLDOWN_ACTIVE',

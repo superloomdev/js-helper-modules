@@ -1,15 +1,15 @@
 // Info: Tests for js-server-helper-postgres.
 // Runs against both emulated (Docker Postgres 16) and integration (real Aurora) targets.
 // Configuration comes entirely from environment variables via loader.js.
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const { Client } = require('pg');
-const ERRORS = require('../postgres.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import { Client } from 'pg';
+import ERRORS from '../postgres.errors.js';
+import helperSqlPostgres from 'helper-sql-postgres';
 
 // Load dependencies via test loader - process.env is touched only there.
-const { Lib, Config, instance, buildLib } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config, instance, buildLib } = loader();
 const Postgres = Lib.Postgres;
 const Instance = Lib.Instance;
 
@@ -515,7 +515,7 @@ describe('multiple instances', function () {
 
   it('should allow independent pools via multiple loader calls', async function () {
 
-    const ModuleFactory = require('helper-sql-postgres');
+    const ModuleFactory = helperSqlPostgres;
 
     const A = ModuleFactory(Lib, {
       HOST: Config.postgres_host,

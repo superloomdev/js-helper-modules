@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for js-server-helper-nosql-aws-dynamodb-admin.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   ADMIN_CONNECTION_FAILED: Object.freeze({
     type: 'ADMIN_CONNECTION_FAILED',

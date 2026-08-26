@@ -19,7 +19,7 @@
 //   before that, and actor_id is everything remaining. Both token segments
 //   are drawn from TOKEN_CHARSET (alphanumeric only), so the parse is
 //   unambiguous regardless of what actor_id contains.
-'use strict';
+
 
 
 // Charset for token_key and token_secret. Drawn from a controlled set so
@@ -46,7 +46,7 @@ createInterface.
 
 @return {Object} - Public AuthId interface
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+export default function loader (Lib, CONFIG, ERRORS) {
 
   // No per-instance validation or state for this part.
   return createInterface(Lib, CONFIG, ERRORS);

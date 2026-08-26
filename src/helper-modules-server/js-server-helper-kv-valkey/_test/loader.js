@@ -3,7 +3,10 @@
 // builds Lib container, returns { Lib, Config, instance, buildLib }.
 // Same loader works for both emulated (Docker Valkey) and integration
 // (real server) testing.
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperKvValkey from 'helper-kv-valkey';
 
 
 /********************************************************************
@@ -23,7 +26,7 @@ Instance process cleanup queue and its own KV driver state.
 @return {Object} result.instance - Default request instance
 @return {Function} result.buildLib - (instance_config) => { Lib, instance }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config
   const Config = {
@@ -46,12 +49,12 @@ module.exports = function loader () {
     const Lib = {};
 
     // Helper modules
-    Lib.Utils = require('helper-utils')(Lib, {});
-    Lib.Debug = require('helper-debug')(Lib, {});
-    Lib.Instance = require('helper-instance')(Lib, instance_config);
+    Lib.Utils = helperUtils(Lib, {});
+    Lib.Debug = helperDebug(Lib, {});
+    Lib.Instance = helperInstance(Lib, instance_config);
 
     // Server helper modules
-    Lib.KV = require('helper-kv-valkey')(Lib, config_kv);
+    Lib.KV = helperKvValkey(Lib, config_kv);
 
     const instance = Lib.Instance.initialize();
 

@@ -1,16 +1,16 @@
 // Tests for js-server-helper-nosql-mongodb-admin
 // Works with both emulated (local MongoDB) and integration (real MongoDB) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const { MongoClient } = require('mongodb');
-const ERRORS = require('../mongodb-admin.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import { MongoClient } from 'mongodb';
+import ERRORS from '../mongodb-admin.errors.js';
+import loader from './loader.js';
+import mongodbAdminLoader from 'helper-nosql-mongodb-admin';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config, instance, buildLib } = require('./loader')();
+const { Lib, Config, instance, buildLib } = loader();
 const MongoDBAdmin = Lib.MongoDBAdmin;
 const Instance = Lib.Instance;
 
@@ -67,7 +67,7 @@ describe('Factory Pattern', function () {
 
   it('should create independent instances', function () {
 
-    const { Lib: Lib2 } = require('./loader')();
+    const { Lib: Lib2 } = loader();
     const MongoDBAdmin2 = Lib2.MongoDBAdmin;
 
     assert.notStrictEqual(MongoDBAdmin, MongoDBAdmin2, 'Instances should be independent');
@@ -385,7 +385,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when CONNECTION_STRING is null', function () {
 
     assert.throws(function () {
-      require('helper-nosql-mongodb-admin')(Lib, {
+      mongodbAdminLoader(Lib, {
         CONNECTION_STRING: null,
         DATABASE_NAME: 'test'
       });
@@ -395,7 +395,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when DATABASE_NAME is null', function () {
 
     assert.throws(function () {
-      require('helper-nosql-mongodb-admin')(Lib, {
+      mongodbAdminLoader(Lib, {
         CONNECTION_STRING: 'mongodb://localhost:27018',
         DATABASE_NAME: null
       });
@@ -405,7 +405,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when CONNECT_TIMEOUT_MS is not a number', function () {
 
     assert.throws(function () {
-      require('helper-nosql-mongodb-admin')(Lib, {
+      mongodbAdminLoader(Lib, {
         CONNECTION_STRING: 'mongodb://localhost:27018',
         DATABASE_NAME: 'test',
         CONNECT_TIMEOUT_MS: 'fast'
@@ -450,7 +450,7 @@ describe('Operational Failure', function () {
   it('should return error envelope (not throw) when connection fails', async function () {
 
     // Create an instance with a wrong port
-    const badAdmin = require('helper-nosql-mongodb-admin')(Lib, {
+    const badAdmin = mongodbAdminLoader(Lib, {
       CONNECTION_STRING: 'mongodb://127.0.0.1:9999',
       DATABASE_NAME: 'test',
       CONNECT_TIMEOUT_MS: 1000

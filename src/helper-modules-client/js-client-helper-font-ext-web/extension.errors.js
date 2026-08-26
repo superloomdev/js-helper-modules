@@ -1,9 +1,7 @@
 // Info: Error catalog for helper-font-ext-web.
 //
 // Frozen on export. Injected into the public interface.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   DOCUMENT_UNAVAILABLE: {
     type: 'helper-font-ext-web/document-unavailable',

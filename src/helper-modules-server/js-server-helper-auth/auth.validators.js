@@ -9,7 +9,7 @@
 // Singleton: Lib is injected once by the loader. Public and private objects
 // are declared at module scope - Node.js require cache guarantees the same
 // reference is returned on every subsequent require. No factory needed.
-'use strict';
+
 
 
 // Shared dependency injected by loader
@@ -32,7 +32,7 @@ run before CONFIG is validated.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
+export default function loader (shared_libs, errors) { // eslint-disable-line no-unused-vars
 
   // Inject shared dependency
   Lib = shared_libs;

@@ -11,7 +11,6 @@
 //   queryByResourceId(instance, tenant_id, resource_id)                -> { success, records, error }
 //   deleteByDataVersionLte(instance, tenant_id, resource_id, dv)       -> { success, error }
 //   queryByResourceIdPrefix(instance, tenant_id, resource_id_prefix)   -> { success, records, error }
-'use strict';
 
 
 /********************************************************************
@@ -22,7 +21,7 @@ isolation.
 
 @return {Object} - Store interface (plus _records for white-box assertions)
 *********************************************************************/
-module.exports = function createMemoryStore () {
+export default function createMemoryStore () {
 
   // All records stored as flat array (simple, mirrors append-only semantics)
   const _records = [];

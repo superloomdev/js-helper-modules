@@ -14,7 +14,9 @@
 // so the singleton pattern is forbidden by the constitution.
 //
 // Dependency direction: Extension -> Core (extension is boss, core is library)
-'use strict';
+import CONFIG_DEFAULTS from './extension.config.js';
+import ERRORS from './extension.errors.js';
+import createValidators from './extension.validators.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -31,7 +33,7 @@ React context and state.
 @return {Object} - { ThemeProvider, useThemeController, useTheme,
                      useTokens, ThemeContext }
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -44,15 +46,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./extension.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./extension.errors');
+  // ERRORS imported at top level
 
   // Validators singleton - Lib and ERRORS injected here
-  const Validators = require('./extension.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate injected dependencies so a missing React or Themer fails at startup
   Validators.validateSharedLibs(shared_libs);

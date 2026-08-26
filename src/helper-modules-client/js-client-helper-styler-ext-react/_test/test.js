@@ -3,13 +3,19 @@
 // Tests use ONLY public API exports (no direct part imports).
 //
 // Extension pattern: these tests verify the extension CONSUMES the core correctly.
-'use strict';
-
-const { describe, it, before } = require('node:test');
-const assert = require('node:assert/strict');
+import { describe, it, before } from 'node:test';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
 
 // Loader injects all dependencies via npm aliases
-const { React, ReactTestRenderer, Extension, Styler } = require('./loader.js');
+import {
+  React,
+  ReactTestRenderer,
+  Extension,
+  Styler
+} from './loader.js';
+
+const require = createRequire(import.meta.url);
 
 // Fixtures
 const base = require('./fixtures/base.json');

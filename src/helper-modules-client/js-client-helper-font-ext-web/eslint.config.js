@@ -2,6 +2,6 @@
 // @superloomdev/js-helper-eslint-config package via the `browser` preset
 // (base plus DOM globals). No per-module rule overrides are permitted.
 // See docs/languages/js/code-formatting.md for the rule catalog.
-const { browser } = require('@superloomdev/js-helper-eslint-config');
+import { app } from '@superloomdev/js-helper-eslint-config';
 
-module.exports = browser;
+export default app;

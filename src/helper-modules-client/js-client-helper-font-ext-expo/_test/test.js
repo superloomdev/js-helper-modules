@@ -1,14 +1,13 @@
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fontExtExpoLoader from 'helper-font-ext-expo';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const {
+import {
   ExpoFontAdapter,
   Font,
   Utils,
   Debug
-} = require('./loader');
+} from './loader.js';
 
 
 // ~~~~~~~~~~~~~~~~~~~~ loadManifest ~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +50,7 @@ test('loadManifest with FAIL_ON_ERROR returns error on failure', async function 
     }
   };
 
-  const FailingAdapter = require('helper-font-ext-expo')({
+  const FailingAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -76,7 +75,7 @@ test('loadManifest without FAIL_ON_ERROR continues on failure', async function (
     }
   };
 
-  const LenientAdapter = require('helper-font-ext-expo')({
+  const LenientAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -160,7 +159,7 @@ test('loadManifest accepts entry with path only (native)', async function () {
 
 test('isReady returns false before loadManifest', function () {
 
-  const FreshAdapter = require('helper-font-ext-expo')({
+  const FreshAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -174,7 +173,7 @@ test('isReady returns false before loadManifest', function () {
 
 test('isReady returns true after successful loadManifest', async function () {
 
-  const FreshAdapter = require('helper-font-ext-expo')({
+  const FreshAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -203,7 +202,7 @@ test('constructor throws when Font core is not injected', function () {
 
   assert.throws(function () {
 
-    require('helper-font-ext-expo')({
+    fontExtExpoLoader({
       Utils: Utils,
       Debug: Debug
     });
@@ -216,7 +215,7 @@ test('constructor does not require expo-font injection', function () {
 
   // The extension requires expo-font directly at module scope.
   // No injection needed — should NOT throw.
-  const Adapter = require('helper-font-ext-expo')({
+  const Adapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -232,7 +231,7 @@ test('constructor does not require expo-font injection', function () {
 
 test('isFamilyLoaded returns false before loadManifest', function () {
 
-  const FreshAdapter = require('helper-font-ext-expo')({
+  const FreshAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -246,7 +245,7 @@ test('isFamilyLoaded returns false before loadManifest', function () {
 
 test('isFamilyLoaded returns true after loadManifest', async function () {
 
-  const FreshAdapter = require('helper-font-ext-expo')({
+  const FreshAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -273,7 +272,7 @@ test('isFamilyLoaded returns true after loadManifest', async function () {
 
 test('loadManifest skips already-loaded families on second call', async function () {
 
-  const FreshAdapter = require('helper-font-ext-expo')({
+  const FreshAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -307,7 +306,7 @@ test('loadManifest skips already-loaded families on second call', async function
 
 test('loadManifest with partial manifest loads only new families', async function () {
 
-  const FreshAdapter = require('helper-font-ext-expo')({
+  const FreshAdapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font

@@ -1,14 +1,13 @@
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fontExtRnLoader from 'helper-font-ext-rn';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const {
+import {
   RNFontAdapter,
   Font,
   Utils,
   Debug
-} = require('./loader');
+} from './loader.js';
 
 
 // ~~~~~~~~~~~~~~~~~~~~ loadManifest ~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +50,7 @@ test('loadManifest with FAIL_ON_ERROR returns error on failure', async function 
     }
   });
 
-  const FailingAdapter = require('helper-font-ext-rn')({
+  const FailingAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -69,7 +68,7 @@ test('loadManifest with FAIL_ON_ERROR returns error on failure', async function 
 test('loadManifest without FAIL_ON_ERROR continues on failure', async function () {
 
   // The BadFont entry (url only, no path) will fail validation in loadFontFile
-  const LenientAdapter = require('helper-font-ext-rn')({
+  const LenientAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -97,7 +96,7 @@ test('loadManifest rejects entry with url but no path', async function () {
     }
   };
 
-  const StrictAdapter = require('helper-font-ext-rn')({
+  const StrictAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -145,7 +144,7 @@ test('loadManifest accepts entry with path', async function () {
 
 test('isReady returns false before loadManifest', function () {
 
-  const FreshAdapter = require('helper-font-ext-rn')({
+  const FreshAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -159,7 +158,7 @@ test('isReady returns false before loadManifest', function () {
 
 test('isReady returns true after successful loadManifest', async function () {
 
-  const FreshAdapter = require('helper-font-ext-rn')({
+  const FreshAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -188,7 +187,7 @@ test('constructor throws when Font core is not injected', function () {
 
   assert.throws(function () {
 
-    require('helper-font-ext-rn')({
+    fontExtRnLoader({
       Utils: Utils,
       Debug: Debug
     });
@@ -201,7 +200,7 @@ test('constructor does not require NativeFontLoader injection', function () {
 
   // The extension now requires @vitrion/react-native-load-fonts directly.
   // No NativeFontLoader in shared_libs — should NOT throw.
-  const Adapter = require('helper-font-ext-rn')({
+  const Adapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -217,7 +216,7 @@ test('constructor does not require NativeFontLoader injection', function () {
 
 test('isFamilyLoaded returns false before loadManifest', function () {
 
-  const FreshAdapter = require('helper-font-ext-rn')({
+  const FreshAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -231,7 +230,7 @@ test('isFamilyLoaded returns false before loadManifest', function () {
 
 test('isFamilyLoaded returns true after loadManifest', async function () {
 
-  const FreshAdapter = require('helper-font-ext-rn')({
+  const FreshAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -258,7 +257,7 @@ test('isFamilyLoaded returns true after loadManifest', async function () {
 
 test('loadManifest skips already-loaded families on second call', async function () {
 
-  const FreshAdapter = require('helper-font-ext-rn')({
+  const FreshAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font
@@ -292,7 +291,7 @@ test('loadManifest skips already-loaded families on second call', async function
 
 test('loadManifest with partial manifest loads only new families', async function () {
 
-  const FreshAdapter = require('helper-font-ext-rn')({
+  const FreshAdapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font

@@ -2,6 +2,7 @@
   "name": "@superloomdev/js-client-helper-font-ext-expo-test",
   "description": "Unit tests for js-client-helper-font-ext-expo",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test test.js test-concurrency.js"
@@ -11,6 +12,6 @@
     "helper-font": "npm:@superloomdev/js-client-helper-font@^1.0.0",
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
-    "expo-font": "file:./stubs/expo-font.js"
+    "expo-font": "file:./stubs"
   }
 }

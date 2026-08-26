@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-http-gateway",
   "description": "Incoming HTTP gateway for Node.js. Normalizes raw runtime request data (API Gateway, Express) into a per-request instance and writes responses back. Runtime adapters are separate packages.",
   "version": "1.0.0",
-  "main": "http-gateway.js",
+  "type": "module",
+  "exports": {
+    ".": "./http-gateway.js",
+    "./http-gateway.config.js": "./http-gateway.config.js",
+    "./http-gateway.errors.js": "./http-gateway.errors.js",
+    "./http-gateway.validators.js": "./http-gateway.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

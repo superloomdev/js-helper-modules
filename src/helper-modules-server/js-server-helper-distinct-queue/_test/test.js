@@ -1,19 +1,19 @@
 // Tests for js-server-helper-distinct-queue
 // Offline module - storage adapter is injected per-test (in-memory implementation).
 // process.env is NEVER accessed in test files - only in loader.js
-'use strict';
 
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 // Load all dependencies via test loader (mirrors main project loader pattern)
-const { Lib } = require('./loader')();
+import loader from './loader.js';
+const { Lib } = loader();
 
 // Distinct-queue module under test - constructed per-case with its own adapter
-const DistinctQueueFactory = require('helper-distinct-queue');
+import DistinctQueueFactory from 'helper-distinct-queue';
 
 // In-process Map-backed store fixture (Tier-2 enabler)
-const createMemoryStore = require('./memory-store');
+import createMemoryStore from './memory-store.js';
 
 
 // Helper - shorthand to construct a distinct-queue instance backed by an

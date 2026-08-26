@@ -1,9 +1,6 @@
 // Info: Configuration for js-server-helper-queue-aws-sqs
 // All values can be overridden via loader config injection
-'use strict';
-
-
-module.exports = {
+export default {
 
   // AWS Region
   REGION: 'us-east-1',

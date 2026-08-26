@@ -10,7 +10,7 @@
 //
 // Inbound cookies are read from instance.http_request.cookies (already
 // parsed by the HTTP gateway adapter before the request reaches auth).
-'use strict';
+
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -24,7 +24,7 @@ Factory loader.
 
 @return {Object} - Public TokenSource interface
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+export default function loader (Lib, CONFIG, ERRORS) {
 
   return createInterface(Lib, CONFIG, ERRORS);
 

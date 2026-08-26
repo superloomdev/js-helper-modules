@@ -1,16 +1,15 @@
 // Tests for js-server-helper-queue-aws-sqs
 // Works with both emulated (ElasticMQ) and integration (real AWS SQS) testing
 // Config comes from environment variables via loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const { SQSClient, CreateQueueCommand, DeleteQueueCommand, PurgeQueueCommand } = require('@aws-sdk/client-sqs');
-const ERRORS = require('../sqs.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import { SQSClient, CreateQueueCommand, DeleteQueueCommand, PurgeQueueCommand } from '@aws-sdk/client-sqs';
+import ERRORS from '../sqs.errors.js';
 
 // Load all dependencies and config via test loader (mirrors main project loader pattern)
 // process.env is NEVER accessed in test files - only in loader.js
-const { Lib, Config } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config } = loader();
 const SQS = Lib.SQS;
 const Instance = Lib.Instance;
 

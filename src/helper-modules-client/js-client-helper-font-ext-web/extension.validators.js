@@ -1,9 +1,7 @@
 // Info: Validators for helper-font-ext-web.
 //
 // Receives Lib and ERRORS by injection from the loader.
-'use strict';
-
-module.exports = function (Lib, ERRORS) {
+export default function (Lib, ERRORS) {
 
   const Validators = {
 

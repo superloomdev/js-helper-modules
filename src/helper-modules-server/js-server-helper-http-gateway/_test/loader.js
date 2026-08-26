@@ -2,7 +2,11 @@
 // container (Utils, Debug, Instance, Time) used by all gateway tests.
 // No adapter packages are loaded here - tests use the in-process
 // stub adapter (stub-adapter.js).
-'use strict';
+
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import timeLoader from 'helper-time';
+import instanceLoader from 'helper-instance';
 
 
 /********************************************************************
@@ -13,7 +17,7 @@ use only the in-process stub adapter (stub-adapter.js).
 
 @return {Object} - { Lib }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Debug config (empty - level controlled by injected Debug)
 
@@ -21,12 +25,12 @@ module.exports = function loader () {
   const Lib = {};
 
   // Foundation modules
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, {});
-  Lib.Time = require('helper-time')(Lib, {});
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, {});
+  Lib.Time = timeLoader(Lib, {});
 
   // Server helper modules
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
 
 
   return { Lib: Lib };

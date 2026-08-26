@@ -5,7 +5,10 @@
 // SQLite is offline by default - if SQLITE_FILE is unset the tests run
 // against an in-memory database. Point SQLITE_FILE at a file path to test
 // on-disk behavior (journal_mode=WAL, etc.).
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperSqlSqlite from 'helper-sql-sqlite';
 
 
 /********************************************************************
@@ -26,7 +29,7 @@ tests cannot leak state into one another.
 @return {Object} result.instance - Default request instance
 @return {Function} result.buildLib - (instance_config) => { Lib, instance }
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // Test-wide environment config - available to test.js for admin-DB setup
   const Config = {
@@ -50,12 +53,12 @@ module.exports = function loader () {
     const Lib = {};
 
     // Helper modules
-    Lib.Utils = require('helper-utils')(Lib, {});
-    Lib.Debug = require('helper-debug')(Lib, {});
-    Lib.Instance = require('helper-instance')(Lib, instance_config);
+    Lib.Utils = helperUtils(Lib, {});
+    Lib.Debug = helperDebug(Lib, {});
+    Lib.Instance = helperInstance(Lib, instance_config);
 
     // Server helper modules
-    Lib.SQLite = require('helper-sql-sqlite')(Lib, config_sqlite);
+    Lib.SQLite = helperSqlSqlite(Lib, config_sqlite);
 
     const instance = Lib.Instance.initialize();
 

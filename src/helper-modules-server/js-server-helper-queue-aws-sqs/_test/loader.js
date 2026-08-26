@@ -1,7 +1,10 @@
 // Info: Test loader for js-server-helper-queue-aws-sqs
 // Mirrors the main project loader pattern: loads dependencies, merges config from environment
 // Same loader works for both emulated (dev) and integration testing - env vars control the target
-'use strict';
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import helperInstance from 'helper-instance';
+import helperQueueAwsSqs from 'helper-queue-aws-sqs';
 
 
 /********************************************************************
@@ -17,7 +20,7 @@ config_sqs = module-specific config slice, only passed to the SQS module.
 @return {Object} result.Lib - Dependency container (Utils, Debug, SQS)
 @return {Object} result.Config - Test-wide environment values for test infrastructure
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= Configuration ========================= //
 
@@ -52,14 +55,14 @@ module.exports = function loader () {
 
   // ==================== Helper Modules ============================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Utils = helperUtils(Lib, {});
+  Lib.Debug = helperDebug(Lib, config_debug);
+  Lib.Instance = helperInstance(Lib, {});
 
 
   // ==================== Server Helper Modules ====================== //
 
-  Lib.SQS = require('helper-queue-aws-sqs')(Lib, config_sqs);
+  Lib.SQS = helperQueueAwsSqs(Lib, config_sqs);
 
 
   // Return runtime objects

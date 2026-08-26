@@ -1,8 +1,11 @@
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import fontLoader from 'helper-font';
+import webFontExtWebLoader from 'helper-font-ext-web';
 
-const Utils = require('helper-utils')();
-const Debug = require('helper-debug')({ Utils: Utils });
-const Font = require('helper-font')({ Utils: Utils, Debug: Debug });
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils: Utils });
+const Font = fontLoader({ Utils: Utils, Debug: Debug });
 
 // Register example families with url (web) and path (native)
 Font.registerFamilies({
@@ -70,7 +73,7 @@ function createDocumentStub () {
 
 const docStub = createDocumentStub();
 
-const WebFontAdapter = require('helper-font-ext-web')({
+const WebFontAdapter = webFontExtWebLoader({
   Utils: Utils,
   Debug: Debug,
   Font: Font,
@@ -78,11 +81,11 @@ const WebFontAdapter = require('helper-font-ext-web')({
 });
 
 
-module.exports = {
-  WebFontAdapter: WebFontAdapter,
-  Font: Font,
-  Utils: Utils,
-  Debug: Debug,
-  docStub: docStub,
-  createDocumentStub: createDocumentStub
+export {
+  WebFontAdapter,
+  Font,
+  Utils,
+  Debug,
+  docStub,
+  createDocumentStub
 };

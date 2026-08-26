@@ -3,24 +3,21 @@
 // test.js with tests that verify parallel loading behavior, native loader
 // call arguments, factory independence, and config absorption.
 // Tests use ONLY public API exports (no direct private function access).
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import NativeLoaderStub from '@vitrion/react-native-load-fonts';
+import fontExtRnLoader from 'helper-font-ext-rn';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const {
+import {
   Font,
   Utils,
   Debug
-} = require('./loader');
-
-const NativeLoaderStub = require('@vitrion/react-native-load-fonts');
-const RNFontAdapterModule = require('helper-font-ext-rn');
+} from './loader.js';
 
 
 // Helper: create a fresh adapter for each test
 function createAdapter (config) {
-  return RNFontAdapterModule({
+  return fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,
     Font: Font

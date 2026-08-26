@@ -10,9 +10,9 @@
 // Refresh tokens are opaque random strings (NOT JWTs). Only their
 // SHA-256 hash is persisted in the session record's refresh_token_hash
 // column; the plaintext is returned once at mint time.
-'use strict';
 
-const crypto = require('crypto');
+
+import crypto from 'node:crypto';
 
 
 // Charset for refresh tokens. Controlled so the token is URL-safe and
@@ -36,7 +36,7 @@ delegates to createInterface.
 
 @return {Object} - Public Jwt interface
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+export default function loader (Lib, CONFIG, ERRORS) {
 
   // No per-instance validation or state for this part.
   return createInterface(Lib, CONFIG, ERRORS);

@@ -28,7 +28,15 @@
 //   helper-auth-store-dynamodb
 //
 // Compatibility: Node.js 24+
-'use strict';
+
+import CONFIG_DEFAULTS from './auth.config.js';
+import ERRORS from './auth.errors.js';
+import createValidators from './auth.validators.js';
+import createRecordShape from './parts/record-shape.js';
+import createAuthId from './parts/auth-id.js';
+import createPolicy from './parts/policy.js';
+import createTokenSource from './parts/token-source.js';
+import createJwt from './parts/jwt.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -43,7 +51,7 @@ misconfiguration fails fast at startup, not on first request.
 
 @return {Object} - Public interface for this Auth instance
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance. Store adapters build their own Lib
   // internally - auth does not inject driver helpers into them.
@@ -58,16 +66,16 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./auth.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Internal error catalog (frozen)
-  const ERRORS = require('./auth.errors');
+  // ERRORS is imported at top level
 
   // Singleton validators: config + options validators in one place.
   // validateConfig runs immediately so misconfiguration fails fast at startup.
-  const Validators = require('./auth.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
   Validators.validateConfig(CONFIG);
 
   // Use the ready-to-use store object passed in via config.Store.
@@ -83,11 +91,11 @@ module.exports = function loader (shared_libs, config) {
   // token-source needing cookie) self-require it; this loader treats
   // them as opaque, independent factories.
   const Parts = {
-    RecordShape: require('./parts/record-shape')(Lib, CONFIG, ERRORS),
-    AuthId: require('./parts/auth-id')(Lib, CONFIG, ERRORS),
-    Policy: require('./parts/policy')(Lib, CONFIG, ERRORS),
-    TokenSource: require('./parts/token-source')(Lib, CONFIG, ERRORS),
-    Jwt: require('./parts/jwt')(Lib, CONFIG, ERRORS)
+    RecordShape: createRecordShape(Lib, CONFIG, ERRORS),
+    AuthId: createAuthId(Lib, CONFIG, ERRORS),
+    Policy: createPolicy(Lib, CONFIG, ERRORS),
+    TokenSource: createTokenSource(Lib, CONFIG, ERRORS),
+    Jwt: createJwt(Lib, CONFIG, ERRORS)
   };
 
   // Build the public interface, closing over Lib, CONFIG, ERRORS,

@@ -7,7 +7,6 @@
 // Singleton: Lib is injected once by the loader. Public and private objects
 // are declared at module tenant_id - Node.js require cache guarantees the same
 // reference is returned on every subsequent require. No factory needed.
-'use strict';
 
 
 // Shared dependency injected by loader
@@ -26,7 +25,7 @@ even when validators do not consume it today.
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-module.exports = function loader (shared_libs, ERRORS) {
+export default function loader (shared_libs, ERRORS) {
 
   // Inject shared dependency
   Lib = shared_libs;

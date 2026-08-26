@@ -1,10 +1,13 @@
 // loader.js - Dependency injection for js-client-helper-styler-ext-react tests
 // Uses npm aliases: helper-styler, helper-utils, helper-debug, helper-styler-ext
 
-'use strict';
+import React from 'react';
+import ReactTestRenderer from 'react-test-renderer';
+import stylerLoader from 'helper-styler';
+import stylerExtLoader from 'helper-styler-ext';
+import { createRequire } from 'node:module';
 
-const React = require('react');
-const ReactTestRenderer = require('react-test-renderer');
+const require = createRequire(import.meta.url);
 
 // Peer dependencies (optional but recommended)
 let Utils;
@@ -22,10 +25,10 @@ try {
 }
 
 // Core styler engine (published version)
-const Styler = require('helper-styler')({ Utils, Debug });
+const Styler = stylerLoader({ Utils, Debug });
 
 // Extension under test
-const Extension = require('helper-styler-ext')({
+const Extension = stylerExtLoader({
   React,
   Styler,
   Utils,
@@ -33,7 +36,7 @@ const Extension = require('helper-styler-ext')({
 });
 
 // Export everything tests need
-module.exports = {
+export {
   React,
   ReactTestRenderer,
   Styler,

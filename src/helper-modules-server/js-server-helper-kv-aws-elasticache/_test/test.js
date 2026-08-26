@@ -3,15 +3,17 @@
 // Tests both local mode (no IAM, ENDPOINT set) and IAM token generation logic.
 // IAM token generation uses mocked credentials - no real AWS calls.
 // All function tests run against a local Valkey container.
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const Redis = require('ioredis');
-const ERRORS = require('../kv-aws-elasticache.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import Redis from 'ioredis';
+import ERRORS from '../kv-aws-elasticache.errors.js';
+import kvAwsElasticache from '../kv-aws-elasticache.js';
+import { SignatureV4 } from '@smithy/signature-v4';
+import { Sha256 } from '@aws-crypto/sha256-js';
 
 // Load dependencies via test loader
-const { Lib, Config, instance, buildLib } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config, instance, buildLib } = loader();
 const KV = Lib.KV;
 const Instance = Lib.Instance;
 
@@ -73,7 +75,7 @@ describe('Factory Pattern', function () {
 
   it('should create independent instances', function () {
 
-    const { Lib: Lib2 } = require('./loader')();
+    const { Lib: Lib2 } = loader();
     assert.notStrictEqual(KV, Lib2.KV, 'Instances should be independent');
   });
 
@@ -90,28 +92,28 @@ describe('Config Validation', function () {
   it('should throw TypeError on unknown config key', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, { UNKNOWN_KEY: true });
+      kvAwsElasticache(Lib, { UNKNOWN_KEY: true });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong REGION type', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, { REGION: 123 });
+      kvAwsElasticache(Lib, { REGION: 123 });
     }, TypeError);
   });
 
   it('should throw TypeError on wrong IAM_USER_ID type', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, { IAM_USER_ID: 123 });
+      kvAwsElasticache(Lib, { IAM_USER_ID: 123 });
     }, TypeError);
   });
 
   it('should throw TypeError when IAM_USER_ID is set without CACHE_NAME', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, {
+      kvAwsElasticache(Lib, {
         IAM_USER_ID: 'my-user',
         KEY: 'AKIATEST',
         SECRET: 'secrettest'
@@ -123,7 +125,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when IAM_USER_ID is set without KEY', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, {
+      kvAwsElasticache(Lib, {
         IAM_USER_ID: 'my-user',
         CACHE_NAME: 'my-cache',
         SECRET: 'secrettest'
@@ -135,7 +137,7 @@ describe('Config Validation', function () {
   it('should throw TypeError when IAM_USER_ID is set without SECRET', function () {
 
     assert.throws(function () {
-      require('../kv-aws-elasticache')(Lib, {
+      kvAwsElasticache(Lib, {
         IAM_USER_ID: 'my-user',
         CACHE_NAME: 'my-cache',
         KEY: 'AKIATEST'
@@ -147,7 +149,7 @@ describe('Config Validation', function () {
   it('should accept valid IAM config', function () {
 
     // Should not throw
-    const kv = require('../kv-aws-elasticache')(Lib, {
+    const kv = kvAwsElasticache(Lib, {
       HOST: Config.valkey_host,
       PORT: Config.valkey_port,
       TLS: false,
@@ -376,7 +378,7 @@ describe('Local Mode (no IAM)', function () {
 
   it('should close idempotently', async function () {
 
-    const { Lib: LibC } = require('./loader')();
+    const { Lib: LibC } = loader();
     const KVC = LibC.KV;
     const instC = LibC.Instance.initialize();
 
@@ -402,8 +404,6 @@ describe('IAM Token Generation', function () {
   it('should generate a valid SigV4 token with mocked credentials', async function () {
 
     // Use the official AWS SDK v3 SignatureV4 to verify token structure
-    const { SignatureV4 } = require('@smithy/signature-v4');
-    const { Sha256 } = require('@aws-crypto/sha256-js');
 
     const signer = new SignatureV4({
       credentials: {
@@ -446,9 +446,6 @@ describe('IAM Token Generation', function () {
 
   it('should add ResourceType=ServerlessCache for serverless caches', async function () {
 
-    const { SignatureV4 } = require('@smithy/signature-v4');
-    const { Sha256 } = require('@aws-crypto/sha256-js');
-
     const signer = new SignatureV4({
       credentials: {
         accessKeyId: 'AKIATEST',
@@ -487,7 +484,7 @@ describe('IAM Token Generation', function () {
 
     // This test verifies that the module can be constructed with IAM config
     // without attempting any AWS API calls. Token generation is local SigV4 signing.
-    const kv = require('../kv-aws-elasticache')(Lib, {
+    const kv = kvAwsElasticache(Lib, {
       HOST: 'nonexistent-host-that-does-not-exist',
       PORT: 6379,
       TLS: false,

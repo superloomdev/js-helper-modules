@@ -9,10 +9,7 @@
 // in getOrFetchCache. When GET_OR_FETCH_LOCK_ENABLED is false (default),
 // getOrFetchCache does plain fetch-and-cache with no lock. Per-backend
 // adapter wiring is documented in docs/configuration.md.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // Ready-to-use store object from the chosen adapter package. Required.
   // Validated at construction. Per-backend wiring: docs/configuration.md.

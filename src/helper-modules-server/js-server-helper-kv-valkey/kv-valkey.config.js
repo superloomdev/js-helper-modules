@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-kv-valkey.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- Connection ----
   // Valkey/Redis server hostname. Override for ElastiCache or remote servers.

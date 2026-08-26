@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for helper-auth.
  * Operational errors returned via {success: false, error}.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   SERVICE_UNAVAILABLE: Object.freeze({
     type: 'AUTH_SERVICE_UNAVAILABLE',

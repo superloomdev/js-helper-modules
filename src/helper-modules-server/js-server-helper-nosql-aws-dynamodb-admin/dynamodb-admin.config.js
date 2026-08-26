@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-nosql-aws-dynamodb-admin.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- AWS Region ----
   // Region where the DynamoDB table lives (or us-east-1 for DynamoDB Local).

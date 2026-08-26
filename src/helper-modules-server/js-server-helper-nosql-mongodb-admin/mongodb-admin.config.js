@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-nosql-mongodb-admin.
 // Pure defaults - the loader merges overrides on top of this. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- Connection ----
   // MongoDB connection string for admin-role user. Must have dbAdmin or root role.

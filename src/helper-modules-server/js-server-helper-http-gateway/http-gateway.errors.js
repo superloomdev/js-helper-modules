@@ -1,12 +1,10 @@
-'use strict';
-
 /**
  * Error catalog for helper-http-gateway.
  * Errors are returned via [err, result] tuples or thrown at construction time.
  * Frozen to prevent accidental mutation.
  */
 
-module.exports = Object.freeze({
+export default Object.freeze({
 
   INVALID_PARAM: Object.freeze({
     type: 'HTTP_GATEWAY_INVALID_PARAM',

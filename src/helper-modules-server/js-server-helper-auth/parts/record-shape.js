@@ -10,7 +10,7 @@
 //   - Client:         client_*  (last-known, mutable on throttled refresh)
 //   - Push:           push_provider, push_token (forward-compat for notification module)
 //   - Custom:         custom_data (project-owned envelope; auth never reads it)
-'use strict';
+
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -27,7 +27,7 @@ to createInterface.
 
 @return {Object} - Public RecordShape interface
 *********************************************************************/
-module.exports = function loader (Lib, CONFIG, ERRORS) {
+export default function loader (Lib, CONFIG, ERRORS) {
 
   // No per-instance validation or state for this part.
   return createInterface(Lib, CONFIG, ERRORS);

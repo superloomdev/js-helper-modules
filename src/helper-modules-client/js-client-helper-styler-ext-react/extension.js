@@ -16,7 +16,6 @@
 //
 // Singleton loader pattern: Context created once per process via Node require cache.
 //
-'use strict';
 
 
 // Injected dependencies, set by the loader (module-scope).
@@ -42,7 +41,7 @@ The core styler is a pure engine; this extension adds React semantics.
 
 @return {Object} - { ThemeProvider, useTheme, useStyles, useThemeController, ThemeContext }
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   Lib = shared_libs || {};
   CONFIG = Object.assign({}, config || {});

@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-nosql-aws-dynamodb-admin",
   "description": "AWS DynamoDB control-plane helper for table and TTL provisioning with admin credentials. Part of Superloom.",
   "version": "1.0.0",
-  "main": "dynamodb-admin.js",
+  "type": "module",
+  "exports": {
+    ".": "./dynamodb-admin.js",
+    "./dynamodb-admin.config.js": "./dynamodb-admin.config.js",
+    "./dynamodb-admin.errors.js": "./dynamodb-admin.errors.js",
+    "./dynamodb-admin.validators.js": "./dynamodb-admin.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {

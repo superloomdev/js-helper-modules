@@ -4,9 +4,7 @@
 // asynchronous work, so every failure it can produce is a programmer
 // error. The catalog feeds thrown messages in the framework's
 // programmer-error format.
-'use strict';
-
-module.exports = Object.freeze({
+export default Object.freeze({
 
   // ~~~~~~~~~~~~~~~~~~~~ Dependency Injection ~~~~~~~~~~~~~~~~~~~~
 

@@ -1,19 +1,18 @@
 // Tests for helper-cache
 // Offline module - storage adapter is injected per-test (in-memory implementation).
 // process.env is NEVER accessed in test files - only in loader.js
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 // Load all dependencies via test loader (mirrors main project loader pattern)
-const { Lib } = require('./loader')();
+import loader from './loader.js';
+const { Lib } = loader();
 
 // Cache module under test - constructed per-case with its own adapter
-const CacheFactory = require('helper-cache');
+import CacheFactory from 'helper-cache';
 
 // In-process Map-backed store fixture (Tier-2 enabler)
-const createMemoryStore = require('./memory-store');
+import createMemoryStore from './memory-store.js';
 
 
 // Helper - shorthand to construct a cache instance backed by an injected

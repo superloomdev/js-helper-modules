@@ -5,7 +5,11 @@
 // Factory pattern: each loader call returns an independent instance with
 // its own pool and config. Useful for multi-db or reader/writer splits.
 // Driver and pool are both lazy-loaded on first query.
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './mysql.config.js';
+import ERRORS_CATALOG from './mysql.errors.js';
+import createValidators from './mysql.validators.js';
+const require = createRequire(import.meta.url);
 
 
 // mysql2 ships two entry points. Both are cached once and shared across
@@ -28,7 +32,7 @@ state and config.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -40,15 +44,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./mysql.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./mysql.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./mysql.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

@@ -2,6 +2,7 @@
   "name": "js-server-helper-kv-aws-elasticache-test",
   "description": "Test suite for js-server-helper-kv-aws-elasticache (standalone, no kv-valkey dependency)",
   "version": "1.0.0",
+  "type": "module",
   "main": "test.js",
   "private": true,
   "license": "MIT",

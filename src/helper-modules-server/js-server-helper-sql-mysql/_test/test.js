@@ -1,15 +1,15 @@
 // Info: Tests for js-server-helper-mysql.
 // Runs against both emulated (Docker MySQL 8) and integration (real database) targets.
 // Configuration comes entirely from environment variables via loader.js.
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it, before, after } = require('node:test');
-const MySQL2Promise = require('mysql2/promise');
-const ERRORS = require('../mysql.errors');
+import assert from 'node:assert/strict';
+import { describe, it, before, after } from 'node:test';
+import MySQL2Promise from 'mysql2/promise';
+import ERRORS from '../mysql.errors.js';
+import helperSqlMysql from 'helper-sql-mysql';
 
 // Load dependencies via test loader - process.env is touched only there.
-const { Lib, Config, instance, buildLib } = require('./loader')();
+import loader from './loader.js';
+const { Lib, Config, instance, buildLib } = loader();
 const MySQL = Lib.MySQL;
 const Instance = Lib.Instance;
 
@@ -501,7 +501,7 @@ describe('multiple instances', function () {
 
   it('should allow independent pools via multiple loader calls', async function () {
 
-    const ModuleFactory = require('helper-sql-mysql');
+    const ModuleFactory = helperSqlMysql;
 
     // Two instances pointing at the same DB with different pool sizes
     const A = ModuleFactory(Lib, {
@@ -694,7 +694,7 @@ describe('connection lifecycle', function () {
 
   it('should reject POOL_MAX_IDLE >= POOL_MAX at load time (D1 fix)', function () {
 
-    const ModuleFactory = require('helper-sql-mysql');
+    const ModuleFactory = helperSqlMysql;
 
     assert.throws(function () {
       ModuleFactory(Lib, { POOL_MAX: 5, POOL_MAX_IDLE: 5 });

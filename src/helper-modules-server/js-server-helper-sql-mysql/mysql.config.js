@@ -1,9 +1,6 @@
 // Info: Default configuration for js-server-helper-mysql.
 // Pure defaults. The loader merges overrides on top. No process.env access here.
-'use strict';
-
-
-module.exports = {
+export default {
 
   // ---- Connection ----
   // Hostname or IP of the MySQL server.

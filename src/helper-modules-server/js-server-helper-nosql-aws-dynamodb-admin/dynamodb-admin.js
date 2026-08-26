@@ -8,7 +8,11 @@
 //
 // Lazy-loaded AWS SDK v3 client (stateless, shared across instances):
 //   - '@aws-sdk/client-dynamodb' -> DynamoDBClient class + control-plane commands
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './dynamodb-admin.config.js';
+import ERRORS from './dynamodb-admin.errors.js';
+import createValidators from './dynamodb-admin.validators.js';
+const require = createRequire(import.meta.url);
 
 // Shared stateless AWS SDK v3 client (module-level - require() is cached anyway).
 let DynamoDBClient = null;
@@ -27,7 +31,7 @@ Lib, CONFIG, and DynamoDB admin client.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -39,15 +43,12 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./dynamodb-admin.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
-  // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./dynamodb-admin.errors');
-
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./dynamodb-admin.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

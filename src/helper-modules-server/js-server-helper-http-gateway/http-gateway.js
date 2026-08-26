@@ -20,7 +20,13 @@
 //   getCountryCode(headers)  -> String | null
 //
 // Compatibility: Node.js 24+
-'use strict';
+
+import CONFIG_DEFAULTS from './http-gateway.config.js';
+import ERRORS from './http-gateway.errors.js';
+import createValidators from './http-gateway.validators.js';
+import createCookies from './parts/cookies.js';
+import createUrlParts from './parts/url-parts.js';
+import createParams from './parts/params.js';
 
 
 // Known HTTP status codes for returnHttpStatus
@@ -48,7 +54,7 @@ first request.
 
 @return {Object} - Public HttpGateway interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -61,15 +67,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./http-gateway.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./http-gateway.errors');
+  // ERRORS is imported at top level
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./http-gateway.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
@@ -80,9 +86,9 @@ module.exports = function loader (shared_libs, config) {
 
   // Parts (Cookies, UrlParts, Params)
   const Parts = {
-    Cookies: require('./parts/cookies')(Lib, CONFIG, ERRORS),
-    UrlParts: require('./parts/url-parts')(Lib, CONFIG, ERRORS),
-    Params: require('./parts/params')(Lib, CONFIG, ERRORS)
+    Cookies: createCookies(Lib, CONFIG, ERRORS),
+    UrlParts: createUrlParts(Lib, CONFIG, ERRORS),
+    Params: createParams(Lib, CONFIG, ERRORS)
   };
 
   // Create and return the public interface

@@ -3,10 +3,8 @@
 // be passed a ready-to-use store object from the chosen adapter. Charsets can
 // be overridden by the project; the defaults are picked for human typing and
 // URL safety. Per-backend adapter wiring is documented in docs/configuration.md.
-'use strict';
 
-
-module.exports = {
+export default {
 
   // Numeric charset for short PINs / OTPs (10 chars)
   // Smallest entropy per char, easiest to type on a phone keypad.

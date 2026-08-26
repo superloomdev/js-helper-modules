@@ -2,7 +2,9 @@
 // Mirrors the main project loader pattern. The cache module under test is
 // NOT loaded here - tests construct it per-case with their own STORE adapter
 // so each test owns isolated state.
-'use strict';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
+import instanceLoader from 'helper-instance';
 
 
 /********************************************************************
@@ -13,7 +15,7 @@ adapter so tests stay independent.
 @return {Object} result - Runtime objects for testing
 @return {Object} result.Lib - Dependency container (Utils, Debug, Instance)
 *********************************************************************/
-module.exports = function loader () {
+export default function loader () {
 
   // ========================= CONFIGURATION ========================= //
 
@@ -30,13 +32,13 @@ module.exports = function loader () {
 
   // ==================== HELPER MODULES ============================= //
 
-  Lib.Utils = require('helper-utils')(Lib, {});
-  Lib.Debug = require('helper-debug')(Lib, config_debug);
+  Lib.Utils = utilsLoader(Lib, {});
+  Lib.Debug = debugLoader(Lib, config_debug);
 
 
   // ==================== SERVER HELPER MODULES ====================== //
 
-  Lib.Instance = require('helper-instance')(Lib, {});
+  Lib.Instance = instanceLoader(Lib, {});
 
 
   // Return runtime objects

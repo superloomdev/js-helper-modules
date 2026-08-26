@@ -10,7 +10,11 @@
 //   ?  - value (translated to $1, $2, ... at query time)
 //   ?? - identifier (inlined as a double-quoted identifier)
 // This keeps application code identical across MySQL and Postgres backends.
-'use strict';
+import { createRequire } from 'node:module';
+import CONFIG_DEFAULTS from './postgres.config.js';
+import ERRORS_CATALOG from './postgres.errors.js';
+import createValidators from './postgres.validators.js';
+const require = createRequire(import.meta.url);
 
 
 // 'pg' is cached once and shared across all instances, since it is
@@ -30,7 +34,7 @@ state and config.
 
 @return {Object} - Public interface for this module
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Dependencies for this instance
   const Lib = {
@@ -42,15 +46,15 @@ module.exports = function loader (shared_libs, config) {
   // Merge overrides over defaults
   const CONFIG = Object.assign(
     {},
-    require('./postgres.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Error catalog (frozen, owned by the main module)
-  const ERRORS = require('./postgres.errors');
+  const ERRORS = ERRORS_CATALOG;
 
   // Validators singleton - Lib, ERRORS, and any static data injected here
-  const Validators = require('./postgres.validators')(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

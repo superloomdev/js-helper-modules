@@ -2,10 +2,8 @@
 // Most fields are required at construction time and validated by the loader.
 // Keys with a default of `null` mean "must be supplied by the project" -
 // the loader throws if they are still null.
-'use strict';
 
-
-module.exports = {
+export default {
 
   // Ready-to-use store object from the chosen adapter package, constructed
   // with its own config before being passed here. Validated at construction.

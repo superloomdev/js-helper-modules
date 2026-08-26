@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-server-helper-kv-aws-elasticache",
   "description": "AWS ElastiCache key-value driver with IAM authentication. Standalone module using ioredis and AWS SDK v3 SigV4 signing. Single instance, cluster mode disabled.",
   "version": "1.0.0",
-  "main": "kv-aws-elasticache.js",
+  "type": "module",
+  "exports": {
+    ".": "./kv-aws-elasticache.js",
+    "./kv-aws-elasticache.config.js": "./kv-aws-elasticache.config.js",
+    "./kv-aws-elasticache.errors.js": "./kv-aws-elasticache.errors.js",
+    "./kv-aws-elasticache.validators.js": "./kv-aws-elasticache.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {
