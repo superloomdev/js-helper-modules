@@ -227,7 +227,7 @@ Use `getClient` + manual `BEGIN` / `COMMIT` / `ROLLBACK` when application logic 
 async getClient(instance) → { success, client, error }
 ```
 
-Acquire a dedicated connection from the pool. The caller is responsible for `BEGIN` / `COMMIT` / `ROLLBACK` and **must call `releaseClient(client)`** when done, even on error paths.
+Acquire a dedicated connection from the pool. The caller is responsible for `BEGIN` / `COMMIT` / `ROLLBACK` and **must call `releaseClient(instance, client)`** when done, even on error paths. The borrowed client is registered for request-scoped release via `Lib.Instance.addInstanceCleanupRoutine`, so a caller that forgets `releaseClient` still returns the client when the request ends.
 
 ```javascript
 const { success, client, error } = await Lib.SqlDB.getClient(instance);
@@ -246,17 +246,17 @@ try {
   await client.rollback();
   throw e;
 } finally {
-  Lib.SqlDB.releaseClient(client);
+  Lib.SqlDB.releaseClient(instance, client);
 }
 ```
 
 ### `releaseClient`
 
 ```javascript
-releaseClient(client) → void
+releaseClient(instance, client) → void
 ```
 
-Return the client to the pool. Safe to call with `null` or `undefined`. Synchronous.
+Return the client to the pool. Safe to call with `null` or `undefined`, and safe against double release. Synchronous.
 
 ---
 
@@ -339,19 +339,34 @@ const rows = await Lib.SqlDB.getRows(
 
 ### `close`
 
+Gracefully drain and close the connection pool. Teardown is registered automatically with `Lib.Instance.addProcessCleanupRoutine` on first pool creation. A caller normally never calls `close()` directly. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` decides when it runs.
+
 ```javascript
-async close() → Promise<void>
+close(instance) → Promise<void>
 ```
 
-Close the pool gracefully. Waits up to `CONFIG.CLOSE_TIMEOUT_MS` (default `5000` ms) for in-flight queries to finish, then force-destroys remaining connections.
+Behavior:
 
-Call once on `SIGTERM` (or in your container shutdown hook). After `close()` returns, new query calls will create a fresh pool on demand. `close` does not invalidate the public interface.
+1. Waits up to `CONFIG.CLOSE_TIMEOUT_MS` (default `5000` ms) for in-flight queries to finish.
+2. Force-destroys any remaining connections after the timeout.
+3. Resolves once the pool is fully closed.
+
+After `close()` returns, new query calls will create a fresh pool on demand. `close` does not invalidate the public interface.
+
+**When close runs:**
+
+| Deployment | `CLOSE_ON_CLEANUP` | When close runs |
+|---|---|---|
+| Persistent (Express, Docker, EC2) | `false` | On SIGTERM via `Lib.Instance.runProcessCleanup()` |
+| Serverless (Lambda, Cloud Functions) | `true` | After every request via `Lib.Instance.runInstanceCleanup(instance)` |
+
+**Example (persistent server):**
 
 ```javascript
 process.on('SIGTERM', async () => {
-  await Lib.SqlDB.close();
+  await Lib.Instance.runProcessCleanup();
   process.exit(0);
 });
 ```
 
-For multi-database setups, call `close()` on **each loader instance** separately. Pools are not shared.
+For multi-database setups, each loader instance registers its own teardown. Pools are not shared.

@@ -38,7 +38,7 @@ Lib.SqlDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
 
 Loader call semantics:
 
-- The first argument is the `Lib` container. The module reads `Lib.Utils` and `Lib.Debug` from it (see [Peer Dependencies](#peer-dependencies-injected)).
+- The first argument is the `Lib` container. The module reads `Lib.Utils`, `Lib.Debug`, and `Lib.Instance` from it (see [Peer Dependencies](#peer-dependencies-injected)).
 - The second argument is the config override. Whatever you pass is merged on top of the module's defaults (see [mysql.config.js](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-sql-mysql/mysql.config.js)). Missing keys fall back to defaults.
 - The pool is **not** created at loader time. It is created lazily on the first query. This keeps cold-start fast in serverless deployments.
 
@@ -55,6 +55,7 @@ Loader call semantics:
 | `PASSWORD` | `String` | Yes (override) | `''` | MySQL password |
 | `SSL` | `Boolean \| Object` | No | `false` | See [SSL Configuration](#ssl-configuration) |
 | `POOL_MAX` | `Number` | No | `10` | Maximum connections in the pool. See [Connection Pool Tuning](#connection-pool-tuning) |
+| `POOL_MAX_IDLE` | `Number` | No | `9` | Maximum idle connections held in the pool. Must be strictly below `POOL_MAX` or `mysql2` never starts its idle reaper and `POOL_IDLE_TIMEOUT_MS` has no effect |
 | `POOL_QUEUE_LIMIT` | `Number` | No | `0` | Queue depth when the pool is full (`0` = unlimited; the caller waits) |
 | `POOL_IDLE_TIMEOUT_MS` | `Number` | No | `60000` | Close idle connections after this many ms |
 | `KEEP_ALIVE_INITIAL_DELAY_MS` | `Number` | No | `10000` | TCP keep-alive probe delay (helps with NAT / load-balancer timeouts) |
@@ -93,9 +94,9 @@ These come from your project's `Lib` container, not from this module's `package.
 |---|---|
 | `@superloomdev/js-helper-utils` | Type checks, validation, data manipulation |
 | `@superloomdev/js-helper-debug` | Structured logging plus `performanceAuditLog` for per-query timing |
-| `@superloomdev/js-server-helper-instance` | Request lifecycle. Provides `instance` context for performance logging |
+| `@superloomdev/js-server-helper-instance` | Process cleanup registration. The driver registers its pool teardown with `Lib.Instance.addProcessCleanupRoutine` on first pool creation. The deployment's `CLOSE_ON_CLEANUP` config on `helper-instance` controls when teardown runs, not this driver |
 
-The `Lib.Instance` peer is technically optional. The module accepts `instance` as the first argument to all I/O functions for API parity. But every production deployment should pass a real instance.
+The `Lib.Instance` peer is required. The driver registers its pool teardown with `Lib.Instance.addProcessCleanupRoutine` on first pool creation, and registers borrowed clients for request-scoped release via `Lib.Instance.addInstanceCleanupRoutine`. The deployment's `CLOSE_ON_CLEANUP` config lives on `helper-instance`, not on this driver.
 
 ---
 
@@ -131,7 +132,7 @@ Lib.ReaderDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
 });
 ```
 
-Each instance maintains its own pool and lifecycle. Call `close()` on each at process exit. Multiple loader calls **do not** share connections, transactions, or timeouts.
+Each instance maintains its own pool and lifecycle. Each registers its own teardown with `Lib.Instance`. Multiple loader calls **do not** share connections, transactions, or timeouts.
 
 ---
 
@@ -179,6 +180,8 @@ POOL_MAX x app_instance_count <= db_max_connections x 0.8
 The `0.8` leaves headroom for database admin connections, monitoring, and burst handling. Cross this threshold and new connection attempts will fail under load.
 
 **Recommendation:** start at `10`, observe `SHOW PROCESSLIST` in production, raise as needed.
+
+**Idle reaper note:** `POOL_MAX_IDLE` must be strictly below `POOL_MAX`. If it equals or exceeds `POOL_MAX`, `mysql2` never starts its idle reaper and `POOL_IDLE_TIMEOUT_MS` has no effect. The default (`9` below `POOL_MAX` `10`) is correct. If you raise `POOL_MAX`, keep `POOL_MAX_IDLE` one below it. The driver also attaches a `pool.on('error', ...)` listener that logs and swallows idle client errors so they do not crash the process, matching the Postgres driver.
 
 ---
 

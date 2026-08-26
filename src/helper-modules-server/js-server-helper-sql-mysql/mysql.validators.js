@@ -9,7 +9,7 @@
 
 
 // Shared dependencies injected by loader
-let Lib; // eslint-disable-line no-unused-vars
+let Lib;
 let ERRORS; // eslint-disable-line no-unused-vars
 
 
@@ -50,10 +50,21 @@ const Validators = {
 
   @return {void}
   *********************************************************************/
-  validateConfig: function (config) { // eslint-disable-line no-unused-vars
+  validateConfig: function (config) {
 
-    // No config keys to validate yet. Replace with real checks when
-    // the first module-specific config validation is needed.
+    // D1 fix: maxIdle must be strictly below connectionLimit, otherwise
+    // mysql2 never starts its idle reaper and POOL_IDLE_TIMEOUT_MS is dead.
+    if (
+      Lib.Utils.isNumber(config.POOL_MAX_IDLE) &&
+      Lib.Utils.isNumber(config.POOL_MAX) &&
+      config.POOL_MAX_IDLE >= config.POOL_MAX
+    ) {
+      throw new Error(
+        'MySQL: POOL_MAX_IDLE (' + config.POOL_MAX_IDLE +
+        ') must be strictly below POOL_MAX (' + config.POOL_MAX +
+        ') or the idle reaper never starts and POOL_IDLE_TIMEOUT_MS has no effect'
+      );
+    }
 
   }
 

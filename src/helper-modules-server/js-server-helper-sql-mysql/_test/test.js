@@ -9,12 +9,9 @@ const MySQL2Promise = require('mysql2/promise');
 const ERRORS = require('../mysql.errors');
 
 // Load dependencies via test loader - process.env is touched only there.
-const { Lib, Config } = require('./loader')();
+const { Lib, Config, instance, buildLib } = require('./loader')();
 const MySQL = Lib.MySQL;
 const Instance = Lib.Instance;
-
-// Single test instance - represents a "request" for performance timeline.
-const instance = Instance.initialize();
 
 // Admin connection for schema setup/teardown. Not part of the module under test.
 const ADMIN_OPTIONS = {
@@ -69,7 +66,7 @@ after(async function () {
   await admin.query('DROP TABLE IF EXISTS ' + TEST_TABLE);
   await admin.end();
 
-  await MySQL.close();
+  await MySQL.close(instance);
 
 });
 
@@ -358,7 +355,7 @@ describe('getClient / releaseClient', function () {
     const [rows] = await res.client.query('SELECT 1 AS one');
     assert.strictEqual(rows[0].one, 1);
 
-    MySQL.releaseClient(res.client);
+    MySQL.releaseClient(instance, res.client);
 
   });
 
@@ -513,7 +510,8 @@ describe('multiple instances', function () {
       DATABASE: Config.mysql_database,
       USER: Config.mysql_user,
       PASSWORD: Config.mysql_password,
-      POOL_MAX: 2
+      POOL_MAX: 2,
+      POOL_MAX_IDLE: 1
     });
     const B = ModuleFactory(Lib, {
       HOST: Config.mysql_host,
@@ -521,7 +519,8 @@ describe('multiple instances', function () {
       DATABASE: Config.mysql_database,
       USER: Config.mysql_user,
       PASSWORD: Config.mysql_password,
-      POOL_MAX: 3
+      POOL_MAX: 3,
+      POOL_MAX_IDLE: 2
     });
 
     const ra = await A.getValue(instance, 'SELECT 1 AS x');
@@ -531,10 +530,178 @@ describe('multiple instances', function () {
     assert.strictEqual(rb.value, 2);
 
     // Each instance has its own close()
-    await A.close();
-    await B.close();
+    await A.close(instance);
+    await B.close(instance);
 
   });
+
+});
+
+
+// ============================================================================
+// 7. Connection lifecycle - registration, persistent vs serverless, background gate
+// ============================================================================
+
+describe('connection lifecycle', function () {
+
+  it('should register the process cleanup routine once, not per query', async function () {
+
+    const { Lib: LibF, instance: instF } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const MySQLF = LibF.MySQL;
+    const InstanceF = LibF.Instance;
+
+    await MySQLF.getValue(instF, 'SELECT 1 AS x');
+    await MySQLF.getValue(instF, 'SELECT 2 AS x');
+
+    assert.strictEqual(InstanceF.getProcessCleanupRoutineCount(), 1);
+
+    await InstanceF.runProcessCleanup();
+
+  });
+
+
+  it('should hold the pool open on a persistent deployment', async function () {
+
+    const { Lib: LibP, instance: instP } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const MySQLP = LibP.MySQL;
+    const InstanceP = LibP.Instance;
+
+    const res1 = await MySQLP.getValue(instP, 'SELECT 1 AS x');
+    assert.strictEqual(res1.success, true);
+
+    await InstanceP.runInstanceCleanup(instP);
+
+    const res2 = await MySQLP.getValue(instP, 'SELECT 2 AS x');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(res2.value, 2);
+
+    await InstanceP.runProcessCleanup();
+
+  });
+
+
+  it('should close the pool on a serverless deployment and re-open on next query', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const MySQLSL = LibSL.MySQL;
+    const InstanceSL = LibSL.Instance;
+
+    const res1 = await MySQLSL.getValue(instSL, 'SELECT 1 AS x');
+    assert.strictEqual(res1.success, true);
+
+    await InstanceSL.runInstanceCleanup(instSL);
+
+    assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+
+    const res2 = await MySQLSL.getValue(instSL, 'SELECT 2 AS x');
+    assert.strictEqual(res2.success, true);
+    assert.strictEqual(res2.value, 2);
+
+    await InstanceSL.runInstanceCleanup(instSL);
+
+  });
+
+
+  it('should close and re-register across multiple serverless request cycles', async function () {
+
+    const { Lib: LibSL, instance: instSL } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const MySQLSL = LibSL.MySQL;
+    const InstanceSL = LibSL.Instance;
+
+    for (let i = 0; i < 3; i++) {
+      const res = await MySQLSL.getValue(instSL, 'SELECT ? AS x', [i + 1]);
+      assert.strictEqual(res.success, true);
+      assert.strictEqual(res.value, i + 1);
+
+      await InstanceSL.runInstanceCleanup(instSL);
+      assert.strictEqual(InstanceSL.getProcessCleanupRoutineCount(), 0);
+    }
+
+  });
+
+
+  it('should run background routines before process cleanup routines', async function () {
+
+    const { Lib: LibBG, instance: instBG } = buildLib({ CLOSE_ON_CLEANUP: true });
+    const InstanceBG = LibBG.Instance;
+
+    const order = [];
+
+    const signal = InstanceBG.addBackgroundRoutine(instBG);
+    setImmediate(function () {
+      order.push('background');
+      signal();
+    });
+
+    InstanceBG.addProcessCleanupRoutine(instBG, function () {
+      order.push('cleanup');
+    });
+
+    await InstanceBG.runInstanceCleanup(instBG);
+
+    assert.strictEqual(order[0], 'background');
+    assert.strictEqual(order[1], 'cleanup');
+
+  });
+
+
+  it('should register a borrowed client for request-scoped release', async function () {
+
+    const { Lib: LibC, instance: instC } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const MySQLC = LibC.MySQL;
+    const InstanceC = LibC.Instance;
+
+    const beforeCount = InstanceC.getInstanceCleanupRoutineCount(instC);
+
+    const res = await MySQLC.getClient(instC);
+    assert.strictEqual(res.success, true);
+    assert.ok(res.client);
+
+    assert.strictEqual(
+      InstanceC.getInstanceCleanupRoutineCount(instC),
+      beforeCount + 1
+    );
+
+    await InstanceC.runInstanceCleanup(instC);
+
+    assert.strictEqual(
+      InstanceC.getInstanceCleanupRoutineCount(instC),
+      beforeCount
+    );
+
+    await InstanceC.runProcessCleanup();
+
+  });
+
+
+  it('should not throw on double release of a borrowed client', async function () {
+
+    const { Lib: LibD, instance: instD } = buildLib({ CLOSE_ON_CLEANUP: false });
+    const MySQLD = LibD.MySQL;
+    const InstanceD = LibD.Instance;
+
+    const res = await MySQLD.getClient(instD);
+    assert.strictEqual(res.success, true);
+
+    MySQLD.releaseClient(instD, res.client);
+
+    await InstanceD.runInstanceCleanup(instD);
+
+    await InstanceD.runProcessCleanup();
+
+  });
+
+
+  it('should reject POOL_MAX_IDLE >= POOL_MAX at load time (D1 fix)', function () {
+
+    const ModuleFactory = require('helper-sql-mysql');
+
+    assert.throws(function () {
+      ModuleFactory(Lib, { POOL_MAX: 5, POOL_MAX_IDLE: 5 });
+    }, /POOL_MAX_IDLE/);
+
+  });
+
 
 });
 

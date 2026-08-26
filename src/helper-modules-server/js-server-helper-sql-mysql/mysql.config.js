@@ -45,7 +45,16 @@ module.exports = {
   // Serverless functions: lower value (e.g. 30000) helps avoid stale sockets
   // after the runtime freezes. Persistent servers can keep this higher to
   // hold connections warm.
+  // NOTE: this only takes effect when POOL_MAX_IDLE is strictly below POOL_MAX.
+  // mysql2 does not start its idle reaper when maxIdle >= connectionLimit.
   POOL_IDLE_TIMEOUT_MS: 60000,
+
+  // Maximum number of idle connections held in the pool. Must be strictly
+  // below POOL_MAX for the idle reaper to run. When maxIdle >= connectionLimit
+  // (the mysql2 default), idleTimeout has no effect and idle connections are
+  // never evicted. Default is POOL_MAX - 1 to keep the reaper active without
+  // evicting every idle connection.
+  POOL_MAX_IDLE: 9,
 
   // ---- TCP Keep-Alive ----
   // Delay before the first TCP keepalive probe is sent on an idle connection.

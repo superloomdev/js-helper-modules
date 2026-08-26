@@ -29,6 +29,10 @@ Error handling, result reading, and exception expectations are the same in every
 
 - **Works on both serverless and persistent infrastructure.** The same module configures cleanly for serverless deployments (cloud functions, on-demand workers) and persistent ones (containers, virtual machines, orchestrated platforms). Switch deployment shape by changing one config value, not by changing the driver or the calling code.
 
+## Connection Lifecycle
+
+The pool is opened lazily on the first query and shared for the process lifetime. Its teardown is registered with `helper-instance` so the deployment decides when it closes: at `SIGTERM` on a persistent server, or after every request on a serverless runtime. The driver never decides when to close the pool. A borrowed client from `getClient` is registered for request-scoped release, so a caller that forgets `releaseClient` still returns the client when the request ends.
+
 ## Hot-Swappable with Other Backends
 
 This module is part of a family of database helpers that share the same calling shape. Switch by changing the loader line. The rest of your code keeps working.
@@ -61,7 +65,7 @@ This module bundles one runtime npm package:
 
 - **`mysql2`** (sidorares). MySQL client with prepared statements and connection pooling. Used because the MySQL wire protocol is proprietary and the driver encodes auth handshake and prepared statement caching that cannot be reimplemented in-house
 
-It expects two peer modules in the `Lib` container (Utils, Debug). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
+It expects three peer modules in the `Lib` container (Utils, Debug, Instance). For the full dependency breakdown, see [`docs/configuration.md`](docs/configuration.md).
 
 ## Testing Status
 

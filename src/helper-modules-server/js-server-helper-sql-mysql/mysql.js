@@ -33,7 +33,8 @@ module.exports = function loader (shared_libs, config) {
   // Dependencies for this instance
   const Lib = {
     Utils: shared_libs.Utils,
-    Debug: shared_libs.Debug
+    Debug: shared_libs.Debug,
+    Instance: shared_libs.Instance
   };
 
   // Merge overrides over defaults
@@ -462,7 +463,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<void>}
     *********************************************************************/
-    close: async function () {
+    close: async function (instance) { // eslint-disable-line no-unused-vars
 
       // Nothing to close
       if (Lib.Utils.isNullOrUndefined(state.pool)) {
@@ -514,21 +515,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     //   } catch (e) {
     //     await client.rollback();
     //   } finally {
-    //     MySQL.releaseClient(client);   // ALWAYS release or the pool leaks
+    //     MySQL.releaseClient(instance, client);   // ALWAYS release or the pool leaks
     //   }
 
     /********************************************************************
     Check out a dedicated pool connection for manual transaction control.
     Must be paired with releaseClient() or the pool will leak.
 
-    @param {Object} instance - Request instance (kept for API parity with Postgres/SQLite)
+    @param {Object} instance - Request instance
 
     @return {Promise<Object>} - { success, client, error }
     *********************************************************************/
-    getClient: async function (instance) { // eslint-disable-line no-unused-vars
+    getClient: async function (instance) {
 
       // Build pool on first call
-      _MySQL.initIfNot();
+      _MySQL.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -536,6 +537,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         // Pull a connection out of the pool. Caller must release() it later.
         const client = await state.pool.getConnection();
+
+        // Register for request-scoped release so a caller that forgets
+        // releaseClient() still returns the connection when the request ends.
+        Lib.Instance.addInstanceCleanupRoutine(instance, async function () {
+          MySQL.releaseClient(instance, client);
+        });
 
         Lib.Debug.performanceAuditLog('End', 'MySQL getClient', start_ms);
 
@@ -567,15 +574,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     /********************************************************************
     Return a client from getClient() back to the pool. No-op if null.
+    Safe on double release - mysql2 throws if release() is called twice
+    on the same connection, so we wrap it in a try-catch.
 
+    @param {Object} instance - Request instance
     @param {Object} client - Connection from getClient()
 
     @return {void}
     *********************************************************************/
-    releaseClient: function (client) {
+    releaseClient: function (instance, client) {
 
       if (client && Lib.Utils.isFunction(client.release)) {
-        client.release();
+        try {
+          client.release();
+        } catch {
+          // Already released - mysql2 throws on double release. Swallow.
+        }
       }
 
     }
@@ -618,7 +632,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {void}
     *********************************************************************/
-    initIfNot: function () {
+    initIfNot: function (instance) {
 
       // Already built
       if (!Lib.Utils.isNullOrUndefined(state.pool)) {
@@ -639,6 +653,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         password: CONFIG.PASSWORD,
         waitForConnections: true,
         connectionLimit: CONFIG.POOL_MAX,
+        maxIdle: CONFIG.POOL_MAX_IDLE,
         queueLimit: CONFIG.POOL_QUEUE_LIMIT,
         enableKeepAlive: true,
         keepAliveInitialDelay: CONFIG.KEEP_ALIVE_INITIAL_DELAY_MS,
@@ -659,6 +674,19 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Pool is lazy - TCP connections open on the first real query
       state.pool = MySQLDriverPromise.createPool(options);
+
+      // This pool outlives the request that opened it. Instance decides
+      // when to run this: at shutdown on a persistent deployment, after
+      // every request on a runtime that must not be left holding handles.
+      Lib.Instance.addProcessCleanupRoutine(instance, MySQL.close);
+
+      // Swallow idle client errors so the whole process does not die.
+      // Mirrors the Postgres driver's listener - an idle connection that
+      // errors (server-side timeout, network blip) is logged and discarded
+      // rather than surfacing as an unhandled emitter error.
+      state.pool.on('error', function (err) {
+        Lib.Debug.debug('MySQL idle client error', { error: err.message });
+      });
 
       Lib.Debug.performanceAuditLog('End', 'MySQL Pool', start_ms);
       Lib.Debug.info('MySQL Pool Initialized', {
@@ -722,7 +750,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     query: async function (instance, sql, params) {
 
       // Build pool on first call
-      _MySQL.initIfNot();
+      _MySQL.initIfNot(instance);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
 
@@ -820,7 +848,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     transaction: async function (instance, statements) {
 
       // Build pool on first call
-      _MySQL.initIfNot();
+      _MySQL.initIfNot(instance);
 
       // Holds the checked-out connection so both success and error paths can release it
       let conn = null;
