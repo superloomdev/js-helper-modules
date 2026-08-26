@@ -1,13 +1,12 @@
 // Tests for js-helper-utils
 // Covers all exported functions with automated assertions
 // Based on handwritten test cases + additional edge cases
-'use strict';
-
-const assert = require('node:assert/strict');
-const { describe, it } = require('node:test');
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
 // Load dependencies via loader (DI pattern)
-const loader = require('./loader');
+import loader from './loader.js';
+import utilsLoader from 'helper-utils';
 const { Lib } = loader();
 const Utils = Lib.Utils;
 
@@ -1531,19 +1530,19 @@ describe('getUnixTimeInMilliSeconds', function () {
 describe('loader', function () {
 
   it('should return Utils object when called with (Lib, {})', function () {
-    const result = require('helper-utils')({}, {});
+    const result = utilsLoader({}, {});
     assert.strictEqual(typeof result, 'object');
     assert.strictEqual(typeof result.isNull, 'function');
   });
 
   it('should return the same singleton reference on repeated calls', function () {
-    const first = require('helper-utils')({}, {});
-    const second = require('helper-utils')({}, {});
+    const first = utilsLoader({}, {});
+    const second = utilsLoader({}, {});
     assert.strictEqual(first, second);
   });
 
   it('should return the same reference as Lib.Utils from loader', function () {
-    const direct = require('helper-utils')({}, {});
+    const direct = utilsLoader({}, {});
     assert.strictEqual(direct, Utils);
   });
 

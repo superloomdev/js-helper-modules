@@ -4,17 +4,25 @@
 // Compatibility: Node.js 24+.
 //
 // Singleton: Validators initialized once by the loader. Public and private
-// objects are declared at module scope - Node.js require cache guarantees
-// the same Utils object is returned on every subsequent require.
+// objects are declared at module scope - ESM module records guarantee
+// the same Utils object is returned on every subsequent import.
 // No factory needed.
-'use strict';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 
 // Merged configuration (set once by loader from defaults + caller overrides)
 let CONFIG;
 
-// Error catalog (loaded at require time, never reassigned)
-const ERRORS = require('./utils.errors');
+// Error catalog (loaded at import time, never reassigned)
+import ERRORS from './utils.errors.js';
+
+// Default config (loaded at import time, never reassigned)
+import CONFIG_DEFAULTS from './utils.config.js';
+
+// Validators factory (loaded at import time, called once by loader)
+import createValidators from './utils.validators.js';
 
 // Validators module (singleton, initialized once by loader)
 let Validators;
@@ -24,7 +32,7 @@ let Validators;
 
 /********************************************************************
 Singleton loader. Initializes Validators, validates config, and returns
-the module-scope Utils object directly. Node.js require cache guarantees
+the module-scope Utils object directly. ESM module records guarantee
 a single instance across the process.
 
 @param {Object} shared_libs - Lib container (unused - Utils is the foundation)
@@ -32,17 +40,17 @@ a single instance across the process.
 
 @return {Object} - Public Utils interface
 *********************************************************************/
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
 
   // Merge overrides over defaults
   CONFIG = Object.assign(
     {},
-    require('./utils.config'),
+    CONFIG_DEFAULTS,
     config || {}
   );
 
   // Validators singleton - ERRORS injected by the main module loader
-  Validators = require('./utils.validators')(shared_libs, ERRORS);
+  Validators = createValidators(shared_libs, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);

@@ -2,7 +2,13 @@
   "name": "@superloomdev/js-helper-utils",
   "description": "Utility functions for type checks, validation, sanitization, and data manipulation. Zero runtime dependencies. Part of Superloom.",
   "version": "1.0.0",
-  "main": "utils.js",
+  "type": "module",
+  "exports": {
+    ".": "./utils.js",
+    "./utils.errors.js": "./utils.errors.js",
+    "./utils.config.js": "./utils.config.js",
+    "./utils.validators.js": "./utils.validators.js"
+  },
   "private": false,
   "license": "MIT",
   "author": {
