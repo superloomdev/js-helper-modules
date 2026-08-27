@@ -44,5 +44,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js _test/test-jwt.js"
-  }
+  },
+  "main": "./auth.js"
 }

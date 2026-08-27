@@ -41,5 +41,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  }
+  },
+  "main": "./s3-url-signer.js"
 }

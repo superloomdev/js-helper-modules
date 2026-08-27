@@ -38,5 +38,6 @@
     "lint:fix": "eslint . --fix",
     "generate": "node scripts/generate-country-data.js",
     "test": "node --test _test/test.js"
-  }
+  },
+  "main": "./adapter.js"
 }

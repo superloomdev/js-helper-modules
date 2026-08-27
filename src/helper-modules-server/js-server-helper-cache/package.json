@@ -34,5 +34,6 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
-  }
+  },
+  "main": "./cache.js"
 }

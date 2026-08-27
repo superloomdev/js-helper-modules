@@ -36,5 +36,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "cd _test && npm install && npm test"
-  }
+  },
+  "main": "./store.js"
 }

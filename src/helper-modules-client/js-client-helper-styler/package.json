@@ -38,5 +38,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  }
+  },
+  "main": "./styler.js"
 }
