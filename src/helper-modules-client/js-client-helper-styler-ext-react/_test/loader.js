@@ -5,24 +5,14 @@ import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import stylerLoader from 'helper-styler';
 import stylerExtLoader from 'helper-styler-ext';
-import { createRequire } from 'node:module';
+import utilsLoader from 'helper-utils';
+import debugLoader from 'helper-debug';
 
-const require = createRequire(import.meta.url);
-
-// Peer dependencies (optional but recommended)
-let Utils;
-let Debug;
-try {
-  Utils = require('helper-utils')();
-} catch (e) {
-  Utils = null;
-}
-
-try {
-  Debug = require('helper-debug')();
-} catch (e) {
-  Debug = null;
-}
+// Peer dependencies (declared as peer deps; absence is a setup error
+// that should fail loudly, not be silently swallowed).
+// Utils is the foundation lib; Debug depends on Utils via shared_libs.
+const Utils = utilsLoader();
+const Debug = debugLoader({ Utils });
 
 // Core styler engine (published version)
 const Styler = stylerLoader({ Utils, Debug });

@@ -64,7 +64,7 @@ const Validators = {
     ) {
       throw new Error(
         '[helper-contact-phone] CONFIG.Adapter must be a ready-to-use adapter object. ' +
-        'Create it first: const Adapter = require("helper-contact-phone-adapter-basic")(Lib, {})'
+        'Create it first: import contactPhoneAdapterBasic from "helper-contact-phone-adapter-basic"; const Adapter = contactPhoneAdapterBasic(Lib, {})'
       );
     }
 

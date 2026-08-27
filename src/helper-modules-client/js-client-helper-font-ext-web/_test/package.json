@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "helper-font-ext-web": "file:../",
-    "helper-font": "file:../../js-client-helper-font",
+    "helper-font": "npm:@superloomdev/js-client-helper-font@^1.0.0",
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0"
   }

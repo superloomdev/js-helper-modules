@@ -8,14 +8,11 @@
 //
 // Re-run: npm run generate
 // Output: data/extended.address-data.json
-'use strict';
+import fs from 'node:fs';
+import path from 'node:path';
 
-
-const fs = require('fs');
-const path = require('path');
-
-const pcc = require('postal-code-checker');
-const metadata = require('libphonenumber-js/min/metadata');
+import * as pcc from 'postal-code-checker';
+import metadata from 'libphonenumber-js/min/metadata';
 
 // Get country list from libphonenumber-js
 const countries = Object.keys(metadata.countries).map(function (code) {
@@ -75,7 +72,7 @@ countries.forEach(function (cc) {
 });
 
 // Generate output - pure JSON, no comments or module.exports wrapper
-const outputPath = path.join(__dirname, '..', 'data', 'extended.address-data.json');
+const outputPath = path.join(import.meta.dirname, '..', 'data', 'extended.address-data.json');
 fs.writeFileSync(outputPath, JSON.stringify(data, null, 2) + '\n');
 
 // Stats

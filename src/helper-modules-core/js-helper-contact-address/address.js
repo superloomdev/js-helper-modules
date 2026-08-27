@@ -13,8 +13,10 @@
 // Metadata: free-form object for extensibility.
 //
 // Construction (in the composition root):
-//   const Adapter = require('helper-contact-address-adapter-basic')(Lib, {});
-//   Lib.ContactAddress = require('helper-contact-address')(Lib, { Adapter });
+//   import contactAddressAdapterBasic from 'helper-contact-address-adapter-basic';
+//   const Adapter = contactAddressAdapterBasic(Lib, {});
+//   import contactAddress from 'helper-contact-address';
+//   Lib.ContactAddress = contactAddress(Lib, { Adapter });
 //
 // Compatibility: Node.js 24+ and any modern browser.
 import CONFIG_DEFAULTS from './address.config.js';

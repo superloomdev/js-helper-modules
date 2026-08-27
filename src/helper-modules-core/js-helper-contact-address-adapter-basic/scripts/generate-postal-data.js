@@ -7,14 +7,11 @@
 //
 // Re-run: npm run generate
 // Output: data/basic.postal-data.json
-'use strict';
-
-
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 // Get country list from libphonenumber-js metadata
-const metadata = require('libphonenumber-js/min/metadata');
+import metadata from 'libphonenumber-js/min/metadata';
 const countries = Object.keys(metadata.countries).map(function (code) {
   return code.toLowerCase();
 });
@@ -123,7 +120,7 @@ countries.forEach(function (cc) {
 });
 
 // Generate output
-const outputPath = path.join(__dirname, '..', 'data', 'basic.postal-data.json');
+const outputPath = path.join(import.meta.dirname, '..', 'data', 'basic.postal-data.json');
 fs.writeFileSync(outputPath, JSON.stringify(data, null, 2) + '\n');
 
 console.log('Generated ' + outputPath);

@@ -11,8 +11,10 @@
 // identical regardless of validation depth.
 //
 // Construction (in the composition root):
-//   const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
-//   Lib.ContactPhone = require('helper-contact-phone')(Lib, { Adapter });
+//   import contactPhoneAdapterBasic from 'helper-contact-phone-adapter-basic';
+//   const Adapter = contactPhoneAdapterBasic(Lib, {});
+//   import contactPhone from 'helper-contact-phone';
+//   Lib.ContactPhone = contactPhone(Lib, { Adapter });
 //
 // Compatibility: Node.js 24+ and any modern browser.
 //

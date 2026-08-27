@@ -7,15 +7,13 @@
 //
 // Re-run: npm run generate
 // Output: data/basic.country-data.json
-'use strict';
-
-
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 // Access the metadata from libphonenumber-js
 // The min metadata is sufficient for country list, calling codes, and lengths
-const metadata = require('libphonenumber-js/min/metadata');
+import metadata from 'libphonenumber-js/min/metadata';
+import { Metadata } from 'libphonenumber-js';
 
 
 // Extract country data from the metadata
@@ -106,8 +104,6 @@ Object.keys(metadataCountries).forEach(function (isoCode) {
   // But this varies. Let's look for arrays of numbers in the entry.
 
   // Actually, the most reliable way is to use the Metadata class
-  const { Metadata } = require('libphonenumber-js');
-
   const meta = new Metadata(metadata);
   meta.country(isoCode);
 
@@ -166,7 +162,7 @@ Object.keys(metadataCountries).forEach(function (isoCode) {
 
 
 // Generate the output file (pure JSON, no code wrapper)
-const outputPath = path.join(__dirname, '..', 'data', 'basic.country-data.json');
+const outputPath = path.join(import.meta.dirname, '..', 'data', 'basic.country-data.json');
 fs.writeFileSync(outputPath, JSON.stringify(countries, null, 2) + '\n');
 
 // Report

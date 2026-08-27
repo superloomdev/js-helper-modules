@@ -63,7 +63,7 @@ const Validators = {
     ) {
       throw new Error(
         '[helper-http-gateway] CONFIG.Adapter must be a ready-to-use adapter object. ' +
-        'Create it first: const Adapter = require("helper-http-gateway-adapter-express")(adapter_config)'
+        'Create it first: import httpGatewayAdapterExpress from "helper-http-gateway-adapter-express"; const Adapter = httpGatewayAdapterExpress(adapter_config)'
       );
     }
 

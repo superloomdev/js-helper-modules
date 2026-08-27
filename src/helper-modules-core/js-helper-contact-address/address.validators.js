@@ -32,7 +32,7 @@ const Validators = {
     ) {
       throw new Error(
         '[helper-contact-address] CONFIG.Adapter must be a ready-to-use adapter object. ' +
-        'Create it first: const Adapter = require("helper-contact-address-adapter-basic")(Lib, {})'
+        'Create it first: import contactAddressAdapterBasic from "helper-contact-address-adapter-basic"; const Adapter = contactAddressAdapterBasic(Lib, {})'
       );
     }
 

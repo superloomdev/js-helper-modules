@@ -15,9 +15,10 @@
 //
 // Storage backends are provided by standalone adapter packages. The caller
 // passes the chosen ready-to-use store object directly as CONFIG.Store - no
-// string dispatch inside this module. Configure and require only the adapter
+// string dispatch inside this module. Configure and import only the adapter
 // you need:
-//   const Store = require('helper-cache-store-valkey')(Lib, config)
+//   import cacheStoreValkey from 'helper-cache-store-valkey';
+//   const Store = cacheStoreValkey(Lib, config);
 //
 // Compatibility: Node.js 24+
 import CONFIG_DEFAULTS from './cache.config.js';

@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
-    "helper-contact-email": "file:../../js-helper-contact-email",
+    "helper-contact-email": "npm:@superloomdev/js-helper-contact-email@^1.0.0",
     "helper-contact-email-adapter-extended": "file:../",
-    "helper-contact-email-adapter-basic": "file:../../js-helper-contact-email-adapter-basic"
+    "helper-contact-email-adapter-basic": "npm:@superloomdev/js-helper-contact-email-adapter-basic@^1.0.0"
   },
   "scripts": {
     "test": "node --test test.js"

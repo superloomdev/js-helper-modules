@@ -68,7 +68,7 @@ const Validators = {
       Lib.Utils.isNullOrUndefined(CONFIG.Store) ||
       !Lib.Utils.isObject(CONFIG.Store)
     ) {
-      throw new Error('[helper-auth] CONFIG.Store must be a ready-to-use store object from an adapter (e.g. require("helper-auth-store-sqlite")({...}))');
+      throw new Error('[helper-auth] CONFIG.Store must be a ready-to-use store object from an adapter (e.g. import authStoreSqlite from "helper-auth-store-sqlite"; const Store = authStoreSqlite({...}))');
     }
 
     // ACTOR_TYPE is required and must be a non-empty string

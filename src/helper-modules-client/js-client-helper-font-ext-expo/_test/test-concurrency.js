@@ -5,7 +5,7 @@
 // Tests use ONLY public API exports (no direct private function access).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import ExpoFontStub from 'expo-font';
+import * as ExpoFontStub from 'expo-font';
 import fontExtExpoLoader from 'helper-font-ext-expo';
 
 import {

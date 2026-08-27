@@ -3,7 +3,7 @@
 // Class I standalone module. Wraps the React Native Platform, Dimensions,
 // AppState, NetInfo, and SafeArea APIs behind a unified device interface.
 // All platform APIs are injected via shared_libs so the module is testable
-// in pure Node with stubs. No direct require('react-native').
+// in pure Node with stubs. No direct import from 'react-native'.
 //
 // Provides: getPlatform, getViewport, onViewportChange, getNetworkState,
 //           onAppStateChange, getSafeAreaInsets.

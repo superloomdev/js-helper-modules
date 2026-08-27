@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --test test.js test-concurrency.js"
+    "test": "node --preserve-symlinks --test test.js test-concurrency.js"
   },
   "dependencies": {
     "helper-font-ext-expo": "file:../",

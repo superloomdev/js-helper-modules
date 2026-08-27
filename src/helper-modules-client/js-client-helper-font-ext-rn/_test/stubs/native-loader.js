@@ -1,13 +1,26 @@
 // Stub for @vitrion/react-native-load-fonts in Node tests.
 // Exposes loadFontFromFile(name, filePath) matching the real API.
+// ESM with named exports — consumed via `import * as NativeFonts from '@vitrion/react-native-load-fonts'`.
 
 const loadedFonts = {};
 
-function setShouldFail (shouldFail) {
+export function loadFontFromFile (name, filePath) {
+
+  if (loadedFonts._shouldFail) {
+    return Promise.reject(new Error('stub: font load failed for ' + name));
+  }
+
+  loadedFonts[name] = filePath;
+  return Promise.resolve(name);
+
+}
+
+// Test helpers
+export function _setShouldFail (shouldFail) {
   loadedFonts._shouldFail = shouldFail;
 }
 
-function getLoadedFonts () {
+export function _getLoadedFonts () {
   const copy = {};
   const keys = Object.keys(loadedFonts);
   for (let i = 0; i < keys.length; i++) {
@@ -18,27 +31,9 @@ function getLoadedFonts () {
   return copy;
 }
 
-function clearLoadedFonts () {
+export function _clearLoadedFonts () {
   const keys = Object.keys(loadedFonts);
   for (let i = 0; i < keys.length; i++) {
     delete loadedFonts[keys[i]];
   }
 }
-
-module.exports = {
-  loadFontFromFile: function (name, filePath) {
-
-    if (loadedFonts._shouldFail) {
-      return Promise.reject(new Error('stub: font load failed for ' + name));
-    }
-
-    loadedFonts[name] = filePath;
-    return Promise.resolve(name);
-
-  },
-
-  // Test helpers
-  _setShouldFail: setShouldFail,
-  _getLoadedFonts: getLoadedFonts,
-  _clearLoadedFonts: clearLoadedFonts
-};

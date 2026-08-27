@@ -14,16 +14,10 @@
 //
 // Factory pattern: each loader call returns an independent instance with
 // its own loaded state.
-import { createRequire } from 'node:module';
+import * as NativeFonts from '@vitrion/react-native-load-fonts';
 import CONFIG_DEFAULTS from './extension.config.js';
 import ERRORS from './extension.errors.js';
 import createValidators from './extension.validators.js';
-const require = createRequire(import.meta.url);
-
-
-// Direct dependency — the native font loader. Required at module scope.
-// In tests, _test/package.json aliases this to a stub.
-const NativeFonts = require('@vitrion/react-native-load-fonts');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////

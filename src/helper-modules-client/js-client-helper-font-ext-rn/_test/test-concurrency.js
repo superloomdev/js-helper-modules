@@ -5,7 +5,7 @@
 // Tests use ONLY public API exports (no direct private function access).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import NativeLoaderStub from '@vitrion/react-native-load-fonts';
+import * as NativeLoaderStub from '@vitrion/react-native-load-fonts';
 import fontExtRnLoader from 'helper-font-ext-rn';
 
 import {

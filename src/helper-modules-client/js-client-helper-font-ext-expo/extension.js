@@ -14,16 +14,10 @@
 //
 // Factory pattern: each loader call returns an independent instance with
 // its own loaded state.
-import { createRequire } from 'node:module';
+import * as ExpoFont from 'expo-font';
 import CONFIG_DEFAULTS from './extension.config.js';
 import ERRORS from './extension.errors.js';
 import createValidators from './extension.validators.js';
-const require = createRequire(import.meta.url);
-
-
-// Direct dependency — expo-font. Required at module scope.
-// In tests, _test/package.json aliases this to a stub.
-const ExpoFont = require('expo-font');
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////

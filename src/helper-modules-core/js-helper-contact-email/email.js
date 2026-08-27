@@ -11,8 +11,10 @@
 // identical regardless of validation depth.
 //
 // Construction (in the composition root):
-//   const Adapter = require('helper-contact-email-adapter-basic')(Lib, {});
-//   Lib.ContactEmail = require('helper-contact-email')(Lib, { Adapter });
+//   import contactEmailAdapterBasic from 'helper-contact-email-adapter-basic';
+//   const Adapter = contactEmailAdapterBasic(Lib, {});
+//   import contactEmail from 'helper-contact-email';
+//   Lib.ContactEmail = contactEmail(Lib, { Adapter });
 //
 // Compatibility: Node.js 24+ and any modern browser.
 //

@@ -11,8 +11,10 @@
 //
 // Runtime adapters are provided by standalone adapter packages. The caller
 // passes the chosen ready-to-use adapter object as config.Adapter:
-//   Adapter: require('helper-http-gateway-adapter-aws-apigateway')(Lib, {})
-//   Adapter: require('helper-http-gateway-adapter-express')(Lib, {})
+//   import httpGatewayAdapterAwsApigateway from 'helper-http-gateway-adapter-aws-apigateway';
+//   Adapter: httpGatewayAdapterAwsApigateway(Lib, {})
+//   import httpGatewayAdapterExpress from 'helper-http-gateway-adapter-express';
+//   Adapter: httpGatewayAdapterExpress(Lib, {})
 //
 // Adapter contract (3 methods every adapter must implement):
 //   extractRequest(raw_request, raw_context, response_callback)

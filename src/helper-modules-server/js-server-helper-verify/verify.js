@@ -7,12 +7,17 @@
 //
 // Storage backends are provided by standalone adapter packages. The caller
 // passes the chosen ready-to-use store object directly as CONFIG.Store - no string
-// dispatch inside this module. Configure and require only the adapter you need:
-//   const Store = require('helper-verify-store-sqlite')(config)
-//   const Store = require('helper-verify-store-postgres')(config)
-//   const Store = require('helper-verify-store-mysql')(config)
-//   const Store = require('helper-verify-store-mongodb')(config)
-//   const Store = require('helper-verify-store-dynamodb')(config)
+// dispatch inside this module. Configure and import only the adapter you need:
+//   import verifyStoreSqlite from 'helper-verify-store-sqlite';
+//   const Store = verifyStoreSqlite(config);
+//   import verifyStorePostgres from 'helper-verify-store-postgres';
+//   const Store = verifyStorePostgres(config);
+//   import verifyStoreMysql from 'helper-verify-store-mysql';
+//   const Store = verifyStoreMysql(config);
+//   import verifyStoreMongodb from 'helper-verify-store-mongodb';
+//   const Store = verifyStoreMongodb(config);
+//   import verifyStoreDynamodb from 'helper-verify-store-dynamodb';
+//   const Store = verifyStoreDynamodb(config);
 //
 // Compatibility: Node.js 24+
 
