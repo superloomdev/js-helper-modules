@@ -1,6 +1,6 @@
 # helper-logger
 
-[![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml)
+[![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js 24+](https://img.shields.io/badge/Node.js-24%2B-brightgreen.svg)](https://nodejs.org)
 
@@ -83,7 +83,7 @@ It expects four peer modules in the `Lib` container (Utils, Debug, Crypto, Insta
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 The logger module's own tests use the in-process memory fixture (`_test/memory-store.js`) which implements the full five-method store contract (`setupNewStore`, `addLog`, `getLogsByEntity`, `getLogsByActor`, `cleanupExpiredLogs`). There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-logger-store-*`) and run the shared store-contract suite against real backends.
 

@@ -5,7 +5,9 @@ This adapter implements the 9-method store contract consumed by `helper-cache` (
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-mongodb')(Lib, {
+import cacheStoreMongodb from '@superloomdev/js-server-helper-cache-store-mongodb';
+
+const Store = cacheStoreMongodb(Lib, {
   COLLECTION_NAME: 'my_cache_collection'
 });
 ```

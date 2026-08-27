@@ -6,7 +6,9 @@
 ## Loader
 
 ```javascript
-const Idle = require('@superloomdev/js-react-helper-idle')({
+import idle from '@superloomdev/js-react-helper-idle';
+
+const Idle = idle({
   React: React,
   Utils: Utils,
   Debug: Debug

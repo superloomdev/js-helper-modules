@@ -12,7 +12,9 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Debug = require('helper-debug')(Lib, { /* config overrides */ });
+import debug from 'helper-debug';
+
+Lib.Debug = debug(Lib, { /* config overrides */ });
 ```
 
 `shared_libs` is accepted for interface uniformity but unused - Debug has no external lib dependencies. Config overrides are merged over defaults to create an independent instance.

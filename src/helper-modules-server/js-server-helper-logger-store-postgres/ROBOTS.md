@@ -7,11 +7,14 @@ Requires a running PostgreSQL instance. Uses `helper-sql-postgres` (pooled `pg` 
 ## Construction
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, {
+import loggerStorePostgres from '@superloomdev/js-server-helper-logger-store-postgres';
+import logger from '@superloomdev/js-server-helper-logger';
+
+const Store = loggerStorePostgres(Lib, {
   TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+Lib.Logger = logger(Lib, {
   Store: Store
 });
 ```

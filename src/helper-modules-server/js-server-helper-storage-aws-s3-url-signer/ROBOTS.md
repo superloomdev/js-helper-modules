@@ -22,7 +22,9 @@ Server helper. Service-dependent (needs Docker/MinIO for emulated, AWS for integ
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.S3UrlSigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, { /* config overrides */ });
+import storageAwsS3UrlSigner from '@superloomdev/js-server-helper-storage-aws-s3-url-signer';
+
+Lib.S3UrlSigner = storageAwsS3UrlSigner(Lib, { /* config overrides */ });
 ```
 
 Returns an independent S3 URL signer interface with its own `Lib`, `CONFIG`, and S3 client instance.

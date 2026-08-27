@@ -21,8 +21,10 @@ Server helper. Service-dependent (needs Docker for emulated, real MySQL-compatib
 ## Loader Pattern (Multi-DB Capable)
 
 ```javascript
-Lib.PrimaryDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, { HOST: ..., DATABASE: ... });
-Lib.ReaderDB  = require('@superloomdev/js-server-helper-sql-mysql')(Lib, { HOST: ..., DATABASE: ... });
+import sqlMysql from '@superloomdev/js-server-helper-sql-mysql';
+
+Lib.PrimaryDB = sqlMysql(Lib, { HOST: ..., DATABASE: ... });
+Lib.ReaderDB  = sqlMysql(Lib, { HOST: ..., DATABASE: ... });
 ```
 
 Each loader call returns an independent public interface with its own pool - no shared singleton state.
@@ -116,7 +118,7 @@ A borrowed client from `getClient` is registered for request-scoped release via 
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own pool. No module-level singletons.
-- **Lazy adapter load:** `mysql2` and `mysql2/promise` are `require()`-d on first use via `loadAdapter()`. The adapter modules are cached at module scope and shared across every instance because they are stateless.
+- **Lazy adapter load:** `mysql2` and `mysql2/promise` are loaded on first use via `loadAdapter()` using `createRequire(import.meta.url)` - the sanctioned pattern for lazy CJS loading in the server tier. The adapter modules are cached at module scope and shared across every instance because they are stateless.
 - **Lazy pool init:** pool is created on the first query, not at loader time. Friendly to serverless functions.
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholders:** `?` for values, `??` for identifiers. MySQL native, no translation needed.

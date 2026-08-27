@@ -3,7 +3,9 @@
 ## Loader
 
 ```javascript
-const ExpoFontAdapter = require('@superloomdev/js-client-helper-font-ext-expo')(shared_libs, config);
+import fontExtExpo from '@superloomdev/js-client-helper-font-ext-expo';
+
+const ExpoFontAdapter = fontExtExpo(shared_libs, config);
 ```
 
 ### Required Injections

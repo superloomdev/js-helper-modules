@@ -5,7 +5,9 @@ This adapter implements the 5-method store contract consumed by `helper-logger`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-dynamodb')(Lib, {
+import loggerStoreDynamodb from '@superloomdev/js-server-helper-logger-store-dynamodb';
+
+const store = loggerStoreDynamodb(Lib, {
   TABLE_NAME: 'action_log'
 });
 ```

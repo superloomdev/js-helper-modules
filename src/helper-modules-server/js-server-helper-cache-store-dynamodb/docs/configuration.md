@@ -3,11 +3,14 @@
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-dynamodb')(Lib, {
+import cacheStoreDynamodb from '@superloomdev/js-server-helper-cache-store-dynamodb';
+import cache from '@superloomdev/js-server-helper-cache';
+
+const Store = cacheStoreDynamodb(Lib, {
   TABLE_NAME: 'my_cache_table'
 });
 
-Lib.Cache = require('@superloomdev/js-server-helper-cache')(Lib, {
+Lib.Cache = cache(Lib, {
   Store: Store
 });
 ```

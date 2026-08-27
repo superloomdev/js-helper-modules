@@ -21,7 +21,9 @@ Server helper. Class C (driver wrapper, control-plane). Service-dependent (needs
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.MongoDBAdmin = require('@superloomdev/js-server-helper-nosql-mongodb-admin')(Lib, { /* config overrides */ });
+import nosqlMongodbAdmin from '@superloomdev/js-server-helper-nosql-mongodb-admin';
+
+Lib.MongoDBAdmin = nosqlMongodbAdmin(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent MongoDB admin interface with its own `Lib`, `CONFIG`, and MongoClient instance. The admin connection string must authenticate as a user with `dbAdmin` or `root` role.

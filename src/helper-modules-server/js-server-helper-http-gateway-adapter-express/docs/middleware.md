@@ -43,7 +43,7 @@ Without this, `application/x-www-form-urlencoded` requests produce empty `body`.
 ### cookie-parser
 
 ```javascript
-const cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
 app.use(cookieParser());
 ```
 
@@ -68,7 +68,7 @@ The adapter will still expose `req.body` as a string in `instance.http_request.b
 The adapter does **not** support `multipart/form-data`. To accept file uploads, install application-level middleware (e.g. `multer`) that populates `req.body` and `req.files` before the route handler:
 
 ```javascript
-const multer = require('multer');
+import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 
 app.post('/upload', upload.single('file'), function (req, res) {
@@ -102,16 +102,18 @@ The adapter test suite explicitly covers each of these compatibility points agai
 A minimal, idiomatic Express + gateway setup:
 
 ```javascript
-const express        = require('express');
-const cookieParser   = require('cookie-parser');
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')({});
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: ExpressAdapter });
+const ExpressAdapter = httpGatewayAdapterExpress({});
+const Gateway = httpGateway(Lib, { Adapter: ExpressAdapter });
 
 app.post('/api/users/:user_id', function (req, res) {
   const instance = Lib.Instance.initialize();

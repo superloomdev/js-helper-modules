@@ -7,7 +7,9 @@ Requires a running MongoDB instance. Uses `helper-nosql-mongodb` (MongoDB Node.j
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-mongodb')(Lib, {
+import cacheStoreMongodb from '@superloomdev/js-server-helper-cache-store-mongodb';
+
+const Store = cacheStoreMongodb(Lib, {
   COLLECTION_NAME: 'my_cache_collection'
 });
 ```

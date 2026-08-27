@@ -17,11 +17,14 @@ Loader pattern, every configuration key, the environment-variable boundary, peer
 Every Superloom server-side module is a factory function that takes the `Lib` container and a `CONFIG` object and returns the public interface. The cache module follows that shape exactly.
 
 ```js
-const Store = require('helper-cache-store-valkey')(Lib, {
+import cacheStoreValkey from 'helper-cache-store-valkey';
+import cache from 'helper-cache';
+
+const Store = cacheStoreValkey(Lib, {
   KEY_PREFIX: 'cache:'
 });
 
-Lib.Cache = require('helper-cache')(Lib, {
+Lib.Cache = cache(Lib, {
   Store: Store
 });
 ```

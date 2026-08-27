@@ -3,11 +3,14 @@
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, {
+import verifyStoreMongodb from '@superloomdev/js-server-helper-verify-store-mongodb';
+import verify from '@superloomdev/js-server-helper-verify';
+
+const Store = verifyStoreMongodb(Lib, {
   COLLECTION_NAME: 'verification_codes'
 });
 
-Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
+Lib.Verify = verify(Lib, {
   Store: Store
 });
 ```

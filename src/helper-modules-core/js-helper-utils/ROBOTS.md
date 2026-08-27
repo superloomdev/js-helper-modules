@@ -19,7 +19,9 @@ None.
 ## Loader Pattern
 
 ```javascript
-Lib.Utils = require('helper-utils')(Lib, {});
+import utils from 'helper-utils';
+
+Lib.Utils = utils(Lib, {});
 ```
 
 `shared_libs` accepted for interface uniformity but unused - Utils has no external lib dependencies.
@@ -94,7 +96,7 @@ roundWithCascading(num, digits_after_decimal, safety) → Number | async:no
 ### Errors & Misc
 error(err_obj, context) → Error | async:no - normalize error
 nullFunc() → undefined | async:no - no-op
-moduleAvailable(module_name) → Boolean | async:no - safe require check
+moduleAvailable(module_name) → Boolean | async:no - safe module availability check
 
 ### URL/Path Parsing
 disjoinUrl(url) → Object | async:no

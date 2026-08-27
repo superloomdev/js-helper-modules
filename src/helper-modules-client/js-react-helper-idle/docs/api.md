@@ -6,7 +6,9 @@
 ## Loader
 
 ```javascript
-const Idle = require('@superloomdev/js-react-helper-idle')({
+import idle from '@superloomdev/js-react-helper-idle';
+
+const Idle = idle({
   React: React,           // required - React 18+ (useState, useEffect)
   Utils: Utils,           // required - helper-utils instance
   Debug: Debug            // required - helper-debug instance

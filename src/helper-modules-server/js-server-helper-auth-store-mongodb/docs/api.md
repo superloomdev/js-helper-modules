@@ -20,7 +20,9 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
+import authStoreMongodb from '@superloomdev/js-server-helper-auth-store-mongodb';
+
+const store = authStoreMongodb(Lib, {
   COLLECTION_NAME: 'sessions_user'
 });
 ```

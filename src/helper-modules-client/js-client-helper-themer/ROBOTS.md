@@ -7,7 +7,9 @@
 ## Load
 
 ```javascript
-Lib.Themer = require('helper-themer')(Lib, CONFIG);
+import themer from 'helper-themer';
+
+Lib.Themer = themer(Lib, CONFIG);
 ```
 
 Factory. Each call returns an independent instance with its own cache. `Lib` must carry `Utils` and `Debug`.

@@ -14,7 +14,7 @@ Every exported preset with its rule set and globals. For dependency and setup no
 
 ### `base`
 
-The Node 24 CommonJS baseline. Every Superloom module lints against this unless it needs browser globals or ESM/JSX support.
+The Node 24 ESM baseline. Every Superloom module lints against this unless it needs browser globals or JSX support.
 
 **Shape:** Array of 3 config objects.
 
@@ -22,7 +22,7 @@ The Node 24 CommonJS baseline. Every Superloom module lints against this unless 
 |---|---|
 | 0 | Ignores: `_test/**`, `node_modules/**`, `.git/**`, `coverage/**` |
 | 1 | `js.configs.recommended` (from `@eslint/js`) |
-| 2 | Language options (`ecmaVersion: 2022`, `sourceType: 'commonjs'`, Node 24 globals) plus the full rule set |
+| 2 | Language options (`ecmaVersion: 2022`, `sourceType: 'module'`, Node 24 globals) plus the full rule set |
 
 ### `browser`
 

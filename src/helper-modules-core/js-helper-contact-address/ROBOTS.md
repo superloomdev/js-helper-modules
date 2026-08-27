@@ -19,8 +19,11 @@ None.
 ## Loader Pattern
 
 ```javascript
-const Adapter = require('helper-contact-address-adapter-basic')(Lib, {});
-Lib.ContactAddress = require('helper-contact-address')(Lib, { Adapter });
+import contactAddressAdapterBasic from 'helper-contact-address-adapter-basic';
+import contactAddress from 'helper-contact-address';
+
+const Adapter = contactAddressAdapterBasic(Lib, {});
+Lib.ContactAddress = contactAddress(Lib, { Adapter });
 ```
 
 ## Adapter Contract (5 methods)

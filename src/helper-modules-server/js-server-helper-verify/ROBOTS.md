@@ -9,23 +9,26 @@ One-time verification code lifecycle: generate, store, validate, consume. Three 
 ## Factory Pattern
 
 ```js
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
   // Validates CONFIG at construction (Store must be a ready-to-use object).
   // Throws synchronously on misconfiguration.
   return { createPin, createCode, createToken, verify, setupNewStore, cleanupExpiredRecords };
-};
+}
 ```
 
 `CONFIG.Store` is a **ready-to-use store object**, not a factory function. The loader uses it directly. The adapter is a fully independent module that owns its own Lib/Config/ERRORS. Passing a factory function throws `CONFIG.Store is required and must be a ready-to-use store object`.
 
 ```js
-const Store = require('helper-verify-store-postgres')({
+import verifyStorePostgres from 'helper-verify-store-postgres';
+import verify from 'helper-verify';
+
+const Store = verifyStorePostgres({
   TABLE_NAME: 'verification_codes',
   lib_postgresql: Lib.PostgreSQL
 });
 
-Lib.Verify = require('helper-verify')(Lib, {
+Lib.Verify = verify(Lib, {
   Store: Store
 });
 ```

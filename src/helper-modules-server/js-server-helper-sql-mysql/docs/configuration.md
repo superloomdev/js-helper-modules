@@ -28,7 +28,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own pool, config, and lifecycle. The driver (`mysql2`) is cached at the module scope and shared across instances because it is stateless.
 
 ```javascript
-Lib.SqlDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
+import sqlMysql from '@superloomdev/js-server-helper-sql-mysql';
+
+Lib.SqlDB = sqlMysql(Lib, {
   HOST:     process.env.DB_HOST,
   DATABASE: process.env.DB_NAME,
   USER:     process.env.DB_USER,
@@ -106,7 +108,7 @@ The `Lib.Instance` peer is required. The driver registers its pool teardown with
 |---|---|---|
 | `mysql2` | `^3.x` | MySQL driver with native Promise support. Lazy-loaded on first query, cached at module scope. |
 
-The driver is the only direct dependency. It is bundled because it is the implementation detail this module exists to wrap. You should never `require('mysql2')` in your application code.
+The driver is the only direct dependency. It is bundled because it is the implementation detail this module exists to wrap. You should never import `mysql2` in your application code.
 
 ---
 
@@ -115,7 +117,9 @@ The driver is the only direct dependency. It is bundled because it is the implem
 Each loader call returns an independent instance with its own pool. Load the module twice (or more) to connect to several databases (or a writer plus a reader) from the same process:
 
 ```javascript
-Lib.PrimaryDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
+import sqlMysql from '@superloomdev/js-server-helper-sql-mysql';
+
+Lib.PrimaryDB = sqlMysql(Lib, {
   HOST: 'primary-db.example.com',
   DATABASE: 'app_db',
   USER: 'app_user',
@@ -123,7 +127,7 @@ Lib.PrimaryDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
   POOL_MAX: 20
 });
 
-Lib.ReaderDB = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
+Lib.ReaderDB = sqlMysql(Lib, {
   HOST: 'reader-db.example.com',
   DATABASE: 'app_db',
   USER: 'readonly_user',
@@ -147,8 +151,10 @@ Each instance maintains its own pool and lifecycle. Each registers its own teard
 **Custom CA example (managed databases that publish their own root CA):**
 
 ```javascript
+import fs from 'node:fs';
+
 SSL: {
-  ca: require('fs').readFileSync('/path/to/managed-db-ca.pem').toString(),
+  ca: fs.readFileSync('/path/to/managed-db-ca.pem').toString(),
   rejectUnauthorized: true
 }
 ```
@@ -191,7 +197,7 @@ The module ships two test tiers:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Emulated** | MySQL 8.0.44 in Docker | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Emulated** | MySQL 8.0.44 in Docker | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | **Integration** | Real MySQL 8+ instance | Manually, against a sandbox database | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 ### Emulated (Docker)

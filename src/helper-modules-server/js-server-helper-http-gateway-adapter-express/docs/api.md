@@ -108,10 +108,11 @@ Writing: `Gateway.buildCookie(...)` returns a descriptor object. `Gateway.return
 To enable country detection behind a CDN, write a thin wrapper adapter:
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express');
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
 function CustomAdapter (Lib, config, errors) {
-  const base = ExpressAdapter(Lib, config, errors);
+  const base = httpGatewayAdapterExpress(Lib, config, errors);
   return Object.assign({}, base, {
     getCountryCode: function (headers) {
       return (headers && headers['cloudfront-viewer-country']) || null;
@@ -119,7 +120,7 @@ function CustomAdapter (Lib, config, errors) {
   });
 }
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { ADAPTER: CustomAdapter });
+const Gateway = httpGateway(Lib, { ADAPTER: CustomAdapter });
 ```
 
 The other two contract methods (`extractRequest`, `buildResponseEnvelope`) inherit from the base adapter unchanged.

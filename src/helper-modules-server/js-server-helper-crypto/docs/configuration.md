@@ -18,7 +18,9 @@ Loader pattern, configuration keys, dependency notes, and testing tier. For the 
 The module is a factory. Each loader call returns an independent public interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators` captured in a closure.
 
 ```javascript
-Lib.Crypto = require('helper-crypto')(Lib, {});
+import crypto from 'helper-crypto';
+
+Lib.Crypto = crypto(Lib, {});
 ```
 
 Loader call semantics:
@@ -69,7 +71,7 @@ None. The module never reads `process.env`. All configuration flows through the 
 |---|---|
 | `helper-utils` | Used for input validation (`isEmpty`, `isNullOrUndefined`) |
 
-The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not `require()` the peer directly.
+The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not import the peer directly.
 
 ---
 
@@ -77,7 +79,7 @@ The peer is consumed through the standard `Lib.Utils` injection in the loader's 
 
 | Dependency | Why |
 |---|---|
-| Node.js built-in `crypto` | All cryptographic primitives. Loaded once at module initialization via `require('crypto')`. Not a third-party package; ships with the runtime |
+| Node.js built-in `crypto` | All cryptographic primitives. Loaded once at module initialization via `import`. Not a third-party package; ships with the runtime |
 
 The module's `package.json` declares no `dependencies`. The supply chain you audit ends at this package, its single peer, and the Node runtime itself.
 
@@ -89,7 +91,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Tests verify both the deterministic behavior (AES round-trip, hash output length, base-conversion identity) and the random-output shape (length, character set membership) using Node's built-in `crypto` for the secure paths.
 

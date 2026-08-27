@@ -12,24 +12,34 @@ Uses a **composite primary key design** (`p` = tenant_id, `id` = sort key with `
 
 ```javascript
 // Load base helpers
-Lib.Utils = require('helper-utils')();
-Lib.Debug = require('helper-debug')(Lib);
-Lib.Instance = require('helper-instance')(Lib);
+import utils from 'helper-utils';
+import debug from 'helper-debug';
+import instance from 'helper-instance';
 
 // Load DynamoDB driver helper
-Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from 'helper-nosql-aws-dynamodb';
+
+// Load the DynamoDB store adapter
+import distinctQueueStoreDynamodb from 'helper-distinct-queue-store-dynamodb';
+
+// Load distinct-queue with the ready-to-use store object
+import distinctQueue from 'helper-distinct-queue';
+
+Lib.Utils = utils();
+Lib.Debug = debug(Lib);
+Lib.Instance = instance(Lib);
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   REGION: process.env.AWS_REGION,
   KEY: process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-// Load the DynamoDB store adapter
-Lib.DistinctQueueStore = require('helper-distinct-queue-store-dynamodb')(Lib, {
+Lib.DistinctQueueStore = distinctQueueStoreDynamodb(Lib, {
   TABLE_NAME: 'queue_jobs'
 });
 
-// Load distinct-queue with the ready-to-use store object
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Lib.DistinctQueueStore
 });
 

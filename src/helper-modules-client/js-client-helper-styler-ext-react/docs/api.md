@@ -19,17 +19,17 @@ This extension has peer dependencies on React and the styler core:
 
 ```bash
 npm install react @superloomdev/js-client-helper-styler
-# Extension is used via require in this monorepo setup
+# Extension is used via import in this monorepo setup
 ```
 
 ## Quick start
 
 ```js
-const React = require('react');
-const StylerExt = require('@superloomdev/js-client-helper-styler-ext-react');
+import React from 'react';
+import stylerExt from '@superloomdev/js-client-helper-styler-ext-react';
 
 // Build the extension with injected React
-const { ThemeProvider, useTheme, useStyles } = StylerExt({ React });
+const { ThemeProvider, useTheme, useStyles } = stylerExt({ React });
 
 // Your base theme values
 const base = {
@@ -67,8 +67,9 @@ function Screen() {
 The extension is a loader function that returns React bindings:
 
 ```js
-const StylerExt = require('@superloomdev/js-client-helper-styler-ext-react');
-const bindings = StylerExt({ React, Styler? });
+import stylerExt from '@superloomdev/js-client-helper-styler-ext-react';
+
+const bindings = stylerExt({ React, Styler? });
 ```
 
 | Export | Type | Description |
@@ -186,7 +187,7 @@ Most apps should use the provided hooks instead.
 
 The extension internally:
 
-1. Imports the styler core: `require('@superloomdev/js-client-helper-styler')`
+1. Imports the styler core: `import styler from '@superloomdev/js-client-helper-styler'`
 2. Calls `Styler.assemble()` with provided base + variant
 3. Calls `Styler.generateUtilities()` with assembled theme
 4. Wraps results in React context

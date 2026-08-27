@@ -22,7 +22,9 @@ Server helper. Service-dependent (needs Docker for emulated, AWS for integration
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, { /* config overrides */ });
+import nosqlAwsDynamodb from '@superloomdev/js-server-helper-nosql-aws-dynamodb';
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent DynamoDB interface with its own `Lib`, `CONFIG`, and DynamoDB client instance.

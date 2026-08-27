@@ -3,7 +3,9 @@
 ## Loader
 
 ```javascript
-const Font = require('@superloomdev/js-client-helper-font')(shared_libs, config);
+import font from '@superloomdev/js-client-helper-font';
+
+const Font = font(shared_libs, config);
 ```
 
 ### Parameters
@@ -21,9 +23,9 @@ Each family in the manifest is keyed by family name. Each style entry must have 
 |---|---|---|---|
 | `url` | `string` | ext-web | Remote URL for `@font-face` (browser fetches) |
 | `path` | `string` | ext-rn | Local file path (app provides the file) |
-| `asset` | `number` | ext-expo | Requireable module ID from `require()` |
-| `weight` | `string` | All | Font weight ('400', '600', etc.) — optional |
-| `style` | `string` | All | Font style ('normal' or 'italic') — optional, default 'normal' |
+| `asset` | `number` | ext-expo | Requireable module ID from Metro's `require()` |
+| `weight` | `string` | All | Font weight ('400', '600', etc.) - optional |
+| `style` | `string` | All | Font style ('normal' or 'italic') - optional, default 'normal' |
 
 ```javascript
 // Styles map (multiple weights)
@@ -49,6 +51,7 @@ Each family in the manifest is keyed by family name. Each style entry must have 
 {
   Inter: {
     styles: {
+      // Metro asset require - returns numeric module ID, not CJS require
       '400': { asset: require('./assets/inter-400.ttf') }
     }
   }
@@ -89,9 +92,9 @@ Font.registerRoles({
 
 Resolves a theme token to a concrete font-family string. Lookup order:
 
-1. **Role mapping** — if the token matches a registered role (e.g. `'primary'` → `'Poppins_400Regular'`)
-2. **Direct family name** — if the token matches a registered family (e.g. `'Poppins'` → `'Poppins'`)
-3. **DEFAULT_FAMILY fallback** — falls back to `'System'`
+1. **Role mapping** - if the token matches a registered role (e.g. `'primary'` → `'Poppins_400Regular'`)
+2. **Direct family name** - if the token matches a registered family (e.g. `'Poppins'` → `'Poppins'`)
+3. **DEFAULT_FAMILY fallback** - falls back to `'System'`
 
 ```javascript
 Font.resolveFamily('primary');

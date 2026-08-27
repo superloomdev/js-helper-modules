@@ -7,11 +7,14 @@ Requires a running MySQL or MariaDB instance. Uses `helper-sql-mysql` (pooled `m
 ## Construction
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-mysql')(Lib, {
+import loggerStoreMysql from '@superloomdev/js-server-helper-logger-store-mysql';
+import logger from '@superloomdev/js-server-helper-logger';
+
+const Store = loggerStoreMysql(Lib, {
   TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+Lib.Logger = logger(Lib, {
   Store: Store
 });
 ```

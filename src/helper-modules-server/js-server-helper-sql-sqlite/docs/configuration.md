@@ -28,7 +28,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own database handle, config, and lifecycle. The driver (`node:sqlite`) is cached at the module scope and shared across instances because it is stateless. Only the handle holds state.
 
 ```javascript
-Lib.SqlDB = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, {
+import sqlSqlite from '@superloomdev/js-server-helper-sql-sqlite';
+
+Lib.SqlDB = sqlSqlite(Lib, {
   FILE: '/var/data/app.db',
   JOURNAL_MODE: 'WAL',
   ENABLE_FOREIGN_KEYS: true
@@ -102,12 +104,14 @@ There are **no** direct npm dependencies. The driver ships with Node itself.
 Each loader call returns an independent instance with its own database handle. Load the module twice (or more) to use several databases (for example a cache database plus an analytics database) from the same process:
 
 ```javascript
-Lib.CacheDB = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, {
+import sqlSqlite from '@superloomdev/js-server-helper-sql-sqlite';
+
+Lib.CacheDB = sqlSqlite(Lib, {
   FILE: '/var/data/cache.db',
   JOURNAL_MODE: 'WAL'
 });
 
-Lib.AnalyticsDB = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, {
+Lib.AnalyticsDB = sqlSqlite(Lib, {
   FILE: '/var/data/analytics.db',
   JOURNAL_MODE: 'WAL',
   SYNCHRONOUS: 'NORMAL'
@@ -162,7 +166,7 @@ SQLite has a single test tier. There is no managed service to integrate against.
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Offline** | In-memory SQLite via `node:sqlite` (or file-backed when `SQLITE_FILE` is set) | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Offline** | In-memory SQLite via `node:sqlite` (or file-backed when `SQLITE_FILE` is set) | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 ### Offline (Default)
 

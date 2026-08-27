@@ -19,7 +19,9 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Money = require('helper-money')(Lib, { /* config overrides */ });
+import money from 'helper-money';
+
+Lib.Money = money(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent `Money` interface with its own merged configuration captured in a closure. Functions are pure - no shared module-level state between instances.

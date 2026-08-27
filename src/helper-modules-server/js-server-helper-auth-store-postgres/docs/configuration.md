@@ -13,7 +13,11 @@ The PostgreSQL store adapter receives a `Lib` container and config to produce a 
 ## Loader Pattern
 
 ```js
-Lib.Postgres = require('@superloomdev/js-server-helper-sql-postgres')(Lib, {
+import sqlPostgres from '@superloomdev/js-server-helper-sql-postgres';
+import authStorePostgres from '@superloomdev/js-server-helper-auth-store-postgres';
+import auth from '@superloomdev/js-server-helper-auth';
+
+Lib.Postgres = sqlPostgres(Lib, {
   HOST:     'localhost',
   DATABASE: 'app_db',
   USER:     'app_user',
@@ -22,11 +26,11 @@ Lib.Postgres = require('@superloomdev/js-server-helper-sql-postgres')(Lib, {
 });
 Lib.SQL = Lib.Postgres;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-postgres')(Lib, {
+const Store = authStorePostgres(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user',
   TTL_SECONDS: 2592000
@@ -49,7 +53,7 @@ The validator throws an `Error` at loader time if `TABLE_NAME` is missing, null,
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+The adapter does not import these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
 | Package | Reads via `Lib` |
 |---|---|
@@ -57,7 +61,7 @@ The adapter does not require these packages directly. It accesses them through `
 | `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
 | `@superloomdev/js-server-helper-sql-postgres` | `Lib.SQL` (set by caller as `Lib.SQL = Lib.Postgres`) |
 
-The driver helper (`Lib.Postgres`) carries its own peer dependency on `pg` (node-postgres). The adapter never `require`s `pg` directly; applications that never use this store never load the driver.
+The driver helper (`Lib.Postgres`) carries its own peer dependency on `pg` (node-postgres). The adapter never imports `pg` directly; applications that never use this store never load the driver.
 
 ## Environment Variables
 

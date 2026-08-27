@@ -20,7 +20,9 @@ None. Uses Node built-in globals: `fetch`, `AbortSignal`, `URL`, `URLSearchParam
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Http = require('@superloomdev/js-server-helper-http')(Lib, { /* config overrides */ });
+import http from '@superloomdev/js-server-helper-http';
+
+Lib.Http = http(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent Http interface with its own `Lib` and `CONFIG`. Stateless. No per-instance resources, no connection pools, no caches.

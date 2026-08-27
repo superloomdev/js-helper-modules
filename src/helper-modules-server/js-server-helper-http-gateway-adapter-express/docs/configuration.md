@@ -14,14 +14,17 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 Instantiate the adapter by calling it with the shared `Lib` container and an optional config object, then pass the ready-to-use object as `CONFIG.Adapter` to the gateway loader:
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const ExpressAdapter = httpGatewayAdapterExpress(Lib, {});
+
+const Gateway = httpGateway(Lib, {
   Adapter: ExpressAdapter
 });
 ```
 
-The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It merges config over companion file defaults and returns a ready-to-use adapter object - not the `require()` result directly - to the gateway.
+The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It merges config over companion file defaults and returns a ready-to-use adapter object - not the import result directly - to the gateway.
 
 ---
 
@@ -30,7 +33,9 @@ The adapter receives `Lib` by reference from the injected container (same shape 
 The Express adapter accepts **no configuration**. Pass an empty object `{}` or `null`/`undefined`:
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+
+const ExpressAdapter = httpGatewayAdapterExpress(Lib, {});
 ```
 
 | Config key | Required | Description |
@@ -66,7 +71,10 @@ See [`middleware.md`](middleware.md) for the full setup pattern.
 To enable country detection when fronting Express with a CDN (e.g. CloudFront), instantiate the base adapter and extend it:
 
 ```javascript
-const base = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
+
+const base = httpGatewayAdapterExpress(Lib, {});
 
 const CustomAdapter = Object.assign({}, base, {
   getCountryCode: function (headers) {
@@ -74,7 +82,7 @@ const CustomAdapter = Object.assign({}, base, {
   }
 });
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: CustomAdapter });
+const Gateway = httpGateway(Lib, { Adapter: CustomAdapter });
 ```
 
 The other two contract methods inherit from the base adapter unchanged.

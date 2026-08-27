@@ -3,8 +3,11 @@
 ## Loader Pattern
 
 ```javascript
-const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
-Lib.ContactPhone = require('helper-contact-phone')(Lib, {
+import contactPhoneAdapterBasic from 'helper-contact-phone-adapter-basic';
+import contactPhone from 'helper-contact-phone';
+
+const Adapter = contactPhoneAdapterBasic(Lib, {});
+Lib.ContactPhone = contactPhone(Lib, {
   Adapter: Adapter
 });
 ```

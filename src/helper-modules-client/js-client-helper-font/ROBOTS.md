@@ -26,7 +26,9 @@ None. All dependencies are peer dependencies.
 ## Loader Pattern
 
 ```javascript
-const Font = require('@superloomdev/js-client-helper-font')({
+import font from '@superloomdev/js-client-helper-font';
+
+const Font = font({
   Utils: Utils,
   Debug: Debug
 }, {

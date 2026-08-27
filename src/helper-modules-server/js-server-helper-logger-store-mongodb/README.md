@@ -45,11 +45,14 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 This adapter is installed alongside the Logger parent module and the `nosql-mongodb` driver helper. Construct the store first, then pass it to the Logger:
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
+import loggerStoreMongodb from '@superloomdev/js-server-helper-logger-store-mongodb';
+import logger from '@superloomdev/js-server-helper-logger';
+
+const Store = loggerStoreMongodb(Lib, {
   COLLECTION_NAME: 'action_log'
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
+Lib.Logger = logger(Lib, { Store: Store });
 ```
 
 Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
@@ -62,7 +65,7 @@ Do not vendor the source or use it as a local file dependency. The published pac
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Contract + Integration | MongoDB via Docker Compose | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Contract + Integration | MongoDB via Docker Compose | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Docker lifecycle is fully automatic - `npm test` from `_test/` manages `pretest`/`posttest`. Test runtime details live in [Configuration - Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-mongodb/docs/configuration.md#testing-tier).
 

@@ -10,12 +10,15 @@
 
 ```js
 // Load the adapter with Lib injected
-const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
+import distinctQueueStoreDynamodb from 'helper-distinct-queue-store-dynamodb';
+import distinctQueue from 'helper-distinct-queue';
+
+const Store = distinctQueueStoreDynamodb(Lib, {
   TABLE_NAME: 'queue_jobs'
 });
 
 // Pass the ready-to-use store object to the parent module
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Store
 });
 ```

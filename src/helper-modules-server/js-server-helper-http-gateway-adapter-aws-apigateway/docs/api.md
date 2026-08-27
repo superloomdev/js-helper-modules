@@ -124,7 +124,7 @@ For `async`/Promise-based Lambda handlers, the `callback` argument is still acce
 API Gateway v2.0 places authorizer output (JWT claims, IAM identity, Lambda authorizer payload) on the raw event at `event.requestContext.authorizer`. The adapter does **not** promote this data into `instance.http_request`. Application code that needs it should read the raw event directly:
 
 ```javascript
-exports.handler = function (event, context, callback) {
+export const handler = function (event, context, callback) {
   const instance = Lib.Instance.initialize();
   Gateway.initHttpRequestData(instance, event, context, callback);
 

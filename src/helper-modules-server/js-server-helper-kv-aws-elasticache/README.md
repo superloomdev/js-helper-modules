@@ -33,7 +33,9 @@ The ioredis client is created lazily on the first call and shared for the proces
 ## Adding to Your Project
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+import kvAwsElasticache from '@superloomdev/js-server-helper-kv-aws-elasticache';
+
+const KV = kvAwsElasticache(Lib, {
   HOST: 'your-cluster.xxxxxx.cache.amazonaws.com',
   PORT: 6379,
   TLS: true,

@@ -18,11 +18,16 @@ Loader pattern, every configuration key, the per-backend store config shape, pee
 
 ## Loader Pattern
 
-The module is a factory. Each `require(...)(Lib, config)` call returns an independent public interface bound to one `actor_type`, one store, and one configuration. Two simultaneous instances (e.g. one for `user` sessions and one for `admin` sessions) share no state.
+The module is a factory. Each `auth(Lib, config)` call (after `import auth from 'helper-auth'`) returns an independent public interface bound to one `actor_type`, one store, and one configuration. Two simultaneous instances (e.g. one for `user` sessions and one for `admin` sessions) share no state.
 
 ```javascript
-Lib.AuthUser = require('helper-auth')(Lib, {
-  Store:        require('helper-auth-store-postgres')({ table_name: 'sessions_user', lib_sql: Lib.Postgres }),
+import auth from 'helper-auth';
+import authStorePostgres from 'helper-auth-store-postgres';
+
+const Store = authStorePostgres({ table_name: 'sessions_user', lib_sql: Lib.Postgres });
+
+Lib.AuthUser = auth(Lib, {
+  Store:        Store,
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
   LIMITS:       { TOTAL_MAX: 20, EVICT_OLDEST_ON_LIMIT: true },
@@ -38,8 +43,14 @@ Loader call semantics:
 
 ```javascript
 // Two actor types, two policies, one process.
-Lib.AuthUser  = require('...auth')(Lib, { ACTOR_TYPE: 'user',  Store: require('...auth-store-postgres')({ table_name: 'sessions_user',  lib_sql: Lib.Postgres }), TTL_SECONDS: 2592000 });
-Lib.AuthAdmin = require('...auth')(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-store-postgres')({ table_name: 'sessions_admin', lib_sql: Lib.Postgres }), TTL_SECONDS: 3600 });
+import auth from 'helper-auth';
+import authStorePostgres from 'helper-auth-store-postgres';
+
+const StoreUser  = authStorePostgres({ table_name: 'sessions_user',  lib_sql: Lib.Postgres });
+const StoreAdmin = authStorePostgres({ table_name: 'sessions_admin', lib_sql: Lib.Postgres });
+
+Lib.AuthUser  = auth(Lib, { ACTOR_TYPE: 'user',  Store: StoreUser,  TTL_SECONDS: 2592000 });
+Lib.AuthAdmin = auth(Lib, { ACTOR_TYPE: 'admin', Store: StoreAdmin, TTL_SECONDS: 3600 });
 ```
 
 Sessions never cross actor types. The stored `actor_type` is verified on every `verifySession` call (defense-in-depth against misconfigured table pointers).
@@ -52,7 +63,7 @@ All keys are merged over `auth.config.js` defaults. Keys with a `null` default a
 
 | Key | Type | Default | Required | Description |
 |---|---|---|---|---|
-| `Store` | `object` | `null` | Yes | A ready-to-use store object from the chosen adapter. Call the adapter with its config: `require('helper-auth-store-*')({...})`. The value must be a plain object with the required store methods |
+| `Store` | `object` | `null` | Yes | A ready-to-use store object from the chosen adapter. Call the adapter with its config: `import authStore<Backend> from 'helper-auth-store-<backend>'; const Store = authStore<Backend>({...})`. The value must be a plain object with the required store methods |
 | `ACTOR_TYPE` | `string` | `null` | Yes | Non-empty string naming the kind of actor (`'user'`, `'admin'`, `'merchant'`, ...). Stamped on every record and verified on every read |
 | `TTL_SECONDS` | `number` | `2592000` (30 days) | No | Session lifetime in seconds. `expires_at` rolls forward by `TTL_SECONDS` on each throttled activity refresh |
 | `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | `number` | `600` (10 min) | No | Minimum gap between `last_active_at` write-backs. Prevents one DB write per request on busy actors |
@@ -78,19 +89,23 @@ Each adapter is a fully independent module that validates its own config interna
 Example: Postgres
 
 ```javascript
-Store: require('helper-auth-store-postgres')({
+import authStorePostgres from 'helper-auth-store-postgres';
+
+const Store = authStorePostgres({
   table_name: 'sessions_user',
   lib_sql:    Lib.Postgres
-})
+});
 ```
 
 Example: MongoDB
 
 ```javascript
-Store: require('helper-auth-store-mongodb')({
+import authStoreMongodb from 'helper-auth-store-mongodb';
+
+const Store = authStoreMongodb({
   collection_name: 'sessions_user',
   lib_mongodb:     Lib.MongoDB
-})
+});
 ```
 
 ---
@@ -173,7 +188,7 @@ The auth module's own tests are **fully offline**. They use an in-process memory
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit (offline)** | Node.js `node --test` against the in-process memory store | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit (offline)** | Node.js `node --test` against the in-process memory store | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 ```bash
 cd _test && npm install && npm test

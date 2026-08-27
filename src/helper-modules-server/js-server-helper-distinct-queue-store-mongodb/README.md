@@ -12,23 +12,33 @@ Uses a **smart subdocument `_id` design** to enable efficient queue operations w
 
 ```javascript
 // Load base helpers
-Lib.Utils = require('helper-utils');
-Lib.Debug = require('helper-debug')(Lib);
-Lib.Instance = require('helper-instance')(Lib);
+import utils from 'helper-utils';
+import debug from 'helper-debug';
+import instance from 'helper-instance';
 
 // Load MongoDB driver helper
-Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
+import nosqlMongodb from 'helper-nosql-mongodb';
+
+// Load the MongoDB store adapter
+import distinctQueueStoreMongodb from 'helper-distinct-queue-store-mongodb';
+
+// Load distinct-queue with the ready-to-use store object
+import distinctQueue from 'helper-distinct-queue';
+
+Lib.Utils = utils;
+Lib.Debug = debug(Lib);
+Lib.Instance = instance(Lib);
+
+Lib.MongoDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// Load the MongoDB store adapter
-Lib.DistinctQueueStore = require('helper-distinct-queue-store-mongodb')(Lib, {
+Lib.DistinctQueueStore = distinctQueueStoreMongodb(Lib, {
   COLLECTION_NAME: 'queue_jobs'
 });
 
-// Load distinct-queue with the ready-to-use store object
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Lib.DistinctQueueStore
 });
 

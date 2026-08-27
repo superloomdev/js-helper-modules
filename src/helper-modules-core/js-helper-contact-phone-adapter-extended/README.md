@@ -33,8 +33,11 @@ Choose this adapter on servers where validation depth matters more than bundle s
 ## Adding to Your Project
 
 ```javascript
-const Adapter = require('helper-contact-phone-adapter-extended')(Lib, {});
-Lib.ContactPhone = require('helper-contact-phone')(Lib, { Adapter });
+import contactPhoneAdapterExtended from 'helper-contact-phone-adapter-extended';
+import contactPhone from 'helper-contact-phone';
+
+const Adapter = contactPhoneAdapterExtended(Lib, {});
+Lib.ContactPhone = contactPhone(Lib, { Adapter });
 ```
 
 ## Dependencies

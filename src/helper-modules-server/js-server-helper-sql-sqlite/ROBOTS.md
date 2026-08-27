@@ -24,8 +24,10 @@ Server helper. Offline (no Docker, no network - uses `:memory:` or a local file)
 ## Loader Pattern (Multi-DB Capable)
 
 ```javascript
-Lib.CacheDB     = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, { FILE: '/var/data/cache.db' });
-Lib.AnalyticsDB = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, { FILE: '/var/data/analytics.db' });
+import sqlSqlite from '@superloomdev/js-server-helper-sql-sqlite';
+
+Lib.CacheDB     = sqlSqlite(Lib, { FILE: '/var/data/cache.db' });
+Lib.AnalyticsDB = sqlSqlite(Lib, { FILE: '/var/data/analytics.db' });
 ```
 
 Each loader call returns an independent public interface with its own database handle - no singleton state.
@@ -132,7 +134,7 @@ A borrowed handle from `getClient` is registered for request-scoped release via 
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own handle. No module-level singletons.
-- **Lazy adapter load:** `node:sqlite` is `require()`-d on first use via `loadAdapter()`. Cached at module scope and shared across every instance because the driver module is stateless.
+- **Lazy adapter load:** `node:sqlite` is loaded on first use via `loadAdapter()` using `createRequire(import.meta.url)` - the sanctioned pattern for lazy loading in the server tier. Cached at module scope and shared across every instance because the driver module is stateless.
 - **Lazy handle init:** handle is created on the first query, not at loader time. Friendly to serverless functions.
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholder translation:** `?`/`??` in source SQL → native `?` with identifiers inlined before `prepare()`.

@@ -41,7 +41,7 @@ A template is therefore a *recipe*; the theme supplies the *ingredients*.
 ## Top-level shape
 
 ```js
-module.exports = {
+export default {
   color:     { defaults: { … }, swatches:  { … } },
   dimension: { defaults: { … }, scales:    { … }, constants: [ … ] },
   font:      { defaults: { … }, roles:     [ … ] }
@@ -237,7 +237,7 @@ changes. Steps:
 2. **Dimension** - set seed numbers in `dimension.defaults`, define `scales`
    (`modular`/`linear`), add any `presets`, and list scalar `constants`.
 3. **Font** - set `<role>Family` defaults and the ordered `roles` array.
-4. **Validate** - `require('@superloomdev/js-client-helper-styler').validators(Lib).validateTemplate(myTemplate)`
+4. **Validate** - `import styler from '@superloomdev/js-client-helper-styler'; styler.validators(Lib).validateTemplate(myTemplate)`
    throws (with a `.code`) on the first structural problem.
 5. **Use it** - pass your template wherever the default is used:
    `styler.assemble(myTemplate, base, variant)`.

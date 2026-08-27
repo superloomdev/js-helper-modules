@@ -67,7 +67,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance). F
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Emulated | MongoDB 8 single-node replica set in Docker | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Emulated | MongoDB 8 single-node replica set in Docker | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | Integration | Real MongoDB cluster (Atlas or self-hosted) | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 The emulated tier runs as a single-node replica set on port 27018 (offset from the data-plane module's 27017) so parallel local runs never collide. Test runtime details live in [Configuration - Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-nosql-mongodb-admin/docs/configuration.md#testing-tiers).

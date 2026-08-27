@@ -29,8 +29,10 @@ Class D Cloud Service Wrapper. Standalone ElastiCache key-value driver with IAM 
 ## Loader Pattern (Factory)
 
 ```javascript
+import kvAwsElasticache from '@superloomdev/js-server-helper-kv-aws-elasticache';
+
 // With IAM auth (production)
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+const KV = kvAwsElasticache(Lib, {
   HOST: 'cluster.cache.amazonaws.com',
   PORT: 6379,
   TLS: true,
@@ -42,7 +44,7 @@ const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
 });
 
 // Without IAM auth (local testing)
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+const KV = kvAwsElasticache(Lib, {
   HOST: 'localhost',
   PORT: 6379,
   TLS: false

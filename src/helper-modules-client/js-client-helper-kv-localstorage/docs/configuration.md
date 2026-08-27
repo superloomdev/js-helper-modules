@@ -7,7 +7,9 @@
 ## Loader
 
 ```javascript
-const Store = require('@superloomdev/js-client-helper-kv-localstorage')({
+import kvLocalstorage from '@superloomdev/js-client-helper-kv-localstorage';
+
+const Store = kvLocalstorage({
   Utils: Utils,
   Debug: Debug,
   WebStorage: engine    // optional - injected storage engine

@@ -26,7 +26,7 @@ A successful `verify(...)` deletes the record in the background, making the code
 
 ```
 Verify instance
- ├─ CONFIG.Store          (ready-to-use store object, e.g. require('helper-verify-store-postgres')(config))
+ ├─ CONFIG.Store          (ready-to-use store object, e.g. verifyStorePostgres(config) after import)
  ├─ CONFIG.PIN_CHARSET    ('0123456789' by default)
  ├─ CONFIG.CODE_CHARSET   (Crockford Base32 by default)
  ├─ CONFIG.TOKEN_CHARSET  ('a-zA-Z0-9' by default)
@@ -86,7 +86,7 @@ It expects four peer modules in the `Lib` container (Utils, Debug, Crypto, Insta
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 The verify module's own tests use the in-process memory fixture (`_test/memory-store.js`) which implements the full six-method store contract (`setupNewStore`, `getRecord`, `setRecord`, `incrementFailCount`, `deleteRecord`, `cleanupExpiredRecords`). There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-verify-store-*`) and run the shared store-contract suite against real backends.
 

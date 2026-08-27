@@ -13,9 +13,12 @@
 ## Adapter Loader
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
+import httpGatewayAdapterAwsApigateway from '@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const AwsAdapter = httpGatewayAdapterAwsApigateway(Lib, {});
+
+const Gateway = httpGateway(Lib, {
   Adapter: AwsAdapter
 });
 ```

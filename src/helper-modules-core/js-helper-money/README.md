@@ -48,7 +48,7 @@ This module expects one peer module in the `Lib` container (Utils). For the full
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Test runtime details (no Docker, no service required) live in [Configuration → Testing Tiers](https://github.com/superloomdev/js-helper-modules/blob/main/src/helper-modules-core/js-helper-money/docs/configuration.md#testing-tiers).
 

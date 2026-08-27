@@ -136,12 +136,15 @@ Substitute the adapter package for your database. The full list is in the [Stora
 
 ```js
 // In your project loader
-const DistinctQueueFactory = require('@superloomdev/js-server-helper-distinct-queue');
+import distinctQueue from '@superloomdev/js-server-helper-distinct-queue';
+import distinctQueueStoreDynamodb from '@superloomdev/js-server-helper-distinct-queue-store-dynamodb';
 
-Lib.DistinctQueue = DistinctQueueFactory(Lib, {
-  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
-    table_name: 'distinct_queue'
-  })
+const Store = distinctQueueStoreDynamodb(Lib, {
+  table_name: 'distinct_queue'
+});
+
+Lib.DistinctQueue = distinctQueue(Lib, {
+  Store: Store
 });
 ```
 

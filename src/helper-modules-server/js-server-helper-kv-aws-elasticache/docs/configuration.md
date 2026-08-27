@@ -5,7 +5,9 @@
 ### With IAM Auth (ElastiCache Production)
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+import kvAwsElasticache from '@superloomdev/js-server-helper-kv-aws-elasticache';
+
+const KV = kvAwsElasticache(Lib, {
   HOST: 'your-cluster.xxxxxx.cache.amazonaws.com',
   PORT: 6379,
   TLS: true,
@@ -20,7 +22,9 @@ const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
 ### Without IAM Auth (Local Testing)
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+import kvAwsElasticache from '@superloomdev/js-server-helper-kv-aws-elasticache';
+
+const KV = kvAwsElasticache(Lib, {
   HOST: 'localhost',
   PORT: 6379,
   TLS: false
@@ -106,7 +110,9 @@ Attach the policy to the IAM identity whose credentials you pass as `KEY`/`SECRE
 ### 4. Configure the Module
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+import kvAwsElasticache from '@superloomdev/js-server-helper-kv-aws-elasticache';
+
+const KV = kvAwsElasticache(Lib, {
   HOST: 'my-cluster.xxxxxx.cache.amazonaws.com',
   PORT: 6379,
   TLS: true,

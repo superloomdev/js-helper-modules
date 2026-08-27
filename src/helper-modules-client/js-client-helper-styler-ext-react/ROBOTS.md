@@ -19,7 +19,9 @@
 ## Loader
 
 ```javascript
-const Extension = require('@superloomdev/js-client-helper-styler-ext-react')({
+import extension from '@superloomdev/js-client-helper-styler-ext-react';
+
+const Extension = extension({
   React: required,      // React 18+ (createContext, useState, useContext)
   Styler: required,     // Core styler engine (used for defaultTemplate + assemble)
   Utils: optional,      // Type checks, validation

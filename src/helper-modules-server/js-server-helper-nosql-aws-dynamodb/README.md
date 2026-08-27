@@ -66,7 +66,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance). F
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Emulated | DynamoDB Local in Docker | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Emulated | DynamoDB Local in Docker | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | Integration | Real AWS DynamoDB (sandbox) | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 Test runtime details (Docker lifecycle, environment variables, integration setup, IAM permissions) live in [Configuration → Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-nosql-aws-dynamodb/docs/configuration.md#testing-tiers).

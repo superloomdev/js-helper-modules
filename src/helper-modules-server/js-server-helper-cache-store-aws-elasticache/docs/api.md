@@ -5,7 +5,9 @@ This adapter implements the 9-method store contract consumed by `helper-cache` (
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-aws-elasticache')(Lib, {
+import cacheStoreAwsElasticache from '@superloomdev/js-server-helper-cache-store-aws-elasticache';
+
+const Store = cacheStoreAwsElasticache(Lib, {
   KEY_PREFIX: 'cache:',
   KEY_SEPARATOR: ':',
   LOCK_KEY_PREFIX: 'cache:lock:'

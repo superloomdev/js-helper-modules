@@ -29,14 +29,16 @@ Class H extension of `js-client-helper-font`. Expo font loader adapter. Uses `ex
 ## Loader Pattern
 
 ```javascript
-const ExpoFontAdapter = require('@superloomdev/js-client-helper-font-ext-expo')({
+import fontExtExpo from '@superloomdev/js-client-helper-font-ext-expo';
+
+const ExpoFontAdapter = fontExtExpo({
   Utils: Utils,
   Debug: Debug,
   Font: Font                  // required - the js-client-helper-font instance
 });
 ```
 
-Missing `shared_libs.Font` throws at construction time. The `expo-font` package is required directly at module scope — no injection needed.
+Missing `shared_libs.Font` throws at construction time. The `expo-font` package is imported directly at module scope via `import * as` - no injection needed.
 
 ## Config Keys
 

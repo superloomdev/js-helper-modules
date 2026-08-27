@@ -13,9 +13,12 @@
 ## Adapter Loader
 
 ```javascript
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const ExpressAdapter = httpGatewayAdapterExpress(Lib, {});
+
+const Gateway = httpGateway(Lib, {
   Adapter: ExpressAdapter
 });
 ```

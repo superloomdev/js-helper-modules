@@ -33,8 +33,11 @@ Choose this adapter when bundle size matters more than validation depth: browser
 ## Adding to Your Project
 
 ```javascript
-const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
-Lib.ContactPhone = require('helper-contact-phone')(Lib, { Adapter });
+import contactPhoneAdapterBasic from 'helper-contact-phone-adapter-basic';
+import contactPhone from 'helper-contact-phone';
+
+const Adapter = contactPhoneAdapterBasic(Lib, {});
+Lib.ContactPhone = contactPhone(Lib, { Adapter });
 ```
 
 ## Dependencies

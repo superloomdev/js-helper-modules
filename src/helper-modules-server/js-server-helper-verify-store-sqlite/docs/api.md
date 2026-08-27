@@ -5,7 +5,9 @@ This adapter implements the 6-method store contract consumed by `helper-verify`.
 ## Adapter Factory
 
 ```js
-const store = require('helper-verify-store-sqlite')(Lib, {
+import verifyStoreSqlite from 'helper-verify-store-sqlite';
+
+const store = verifyStoreSqlite(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 ```

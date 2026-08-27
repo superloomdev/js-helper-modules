@@ -6,7 +6,9 @@
 ## Loader
 
 ```javascript
-const Timer = require('@superloomdev/js-react-helper-timer')({
+import timer from '@superloomdev/js-react-helper-timer';
+
+const Timer = timer({
   React: React,           // required - React 18+ (useState, useEffect)
   Utils: Utils,           // required - helper-utils instance
   Debug: Debug            // required - helper-debug instance

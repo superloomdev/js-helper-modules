@@ -28,7 +28,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own AWS SDK client, config, and lifecycle. The SDK clients (`@aws-sdk/client-dynamodb`, `@aws-sdk/lib-dynamodb`) are cached at the module scope and shared across instances because they are stateless. Only the configured `DynamoDBClient` instance holds region/credential state.
 
 ```javascript
-Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from '@superloomdev/js-server-helper-nosql-aws-dynamodb';
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   REGION: process.env.AWS_REGION,
   KEY:    process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
@@ -100,7 +102,7 @@ These come from your project's `Lib` container, not from this module's `package.
 | `@aws-sdk/client-dynamodb` | `^3.x` | Base DynamoDB client. Lazy-loaded on first call, cached at module scope. |
 | `@aws-sdk/lib-dynamodb` | `^3.x` | Document Client and `*Command` classes. Lazy-loaded, cached. |
 
-You should never `require('@aws-sdk/*')` in your application code. The module exists to wrap them.
+You should never import `@aws-sdk/*` in your application code. The module exists to wrap them.
 
 ---
 
@@ -154,13 +156,15 @@ The test loader uses `KEY: 'local'` and `SECRET: 'local'` for the emulated tier.
 Each loader call returns an independent instance with its own SDK client, region, and credentials. Load the module multiple times for cross-region replicas or cross-account access:
 
 ```javascript
-Lib.PrimaryDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from '@superloomdev/js-server-helper-nosql-aws-dynamodb';
+
+Lib.PrimaryDB = nosqlAwsDynamodb(Lib, {
   REGION: 'us-east-1',
   KEY:    process.env.PRIMARY_AWS_KEY,
   SECRET: process.env.PRIMARY_AWS_SECRET
 });
 
-Lib.DRDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, {
+Lib.DRDB = nosqlAwsDynamodb(Lib, {
   REGION: 'us-west-2',
   KEY:    process.env.DR_AWS_KEY,
   SECRET: process.env.DR_AWS_SECRET
@@ -177,7 +181,7 @@ The module ships two test tiers:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Emulated** | DynamoDB Local in Docker | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Emulated** | DynamoDB Local in Docker | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | **Integration** | Real AWS DynamoDB (sandbox account) | Manually, against a sandbox table | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 ### Emulated (Docker)

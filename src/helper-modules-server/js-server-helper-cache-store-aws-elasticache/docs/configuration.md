@@ -3,13 +3,16 @@
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-aws-elasticache')(Lib, {
+import cacheStoreAwsElasticache from '@superloomdev/js-server-helper-cache-store-aws-elasticache';
+import cache from '@superloomdev/js-server-helper-cache';
+
+const Store = cacheStoreAwsElasticache(Lib, {
   KEY_PREFIX: 'cache:',
   KEY_SEPARATOR: ':',
   LOCK_KEY_PREFIX: 'cache:lock:'
 });
 
-Lib.Cache = require('@superloomdev/js-server-helper-cache')(Lib, {
+Lib.Cache = cache(Lib, {
   Store: Store
 });
 ```

@@ -11,11 +11,14 @@ Configuration reference for `helper-http-gateway`.
 
 ## Loader Pattern
 
-The gateway is a singleton module. One `require()(Lib, config)` call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js `require` cache guarantees the same object is returned on every subsequent call, so there is one loader call per process.
+The gateway is a singleton module. One loader call injects dependencies, initializes the adapter and internal parts, and returns the module-scope `HttpGateway` object. Node.js module cache guarantees the same object is returned on every subsequent call, so there is one loader call per process.
 
 ```javascript
-const Adapter = require('helper-http-gateway-adapter-aws-apigateway')({});
-const Gateway = require('helper-http-gateway')(Lib, {
+import httpGatewayAdapterAwsApigateway from 'helper-http-gateway-adapter-aws-apigateway';
+import httpGateway from 'helper-http-gateway';
+
+const Adapter = httpGatewayAdapterAwsApigateway({});
+const Gateway = httpGateway(Lib, {
   Adapter: Adapter
 });
 ```
@@ -43,8 +46,11 @@ The ready-to-use adapter object. Create it by calling the adapter package with i
 
 **Example:**
 ```javascript
-const ExpressAdapter = require('helper-http-gateway-adapter-express')({});
-const Gateway = require('helper-http-gateway')(Lib, {
+import httpGatewayAdapterExpress from 'helper-http-gateway-adapter-express';
+import httpGateway from 'helper-http-gateway';
+
+const ExpressAdapter = httpGatewayAdapterExpress({});
+const Gateway = httpGateway(Lib, {
   Adapter: ExpressAdapter
 });
 ```
@@ -101,7 +107,7 @@ The `_test/loader.js` used by the test suite does not read environment variables
 
 | Tier | Runtime | Status |
 |------|---------|--------|
-| Emulated | Node.js built-in test runner against in-process stub adapter | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Emulated | Node.js built-in test runner against in-process stub adapter | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 The gateway's own tests use the in-process stub adapter (`_test/stub-adapter.js`) which satisfies the three-method adapter contract with minimal fixed-output behavior. It is not a simulation of API Gateway or Express internals. It exists only to let the gateway module exercise its own logic without any real runtime.
 

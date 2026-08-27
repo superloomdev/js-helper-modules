@@ -67,7 +67,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance). F
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Emulated | Valkey in Docker | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Emulated | Valkey in Docker | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | Integration | Real Valkey or Redis OSS server | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 A Valkey container is the same engine as Redis OSS, so if the suite passes against local Valkey, the module works against any Redis OSS 7.2- or Valkey 7.2+ server. ElastiCache with cluster mode disabled is verified by the local Valkey suite and is not tested against AWS directly.

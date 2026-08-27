@@ -5,11 +5,14 @@
 The adapter is configured and instantiated independently, then passed to the Verify parent as a ready-to-use store object:
 
 ```js
-const Store = require('helper-verify-store-sqlite')(Lib, {
+import verifyStoreSqlite from 'helper-verify-store-sqlite';
+import verify from 'helper-verify';
+
+const Store = verifyStoreSqlite(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 
-Lib.Verify = require('helper-verify')(Lib, {
+Lib.Verify = verify(Lib, {
   Store: Store
 });
 ```
@@ -32,7 +35,7 @@ The validator rejects missing, null, or empty-string values. The `TABLE_NAME` do
 | `helper-debug` | Injected | Structured debug logging |
 | `helper-sql-sqlite` | Injected | SQLite driver wrapper (`Lib.SQL`) |
 
-All three dependencies are injected by the application through the `shared_libs` container. The adapter picks them by reference and does not require them directly.
+All three dependencies are injected by the application through the `shared_libs` container. The adapter picks them by reference and does not import them directly.
 
 ## Environment Variables
 

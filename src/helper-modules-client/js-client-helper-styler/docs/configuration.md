@@ -18,13 +18,18 @@ In production this resolves like any package:
 
 ```js
 // The package entry IS the Styler loader (no index.js).
-const styler   = require('@superloomdev/js-client-helper-styler')(Lib);  // inject your Lib (Lib.Debug optional)
+import styler from '@superloomdev/js-client-helper-styler';
+
+const Styler = styler(Lib);  // inject your Lib (Lib.Debug optional)
 
 // React binding - its own subpath; only where React exists; inject Lib.React:
-const adapter  = require('@superloomdev/js-client-helper-styler/styler.adapter-react.js')({ React: require('react') });
+import adapterReact from '@superloomdev/js-client-helper-styler/styler.adapter-react.js';
+import React from 'react';
+
+const adapter = adapterReact({ React });
 ```
 
-In this monorepo demo it lives at `src/styler/` and is required by relative path
+In this monorepo demo it lives at `src/styler/` and is imported by relative path
 from the client loader (Metro picks it up via `watchFolders`; dev-time only,
 see app `thoughts.md` T16).
 
@@ -47,21 +52,22 @@ The package never bundles schemes or fonts - those are app data.
 
 ```js
 // loader.js (DI root) - inject React, build the Styler instance
-const stylerLoader = require('@superloomdev/js-client-helper-styler');                      // entry IS the loader
-const StylerTemplate = require('@superloomdev/js-client-helper-styler/styler.template.js'); // data subpath
-Lib.React = require('react');           // centralized React, injected for the adapter
-Lib.StylerTemplate = StylerTemplate;    // data
-Lib.Styler = stylerLoader(Lib);         // Styler instance (Lib.Debug injected for logging)
+import stylerLoader from '@superloomdev/js-client-helper-styler';                      // entry IS the loader
+import StylerTemplate from '@superloomdev/js-client-helper-styler/styler.template.js'; // data subpath
+import React from 'react';           // centralized React, injected for the adapter
+Lib.React = React;                   // centralized React, injected for the adapter
+Lib.StylerTemplate = StylerTemplate; // data
+Lib.Styler = stylerLoader(Lib);      // Styler instance (Lib.Debug injected for logging)
 
 // ThemeContext.js - assemble per app shape, provide to subtree
-const base    = require('./schemes/base.json');
-const variant = require('./schemes/tasks.json');
-const theme   = Lib.Styler.assemble(Lib.StylerTemplate, base, variant);
+import base from './schemes/base.json';
+import variant from './schemes/tasks.json';
+const theme = Lib.Styler.assemble(Lib.StylerTemplate, base, variant);
 ```
 
 ## Config knobs
 
-`styler.config.js` currently exposes **no knobs** (`module.exports = {}`). It is
+`styler.config.js` currently exposes **no knobs** (`export default {}`). It is
 kept and still merged by the loaders so the signature stays uniform and future
 knobs have a home.
 
@@ -79,21 +85,23 @@ and return the module's interface.
 
 The logic modules follow the JS helper-module loader convention and are
 **singletons**: the public/private objects live at module scope and the loader
-just wires in `Lib` + config once. Node's `require` cache then guarantees a
+just wires in `Lib` + config once. The ES module system then guarantees a
 single instance per process:
 
 ```js
+import CONFIG_DEFAULTS from './styler.config.js';
+
 let Lib, CONFIG;
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
   Lib = shared_libs || {};
-  CONFIG = Object.assign({}, require('./styler.config'), config || {});
+  CONFIG = Object.assign({}, CONFIG_DEFAULTS, config || {});
   return Styler; // module-scope object
-};
+}
 ```
 
 **Styler** additionally initializes its siblings on load - the frozen `errors`
 catalog, the `validators` subloader (`validators(Lib)`), and the pure `parts/`
-(`color-ops`, `scale`, `utilities`) - so a single `require('@superloomdev/js-client-helper-styler')(Lib)`
+(`color-ops`, `scale`, `utilities`) - so a single `import styler from '@superloomdev/js-client-helper-styler'; styler(Lib)`
 call yields a fully wired interface with `generateUtilities` exposed. The **adapter** creates its React context once in the loader and exposes
 it on the returned bindings.
 

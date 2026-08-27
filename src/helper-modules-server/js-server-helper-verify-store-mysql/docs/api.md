@@ -5,7 +5,9 @@ This adapter implements the 6-method store contract consumed by `helper-verify`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-mysql')(Lib, {
+import verifyStoreMysql from '@superloomdev/js-server-helper-verify-store-mysql';
+
+const store = verifyStoreMysql(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 ```

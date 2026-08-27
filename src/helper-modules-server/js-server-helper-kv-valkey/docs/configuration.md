@@ -3,7 +3,9 @@
 ## Loader Pattern
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-valkey')(Lib, {
+import kvValkey from '@superloomdev/js-server-helper-kv-valkey';
+
+const KV = kvValkey(Lib, {
   HOST: process.env.KV_HOST || 'localhost',
   PORT: 6379,
   KEY_PREFIX: 'myapp:'
@@ -51,7 +53,9 @@ ElastiCache with cluster mode disabled is supported by this module with no addit
 To connect to ElastiCache with cluster mode disabled:
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-valkey')(Lib, {
+import kvValkey from '@superloomdev/js-server-helper-kv-valkey';
+
+const KV = kvValkey(Lib, {
   HOST: 'your-elasticache-primary.xxxxxx.cache.amazonaws.com',
   PORT: 6379,
   TLS: true,
@@ -68,7 +72,9 @@ const KV = require('@superloomdev/js-server-helper-kv-valkey')(Lib, {
 Set `TLS: true` to enable TLS. Pass additional TLS options via `TLS_CONFIG`:
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-valkey')(Lib, {
+import kvValkey from '@superloomdev/js-server-helper-kv-valkey';
+
+const KV = kvValkey(Lib, {
   HOST: 'your-server.com',
   PORT: 6379,
   TLS: true,

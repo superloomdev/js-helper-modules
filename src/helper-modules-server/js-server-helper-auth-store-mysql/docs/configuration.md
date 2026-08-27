@@ -13,7 +13,11 @@ The MySQL store adapter receives a `Lib` container and config to produce a ready
 ## Loader Pattern
 
 ```js
-Lib.MySQL = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
+import sqlMysql from '@superloomdev/js-server-helper-sql-mysql';
+import authStoreMysql from '@superloomdev/js-server-helper-auth-store-mysql';
+import auth from '@superloomdev/js-server-helper-auth';
+
+Lib.MySQL = sqlMysql(Lib, {
   HOST:     'localhost',
   PORT:     3306,
   DATABASE: 'app_db',
@@ -23,11 +27,11 @@ Lib.MySQL = require('@superloomdev/js-server-helper-sql-mysql')(Lib, {
 });
 Lib.SQL = Lib.MySQL;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-mysql')(Lib, {
+const Store = authStoreMysql(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user',
   TTL_SECONDS: 2592000
@@ -52,7 +56,7 @@ The validator throws an `Error` at loader time if `TABLE_NAME` is missing, null,
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+The adapter does not import these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
 | Package | Reads via `Lib` |
 |---|---|
@@ -60,7 +64,7 @@ The adapter does not require these packages directly. It accesses them through `
 | `@superloomdev/js-helper-debug` | `Lib.Debug` for driver-error logging |
 | `@superloomdev/js-server-helper-sql-mysql` | `Lib.SQL` (set by caller as `Lib.SQL = Lib.MySQL`) |
 
-The driver helper (`Lib.MySQL`) carries its own peer dependency on `mysql2`. The adapter never `require`s `mysql2` directly; applications that never use this store never load the driver.
+The driver helper (`Lib.MySQL`) carries its own peer dependency on `mysql2`. The adapter never imports `mysql2` directly; applications that never use this store never load the driver.
 
 ## Environment Variables
 

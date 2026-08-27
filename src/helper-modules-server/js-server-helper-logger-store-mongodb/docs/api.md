@@ -5,7 +5,9 @@ This adapter implements the 5-method store contract consumed by `helper-logger`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-mongodb')(Lib, {
+import loggerStoreMongodb from '@superloomdev/js-server-helper-logger-store-mongodb';
+
+const store = loggerStoreMongodb(Lib, {
   COLLECTION_NAME: 'action_log'
 });
 ```

@@ -22,7 +22,9 @@ export VALKEY_PORT=6379
 2. Write a small script that constructs the module with IAM config:
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-aws-elasticache')(Lib, {
+import kvAwsElasticache from '@superloomdev/js-server-helper-kv-aws-elasticache';
+
+const KV = kvAwsElasticache(Lib, {
   HOST: process.env.VALKEY_HOST,
   PORT: parseInt(process.env.VALKEY_PORT, 10),
   TLS: true,

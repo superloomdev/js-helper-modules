@@ -27,7 +27,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own `DynamoDBClient`, config, and lifecycle. The SDK client is cached at the module scope and shared across instances because it is stateless. Only the client reference holds state.
 
 ```javascript
-Lib.DynamoDBAdmin = require('@superloomdev/js-server-helper-nosql-aws-dynamodb-admin')(Lib, {
+import nosqlAwsDynamodbAdmin from '@superloomdev/js-server-helper-nosql-aws-dynamodb-admin';
+
+Lib.DynamoDBAdmin = nosqlAwsDynamodbAdmin(Lib, {
   AWS_REGION: process.env.AWS_REGION,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY
@@ -102,15 +104,18 @@ The admin module uses a **separate set of AWS credentials** from the data-plane 
 In a typical project loader:
 
 ```javascript
+import nosqlAwsDynamodb from '@superloomdev/js-server-helper-nosql-aws-dynamodb';
+import nosqlAwsDynamodbAdmin from '@superloomdev/js-server-helper-nosql-aws-dynamodb-admin';
+
 // Data-plane: read/write user
-Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, {
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   REGION: process.env.AWS_REGION,
   KEY: process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
 });
 
 // Control-plane: admin user (only loaded in provisioning scripts or migration runners)
-Lib.DynamoDBAdmin = require('@superloomdev/js-server-helper-nosql-aws-dynamodb-admin')(Lib, {
+Lib.DynamoDBAdmin = nosqlAwsDynamodbAdmin(Lib, {
   AWS_REGION: process.env.AWS_REGION,
   AWS_ACCESS_KEY_ID: process.env.DYNAMODB_ADMIN_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY: process.env.DYNAMODB_ADMIN_SECRET_ACCESS_KEY

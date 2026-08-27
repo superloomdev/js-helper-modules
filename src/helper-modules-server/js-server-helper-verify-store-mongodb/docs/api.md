@@ -5,7 +5,9 @@ This adapter implements the 6-method store contract consumed by `helper-verify`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, {
+import verifyStoreMongodb from '@superloomdev/js-server-helper-verify-store-mongodb';
+
+const store = verifyStoreMongodb(Lib, {
   COLLECTION_NAME: 'verification_codes'
 });
 ```

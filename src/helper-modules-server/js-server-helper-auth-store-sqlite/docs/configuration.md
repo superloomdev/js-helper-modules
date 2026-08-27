@@ -13,16 +13,20 @@ The SQLite store adapter is a fully independent module. Call it with its config 
 ## Loader Pattern
 
 ```js
-Lib.SQLite = require('@superloomdev/js-server-helper-sql-sqlite')(Lib, {
+import sqlSqlite from '@superloomdev/js-server-helper-sql-sqlite';
+import authStoreSqlite from '@superloomdev/js-server-helper-auth-store-sqlite';
+import auth from '@superloomdev/js-server-helper-auth';
+
+Lib.SQLite = sqlSqlite(Lib, {
   FILE: '/var/data/sessions.db'   // path to a SQLite file, or ':memory:'
 });
 Lib.SQL = Lib.SQLite;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-sqlite')(Lib, {
+const Store = authStoreSqlite(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user',
   TTL_SECONDS: 2592000
@@ -49,7 +53,7 @@ The validator throws an `Error` at loader time if `TABLE_NAME` is missing, null,
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+The adapter does not import these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
 | Package | Reads via `Lib` |
 |---|---|

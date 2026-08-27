@@ -15,7 +15,9 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: false });
+import instance from 'helper-instance';
+
+Lib.Instance = instance(Lib, { CLOSE_ON_CLEANUP: false });
 ```
 
 Each loader call returns an independent Instance interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators`, **and its own process cleanup queue**. Load it exactly once, from the composition root, and share it through `Lib`.

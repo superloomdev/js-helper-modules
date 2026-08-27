@@ -19,7 +19,9 @@ Loader pattern, configuration keys, output formats, dependency notes, and testin
 The module is a factory. Each loader call returns an independent public interface with its own merged configuration captured in a closure.
 
 ```javascript
-Lib.Debug = require('helper-debug')(Lib, {
+import debug from 'helper-debug';
+
+Lib.Debug = debug(Lib, {
   LOG_LEVEL:  'info',
   LOG_FORMAT: 'json',
   APP_NAME:   'orders-api',
@@ -111,7 +113,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 There is no Docker container and no service emulator. Tests inspect the module's stdout / stderr behavior directly.
 

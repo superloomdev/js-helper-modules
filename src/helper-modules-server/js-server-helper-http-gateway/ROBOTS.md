@@ -15,8 +15,11 @@ through runtime-specific adapters.
 ## Loader Pattern (Factory)
 
 ```javascript
-const Adapter = require('helper-http-gateway-adapter-aws-apigateway')(Lib, {});
-const Gateway = require('helper-http-gateway')(Lib, {
+import httpGatewayAdapterAwsApigateway from 'helper-http-gateway-adapter-aws-apigateway';
+import httpGateway from 'helper-http-gateway';
+
+const Adapter = httpGatewayAdapterAwsApigateway(Lib, {});
+const Gateway = httpGateway(Lib, {
   Adapter: Adapter
 });
 ```

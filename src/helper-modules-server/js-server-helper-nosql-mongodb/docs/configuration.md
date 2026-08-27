@@ -27,7 +27,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own `MongoClient`, config, and lifecycle. The driver (`mongodb`) is cached at the module scope and shared across instances because it is stateless. Only the client and database references hold state.
 
 ```javascript
-Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+import nosqlMongodb from '@superloomdev/js-server-helper-nosql-mongodb';
+
+Lib.MongoDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE_NAME:     process.env.MONGODB_DATABASE
 });
@@ -87,7 +89,7 @@ The `Lib.Instance` peer is required. The module registers its connection teardow
 |---|---|---|
 | `mongodb` | `^6.x` | Official MongoDB Node.js driver. Lazy-loaded on first call, cached at module scope. |
 
-The driver is the only direct dependency. It is bundled because it is the implementation detail this module exists to wrap. You should never `require('mongodb')` in your application code.
+The driver is the only direct dependency. It is bundled because it is the implementation detail this module exists to wrap. You should never import `mongodb` in your application code.
 
 ---
 
@@ -96,13 +98,15 @@ The driver is the only direct dependency. It is bundled because it is the implem
 Each loader call returns an independent instance with its own `MongoClient`. Load the module twice (or more) to bind to multiple databases (or a primary database plus a read replica) from the same process:
 
 ```javascript
-Lib.PrimaryDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+import nosqlMongodb from '@superloomdev/js-server-helper-nosql-mongodb';
+
+Lib.PrimaryDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.PRIMARY_MONGODB_URI,
   DATABASE_NAME:     'app_db',
   MAX_POOL_SIZE:     20
 });
 
-Lib.AnalyticsDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+Lib.AnalyticsDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.ANALYTICS_MONGODB_URI,
   DATABASE_NAME:     'analytics_db',
   MAX_POOL_SIZE:     10
@@ -141,7 +145,7 @@ The module ships two test tiers:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Emulated** | MongoDB 7 single-node replica set in Docker | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Emulated** | MongoDB 7 single-node replica set in Docker | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | **Integration** | Real MongoDB cluster (Atlas or self-hosted) | Manually, against a sandbox cluster | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 ### Emulated (Docker)

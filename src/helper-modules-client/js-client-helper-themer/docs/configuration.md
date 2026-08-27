@@ -35,7 +35,9 @@ Internal references use the npm alias, so source code stays free of the scope:
 ## Loader Pattern
 
 ```javascript
-Lib.Themer = require('helper-themer')(Lib, {
+import themer from 'helper-themer';
+
+Lib.Themer = themer(Lib, {
   BASE_FONT_SIZE: 16,
   CACHE_CAPACITY: 32
 });

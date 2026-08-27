@@ -7,8 +7,11 @@ Email address validation, sanitization, canonicalization, and disposable domain 
 ## Loader
 
 ```javascript
-const Adapter = require('helper-contact-email-adapter-basic')(Lib, {});
-Lib.ContactEmail = require('helper-contact-email')(Lib, { Adapter });
+import contactEmailAdapterBasic from 'helper-contact-email-adapter-basic';
+import contactEmail from 'helper-contact-email';
+
+const Adapter = contactEmailAdapterBasic(Lib, {});
+Lib.ContactEmail = contactEmail(Lib, { Adapter });
 ```
 
 ## Exported Functions (7 total)

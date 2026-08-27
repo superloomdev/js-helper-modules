@@ -18,7 +18,9 @@ Loader pattern, configuration keys, dependency notes, and testing tier. For the 
 The module is a factory. Each loader call returns an independent public interface with its own merged configuration captured in a closure.
 
 ```javascript
-Lib.Crypto = require('helper-crypto')(Lib, {});
+import crypto from 'helper-crypto';
+
+Lib.Crypto = crypto(Lib, {});
 ```
 
 Loader call semantics:
@@ -55,7 +57,7 @@ None. The module never reads `process.env`. Browsers do not expose `process.env`
 |---|---|
 | `helper-utils` | Used for input validation (`isEmpty`, `isFunction`) |
 
-The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not `require()` the peer directly.
+The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not import the peer directly.
 
 ---
 
@@ -71,7 +73,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Tests run under Node and exercise both Web Crypto paths (where `globalThis.crypto` is available) and the polyfill paths (by stubbing the global). There is no separate browser tier; the surface is identical because both runtimes implement the same Web Crypto API.
 

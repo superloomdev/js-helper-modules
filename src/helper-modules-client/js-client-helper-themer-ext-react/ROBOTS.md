@@ -7,7 +7,9 @@
 ## Load
 
 ```javascript
-const Extension = require('helper-themer-ext-react')({
+import themerExtReact from 'helper-themer-ext-react';
+
+const Extension = themerExtReact({
   React: React,       // required, React 18+
   Themer: Lib.Themer, // required, a built themer instance
   Utils: Lib.Utils,   // optional

@@ -184,7 +184,7 @@ The test suite uses 23 event fixtures stored in `_test/fixtures/`:
 Loading any fixture:
 
 ```javascript
-const fs = require('node:fs');
+import fs from 'node:fs';
 const event = JSON.parse(fs.readFileSync('_test/fixtures/v2-post-json.json', 'utf8'));
 ```
 

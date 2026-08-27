@@ -21,7 +21,9 @@ Server helper. Class C (driver wrapper, control-plane). Service-dependent (needs
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.DynamoDBAdmin = require('@superloomdev/js-server-helper-nosql-aws-dynamodb-admin')(Lib, { /* config overrides */ });
+import nosqlAwsDynamodbAdmin from '@superloomdev/js-server-helper-nosql-aws-dynamodb-admin';
+
+Lib.DynamoDBAdmin = nosqlAwsDynamodbAdmin(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent DynamoDB admin interface with its own `Lib`, `CONFIG`, and DynamoDBClient instance. The admin credentials must have IAM permissions for CreateTable, DeleteTable, UpdateTimeToLive, DescribeTable, and ListTables.

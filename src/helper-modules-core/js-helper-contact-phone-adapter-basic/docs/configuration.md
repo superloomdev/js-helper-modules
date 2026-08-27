@@ -3,8 +3,11 @@
 ## Loader Pattern
 
 ```javascript
-const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
-Lib.ContactPhone = require('helper-contact-phone')(Lib, { Adapter });
+import contactPhoneAdapterBasic from 'helper-contact-phone-adapter-basic';
+import contactPhone from 'helper-contact-phone';
+
+const Adapter = contactPhoneAdapterBasic(Lib, {});
+Lib.ContactPhone = contactPhone(Lib, { Adapter });
 ```
 
 ## Peer Dependencies
@@ -34,7 +37,7 @@ Country data is generated from `libphonenumber-js` min metadata, which is source
 - **Fields per country:** `calling_code`, `min_length`, `max_length`
 - **max_length cap:** Capped at `15 - calling_code.length` to stay within E.164
 
-The generated file is committed so consumers need no build step. Metro and other bundlers see a static `require()` with no dynamic resolution.
+The generated file is committed so consumers need no build step. Metro and other bundlers see a static `createRequire(import.meta.url)` call with no dynamic resolution.
 
 ## Testing Tiers
 

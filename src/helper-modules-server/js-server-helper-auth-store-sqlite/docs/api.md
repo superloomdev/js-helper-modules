@@ -22,7 +22,9 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ```js
 Lib.SQL = Lib.SQLite;  // alias so the adapter picks Lib.SQL
 
-const store = require('@superloomdev/js-server-helper-auth-store-sqlite')(Lib, {
+import authStoreSqlite from '@superloomdev/js-server-helper-auth-store-sqlite';
+
+const store = authStoreSqlite(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 ```

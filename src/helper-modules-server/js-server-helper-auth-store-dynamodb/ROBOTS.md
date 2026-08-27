@@ -7,11 +7,14 @@ Cloud-native. Uses a single-table design with composite Sort Key. Table provisio
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
+import authStoreDynamodb from '@superloomdev/js-server-helper-auth-store-dynamodb';
+import auth from '@superloomdev/js-server-helper-auth';
+
+const Store = authStoreDynamodb(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user'
 });
@@ -50,7 +53,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-dynamodb')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `authStoreDynamodb(Lib, { table_name })` (after `import authStoreDynamodb from '@superloomdev/js-server-helper-auth-store-dynamodb'`) to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
 2. **`setupNewStore` delegates to `Lib.DynamoDBAdmin` when injected.** When `shared_libs.DynamoDBAdmin` is present, `setupNewStore` creates the table with PK=`tenant_id`, SK=`session_key`, waits for ACTIVE, and enables native TTL on `expires_at` - all with idempotent semantics. When no admin is injected, it returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` and the operator must provision out-of-band via IaC or AWS Console.
 

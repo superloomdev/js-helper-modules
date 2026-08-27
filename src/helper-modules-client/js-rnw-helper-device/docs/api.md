@@ -3,7 +3,9 @@
 ## Loader
 
 ```javascript
-const Device = require('@superloomdev/js-rnw-helper-device')(shared_libs, config);
+import device from '@superloomdev/js-rnw-helper-device';
+
+const Device = device(shared_libs, config);
 ```
 
 ### Parameters

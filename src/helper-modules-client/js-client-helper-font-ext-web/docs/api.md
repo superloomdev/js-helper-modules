@@ -3,7 +3,9 @@
 ## Loader
 
 ```javascript
-const WebFontAdapter = require('@superloomdev/js-client-helper-font-ext-web')(shared_libs, config);
+import fontExtWeb from '@superloomdev/js-client-helper-font-ext-web';
+
+const WebFontAdapter = fontExtWeb(shared_libs, config);
 ```
 
 ### Required Injections

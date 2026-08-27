@@ -5,7 +5,9 @@ This adapter implements the 9-method store contract consumed by `helper-cache` (
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-valkey')(Lib, {
+import cacheStoreValkey from '@superloomdev/js-server-helper-cache-store-valkey';
+
+const Store = cacheStoreValkey(Lib, {
   KEY_PREFIX: 'cache:',
   KEY_SEPARATOR: ':',
   LOCK_KEY_PREFIX: 'cache:lock:'

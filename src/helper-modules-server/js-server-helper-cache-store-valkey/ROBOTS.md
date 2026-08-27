@@ -7,7 +7,9 @@ Requires a running Valkey instance. Uses `helper-kv-valkey` (native driver wrapp
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-valkey')(Lib, {
+import cacheStoreValkey from '@superloomdev/js-server-helper-cache-store-valkey';
+
+const Store = cacheStoreValkey(Lib, {
   KEY_PREFIX: 'cache:',
   KEY_SEPARATOR: ':'
 });

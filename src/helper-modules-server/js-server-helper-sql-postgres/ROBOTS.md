@@ -23,8 +23,10 @@ Class C. Server helper. Service-dependent (needs Docker for emulated, real Postg
 ## Loader Pattern (Multi-DB Capable)
 
 ```javascript
-Lib.PrimaryDB = require('@superloomdev/js-server-helper-sql-postgres')(Lib, { HOST: ..., DATABASE: ... });
-Lib.ReaderDB  = require('@superloomdev/js-server-helper-sql-postgres')(Lib, { HOST: ..., DATABASE: ... });
+import sqlPostgres from '@superloomdev/js-server-helper-sql-postgres';
+
+Lib.PrimaryDB = sqlPostgres(Lib, { HOST: ..., DATABASE: ... });
+Lib.ReaderDB  = sqlPostgres(Lib, { HOST: ..., DATABASE: ... });
 ```
 
 Each loader call returns an independent public interface with its own pool - no singleton state.
@@ -128,7 +130,7 @@ A borrowed client from `getClient` is registered for request-scoped release via 
 
 ## Patterns
 - **Factory per loader:** every loader call returns its own instance with its own pool. No module-level singletons.
-- **Lazy adapter load:** `pg` is `require()`-d on first use via `loadAdapter()`. Cached at module scope and shared across every instance because the driver is stateless.
+- **Lazy adapter load:** `pg` is loaded on first use via `loadAdapter()` using `createRequire(import.meta.url)` - the sanctioned pattern for lazy CJS loading in the server tier. Cached at module scope and shared across every instance because the driver is stateless.
 - **Lazy pool init:** pool is created on the first query, not at loader time. Friendly to serverless functions.
 - **Performance logging:** `Lib.Debug.performanceAuditLog` on every I/O function using a local `start_ms` captured at operation entry.
 - **Placeholder translation:** `?`/`??` in source SQL → `$N` / inlined identifier before pool.query.

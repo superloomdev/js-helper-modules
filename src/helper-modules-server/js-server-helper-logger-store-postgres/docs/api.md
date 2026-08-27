@@ -5,7 +5,9 @@ This adapter implements the 5-method store contract consumed by `helper-logger`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, { TABLE_NAME: 'action_log' });
+import loggerStorePostgres from '@superloomdev/js-server-helper-logger-store-postgres';
+
+const store = loggerStorePostgres(Lib, { TABLE_NAME: 'action_log' });
 ```
 
 ## Store Contract

@@ -7,11 +7,14 @@ Embedded / in-process. Uses Node's built-in `node:sqlite` through the `helper-sq
 ## Construction
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
+import loggerStoreSqlite from '@superloomdev/js-server-helper-logger-store-sqlite';
+import logger from '@superloomdev/js-server-helper-logger';
+
+const Store = loggerStoreSqlite(Lib, {
   TABLE_NAME: 'action_log'  // required. one table per logger instance
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+Lib.Logger = logger(Lib, {
   Store: Store
 });
 ```
@@ -60,7 +63,7 @@ helper-debug                (structured logging - via shared_libs.Debug)
 helper-sql-sqlite           (node:sqlite wrapper - via shared_libs.SQL)
 ```
 
-All are loaded into `Lib` by the application. The adapter never requires any of them directly; it picks them from the injected container.
+All are loaded into `Lib` by the application. The adapter never imports any of them directly; it picks them from the injected container.
 
 ## Error Catalog
 

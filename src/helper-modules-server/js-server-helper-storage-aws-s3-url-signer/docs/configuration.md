@@ -29,7 +29,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module uses a factory pattern. Each loader call constructs an independent `S3Client` from the merged config. The SDK (`@aws-sdk/client-s3` plus `@aws-sdk/s3-request-presigner`) is cached at module scope and shared across loader invocations because it is stateless. Only the configured `S3Client` instance holds region/credential state.
 
 ```javascript
-Lib.S3UrlSigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, {
+import storageAwsS3UrlSigner from '@superloomdev/js-server-helper-storage-aws-s3-url-signer';
+
+Lib.S3UrlSigner = storageAwsS3UrlSigner(Lib, {
   REGION: process.env.AWS_REGION,
   KEY:    process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
@@ -105,7 +107,7 @@ The module uses a factory pattern (each loader call returns an independent inter
 | `@aws-sdk/client-s3` | `^3.x` | AWS S3 client and command constructors. Lazy-loaded on first call, cached at module scope |
 | `@aws-sdk/s3-request-presigner` | `^3.x` | Presigned URL generation. Lazy-loaded on first call, cached at module scope |
 
-You should never `require('@aws-sdk/client-s3')` or `require('@aws-sdk/s3-request-presigner')` in your application code. The module exists to wrap them.
+You should never import `@aws-sdk/client-s3` or `@aws-sdk/s3-request-presigner` in your application code. The module exists to wrap them.
 
 ---
 
@@ -175,13 +177,15 @@ For any of these, set `REGION` to whatever the service expects (often `us-east-1
 Each loader call returns an independent factory instance with its own SDK client, region, and credentials. Load the module multiple times for cross-region buckets or cross-account access:
 
 ```javascript
-Lib.PrimarySigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, {
+import storageAwsS3UrlSigner from '@superloomdev/js-server-helper-storage-aws-s3-url-signer';
+
+Lib.PrimarySigner = storageAwsS3UrlSigner(Lib, {
   REGION: 'us-east-1',
   KEY:    process.env.PRIMARY_AWS_KEY,
   SECRET: process.env.PRIMARY_AWS_SECRET
 });
 
-Lib.BackupSigner = require('@superloomdev/js-server-helper-storage-aws-s3-url-signer')(Lib, {
+Lib.BackupSigner = storageAwsS3UrlSigner(Lib, {
   REGION: 'eu-west-1',
   KEY:    process.env.BACKUP_AWS_KEY,
   SECRET: process.env.BACKUP_AWS_SECRET
@@ -217,7 +221,7 @@ The module ships two test tiers:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Emulated** | MinIO in Docker (S3-compatible) | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Emulated** | MinIO in Docker (S3-compatible) | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | **Integration** | Real AWS S3 (sandbox bucket) | Manually, against a sandbox bucket | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 ### Emulated (Docker)

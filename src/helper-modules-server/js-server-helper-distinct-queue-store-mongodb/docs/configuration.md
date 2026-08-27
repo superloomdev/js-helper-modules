@@ -9,12 +9,15 @@ you provide to the parent module's `CONFIG.Store` key.
 
 ```javascript
 // Load the adapter with Lib injected and its own config
-const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
+import distinctQueueStoreMongodb from 'helper-distinct-queue-store-mongodb';
+import distinctQueue from 'helper-distinct-queue';
+
+const Store = distinctQueueStoreMongodb(Lib, {
   COLLECTION_NAME: 'distinct_queue_jobs'
 });
 
 // Pass the ready-to-use store to the parent module
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Store
 });
 ```
@@ -44,7 +47,9 @@ The adapter reads these from the injected `Lib` container:
 | `Lib.MongoDB` | `helper-nosql-mongodb` | The MongoDB driver used for all storage operations |
 
 ```javascript
-Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
+import nosqlMongodb from 'helper-nosql-mongodb';
+
+Lib.MongoDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE: process.env.MONGODB_DATABASE
 });
@@ -54,21 +59,30 @@ Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
 
 ```javascript
 // 1. Load base helpers
-Lib.Utils = require('helper-utils');
-Lib.Debug = require('helper-debug')(Lib);
-Lib.Instance = require('helper-instance')(Lib);
+import utils from 'helper-utils';
+import debug from 'helper-debug';
+import instance from 'helper-instance';
 
 // 2. Load MongoDB helper
-Lib.MongoDB = require('helper-nosql-mongodb')(Lib, {
+import nosqlMongodb from 'helper-nosql-mongodb';
+
+// 3. Load the store adapter (Lib injected), then the parent module
+import distinctQueueStoreMongodb from 'helper-distinct-queue-store-mongodb';
+import distinctQueue from 'helper-distinct-queue';
+
+Lib.Utils = utils;
+Lib.Debug = debug(Lib);
+Lib.Instance = instance(Lib);
+
+Lib.MongoDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE: process.env.MONGODB_DATABASE
 });
 
-// 3. Load the store adapter (Lib injected), then the parent module
-const Store = require('helper-distinct-queue-store-mongodb')(Lib, {
+const Store = distinctQueueStoreMongodb(Lib, {
   COLLECTION_NAME: 'queue_jobs'
 });
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Store
 });
 

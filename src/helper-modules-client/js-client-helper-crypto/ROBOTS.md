@@ -13,7 +13,9 @@ None. Uses browser/runtime-native Web Crypto API (`globalThis.crypto`).
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Crypto = require('helper-crypto')(Lib, { /* config overrides */ });
+import crypto from 'helper-crypto';
+
+Lib.Crypto = crypto(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent Crypto interface with its own `Lib` and `CONFIG`. Stateless - no per-instance resources.

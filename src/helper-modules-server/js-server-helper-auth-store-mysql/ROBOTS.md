@@ -5,13 +5,16 @@ Class F storage adapter. MySQL backend for `helper-auth`. Standard factory shape
 ## Loader Pattern
 
 ```js
+import authStoreMysql from '@superloomdev/js-server-helper-auth-store-mysql';
+import auth from '@superloomdev/js-server-helper-auth';
+
 Lib.SQL = Lib.MySQL;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-mysql')(Lib, {
+const Store = authStoreMysql(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user'
 });
@@ -50,7 +53,7 @@ All methods are async. `instance` is the per-request scope object from `Lib.Inst
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-mysql')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`. Ensure `Lib.SQL` is set to `Lib.MySQL` before calling.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `authStoreMysql(Lib, { table_name })` (after `import authStoreMysql from '@superloomdev/js-server-helper-auth-store-mysql'`) to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`. Ensure `Lib.SQL` is set to `Lib.MySQL` before calling.
 
 2. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration. The compare runs after the primary-key row read.
 

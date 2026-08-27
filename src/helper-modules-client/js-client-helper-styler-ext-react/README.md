@@ -32,11 +32,11 @@ npm install react @superloomdev/js-client-helper-styler
 Then load the extension:
 
 ```js
-const React = require('react');
-const StylerExt = require('@superloomdev/js-client-helper-styler-ext-react');
+import React from 'react';
+import stylerExt from '@superloomdev/js-client-helper-styler-ext-react';
 
 // Build the extension with React injected
-const { ThemeProvider, useTheme, useStyles } = StylerExt({ React });
+const { ThemeProvider, useTheme, useStyles } = stylerExt({ React });
 ```
 
 Wrap your app with the provider:

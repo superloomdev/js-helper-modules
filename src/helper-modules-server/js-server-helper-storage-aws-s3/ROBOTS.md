@@ -21,7 +21,9 @@ Server helper. Service-dependent (needs Docker/MinIO for emulated, AWS for integ
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.S3 = require('@superloomdev/js-server-helper-storage-aws-s3')(Lib, { /* config overrides */ });
+import storageAwsS3 from '@superloomdev/js-server-helper-storage-aws-s3';
+
+Lib.S3 = storageAwsS3(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent S3 interface with its own `Lib`, `CONFIG`, and S3 client instance.

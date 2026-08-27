@@ -32,7 +32,7 @@ Two identifier parameters - `namespace` and `cache_code` - locate every entry. T
 
 ```
 Cache instance
- ├─ CONFIG.Store          (ready-to-use store object, e.g. require('helper-cache-store-valkey')(Lib, config))
+ ├─ CONFIG.Store          (ready-to-use store object, e.g. import cacheStoreValkey from 'helper-cache-store-valkey'; cacheStoreValkey(Lib, config))
  └─ Store                 (passed directly; reads/writes cache entries)
 ```
 

@@ -30,8 +30,11 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own SQS client, queue-URL cache, and config. The SDK adapter (`@aws-sdk/client-sqs`) is cached at module scope and shared across instances because it is stateless.
 
 ```javascript
-Lib.Instance = require('@superloomdev/js-server-helper-instance')(Lib, {});
-Lib.SQS = require('@superloomdev/js-server-helper-queue-aws-sqs')(Lib, {
+import instance from '@superloomdev/js-server-helper-instance';
+import queueAwsSqs from '@superloomdev/js-server-helper-queue-aws-sqs';
+
+Lib.Instance = instance(Lib, {});
+Lib.SQS = queueAwsSqs(Lib, {
   REGION: process.env.AWS_REGION,
   KEY:    process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
@@ -116,7 +119,7 @@ The `instance` argument is read on every call: `instance.time_ms` is the start t
 |---|---|---|
 | `@aws-sdk/client-sqs` | `^3.x` | AWS SQS client and command constructors. Lazy-loaded on first call, cached at module scope |
 
-You should never `require('@aws-sdk/client-sqs')` in your application code. The module exists to wrap it.
+You should never import `@aws-sdk/client-sqs` in your application code. The module exists to wrap it.
 
 ---
 
@@ -232,14 +235,16 @@ If processing time is highly variable (e.g. some messages take 2 seconds, others
 Each loader call returns an independent instance with its own SDK client, region, and credentials. Load the module multiple times for cross-region queues or cross-account access:
 
 ```javascript
-Lib.PrimarySQS = require('@superloomdev/js-server-helper-queue-aws-sqs')(Lib, {
+import queueAwsSqs from '@superloomdev/js-server-helper-queue-aws-sqs';
+
+Lib.PrimarySQS = queueAwsSqs(Lib, {
   REGION: 'us-east-1',
   KEY:    process.env.PRIMARY_AWS_KEY,
   SECRET: process.env.PRIMARY_AWS_SECRET,
   QUEUE_URL_PREFIX: 'https://sqs.us-east-1.amazonaws.com/111111111111/'
 });
 
-Lib.BackupSQS = require('@superloomdev/js-server-helper-queue-aws-sqs')(Lib, {
+Lib.BackupSQS = queueAwsSqs(Lib, {
   REGION: 'eu-west-1',
   KEY:    process.env.BACKUP_AWS_KEY,
   SECRET: process.env.BACKUP_AWS_SECRET,
@@ -257,7 +262,7 @@ The module ships two test tiers:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Emulated** | ElasticMQ in Docker (SQS-compatible) | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Emulated** | ElasticMQ in Docker (SQS-compatible) | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | **Integration** | Real AWS SQS (sandbox queue) | Manually, against a sandbox queue | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 ### Emulated (Docker)

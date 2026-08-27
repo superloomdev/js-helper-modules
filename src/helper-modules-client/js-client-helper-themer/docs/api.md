@@ -5,7 +5,9 @@ Every exported function of `helper-themer`, its arguments, and its return shape.
 ## Loader
 
 ```javascript
-const Themer = require('@superloomdev/js-client-helper-themer')(shared_libs, config);
+import themer from '@superloomdev/js-client-helper-themer';
+
+const Themer = themer(shared_libs, config);
 ```
 
 ### Parameters

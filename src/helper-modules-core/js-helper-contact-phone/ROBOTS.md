@@ -19,8 +19,11 @@ None. The core owns no country data.
 ## Loader Pattern (Factory)
 
 ```javascript
-const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
-Lib.ContactPhone = require('helper-contact-phone')(Lib, { Adapter });
+import contactPhoneAdapterBasic from 'helper-contact-phone-adapter-basic';
+import contactPhone from 'helper-contact-phone';
+
+const Adapter = contactPhoneAdapterBasic(Lib, {});
+Lib.ContactPhone = contactPhone(Lib, { Adapter });
 ```
 
 Each loader call returns an independent `ContactPhone` interface with its own merged configuration and adapter. The adapter is required and validated at construction time.

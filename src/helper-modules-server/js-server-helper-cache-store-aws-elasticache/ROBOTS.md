@@ -7,7 +7,9 @@ Requires a running ElastiCache instance. Uses `helper-kv-aws-elasticache` (nativ
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-aws-elasticache')(Lib, {
+import cacheStoreAwsElasticache from '@superloomdev/js-server-helper-cache-store-aws-elasticache';
+
+const Store = cacheStoreAwsElasticache(Lib, {
   KEY_PREFIX: 'cache:',
   KEY_SEPARATOR: ':'
 });

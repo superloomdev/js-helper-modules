@@ -37,9 +37,9 @@ Add to `devDependencies` in the module's `package.json`:
 Then replace the module's `eslint.config.js` with:
 
 ```javascript
-const { base } = require('@superloomdev/js-helper-eslint-config');
+import { base } from '@superloomdev/js-helper-eslint-config';
 
-module.exports = base;
+export default base;
 ```
 
 Use `browser` instead of `base` for modules that need DOM globals. Use `app` for application repos with ESM and JSX.

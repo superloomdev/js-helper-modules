@@ -25,11 +25,15 @@ Published to GitHub Packages under the `@superloomdev` scope. Registry setup is 
 ## Quick Start
 
 ```javascript
-const Lib = {};
-Lib.Utils = require('helper-utils')(Lib, {});
-Lib.Debug = require('helper-debug')(Lib, {});
+import helperUtils from 'helper-utils';
+import helperDebug from 'helper-debug';
+import themer from 'helper-themer';
 
-Lib.Themer = require('helper-themer')(Lib, {});
+const Lib = {};
+Lib.Utils = helperUtils(Lib, {});
+Lib.Debug = helperDebug(Lib, {});
+
+Lib.Themer = themer(Lib, {});
 
 const theme = Lib.Themer.buildTheme(template, [
   { name: 'brand', tokens: { brand: '#0f62fe' } },

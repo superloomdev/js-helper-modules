@@ -19,12 +19,15 @@ Every Superloom server-side module is a factory function that takes the `Lib` co
 Each store adapter is a **fully independent module** - it owns its own Lib, Config, and ERRORS. Construct the adapter first with its own config, then pass the ready-to-use store object as `CONFIG.Store`.
 
 ```js
-const Store = require('helper-logger-store-postgres')({
+import loggerStorePostgres from 'helper-logger-store-postgres';
+import logger from 'helper-logger';
+
+const Store = loggerStorePostgres({
   table_name: 'action_log',
   lib_sql:    Lib.Postgres
 });
 
-Lib.Logger = require('helper-logger')(Lib, {
+Lib.Logger = logger(Lib, {
   Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY    // optional
 });
@@ -38,7 +41,7 @@ The factory validates `CONFIG` at construction time. Misconfiguration fails at b
 
 | Key | Type | Default | Required | Notes |
 |---|---|---|---|---|
-| `Store` | `object` | `null` | Yes | Ready-to-use store object. Construct the adapter first: `require('helper-logger-store-<backend>')({ ... })`. Loader throws on missing or non-object |
+| `Store` | `object` | `null` | Yes | Ready-to-use store object. Construct the adapter first: `import loggerStore<Backend> from 'helper-logger-store-<backend>'; const Store = loggerStore<Backend>({ ... })`. Loader throws on missing or non-object |
 | `IP_ENCRYPT_KEY` | `string` | `null` | No | When set, every non-empty `ip` is AES-encrypted at rest via `Lib.Crypto.aesEncrypt`. Reads transparently decrypt via `Lib.Crypto.aesDecrypt`. Empty string throws; pass `null` (or omit) to store plaintext |
 
 ---
@@ -70,7 +73,7 @@ A decrypt failure (wrong key, key rotation in flight) returns the ciphertext rat
 
 ## Peer Dependencies
 
-Loaded through the standard Superloom loader. The logger reads only from the shared `Lib` container; nothing is `require`d directly inside the module.
+Loaded through the standard Superloom loader. The logger reads only from the shared `Lib` container; nothing is imported directly inside the module.
 
 | `Lib.*` | Source package | Used for |
 |---|---|---|

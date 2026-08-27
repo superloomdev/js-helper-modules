@@ -7,7 +7,9 @@ The adapter provisions the table itself via `setupNewStore` using `PAY_PER_REQUE
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-dynamodb')(Lib, {
+import verifyStoreDynamodb from '@superloomdev/js-server-helper-verify-store-dynamodb';
+
+const Store = verifyStoreDynamodb(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 ```
@@ -78,7 +80,7 @@ helper-debug                (structured logging - via shared_libs.Debug)
 helper-nosql-aws-dynamodb   (DynamoDB wrapper - via shared_libs.DynamoDB)
 ```
 
-All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never requires any of them directly; it picks them from the injected container.
+All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never imports any of them directly; it picks them from the injected container.
 
 ## Error Catalog
 

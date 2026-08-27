@@ -21,13 +21,16 @@ None. The adapter owns no runtime dependencies of its own.
 ## Loader Pattern
 
 ```js
+import authStorePostgres from '@superloomdev/js-server-helper-auth-store-postgres';
+import auth from '@superloomdev/js-server-helper-auth';
+
 Lib.SQL = Lib.Postgres;  // alias so the adapter picks Lib.SQL
 
-const Store = require('@superloomdev/js-server-helper-auth-store-postgres')(Lib, {
+const Store = authStorePostgres(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user'
 });
@@ -41,7 +44,7 @@ The adapter implements the 8-method session store contract defined by the Auth p
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-postgres')(Lib, { table_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`. Ensure `Lib.SQL` is set to `Lib.Postgres` before calling.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `authStorePostgres(Lib, { table_name })` (after `import authStorePostgres from '@superloomdev/js-server-helper-auth-store-postgres'`) to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`. Ensure `Lib.SQL` is set to `Lib.Postgres` before calling.
 
 2. **`getSession` returns `record: null` on hash mismatch.** Identical to the "session does not exist" shape. The wrong-secret path must not surface as an error envelope or distinct return; it must look identical to a missing row to prevent timing-based enumeration.
 

@@ -49,11 +49,14 @@ If your project is built on Superloom conventions (the same loader pattern, the 
 This adapter is installed alongside the Logger parent module and the `sql-sqlite` driver helper. Construct the store first, then pass it to the Logger:
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-sqlite')(Lib, {
+import loggerStoreSqlite from '@superloomdev/js-server-helper-logger-store-sqlite';
+import logger from '@superloomdev/js-server-helper-logger';
+
+const Store = loggerStoreSqlite(Lib, {
   TABLE_NAME: 'action_log'
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, { Store: Store });
+Lib.Logger = logger(Lib, { Store: Store });
 ```
 
 Do not vendor the source or use it as a local file dependency. The published package is the supported integration path.
@@ -66,7 +69,7 @@ The `helper-sql-sqlite` driver helper is a peer dependency. Inject it via `share
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Contract + Integration | SQLite (`:memory:`, in-process via `node:sqlite`) | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Contract + Integration | SQLite (`:memory:`, in-process via `node:sqlite`) | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Tests run fully in-process; no Docker, no service to provision. Test runtime details live in [Configuration - Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-logger-store-sqlite/docs/configuration.md#testing-tier).
 

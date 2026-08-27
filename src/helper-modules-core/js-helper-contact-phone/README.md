@@ -45,11 +45,14 @@ Both adapters expose the same contract. Swapping an adapter changes validation d
 ## Adding to Your Project
 
 ```javascript
+import contactPhoneAdapterBasic from 'helper-contact-phone-adapter-basic';
+import contactPhone from 'helper-contact-phone';
+
 // 1. Load the adapter first
-const Adapter = require('helper-contact-phone-adapter-basic')(Lib, {});
+const Adapter = contactPhoneAdapterBasic(Lib, {});
 
 // 2. Pass it to the core
-Lib.ContactPhone = require('helper-contact-phone')(Lib, { Adapter });
+Lib.ContactPhone = contactPhone(Lib, { Adapter });
 ```
 
 The loader pattern, including the full `Lib` container shape, is documented in [Server Loader Architecture](https://github.com/superloomdev/superloom/blob/main/docs/server/server-loader.md). For one-time GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
@@ -64,7 +67,7 @@ This module expects one peer module in the `Lib` container (Utils). For the full
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 ## License
 

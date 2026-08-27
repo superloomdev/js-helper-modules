@@ -16,7 +16,9 @@ Server helper. Service-dependent (needs Docker for emulated, AWS for integration
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.SQS = require('@superloomdev/js-server-helper-queue-aws-sqs')(Lib, { /* config overrides */ });
+import queueAwsSqs from '@superloomdev/js-server-helper-queue-aws-sqs';
+
+Lib.SQS = queueAwsSqs(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent SQS interface with its own `Lib`, `CONFIG`, SQS client, and queue URL cache.

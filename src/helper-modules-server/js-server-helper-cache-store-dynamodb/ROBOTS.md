@@ -7,7 +7,9 @@ Requires a running DynamoDB instance. Uses `helper-nosql-aws-dynamodb` (AWS SDK 
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-dynamodb')(Lib, {
+import cacheStoreDynamodb from '@superloomdev/js-server-helper-cache-store-dynamodb';
+
+const Store = cacheStoreDynamodb(Lib, {
   TABLE_NAME: 'my_cache_table'
 });
 ```

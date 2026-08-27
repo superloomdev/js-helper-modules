@@ -13,18 +13,22 @@ The MongoDB store adapter receives a `Lib` container and config to produce a rea
 ## Loader Pattern
 
 ```js
-Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+import nosqlMongodb from '@superloomdev/js-server-helper-nosql-mongodb';
+import authStoreMongodb from '@superloomdev/js-server-helper-auth-store-mongodb';
+import auth from '@superloomdev/js-server-helper-auth';
+
+Lib.MongoDB = nosqlMongodb(Lib, {
   CONNECTION_STRING:        'mongodb://localhost:27017/?directConnection=true',
   DATABASE_NAME:            'app_db',
   MAX_POOL_SIZE:            10,
   SERVER_SELECTION_TIMEOUT: 5000
 });
 
-const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
+const Store = authStoreMongodb(Lib, {
   COLLECTION_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user',
   TTL_SECONDS: 2592000
@@ -47,7 +51,7 @@ The validator throws an `Error` at loader time if `COLLECTION_NAME` is missing, 
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+The adapter does not import these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
 | Package | Reads via `Lib` |
 |---|---|
@@ -56,7 +60,7 @@ The adapter does not require these packages directly. It accesses them through `
 | `@superloomdev/js-server-helper-nosql-mongodb` | `Lib.MongoDB` injected by the caller |
 | `@superloomdev/js-server-helper-nosql-mongodb-admin` | `Lib.MongoDBAdmin` optional, injected for `setupNewStore` delegation |
 
-The driver helper (`Lib.MongoDB`) carries its own peer dependency on the native `mongodb` driver. The adapter never `require`s `mongodb` directly; applications that never use this store never load the driver.
+The driver helper (`Lib.MongoDB`) carries its own peer dependency on the native `mongodb` driver. The adapter never imports `mongodb` directly; applications that never use this store never load the driver.
 
 ## Environment Variables
 

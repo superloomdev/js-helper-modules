@@ -5,7 +5,9 @@ This adapter implements the 6-method store contract consumed by `helper-verify`.
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, {
+import verifyStorePostgres from '@superloomdev/js-server-helper-verify-store-postgres';
+
+const store = verifyStorePostgres(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 ```

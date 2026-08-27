@@ -20,15 +20,18 @@ Example with this module:
 
 **Core (pure JavaScript)**
 ```js
-const Styler = require('@superloomdev/js-client-helper-styler')({});
+import styler from '@superloomdev/js-client-helper-styler';
+
+const Styler = styler({});
 const theme = Styler.assemble(Styler.defaultTemplate, base, variant);
 ```
 
 **Extension (React)**
 ```js
-const Ext = require('@superloomdev/js-client-helper-styler-ext-react')({
-  React: require('react')
-});
+import extReact from '@superloomdev/js-client-helper-styler-ext-react';
+import React from 'react';
+
+const Ext = extReact({ React });
 
 // In your component
 const theme = Ext.useTheme();  // gets reactive theme from context

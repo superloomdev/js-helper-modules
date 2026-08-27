@@ -11,15 +11,19 @@ The pure core of the font system. It owns the family registry, family-name resol
 
 The core is testable in pure Node with zero stubs. No DOM, no React, no react-native, no Expo.
 
-```text
+```javascript
 // Core: register families and resolve tokens
-const Font = require('@superloomdev/js-client-helper-font')(Lib);
+import font from '@superloomdev/js-client-helper-font';
+
+const Font = font(Lib);
 Font.registerFamilies(manifest);
 Font.registerRoles({ primary: 'Poppins_400Regular' });
 const { family } = Font.resolveFamily('primary');
 
 // Web extension: inject @font-face into the DOM
-const WebFontAdapter = require('@superloomdev/js-client-helper-font-ext-web')(Lib);
+import fontExtWeb from '@superloomdev/js-client-helper-font-ext-web';
+
+const WebFontAdapter = fontExtWeb(Lib);
 await WebFontAdapter.loadManifest(Font.getManifest().manifest);
 ```
 

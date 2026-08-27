@@ -20,7 +20,9 @@ This page is intentionally short. HTTP has two configuration keys, no environmen
 The module is a factory. Each loader call returns an independent public interface with its own `Lib` and `CONFIG` captured in a closure. The module is stateless: there are no per-instance resources, no connection pools, no caches. Two loader calls return functionally identical interfaces.
 
 ```javascript
-Lib.Http = require('@superloomdev/js-server-helper-http')(Lib, {});
+import http from '@superloomdev/js-server-helper-http';
+
+Lib.Http = http(Lib, {});
 ```
 
 Loader call semantics:
@@ -61,7 +63,7 @@ None. The module never reads `process.env`. All configuration flows through the 
 | `@superloomdev/js-helper-utils` | Used internally for `Lib.Utils.isEmpty` (auth header validation) and `Lib.Utils.isNullOrUndefined` (query-string parameter filtering) |
 | `@superloomdev/js-helper-debug` | Used for outbound request logging (`Lib.Debug.log`) and per-request performance audit (`Lib.Debug.performanceAuditLog`) on both success and failure paths |
 
-The peers are consumed through the standard `Lib` injection in the loader's first argument. The module does not `require()` either peer directly.
+The peers are consumed through the standard `Lib` injection in the loader's first argument. The module does not import either peer directly.
 
 ---
 
@@ -88,7 +90,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit (real-network integration)** | Node.js `node --test` against `httpbin.org` | Every commit, every CI run. Requires outbound network access | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit (real-network integration)** | Node.js `node --test` against `httpbin.org` | Every commit, every CI run. Requires outbound network access | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 There is no Docker container and no service emulator. The tests issue real HTTP requests to [`httpbin.org`](https://httpbin.org), which echoes the request back and lets the test assert on what was actually sent (headers, body, query string). This catches end-to-end issues that a mocked test would not see: malformed multipart boundaries, incorrect content-type encoding, broken auth-header construction.
 

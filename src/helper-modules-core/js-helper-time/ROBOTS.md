@@ -14,7 +14,9 @@ None.
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Time = require('helper-time')(Lib, { /* config overrides */ });
+import time from 'helper-time';
+
+Lib.Time = time(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent `Time` interface with its own `Lib` captured in closure. Functions are pure - no shared module-level state.

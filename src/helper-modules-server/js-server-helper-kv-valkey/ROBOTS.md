@@ -27,7 +27,9 @@ Class C Driver Wrapper. Wraps Valkey/Redis via `ioredis`. Single instance only, 
 ## Loader Pattern (Factory)
 
 ```javascript
-const KV = require('@superloomdev/js-server-helper-kv-valkey')(Lib, {
+import kvValkey from '@superloomdev/js-server-helper-kv-valkey';
+
+const KV = kvValkey(Lib, {
   HOST: 'localhost',
   PORT: 6379,
   KEY_PREFIX: 'myapp:'

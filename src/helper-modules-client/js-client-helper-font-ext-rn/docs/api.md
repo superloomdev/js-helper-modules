@@ -3,7 +3,9 @@
 ## Loader
 
 ```javascript
-const RNFontAdapter = require('@superloomdev/js-client-helper-font-ext-rn')(shared_libs, config);
+import fontExtRn from '@superloomdev/js-client-helper-font-ext-rn';
+
+const RNFontAdapter = fontExtRn(shared_libs, config);
 ```
 
 ### Required Injections

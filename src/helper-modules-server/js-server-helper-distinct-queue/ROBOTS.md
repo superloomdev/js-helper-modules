@@ -9,21 +9,26 @@ Persistent, storage-agnostic last-write-wins coalescing queue keyed by `(tenant_
 ## Factory Pattern
 
 ```js
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
   // Validates CONFIG at construction (Store must be a ready-to-use object).
   // Throws synchronously on misconfiguration.
   return { enqueue, claim, listByPrefix };
-};
+}
 ```
 
 `CONFIG.Store` is a **ready-to-use store object** from a fully-independent adapter module. The adapter owns its own `Lib`, `Config`, and `ERRORS` internally. The parent module uses the store directly through the contract interface. Passing a non-object throws `CONFIG.Store is required and must be a store object`.
 
 ```js
-Lib.DistinctQueue = require('@superloomdev/js-server-helper-distinct-queue')(Lib, {
-  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
-    TABLE_NAME: 'distinct_queue'
-  })
+import distinctQueue from '@superloomdev/js-server-helper-distinct-queue';
+import distinctQueueStoreDynamodb from '@superloomdev/js-server-helper-distinct-queue-store-dynamodb';
+
+const Store = distinctQueueStoreDynamodb(Lib, {
+  TABLE_NAME: 'distinct_queue'
+});
+
+Lib.DistinctQueue = distinctQueue(Lib, {
+  Store: Store
 });
 ```
 

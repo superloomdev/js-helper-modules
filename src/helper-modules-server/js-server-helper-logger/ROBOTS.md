@@ -9,23 +9,26 @@ Compliance-friendly action log. One immutable row per log-worthy event recording
 ## Factory Pattern
 
 ```js
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
   // Validates CONFIG at construction (Store must be a ready-to-use object).
   // Throws synchronously on misconfiguration.
   return { log, listByEntity, listByActor, cleanupExpiredLogs, setupNewStore };
-};
+}
 ```
 
 `CONFIG.Store` is a **ready-to-use store object**, constructed by the adapter before being passed in. The adapter is a fully independent module that owns its own Lib, Config, and ERRORS.
 
 ```js
-const Store = require('helper-logger-store-postgres')({
+import loggerStorePostgres from 'helper-logger-store-postgres';
+import logger from 'helper-logger';
+
+const Store = loggerStorePostgres({
   TABLE_NAME: 'action_log',
   lib_sql:    Lib.Postgres
 });
 
-Lib.Logger = require('helper-logger')(Lib, {
+Lib.Logger = logger(Lib, {
   Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY    // optional
 });
@@ -84,7 +87,7 @@ Idempotent backend setup. Behavior varies by adapter: SQL creates table + indexe
 
 | Key | Type | Required | Notes |
 |---|---|---|---|
-| `Store` | object | Yes | Ready-to-use store object. Construct the adapter first: `require('helper-logger-store-<backend>')({ ... })` |
+| `Store` | object | Yes | Ready-to-use store object. Construct the adapter first: `import loggerStore<Backend> from 'helper-logger-store-<backend>'; const Store = loggerStore<Backend>({ ... })` |
 | `IP_ENCRYPT_KEY` | string \| null | No | When set, AES-encrypts `ip` at rest via `Lib.Crypto.aesEncrypt` |
 
 ## Error Catalog

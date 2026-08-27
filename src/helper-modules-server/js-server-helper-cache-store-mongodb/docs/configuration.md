@@ -3,11 +3,14 @@
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-cache-store-mongodb')(Lib, {
+import cacheStoreMongodb from '@superloomdev/js-server-helper-cache-store-mongodb';
+import cache from '@superloomdev/js-server-helper-cache';
+
+const Store = cacheStoreMongodb(Lib, {
   COLLECTION_NAME: 'my_cache_collection'
 });
 
-Lib.Cache = require('@superloomdev/js-server-helper-cache')(Lib, {
+Lib.Cache = cache(Lib, {
   Store: Store
 });
 ```

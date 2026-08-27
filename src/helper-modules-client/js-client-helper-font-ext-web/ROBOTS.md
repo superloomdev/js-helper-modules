@@ -27,7 +27,9 @@ None. All dependencies are peer dependencies.
 ## Loader Pattern
 
 ```javascript
-const WebFontAdapter = require('@superloomdev/js-client-helper-font-ext-web')({
+import fontExtWeb from '@superloomdev/js-client-helper-font-ext-web';
+
+const WebFontAdapter = fontExtWeb({
   Utils: Utils,
   Debug: Debug,
   Font: Font,         // required - the js-client-helper-font instance

@@ -26,7 +26,9 @@ None. All dependencies are peer dependencies.
 ## Loader Pattern
 
 ```javascript
-const Store = require('@superloomdev/js-client-helper-kv-localstorage')({
+import kvLocalstorage from '@superloomdev/js-client-helper-kv-localstorage';
+
+const Store = kvLocalstorage({
   Utils: Utils,
   Debug: Debug,
   WebStorage: engine    // optional; falls back to globalThis[localStorage|sessionStorage]

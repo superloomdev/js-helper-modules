@@ -7,7 +7,9 @@ Requires a running PostgreSQL instance. Uses `helper-sql-postgres` (pooled `pg` 
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, {
+import verifyStorePostgres from '@superloomdev/js-server-helper-verify-store-postgres';
+
+const Store = verifyStorePostgres(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 ```
@@ -74,7 +76,7 @@ helper-debug              (structured logging - via shared_libs.Debug)
 helper-sql-postgres       (pg driver wrapper - via shared_libs.SQL)
 ```
 
-All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never requires any of them directly; it picks them from the injected container.
+All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never imports any of them directly; it picks them from the injected container.
 
 ## Error Catalog
 

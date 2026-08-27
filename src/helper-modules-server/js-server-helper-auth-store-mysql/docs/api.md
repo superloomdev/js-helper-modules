@@ -22,7 +22,9 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ```js
 Lib.SQL = Lib.MySQL;  // alias so the adapter picks Lib.SQL
 
-const store = require('@superloomdev/js-server-helper-auth-store-mysql')(Lib, {
+import authStoreMysql from '@superloomdev/js-server-helper-auth-store-mysql';
+
+const store = authStoreMysql(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 ```

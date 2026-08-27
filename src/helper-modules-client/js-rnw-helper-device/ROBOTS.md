@@ -4,7 +4,7 @@
 
 ## Type
 
-Class I standalone module. Wraps React Native Platform, Dimensions, AppState, NetInfo, and SafeArea APIs. All platform APIs injected via `shared_libs`. No direct `require('react-native')`.
+Class I standalone module. Wraps React Native Platform, Dimensions, AppState, NetInfo, and SafeArea APIs. All platform APIs injected via `shared_libs`. No direct `import 'react-native'`.
 
 ## Peer Dependencies
 
@@ -36,7 +36,9 @@ None. All dependencies are peer dependencies or injected platform APIs.
 ## Loader Pattern
 
 ```javascript
-const Device = require('@superloomdev/js-rnw-helper-device')({
+import device from '@superloomdev/js-rnw-helper-device';
+
+const Device = device({
   Utils: Utils,
   Debug: Debug,
   Platform: Platform,           // required - react-native Platform
@@ -82,7 +84,7 @@ getSafeAreaInsets() -> { success, top, bottom, left, right, error } | async:no
 ## Patterns
 
 - **Factory-per-loader**: each `loader(shared_libs, config)` call returns an independent instance with its own subscription state
-- **Injection-only platform access**: no direct `require('react-native')`; all platform APIs arrive via `shared_libs`
+- **Injection-only platform access**: no direct `import 'react-native'`; all platform APIs arrive via `shared_libs`
 - **Optional APIs degrade gracefully**: AppState, NetInfo, SafeArea return error envelopes when not injected; Platform and Dimensions are required and throw at construction
 - **Subscription management**: `onViewportChange` and `onAppStateChange` return unsubscribe functions; callbacks stored in per-instance state
 - **Debounce**: viewport changes debounced when `VIEWPORT_DEBOUNCE_MS > 0`

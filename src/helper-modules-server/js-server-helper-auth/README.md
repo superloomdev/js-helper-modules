@@ -30,7 +30,7 @@ Storage backends are independent packages. A project installs only the adapter f
 
 ## Architecture Overview
 
-Auth is a **factory module**. Each `require()(Lib, config)` call returns a fully independent Auth interface bound to one actor type, one store, and one configuration. Multiple instances coexist in the same process and share no state.
+Auth is a **factory module**. Each `auth(Lib, config)` call (after `import auth from 'helper-auth'`) returns a fully independent Auth interface bound to one actor type, one store, and one configuration. Multiple instances coexist in the same process and share no state.
 
 ```
 Auth instance
@@ -94,7 +94,7 @@ It expects five peer modules in the `Lib` container (Utils, Debug, Crypto, Insta
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Unit (offline) | Node.js `node --test` against an in-process memory store | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Auth's own tests use the in-process memory fixture (`MemoryStore` in `_test/`) which implements the full eight-method store contract. There is no Docker dependency in this package and no database driver is required. Integration tests for each storage backend live in the corresponding adapter package (`helper-auth-store-*`) and run the shared store contract suite against real backends.
 

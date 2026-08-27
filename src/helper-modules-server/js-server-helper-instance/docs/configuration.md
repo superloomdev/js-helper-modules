@@ -20,7 +20,9 @@ This page is intentionally short. Instance has no current configuration keys and
 The module is a factory. Each loader call returns an independent public interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators` captured in a closure. Per-request state lives on the instance object returned by `initialize()`, not inside the loaded interface.
 
 ```javascript
-Lib.Instance = require('helper-instance')(Lib, {});
+import instance from 'helper-instance';
+
+Lib.Instance = instance(Lib, {});
 ```
 
 Loader call semantics:
@@ -51,11 +53,13 @@ Loader call semantics:
 The entry point supplies this. **The module never reads the environment to guess it**, because the platform boundary is already expressed structurally: a deployment has a Lambda entry point or a server entry point, and each supplies its own config.
 
 ```javascript
+import instance from 'helper-instance';
+
 // Lambda composition root
-Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: true });
+Lib.Instance = instance(Lib, { CLOSE_ON_CLEANUP: true });
 
 // Express composition root
-Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: false });
+Lib.Instance = instance(Lib, { CLOSE_ON_CLEANUP: false });
 ```
 
 Setting `true` on a persistent server is not a crash, but it destroys connection reuse: every request would open and close its own pool and pay a TCP, TLS, and authentication handshake.
@@ -75,7 +79,7 @@ None. The module never reads `process.env`.
 | `helper-utils` | `initialize` uses `getUnixTime` and `getUnixTimeInMilliSeconds`; `getAge` uses `getUnixTimeInMilliSeconds`; `validateConfig` uses `isBoolean` |
 | `helper-debug` | `Lib.Debug.error` reports a teardown routine that threw, so one failure never strands the routines after it |
 
-The peers are consumed through the standard `Lib` injection in the loader's first argument. The module does not `require()` either peer directly.
+The peers are consumed through the standard `Lib` injection in the loader's first argument. The module does not import either peer directly.
 
 ---
 
@@ -91,7 +95,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 There is no Docker container and no service emulator. Tests exercise the lifecycle ordering (initialize -> register cleanup -> register background -> complete background -> cleanup runs) directly against the module's public interface.
 

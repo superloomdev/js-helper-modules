@@ -11,9 +11,11 @@ A standalone device helper module for RNW applications. It wraps the React Nativ
 
 The module reads React Native `Platform`, not Expo, so it is not affected by the Expo pin. It targets the RNW pipeline because `react-native` Platform works across web, iOS, and Android via Metro.
 
-```text
+```javascript
 // In the host loader
-Lib.Device = require('@superloomdev/js-rnw-helper-device')({
+import device from '@superloomdev/js-rnw-helper-device';
+
+Lib.Device = device({
   Utils:  Lib.Utils,
   Debug:  Lib.Debug,
   Platform:   Platform,     // from react-native
@@ -28,7 +30,7 @@ Lib.Device = require('@superloomdev/js-rnw-helper-device')({
 
 1. **Centralized platform detection.** One module answers "which platform are we on" so the rest of the codebase reads as platform-agnostic.
 
-2. **Injection-only access.** No direct `require('react-native')`. All platform APIs arrive via `shared_libs`, making the module testable in pure Node with stubs.
+2. **Injection-only access.** No direct `import 'react-native'`. All platform APIs arrive via `shared_libs`, making the module testable in pure Node with stubs.
 
 3. **Optional APIs degrade gracefully.** AppState, NetInfo, and SafeArea return error envelopes when not injected, so the module works with a partial dependency set.
 

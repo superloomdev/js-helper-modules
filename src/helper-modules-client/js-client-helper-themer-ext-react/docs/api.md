@@ -5,7 +5,9 @@ Every exported function of `helper-themer-ext-react`, its arguments, and its ret
 ## Loader
 
 ```javascript
-const Extension = require('@superloomdev/js-client-helper-themer-ext-react')({
+import themerExtReact from '@superloomdev/js-client-helper-themer-ext-react';
+
+const Extension = themerExtReact({
   React: React,
   Themer: Lib.Themer,
   Utils: Lib.Utils,
@@ -18,7 +20,7 @@ const Extension = require('@superloomdev/js-client-helper-themer-ext-react')({
 | Parameter | Type | Description |
 |---|---|---|
 | `shared_libs.React` | `Function` | React 18+ (createContext, useState, useContext, useMemo, createElement) |
-| `shared_libs.Thermer` | `Object` | A built themer instance from `require('helper-themer')(Lib, config)` |
+| `shared_libs.Thermer` | `Object` | A built themer instance from `import themer from 'helper-themer'; themer(Lib, config)` |
 | `shared_libs.Utils` | `Object` | Type-check primitives (optional) |
 | `shared_libs.Debug` | `Object` | Logging (optional) |
 

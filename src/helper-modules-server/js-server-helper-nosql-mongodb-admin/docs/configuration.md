@@ -27,7 +27,9 @@ The page is split into two halves: a **reference** block (what you can set) at t
 The module is a factory. Each loader call returns an independent public interface with its own `MongoClient`, config, and lifecycle. The driver (`mongodb`) is cached at the module scope and shared across instances because it is stateless. Only the client and database references hold state.
 
 ```javascript
-Lib.MongoDBAdmin = require('@superloomdev/js-server-helper-nosql-mongodb-admin')(Lib, {
+import nosqlMongodbAdmin from '@superloomdev/js-server-helper-nosql-mongodb-admin';
+
+Lib.MongoDBAdmin = nosqlMongodbAdmin(Lib, {
   CONNECTION_STRING: process.env.MONGODB_ADMIN_CONNECTION_STRING,
   DATABASE_NAME:     process.env.MONGODB_ADMIN_DATABASE
 });
@@ -97,14 +99,17 @@ The admin module uses a **separate connection string** from the data-plane `nosq
 In a typical project loader:
 
 ```javascript
+import nosqlMongodb from '@superloomdev/js-server-helper-nosql-mongodb';
+import nosqlMongodbAdmin from '@superloomdev/js-server-helper-nosql-mongodb-admin';
+
 // Data-plane: read/write user
-Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, {
+Lib.MongoDB = nosqlMongodb(Lib, {
   CONNECTION_STRING: process.env.MONGODB_CONNECTION_STRING,
   DATABASE_NAME:     process.env.MONGODB_DATABASE
 });
 
 // Control-plane: admin user (only loaded in provisioning scripts or migration runners)
-Lib.MongoDBAdmin = require('@superloomdev/js-server-helper-nosql-mongodb-admin')(Lib, {
+Lib.MongoDBAdmin = nosqlMongodbAdmin(Lib, {
   CONNECTION_STRING: process.env.MONGODB_ADMIN_CONNECTION_STRING,
   DATABASE_NAME:     process.env.MONGODB_ADMIN_DATABASE
 });

@@ -21,7 +21,9 @@ Server helper. Service-dependent (needs Docker for emulated, Atlas for integrati
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.MongoDB = require('@superloomdev/js-server-helper-nosql-mongodb')(Lib, { /* config overrides */ });
+import nosqlMongodb from '@superloomdev/js-server-helper-nosql-mongodb';
+
+Lib.MongoDB = nosqlMongodb(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent MongoDB interface with its own `Lib`, `CONFIG`, and MongoClient instance.

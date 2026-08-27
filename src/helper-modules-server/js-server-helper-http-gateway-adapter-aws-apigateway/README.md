@@ -14,18 +14,21 @@ A stateless adapter that normalizes AWS API Gateway payload format v2.0 event ob
 ## Usage
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
+import httpGatewayAdapterAwsApigateway from '@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
-const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const AwsAdapter = httpGatewayAdapterAwsApigateway(Lib, {});
+
+const Gateway = httpGateway(Lib, {
   Adapter: AwsAdapter
 });
 
 // In your Lambda handler:
-exports.handler = async function (event, context, callback) {
+export const handler = async function (event, context, callback) {
   const instance = Lib.Instance.initialize();
-  httpGateway.initHttpRequestData(instance, event, context, callback);
+  Gateway.initHttpRequestData(instance, event, context, callback);
   // ... application logic ...
-  httpGateway.returnHttpResponse(instance, 200, null, { ok: true });
+  Gateway.returnHttpResponse(instance, 200, null, { ok: true });
 };
 ```
 
@@ -83,7 +86,7 @@ The adapter receives `Utils` and `Debug` from the shared `Lib` container (inject
 
 | Tier | Runtime | Status |
 |------|---------|--------|
-| Integration | Node.js built-in test runner against 23 real API Gateway v2.0 event fixtures | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Integration | Node.js built-in test runner against 23 real API Gateway v2.0 event fixtures | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Tests are fixture-driven. 6 fixtures are copied verbatim from [`aws/aws-lambda-go events/testdata`](https://github.com/aws/aws-lambda-go/tree/main/events/testdata) - the exact shapes the AWS Go SDK uses to test its own event handling, which is the closest "real Lambda input" available without provisioning AWS infrastructure. 17 hand-written fixtures cover scenarios AWS does not publish (cookies, bearer/basic auth, API key, malformed body, multipart, unicode, base64, edge cases). The v1.0 REST API authorizer payload in the AWS testdata is included as a documented unsupported boundary. Direct unit tests (Group J) cover all adapter helper functions with 93 total tests.
 

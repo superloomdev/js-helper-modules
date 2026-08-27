@@ -12,23 +12,25 @@ A stateless adapter that reads from the Express `req` object and stores `res` as
 ## Usage
 
 ```javascript
-const express = require('express');
+import express from 'express';
+import httpGatewayAdapterExpress from '@superloomdev/js-server-helper-http-gateway-adapter-express';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const ExpressAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-express')(Lib, {});
+const ExpressAdapter = httpGatewayAdapterExpress(Lib, {});
 
-const httpGateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const Gateway = httpGateway(Lib, {
   Adapter: ExpressAdapter
 });
 
 app.post('/api/example', function (req, res) {
   const instance = Lib.Instance.initialize();
-  httpGateway.initHttpRequestData(instance, req, null, res);
+  Gateway.initHttpRequestData(instance, req, null, res);
   // ... application logic ...
-  httpGateway.returnHttpResponse(instance, 200, null, { ok: true });
+  Gateway.returnHttpResponse(instance, 200, null, { ok: true });
 });
 ```
 
@@ -80,7 +82,7 @@ The adapter relies on the application providing standard Express middleware (`ex
 
 | Tier | Runtime | Status |
 |------|---------|--------|
-| Integration | Node.js built-in test runner against a real Express 5 server on a random free port | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Integration | Node.js built-in test runner against a real Express 5 server on a random free port | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Tests boot a real Express 5 server (`app.listen(0)`), install `express.json`, `express.urlencoded`, and `cookie-parser` middleware, then hit the server with native `fetch`. No mocked `req`/`res` objects. Coverage includes request normalization, auth patterns, cookie round-trip (with and without `cookie-parser`), response building, full parameter-extraction pipeline, unicode, large bodies, and graceful error handling for malformed JSON. Direct unit tests (Group H) cover adapter methods without HTTP server with 80 total tests.
 

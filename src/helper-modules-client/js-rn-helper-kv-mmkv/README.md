@@ -11,12 +11,16 @@ A standalone key-value storage module for React Native applications. It wraps th
 
 The module exposes the same 18-function API as `helper-kv-localstorage`, so an application can swap between them at the loader level based on platform:
 
-```text
+```javascript
 // Web build
-Lib.KvStore = require('@superloomdev/js-client-helper-kv-localstorage')(Lib, { NAMESPACE: 'myapp' });
+import kvLocalstorage from '@superloomdev/js-client-helper-kv-localstorage';
+
+Lib.KvStore = kvLocalstorage(Lib, { NAMESPACE: 'myapp' });
 
 // Native build
-Lib.KvStore = require('@superloomdev/js-rn-helper-kv-mmkv')(Lib, { NAMESPACE: 'myapp' });
+import kvMmkv from '@superloomdev/js-rn-helper-kv-mmkv';
+
+Lib.KvStore = kvMmkv(Lib, { NAMESPACE: 'myapp' });
 ```
 
 ## Storage Limits

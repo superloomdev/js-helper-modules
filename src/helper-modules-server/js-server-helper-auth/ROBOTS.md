@@ -25,8 +25,13 @@ None. JWT signing uses Node's built-in `crypto` (via `Lib.Crypto`).
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.AuthUser = require('helper-auth')(Lib, {
-  Store:        require('helper-auth-store-postgres')({ TABLE_NAME: 'sessions_user', lib_sql: Lib.Postgres }),
+import auth from 'helper-auth';
+import authStorePostgres from 'helper-auth-store-postgres';
+
+const Store = authStorePostgres({ TABLE_NAME: 'sessions_user', lib_sql: Lib.Postgres });
+
+Lib.AuthUser = auth(Lib, {
+  Store:        Store,
   ACTOR_TYPE:   'user',
   TTL_SECONDS:  2592000,
   LIMITS:       { TOTAL_MAX: 20, EVICT_OLDEST_ON_LIMIT: true },
@@ -37,9 +42,14 @@ Lib.AuthUser = require('helper-auth')(Lib, {
 One Auth instance per `actor_type`:
 
 ```javascript
-const AuthFactory = require('helper-auth');
-Lib.AuthUser  = AuthFactory(Lib, { ACTOR_TYPE: 'user',  Store: require('...auth-store-postgres')({ TABLE_NAME: 'sessions_user',  lib_sql: Lib.Postgres }) });
-Lib.AuthAdmin = AuthFactory(Lib, { ACTOR_TYPE: 'admin', Store: require('...auth-store-postgres')({ TABLE_NAME: 'sessions_admin', lib_sql: Lib.Postgres }) });
+import auth from 'helper-auth';
+import authStorePostgres from 'helper-auth-store-postgres';
+
+const StoreUser  = authStorePostgres({ TABLE_NAME: 'sessions_user',  lib_sql: Lib.Postgres });
+const StoreAdmin = authStorePostgres({ TABLE_NAME: 'sessions_admin', lib_sql: Lib.Postgres });
+
+Lib.AuthUser  = auth(Lib, { ACTOR_TYPE: 'user',  Store: StoreUser });
+Lib.AuthAdmin = auth(Lib, { ACTOR_TYPE: 'admin', Store: StoreAdmin });
 ```
 
 **Store must be a ready-to-use store object returned by calling the adapter with its config.** Passing a function or string is rejected at loader time.
@@ -76,7 +86,7 @@ Inbound cookies are read from `instance.http_request.cookies` (already parsed by
 
 | Key | Type | Default | Notes |
 |---|---|---|---|
-| `Store` | Object | `null` | **Required.** Pass a ready-to-use store object: `require('helper-auth-store-*')({...})` |
+| `Store` | Object | `null` | **Required.** Pass a ready-to-use store object: `import authStore<Backend> from 'helper-auth-store-<backend>'; const Store = authStore<Backend>({...})` |
 | `ACTOR_TYPE` | String | `null` | **Required.** This instance owns one actor_type |
 | `TTL_SECONDS` | Number | `2592000` (30 days) | Session lifetime |
 | `LAST_ACTIVE_UPDATE_INTERVAL_SECONDS` | Number | `600` | Throttle for last_active refresh |

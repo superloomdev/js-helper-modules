@@ -7,7 +7,9 @@
 ## Loader
 
 ```javascript
-const Store = require('@superloomdev/js-rn-helper-kv-mmkv')({
+import kvMmkv from '@superloomdev/js-rn-helper-kv-mmkv';
+
+const Store = kvMmkv({
   Utils: Utils,
   Debug: Debug,
   MMKV: MMKV    // required - the MMKV class from react-native-mmkv

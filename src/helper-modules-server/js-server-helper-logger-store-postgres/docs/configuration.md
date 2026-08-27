@@ -5,11 +5,14 @@
 Construct this adapter before the Logger parent and pass it as `CONFIG.Store`.
 
 ```js
-const Store = require('@superloomdev/js-server-helper-logger-store-postgres')(Lib, {
+import loggerStorePostgres from '@superloomdev/js-server-helper-logger-store-postgres';
+import logger from '@superloomdev/js-server-helper-logger';
+
+const Store = loggerStorePostgres(Lib, {
   TABLE_NAME: 'action_log'
 });
 
-Lib.Logger = require('@superloomdev/js-server-helper-logger')(Lib, {
+Lib.Logger = logger(Lib, {
   Store:          Store,
   IP_ENCRYPT_KEY: process.env.IP_ENCRYPT_KEY  // optional
 });

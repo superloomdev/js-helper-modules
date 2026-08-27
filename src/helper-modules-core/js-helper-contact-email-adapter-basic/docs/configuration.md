@@ -3,8 +3,11 @@
 ## Loader Pattern
 
 ```javascript
-const Adapter = require('helper-contact-email-adapter-basic')(Lib, {});
-Lib.ContactEmail = require('helper-contact-email')(Lib, { Adapter });
+import contactEmailAdapterBasic from 'helper-contact-email-adapter-basic';
+import contactEmail from 'helper-contact-email';
+
+const Adapter = contactEmailAdapterBasic(Lib, {});
+Lib.ContactEmail = contactEmail(Lib, { Adapter });
 ```
 
 ## Peer Dependencies

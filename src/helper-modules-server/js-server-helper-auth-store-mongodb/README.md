@@ -63,7 +63,7 @@ It receives Utils, Debug, and MongoDB through the `Lib` container injected by th
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Contract + Integration | MongoDB in Docker | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Contract + Integration | MongoDB in Docker | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 Test runtime details (Docker lifecycle, environment variables, contract suite coverage) live in [Configuration - Testing Tier](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-auth-store-mongodb/docs/configuration.md#testing-tier).
 

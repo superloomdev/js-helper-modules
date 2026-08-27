@@ -12,7 +12,9 @@ Server module. Node.js-specific cryptography helpers using the built-in `crypto`
 ## Loader Pattern (Factory)
 
 ```javascript
-Lib.Crypto = require('helper-crypto')(Lib, { /* config overrides */ });
+import crypto from 'helper-crypto';
+
+Lib.Crypto = crypto(Lib, { /* config overrides */ });
 ```
 
 Each loader call returns an independent Crypto interface with its own `Lib`, `CONFIG`, `ERRORS`, and `Validators`. Stateless - no per-instance resources. The shared Node.js `crypto` module is cached at module level.

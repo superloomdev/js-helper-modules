@@ -20,7 +20,9 @@ The contract is identical in shape across every `auth-store-*` adapter; only the
 ## Adapter Factory
 
 ```js
-const store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
+import authStoreDynamodb from '@superloomdev/js-server-helper-auth-store-dynamodb';
+
+const store = authStoreDynamodb(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 ```

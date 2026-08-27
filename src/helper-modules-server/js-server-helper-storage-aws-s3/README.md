@@ -61,7 +61,7 @@ It expects two peer modules in the `Lib` container (Utils, Debug). For the full 
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Emulated | MinIO in Docker (S3-compatible) | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Emulated | MinIO in Docker (S3-compatible) | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 | Integration | Real AWS S3 (sandbox bucket) | ![Integration Tests](https://img.shields.io/badge/Integration_Tests-not_yet_tested-lightgrey) |
 
 Test runtime details (Docker lifecycle, environment variables, integration setup, IAM permissions) live in [Configuration → Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-storage-aws-s3/docs/configuration.md#testing-tiers).

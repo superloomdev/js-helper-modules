@@ -3,11 +3,14 @@
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-postgres')(Lib, {
+import verifyStorePostgres from '@superloomdev/js-server-helper-verify-store-postgres';
+import verify from '@superloomdev/js-server-helper-verify';
+
+const Store = verifyStorePostgres(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 
-Lib.Verify = require('@superloomdev/js-server-helper-verify')(Lib, {
+Lib.Verify = verify(Lib, {
   Store: Store
 });
 ```

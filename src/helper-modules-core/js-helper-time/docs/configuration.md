@@ -20,7 +20,9 @@ This page is intentionally short. Time accepts no configuration keys and reads n
 The module is a factory. Each loader call returns an independent public interface with its own `Lib` container captured in a closure.
 
 ```javascript
-Lib.Time = require('helper-time')(Lib, {});
+import time from 'helper-time';
+
+Lib.Time = time(Lib, {});
 ```
 
 Loader call semantics:
@@ -51,7 +53,7 @@ None. The module never reads `process.env`.
 |---|---|
 | `helper-utils` | Used by `secondsToTimeString` for null-and-undefined detection. The rest of the surface is self-contained |
 
-The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not `require()` the peer directly.
+The peer is consumed through the standard `Lib.Utils` injection in the loader's first argument. The module does not import the peer directly.
 
 ---
 
@@ -67,7 +69,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 There is no Docker container and no service emulator. Every function is pure JavaScript with no I/O.
 

@@ -14,14 +14,17 @@ Configuration reference for `@superloomdev/js-server-helper-http-gateway-adapter
 Instantiate the adapter by calling it with the shared `Lib` container and an optional config object, then pass the ready-to-use object as `CONFIG.Adapter` to the gateway loader:
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
+import httpGatewayAdapterAwsApigateway from '@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
 
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, {
+const AwsAdapter = httpGatewayAdapterAwsApigateway(Lib, {});
+
+const Gateway = httpGateway(Lib, {
   Adapter: AwsAdapter
 });
 ```
 
-The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It merges config over companion file defaults and returns a ready-to-use adapter object - not the `require()` result directly - to the gateway.
+The adapter receives `Lib` by reference from the injected container (same shape as every other helper module). It merges config over companion file defaults and returns a ready-to-use adapter object - not the import result directly - to the gateway.
 
 ---
 
@@ -30,7 +33,9 @@ The adapter receives `Lib` by reference from the injected container (same shape 
 The AWS adapter accepts no configuration keys. Pass an empty object `{}` for defaults:
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
+import httpGatewayAdapterAwsApigateway from '@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway';
+
+const AwsAdapter = httpGatewayAdapterAwsApigateway(Lib, {});
 ```
 
 ---
@@ -49,12 +54,15 @@ The adapter receives `Utils` and `Debug` from the shared `Lib` container (inject
 ## Lambda Handler Pattern
 
 ```javascript
-const AwsAdapter = require('@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway')(Lib, {});
+import httpGatewayAdapterAwsApigateway from '@superloomdev/js-server-helper-http-gateway-adapter-aws-apigateway';
+import httpGateway from '@superloomdev/js-server-helper-http-gateway';
+
+const AwsAdapter = httpGatewayAdapterAwsApigateway(Lib, {});
 
 // Build the gateway once at module scope so it survives across warm invocations:
-const Gateway = require('@superloomdev/js-server-helper-http-gateway')(Lib, { Adapter: AwsAdapter });
+const Gateway = httpGateway(Lib, { Adapter: AwsAdapter });
 
-exports.handler = function (event, context, callback) {
+export const handler = function (event, context, callback) {
   const instance = Lib.Instance.initialize();
   Gateway.initHttpRequestData(instance, event, context, callback);
 

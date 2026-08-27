@@ -41,9 +41,12 @@ Registry setup: see [npmrc setup](https://github.com/superloomdev/superloom/blob
 ## Quick Start
 
 ```javascript
-const React = require('react');
-const Themer = require('helper-themer')(Lib, {});
-const Extension = require('helper-themer-ext-react')({
+import React from 'react';
+import themer from 'helper-themer';
+import themerExtReact from 'helper-themer-ext-react';
+
+const Themer = themer(Lib, {});
+const Extension = themerExtReact({
   React: React,
   Themer: Themer,
   Utils: Lib.Utils,

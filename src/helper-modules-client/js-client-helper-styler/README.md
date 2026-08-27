@@ -34,7 +34,9 @@ The output is a complete theme object with semantic tokens like `APP_PRIMARY`, `
 
 ```js
 // Load the module
-const Styler = require('@superloomdev/js-client-helper-styler')({});
+import styler from '@superloomdev/js-client-helper-styler';
+
+const Styler = styler({});
 
 // Your complete base theme
 const base = {
@@ -63,9 +65,10 @@ styles.p_a_md;               // { padding: 12 }
 Use the extension module:
 
 ```js
-const Ext = require('@superloomdev/js-client-helper-styler-ext-react')({
-  React: require('react')
-});
+import extReact from '@superloomdev/js-client-helper-styler-ext-react';
+import React from 'react';
+
+const Ext = extReact({ React });
 
 function App() {
   return (

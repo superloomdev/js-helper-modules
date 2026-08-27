@@ -191,7 +191,7 @@ The module's currency database (`data/currencies.json`) uses this structure:
 The module uses the Superloom factory pattern:
 
 ```javascript
-const Money = require('helper-money');
+import Money from 'helper-money';
 
 // Create instance with default config
 const money = Money(Lib);

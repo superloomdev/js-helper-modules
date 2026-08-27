@@ -21,8 +21,11 @@ Core module. Adapter (Class F). Factory pattern.
 ## Loader Pattern
 
 ```javascript
-const Adapter = require('helper-contact-email-adapter-extended')(Lib, {});
-Lib.ContactEmail = require('helper-contact-email')(Lib, { Adapter });
+import contactEmailAdapterExtended from 'helper-contact-email-adapter-extended';
+import contactEmail from 'helper-contact-email';
+
+const Adapter = contactEmailAdapterExtended(Lib, {});
+Lib.ContactEmail = contactEmail(Lib, { Adapter });
 ```
 
 ## Adapter Contract (3 methods)

@@ -69,7 +69,7 @@ It expects three peer modules in the `Lib` container (Utils, Debug, Instance). F
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Offline | In-memory SQLite via `node:sqlite` | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| Offline | In-memory SQLite via `node:sqlite` | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 SQLite has no separate integration tier. The offline `node:sqlite` runtime is the production runtime. There is no managed service to integrate against. Test runtime details (in-memory vs file-backed, journal mode) live in [Configuration → Testing Tiers](https://github.com/superloomdev/superloom/blob/main/src/helper-modules-server/js-server-helper-sql-sqlite/docs/configuration.md#testing-tiers).
 

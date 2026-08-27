@@ -5,11 +5,14 @@ Class F storage adapter. MongoDB backend for `helper-auth`. Standard factory sha
 ## Loader Pattern
 
 ```js
-const Store = require('@superloomdev/js-server-helper-auth-store-mongodb')(Lib, {
+import authStoreMongodb from '@superloomdev/js-server-helper-auth-store-mongodb';
+import auth from '@superloomdev/js-server-helper-auth';
+
+const Store = authStoreMongodb(Lib, {
   COLLECTION_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user'
 });
@@ -65,7 +68,7 @@ Each session is a single document. The shape is the canonical record plus two ad
 
 ## Behaviors That Must Not Be Violated When Generating Code
 
-1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `require('...auth-store-mongodb')(Lib, { collection_name })` to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
+1. **Call the adapter with `Lib` and config, then pass the result as `Store` to the Auth parent.** Application code calls `authStoreMongodb(Lib, { collection_name })` (after `import authStoreMongodb from '@superloomdev/js-server-helper-auth-store-mongodb'`) to get a ready-to-use store object, then passes it to the Auth parent as `CONFIG.Store`.
 
 2. **`setupNewStore` delegates to `Lib.MongoDBAdmin` when injected.** When `shared_libs.MongoDBAdmin` is present, `setupNewStore` creates the collection and the `prefix` + `expires_at` secondary indexes with idempotent semantics. When no admin is injected, it returns `{ success: false, error: ERRORS.NOT_IMPLEMENTED }` and the operator must provision out-of-band. Generated code that calls `setupNewStore` must handle both the success and `NOT_IMPLEMENTED` paths.
 

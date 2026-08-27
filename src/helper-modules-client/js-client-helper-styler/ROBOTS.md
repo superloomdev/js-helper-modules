@@ -13,7 +13,9 @@
 ## Loader
 
 ```javascript
-const Styler = require('@superloomdev/js-client-helper-styler')({
+import styler from '@superloomdev/js-client-helper-styler';
+
+const Styler = styler({
   Utils: optional,    // Type checks, validation
   Debug: optional     // Logging (debug level assembly summary)
 });
@@ -50,7 +52,9 @@ const Styler = require('@superloomdev/js-client-helper-styler')({
 ## Example (Canonical)
 
 ```javascript
-const Styler = require('@superloomdev/js-client-helper-styler')({});
+import styler from '@superloomdev/js-client-helper-styler';
+
+const Styler = styler({});
 
 const base = {
   color: { primary: '#0D9488', bg: '#FFFFFF' },

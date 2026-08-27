@@ -7,7 +7,7 @@ Shared ESLint flat configuration presets for Superloom modules and applications.
 
 ## What This Is
 
-A single published package exporting three ESLint flat-config presets: `base` (Node 24 CommonJS), `browser` (base plus DOM globals), and `app` (ESM plus JSX plus browser globals for application repos). Every Superloom module consumes one of these presets as a devDependency, replacing 59 hand-maintained `eslint.config.js` files that had drifted into 24 byte-distinct variants.
+A single published package exporting three ESLint flat-config presets: `base` (Node 24), `browser` (base plus DOM globals), and `app` (ESM plus JSX plus browser globals for application repos). Every Superloom module consumes one of these presets as a devDependency, replacing 59 hand-maintained `eslint.config.js` files that had drifted into 24 byte-distinct variants.
 
 ## Why Use This Module
 
@@ -35,9 +35,9 @@ Extended documentation lives alongside the source on GitHub:
 Install this module as a devDependency and select a preset in your `eslint.config.js`:
 
 ```javascript
-const { base } = require('@superloomdev/js-helper-eslint-config');
+import { base } from '@superloomdev/js-helper-eslint-config';
 
-module.exports = base;
+export default base;
 ```
 
 For GitHub Packages registry setup, see the [npmrc setup guide](https://github.com/superloomdev/superloom/blob/main/docs/dev/npmrc-setup.md).
@@ -50,7 +50,7 @@ This module has no runtime dependencies. It declares `eslint` and `@eslint/js` a
 
 | Tier | Runtime | Status |
 |---|---|---|
-| Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-publish-helper-modules.yml) |
+| Unit | Node.js `node --test` | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 ## License
 

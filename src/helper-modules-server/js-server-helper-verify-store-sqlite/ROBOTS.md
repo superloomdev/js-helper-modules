@@ -7,7 +7,9 @@ Embedded / in-process. Uses Node's built-in `node:sqlite` through the `helper-sq
 ## Adapter Factory
 
 ```js
-const Store = require('helper-verify-store-sqlite')(Lib, {
+import verifyStoreSqlite from 'helper-verify-store-sqlite';
+
+const Store = verifyStoreSqlite(Lib, {
   TABLE_NAME: 'verification_codes'
 });
 ```
@@ -71,7 +73,7 @@ helper-debug                 (structured logging)
 helper-sql-sqlite            (node:sqlite wrapper)
 ```
 
-These are injected by the application through the `shared_libs` container. The adapter picks them by reference (`Utils`, `Debug`, `SQL`). It does not require any of them directly.
+These are injected by the application through the `shared_libs` container. The adapter picks them by reference (`Utils`, `Debug`, `SQL`). It does not import any of them directly.
 
 ## Error Catalog Used
 

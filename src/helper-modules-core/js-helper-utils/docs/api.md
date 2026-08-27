@@ -239,7 +239,7 @@ A no-op. Useful where an API requires a function but no behavior is desired (`ca
 
 #### `moduleAvailable(module_name)`
 
-Returns `true` if `require(module_name)` would succeed. Implemented via `require.resolve` and a try/catch. Useful for optional-dependency code paths.
+Returns `true` if the module can be resolved. Implemented via `createRequire(import.meta.url)` and `require.resolve` with a try/catch. Useful for optional-dependency code paths.
 
 ### Random
 

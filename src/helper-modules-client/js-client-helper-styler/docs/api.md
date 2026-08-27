@@ -9,7 +9,9 @@ Here's everything you can do with Styler. Each function is explained with exampl
 First, load the module:
 
 ```js
-const Styler = require('@superloomdev/js-client-helper-styler')({});
+import styler from '@superloomdev/js-client-helper-styler';
+
+const Styler = styler({});
 ```
 
 The `{}` is the `Lib` container - you can pass `Lib.Debug` if you want logging, but it's optional.
@@ -191,9 +193,10 @@ const theme = Styler.assemble(Styler.defaultTemplate, base, variant);
 For React integration, use the extension module instead of this one directly:
 
 ```js
-const Ext = require('@superloomdev/js-client-helper-styler-ext-react')({
-  React: require('react')
-});
+import extReact from '@superloomdev/js-client-helper-styler-ext-react';
+import React from 'react';
+
+const Ext = extReact({ React });
 
 // In your component:
 const theme = Ext.useTheme();      // Same as Styler.assemble() output

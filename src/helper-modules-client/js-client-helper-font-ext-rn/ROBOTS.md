@@ -29,14 +29,16 @@ Class H extension of `js-client-helper-font`. React Native font loader adapter. 
 ## Loader Pattern
 
 ```javascript
-const RNFontAdapter = require('@superloomdev/js-client-helper-font-ext-rn')({
+import fontExtRn from '@superloomdev/js-client-helper-font-ext-rn';
+
+const RNFontAdapter = fontExtRn({
   Utils: Utils,
   Debug: Debug,
   Font: Font                  // required - the js-client-helper-font instance
 });
 ```
 
-Missing `shared_libs.Font` throws at construction time. The native loader (`@vitrion/react-native-load-fonts`) is required directly at module scope — no injection needed.
+Missing `shared_libs.Font` throws at construction time. The native loader (`@vitrion/react-native-load-fonts`) is imported directly at module scope via `import * as` - no injection needed.
 
 ## Config Keys
 

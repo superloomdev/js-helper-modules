@@ -8,12 +8,15 @@ construction time  -  misconfiguration throws synchronously at startup, never
 at runtime.
 
 ```js
-const DistinctQueueFactory = require('@superloomdev/js-server-helper-distinct-queue');
+import distinctQueue from '@superloomdev/js-server-helper-distinct-queue';
+import distinctQueueStoreDynamodb from '@superloomdev/js-server-helper-distinct-queue-store-dynamodb';
 
-Lib.DistinctQueue = DistinctQueueFactory(Lib, {
-  Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
-    table_name: 'distinct_queue'
-  })
+const Store = distinctQueueStoreDynamodb(Lib, {
+  table_name: 'distinct_queue'
+});
+
+Lib.DistinctQueue = distinctQueue(Lib, {
+  Store: Store
 });
 ```
 
@@ -35,9 +38,11 @@ Each adapter owns its config. Pass `Lib` and the config object directly to the a
 ### DynamoDB
 
 ```js
-Store: require('@superloomdev/js-server-helper-distinct-queue-store-dynamodb')(Lib, {
+import distinctQueueStoreDynamodb from '@superloomdev/js-server-helper-distinct-queue-store-dynamodb';
+
+const Store = distinctQueueStoreDynamodb(Lib, {
   table_name: 'distinct_queue'
-})
+});
 ```
 
 Table schema: partition key `p` (String), sort key `id` (String). No GSI.
@@ -46,9 +51,11 @@ See `@superloomdev/js-server-helper-distinct-queue-store-dynamodb` README.
 ### MongoDB
 
 ```js
-Store: require('@superloomdev/js-server-helper-distinct-queue-store-mongodb')(Lib, {
+import distinctQueueStoreMongodb from '@superloomdev/js-server-helper-distinct-queue-store-mongodb';
+
+const Store = distinctQueueStoreMongodb(Lib, {
   collection_name: 'distinct_queue'
-})
+});
 ```
 
 Compound index: `{ tenant_id: 1, resource_id: 1, data_version: 1 }`.

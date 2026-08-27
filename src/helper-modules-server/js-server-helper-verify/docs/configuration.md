@@ -19,12 +19,15 @@ Loader pattern, every configuration key, the per-backend configuration shape, th
 Every Superloom server-side module is a factory function that takes the `Lib` container and a `CONFIG` object and returns the public interface. The verify module follows that shape exactly.
 
 ```js
-const Store = require('helper-verify-store-postgres')({
+import verifyStorePostgres from 'helper-verify-store-postgres';
+import verify from 'helper-verify';
+
+const Store = verifyStorePostgres({
   table_name: 'verification_codes',
   lib_postgresql: Lib.PostgreSQL
 });
 
-Lib.Verify = require('helper-verify')(Lib, {
+Lib.Verify = verify(Lib, {
   Store: Store
 });
 ```
@@ -82,7 +85,7 @@ The verify module reads no environment variables. Per the Superloom loader contr
 
 ## Peer Dependencies
 
-Loaded through the standard Superloom loader. The verify module reads only from the shared `Lib` container; nothing is `require`d directly inside the module.
+Loaded through the standard Superloom loader. The verify module reads only from the shared `Lib` container; nothing is imported directly inside the module.
 
 | `Lib.*` | Source package | Used for |
 |---|---|---|

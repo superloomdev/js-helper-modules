@@ -11,8 +11,10 @@ The web extension of `js-client-helper-font`. It implements the adapter contract
 
 No React, no react-native. Pure DOM manipulation. Tests run in Node with a minimal `document` stub.
 
-```text
-const WebFontAdapter = require('@superloomdev/js-client-helper-font-ext-web')({
+```javascript
+import fontExtWeb from '@superloomdev/js-client-helper-font-ext-web';
+
+const WebFontAdapter = fontExtWeb({
   Utils: Utils,
   Debug: Debug,
   Font: Font

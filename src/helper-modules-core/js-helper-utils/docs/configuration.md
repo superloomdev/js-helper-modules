@@ -17,17 +17,19 @@ This page is intentionally short. Foundation utility modules accept no config ke
 
 ## Loader Pattern
 
-The module is a singleton. The loader initializes Validators and returns the module-scope Utils object. Node.js require cache guarantees the same reference is returned on every subsequent require.
+The module is a singleton. The loader initializes Validators and returns the module-scope Utils object. Node.js module cache guarantees the same reference is returned on every subsequent import.
 
 ```javascript
-Lib.Utils = require('helper-utils')(Lib, {});
+import utils from 'helper-utils';
+
+Lib.Utils = utils(Lib, {});
 ```
 
 Loader call semantics:
 
 - **First argument: `Lib`.** Accepted for interface uniformity with other Superloom modules. Foundation utility does not read it. Pass whatever the project uses (commonly `Lib`, `null`, or `{}`).
 - **Second argument: config.** Accepted for interface uniformity. Merged over defaults from `utils.config.js` (currently empty). The merged config is validated by `Validators.validateConfig` at startup. Pass `{}`.
-- **Multiple loader calls return the same singleton reference.** Node.js require cache guarantees identity. The loader is idempotent.
+- **Multiple loader calls return the same singleton reference.** Node.js module cache guarantees identity. The loader is idempotent.
 
 > **Why accept arguments the loader does not read?** Every Superloom helper accepts the same `(Lib, config)` shape so that consumers can swap modules without changing the loader call. Higher-tier modules use both arguments; foundation modules accept them and discard them. The uniformity is the point.
 
@@ -65,7 +67,7 @@ The module ships a single test tier:
 
 | Tier | Runtime | When to run | CI Status |
 |---|---|---|---|
-| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/superloom/actions/workflows/ci-helper-modules.yml) |
+| **Unit** | Node.js `node --test` | Every commit, every CI run | [![Test](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml/badge.svg?branch=main)](https://github.com/superloomdev/js-helper-modules/actions/workflows/ci-publish-helper-modules.yml) |
 
 There is no Docker container, no service emulator, and no integration tier. Every function is pure JavaScript with no I/O.
 

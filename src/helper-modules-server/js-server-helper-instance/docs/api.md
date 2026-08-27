@@ -193,7 +193,9 @@ Milliseconds since `initialize()`.
 
 ```javascript
 // Composition root, once
-Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: false });
+import instance from 'helper-instance';
+
+Lib.Instance = instance(Lib, { CLOSE_ON_CLEANUP: false });
 ```
 
 ```javascript
@@ -227,7 +229,9 @@ The pool is opened by the first request and reused by every later one. It closes
 
 ```javascript
 // Composition root, once per container
-Lib.Instance = require('helper-instance')(Lib, { CLOSE_ON_CLEANUP: true });
+import instance from 'helper-instance';
+
+Lib.Instance = instance(Lib, { CLOSE_ON_CLEANUP: true });
 ```
 
 ```javascript

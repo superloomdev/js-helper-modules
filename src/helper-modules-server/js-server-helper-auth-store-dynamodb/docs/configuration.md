@@ -14,16 +14,20 @@ The DynamoDB store adapter receives a `Lib` container and config to produce a re
 ## Loader Pattern
 
 ```js
-Lib.DynamoDB = require('@superloomdev/js-server-helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from '@superloomdev/js-server-helper-nosql-aws-dynamodb';
+import authStoreDynamodb from '@superloomdev/js-server-helper-auth-store-dynamodb';
+import auth from '@superloomdev/js-server-helper-auth';
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   ENDPOINT: process.env.DYNAMO_ENDPOINT,  // optional: for local emulator
   REGION:   process.env.AWS_REGION        // required: AWS region
 });
 
-const Store = require('@superloomdev/js-server-helper-auth-store-dynamodb')(Lib, {
+const Store = authStoreDynamodb(Lib, {
   TABLE_NAME: 'sessions_user'
 });
 
-Lib.AuthUser = require('@superloomdev/js-server-helper-auth')(Lib, {
+Lib.AuthUser = auth(Lib, {
   Store:      Store,
   ACTOR_TYPE: 'user',
   TTL_SECONDS: 2592000
@@ -88,7 +92,7 @@ The adapter does not interact with IAM credential acquisition. The driver helper
 
 ## Peer Dependencies
 
-The adapter does not require these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
+The adapter does not import these packages directly. It accesses them through `Lib`, which the application populates before constructing the Auth parent.
 
 | Package | Reads via `Lib` |
 |---|---|
@@ -97,7 +101,7 @@ The adapter does not require these packages directly. It accesses them through `
 | `@superloomdev/js-server-helper-nosql-aws-dynamodb` | `Lib.DynamoDB` injected by the caller |
 | `@superloomdev/js-server-helper-nosql-aws-dynamodb-admin` | `Lib.DynamoDBAdmin` optional, injected for `setupNewStore` delegation |
 
-The driver helper carries its own dependency on the AWS SDK for JavaScript v3. The adapter never `require`s the AWS SDK directly; applications that never use this store never load the DynamoDB client.
+The driver helper carries its own dependency on the AWS SDK for JavaScript v3. The adapter never imports the AWS SDK directly; applications that never use this store never load the DynamoDB client.
 
 ## Environment Variables
 

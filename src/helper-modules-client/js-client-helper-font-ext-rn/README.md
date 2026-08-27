@@ -9,10 +9,12 @@ React Native font loader adapter for the font family system. Loads font files vi
 
 The React Native extension of `js-client-helper-font`. It implements the adapter contract: `loadManifest` and `isReady`. The core provides the manifest; this extension calls `loadFontFromFile(name, path)` for each font entry that has a `path` field.
 
-No React import, no hooks, no components. The native loader (`@vitrion/react-native-load-fonts`) is a direct dependency — required at module scope, not injected by the app. Tests stub it via a `package.json` alias.
+No React import, no hooks, no components. The native loader (`@vitrion/react-native-load-fonts`) is a direct dependency - imported at module scope via `import * as`, not injected by the app. Tests stub it via a `package.json` alias.
 
-```text
-const RNFontAdapter = require('@superloomdev/js-client-helper-font-ext-rn')({
+```javascript
+import fontExtRn from '@superloomdev/js-client-helper-font-ext-rn';
+
+const RNFontAdapter = fontExtRn({
   Utils: Utils,
   Debug: Debug,
   Font: Font

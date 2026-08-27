@@ -7,7 +7,9 @@ Requires a running MongoDB instance. Uses `helper-nosql-mongodb` (native driver 
 ## Adapter Factory
 
 ```js
-const Store = require('@superloomdev/js-server-helper-verify-store-mongodb')(Lib, {
+import verifyStoreMongodb from '@superloomdev/js-server-helper-verify-store-mongodb';
+
+const Store = verifyStoreMongodb(Lib, {
   COLLECTION_NAME: 'verification_codes'
 });
 ```
@@ -72,7 +74,7 @@ helper-debug              (structured logging - via shared_libs.Debug)
 helper-nosql-mongodb      (MongoDB driver wrapper - via shared_libs.MongoDB)
 ```
 
-All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never requires any of them directly; it picks them from the injected container.
+All are loaded into `Lib` by the application before the Verify parent is loaded. The adapter never imports any of them directly; it picks them from the injected container.
 
 ## Error Catalog
 

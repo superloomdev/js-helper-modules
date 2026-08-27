@@ -33,7 +33,9 @@ None. All dependencies are peer dependencies.
 ## Loader Pattern
 
 ```javascript
-const Timer = require('@superloomdev/js-react-helper-timer')({
+import timer from '@superloomdev/js-react-helper-timer';
+
+const Timer = timer({
   React: React,
   Utils: Utils,
   Debug: Debug

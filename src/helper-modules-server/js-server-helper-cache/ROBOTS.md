@@ -4,29 +4,32 @@ Compact, AI-targeted reference for the public interface. Humans should read `REA
 
 ## Module Overview
 
-Application-level cache with TTL and namespacing. Cache-aside pattern: the application fetches from the source database on a miss and populates the cache; this module never reads the source. Eight operations cover the lifecycle of a cached value: `setCache`, `getCache`, `deleteCache`, `getOrFetchCache` (cache-aside with optional distributed stampede protection), `getCacheExists` (existence check without fetching the value), `deleteCacheByPrefix` (selective mass invalidation by prefix), `clearCache` (wipe all entries in a namespace), and `listCacheCodes` (enumerate cache_codes by prefix). Storage backends are standalone Class F adapter packages (`helper-cache-store-*`); the caller passes the ready-to-use store object directly as `CONFIG.Store`.
+Application-level cache with TTL and namespacing. Cache-aside pattern: the application fetches from the source database on a miss and populates the cache; this module never reads the source. Eight operations cover the lifecycle of a cached value: `setCache`, `getCache`, `deleteCache`, `getOrFetchCache` (cache-aside with optional stampede protection), `getCacheExists` (existence check), `deleteCacheByPrefix` (selective mass invalidation by prefix), `clearCache` (wipe all entries in a namespace), and `listCacheCodes` (enumerate cache_codes by prefix). Storage backends are provided by standalone adapter packages. The caller passes the chosen ready-to-use store object directly as `CONFIG.Store` - no string dispatch inside this module.
 
 ## Factory Pattern
 
 ```js
-module.exports = function loader (shared_libs, config) {
+export default function loader (shared_libs, config) {
   // Returns independent instance with isolated Lib + CONFIG.
   // Validates CONFIG at construction (Store must be a ready-to-use object).
   // Validates the 7-method store contract at construction.
   // When GET_OR_FETCH_LOCK_ENABLED is true, validates setCacheLock and releaseCacheLock.
   // Throws synchronously on misconfiguration.
   return { setCache, getCache, deleteCache, getOrFetchCache, getCacheExists, deleteCacheByPrefix, clearCache, listCacheCodes };
-};
+}
 ```
 
 `CONFIG.Store` is a **ready-to-use store object**, not a factory function. The loader uses it directly. The adapter is a fully independent module that owns its own Lib/Config/ERRORS. Passing a factory function throws `CONFIG.Store is required and must be a ready-to-use store object`.
 
 ```js
-const Store = require('helper-cache-store-valkey')(Lib, {
+import cacheStoreValkey from 'helper-cache-store-valkey';
+import cache from 'helper-cache';
+
+const Store = cacheStoreValkey(Lib, {
   KEY_PREFIX: 'cache:'
 });
 
-Lib.Cache = require('helper-cache')(Lib, {
+Lib.Cache = cache(Lib, {
   Store: Store
 });
 ```

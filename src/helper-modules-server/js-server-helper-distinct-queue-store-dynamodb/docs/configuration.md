@@ -9,12 +9,15 @@ you provide to the parent module's `CONFIG.Store` key.
 
 ```javascript
 // Load the adapter with Lib injected and its own config
-const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
+import distinctQueueStoreDynamodb from 'helper-distinct-queue-store-dynamodb';
+import distinctQueue from 'helper-distinct-queue';
+
+const Store = distinctQueueStoreDynamodb(Lib, {
   TABLE_NAME: 'distinct_queue_jobs'
 });
 
 // Pass the ready-to-use store to the parent module
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Store
 });
 ```
@@ -57,7 +60,9 @@ The adapter reads these from the injected `Lib` container:
 | `Lib.DynamoDB` | `helper-nosql-aws-dynamodb` | The DynamoDB driver used for all storage operations |
 
 ```javascript
-Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from 'helper-nosql-aws-dynamodb';
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   REGION: process.env.AWS_REGION,
   KEY: process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
@@ -68,22 +73,31 @@ Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
 
 ```javascript
 // 1. Load base helpers
-Lib.Utils = require('helper-utils')();
-Lib.Debug = require('helper-debug')(Lib);
-Lib.Instance = require('helper-instance')(Lib);
+import utils from 'helper-utils';
+import debug from 'helper-debug';
+import instance from 'helper-instance';
 
 // 2. Load DynamoDB helper
-Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from 'helper-nosql-aws-dynamodb';
+
+// 3. Load the store adapter (Lib injected), then the parent module
+import distinctQueueStoreDynamodb from 'helper-distinct-queue-store-dynamodb';
+import distinctQueue from 'helper-distinct-queue';
+
+Lib.Utils = utils();
+Lib.Debug = debug(Lib);
+Lib.Instance = instance(Lib);
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   REGION: process.env.AWS_REGION || 'us-east-1',
   KEY: process.env.AWS_ACCESS_KEY_ID,
   SECRET: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-// 3. Load the store adapter (Lib injected), then the parent module
-const Store = require('helper-distinct-queue-store-dynamodb')(Lib, {
+const Store = distinctQueueStoreDynamodb(Lib, {
   TABLE_NAME: 'queue_jobs'
 });
-Lib.DistinctQueue = require('helper-distinct-queue')(Lib, {
+Lib.DistinctQueue = distinctQueue(Lib, {
   Store: Store
 });
 
@@ -96,7 +110,9 @@ await Store.setupNewStore(Lib.Instance.initialize());
 For DynamoDB Local (emulated testing):
 
 ```javascript
-Lib.DynamoDB = require('helper-nosql-aws-dynamodb')(Lib, {
+import nosqlAwsDynamodb from 'helper-nosql-aws-dynamodb';
+
+Lib.DynamoDB = nosqlAwsDynamodb(Lib, {
   REGION: 'us-east-1',
   KEY: 'local',
   SECRET: 'local',
