@@ -7,7 +7,8 @@
     ".": "./mongodb-admin.js",
     "./mongodb-admin.config.js": "./mongodb-admin.config.js",
     "./mongodb-admin.errors.js": "./mongodb-admin.errors.js",
-    "./mongodb-admin.validators.js": "./mongodb-admin.validators.js"
+    "./mongodb-admin.validators.js": "./mongodb-admin.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -40,6 +41,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./mongodb-admin.js"
+  }
 }

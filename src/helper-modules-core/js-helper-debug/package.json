@@ -7,7 +7,8 @@
     ".": "./debug.js",
     "./debug.config.js": "./debug.config.js",
     "./debug.errors.js": "./debug.errors.js",
-    "./debug.validators.js": "./debug.validators.js"
+    "./debug.validators.js": "./debug.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -32,6 +33,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./debug.js"
+  }
 }

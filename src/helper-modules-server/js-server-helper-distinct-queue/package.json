@@ -4,9 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    ".": {
-      "default": "./distinct-queue.js"
-    }
+    ".": "./distinct-queue.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -40,8 +39,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": {
-    "default": "./distinct-queue.js"
   }
 }

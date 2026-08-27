@@ -13,7 +13,8 @@
     ".": "./device.js",
     "./device.config.js": "./device.config.js",
     "./device.errors.js": "./device.errors.js",
-    "./device.validators.js": "./device.validators.js"
+    "./device.validators.js": "./device.validators.js",
+    "./package.json": "./package.json"
   },
   "engines": {
     "node": ">=24"
@@ -34,6 +35,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./device.js"
+  }
 }

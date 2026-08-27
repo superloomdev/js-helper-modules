@@ -7,7 +7,8 @@
     ".": "./http-gateway.js",
     "./http-gateway.config.js": "./http-gateway.config.js",
     "./http-gateway.errors.js": "./http-gateway.errors.js",
-    "./http-gateway.validators.js": "./http-gateway.validators.js"
+    "./http-gateway.validators.js": "./http-gateway.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -45,6 +46,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./http-gateway.js"
+  }
 }

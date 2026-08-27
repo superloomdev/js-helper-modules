@@ -7,7 +7,8 @@
     ".": "./dynamodb.js",
     "./dynamodb.config.js": "./dynamodb.config.js",
     "./dynamodb.errors.js": "./dynamodb.errors.js",
-    "./dynamodb.validators.js": "./dynamodb.validators.js"
+    "./dynamodb.validators.js": "./dynamodb.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -41,6 +42,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./dynamodb.js"
+  }
 }

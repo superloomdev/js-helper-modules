@@ -11,7 +11,8 @@
     "./styler.template.js": "./styler.template.js",
     "./parts/color-ops.js": "./parts/color-ops.js",
     "./parts/scale.js": "./parts/scale.js",
-    "./parts/utilities.js": "./parts/utilities.js"
+    "./parts/utilities.js": "./parts/utilities.js",
+    "./package.json": "./package.json"
   },
   "author": {
     "name": "sj00"
@@ -38,6 +39,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./styler.js"
+  }
 }

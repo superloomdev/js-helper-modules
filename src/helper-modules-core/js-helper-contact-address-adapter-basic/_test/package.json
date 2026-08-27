@@ -12,10 +12,9 @@
   "dependencies": {
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-contact-address": "npm:@superloomdev/js-helper-contact-address@^1.0.0",
-    "helper-contact-address-adapter-basic": "file:../",
-    "helper-contact-phone-adapter-basic": "file:../../js-helper-contact-phone-adapter-basic"
+    "helper-contact-address-adapter-basic": "file:../"
   },
   "scripts": {
-    "test": "node --test test.js country-parity.test.js"
+    "test": "node --test test.js"
   }
 }

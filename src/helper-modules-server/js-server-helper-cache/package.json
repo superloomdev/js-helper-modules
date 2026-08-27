@@ -7,7 +7,8 @@
     ".": "./cache.js",
     "./cache.config.js": "./cache.config.js",
     "./cache.errors.js": "./cache.errors.js",
-    "./cache.validators.js": "./cache.validators.js"
+    "./cache.validators.js": "./cache.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -34,6 +35,5 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
-  },
-  "main": "./cache.js"
+  }
 }

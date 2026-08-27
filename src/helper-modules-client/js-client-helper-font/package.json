@@ -7,7 +7,8 @@
     ".": "./font.js",
     "./font.config.js": "./font.config.js",
     "./font.errors.js": "./font.errors.js",
-    "./font.validators.js": "./font.validators.js"
+    "./font.validators.js": "./font.validators.js",
+    "./package.json": "./package.json"
   },
   "author": {
     "name": "sj00"
@@ -34,6 +35,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./font.js"
+  }
 }

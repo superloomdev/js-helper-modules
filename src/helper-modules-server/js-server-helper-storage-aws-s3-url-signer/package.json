@@ -7,7 +7,8 @@
     ".": "./s3-url-signer.js",
     "./s3-url-signer.config.js": "./s3-url-signer.config.js",
     "./s3-url-signer.errors.js": "./s3-url-signer.errors.js",
-    "./s3-url-signer.validators.js": "./s3-url-signer.validators.js"
+    "./s3-url-signer.validators.js": "./s3-url-signer.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -41,6 +42,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./s3-url-signer.js"
+  }
 }

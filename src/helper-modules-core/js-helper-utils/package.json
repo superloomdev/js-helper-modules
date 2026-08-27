@@ -7,7 +7,8 @@
     ".": "./utils.js",
     "./utils.errors.js": "./utils.errors.js",
     "./utils.config.js": "./utils.config.js",
-    "./utils.validators.js": "./utils.validators.js"
+    "./utils.validators.js": "./utils.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -33,6 +34,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./utils.js"
+  }
 }

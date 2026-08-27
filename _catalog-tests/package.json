@@ -1,0 +1,14 @@
+{
+  "name": "catalog-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test country-parity.test.js"
+  },
+  "dependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-contact-phone-adapter-basic": "npm:@superloomdev/js-helper-contact-phone-adapter-basic@^1.0.0",
+    "helper-contact-address-adapter-basic": "npm:@superloomdev/js-helper-contact-address-adapter-basic@^1.0.0"
+  }
+}

@@ -4918,3 +4918,32 @@ jobs:
             echo "Publishing $PKG_NAME@$PKG_VERSION..."
             npm publish
           fi
+
+
+  # ###########################################################################
+  #   CATALOG-LEVEL GUARD: country parity across basic contact adapters
+  #   Runs after both basic adapters publish. Neither gates the other.
+  # ###########################################################################
+
+  catalog-country-parity:
+    needs: [detect, publish-contact-phone-adapter-basic, publish-contact-address-adapter-basic]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['publish-contact-phone-adapter-basic'].result != 'failure' &&
+      needs['publish-contact-address-adapter-basic'].result != 'failure'
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Country parity across basic contact adapters
+        working-directory: _catalog-tests
+        run: |
+          npm install
+          npm test

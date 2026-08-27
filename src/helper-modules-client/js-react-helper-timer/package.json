@@ -13,7 +13,8 @@
     ".": "./timer.js",
     "./timer.config.js": "./timer.config.js",
     "./timer.errors.js": "./timer.errors.js",
-    "./timer.validators.js": "./timer.validators.js"
+    "./timer.validators.js": "./timer.validators.js",
+    "./package.json": "./package.json"
   },
   "engines": {
     "node": ">=24"
@@ -35,6 +36,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./timer.js"
+  }
 }

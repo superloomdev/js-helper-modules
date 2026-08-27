@@ -13,7 +13,8 @@
     ".": "./extension.js",
     "./extension.config.js": "./extension.config.js",
     "./extension.errors.js": "./extension.errors.js",
-    "./extension.validators.js": "./extension.validators.js"
+    "./extension.validators.js": "./extension.validators.js",
+    "./package.json": "./package.json"
   },
   "engines": {
     "node": ">=24"
@@ -39,6 +40,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./extension.js"
+  }
 }

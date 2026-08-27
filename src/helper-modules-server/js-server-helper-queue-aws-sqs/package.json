@@ -7,7 +7,8 @@
     ".": "./sqs.js",
     "./sqs.config.js": "./sqs.config.js",
     "./sqs.errors.js": "./sqs.errors.js",
-    "./sqs.validators.js": "./sqs.validators.js"
+    "./sqs.validators.js": "./sqs.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -40,6 +41,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./sqs.js"
+  }
 }

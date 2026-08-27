@@ -4,20 +4,28 @@
 // are regenerated from different source versions can silently disagree on
 // which countries exist, which makes a country valid for a phone number and
 // unknown for an address in the same application. This guard is the thing
-// that stops that going unnoticed. A mirrored copy runs in the address
-// adapter's suite so either package's CI job catches the drift.
+// that stops that going unnoticed.
+//
+// This guard runs at the catalog tier, not inside either module's test
+// suite. Both adapters are installed from the registry after both have
+// published, so neither package's publish gate depends on the other. The
+// previous module-tier packaging created a registry cycle that deadlocked
+// every full republish; moving the guard here breaks that cycle without
+// weakening the invariant.
+
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+
 import utilsLoader from 'helper-utils';
 import phoneAdapterBasicLoader from 'helper-contact-phone-adapter-basic';
-import adapterBasicLoader from 'helper-contact-address-adapter-basic';
-
+import addressAdapterBasicLoader from 'helper-contact-address-adapter-basic';
 
 const Lib = {};
 Lib.Utils = utilsLoader(Lib, {});
 
 const PhoneAdapter = phoneAdapterBasicLoader(Lib, {});
-const AddressAdapter = adapterBasicLoader(Lib, {});
+const AddressAdapter = addressAdapterBasicLoader(Lib, {});
 
 
 

@@ -13,7 +13,8 @@
     ".": "./mmkv.js",
     "./mmkv.config.js": "./mmkv.config.js",
     "./mmkv.errors.js": "./mmkv.errors.js",
-    "./mmkv.validators.js": "./mmkv.validators.js"
+    "./mmkv.validators.js": "./mmkv.validators.js",
+    "./package.json": "./package.json"
   },
   "engines": {
     "node": ">=24"
@@ -35,6 +36,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./mmkv.js"
+  }
 }

@@ -7,7 +7,8 @@
     ".": "./crypto.js",
     "./crypto.config.js": "./crypto.config.js",
     "./crypto.errors.js": "./crypto.errors.js",
-    "./crypto.validators.js": "./crypto.validators.js"
+    "./crypto.validators.js": "./crypto.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -36,6 +37,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./crypto.js"
+  }
 }

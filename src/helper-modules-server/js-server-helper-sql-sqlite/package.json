@@ -7,7 +7,8 @@
     ".": "./sqlite.js",
     "./sqlite.config.js": "./sqlite.config.js",
     "./sqlite.errors.js": "./sqlite.errors.js",
-    "./sqlite.validators.js": "./sqlite.validators.js"
+    "./sqlite.validators.js": "./sqlite.validators.js",
+    "./package.json": "./package.json"
   },
   "private": false,
   "license": "MIT",
@@ -37,6 +38,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node --test _test/test.js"
-  },
-  "main": "./sqlite.js"
+  }
 }

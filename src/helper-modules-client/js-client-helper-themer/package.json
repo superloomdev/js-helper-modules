@@ -11,7 +11,8 @@
     "./parts/color.js": "./parts/color.js",
     "./parts/scale.js": "./parts/scale.js",
     "./parts/emit.js": "./parts/emit.js",
-    "./parts/resolve.js": "./parts/resolve.js"
+    "./parts/resolve.js": "./parts/resolve.js",
+    "./package.json": "./package.json"
   },
   "author": {
     "name": "sj00"
@@ -39,6 +40,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./themer.js"
+  }
 }

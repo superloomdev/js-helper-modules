@@ -7,7 +7,8 @@
     ".": "./localstorage.js",
     "./localstorage.config.js": "./localstorage.config.js",
     "./localstorage.errors.js": "./localstorage.errors.js",
-    "./localstorage.validators.js": "./localstorage.validators.js"
+    "./localstorage.validators.js": "./localstorage.validators.js",
+    "./package.json": "./package.json"
   },
   "author": {
     "name": "sj00"
@@ -34,6 +35,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "main": "./localstorage.js"
+  }
 }
