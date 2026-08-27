@@ -18,13 +18,10 @@
 //   [3]     - Browser globals overlay (from browser preset)
 //   [4]     - App-specific language options (JSX parsing, React ignore pattern)
 //
-// Note: The client repo uses a mix of ESM (import/export) and CommonJS
-// (require/module.exports). ESLint's flat config handles this by setting
-// sourceType to 'module' globally; CommonJS files that use require still
-// work because require is in the Node globals from base.
-'use strict';
-
-const browser = require('./browser');
+// Note: The application repo is ESM. Node globals (module, require, __dirname)
+// remain available for the two Expo toolchain config files (metro.config.js,
+// babel.config.js) that are deliberately CJS.
+import browser from './browser.js';
 
 
 /////////////////////////// App Language Options START /////////////////////////
@@ -52,7 +49,7 @@ const APP_LANGUAGE_OPTIONS = {
 //
 // The no-unused-vars override uses varsIgnorePattern so that `import React`
 // does not trigger the rule. All other rules remain identical to base.
-module.exports = [
+export default [
   ...browser,
 
   // [4] App-specific language options and rule overrides.

@@ -8,12 +8,10 @@
 // that is the job of `npm run lint` in the package root.
 //
 // Test runtime: Node.js `node --test`, no external services, no Docker.
-'use strict';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-
-const config = require('helper-eslint-config');
+import * as config from 'helper-eslint-config';
 
 
 ////////////////////////////// Shape Tests START ///////////////////////////////
@@ -39,8 +37,8 @@ test('base[0].ignores contains exactly the four ignore patterns', () => {
 });
 
 
-test('base[2].languageOptions.sourceType is exactly commonjs', () => {
-  assert.equal(config.base[2].languageOptions.sourceType, 'commonjs');
+test('base[2].languageOptions.sourceType is exactly module', () => {
+  assert.equal(config.base[2].languageOptions.sourceType, 'module');
 });
 
 

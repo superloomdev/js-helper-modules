@@ -9,9 +9,7 @@
 //
 // The spread (`...base`) ensures that any future change to base.js - new rules,
 // new ignores, new Node globals - is inherited without editing this file.
-'use strict';
-
-const base = require('./base');
+import base from './base.js';
 
 
 //////////////////////////// Browser Globals START /////////////////////////////
@@ -38,7 +36,7 @@ const BROWSER_GLOBALS = {
 // 4th object that adds browser globals on top of the Node globals from base.
 // ESLint merges globals from multiple config objects, so both Node and
 // browser globals are available in modules using this preset.
-module.exports = [
+export default [
   ...base,
 
   // [3] Browser globals overlay. No rules are set here - only globals.
@@ -53,6 +51,6 @@ module.exports = [
 ];
 
 // Named export for test assertions and for the app preset to layer on top.
-module.exports.BROWSER_GLOBALS = BROWSER_GLOBALS;
+export { BROWSER_GLOBALS };
 
 //////////////////////////// Flat-Config Export END ////////////////////////////

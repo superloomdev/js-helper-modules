@@ -1,5 +1,5 @@
-// Info: The Node 24 CommonJS baseline. Every Superloom module lints against
-// this preset unless it needs browser globals (use `browser`) or ESM/JSX
+// Info: The Node 24 ESM baseline. Every Superloom module lints against
+// this preset unless it needs browser globals (use `browser`) or JSX
 // (use `app`). Globals are the Node 24 global surface only - no browser
 // globals - so a stray `document` or `window` reference in a server module
 // is caught as no-undef.
@@ -15,9 +15,7 @@
 // The rule set is split into named blocks so docs/api.md can describe each
 // block independently. NODE_GLOBALS and RULES are also attached as named
 // exports so the browser and app presets can layer on top without duplicating.
-'use strict';
-
-const js = require('@eslint/js');
+import js from '@eslint/js';
 
 
 ///////////////////////////// Node Globals START ///////////////////////////////
@@ -25,6 +23,8 @@ const js = require('@eslint/js');
 // Node 24 global surface. Anything not listed here is an error when referenced.
 // This covers the full Node 24 runtime: core modules, timers, Web APIs that
 // Node 24 exposes globally (fetch, crypto, AbortController, etc.).
+// module, require, __dirname, __filename are kept for the two Expo toolchain
+// config files (metro.config.js, babel.config.js) that are deliberately CJS.
 const NODE_GLOBALS = {
   console: 'readonly',
   process: 'readonly',
@@ -176,8 +176,8 @@ const RULES = {
 /////////////////////////// Flat-Config Export START ///////////////////////////
 
 // The exported flat-config array. ESLint consumes this directly when a
-// consumer's `eslint.config.js` does `module.exports = base`.
-module.exports = [
+// consumer's `eslint.config.js` does `export default base`.
+export default [
 
   // [0] Global ignores. Directories that ESLint should never lint.
   {
@@ -194,14 +194,14 @@ module.exports = [
   // no-cond-assign, etc.
   js.configs.recommended,
 
-  // [2] Project rules. Language options (Node 24 globals, CommonJS) plus
+  // [2] Project rules. Language options (Node 24 globals, ESM) plus
   // the full rule set defined above. This is the block that consumers
   // override if they need browser globals (see presets/browser.js).
   {
     files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.jsx'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: NODE_GLOBALS
     },
     rules: RULES
@@ -211,7 +211,6 @@ module.exports = [
 // Named exports for preset layering. The browser preset spreads `base` and
 // adds its own globals overlay; it needs NODE_GLOBALS to avoid duplication.
 // RULES is exported for test assertions and documentation generation.
-module.exports.NODE_GLOBALS = NODE_GLOBALS;
-module.exports.RULES = RULES;
+export { NODE_GLOBALS, RULES };
 
 //////////////////////////// Flat-Config Export END ////////////////////////////

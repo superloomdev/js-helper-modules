@@ -2,7 +2,11 @@
   "name": "@superloomdev/js-helper-eslint-config",
   "description": "Shared ESLint flat configuration presets for Superloom modules and applications. Zero runtime dependencies. Part of Superloom.",
   "version": "1.0.0",
-  "main": "eslint-config.js",
+  "type": "module",
+  "exports": {
+    ".": "./eslint-config.js",
+    "./presets/*": "./presets/*"
+  },
   "private": false,
   "license": "MIT",
   "author": {
