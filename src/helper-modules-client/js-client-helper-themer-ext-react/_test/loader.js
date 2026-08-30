@@ -38,8 +38,8 @@ function buildTemplate () {
       spacing05: { scale: 'miniUnit', multiplier: 4 }
     },
     meta: {
-      background: { group: 'colour' },
-      textPrimary: { group: 'colour' },
+      background: { group: 'color' },
+      textPrimary: { group: 'color' },
       spacing03: { group: 'dimension' },
       spacing05: { group: 'dimension' }
     },
