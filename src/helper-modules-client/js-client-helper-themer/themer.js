@@ -157,6 +157,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       Validators.validateLayers(layers);
       Validators.validateOptions(options);
 
+      // Validate emitter group names so an unknown group fails loudly at build
+      // time rather than silently passing through unprojected
+      Validators.validateGroups(template.meta, Parts.Emit.groups());
+
       // Serve a cached derivation when this instance has produced it already
       const key = _Themer.resolveKey(state, template, layers, options);
       const cached = _Themer.getCache(state, key);
@@ -322,14 +326,14 @@ const _Themer = {
   *********************************************************************/
   buildParts: function (Lib, CONFIG, ERRORS, Validators) {
 
-    // Colour and scale depend on nothing but Lib, so they build first
+    // Color and scale depend on nothing but Lib, so they build first
     const Color = createColor(Lib, CONFIG, ERRORS);
     const Scale = createScale(Lib, CONFIG, ERRORS);
 
-    // Emit needs colour to render shadow layers as rgba
+    // Emit needs color to render shadow layers as rgba
     const emit_libs = Object.assign({}, Lib, { Color: Color });
 
-    // Resolve needs colour for contrast, scale for generators, and the validators
+    // Resolve needs color for contrast, scale for generators, and the validators
     const resolve_libs = Object.assign({}, Lib, {
       Color: Color,
       Scale: Scale,

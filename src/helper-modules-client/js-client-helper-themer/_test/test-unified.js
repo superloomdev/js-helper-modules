@@ -44,13 +44,13 @@ function declare (name, entry, meta) {
   template.meta[name] = meta;
 }
 
-// Colour
-declare('background', { op: 'rampStep', args: [0] }, { group: 'colour' });
-declare('layer.01', { op: 'rampStep', args: [1] }, { group: 'colour' });
-declare('text.primary', { op: 'rampStep', args: [10] }, { group: 'colour' });
-declare('text.error', { op: 'hue', args: ['red', 60] }, { group: 'colour' });
-declare('link.primary', { op: 'hue', args: ['blue', 60] }, { group: 'colour' });
-declare('border.interactive', '{link.primary}', { group: 'colour' });
+// Color
+declare('background', { op: 'rampStep', args: [0] }, { group: 'color' });
+declare('layer.01', { op: 'rampStep', args: [1] }, { group: 'color' });
+declare('text.primary', { op: 'rampStep', args: [10] }, { group: 'color' });
+declare('text.error', { op: 'hue', args: ['red', 60] }, { group: 'color' });
+declare('link.primary', { op: 'hue', args: ['blue', 60] }, { group: 'color' });
+declare('border.interactive', '{link.primary}', { group: 'color' });
 
 // Dimension, every step from one generator
 SPACING_MULTIPLIERS.forEach(function (multiplier, i) {
@@ -356,8 +356,8 @@ describe('unified engine - failure modes', () => {
     const cyclic = JSON.parse(JSON.stringify(template));
     cyclic.tokens['a'] = '{b}';
     cyclic.tokens['b'] = '{a}';
-    cyclic.meta['a'] = { group: 'colour' };
-    cyclic.meta['b'] = { group: 'colour' };
+    cyclic.meta['a'] = { group: 'color' };
+    cyclic.meta['b'] = { group: 'color' };
 
     assert.throws(() => Themer.resolve(cyclic, [{ name: 'x' }]), /\[helper-themer\]/);
 
@@ -377,7 +377,7 @@ describe('unified engine - failure modes', () => {
 
     const badOp = JSON.parse(JSON.stringify(template));
     badOp.tokens['oops'] = { op: 'nope', args: [] };
-    badOp.meta['oops'] = { group: 'colour' };
+    badOp.meta['oops'] = { group: 'color' };
 
     assert.throws(() => Themer.resolve(badOp, [{ name: 'x' }]), /\[helper-themer\]/);
 
@@ -395,7 +395,7 @@ describe('unified engine - failure modes', () => {
 
     const missingAlias = JSON.parse(JSON.stringify(template));
     missingAlias.tokens['oops'] = '{does.not.exist}';
-    missingAlias.meta['oops'] = { group: 'colour' };
+    missingAlias.meta['oops'] = { group: 'color' };
 
     assert.throws(() => Themer.resolve(missingAlias, [{ name: 'x' }]), /\[helper-themer\]/);
 

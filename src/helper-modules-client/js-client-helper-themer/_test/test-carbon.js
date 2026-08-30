@@ -219,7 +219,7 @@ describe('Carbon conformance - generativity (white-label case)', () => {
 
   });
 
-  it('should resolve the pinned brand colour for acme-light', () => {
+  it('should resolve the pinned brand color for acme-light', () => {
 
     const result = Themer.resolve(template, [brandLight]);
 
@@ -229,7 +229,7 @@ describe('Carbon conformance - generativity (white-label case)', () => {
 
   });
 
-  it('should resolve the pinned brand colour for acme-dark', () => {
+  it('should resolve the pinned brand color for acme-dark', () => {
 
     const result = Themer.resolve(template, [brandDark]);
 

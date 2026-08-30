@@ -81,17 +81,17 @@ tokens: {
 }
 ```
 
-**A pinned literal is not a failure of the system.** A colour chosen by eye against a specific background is a real design decision that no positional rule reproduces. Pin it.
+**A pinned literal is not a failure of the system.** A color chosen by eye against a specific background is a real design decision that no positional rule reproduces. Pin it.
 
 ---
 
 ## Metadata and Token Groups
 
-`meta` tells the engine which emitter a token goes through. A token with no metadata is treated as group `raw` and passes through unchanged.
+`meta` tells the engine which emitter a token goes through. A token with no metadata is treated as group `raw` and passes through unchanged. A `group` value the engine does not recognize is a build-time `TypeError` naming every offending token, not a silent pass-through.
 
 | Group | Web emits | Native emits |
 |---|---|---|
-| `colour` | unchanged | unchanged |
+| `color` | unchanged | unchanged |
 | `dimension` | `'1rem'` | `16` |
 | `fontSize` | `'0.75rem'` | `12` |
 | `letterSpacing` | `'0.32px'` | `0.32` |
@@ -103,7 +103,7 @@ tokens: {
 
 ```javascript
 meta: {
-  background: { group: 'colour' },
+  background: { group: 'color' },
   spacing03: { group: 'dimension' },
   body01: { group: 'typeSet' }
 }
@@ -135,7 +135,7 @@ A layer can override a seed, which is what makes a density change a one-number e
 
 | Operation | Arguments | Produces |
 |---|---|---|
-| `rampStep` | `[steps]` | A colour that distance along the neutral ramp, away from the background |
+| `rampStep` | `[steps]` | A color that distance along the neutral ramp, away from the background |
 | `hue` | `[family, step]` | The named palette entry, for example `blue` and `60` |
 | `mix` | `[token_a, token_b, weight]` | A blend of two resolved tokens, weighted toward the first |
 | `scaleBy` | `[token, multiplier]` | An already-resolved number, scaled |
@@ -203,11 +203,11 @@ contrast_rules: [
 ]
 ```
 
-Enforcement runs after resolution, so it covers literals, aliases, and rules alike. A failing colour is corrected by one of three strategies, tried in order:
+Enforcement runs after resolution, so it covers literals, aliases, and rules alike. A failing color is corrected by one of three strategies, tried in order:
 
 1. **Snap** to a compliant step in the value's own palette family. Keeps the result inside the design system.
-2. **Shift lightness** while holding hue and saturation. Keeps a brand colour recognizable.
-3. **Mix** toward white or black. Last resort, because it invents a colour the palette does not contain.
+2. **Shift lightness** while holding hue and saturation. Keeps a brand color recognizable.
+3. **Mix** toward white or black. Last resort, because it invents a color the palette does not contain.
 
 Pass `{ contrast: 'report' }` to record violations without rewriting anything, which is what a build-time check wants.
 
@@ -233,7 +233,7 @@ Both platforms then emit the same token keys, and the substitution is reported i
 
 ## Authoring Checklist
 
-- [ ] Every token in `tokens` has an entry in `meta` naming its group
+- [ ] Every token in `tokens` has an entry in `meta` naming its group, and every group is one the engine recognizes
 - [ ] Every alias target exists
 - [ ] Every generator's scale has seeds in `scales`
 - [ ] Every `hue` rule's palette entry exists

@@ -67,6 +67,7 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 | unknown scale | `tokens.X.scale must name a generator this engine provides` |
 | unknown operation | `tokens.X.op must name an operation this engine provides` |
 | unknown platform | `platform must be one of: web, native` |
+| unknown group | `tokens.X (group: Y) must name a known emitter group` |
 
 ## Naming Rule (important)
 
@@ -94,9 +95,9 @@ Shadow layer geometry: `offset_x`, `offset_y`, `blur`, `spread`, `opacity`.
 
 ## Metadata Groups
 
-`colour`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`.
+`color`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`.
 
-A token with no `meta` entry defaults to `raw`. A token with a `platforms` list that excludes a platform **must** declare `fallback` for it.
+A token with no `meta` entry defaults to `raw`. A token with a `platforms` list that excludes a platform **must** declare `fallback` for it. An unknown `group` is a build-time `TypeError` naming every offending token, not a silent pass-through.
 
 ## Layer Fields
 
@@ -114,7 +115,7 @@ A token with no `meta` entry defaults to `raw`. A token with a `platforms` list 
 - **An absent `weight` stays absent.** Do not `String()` it blindly; that emits the literal `'undefined'`
 - **Both platforms emit identical token keys.** Never guard against a missing key; check `substituted` instead
 - **`lossy` and `substituted` are return values, not warnings.** The caller decides whether they are fatal
-- **Contrast correction can override an explicit pin.** A tenant's brand colour may be altered; use `{ contrast: 'report' }` at build time to see it instead
+- **Contrast correction can override an explicit pin.** A tenant's brand color may be altered; use `{ contrast: 'report' }` at build time to see it instead
 - **The engine does no I/O.** It never fetches a theme, loads a font, or reads the DOM
 
 ## Testing

@@ -22,7 +22,7 @@ A design system has on the order of a hundred semantic tokens. Writing all of th
 
 Themer treats a theme as a **derivation**. A template declares what tokens exist and how each one is produced; a theme supplies the handful of values that actually differ. A theme that pins four seeds and a theme that pins every value are the same object on the same code path.
 
-The engine deliberately does not decide which of those you should write. A design system with hand-tuned values is not a system doing it wrong: a colour chosen by eye against a specific background is a real decision that no positional rule reproduces. Pinning it is the correct encoding, and the engine treats a pin as a first-class route rather than an escape hatch.
+The engine deliberately does not decide which of those you should write. A design system with hand-tuned values is not a system doing it wrong: a color chosen by eye against a specific background is a real decision that no positional rule reproduces. Pinning it is the correct encoding, and the engine treats a pin as a first-class route rather than an escape hatch.
 
 ## 2. One Resolution, Two Projections
 
@@ -49,6 +49,8 @@ Themer reports instead. Every emit returns two lists beside the tokens:
 - **`lossy`** names a fact a projection could not represent, which token lost it, and why.
 
 Both are ordinary return values, not warnings, so a build tool can fail on them and a runtime can ignore them. The engine does not decide which; it makes the information available.
+
+The same principle applies before emit: a token metadata entry that names a group no emitter table recognizes is a build-time `TypeError` naming every offending token, not a silent pass-through that leaves the value unprojected.
 
 ## 4. Layers Instead of Modes
 

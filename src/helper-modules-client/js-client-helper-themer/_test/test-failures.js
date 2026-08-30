@@ -31,8 +31,8 @@ function baseTemplate () {
       textPrimary: { op: 'rampStep', args: [10] }
     },
     meta: {
-      background: { group: 'colour' },
-      textPrimary: { group: 'colour' }
+      background: { group: 'color' },
+      textPrimary: { group: 'color' }
     },
     contrast_rules: [['textPrimary', 'background', 4.5]]
   };
@@ -47,8 +47,8 @@ describe('failure matrix - structural', () => {
     const t = baseTemplate();
     t.tokens.a = '{b}';
     t.tokens.b = '{a}';
-    t.meta.a = { group: 'colour' };
-    t.meta.b = { group: 'colour' };
+    t.meta.a = { group: 'color' };
+    t.meta.b = { group: 'color' };
 
     assert.throws(() => Themer.resolve(t, []), PREFIX);
 
@@ -60,9 +60,9 @@ describe('failure matrix - structural', () => {
     t.tokens.a = '{b}';
     t.tokens.b = '{c}';
     t.tokens.c = '{a}';
-    t.meta.a = { group: 'colour' };
-    t.meta.b = { group: 'colour' };
-    t.meta.c = { group: 'colour' };
+    t.meta.a = { group: 'color' };
+    t.meta.b = { group: 'color' };
+    t.meta.c = { group: 'color' };
 
     assert.throws(() => Themer.resolve(t, []), PREFIX);
 
@@ -72,7 +72,7 @@ describe('failure matrix - structural', () => {
 
     const t = baseTemplate();
     t.tokens.x = '{nonexistent}';
-    t.meta.x = { group: 'colour' };
+    t.meta.x = { group: 'color' };
 
     assert.throws(() => Themer.resolve(t, []), PREFIX);
 
@@ -107,7 +107,7 @@ describe('failure matrix - scale and operation', () => {
 
     const t = baseTemplate();
     t.tokens.badOp = { op: 'nonexistent', args: [] };
-    t.meta.badOp = { group: 'colour' };
+    t.meta.badOp = { group: 'color' };
 
     assert.throws(() => Themer.resolve(t, []), PREFIX);
 
@@ -117,7 +117,7 @@ describe('failure matrix - scale and operation', () => {
 
     const t = baseTemplate();
     t.tokens.badHue = { op: 'hue', args: ['blue', 99] };
-    t.meta.badHue = { group: 'colour' };
+    t.meta.badHue = { group: 'color' };
 
     assert.throws(() => Themer.resolve(t, []), PREFIX);
 

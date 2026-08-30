@@ -229,7 +229,7 @@ describe('resolve', () => {
 
   });
 
-  it('should correct a failing colour and record the change when contrast mode is correct', () => {
+  it('should correct a failing color and record the change when contrast mode is correct', () => {
 
     const result = Themer.resolve(TEMPLATE, BASE_LAYER);
 
@@ -241,7 +241,7 @@ describe('resolve', () => {
 
   });
 
-  it('should snap to a palette step rather than invent a colour when one complies', () => {
+  it('should snap to a palette step rather than invent a color when one complies', () => {
 
     const result = Themer.resolve(TEMPLATE, BASE_LAYER);
 
@@ -291,7 +291,7 @@ describe('resolve', () => {
 
     const template = buildTemplate();
     template.tokens.orphan = '{missing}';
-    template.meta.orphan = { group: 'colour' };
+    template.meta.orphan = { group: 'color' };
 
     assert.throws(
       () => Themer.resolve(template, BASE_LAYER),
@@ -305,8 +305,8 @@ describe('resolve', () => {
     const template = buildTemplate();
     template.tokens.loopA = '{loopB}';
     template.tokens.loopB = '{loopA}';
-    template.meta.loopA = { group: 'colour' };
-    template.meta.loopB = { group: 'colour' };
+    template.meta.loopA = { group: 'color' };
+    template.meta.loopB = { group: 'color' };
 
     assert.throws(
       () => Themer.resolve(template, BASE_LAYER),
@@ -345,7 +345,7 @@ describe('resolve', () => {
 
     const template = buildTemplate();
     template.tokens.odd = { op: 'nonexistent', args: [] };
-    template.meta.odd = { group: 'colour' };
+    template.meta.odd = { group: 'color' };
 
     assert.throws(
       () => Themer.resolve(template, BASE_LAYER),

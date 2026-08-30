@@ -184,6 +184,59 @@ const Validators = {
 
 
   /********************************************************************
+  Validate that every token metadata entry names a known emitter group.
+  Collects the whole offending set before throwing so one boot reports
+  every gap rather than one per run.
+
+  @param {Object} meta - Template metadata map (token name to entry)
+  @param {String[]} knownGroups - Emitter group names the engine provides
+
+  @return {void}
+  *********************************************************************/
+  validateGroups: function (meta, knownGroups) {
+
+    // No metadata means every token defaults to raw, which is always valid
+    if (Lib.Utils.isNullOrUndefined(meta)) {
+      return;
+    }
+
+    // Collect every token whose group is not recognized, naming them all at once
+    const unknown = [];
+
+    const names = Object.keys(meta);
+
+    for (let i = 0; i < names.length; i++) {
+
+      const entry = meta[names[i]];
+
+      // An entry without a group defaults to raw, which is always valid
+      if (Lib.Utils.isNullOrUndefined(entry) || Lib.Utils.isNullOrUndefined(entry.group)) {
+        continue;
+      }
+
+      // A non-string group is a different defect; skip it here so the type
+      // check during resolution names it with the right field path
+      if (!Lib.Utils.isString(entry.group)) {
+        continue;
+      }
+
+      if (knownGroups.indexOf(entry.group) === -1) {
+        unknown.push(names[i] + ' (group: ' + entry.group + ')');
+      }
+
+    }
+
+    // Report the complete unknown set in one throw
+    if (unknown.length > 0) {
+      throw new TypeError(
+        '[helper-themer] tokens ' + unknown.join(', ') + ' ' + ERRORS.MUST_BE_KNOWN_GROUP
+      );
+    }
+
+  },
+
+
+  /********************************************************************
   Validate a layer stack. Each layer is a sparse overlay applied in
   array order, so a malformed entry would silently skip its pins.
 
@@ -328,7 +381,7 @@ const Validators = {
   *********************************************************************/
   assertContrastRatio: function (value, path) {
 
-    // 21 is the maximum ratio any colour pair can reach, so above it never satisfies
+    // 21 is the maximum ratio any color pair can reach, so above it never satisfies
     if (!Lib.Utils.isNumber(value) || value < 1 || value > 21) {
       _Validators.fail(path, ERRORS.MUST_BE_CONTRAST_RATIO);
     }

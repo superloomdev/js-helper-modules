@@ -31,6 +31,8 @@ export default Object.freeze({
 
   MUST_BE_KNOWN_OPERATION: 'must name an operation this engine provides',
 
+  MUST_BE_KNOWN_GROUP: 'must name a known emitter group',
+
 
   // ~~~~~~~~~~~~~~~~~~~~ Numeric Range ~~~~~~~~~~~~~~~~~~~~
 

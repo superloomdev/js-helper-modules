@@ -483,12 +483,12 @@ const _Resolve = {
     // Geometry comes either from an elevation level or from explicit layers
     const layers = _Resolve.shadowLayers(name, entry, context);
 
-    // The colour may itself be an alias, so it resolves through the same chain
-    const colour = _Resolve.shadowColour(entry, context);
+    // The color may itself be an alias, so it resolves through the same chain
+    const resolved_color = _Resolve.shadowColor(entry, context);
 
-    // Stamp the resolved colour onto every layer so emit needs no second lookup
+    // Stamp the resolved color onto every layer so emit needs no second lookup
     const composed = layers.map(function (l) {
-      return Object.assign({ color: colour }, l);
+      return Object.assign({ color: resolved_color }, l);
     });
 
     return {
@@ -538,16 +538,16 @@ const _Resolve = {
 
 
   /********************************************************************
-  Resolve the colour a shadow paints with.
+  Resolve the color a shadow paints with.
 
   @param {Object} entry - Shadow entry
   @param {Object} context - Resolution context
 
-  @return {String} - Hex colour
+  @return {String} - Hex color
   *********************************************************************/
-  shadowColour: function (entry, context) {
+  shadowColor: function (entry, context) {
 
-    // Default to black, which is what an unstated shadow colour means
+    // Default to black, which is what an unstated shadow color means
     if (!entry.color) {
       return '#000000';
     }
@@ -702,7 +702,7 @@ const _Resolve = {
     const min_ratio = Lib.Utils.isNumber(rule[2]) ? rule[2] : context.min_contrast_ratio;
     Validators.assertContrastRatio(min_ratio, 'template.contrast_rules[' + index + '][2]');
 
-    // Only a pair of resolved colour strings can be measured
+    // Only a pair of resolved color strings can be measured
     const before = context.resolved[rule[0]];
     const against = context.resolved[rule[1]];
 
@@ -860,7 +860,7 @@ const _Operations = {
   @param {Array} args - Operation arguments
   @param {Object} context - Resolution context
 
-  @return {String} - Hex colour from the ramp
+  @return {String} - Hex color from the ramp
   *********************************************************************/
   rampStep: function (args, context) {
 
@@ -882,14 +882,14 @@ const _Operations = {
   @param {Array} args - Family name and step number
   @param {Object} context - Resolution context
 
-  @return {String} - Hex colour from the palette
+  @return {String} - Hex color from the palette
   *********************************************************************/
   hue: function (args, context) {
 
     // Compose the palette key the two arguments name
     const key = args[0] + args[1];
 
-    // A missing entry means the template names a colour its palette lacks
+    // A missing entry means the template names a color its palette lacks
     if (!context.palette[key]) {
       Validators.fail('template.palette.' + key, ERRORS.MUST_BE_DECLARED_TOKEN);
     }
@@ -905,7 +905,7 @@ const _Operations = {
   @param {Array} args - Two token references and a weight
   @param {Object} context - Resolution context
 
-  @return {String} - Blended hex colour
+  @return {String} - Blended hex color
   *********************************************************************/
   mix: function (args, context) {
 

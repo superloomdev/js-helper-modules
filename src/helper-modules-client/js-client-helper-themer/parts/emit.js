@@ -17,7 +17,7 @@ let Lib;               // eslint-disable-line no-unused-vars
 let CONFIG;            // eslint-disable-line no-unused-vars
 let ERRORS;            // eslint-disable-line no-unused-vars
 
-// Colour part, injected by the parent so the shadow emitter can build rgba
+// Color part, injected by the parent so the shadow emitter can build rgba
 let Color;
 
 
@@ -27,11 +27,16 @@ let Color;
 const PLATFORMS = ['web', 'native'];
 
 
+// Emitter group names, frozen so the validator and the tables cannot drift apart.
+// Exported through the public Emit interface as groups().
+const GROUPS = Object.freeze(['color', 'dimension', 'fontSize', 'letterSpacing', 'duration', 'easing', 'typeSet', 'shadow', 'raw']);
+
+
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
 Singleton part loader. Assigns the uniform part dependencies plus
-the colour part to module scope and returns the shared Emit object.
+the color part to module scope and returns the shared Emit object.
 
 @param {Object} shared_libs - Lib container with Utils and the Color part
 @param {Object} config - Merged config from the parent module
@@ -46,7 +51,7 @@ export default function loader (shared_libs, config, errors) {
   CONFIG = config;
   ERRORS = errors;
 
-  // The colour part rides in on the container, keeping the parts signature uniform
+  // The color part rides in on the container, keeping the parts signature uniform
   Color = shared_libs.Color;
 
   return Emit;
@@ -71,6 +76,19 @@ const Emit = {
 
     // Copy so a caller cannot mutate the engine's own list
     return PLATFORMS.slice();
+
+  },
+
+
+  /********************************************************************
+  List the emitter group names this engine recognizes.
+
+  @return {String[]} - Group names, frozen
+  *********************************************************************/
+  groups: function () {
+
+    // Already frozen, so returning the reference is safe
+    return GROUPS;
 
   },
 
@@ -132,7 +150,7 @@ const _Emit = {
   *********************************************************************/
   tables: function () {
 
-    // Assembled on demand so the colour part is available by call time
+    // Assembled on demand so the color part is available by call time
     return {
       web: _Emit.webTable(),
       native: _Emit.nativeTable()
@@ -150,7 +168,7 @@ const _Emit = {
 
     return {
 
-      colour: function (v) {
+      color: function (v) {
         return v;
       },
 
@@ -196,7 +214,7 @@ const _Emit = {
 
     return {
 
-      colour: function (v) {
+      color: function (v) {
         return v;
       },
 

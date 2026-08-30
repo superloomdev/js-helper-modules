@@ -39,7 +39,7 @@ function makeTemplate (accentHex) {
       }
     },
     meta: {
-      brand: { group: 'colour' },
+      brand: { group: 'color' },
       bodyText: { group: 'typeSet' },
       codeText: { group: 'typeSet' },
       cardShadow: { group: 'shadow' },

@@ -114,7 +114,7 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 
 | Field | Type | Required | Note |
 |---|---|---|---|
-| `group` | `String` | No | Selects the emitter: `colour`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw` |
+| `group` | `String` | No | Selects the emitter: `color`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`. An unknown group is a build-time `TypeError` naming every offending token, not a silent pass-through |
 | `platforms` | `String[]` | No | Platforms this token is available on. Defaults to all |
 | `fallback` | `Object` | Required when `platforms` excludes a platform | Value to substitute per excluded platform |
 
@@ -142,7 +142,7 @@ The optional per-call bundle passed to `resolve` and `buildTheme`.
 
 | Key | Type | Default | Constraint |
 |---|---|---|---|
-| `contrast` | `String` | `'correct'` | `'correct'` rewrites failing colours; any other value only reports them |
+| `contrast` | `String` | `'correct'` | `'correct'` rewrites failing colors; any other value only reports them |
 | `min_contrast_ratio` | `Number` | `CONFIG.MIN_CONTRAST_RATIO` | Between 1 and 21 inclusive |
 | `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive |
 
@@ -203,7 +203,7 @@ A `lossy` entry carries `token`, `fact`, and `reason`. A value that vanishes wit
 Stated explicitly, because the gaps are deliberate rather than oversights.
 
 - **Whether a `font_family` token names a real typeface.** The engine has no font registry and does no I/O. It emits the token unchanged; `helper-font` resolves it to a registered family name. See [Philosophy](philosophy.md) for why the two modules do not depend on each other.
-- **Whether a colour is a valid hex string.** A malformed hex produces `NaN` channels rather than a throw. Templates are authored artifacts, and a build-time check is the right place for this.
+- **Whether a color is a valid hex string.** A malformed hex produces `NaN` channels rather than a throw. Templates are authored artifacts, and a build-time check is the right place for this.
 - **Whether a theme document came from a trusted source.** Schema shape is not provenance.
 - **Whether the emitted values look right.** Contrast rules are the only aesthetic constraint the engine enforces.
 
@@ -228,6 +228,7 @@ Every throw follows the framework's programmer-error format: an alias prefix, th
 | `[helper-themer] tokens.pad.scale must name a generator this engine provides` | Unknown scale name |
 | `[helper-themer] tokens.brand.op must name an operation this engine provides` | Unknown operation name |
 | `[helper-themer] platform must be one of: web, native` | Unknown emit target |
+| `[helper-themer] tokens bad (group: nonsense) must name a known emitter group` | Token metadata names a group no emitter table recognizes |
 | `[helper-themer] CONFIG.CACHE_CAPACITY must be a whole number of 1 or greater` | Misconfigured at load time |
 
 The expected-shape clauses live in `themer.errors.js`, so the format stays in one place and every message reads alike.

@@ -11,7 +11,7 @@ Returned by a function rather than exported as a constant, so a test
 that mutates one template cannot affect another, and so two distinct
 template objects are available for cache-identity checks.
 
-@param {String} [accent] - Accent colour, letting callers vary one value
+@param {String} [accent] - Accent color, letting callers vary one value
 
 @return {Object} - A complete template
 *********************************************************************/
@@ -94,13 +94,13 @@ export default function buildTemplate (accent) {
     },
 
     meta: {
-      background: { group: 'colour' },
-      accent: { group: 'colour' },
-      textPrimary: { group: 'colour' },
-      brand: { group: 'colour' },
-      warning: { group: 'colour' },
-      brandAlias: { group: 'colour' },
-      brandMuted: { group: 'colour' },
+      background: { group: 'color' },
+      accent: { group: 'color' },
+      textPrimary: { group: 'color' },
+      brand: { group: 'color' },
+      warning: { group: 'color' },
+      brandAlias: { group: 'color' },
+      brandMuted: { group: 'color' },
       spacing03: { group: 'dimension' },
       spacing05: { group: 'dimension' },
       geoStep03: { group: 'dimension' },
