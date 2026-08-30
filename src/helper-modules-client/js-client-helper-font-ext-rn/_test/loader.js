@@ -23,9 +23,9 @@ Font.registerFamilies({
 
 // The native loader stub is aliased via _test/package.json and the parent
 // package.json devDependencies. The extension requires it directly at module
-// scope — no injection needed.
+// scope - no injection needed.
 
-// Build the adapter — no NativeFontLoader injection needed
+// Build the adapter - no NativeFontLoader injection needed
 const RNFontAdapter = fontExtRnLoader({
   Utils: Utils,
   Debug: Debug,

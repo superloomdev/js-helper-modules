@@ -199,7 +199,7 @@ test('constructor throws when Font core is not injected', function () {
 test('constructor does not require NativeFontLoader injection', function () {
 
   // The extension now requires @vitrion/react-native-load-fonts directly.
-  // No NativeFontLoader in shared_libs — should NOT throw.
+  // No NativeFontLoader in shared_libs - should NOT throw.
   const Adapter = fontExtRnLoader({
     Utils: Utils,
     Debug: Debug,

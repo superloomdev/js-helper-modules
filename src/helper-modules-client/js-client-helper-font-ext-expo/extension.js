@@ -265,9 +265,9 @@ const _Expo = {
   /********************************************************************
   Load a single font via expo-font's loadAsync. Resolves the best
   source based on what's available in the entry:
-  1. asset (Expo requireable module ID) — native
-  2. url (remote URL) — web
-  3. path (local file path) — native fallback
+  1. asset (Expo requireable module ID) - native
+  2. url (remote URL) - web
+  3. path (local file path) - native fallback
 
   expo-font's loadAsync accepts (familyName, source) where source
   can be a requireable module, a URI string, or an object with

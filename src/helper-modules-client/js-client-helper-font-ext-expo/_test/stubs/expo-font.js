@@ -1,6 +1,6 @@
 // Stub for expo-font in Node tests.
 // Exposes loadAsync(fontDescriptor, source) matching the real API.
-// ESM with named exports — consumed via `import * as ExpoFont from 'expo-font'`.
+// ESM with named exports - consumed via `import * as ExpoFont from 'expo-font'`.
 //
 // Uses globalThis for state so that both the extension (symlinked via
 // file:../) and the test file resolve to the same state even when Node

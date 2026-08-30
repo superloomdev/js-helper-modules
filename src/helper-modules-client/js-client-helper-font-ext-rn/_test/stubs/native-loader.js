@@ -1,6 +1,6 @@
 // Stub for @vitrion/react-native-load-fonts in Node tests.
 // Exposes loadFontFromFile(name, filePath) matching the real API.
-// ESM with named exports — consumed via `import * as NativeFonts from '@vitrion/react-native-load-fonts'`.
+// ESM with named exports - consumed via `import * as NativeFonts from '@vitrion/react-native-load-fonts'`.
 //
 // Uses globalThis for state so that both the extension (symlinked via
 // file:../) and the test file resolve to the same state even when Node

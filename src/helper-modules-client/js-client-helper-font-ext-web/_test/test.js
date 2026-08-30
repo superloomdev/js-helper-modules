@@ -270,7 +270,7 @@ test('loadManifest skips entries without url (native/Expo-only)', async function
     Document: freshDoc
   });
 
-  // Manifest with a path-only entry (no url) — should be skipped
+  // Manifest with a path-only entry (no url) - should be skipped
   const manifest = {
     NativeOnlyFont: {
       styles: {

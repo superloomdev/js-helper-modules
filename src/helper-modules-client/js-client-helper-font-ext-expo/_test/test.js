@@ -214,7 +214,7 @@ test('constructor throws when Font core is not injected', function () {
 test('constructor does not require expo-font injection', function () {
 
   // The extension requires expo-font directly at module scope.
-  // No injection needed — should NOT throw.
+  // No injection needed - should NOT throw.
   const Adapter = fontExtExpoLoader({
     Utils: Utils,
     Debug: Debug,
