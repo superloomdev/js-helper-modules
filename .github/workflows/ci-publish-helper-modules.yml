@@ -174,13 +174,15 @@ jobs:
           # Step 2: Find every module on disk (canonical list)
           ALL_MODULES=$(ls -d src/helper-modules-*/js-* 2>/dev/null | sort -u)
 
-          # Step 3: Build PUBLISH_MODULES via registry-existence check.
-          # A module needs publishing if its current <name>@<version> is not on the registry.
+          # Step 3: Build PUBLISH_MODULES via shasum comparison.
+          # A module needs publishing if its packed content differs from the registry
+          # or is absent. A content match means the registry already serves identical
+          # content, so the publish job is skipped.
           # Only run on main pushes — PRs and other refs never publish.
           PUBLISH_MODULES=""
           if [ "$IS_MAIN_PUSH" == "true" ]; then
             echo ""
-            echo "=== Registry check (publish detection) ==="
+            echo "=== Registry check (shasum comparison) ==="
             for MODULE in $ALL_MODULES; do
               PKG_PATH="$MODULE/package.json"
               if [ ! -f "$PKG_PATH" ]; then
@@ -193,13 +195,16 @@ jobs:
                 continue
               fi
 
-              # npm view returns 0 if the version exists, non-zero otherwise.
-              # On non-zero (404 or transient error), we err on the side of publishing —
-              # the per-job safety net will skip if the version is actually present.
-              if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null >/dev/null; then
-                echo "  on registry:    $PKG_NAME@$PKG_VERSION"
+              LOCAL_SHASUM=$(cd "$MODULE" && npm pack --dry-run --json 2>/dev/null | jq -r '.[0].shasum')
+              REGISTRY_SHASUM=$(npm view "$PKG_NAME@$PKG_VERSION" dist.shasum 2>/dev/null || echo "")
+
+              if [ -n "$REGISTRY_SHASUM" ] && [ "$LOCAL_SHASUM" = "$REGISTRY_SHASUM" ]; then
+                echo "  match:          $PKG_NAME@$PKG_VERSION (shasum $LOCAL_SHASUM)"
+              elif [ -n "$REGISTRY_SHASUM" ] && [ "$LOCAL_SHASUM" != "$REGISTRY_SHASUM" ]; then
+                echo "  DIFFER:         $PKG_NAME@$PKG_VERSION (local $LOCAL_SHASUM vs registry $REGISTRY_SHASUM)"
+                PUBLISH_MODULES="${PUBLISH_MODULES}${MODULE}"$'\n'
               else
-                echo "  needs publish:  $PKG_NAME@$PKG_VERSION"
+                echo "  needs publish:  $PKG_NAME@$PKG_VERSION (shasum $LOCAL_SHASUM)"
                 PUBLISH_MODULES="${PUBLISH_MODULES}${MODULE}"$'\n'
               fi
             done
@@ -276,20 +281,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-eslint-config
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-eslint-config
   # ###########################################################################
   #   MODULE 1: js-helper-utils (no dependencies)
   # ###########################################################################
@@ -340,20 +334,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-utils
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-utils
   # ###########################################################################
   #   MODULE 2: js-helper-debug (no dependencies)
   # ###########################################################################
@@ -404,20 +387,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-debug
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-debug
   # ###########################################################################
   #   MODULE 3: js-helper-time (needs utils, debug)
   # ###########################################################################
@@ -468,20 +440,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-time
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-time
   # ###########################################################################
   #   MODULE 4: js-helper-money (needs utils, debug)
   # ###########################################################################
@@ -532,20 +493,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-money
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-money
   # ###########################################################################
   #   MODULE 5: js-client-helper-crypto (needs utils, debug)
   # ###########################################################################
@@ -596,20 +546,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-crypto
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-crypto
   # ###########################################################################
   #   MODULE 7: js-helper-contact-phone (needs utils, debug)
   # ###########################################################################
@@ -660,20 +599,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-phone
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-phone
   # ###########################################################################
   #   MODULE 8: js-helper-contact-phone-adapter-basic (needs contact-phone)
   # ###########################################################################
@@ -724,20 +652,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-phone-adapter-basic
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-phone-adapter-basic
   # ###########################################################################
   #   MODULE 8a: js-helper-contact-phone-adapter-extended (needs contact-phone)
   # ###########################################################################
@@ -788,20 +705,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-phone-adapter-extended
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-phone-adapter-extended
   # ###########################################################################
   #   MODULE 8b: js-helper-contact-email (needs utils)
   # ###########################################################################
@@ -852,20 +758,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-email
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-email
   # ###########################################################################
   #   MODULE 8c: js-helper-contact-email-adapter-basic (needs contact-email)
   # ###########################################################################
@@ -916,20 +811,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-email-adapter-basic
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-email-adapter-basic
   # ###########################################################################
   #   MODULE 8d: js-helper-contact-email-adapter-extended (needs contact-email)
   # ###########################################################################
@@ -980,20 +864,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-email-adapter-extended
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-email-adapter-extended
   # ###########################################################################
   #   MODULE 8e: js-helper-contact-address (needs utils)
   # ###########################################################################
@@ -1044,20 +917,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-address
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-address
   # ###########################################################################
   #   MODULE 8f: js-helper-contact-address-adapter-basic (needs contact-address)
   # ###########################################################################
@@ -1108,20 +970,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-address-adapter-basic
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-address-adapter-basic
   # ###########################################################################
   #   MODULE 8g: js-helper-contact-address-adapter-extended (needs contact-address)
   # ###########################################################################
@@ -1172,20 +1023,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-core/js-helper-contact-address-adapter-extended
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-core/js-helper-contact-address-adapter-extended
   # ╔═══════════════════════════════════════════════════════════════════════════╗
   # ║  GROUP 2: SERVER MODULES (helper-modules-server/)                         ║
   # ║  Node.js runtime - crypto, HTTP, storage, databases, services             ║
@@ -1241,20 +1081,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-crypto
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-crypto
   # ###########################################################################
   #   MODULE 7: js-server-helper-instance (needs utils, debug)
   # ###########################################################################
@@ -1305,20 +1134,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-instance
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-instance
   # ###########################################################################
   #   MODULE 8: js-server-helper-http (needs utils, debug)
   # ###########################################################################
@@ -1369,20 +1187,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-http
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-http
   # ###########################################################################
   #   MODULE 9: js-server-helper-http-gateway
   #   (needs utils, debug, instance, http; no Docker required)
@@ -1434,20 +1241,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-http-gateway
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-http-gateway
   # ###########################################################################
   #   MODULE 10: js-server-helper-http-gateway-adapter-aws-apigateway
   #   (no runtime deps; no Docker required)
@@ -1499,20 +1295,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-http-gateway-adapter-aws-apigateway
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-http-gateway-adapter-aws-apigateway
   # ###########################################################################
   #   MODULE 11: js-server-helper-http-gateway-adapter-express
   #   (no runtime deps; no Docker required)
@@ -1564,20 +1349,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-http-gateway-adapter-express
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-http-gateway-adapter-express
   # ###########################################################################
   #   MODULE 12: js-server-helper-storage-aws-s3-url-signer (needs utils, debug)
   # ###########################################################################
@@ -1628,20 +1402,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-storage-aws-s3-url-signer
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-storage-aws-s3-url-signer
   # ###########################################################################
   #   MODULE 13: js-server-helper-sql-sqlite (needs utils, debug, instance)
   # ###########################################################################
@@ -1692,20 +1455,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-sql-sqlite
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-sql-sqlite
   # ###########################################################################
   #   MODULE 14: js-server-helper-storage-aws-s3 (needs utils, debug, instance)
   # ###########################################################################
@@ -1761,20 +1513,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-storage-aws-s3
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-storage-aws-s3
   # ###########################################################################
   #   MODULE 15: js-server-helper-nosql-aws-dynamodb (needs utils, debug, instance)
   # ###########################################################################
@@ -1829,20 +1570,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-nosql-aws-dynamodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-nosql-aws-dynamodb
   # ###########################################################################
   #   MODULE 16: js-server-helper-nosql-mongodb (needs utils, debug, instance)
   # ###########################################################################
@@ -1895,20 +1625,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-nosql-mongodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-nosql-mongodb
   # ###########################################################################
   #   MODULE 16a: js-server-helper-nosql-aws-dynamodb-admin (needs utils, debug, instance)
   # ###########################################################################
@@ -1963,20 +1682,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-nosql-aws-dynamodb-admin
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-nosql-aws-dynamodb-admin
   # ###########################################################################
   #   MODULE 16b: js-server-helper-nosql-mongodb-admin (needs utils, debug, instance)
   # ###########################################################################
@@ -2029,20 +1737,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-nosql-mongodb-admin
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-nosql-mongodb-admin
   # ###########################################################################
   #   MODULE 17: js-server-helper-queue-aws-sqs (needs utils, debug, instance)
   # ###########################################################################
@@ -2097,20 +1794,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-queue-aws-sqs
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-queue-aws-sqs
   # ###########################################################################
   #   MODULE 18: js-server-helper-sql-mysql (needs utils, debug, instance)
   # ###########################################################################
@@ -2167,20 +1853,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-sql-mysql
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-sql-mysql
   # ###########################################################################
   #   MODULE 19: js-server-helper-sql-postgres (needs utils, debug, instance)
   # ###########################################################################
@@ -2236,20 +1911,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-sql-postgres
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-sql-postgres
   # ###########################################################################
   #   MODULE 20: js-server-helper-verify-store-sqlite
   #   (needs publish-verify so verify@^2.x is on the registry before npm install)
@@ -2301,20 +1965,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-verify-store-sqlite
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-verify-store-sqlite
   # ###########################################################################
   #   MODULE 21: js-server-helper-verify-store-postgres
   #   (needs sql-postgres published; real Postgres backend via Docker)
@@ -2366,20 +2019,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-verify-store-postgres
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-verify-store-postgres
   # ###########################################################################
   #   MODULE 22: js-server-helper-verify-store-mysql
   #   (needs sql-mysql published; real MySQL backend via Docker)
@@ -2431,20 +2073,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-verify-store-mysql
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-verify-store-mysql
   # ###########################################################################
   #   MODULE 23: js-server-helper-verify-store-mongodb
   #   (needs nosql-mongodb published; real MongoDB via Docker)
@@ -2496,20 +2127,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-verify-store-mongodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-verify-store-mongodb
   # ###########################################################################
   #   MODULE 24: js-server-helper-verify-store-dynamodb
   #   (needs nosql-aws-dynamodb published; DynamoDB Local via Docker)
@@ -2564,20 +2184,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-verify-store-dynamodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-verify-store-dynamodb
   # ###########################################################################
   #   MODULE 25: js-server-helper-verify (needs utils, debug, instance, crypto)
   #   NOTE: must run BEFORE verify-store-* jobs so publish-verify puts v2.x on
@@ -2630,20 +2239,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-verify
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-verify
   # ###########################################################################
   #   MODULE 26: js-server-helper-logger
   #   (needs utils, debug, instance, crypto + every storage helper for tests)
@@ -2695,20 +2293,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-logger
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-logger
   # ###########################################################################
   #   MODULE 27: js-server-helper-logger-store-sqlite
   #   (needs publish-logger; runs in-memory SQLite, no Docker needed)
@@ -2760,20 +2347,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-logger-store-sqlite
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-logger-store-sqlite
   # ###########################################################################
   #   MODULE 28: js-server-helper-logger-store-postgres
   #   (needs publish-logger-store-sqlite; real Postgres via Docker)
@@ -2825,20 +2401,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-logger-store-postgres
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-logger-store-postgres
   # ###########################################################################
   #   MODULE 29: js-server-helper-logger-store-mysql
   #   (needs publish-logger-store-postgres; real MySQL via Docker)
@@ -2890,20 +2455,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-logger-store-mysql
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-logger-store-mysql
   # ###########################################################################
   #   MODULE 30: js-server-helper-logger-store-dynamodb
   #   (needs publish-logger-store-mysql; DynamoDB Local via Docker)
@@ -2958,20 +2512,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-logger-store-dynamodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-logger-store-dynamodb
   # ###########################################################################
   #   MODULE 31: js-server-helper-logger-store-mongodb
   #   (needs publish-logger-store-dynamodb; real MongoDB via Docker)
@@ -3023,20 +2566,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-logger-store-mongodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo " $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-logger-store-mongodb
   # ###########################################################################
   #   MODULE 32: js-server-helper-auth
   #   (needs utils, debug, crypto, instance + every storage helper for tests)
@@ -3088,20 +2620,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-auth
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-auth
   # ###########################################################################
   #   MODULE 33: js-server-helper-auth-store-sqlite
   #   (offline - no Docker, needs auth published)
@@ -3153,20 +2674,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-auth-store-sqlite
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-auth-store-sqlite
   # ###########################################################################
   #   MODULE 34: js-server-helper-auth-store-postgres
   #   (needs auth-store-sqlite published, Postgres via Docker)
@@ -3218,20 +2728,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-auth-store-postgres
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-auth-store-postgres
   # ###########################################################################
   #   MODULE 35: js-server-helper-auth-store-mysql
   #   (needs auth-store-postgres published, MySQL via Docker)
@@ -3283,20 +2782,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-auth-store-mysql
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-auth-store-mysql
   # ###########################################################################
   #   MODULE 36: js-server-helper-auth-store-mongodb
   #   (needs auth-store-mysql published, MongoDB via Docker)
@@ -3348,20 +2836,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-auth-store-mongodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-auth-store-mongodb
   # ###########################################################################
   #   MODULE 37: js-server-helper-auth-store-dynamodb
   #   (needs auth-store-mongodb published, DynamoDB local emulator via Docker)
@@ -3416,20 +2893,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-auth-store-dynamodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-auth-store-dynamodb
   # ###########################################################################
   #   MODULE 38: js-server-helper-distinct-queue
   #   (needs utils, debug, crypto, instance; no Docker — tests use in-memory store)
@@ -3481,20 +2947,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-distinct-queue
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-distinct-queue
   # ###########################################################################
   #   MODULE 39: js-server-helper-distinct-queue-store-mongodb
   #   (needs utils, debug, crypto, instance, nosql-mongodb, distinct-queue; Docker)
@@ -3546,20 +3001,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-mongodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-mongodb
   # ###########################################################################
   #   MODULE 40: js-server-helper-distinct-queue-store-dynamodb
   #   (needs utils, debug, crypto, instance, nosql-aws-dynamodb, distinct-queue; Docker)
@@ -3611,20 +3055,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-distinct-queue-store-dynamodb
   # ╔═══════════════════════════════════════════════════════════════════════════╗
   # ║  GROUP 3: CLIENT MODULES (helper-modules-client/)                         ║
   # ║  Universal runtime - UI-adjacent, browser-focused                         ║
@@ -3681,19 +3114,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-styler
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-styler
   # ###########################################################################
   #   MODULE 43: js-client-helper-styler-ext-react (needs styler, React)
   #   React extension for js-client-helper-styler - Class H extension module
@@ -3745,21 +3168,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-styler-ext-react
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-styler-ext-react
   # ###########################################################################
   #   MODULE 43a: js-client-helper-themer (needs utils, debug)
   #   Pure JS token engine - zero runtime dependencies
@@ -3811,19 +3222,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-themer
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-themer
   # ###########################################################################
   #   MODULE 43b: js-client-helper-themer-ext-react
   #   (needs react, helper-themer, helper-utils, helper-debug)
@@ -3876,19 +3277,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-themer-ext-react
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-themer-ext-react
   # ╔═══════════════════════════════════════════════════════════════════════════╗
   # ║  GROUP 3 (continued): NEW CLIENT MODULES                                 ║
   # ║  Class I framework modules + Class E/F storage                            ║
@@ -3945,20 +3336,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-react-helper-idle
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-react-helper-idle
   # ###########################################################################
   #   MODULE 45: js-react-helper-timer (needs utils, debug, time)
   #   Class I framework module - React injected via shared_libs
@@ -4010,20 +3390,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-react-helper-timer
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-react-helper-timer
   # ###########################################################################
   #   MODULE 46: js-client-helper-kv-localstorage (needs utils, debug)
   #   Class C driver wrapper - browser Web Storage (localStorage/sessionStorage)
@@ -4075,20 +3444,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-kv-localstorage
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-kv-localstorage
   # ###########################################################################
   #   MODULE 47: js-rn-helper-kv-mmkv (needs utils, debug)
   #   Class C driver wrapper - react-native-mmkv (JSI, mmap-backed)
@@ -4140,20 +3498,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-rn-helper-kv-mmkv
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-rn-helper-kv-mmkv
   # ###########################################################################
   #   MODULE 48: js-client-helper-font (needs utils, debug)
   #   Class G pure core - font registry and @font-face construction, no platform
@@ -4205,20 +3552,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-font
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-font
   # ###########################################################################
   #   MODULE 49: js-client-helper-font-ext-web (needs utils, debug, font)
   #   Class H extension - injects @font-face CSS into the DOM
@@ -4271,20 +3607,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-font-ext-web
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-font-ext-web
   # ###########################################################################
   #   MODULE 50: js-client-helper-font-ext-rn (needs utils, debug, font)
   #   Class H extension - native font registration via injected loader
@@ -4337,20 +3662,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-font-ext-rn
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-font-ext-rn
   # ###########################################################################
   #   MODULE 50a: js-client-helper-font-ext-expo (needs utils, debug, font)
   #   Class H extension - font registration via expo-font
@@ -4403,20 +3717,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-client-helper-font-ext-expo
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-client-helper-font-ext-expo
   # ###########################################################################
   #   MODULE 51: js-rnw-helper-device (needs utils, debug)
   #   Class I framework module - RN platform APIs injected via shared_libs
@@ -4468,19 +3771,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-client/js-rnw-helper-device
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-client/js-rnw-helper-device
   # =========================================================================
   # 52. kv-valkey (server driver, Valkey/Redis)
   # =========================================================================
@@ -4532,19 +3825,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-kv-valkey
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-kv-valkey
   # =========================================================================
   # 53. kv-aws-elasticache (server driver, ElastiCache IAM auth)
   # =========================================================================
@@ -4596,19 +3879,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-kv-aws-elasticache
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-kv-aws-elasticache
   test-cache:
     needs: [detect, publish-kv-aws-elasticache]
     if: |
@@ -4655,19 +3928,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-cache
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-cache
   test-cache-store-valkey:
     needs: [detect, publish-cache, publish-kv-valkey]
     if: |
@@ -4714,19 +3977,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-cache-store-valkey
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-cache-store-valkey
   # ###########################################################################
   #   MODULE 56: js-server-helper-cache-store-dynamodb
   #   (needs nosql-aws-dynamodb + cache published; DynamoDB Local via Docker)
@@ -4778,19 +4031,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-cache-store-dynamodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-cache-store-dynamodb
   # ###########################################################################
   #   MODULE 57: js-server-helper-cache-store-mongodb
   #   (needs nosql-mongodb + cache published; MongoDB via Docker)
@@ -4842,19 +4085,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-cache-store-mongodb
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-cache-store-mongodb
   # ###########################################################################
   #   MODULE 58: js-server-helper-cache-store-aws-elasticache
   #   (needs kv-aws-elasticache + cache published; Valkey via Docker)
@@ -4906,20 +4139,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: Pin npm to v10
         run: npm install -g npm@10
-      - name: Publish
-        working-directory: src/helper-modules-server/js-server-helper-cache-store-aws-elasticache
-        run: |
-          npm install
-          PKG_NAME=$(jq -r '.name' package.json)
-          PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
-            echo "⚠️ $PKG_NAME@$PKG_VERSION already published - skipping"
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION..."
-            npm publish
-          fi
-
-
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-cache-store-aws-elasticache
   # ###########################################################################
   #   CATALOG-LEVEL GUARD: country parity across basic contact adapters
   #   Runs after both basic adapters publish. Neither gates the other.

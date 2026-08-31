@@ -1,0 +1,61 @@
+name: Publish Guard
+description: Compare packed content against the registry and publish only if the version is absent. Fail loudly on a same-version content mismatch.
+
+inputs:
+  working-directory:
+    description: Path to the module directory (relative to repo root)
+    required: true
+
+outputs:
+  needs_publish:
+    description: '"true" if the module was published, "false" if skipped or failed'
+    value: ${{ steps.guard.outputs.needs_publish }}
+  local_shasum:
+    description: The shasum of the locally packed tarball
+    value: ${{ steps.guard.outputs.local_shasum }}
+  registry_shasum:
+    description: The shasum from the registry (empty if not published)
+    value: ${{ steps.guard.outputs.registry_shasum }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install dependencies
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: npm install
+
+    - name: Publish guard (shasum comparison)
+      id: guard
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: |
+        PKG_NAME=$(jq -r '.name' package.json)
+        PKG_VERSION=$(jq -r '.version' package.json)
+        LOCAL_SHASUM=$(npm pack --dry-run --json 2>/dev/null | jq -r '.[0].shasum')
+        REGISTRY_SHASUM=$(npm view "$PKG_NAME@$PKG_VERSION" dist.shasum 2>/dev/null || echo "")
+
+        echo "local_shasum=$LOCAL_SHASUM" >> $GITHUB_OUTPUT
+        echo "registry_shasum=$REGISTRY_SHASUM" >> $GITHUB_OUTPUT
+
+        if [ -n "$REGISTRY_SHASUM" ] && [ "$LOCAL_SHASUM" = "$REGISTRY_SHASUM" ]; then
+          echo "needs_publish=false" >> $GITHUB_OUTPUT
+          echo "Registry already serves $PKG_NAME@$PKG_VERSION with identical content (shasum $LOCAL_SHASUM)"
+        elif [ -n "$REGISTRY_SHASUM" ] && [ "$LOCAL_SHASUM" != "$REGISTRY_SHASUM" ]; then
+          echo "needs_publish=false" >> $GITHUB_OUTPUT
+          echo "FAIL: $PKG_NAME@$PKG_VERSION exists on registry with a different shasum."
+          echo "Local:  $LOCAL_SHASUM"
+          echo "Remote: $REGISTRY_SHASUM"
+          echo "Delete the version from the registry before pushing, then push again."
+          echo "Never bump the version number to work around this."
+          exit 1
+        else
+          echo "needs_publish=true" >> $GITHUB_OUTPUT
+          echo "Version $PKG_NAME@$PKG_VERSION needs publishing (shasum $LOCAL_SHASUM)"
+        fi
+
+    - name: Publish to GitHub Packages
+      if: steps.guard.outputs.needs_publish == 'true'
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: npm publish
