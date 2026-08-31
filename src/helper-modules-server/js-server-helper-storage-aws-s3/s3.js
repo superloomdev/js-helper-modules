@@ -431,7 +431,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     // High-level functions that build params then execute.
 
     /********************************************************************
-    List objects in a bucket with an optional prefix filter. Returns up to
+    List files in a bucket with an optional prefix filter. Returns up to
     1000 keys in a single call (S3 ListObjectsV2 default page size).
 
     @param {Object} instance - Request instance
@@ -440,7 +440,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
     @return {Promise<Object>} - { success, keys, error }
     *********************************************************************/
-    listObjects: async function (instance, bucket, prefix) {
+    listFiles: async function (instance, bucket, prefix) {
 
       // Ensure S3 client is initialized
       _S3.initIfNot();

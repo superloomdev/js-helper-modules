@@ -73,7 +73,7 @@ runCopyObjectCommand(instance, service_params) → { success, error } | async:ye
 
 ### Convenience (DRY - build + execute internally)
 
-listObjects(instance, bucket, prefix?) → { success, keys, error } | async:yes
+listFiles(instance, bucket, prefix?) → { success, keys, error } | async:yes
   List up to 1000 keys via ListObjectsV2. Prefix optional.
 
 uploadFile(instance, bucket, key, body, content_type?, metadata?, is_public?) → { success, etag, error } | async:yes

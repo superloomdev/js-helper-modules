@@ -17,7 +17,7 @@ Every exported function with its signature, parameters, return shape, semantics,
   - [`runDeleteObjectCommand`](#commanddeleteobject)
   - [`runCopyObjectCommand`](#commandcopyobject)
 - [File Operations](#file-operations) *(convenience)*
-  - [`listObjects`](#listobjects)
+  - [`listFiles`](#listfiles)
   - [`uploadFile`](#uploadfile)
   - [`uploadFiles`](#uploadfiles)
   - [`getFile`](#getfile)
@@ -53,7 +53,7 @@ This module exposes its single-object operations through three layers, each usef
 |---|---|---|
 | **Builder** (pure) | `buildUploadObjectCommand`, `buildGetObjectCommand`, `buildDeleteObjectCommand`, `buildCopyObjectCommand` | Build a command object ahead of time. Useful if you want to inspect or modify the SDK params before they go out. |
 | **Executor** (async) | `runUploadObjectCommand`, `runGetObjectCommand`, `runDeleteObjectCommand`, `runCopyObjectCommand` | Execute a pre-built command. Pair with a builder when you need fine-grained control. |
-| **Convenience** (async) | `listObjects`, `uploadFile`, `uploadFiles`, `getFile`, `deleteFile`, `deleteFiles`, `copyFile`, `moveFile` | Build + execute in one call. Use for ordinary application code. |
+| **Convenience** (async) | `listFiles`, `uploadFile`, `uploadFiles`, `getFile`, `deleteFile`, `deleteFiles`, `copyFile`, `moveFile` | Build + execute in one call. Use for ordinary application code. |
 
 Most application code uses the **Convenience** layer. The **Builder + Executor** layers are exposed for advanced workflows that want to compose commands before dispatch.
 
@@ -155,16 +155,16 @@ Execute a pre-built `CopyObject` command. `NoSuchKey` (missing source) returns `
 
 The convenience layer. Builds and executes in a single call. Use these for ordinary application code.
 
-### `listObjects`
+### `listFiles`
 
 ```javascript
-async listObjects(instance, bucket, prefix) → { success, keys, error }
+async listFiles(instance, bucket, prefix) → { success, keys, error }
 ```
 
 List up to 1000 keys in a bucket using `ListObjectsV2`. `prefix` is optional. `keys` is always an array of strings (the key names. `Contents.Key` from the SDK response).
 
 ```javascript
-const res = await Lib.S3.listObjects(instance, 'uploads', 'users/42/');
+const res = await Lib.S3.listFiles(instance, 'uploads', 'users/42/');
 console.log(res.keys);   // ['users/42/avatar.jpg', 'users/42/document.pdf', ...]
 ```
 

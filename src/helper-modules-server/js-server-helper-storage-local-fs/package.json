@@ -1,0 +1,41 @@
+{
+  "name": "@superloomdev/js-server-helper-storage-local-fs",
+  "description": "Local filesystem storage module for Node.js. Wraps node:fs with path safety and an API that mirrors the S3 storage module.",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./local-fs.js",
+    "./local-fs.config.js": "./local-fs.config.js",
+    "./local-fs.errors.js": "./local-fs.errors.js",
+    "./local-fs.validators.js": "./local-fs.validators.js",
+    "./package.json": "./package.json"
+  },
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "bundleDependencies": false,
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test _test/test.js"
+  }
+}

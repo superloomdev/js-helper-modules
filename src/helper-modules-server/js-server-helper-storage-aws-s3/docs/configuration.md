@@ -117,7 +117,7 @@ Functions in this module use the following S3 API actions. Grant the smallest se
 
 | Function | S3 actions |
 |---|---|
-| `listObjects` | `s3:ListBucket` |
+| `listFiles` | `s3:ListBucket` |
 | `uploadFile`, `uploadFiles`, `commandUploadObject` | `s3:PutObject` (plus `s3:PutObjectAcl` if `is_public: true`) |
 | `getFile`, `commandGetObject` | `s3:GetObject` |
 | `deleteFile`, `deleteFiles`, `commandDeleteObject` | `s3:DeleteObject` (plus `s3:DeleteObjectVersion` if versioning is on) |

@@ -1,0 +1,20 @@
+{
+  "name": "js-server-helper-storage-local-fs-test",
+  "description": "Test Cases for js-server-helper-storage-local-fs",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "test.js",
+  "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "dependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-storage-local-fs": "file:../"
+  },
+  "scripts": {
+    "test": "node --test test.js"
+  }
+}

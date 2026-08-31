@@ -1,0 +1,42 @@
+{
+  "name": "@superloomdev/js-server-helper-email",
+  "description": "Email sending module with swappable transport adapters. Owns the message model, deliverability headers, and the transport adapter contract.",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./email.js",
+    "./email.config.js": "./email.config.js",
+    "./email.errors.js": "./email.errors.js",
+    "./email.validators.js": "./email.validators.js",
+    "./package.json": "./package.json"
+  },
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "sj00"
+  },
+  "contributors": [],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "bundleDependencies": false,
+  "peerDependencies": {
+    "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
+    "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
+    "helper-crypto": "npm:@superloomdev/js-server-helper-crypto@^1.0.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "@eslint/js": "^10.0.1",
+    "@superloomdev/js-helper-eslint-config": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test _test/test.js"
+  }
+}

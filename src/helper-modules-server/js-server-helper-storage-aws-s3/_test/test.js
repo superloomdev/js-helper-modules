@@ -246,7 +246,7 @@ describe('getFile', function () {
 // 3. LIST OBJECTS
 // ============================================================================
 
-describe('listObjects', function () {
+describe('listFiles', function () {
 
   it('should return keys for all objects in a bucket', async function () {
 
@@ -254,7 +254,7 @@ describe('listObjects', function () {
     await S3.uploadFile(instance, TEST_BUCKET, 'list/a.txt', 'a', 'text/plain');
     await S3.uploadFile(instance, TEST_BUCKET, 'list/b.txt', 'b', 'text/plain');
 
-    const result = await S3.listObjects(instance, TEST_BUCKET);
+    const result = await S3.listFiles(instance, TEST_BUCKET);
 
     assert.strictEqual(result.success, true);
     assert.ok(Array.isArray(result.keys));
@@ -267,7 +267,7 @@ describe('listObjects', function () {
 
   it('should filter keys by prefix', async function () {
 
-    const result = await S3.listObjects(instance, TEST_BUCKET, 'list/');
+    const result = await S3.listFiles(instance, TEST_BUCKET, 'list/');
 
     assert.strictEqual(result.success, true);
     assert.ok(result.keys.length >= 2);
@@ -280,7 +280,7 @@ describe('listObjects', function () {
 
   it('should return empty array when prefix matches nothing', async function () {
 
-    const result = await S3.listObjects(instance, TEST_BUCKET, 'no-such-prefix-xyz/');
+    const result = await S3.listFiles(instance, TEST_BUCKET, 'no-such-prefix-xyz/');
 
     assert.strictEqual(result.success, true);
     assert.deepStrictEqual(result.keys, []);
@@ -381,7 +381,7 @@ describe('deleteFiles', function () {
     assert.strictEqual(result.error, null);
 
     // Verify deletion
-    const list_result = await S3.listObjects(instance, TEST_BUCKET, 'bulk/');
+    const list_result = await S3.listFiles(instance, TEST_BUCKET, 'bulk/');
     assert.strictEqual(list_result.keys.length, 0);
 
   });
