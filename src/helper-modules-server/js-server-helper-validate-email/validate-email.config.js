@@ -12,9 +12,6 @@ export default {
   // Maximum number of MX hosts to try before giving up
   SMTP_MAX_MX_ATTEMPTS: 3,
 
-  // DNS resolution timeout in milliseconds
-  DNS_TIMEOUT_MS: 3000,
-
   // Whether to probe for catch-all domains after a successful RCPT TO.
   // When true, sends a second RCPT TO with a random address to detect
   // domains that accept all addresses regardless of mailbox existence.
@@ -30,8 +27,8 @@ export default {
   GREYLIST_RETRY_MS: 0,
 
   // EHLO FQDN sent in the SMTP greeting. When null, the module derives
-  // the FQDN from the domain part of SMTP_FROM_ADDRESS. Some SMTP
-  // servers reject bare or non-resolvable hostnames in EHLO.
+  // the FQDN from the domain being probed. Some SMTP servers reject
+  // bare or non-resolvable hostnames in EHLO.
   EHLO_FQDN: null,
 
   // Custom DNS servers for MX/A record resolution. When null, uses the

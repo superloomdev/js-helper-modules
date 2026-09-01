@@ -17,18 +17,24 @@ const ValidateEmail = Lib.ValidateEmail;
 
 let original_resolveMx = null;
 let original_resolve4 = null;
+let original_resolve6 = null;
 let dns_mx_records = null;
 let dns_mx_error = null;
 let dns_a_records = null;
 let dns_a_error = null;
+let dns_aaaa_records = null;
+let dns_aaaa_error = null;
 
-function stubDns (mx_records, mx_error, a_records, a_error) {
+function stubDns (mx_records, mx_error, a_records, a_error, aaaa_records, aaaa_error) {
   dns_mx_records = mx_records;
   dns_mx_error = mx_error;
   dns_a_records = a_records;
   dns_a_error = a_error;
+  dns_aaaa_records = aaaa_records || null;
+  dns_aaaa_error = (aaaa_error === undefined) ? new Error('ENOTFOUND') : aaaa_error;
   original_resolveMx = dns.resolveMx;
   original_resolve4 = dns.resolve4;
+  original_resolve6 = dns.resolve6;
   dns.resolveMx = async function () {
     if (dns_mx_error) throw dns_mx_error;
     return dns_mx_records;
@@ -37,13 +43,19 @@ function stubDns (mx_records, mx_error, a_records, a_error) {
     if (dns_a_error) throw dns_a_error;
     return dns_a_records;
   };
+  dns.resolve6 = async function () {
+    if (dns_aaaa_error) throw dns_aaaa_error;
+    return dns_aaaa_records;
+  };
 }
 
 function restoreDns () {
   if (original_resolveMx) dns.resolveMx = original_resolveMx;
   if (original_resolve4) dns.resolve4 = original_resolve4;
+  if (original_resolve6) dns.resolve6 = original_resolve6;
   original_resolveMx = null;
   original_resolve4 = null;
+  original_resolve6 = null;
 }
 
 // ==================== SMTP STUB ==================== //
@@ -53,12 +65,14 @@ let smtp_server = null;
 let smtp_response_code = 250;
 let smtp_should_drop = false;
 let smtp_catch_all_mode = false;
+let smtp_multiline_ehlo = false;
 
-function startSmtpServer (response_code, should_drop, catch_all_mode) {
+function startSmtpServer (response_code, should_drop, catch_all_mode, multiline_ehlo) {
   return new Promise(function (resolve) {
     smtp_response_code = response_code || 250;
     smtp_should_drop = should_drop || false;
     smtp_catch_all_mode = catch_all_mode || false;
+    smtp_multiline_ehlo = multiline_ehlo || false;
     smtp_server = net.createServer(function (socket) {
       // Send greeting
       if (smtp_should_drop) {
@@ -71,7 +85,15 @@ function startSmtpServer (response_code, should_drop, catch_all_mode) {
       socket.on('data', function (data) {
         const line = data.toString().trim();
         if (state === 'greeting' && line.startsWith('EHLO')) {
-          socket.write('250 OK\r\n');
+          // Send multi-line EHLO response when enabled (real servers do this)
+          if (smtp_multiline_ehlo) {
+            socket.write('250-smtp.test.local\r\n');
+            socket.write('250-PIPELINING\r\n');
+            socket.write('250-SIZE 10240000\r\n');
+            socket.write('250 OK\r\n');
+          } else {
+            socket.write('250 OK\r\n');
+          }
           state = 'ehlo';
         } else if (state === 'ehlo' && line.startsWith('MAIL FROM')) {
           socket.write('250 OK\r\n');
@@ -165,6 +187,24 @@ describe('checkDomainMx', function () {
       assert.strictEqual(result.has_mx, true);
       assert.strictEqual(result.mx_records.length, 1);
       assert.strictEqual(result.mx_records[0].exchange, '192.0.2.1');
+      assert.strictEqual(result.error, null);
+    } finally {
+      restoreDns();
+    }
+
+  });
+
+
+  it('should return has_mx true when AAAA record fallback exists (IPv6-only)', async function () {
+
+    stubDns(null, new Error('ENOTFOUND'), null, new Error('ENOTFOUND'), ['2001:db8::1'], null);
+
+    try {
+      const result = await ValidateEmail.checkDomainMx({}, 'test.local');
+      assert.strictEqual(result.success, true);
+      assert.strictEqual(result.has_mx, true);
+      assert.strictEqual(result.mx_records.length, 1);
+      assert.strictEqual(result.mx_records[0].exchange, '2001:db8::1');
       assert.strictEqual(result.error, null);
     } finally {
       restoreDns();
@@ -333,6 +373,41 @@ describe('checkMailbox', function () {
         assert.ok(result.reason.indexOf('550') >= 0);
         assert.strictEqual(result.error, null);
         assert.strictEqual(result.catch_all, false);
+      } finally {
+        dns.resolveMx = original_resolveMx;
+        net.createConnection = original_createConnection;
+      }
+    } finally {
+      await stopSmtpServer();
+    }
+
+  });
+
+
+  it('should handle multi-line EHLO response (250- continuation lines)', async function () {
+
+    const port = await startSmtpServer(250, false, false, true);
+
+    try {
+      const original_resolveMx = dns.resolveMx;
+      dns.resolveMx = async function () {
+        return [{ priority: 10, exchange: '127.0.0.1' }];
+      };
+
+      const original_createConnection = net.createConnection;
+      net.createConnection = function (options) {
+        if (options.host === '127.0.0.1' && options.port === 25) {
+          options.port = port;
+        }
+        return original_createConnection.call(net, options);
+      };
+
+      try {
+        const result = await ValidateEmail.checkMailbox({}, 'user@test.local');
+        assert.strictEqual(result.success, true);
+        assert.strictEqual(result.reachable, true);
+        assert.ok(result.reason.indexOf('250') >= 0);
+        assert.strictEqual(result.error, null);
       } finally {
         dns.resolveMx = original_resolveMx;
         net.createConnection = original_createConnection;

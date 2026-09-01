@@ -166,11 +166,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         throw new TypeError('[helper-validate-email] checkMailbox requires a non-empty string email');
       }
 
-      // Extract domain from email address
-      const at_index = email.lastIndexOf('@');
+      // Check email syntax for consistency with checkEmailDeliverability
+      const syntax_valid = _ValidateEmail.checkSyntax(email);
 
       // Return error for invalid email format
-      if (at_index < 0 || at_index === email.length - 1) {
+      if (!syntax_valid) {
         return {
           success: false,
           reachable: false,
@@ -180,6 +180,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         };
       }
 
+      // Extract domain from email address
+      const at_index = email.lastIndexOf('@');
       const domain = email.substring(at_index + 1);
 
       const start_ms = Lib.Utils.getUnixTimeInMilliSeconds();
@@ -507,18 +509,35 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         } catch (a_error) {
 
-          // Both MX and A resolution failed
-          Lib.Debug.debug('ValidateEmail resolveMx failed', {
-            domain: domain,
-            mx_error: error.message,
-            a_error: a_error.message
-          });
+          // A record failed, try AAAA (IPv6) fallback
+          try {
 
-          return {
-            success: false,
-            mx_records: [],
-            error: ERRORS.VALIDATE_EMAIL_DNS_FAILED
-          };
+            const aaaa_records = await resolver.resolve6(domain);
+
+            // AAAA record fallback: synthesize MX record with the domain itself
+            return {
+              success: true,
+              mx_records: [{ priority: 0, exchange: aaaa_records[0] }],
+              error: null
+            };
+
+          } catch (aaaa_error) {
+
+            // MX, A, and AAAA resolution all failed
+            Lib.Debug.debug('ValidateEmail resolveMx failed', {
+              domain: domain,
+              mx_error: error.message,
+              a_error: a_error.message,
+              aaaa_error: aaaa_error.message
+            });
+
+            return {
+              success: false,
+              mx_records: [],
+              error: ERRORS.VALIDATE_EMAIL_DNS_FAILED
+            };
+
+          }
 
         }
 
@@ -661,111 +680,124 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
         });
 
-        // Process SMTP responses
+        // Process SMTP responses - handles multi-line responses (RFC 5321)
+        // A response line with 4th char '-' is a continuation; the final
+        // line has 4th char ' ' (space) or is exactly 3 digits + CRLF.
+        // Multiple lines may arrive in a single data event.
         socket.on('data', function (data) {
 
           smtp_response += data.toString();
 
-          // Wait for complete response line (ends with CRLF)
-          if (!smtp_response.endsWith('\r\n')) {
-            return;
-          }
+          // Process complete lines (terminated by CRLF)
+          while (smtp_response.indexOf('\r\n') >= 0) {
 
-          const response_code = parseInt(smtp_response.substring(0, 3), 10);
-          smtp_response = '';
+            const crlf_index = smtp_response.indexOf('\r\n');
+            const line = smtp_response.substring(0, crlf_index);
+            smtp_response = smtp_response.substring(crlf_index + 2);
 
-          // State machine: process SMTP handshake
-          if (state === 'connecting') {
+            const response_code = parseInt(line.substring(0, 3), 10);
 
-            // Expect 220 greeting from server
-            if (response_code === 220) {
-              state = 'ehlo';
-              socket.write(commands.ehlo);
-            } else {
-              socket.destroy();
-              resolve({
-                success: false,
-                reachable: null,
-                reason: 'Unexpected greeting: ' + response_code,
-                error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
-                greylisted: false
-              });
+            // SMTP multi-line: 4th char '-' means continuation line follows
+            // Skip continuation lines, only advance state on the final line
+            const fourth_char = line.substring(3, 4);
+            if (fourth_char === '-') {
+              continue;
             }
 
-          } else if (state === 'ehlo') {
+            // State machine: process SMTP handshake
+            if (state === 'connecting') {
 
-            // Expect 250 response to EHLO
-            if (response_code === 250) {
-              state = 'mail_from';
-              socket.write(commands.mail_from);
-            } else {
+              // Expect 220 greeting from server
+              if (response_code === 220) {
+                state = 'ehlo';
+                socket.write(commands.ehlo);
+              } else {
+                socket.destroy();
+                resolve({
+                  success: false,
+                  reachable: null,
+                  reason: 'Unexpected greeting: ' + response_code,
+                  error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
+                  greylisted: false
+                });
+              }
+
+            } else if (state === 'ehlo') {
+
+              // Expect 250 response to EHLO
+              if (response_code === 250) {
+                state = 'mail_from';
+                socket.write(commands.mail_from);
+              } else {
+                socket.destroy();
+                resolve({
+                  success: false,
+                  reachable: null,
+                  reason: 'EHLO rejected: ' + response_code,
+                  error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
+                  greylisted: false
+                });
+              }
+
+            } else if (state === 'mail_from') {
+
+              // Expect 250 response to MAIL FROM
+              if (response_code === 250) {
+                state = 'rcpt_to';
+                socket.write(commands.rcpt_to);
+              } else {
+                socket.destroy();
+                resolve({
+                  success: false,
+                  reachable: null,
+                  reason: 'MAIL FROM rejected: ' + response_code,
+                  error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
+                  greylisted: false
+                });
+              }
+
+            } else if (state === 'rcpt_to') {
+
+              // RCPT TO response determines mailbox reachability
+              socket.write(commands.quit);
               socket.destroy();
-              resolve({
-                success: false,
-                reachable: null,
-                reason: 'EHLO rejected: ' + response_code,
-                error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
-                greylisted: false
-              });
-            }
 
-          } else if (state === 'mail_from') {
+              if (response_code === 250 || response_code === 251) {
+                resolve({
+                  success: true,
+                  reachable: true,
+                  reason: 'Mailbox accepted (SMTP ' + response_code + ')',
+                  error: null,
+                  greylisted: false
+                });
+              } else if (response_code >= 550 && response_code <= 553) {
+                resolve({
+                  success: true,
+                  reachable: false,
+                  reason: 'Mailbox rejected (SMTP ' + response_code + ')',
+                  error: null,
+                  greylisted: false
+                });
+              } else if (response_code >= 400 && response_code < 500) {
 
-            // Expect 250 response to MAIL FROM
-            if (response_code === 250) {
-              state = 'rcpt_to';
-              socket.write(commands.rcpt_to);
-            } else {
-              socket.destroy();
-              resolve({
-                success: false,
-                reachable: null,
-                reason: 'MAIL FROM rejected: ' + response_code,
-                error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
-                greylisted: false
-              });
-            }
+                // 4xx = greylisting (temporary failure)
+                resolve({
+                  success: false,
+                  reachable: null,
+                  reason: 'Greylisted (SMTP ' + response_code + ')',
+                  error: null,
+                  greylisted: true
+                });
+              } else {
+                resolve({
+                  success: false,
+                  reachable: null,
+                  reason: 'Unexpected response (SMTP ' + response_code + ')',
+                  error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
+                  greylisted: false
+                });
+              }
 
-          } else if (state === 'rcpt_to') {
-
-            // RCPT TO response determines mailbox reachability
-            socket.write(commands.quit);
-            socket.destroy();
-
-            if (response_code === 250 || response_code === 251) {
-              resolve({
-                success: true,
-                reachable: true,
-                reason: 'Mailbox accepted (SMTP ' + response_code + ')',
-                error: null,
-                greylisted: false
-              });
-            } else if (response_code >= 550 && response_code <= 553) {
-              resolve({
-                success: true,
-                reachable: false,
-                reason: 'Mailbox rejected (SMTP ' + response_code + ')',
-                error: null,
-                greylisted: false
-              });
-            } else if (response_code >= 400 && response_code < 500) {
-
-              // 4xx = greylisting (temporary failure)
-              resolve({
-                success: false,
-                reachable: null,
-                reason: 'Greylisted (SMTP ' + response_code + ')',
-                error: null,
-                greylisted: true
-              });
-            } else {
-              resolve({
-                success: false,
-                reachable: null,
-                reason: 'Unexpected response (SMTP ' + response_code + ')',
-                error: ERRORS.VALIDATE_EMAIL_SMTP_PROTOCOL_ERROR,
-                greylisted: false
-              });
             }
 
           }

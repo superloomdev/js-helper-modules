@@ -24,7 +24,7 @@ Lib.ValidateEmail = validateEmail(Lib, { /* config overrides */ });
 Each loader call returns an independent ValidateEmail interface with its own Lib, CONFIG, ERRORS, and Validators. Stateless - no per-instance resources.
 
 ## Companion Files
-- `validate-email.config.js` - default config (SMTP_TIMEOUT_MS, SMTP_FROM_ADDRESS, SMTP_MAX_MX_ATTEMPTS, DNS_TIMEOUT_MS, CHECK_CATCH_ALL, CATCH_ALL_TEST_PREFIX, GREYLIST_RETRY_MS, EHLO_FQDN, DNS_SERVERS)
+- `validate-email.config.js` - default config (SMTP_TIMEOUT_MS, SMTP_FROM_ADDRESS, SMTP_MAX_MX_ATTEMPTS, CHECK_CATCH_ALL, CATCH_ALL_TEST_PREFIX, GREYLIST_RETRY_MS, EHLO_FQDN, DNS_SERVERS)
 - `validate-email.errors.js` - frozen error catalog (7 error types)
 - `validate-email.validators.js` - config validators singleton
 
@@ -34,11 +34,10 @@ Each loader call returns an independent ValidateEmail interface with its own Lib
 | SMTP_TIMEOUT_MS | Number | 5000 | SMTP probe timeout in milliseconds |
 | SMTP_FROM_ADDRESS | String | 'verify@superloom.dev' | MAIL FROM address for SMTP probes |
 | SMTP_MAX_MX_ATTEMPTS | Number | 3 | Maximum MX hosts to try before giving up |
-| DNS_TIMEOUT_MS | Number | 3000 | DNS resolution timeout in milliseconds |
 | CHECK_CATCH_ALL | Boolean | true | Whether to probe for catch-all domains after a successful RCPT TO |
 | CATCH_ALL_TEST_PREFIX | String | 'zzz-probe-' | Prefix for the random catch-all probe address |
 | GREYLIST_RETRY_MS | Number | 0 | Greylisting retry delay in milliseconds. 0 = no retry (returns 'unknown' verdict) |
-| EHLO_FQDN | String | null | EHLO FQDN. When null, derives from SMTP_FROM_ADDRESS domain |
+| EHLO_FQDN | String | null | EHLO FQDN. When null, derives from the domain being probed |
 | DNS_SERVERS | Array | null | Custom DNS servers for MX/A resolution. When null, uses system defaults |
 
 ## Exported Functions (4 total)

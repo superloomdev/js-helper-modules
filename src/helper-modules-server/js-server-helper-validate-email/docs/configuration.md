@@ -20,11 +20,10 @@ Each loader call returns an independent ValidateEmail interface. The module is s
 | SMTP_TIMEOUT_MS | Number | 5000 | no | TCP connect and per-command response timeout for SMTP probes, in milliseconds |
 | SMTP_FROM_ADDRESS | String | 'verify@superloom.dev' | no | MAIL FROM address used for SMTP RCPT TO probes |
 | SMTP_MAX_MX_ATTEMPTS | Number | 3 | no | Maximum number of MX hosts to try before giving up |
-| DNS_TIMEOUT_MS | Number | 3000 | no | DNS resolution timeout, in milliseconds |
 | CHECK_CATCH_ALL | Boolean | true | no | Whether to probe for catch-all domains after a successful RCPT TO |
 | CATCH_ALL_TEST_PREFIX | String | 'zzz-probe-' | no | Prefix for the random catch-all probe address |
 | GREYLIST_RETRY_MS | Number | 0 | no | Greylisting retry delay in milliseconds. 0 = no retry (returns 'unknown' verdict). When set to a positive number, retries once after the delay |
-| EHLO_FQDN | String | null | no | EHLO FQDN sent in the SMTP greeting. When null, derives from SMTP_FROM_ADDRESS domain |
+| EHLO_FQDN | String | null | no | EHLO FQDN sent in the SMTP greeting. When null, derives from the domain being probed |
 | DNS_SERVERS | Array | null | no | Custom DNS servers for MX/A resolution. When null, uses system defaults. Must be an array of IP strings |
 
 ## Peer Dependencies

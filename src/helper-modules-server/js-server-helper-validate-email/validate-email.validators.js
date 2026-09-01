@@ -54,11 +54,6 @@ function Validators (Lib, errors) { // eslint-disable-line no-unused-vars
         throw new TypeError('[helper-validate-email] SMTP_MAX_MX_ATTEMPTS must be a positive number');
       }
 
-      // DNS_TIMEOUT_MS must be a positive number
-      if (!Lib.Utils.isNumber(config.DNS_TIMEOUT_MS) || config.DNS_TIMEOUT_MS <= 0) {
-        throw new TypeError('[helper-validate-email] DNS_TIMEOUT_MS must be a positive number');
-      }
-
       // CHECK_CATCH_ALL must be a boolean
       if (!Lib.Utils.isBoolean(config.CHECK_CATCH_ALL)) {
         throw new TypeError('[helper-validate-email] CHECK_CATCH_ALL must be a boolean');
