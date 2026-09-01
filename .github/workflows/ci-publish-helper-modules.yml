@@ -94,6 +94,10 @@
 #   56. test-cache-store-dynamodb → publish-cache-store-dynamodb (needs publish-nosql-aws-dynamodb + publish-cache)
 #   57. test-cache-store-mongodb → publish-cache-store-mongodb (needs publish-nosql-mongodb + publish-cache)
 #   58. test-cache-store-aws-elasticache → publish-cache-store-aws-elasticache (needs publish-kv-aws-elasticache + publish-cache)
+#   59. test-validate-email → publish-validate-email
+#   60. test-storage-local-fs → publish-storage-local-fs
+#   61. test-email → publish-email
+#   62. test-email-adapter-smtp → publish-email-adapter-smtp (needs publish-email)
 #
 # Workflow behavior:
 #   - Commit "wip: small fix"           → tests run sequentially, no publish
@@ -4142,6 +4146,218 @@ jobs:
       - uses: ./.github/actions/publish-guard
         with:
           working-directory: src/helper-modules-server/js-server-helper-cache-store-aws-elasticache
+  # ###########################################################################
+  #   MODULE 59: js-server-helper-validate-email (needs utils, debug)
+  # ###########################################################################
+
+  test-validate-email:
+    needs: [detect, publish-cache-store-aws-elasticache]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-validate-email')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-validate-email
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-validate-email:
+    needs: [detect, test-validate-email]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-validate-email'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-validate-email')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-validate-email
+  # ###########################################################################
+  #   MODULE 60: js-server-helper-storage-local-fs (needs utils, debug)
+  # ###########################################################################
+
+  test-storage-local-fs:
+    needs: [detect, publish-validate-email]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-storage-local-fs')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-storage-local-fs
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-storage-local-fs:
+    needs: [detect, test-storage-local-fs]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-storage-local-fs'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-storage-local-fs')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-storage-local-fs
+  # ###########################################################################
+  #   MODULE 61: js-server-helper-email (needs utils, debug, crypto)
+  # ###########################################################################
+
+  test-email:
+    needs: [detect, publish-storage-local-fs]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-email')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-email
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-email:
+    needs: [detect, test-email]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-email'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-email')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-email
+  # ###########################################################################
+  #   MODULE 62: js-server-helper-email-adapter-smtp (needs utils, debug, email)
+  # ###########################################################################
+
+  test-email-adapter-smtp:
+    needs: [detect, publish-email]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-server/js-server-helper-email-adapter-smtp')
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and test
+        working-directory: src/helper-modules-server/js-server-helper-email-adapter-smtp
+        run: |
+          npm install
+          npm run lint --if-present
+          cd _test && npm install && npm test
+
+  publish-email-adapter-smtp:
+    needs: [detect, test-email-adapter-smtp]
+    if: |
+      !cancelled() &&
+      needs.detect.result == 'success' &&
+      needs['test-email-adapter-smtp'].result == 'success' &&
+      needs.detect.outputs.publish_modules != '[]' &&
+      needs.detect.outputs.publish_modules != '' &&
+      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-server/js-server-helper-email-adapter-smtp')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Pin npm to v10
+        run: npm install -g npm@10
+      - uses: ./.github/actions/publish-guard
+        with:
+          working-directory: src/helper-modules-server/js-server-helper-email-adapter-smtp
   # ###########################################################################
   #   CATALOG-LEVEL GUARD: country parity across basic contact adapters
   #   Runs after both basic adapters publish. Neither gates the other.
