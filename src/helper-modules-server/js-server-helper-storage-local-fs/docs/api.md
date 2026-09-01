@@ -112,7 +112,6 @@ List files in a bucket (subdirectory) with an optional prefix filter. Returns fi
 | `LOCAL_FS_MOVE_FAILED` | Failed to move file within local filesystem |
 | `LOCAL_FS_LIST_FAILED` | Failed to list files in local filesystem |
 | `LOCAL_FS_NOT_FOUND` | File or directory not found |
-| `LOCAL_FS_PATH_TRAVERSAL` | Path traversal detected: key escapes root directory |
 
 ## Relationship to helper-storage-aws-s3
 

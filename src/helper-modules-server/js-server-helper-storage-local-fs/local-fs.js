@@ -510,7 +510,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       try {
 
         // Read the directory recursively
-        const keys = await _LocalFs.listDirectory(bucket_path, prefix || '');
+        const bucket_root = _LocalFs.resolvePath('', '');
+        const keys = await _LocalFs.listDirectory(bucket_path, prefix || '', bucket_root);
 
         Lib.Debug.performanceAuditLog('End', 'LocalFs listFiles', start_ms);
 
@@ -604,10 +605,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
 
     @param {String} dir_path - Absolute directory path to list
     @param {String} prefix - Optional prefix to filter keys by
+    @param {String} bucket_root - Absolute path to the bucket root for key computation
 
     @return {Promise<Array>} - Array of file key strings
     *********************************************************************/
-    listDirectory: async function (dir_path, prefix) {
+    listDirectory: async function (dir_path, prefix, bucket_root) {
 
       const keys = [];
 
@@ -622,7 +624,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         // Recurse into subdirectories
         if (entry.isDirectory()) {
 
-          const sub_keys = await _LocalFs.listDirectory(entry_path, prefix);
+          const sub_keys = await _LocalFs.listDirectory(entry_path, prefix, bucket_root);
           for (let j = 0; j < sub_keys.length; j++) {
             keys.push(sub_keys[j]);
           }
@@ -630,7 +632,6 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
         } else if (entry.isFile()) {
 
           // Compute the key relative to the bucket root
-          const bucket_root = _LocalFs.resolvePath('', '');
           const relative_key = nodePath.relative(bucket_root, entry_path);
 
           // Include if no prefix or key starts with prefix

@@ -38,11 +38,6 @@ export default Object.freeze({
   LOCAL_FS_NOT_FOUND: Object.freeze({
     type: 'LOCAL_FS_NOT_FOUND',
     message: 'File or directory not found'
-  }),
-
-  LOCAL_FS_PATH_TRAVERSAL: Object.freeze({
-    type: 'LOCAL_FS_PATH_TRAVERSAL',
-    message: 'Path traversal detected: key escapes root directory'
   })
 
 });
