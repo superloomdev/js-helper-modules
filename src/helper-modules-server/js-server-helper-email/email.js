@@ -110,7 +110,28 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       normalized_message.headers = _Email.applyDeliverabilityHeaders(normalized_message);
 
       // Delegate to the transport adapter for delivery
-      const result = await adapter.send(instance, normalized_message);
+      let result;
+
+      try {
+        result = await adapter.send(instance, normalized_message);
+      } catch (adapter_error) {
+
+        // Adapter threw - translate to envelope, never let exceptions cross module boundary
+        Lib.Debug.debug('Email sendEmail adapter threw', {
+          message: adapter_error && adapter_error.message
+        });
+
+        Lib.Debug.performanceAuditLog('End', 'Email sendEmail', start_ms);
+
+        return {
+          success: false,
+          message_id: null,
+          accepted: [],
+          rejected: [],
+          error: ERRORS.EMAIL_SEND_FAILED
+        };
+
+      }
 
       Lib.Debug.performanceAuditLog('End', 'Email sendEmail', start_ms);
 
@@ -362,7 +383,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, adapter) {
       const normalized = Object.assign({}, message);
 
       // Apply default from address if not set
-      if (Lib.Utils.isNullOrUndefined(normalized.from) || Lib.Utils.isEmptyString(normalized.from)) {
+      if (Lib.Utils.isNullOrUndefined(normalized.from) || !Lib.Utils.isString(normalized.from) || Lib.Utils.isEmptyString(normalized.from)) {
         if (!Lib.Utils.isNullOrUndefined(CONFIG.DEFAULT_FROM) && !Lib.Utils.isEmptyString(CONFIG.DEFAULT_FROM)) {
           normalized.from = CONFIG.DEFAULT_FROM;
         }

@@ -20,21 +20,6 @@ export default Object.freeze({
     message: 'Email message is missing required fields'
   }),
 
-  EMAIL_RECIPIENTS_EMPTY: Object.freeze({
-    type: 'EMAIL_RECIPIENTS_EMPTY',
-    message: 'At least one recipient (to, cc, or bcc) is required'
-  }),
-
-  EMAIL_SUBJECT_EMPTY: Object.freeze({
-    type: 'EMAIL_SUBJECT_EMPTY',
-    message: 'Subject is required'
-  }),
-
-  EMAIL_BODY_EMPTY: Object.freeze({
-    type: 'EMAIL_BODY_EMPTY',
-    message: 'At least one body (text or html) is required'
-  }),
-
   EMAIL_SEND_FAILED: Object.freeze({
     type: 'EMAIL_SEND_FAILED',
     message: 'Failed to send email'
