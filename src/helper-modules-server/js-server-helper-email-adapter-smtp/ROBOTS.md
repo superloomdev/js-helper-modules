@@ -55,8 +55,7 @@ Deliver a normalized email message through the SMTP transport. Validates attachm
 | Type | Message |
 |---|---|
 | EMAIL_ADAPTER_SMTP_SEND_FAILED | Failed to send email via SMTP transport |
-| EMAIL_ADAPTER_SMTP_CONFIG_INVALID | SMTP adapter configuration is invalid |
-| ATTACHMENT_TOO_LARGE | Attachment size exceeds the configured limit |
+| EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE | Attachment size exceeds the configured limit |
 
 ## Testing
 

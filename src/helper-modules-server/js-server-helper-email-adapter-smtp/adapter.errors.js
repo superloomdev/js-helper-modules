@@ -10,13 +10,8 @@ export default Object.freeze({
     message: 'Failed to send email via SMTP transport'
   }),
 
-  EMAIL_ADAPTER_SMTP_CONFIG_INVALID: Object.freeze({
-    type: 'EMAIL_ADAPTER_SMTP_CONFIG_INVALID',
-    message: 'SMTP adapter configuration is invalid'
-  }),
-
-  ATTACHMENT_TOO_LARGE: Object.freeze({
-    type: 'ATTACHMENT_TOO_LARGE',
+  EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE: Object.freeze({
+    type: 'EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE',
     message: 'Attachment size exceeds the configured limit'
   })
 

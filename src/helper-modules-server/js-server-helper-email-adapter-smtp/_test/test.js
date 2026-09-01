@@ -257,7 +257,7 @@ describe('send', function () {
     });
 
     assert.strictEqual(result.success, false);
-    assert.strictEqual(result.error.type, 'ATTACHMENT_TOO_LARGE');
+    assert.strictEqual(result.error.type, 'EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE');
     assert.strictEqual(received_messages.length, 0);
 
   });
@@ -290,7 +290,7 @@ describe('send', function () {
     });
 
     assert.strictEqual(result.success, false);
-    assert.strictEqual(result.error.type, 'ATTACHMENT_TOO_LARGE');
+    assert.strictEqual(result.error.type, 'EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE');
     assert.strictEqual(received_messages.length, 0);
 
   });

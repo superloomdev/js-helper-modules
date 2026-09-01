@@ -282,51 +282,47 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators) { // eslint-d
       const MB_IN_BYTES = 1024 * 1024;
       let total_size = 0;
 
-      // Check each attachment against the per-file limit
-      if (CONFIG.SMTP_MAX_ATTACHMENT_SIZE_MB > 0) {
+      // Check each attachment against the per-file limit and accumulate total
+      for (let i = 0; i < message.attachments.length; i++) {
 
-        for (let i = 0; i < message.attachments.length; i++) {
+        const size_bytes = _Adapter.calculateAttachmentSize(message.attachments[i]);
 
-          const attachment = message.attachments[i];
-
-          // Calculate size: Buffer content uses length, string content uses byteLength
-          const size_bytes = Buffer.isBuffer(attachment.content)
-            ? attachment.content.length
-            : Buffer.byteLength(attachment.content || '', 'utf8');
-
-          // Return error if this attachment exceeds the per-file limit
-          if (size_bytes > CONFIG.SMTP_MAX_ATTACHMENT_SIZE_MB * MB_IN_BYTES) {
-            return ERRORS.ATTACHMENT_TOO_LARGE;
-          }
-
-          total_size += size_bytes;
-
+        // Return error if this attachment exceeds the per-file limit
+        if (CONFIG.SMTP_MAX_ATTACHMENT_SIZE_MB > 0 && size_bytes > CONFIG.SMTP_MAX_ATTACHMENT_SIZE_MB * MB_IN_BYTES) {
+          return ERRORS.EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE;
         }
 
-      } else {
-
-        // No per-file limit, but still calculate total for the total limit check
-        for (let i = 0; i < message.attachments.length; i++) {
-
-          const attachment = message.attachments[i];
-
-          total_size += Buffer.isBuffer(attachment.content)
-            ? attachment.content.length
-            : Buffer.byteLength(attachment.content || '', 'utf8');
-
-        }
+        total_size += size_bytes;
 
       }
 
       // Check total attachment size against the total limit
       if (CONFIG.SMTP_MAX_TOTAL_ATTACHMENT_SIZE_MB > 0) {
         if (total_size > CONFIG.SMTP_MAX_TOTAL_ATTACHMENT_SIZE_MB * MB_IN_BYTES) {
-          return ERRORS.ATTACHMENT_TOO_LARGE;
+          return ERRORS.EMAIL_ADAPTER_SMTP_ATTACHMENT_TOO_LARGE;
         }
       }
 
       // All sizes within limits
       return null;
+
+    },
+
+
+    /********************************************************************
+    Calculate the byte size of an attachment. Buffer content uses length,
+    string content uses byteLength.
+
+    @param {Object} attachment - Attachment object with content field
+
+    @return {Number} - Size in bytes
+    *********************************************************************/
+    calculateAttachmentSize: function (attachment) {
+
+      // Buffer content uses length, string content uses byteLength
+      return Buffer.isBuffer(attachment.content)
+        ? attachment.content.length
+        : Buffer.byteLength(attachment.content || '', 'utf8');
 
     }
 
