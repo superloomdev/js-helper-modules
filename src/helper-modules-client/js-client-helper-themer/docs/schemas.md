@@ -106,9 +106,22 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 |---|---|---|---|
 | `shadow` | `Boolean` | Yes | Must be `true` |
 | `level` | `Number` | One of `level` or `layers` | 1 through 5. Seeds geometry from the built-in elevation table |
-| `layers` | `Object[]` | One of `level` or `layers` | Explicit geometry: `offset_x`, `offset_y`, `blur`, `spread`, `opacity` |
+| `layers` | `Object[]` | One of `level` or `layers` | Explicit geometry: `offset_x`, `offset_y`, `blur`, `spread`, `opacity`, `inset` |
 | `color` | `String` | No | Hex or an alias. Defaults to `'#000000'` |
 | `elevation` | `Number` | No | Android elevation. Defaults to `level` |
+
+Layer geometry validation:
+
+| Field | Type | Constraint |
+|---|---|---|
+| `offset_x` | `Number` | Finite. May be negative |
+| `offset_y` | `Number` | Finite. May be negative |
+| `blur` | `Number` | Finite, zero or greater. Negative blur is rejected |
+| `spread` | `Number` | Finite. May be negative |
+| `opacity` | `Number` | 0 to 1 inclusive. Defaults to 1 when absent |
+| `inset` | `Boolean` | Optional. Defaults to `false` |
+
+Shadow color and layer opacity compose once. The engine does not apply opacity twice.
 
 ### Metadata fields
 
@@ -145,6 +158,9 @@ The optional per-call bundle passed to `resolve` and `buildTheme`.
 | `contrast` | `String` | `'correct'` | `'correct'` rewrites failing colors; any other value only reports them |
 | `min_contrast_ratio` | `Number` | `CONFIG.MIN_CONTRAST_RATIO` | Between 1 and 21 inclusive |
 | `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive |
+| `shadow_mode` | `String` | `'legacy'` | `'legacy'` collapses to a dominant layer with loss reporting; `'box_shadow'` preserves all layers, inset, and spread where the platform supports them |
+
+Omitted options normalize to their defaults and produce output identical to the existing three-argument call. Options that affect output join the cache key alongside the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
 
 ---
 
@@ -203,7 +219,7 @@ A `lossy` entry carries `token`, `fact`, and `reason`. A value that vanishes wit
 Stated explicitly, because the gaps are deliberate rather than oversights.
 
 - **Whether a `font_family` token names a real typeface.** The engine has no font registry and does no I/O. It emits the token unchanged; `helper-font` resolves it to a registered family name. See [Philosophy](philosophy.md) for why the two modules do not depend on each other.
-- **Whether a color is a valid hex string.** A malformed hex produces `NaN` channels rather than a throw. Templates are authored artifacts, and a build-time check is the right place for this.
+- **Whether a color is a valid hex string.** The parser supports `#RGB`, `#RGBA`, `#RRGGBB`, and `#RRGGBBAA` forms. A malformed hex produces `NaN` channels rather than a throw. Templates are authored artifacts, and a build-time check is the right place for this.
 - **Whether a theme document came from a trusted source.** Schema shape is not provenance.
 - **Whether the emitted values look right.** Contrast rules are the only aesthetic constraint the engine enforces.
 

@@ -294,16 +294,52 @@ const _Emit = {
   rest. That tolerance is what keeps the shadow group at two emit
   targets instead of three.
 
+  In legacy mode (the default), iOS supports one shadow, so the
+  layer with the greatest blur is selected as dominant and the rest
+  are collapsed with loss reporting.
+
+  In box_shadow mode, all layers are preserved in a box-shadow
+  compatible string so a RNW consumer can paint them as CSS. Loss
+  is not reported because no geometry is discarded.
+
   @param {Object} v - Canonical shadow value
   @param {Object[]} v.layers - Ordered shadow layers
   @param {Number} v.elevation - Android elevation seed
-  @param {Object} ctx - Emit context carrying the loss collector
+  @param {Object} ctx - Emit context carrying the loss collector and options
 
   @return {Object} - React Native style fragment
   *********************************************************************/
   nativeShadow: function (v, ctx) {
 
-    // iOS supports one shadow, so keep the layer whose blur carries the height cue
+    // Check the emission mode from the context options
+    const mode = (ctx && ctx.options && ctx.options.shadow_mode) || 'legacy';
+
+    // In box_shadow mode, preserve all layers as a CSS box-shadow string
+    if (mode === 'box_shadow') {
+
+      const rendered = v.layers.map(function (l) {
+
+        const parts = [
+          l.offset_x + 'px',
+          l.offset_y + 'px',
+          l.blur + 'px',
+          (l.spread ? l.spread + 'px' : null),
+          (l.inset ? 'inset' : null),
+          Color.rgbaFrom(l.color, l.opacity)
+        ];
+
+        return parts.filter(Boolean).join(' ');
+
+      });
+
+      return {
+        boxShadow: rendered.join(', '),
+        elevation: v.elevation
+      };
+
+    }
+
+    // Legacy mode: iOS supports one shadow, so keep the layer whose blur carries the height cue
     const dominant = v.layers.reduce(function (acc, l) {
       return (l.blur > acc.blur) ? l : acc;
     }, v.layers[0]);

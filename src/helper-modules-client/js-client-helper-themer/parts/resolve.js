@@ -526,7 +526,35 @@ const _Resolve = {
     // Explicit layers let a template state geometry the table does not cover
     if (Array.isArray(entry.layers)) {
       return entry.layers.map(function (l) {
-        return Object.assign({}, l);
+
+        // Validate geometry: blur must be non-negative, offsets must be finite
+        if (l.blur !== undefined && (typeof l.blur !== 'number' || !isFinite(l.blur) || l.blur < 0)) {
+          delete context.in_progress[name];
+          Validators.fail('tokens.' + name + '.layers[].blur', 'must be a finite number of zero or greater');
+        }
+
+        if (l.offset_x !== undefined && (typeof l.offset_x !== 'number' || !isFinite(l.offset_x))) {
+          delete context.in_progress[name];
+          Validators.fail('tokens.' + name + '.layers[].offset_x', 'must be a finite number');
+        }
+
+        if (l.offset_y !== undefined && (typeof l.offset_y !== 'number' || !isFinite(l.offset_y))) {
+          delete context.in_progress[name];
+          Validators.fail('tokens.' + name + '.layers[].offset_y', 'must be a finite number');
+        }
+
+        if (l.spread !== undefined && (typeof l.spread !== 'number' || !isFinite(l.spread))) {
+          delete context.in_progress[name];
+          Validators.fail('tokens.' + name + '.layers[].spread', 'must be a finite number');
+        }
+
+        // Normalize absent opacity to 1
+        const copy = Object.assign({}, l);
+        if (copy.opacity === undefined) {
+          copy.opacity = 1;
+        }
+
+        return copy;
       });
     }
 

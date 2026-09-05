@@ -57,28 +57,35 @@ const Color = {
   Accepts both the three-digit and six-digit forms, with or without
   a leading hash.
 
-  @param {String} hex - Hex color such as '#0f62fe' or 'f0f'
+  @param {String} hex - Hex color such as '#0f62fe', '#0f62fe80', '#fff', '#fff8'
 
   @return {Object} - Channel values
   @return {Number} .r - Red channel, 0 to 255
   @return {Number} .g - Green channel, 0 to 255
   @return {Number} .b - Blue channel, 0 to 255
+  @return {Number} .a - Alpha channel, 0 to 1 (defaults to 1 when absent)
   *********************************************************************/
   parseHex: function (hex) {
 
     // Strip the hash so both written forms parse through one path
     const body = String(hex).replace('#', '');
 
-    // Expand the shorthand form by doubling each digit
-    const full = (body.length === 3) ? body.split('').map(function (d) {
+    // Expand the shorthand form (3 or 4 digits) by doubling each digit
+    const full = (body.length === 3 || body.length === 4) ? body.split('').map(function (d) {
       return d + d;
     }).join('') : body;
 
-    // Return the three channels as integers
+    // Extract alpha if present (8-digit form after expansion)
+    const hasAlpha = full.length === 8;
+    const alphaHex = hasAlpha ? full.slice(6, 8) : 'ff';
+    const a = parseInt(alphaHex, 16) / 255;
+
+    // Return the channels; alpha defaults to 1 when not present
     return {
       r: parseInt(full.slice(0, 2), 16),
       g: parseInt(full.slice(2, 4), 16),
-      b: parseInt(full.slice(4, 6), 16)
+      b: parseInt(full.slice(4, 6), 16),
+      a: a
     };
 
   },
