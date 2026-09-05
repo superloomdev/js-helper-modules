@@ -152,8 +152,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         }
 
-        // Track this family as loaded
+        // Track this family as loaded in both the adapter and the core
         state.loadedFamilies.add(familyName);
+        if (Lib.Font && typeof Lib.Font.markLoaded === 'function') {
+          Lib.Font.markLoaded(familyName);
+        }
 
       }
 
