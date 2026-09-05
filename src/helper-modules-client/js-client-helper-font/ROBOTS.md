@@ -44,7 +44,7 @@ const Font = font({
 | `DEFAULT_FAMILY` | string | `'System'` | No |
 | `roles` | object | `{}` | No |
 
-## Exported Functions (7 total)
+## Exported Functions (9 total)
 
 ```
 registerFamilies(manifest) -> { success, error } | async:no
@@ -76,6 +76,16 @@ getRegisteredFamilies() -> { success, families, error } | async:no
 isRegistered(familyName) -> Boolean | async:no
   Checks whether a family name is in the registry. Returns true for any
   family added via registerFamilies plus the seeded 'System' family.
+
+markLoaded(familyName) -> Boolean | async:no
+  Marks a family as confirmed loaded by the platform adapter. Called by
+  the adapter after it confirms the font face is available for rendering.
+  Returns true if the family was not previously marked loaded.
+
+isFamilyLoaded(familyName) -> Boolean | async:no
+  Checks whether a family has been confirmed loaded by the adapter.
+  A family can be registered but not loaded; text using such a family
+  renders in a fallback. This check distinguishes the two states.
 ```
 
 ## Adapter Contract

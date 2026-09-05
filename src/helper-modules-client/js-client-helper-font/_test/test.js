@@ -342,6 +342,68 @@ test('isRegistered throws TypeError on null input', function () {
 });
 
 
+// ~~~~~~~~~~~~~~~~~~~~ markLoaded / isFamilyLoaded ~~~~~~~~~~~~~~~~~~~~
+
+test('isFamilyLoaded returns false for a registered but not loaded family', function () {
+
+  Font.registerFamilies({
+    NotLoadedFont: {
+      styles: { '400': { url: 'https://example.com/font.woff2' } }
+    }
+  });
+
+  assert.strictEqual(Font.isRegistered('NotLoadedFont'), true);
+  assert.strictEqual(Font.isFamilyLoaded('NotLoadedFont'), false);
+
+});
+
+test('markLoaded marks a family as loaded', function () {
+
+  Font.registerFamilies({
+    LoadableFont: {
+      styles: { '400': { url: 'https://example.com/font.woff2' } }
+    }
+  });
+
+  assert.strictEqual(Font.isFamilyLoaded('LoadableFont'), false);
+
+  const wasNew = Font.markLoaded('LoadableFont');
+  assert.strictEqual(wasNew, true);
+  assert.strictEqual(Font.isFamilyLoaded('LoadableFont'), true);
+
+});
+
+test('markLoaded returns false when marking an already-loaded family', function () {
+
+  Font.markLoaded('LoadableFont');
+  const wasNew = Font.markLoaded('LoadableFont');
+  assert.strictEqual(wasNew, false);
+
+});
+
+test('isFamilyLoaded returns false for an unregistered family', function () {
+
+  assert.strictEqual(Font.isFamilyLoaded('UnregisteredFont'), false);
+
+});
+
+test('markLoaded throws TypeError on empty string', function () {
+
+  assert.throws(function () {
+    Font.markLoaded('');
+  }, TypeError);
+
+});
+
+test('isFamilyLoaded throws TypeError on non-string input', function () {
+
+  assert.throws(function () {
+    Font.isFamilyLoaded(123);
+  }, TypeError);
+
+});
+
+
 // ~~~~~~~~~~~~~~~~~~~~ Multi-source manifest ~~~~~~~~~~~~~~~~~~~~
 
 test('registerFamilies with path only (native-only)', function () {

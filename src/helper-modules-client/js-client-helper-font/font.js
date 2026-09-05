@@ -9,7 +9,8 @@
 // extensions inject them into the platform (DOM, native, Expo).
 //
 // Provides: registerFamilies, resolveFamily, buildFontFaceString,
-//           getManifest, getRegisteredFamilies, isRegistered.
+//           getManifest, getRegisteredFamilies, isRegistered,
+//           markLoaded, isFamilyLoaded.
 //
 // Compatibility: Node.js 18+ and any JavaScript runtime. No platform
 // dependencies.
@@ -34,9 +35,11 @@ let Validators; // validators module, initialized with Lib
 // families: { [familyName]: { styles: { [styleKey]: { url, path, asset, weight, style } } } }
 // tokenMap: { [token]: familyName }  (direct family-name lookups)
 // ROLES: { [role]: familyName }     (role-to-family mapping for resolveFamily)
+// loaded: Set<familyName>           (families confirmed loaded by the platform adapter)
 const registry = {
   families: {},
   tokenMap: {},
+  loaded: new Set(),
   roles: {}
 };
 
@@ -427,6 +430,54 @@ const Font = {
 
     // Check the registry for the family name
     return Object.prototype.hasOwnProperty.call(registry.families, familyName);
+
+  },
+
+
+  /********************************************************************
+  Mark a family as loaded by the platform adapter.
+
+  Registration is a data declaration; loading is a platform I/O
+  operation. This function is called by the adapter after it confirms
+  the font face is available for rendering. A family can be registered
+  but not loaded, which means text renders in a fallback.
+
+  @param {String} familyName - The family name to mark as loaded
+
+  @return {Boolean} - true if the family was not previously marked loaded
+  *********************************************************************/
+  markLoaded: function (familyName) {
+
+    // Validate the family name (throws TypeError on programmer error)
+    Validators.assertFamilyName(familyName, 'markLoaded');
+
+    // Record the loaded state
+    const wasLoaded = registry.loaded.has(familyName);
+    registry.loaded.add(familyName);
+
+    return !wasLoaded;
+
+  },
+
+
+  /********************************************************************
+  Check whether a family name has been confirmed loaded by the adapter.
+
+  A family that is registered but not loaded has a name in the registry
+  but no confirmed platform font face. Text using such a family renders
+  in a fallback with no signal unless this check is called.
+
+  @param {String} familyName - The family name to check
+
+  @return {Boolean} - true if the family is loaded, false otherwise
+  *********************************************************************/
+  isFamilyLoaded: function (familyName) {
+
+    // Validate the family name (throws TypeError on programmer error)
+    Validators.assertFamilyName(familyName, 'isFamilyLoaded');
+
+    // Check the loaded set for the family name
+    return registry.loaded.has(familyName);
 
   }
 
