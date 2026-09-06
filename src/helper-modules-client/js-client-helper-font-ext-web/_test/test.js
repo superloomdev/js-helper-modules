@@ -561,6 +561,19 @@ test('FW1 a family whose second style fails leaves isFamilyLoaded false while th
   // The family should no longer be considered fully loaded after the 600 failure
   assert.equal(Adapter.isFamilyLoaded('MixedPlex'), false);
 
+  // The first style (400) must remain recorded so a retry requests only 600.
+  // Verify by tracking which descriptors the next call requests.
+  const retryRequested = [];
+  Document.fonts.load = function (desc) {
+    retryRequested.push(desc);
+    return Promise.resolve([{}]);
+  };
+  await Adapter.loadManifest(Core.getManifest().manifest);
+  const count400 = retryRequested.filter(function (d) { return d.indexOf('400') !== -1; }).length;
+  assert.equal(count400, 0, 'weight 400 must not be re-requested after a successful first load');
+  const count600 = retryRequested.filter(function (d) { return d.indexOf('600') !== -1; }).length;
+  assert.equal(count600, 1, 'weight 600 must be requested on retry');
+
   Adapter.clearManifest();
 
 });
@@ -676,6 +689,55 @@ test('FW3 a family name containing a double quote produces a descriptor with int
   assert.equal(requested.length, 1);
   // The double quote must be escaped so the descriptor quoting is intact
   assert.ok(requested[0].indexOf('\\"') !== -1, 'double quote must be escaped in the descriptor');
+
+  Adapter.clearManifest();
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ D3: per-style failedStyles tracking ~~~~~~~~~~~~~~~~~~~~
+
+test('D3 a successful style from a partially failing call is retained and not re-requested on retry', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ PartialPlex: { styles: {
+    '400': { url: 'https://x/400.woff2', weight: '400' },
+    '600': { url: 'https://x/600.woff2', weight: '600' }
+  } } });
+  const Document = createDocumentStub();
+  const requested = [];
+  Document.fonts.load = function (desc) {
+    requested.push(desc);
+    if (desc.indexOf('600') !== -1) {
+      return Promise.reject(new Error('600 failed'));
+    }
+    return Promise.resolve([{}]);
+  };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  // First load: 400 succeeds, 600 fails in the same call
+  const first = await Adapter.loadManifest(Core.getManifest().manifest);
+  assert.equal(first.success, false);
+  assert.equal(first.error.type, 'helper-font-ext-web/load-failed');
+
+  // The family must not be fully loaded
+  assert.equal(Adapter.isFamilyLoaded('PartialPlex'), false);
+
+  // The successful style (400) must remain recorded so retry skips it.
+  // Only the failed style (600) should be re-requested.
+  requested.length = 0;
+  Document.fonts.load = function (desc) {
+    requested.push(desc);
+    return Promise.resolve([{}]);
+  };
+  const retry = await Adapter.loadManifest(Core.getManifest().manifest);
+  assert.equal(retry.success, true);
+  assert.equal(Adapter.isFamilyLoaded('PartialPlex'), true);
+
+  const count400 = requested.filter(function (d) { return d.indexOf('400') !== -1; }).length;
+  assert.equal(count400, 0, 'weight 400 must not be re-requested after a successful first load');
+  const count600 = requested.filter(function (d) { return d.indexOf('600') !== -1; }).length;
+  assert.equal(count600, 1, 'weight 600 must be requested on retry');
 
   Adapter.clearManifest();
 

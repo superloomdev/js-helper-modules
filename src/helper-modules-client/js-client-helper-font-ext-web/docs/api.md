@@ -34,7 +34,7 @@ const { success, error } = await WebFontAdapter.loadManifest(Font.getManifest().
 
 ### isReady()
 
-Returns true only when every requested web face completed successfully. Starting an incremental or queued load clears readiness until every accepted cycle settles. `document.fonts.load` must exist and return at least one matching face; style injection alone, an absent API, or an empty result is not readiness. Partial failures retain CSS and loaded state only for successful families, while rejected families remain retryable. `clearManifest` removes style nodes retained across all incremental cycles.
+Returns true only when every requested web face completed successfully. Starting an incremental or queued load clears readiness until every accepted cycle settles. `document.fonts.load` must exist and return at least one matching face; style injection alone, an absent API, or an empty result is not readiness. Partial failures retain CSS and loaded state for every successful style, while failed styles remain retryable. `clearManifest` removes style nodes retained across all incremental cycles.
 
 ```javascript
 const ready = WebFontAdapter.isReady();
@@ -42,7 +42,7 @@ const ready = WebFontAdapter.isReady();
 
 ### isFamilyLoaded(familyName)
 
-Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families. A family is loaded only when every style seen so far completed successfully; a later style failure removes the family from the loaded set.
+Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families. A family is loaded only when every style seen so far completed successfully; a later style failure removes the family from the loaded set. Successful styles from a partially failing call are retained at the style level so a retry requests only the failed styles.
 
 ```javascript
 const loaded = WebFontAdapter.isFamilyLoaded('Poppins');

@@ -67,6 +67,7 @@ export default function loader (shared_libs, config) {
     styleNodes: [],
     loadedFamilies: new Set(),
     loadedStyles: new Set(),
+    failedStyles: new Set(),
     loadQueue: null,
     pendingLoads: 0
   };
@@ -241,53 +242,66 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           });
         });
         const results = await Promise.allSettled(checks);
-        const failedFamilies = new Set();
-        const successfulFamilies = new Set();
+
+        // Track success and failure at the style level (not family level)
+        // so a successful style from a partially failing call is retained.
+        const successfulStyleKeys = new Set();
+        const failedStyleKeys = new Set();
         for (let i = 0; i < results.length; i++) {
-          const familyName = loadEntries[i].familyName;
+          const compositeKey = loadEntries[i].familyName + SEPARATOR + loadEntries[i].styleKey;
           if (results[i].status === 'fulfilled') {
-            successfulFamilies.add(familyName);
+            successfulStyleKeys.add(compositeKey);
           } else {
-            failedFamilies.add(familyName);
+            failedStyleKeys.add(compositeKey);
           }
         }
 
-        // Mark only families whose loadable faces all completed successfully.
-        // Add each completed style's composite key to loadedStyles, and add
-        // the family to loadedFamilies only when every style seen so far has
-        // completed.
-        const completedFamilies = Array.from(successfulFamilies);
-        for (let i = 0; i < completedFamilies.length; i++) {
-          const familyName = completedFamilies[i];
-          if (!failedFamilies.has(familyName)) {
-
-            // Add each successful style's composite key
-            for (let j = 0; j < loadEntries.length; j++) {
-              if (loadEntries[j].familyName === familyName) {
-                state.loadedStyles.add(familyName + SEPARATOR + loadEntries[j].styleKey);
-              }
-            }
-
-            state.loadedFamilies.add(familyName);
-            if (Lib.Font.isRegistered(familyName)) {
-              Lib.Font.markLoaded(familyName);
-            }
+        // Record every successful style independently of family completion.
+        // Remove it from failedStyles in case a prior call had marked it failed.
+        for (let i = 0; i < loadEntries.length; i++) {
+          const compositeKey = loadEntries[i].familyName + SEPARATOR + loadEntries[i].styleKey;
+          if (successfulStyleKeys.has(compositeKey)) {
+            state.loadedStyles.add(compositeKey);
+            state.failedStyles.delete(compositeKey);
+          } else {
+            state.failedStyles.add(compositeKey);
           }
         }
 
-        // Remove families that had any failed style from loadedFamilies
-        const failedFamilyList = Array.from(failedFamilies);
-        for (let i = 0; i < failedFamilyList.length; i++) {
-          state.loadedFamilies.delete(failedFamilyList[i]);
+        // Determine family-level loaded status. A family is loaded only when
+        // every style in this call succeeded and no prior failure remains.
+        const familyOutcomes = {};
+        for (let i = 0; i < loadEntries.length; i++) {
+          const fn = loadEntries[i].familyName;
+          if (!(fn in familyOutcomes)) {
+            familyOutcomes[fn] = { allSuccess: true };
+          }
+          const key = fn + SEPARATOR + loadEntries[i].styleKey;
+          if (failedStyleKeys.has(key)) {
+            familyOutcomes[fn].allSuccess = false;
+          }
         }
 
-        state.loaded = failedFamilies.size === 0;
+        const outcomeFamilyNames = Object.keys(familyOutcomes);
+        for (let i = 0; i < outcomeFamilyNames.length; i++) {
+          const fn = outcomeFamilyNames[i];
+          if (familyOutcomes[fn].allSuccess) {
+            state.loadedFamilies.add(fn);
+            if (Lib.Font.isRegistered(fn)) {
+              Lib.Font.markLoaded(fn);
+            }
+          } else {
+            state.loadedFamilies.delete(fn);
+          }
+        }
 
-        // Retain only declarations whose whole family completed successfully
+        state.loaded = failedStyleKeys.size === 0;
+
+        // Retain CSS for every successful style, not just fully-successful families
         if (styleNode) {
           const successfulCss = cssEntries
             .filter(function (item) {
-              return successfulFamilies.has(item.familyName) && !failedFamilies.has(item.familyName);
+              return successfulStyleKeys.has(item.familyName + SEPARATOR + item.styleKey);
             })
             .map(function (item) {
               return item.css;
@@ -374,6 +388,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       state.loaded = false;
       state.loadedFamilies.clear();
       state.loadedStyles.clear();
+      state.failedStyles.clear();
 
     }
 

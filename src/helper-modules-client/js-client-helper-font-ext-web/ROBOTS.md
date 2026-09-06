@@ -67,6 +67,8 @@ isFamilyLoaded(familyName) -> Boolean | async:no
   Used for incremental loading to skip already-loaded families.
   A family is loaded only when every style seen so far completed successfully;
   a later style failure removes the family from the loaded set.
+  Successful styles from a partially failing call are retained at the style
+  level so a retry requests only the failed styles.
 
 clearManifest() -> void | async:no
   Removes the injected <style> node from the DOM. Useful for hot reload or cleanup.
