@@ -7,7 +7,7 @@ A pure font family registry and `@font-face` CSS string constructor with zero pl
 
 ## What This Is
 
-The pure core of the font system. It owns the family registry, family-name resolution, and `@font-face` CSS string construction. Extensions (`-ext-web`, `-ext-rn`, `-ext-expo`) implement the adapter contract to load fonts on each platform.
+The pure core of the font system. Each loader call owns an independent family and loaded-state registry, family-name resolution, and `@font-face` CSS string construction. Extensions (`-ext-web`, `-ext-rn`, `-ext-expo`) implement the adapter contract to load fonts on each platform.
 
 The core is testable in pure Node with zero stubs. No DOM, no React, no react-native, no Expo.
 

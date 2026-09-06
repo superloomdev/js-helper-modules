@@ -12,44 +12,21 @@
 //           getManifest, getRegisteredFamilies, isRegistered,
 //           markLoaded, isFamilyLoaded.
 //
-// Compatibility: Node.js 18+ and any JavaScript runtime. No platform
+// Compatibility: Node.js 24+ and any JavaScript runtime. No platform
 // dependencies.
 //
-// Loader pattern: SINGLETON. The public (Font) and private (_Font)
-// objects live at module scope; the loader injects Lib + config and
-// initializes ERRORS + Validators. Node's require cache guarantees one
-// Font per process.
+// Loader pattern: FACTORY. Each call captures dependencies, configuration,
+// validators, and mutable registry state in one independent Font instance.
 import CONFIG_DEFAULTS from './font.config.js';
-import ERRORS_CATALOG from './font.errors.js';
+import ERRORS from './font.errors.js';
 import createValidators from './font.validators.js';
-
-
-// Injected dependencies + sibling modules, set by the loader (module-scope).
-let Lib;        // shared_libs container (Lib.Utils used for type checks)
-let CONFIG;     // merged config; DEFAULT_FAMILY fallback
-let ERRORS;     // frozen error catalog
-let Validators; // validators module, initialized with Lib
-
-
-// Mutable registry state (module-scope).
-// families: { [familyName]: { styles: { [styleKey]: { url, path, asset, weight, style } } } }
-// tokenMap: { [token]: familyName }  (direct family-name lookups)
-// ROLES: { [role]: familyName }     (role-to-family mapping for resolveFamily)
-// loaded: Set<familyName>           (families confirmed loaded by the platform adapter)
-const registry = {
-  families: {},
-  tokenMap: {},
-  loaded: new Set(),
-  roles: {}
-};
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton loader. Injects Lib, merges config, initializes ERRORS +
-Validators, seeds the 'System' family, and returns the module-scope
-Font object.
+Factory loader. Captures Lib and config, initializes Validators,
+seeds the System family, and returns one independent Font object.
 
 @param {Object} shared_libs - Lib container (uses shared_libs.Utils)
 @param {Object} config - Overrides merged over module config defaults
@@ -59,541 +36,562 @@ Font object.
 export default function loader (shared_libs, config) {
 
   // Capture injected deps and merge config over module defaults
-  Lib = shared_libs || {};
-  CONFIG = Object.assign({}, CONFIG_DEFAULTS, config || {});
-  ERRORS = ERRORS_CATALOG;
+  const Lib = {
+    Utils: shared_libs.Utils,
+    Debug: shared_libs.Debug
+  };
+  const CONFIG = Object.assign({}, CONFIG_DEFAULTS, config || {});
 
   // Build the validators subloader (fails fast on a malformed config)
-  Validators = createValidators(Lib, ERRORS);
+  const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
-  // Seed the System family - always present on every platform
-  registry.families['System'] = { styles: {} };
-  registry.tokenMap['System'] = 'System';
+  // Create isolated mutable state and seed the platform System family
+  const state = { families: { System: { styles: {} } }, tokenMap: { System: 'System' }, loaded: new Set(), roles: {} };
 
   // Seed role mappings from config (if provided)
   if (CONFIG.ROLES && Lib.Utils.isObject(CONFIG.ROLES)) {
     const roleKeys = Object.keys(CONFIG.ROLES);
     for (let r = 0; r < roleKeys.length; r++) {
-      registry.roles[roleKeys[r]] = CONFIG.ROLES[roleKeys[r]];
+      state.roles[roleKeys[r]] = CONFIG.ROLES[roleKeys[r]];
     }
   }
 
-  return Font;
+  return createInterface(Lib, CONFIG, ERRORS, Validators, state);
 
 };/////////////////////////// Module-Loader END ///////////////////////////////
 
 
-/////////////////////////// Public Functions START /////////////////////////////
-const Font = {
+/////////////////////////// createInterface START //////////////////////////////
+
+const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
+
+  /////////////////////////// Public Functions START /////////////////////////////
+  const Font = {
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Registry ~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ Registry ~~~~~~~~~~~~~~~~~~~~
 
-  /********************************************************************
-  Register font families from a manifest object. Each key in the
-  manifest is a family name; each value is an object with a `styles`
-  map or a flat entry for a single weight.
+    /********************************************************************
+    Register font families from a manifest object. Each key in the
+    manifest is a family name; each value is an object with a `styles`
+    map or a flat entry for a single weight.
 
-  Each style entry must have at least one source field:
-  - url:   remote URL (used by web extension for @font-face)
-  - path:  local file path (used by native extensions)
-  - asset: requireable module ID (used by Expo extension)
+    Each style entry must have at least one source field:
+    - url:   remote URL (used by web extension for @font-face)
+    - path:  local file path (used by native extensions)
+    - asset: requireable module ID (used by Expo extension)
 
-  Example manifest:
-  {
-  Poppins: {
-  styles: {
-        '400': { url: 'https://fonts.gstatic.com/.../poppins-400.woff2', path: '/app/fonts/poppins-400.ttf' },
-        '600': { url: 'https://fonts.gstatic.com/.../poppins-600.woff2', path: '/app/fonts/poppins-600.ttf' }
-  }
-  },
-  Lora: {
-  url: 'https://example.com/lora-regular.ttf',
-  path: '/app/fonts/lora-regular.ttf',
-  weight: '400'
-  }
-  }
-
-  @param {Object} manifest - Family manifest object
-
-  @return {Object} - { success, error }
-  *********************************************************************/
-  registerFamilies: function (manifest) {
-
-    // Validate manifest
-    const manifestError = Validators.validateManifest(manifest);
-    if (manifestError) {
-
-      return {
-        success: false,
-        error: manifestError
-      };
-
+    Example manifest:
+    {
+    Poppins: {
+    styles: {
+          '400': { url: 'https://fonts.gstatic.com/.../poppins-400.woff2', path: '/app/fonts/poppins-400.ttf' },
+          '600': { url: 'https://fonts.gstatic.com/.../poppins-600.woff2', path: '/app/fonts/poppins-600.ttf' }
+    }
+    },
+    Lora: {
+    url: 'https://example.com/lora-regular.ttf',
+    path: '/app/fonts/lora-regular.ttf',
+    weight: '400'
+    }
     }
 
-    // Process each family in the manifest
-    const familyNames = Object.keys(manifest);
+    @param {Object} manifest - Family manifest object
 
-    for (let i = 0; i < familyNames.length; i++) {
+    @return {Object} - { success, error }
+    *********************************************************************/
+    registerFamilies: function (manifest) {
 
-      // Validate the family name
-      const familyName = familyNames[i];
-      const nameError = Validators.validateFamilyName(familyName);
+      // Validate manifest
+      const manifestError = Validators.validateManifest(manifest);
+      if (manifestError) {
+
+        return {
+          success: false,
+          error: manifestError
+        };
+
+      }
+
+      // Process each family in the manifest
+      const familyNames = Object.keys(manifest);
+
+      for (let i = 0; i < familyNames.length; i++) {
+
+        // Validate the family name
+        const familyName = familyNames[i];
+        const nameError = Validators.validateFamilyName(familyName);
+        if (nameError) {
+
+          return {
+            success: false,
+            error: nameError
+          };
+
+        }
+
+        // Register the family with its styles
+        _Font.registerFamily(familyName, manifest[familyName]);
+
+        // Create a token mapping (token = family name by default)
+        state.tokenMap[familyName] = familyName;
+
+      }
+
+      // Return success with all families registered
+      return {
+        success: true,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Register role-to-family mappings. Merges into the existing role
+    map, overwriting any existing role mappings. Roles allow
+    resolveFamily to accept theme tokens like 'primary' and resolve
+    them to concrete family names like 'Poppins_400Regular'.
+
+    Example:
+    Font.registerRoles({ primary: 'Poppins_400Regular', secondary: 'Poppins_600SemiBold' });
+
+    @param {Object} roles - Mapping of role names to family names
+
+    @return {Object} - { success, error }
+    *********************************************************************/
+    registerRoles: function (roles) {
+
+      // Validate the roles mapping
+      const rolesError = Validators.validateRoles(roles);
+      if (rolesError) {
+
+        return {
+          success: false,
+          error: rolesError
+        };
+
+      }
+
+      // Merge role mappings into the registry
+      const roleKeys = Object.keys(roles);
+      for (let i = 0; i < roleKeys.length; i++) {
+        state.roles[roleKeys[i]] = roles[roleKeys[i]];
+      }
+
+      // Return success with all roles merged
+      return {
+        success: true,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Resolve a theme token to a concrete font-family string. Returns
+    the DEFAULT_FAMILY when the token is not registered.
+
+    Lookup order:
+    1. Role mapping (e.g. 'primary' -> 'Poppins_400Regular')
+    2. Direct family name (e.g. 'Poppins' -> 'Poppins')
+    3. DEFAULT_FAMILY fallback (e.g. 'System')
+
+    @param {String} token - Theme token (role name or family name)
+
+    @return {Object} - { success, family, error }
+    *********************************************************************/
+    resolveFamily: function (token) {
+
+      // Validate token
+      const tokenError = Validators.validateToken(token);
+      if (tokenError) {
+
+        return {
+          success: false,
+          family: null,
+          error: tokenError
+        };
+
+      }
+
+      // 1. Check role mapping first (e.g. 'primary' -> 'Poppins_400Regular')
+      if (state.roles[token]) {
+
+        return {
+          success: true,
+          family: state.roles[token],
+          error: null
+        };
+
+      }
+
+      // 2. Check direct family-name lookup (e.g. 'Poppins' -> 'Poppins')
+      const family = state.tokenMap[token];
+
+      if (family) {
+
+        return {
+          success: true,
+          family: family,
+          error: null
+        };
+
+      }
+
+      // 3. Fall back to the default family
+      return {
+        success: true,
+        family: CONFIG.DEFAULT_FAMILY,
+        error: null
+      };
+
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ @font-face Construction ~~~~~~~~~~~~~~~~~~~~
+
+    /********************************************************************
+    Build a @font-face CSS string from a family name and URL. The
+    weight and style are optional. The string is pure computation;
+    the web extension injects it into the DOM.
+
+    @param {String} name   - Font family name
+    @param {String} url    - Font file URL
+    @param {String} weight - Font weight (e.g. '400', '600') (optional)
+    @param {String} style  - Font style ('normal' or 'italic') (optional)
+
+    @return {Object} - { success, css, error }
+    *********************************************************************/
+    buildFontFaceString: function (name, url, weight, style) {
+
+      // Validate family name
+      const nameError = Validators.validateFamilyName(name);
       if (nameError) {
 
         return {
           success: false,
+          css: null,
           error: nameError
         };
 
       }
 
-      // Register the family with its styles
-      _Font.registerFamily(familyName, manifest[familyName]);
+      // Validate URL
+      const urlError = Validators.validateUrl(url);
+      if (urlError) {
 
-      // Create a token mapping (token = family name by default)
-      registry.tokenMap[familyName] = familyName;
+        return {
+          success: false,
+          css: null,
+          error: urlError
+        };
 
-    }
+      }
 
-    return {
-      success: true,
-      error: null
-    };
+      // Validate weight
+      const weightError = Validators.validateWeight(weight);
+      if (weightError) {
 
-  },
+        return {
+          success: false,
+          css: null,
+          error: weightError
+        };
 
+      }
 
-  /********************************************************************
-  Register role-to-family mappings. Merges into the existing role
-  map, overwriting any existing role mappings. Roles allow
-  resolveFamily to accept theme tokens like 'primary' and resolve
-  them to concrete family names like 'Poppins_400Regular'.
+      // Validate style
+      const styleError = Validators.validateStyle(style);
+      if (styleError) {
 
-  Example:
-  Font.registerRoles({ primary: 'Poppins_400Regular', secondary: 'Poppins_600SemiBold' });
+        return {
+          success: false,
+          css: null,
+          error: styleError
+        };
 
-  @param {Object} roles - Mapping of role names to family names
+      }
 
-  @return {Object} - { success, error }
-  *********************************************************************/
-  registerRoles: function (roles) {
-
-    // Validate the roles mapping
-    const rolesError = Validators.validateRoles(roles);
-    if (rolesError) {
-
-      return {
-        success: false,
-        error: rolesError
-      };
-
-    }
-
-    // Merge role mappings into the registry
-    const roleKeys = Object.keys(roles);
-    for (let i = 0; i < roleKeys.length; i++) {
-      registry.roles[roleKeys[i]] = roles[roleKeys[i]];
-    }
-
-    return {
-      success: true,
-      error: null
-    };
-
-  },
-
-
-  /********************************************************************
-  Resolve a theme token to a concrete font-family string. Returns
-  the DEFAULT_FAMILY when the token is not registered.
-
-  Lookup order:
-  1. Role mapping (e.g. 'primary' -> 'Poppins_400Regular')
-  2. Direct family name (e.g. 'Poppins' -> 'Poppins')
-  3. DEFAULT_FAMILY fallback (e.g. 'System')
-
-  @param {String} token - Theme token (role name or family name)
-
-  @return {Object} - { success, family, error }
-  *********************************************************************/
-  resolveFamily: function (token) {
-
-    // Validate token
-    const tokenError = Validators.validateToken(token);
-    if (tokenError) {
-
-      return {
-        success: false,
-        family: null,
-        error: tokenError
-      };
-
-    }
-
-    // 1. Check role mapping first (e.g. 'primary' -> 'Poppins_400Regular')
-    if (registry.roles[token]) {
+      // Build the @font-face CSS string
+      const css = _Font.buildFontFaceCss(name, url, weight, style);
 
       return {
         success: true,
-        family: registry.roles[token],
+        css: css,
         error: null
       };
 
-    }
-
-    // 2. Check direct family-name lookup (e.g. 'Poppins' -> 'Poppins')
-    const family = registry.tokenMap[token];
-
-    if (family) {
-
-      return {
-        success: true,
-        family: family,
-        error: null
-      };
-
-    }
-
-    // 3. Fall back to the default family
-    return {
-      success: true,
-      family: CONFIG.DEFAULT_FAMILY,
-      error: null
-    };
-
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ @font-face Construction ~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ Introspection ~~~~~~~~~~~~~~~~~~~~
 
-  /********************************************************************
-  Build a @font-face CSS string from a family name and URL. The
-  weight and style are optional. The string is pure computation;
-  the web extension injects it into the DOM.
+    /********************************************************************
+    Get the current manifest of registered families and their styles.
 
-  @param {String} name   - Font family name
-  @param {String} url    - Font file URL
-  @param {String} weight - Font weight (e.g. '400', '600') (optional)
-  @param {String} style  - Font style ('normal' or 'italic') (optional)
+    @return {Object} - { success, manifest, error }
+    *********************************************************************/
+    getManifest: function () {
 
-  @return {Object} - { success, css, error }
-  *********************************************************************/
-  buildFontFaceString: function (name, url, weight, style) {
+      // Build a serializable manifest from the registry
+      const manifest = {};
 
-    // Validate family name
-    const nameError = Validators.validateFamilyName(name);
-    if (nameError) {
+      const familyNames = Object.keys(state.families);
 
-      return {
-        success: false,
-        css: null,
-        error: nameError
-      };
+      for (let i = 0; i < familyNames.length; i++) {
 
-    }
+        const familyName = familyNames[i];
+        const family = state.families[familyName];
+        const styleKeys = Object.keys(family.styles);
 
-    // Validate URL
-    const urlError = Validators.validateUrl(url);
-    if (urlError) {
+        // Only include families with actual style entries
+        if (!Lib.Utils.isEmptyArray(styleKeys)) {
 
-      return {
-        success: false,
-        css: null,
-        error: urlError
-      };
+          manifest[familyName] = { styles: {} };
 
-    }
+          // Copy each style entry into the manifest
+          for (let j = 0; j < styleKeys.length; j++) {
 
-    // Validate weight
-    const weightError = Validators.validateWeight(weight);
-    if (weightError) {
+            const styleKey = styleKeys[j];
+            const entry = family.styles[styleKey];
 
-      return {
-        success: false,
-        css: null,
-        error: weightError
-      };
+            manifest[familyName].styles[styleKey] = {
+              url: entry.url || null,
+              path: entry.path || null,
+              asset: entry.asset !== undefined ? entry.asset : null,
+              weight: entry.weight || null,
+              style: entry.style || 'normal'
+            };
 
-    }
-
-    // Validate style
-    const styleError = Validators.validateStyle(style);
-    if (styleError) {
-
-      return {
-        success: false,
-        css: null,
-        error: styleError
-      };
-
-    }
-
-    // Build the @font-face CSS string
-    const css = _Font.buildFontFaceCss(name, url, weight, style);
-
-    return {
-      success: true,
-      css: css,
-      error: null
-    };
-
-  },
-
-
-  // ~~~~~~~~~~~~~~~~~~~~ Introspection ~~~~~~~~~~~~~~~~~~~~
-
-  /********************************************************************
-  Get the current manifest of registered families and their styles.
-
-  @return {Object} - { success, manifest, error }
-  *********************************************************************/
-  getManifest: function () {
-
-    // Build a serializable manifest from the registry
-    const manifest = {};
-
-    const familyNames = Object.keys(registry.families);
-
-    for (let i = 0; i < familyNames.length; i++) {
-
-      const familyName = familyNames[i];
-      const family = registry.families[familyName];
-      const styleKeys = Object.keys(family.styles);
-
-      // Only include families with actual style entries
-      if (styleKeys.length > 0) {
-
-        manifest[familyName] = { styles: {} };
-
-        // Copy each style entry into the manifest
-        for (let j = 0; j < styleKeys.length; j++) {
-
-          const styleKey = styleKeys[j];
-          const entry = family.styles[styleKey];
-
-          manifest[familyName].styles[styleKey] = {
-            url: entry.url || null,
-            path: entry.path || null,
-            asset: entry.asset !== undefined ? entry.asset : null,
-            weight: entry.weight || null,
-            style: entry.style || 'normal'
-          };
+          }
 
         }
 
       }
 
+      // Return the manifest envelope
+      return {
+        success: true,
+        manifest: manifest,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Get the list of registered family names, including 'System'.
+
+    @return {Object} - { success, families, error }
+    *********************************************************************/
+    getRegisteredFamilies: function () {
+
+      // Return the list of registered family names
+      return {
+        success: true,
+        families: Object.keys(state.families),
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Check whether a family name is registered in the font state.
+    Returns true for any family added via registerFamilies plus the
+    seeded 'System' family.
+
+    @param {String} familyName - The family name to check
+
+    @return {Boolean} - true if the family is registered, false otherwise
+    *********************************************************************/
+    isRegistered: function (familyName) {
+
+      // Validate the family name (throws TypeError on programmer error)
+      Validators.assertFamilyName(familyName, 'isRegistered');
+
+      // Check the registry for the family name
+      return Object.prototype.hasOwnProperty.call(state.families, familyName);
+
+    },
+
+
+    /********************************************************************
+    Mark a family as loaded by the platform adapter.
+
+    Registration is a data declaration; loading is a platform I/O
+    operation. This function is called by the adapter after it confirms
+    the font face is available for rendering. A family can be registered
+    but not loaded, which means text renders in a fallback.
+
+    @param {String} familyName - The family name to mark as loaded
+
+    @return {Boolean} - true if the family was not previously marked loaded
+    *********************************************************************/
+    markLoaded: function (familyName) {
+
+      // Validate the family name (throws TypeError on programmer error)
+      Validators.assertFamilyName(familyName, 'markLoaded');
+
+      // Reject a loaded-state claim for a family this registry does not own
+      if (!Object.prototype.hasOwnProperty.call(state.families, familyName)) {
+        throw new TypeError('[helper-font] markLoaded: family must be registered');
+      }
+
+      // Record the loaded state
+      const wasLoaded = state.loaded.has(familyName);
+      state.loaded.add(familyName);
+
+      // Return whether this is a new load
+      return !wasLoaded;
+
+    },
+
+
+    /********************************************************************
+    Check whether a family name has been confirmed loaded by the adapter.
+
+    A family that is registered but not loaded has a name in the registry
+    but no confirmed platform font face. Text using such a family renders
+    in a fallback with no signal unless this check is called.
+
+    @param {String} familyName - The family name to check
+
+    @return {Boolean} - true if the family is loaded, false otherwise
+    *********************************************************************/
+    isFamilyLoaded: function (familyName) {
+
+      // Validate the family name (throws TypeError on programmer error)
+      Validators.assertFamilyName(familyName, 'isFamilyLoaded');
+
+      // Check the loaded set for the family name
+      return state.loaded.has(familyName);
+
     }
 
-    return {
-      success: true,
-      manifest: manifest,
-      error: null
-    };
 
-  },
+  };/////////////////////////// Public Functions END /////////////////////////////
 
 
-  /********************************************************************
-  Get the list of registered family names, including 'System'.
-
-  @return {Object} - { success, families, error }
-  *********************************************************************/
-  getRegisteredFamilies: function () {
-
-    return {
-      success: true,
-      families: Object.keys(registry.families),
-      error: null
-    };
-
-  },
+  /////////////////////////// Private Functions START ////////////////////////////
+  const _Font = {
 
 
-  /********************************************************************
-  Check whether a family name is registered in the font registry.
-  Returns true for any family added via registerFamilies plus the
-  seeded 'System' family.
+    /********************************************************************
+    Register a single family with its styles.
 
-  @param {String} familyName - The family name to check
+    @param {String} familyName - The family name
+    @param {Object} entry       - The manifest entry for this family
 
-  @return {Boolean} - true if the family is registered, false otherwise
-  *********************************************************************/
-  isRegistered: function (familyName) {
+    @return {void}
+    *********************************************************************/
+    registerFamily: function (familyName, entry) {
 
-    // Validate the family name (throws TypeError on programmer error)
-    Validators.assertFamilyName(familyName, 'isRegistered');
+      // Ensure the family exists in the registry
+      if (!state.families[familyName]) {
+        state.families[familyName] = { styles: {} };
+      }
 
-    // Check the registry for the family name
-    return Object.prototype.hasOwnProperty.call(registry.families, familyName);
+      // Check for a styles map and register each style entry
+      if (entry.styles && Lib.Utils.isObject(entry.styles)) {
 
-  },
+        const styleKeys = Object.keys(entry.styles);
 
+        for (let i = 0; i < styleKeys.length; i++) {
 
-  /********************************************************************
-  Mark a family as loaded by the platform adapter.
+          const styleKey = styleKeys[i];
+          const styleEntry = entry.styles[styleKey];
 
-  Registration is a data declaration; loading is a platform I/O
-  operation. This function is called by the adapter after it confirms
-  the font face is available for rendering. A family can be registered
-  but not loaded, which means text renders in a fallback.
+          _Font.registerStyle(familyName, styleKey, styleEntry);
 
-  @param {String} familyName - The family name to mark as loaded
+        }
 
-  @return {Boolean} - true if the family was not previously marked loaded
-  *********************************************************************/
-  markLoaded: function (familyName) {
+      } else {
 
-    // Validate the family name (throws TypeError on programmer error)
-    Validators.assertFamilyName(familyName, 'markLoaded');
+        // Handle flat entry as a single style with optional weight
+        const weight = entry.weight || '400';
+        const styleKey = weight;
 
-    // Record the loaded state
-    const wasLoaded = registry.loaded.has(familyName);
-    registry.loaded.add(familyName);
-
-    return !wasLoaded;
-
-  },
-
-
-  /********************************************************************
-  Check whether a family name has been confirmed loaded by the adapter.
-
-  A family that is registered but not loaded has a name in the registry
-  but no confirmed platform font face. Text using such a family renders
-  in a fallback with no signal unless this check is called.
-
-  @param {String} familyName - The family name to check
-
-  @return {Boolean} - true if the family is loaded, false otherwise
-  *********************************************************************/
-  isFamilyLoaded: function (familyName) {
-
-    // Validate the family name (throws TypeError on programmer error)
-    Validators.assertFamilyName(familyName, 'isFamilyLoaded');
-
-    // Check the loaded set for the family name
-    return registry.loaded.has(familyName);
-
-  }
-
-
-};/////////////////////////// Public Functions END /////////////////////////////
-
-
-/////////////////////////// Private Functions START ////////////////////////////
-const _Font = {
-
-
-  /********************************************************************
-  Register a single family with its styles.
-
-  @param {String} familyName - The family name
-  @param {Object} entry       - The manifest entry for this family
-
-  @return {void}
-  *********************************************************************/
-  registerFamily: function (familyName, entry) {
-
-    // Ensure the family exists in the registry
-    if (!registry.families[familyName]) {
-      registry.families[familyName] = { styles: {} };
-    }
-
-    // Check for a styles map and register each style entry
-    if (entry.styles && Lib.Utils.isObject(entry.styles)) {
-
-      const styleKeys = Object.keys(entry.styles);
-
-      for (let i = 0; i < styleKeys.length; i++) {
-
-        const styleKey = styleKeys[i];
-        const styleEntry = entry.styles[styleKey];
-
-        _Font.registerStyle(familyName, styleKey, styleEntry);
+        _Font.registerStyle(familyName, styleKey, {
+          url: entry.url,
+          path: entry.path,
+          asset: entry.asset,
+          weight: weight,
+          style: entry.style || 'normal'
+        });
 
       }
 
-    } else {
+    },
 
-      // Handle flat entry as a single style with optional weight
-      const weight = entry.weight || '400';
-      const styleKey = weight;
 
-      _Font.registerStyle(familyName, styleKey, {
-        url: entry.url,
-        path: entry.path,
-        asset: entry.asset,
-        weight: weight,
-        style: entry.style || 'normal'
-      });
+    /********************************************************************
+    Register a single style entry for a family.
+
+    @param {String} familyName - The family name
+    @param {String} styleKey   - The style key (weight or weight-style)
+    @param {Object} styleEntry  - { url, weight, style }
+
+    @return {void}
+    *********************************************************************/
+    registerStyle: function (familyName, styleKey, styleEntry) {
+
+      // Validate that at least one source is present
+      const sourceError = Validators.validateStyleEntry(styleEntry);
+      if (sourceError) {
+        throw new TypeError('[helper-font] registerStyle: styleEntry must have at least one source field');
+      }
+
+      // Store the style entry in the family registry
+      state.families[familyName].styles[styleKey] = {
+        url: styleEntry.url || null,
+        path: styleEntry.path || null,
+        asset: styleEntry.asset !== undefined ? styleEntry.asset : null,
+        weight: styleEntry.weight || null,
+        style: styleEntry.style || 'normal'
+      };
+
+    },
+
+
+    /********************************************************************
+    Build a @font-face CSS string from parts.
+
+    @param {String} name   - Font family name
+    @param {String} url    - Font file URL
+    @param {String} weight - Font weight (optional)
+    @param {String} style  - Font style (optional)
+
+    @return {String} - The @font-face CSS string
+    *********************************************************************/
+    buildFontFaceCss: function (name, url, weight, style) {
+
+      // Build the font-family and src declarations
+      const declarations = [
+        'font-family: \'' + name + '\';',
+        'src: url(\'' + url + '\');'
+      ];
+
+      // Add weight declaration when provided
+      if (weight) {
+        declarations.push('font-weight: ' + weight + ';');
+      }
+
+      // Add style declaration when provided (default 'normal')
+      declarations.push('font-style: ' + (style || 'normal') + ';');
+
+      // Assemble the @font-face rule
+      return '@font-face { ' + declarations.join(' ') + ' }';
 
     }
 
-  },
 
+  };////////////////////////// Private Functions END ////////////////////////////
 
-  /********************************************************************
-  Register a single style entry for a family.
+  return Font;
 
-  @param {String} familyName - The family name
-  @param {String} styleKey   - The style key (weight or weight-style)
-  @param {Object} styleEntry  - { url, weight, style }
-
-  @return {void}
-  *********************************************************************/
-  registerStyle: function (familyName, styleKey, styleEntry) {
-
-    // Validate that at least one source is present
-    const sourceError = Validators.validateStyleEntry(styleEntry);
-    if (sourceError) {
-      throw new TypeError('[helper-font] registerStyle: styleEntry must have at least one source field');
-    }
-
-    registry.families[familyName].styles[styleKey] = {
-      url: styleEntry.url || null,
-      path: styleEntry.path || null,
-      asset: styleEntry.asset !== undefined ? styleEntry.asset : null,
-      weight: styleEntry.weight || null,
-      style: styleEntry.style || 'normal'
-    };
-
-  },
-
-
-  /********************************************************************
-  Build a @font-face CSS string from parts.
-
-  @param {String} name   - Font family name
-  @param {String} url    - Font file URL
-  @param {String} weight - Font weight (optional)
-  @param {String} style  - Font style (optional)
-
-  @return {String} - The @font-face CSS string
-  *********************************************************************/
-  buildFontFaceCss: function (name, url, weight, style) {
-
-    // Build the font-family and src declarations
-    const declarations = [
-      'font-family: \'' + name + '\';',
-      'src: url(\'' + url + '\');'
-    ];
-
-    // Add weight declaration when provided
-    if (weight) {
-      declarations.push('font-weight: ' + weight + ';');
-    }
-
-    // Add style declaration when provided (default 'normal')
-    declarations.push('font-style: ' + (style || 'normal') + ';');
-
-    return '@font-face { ' + declarations.join(' ') + ' }';
-
-  }
-
-
-};////////////////////////// Private Functions END ////////////////////////////
+};/////////////////////////// createInterface END //////////////////////////////

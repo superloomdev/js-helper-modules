@@ -16,7 +16,7 @@ export default function (Lib, ERRORS) {
     validateConfig: function (CONFIG) {
 
       // DEFAULT_FAMILY must be a non-empty string
-      if (!Lib.Utils.isString(CONFIG.DEFAULT_FAMILY) || CONFIG.DEFAULT_FAMILY.length === 0) {
+      if (!Lib.Utils.isString(CONFIG.DEFAULT_FAMILY) || Lib.Utils.isEmptyString(CONFIG.DEFAULT_FAMILY)) {
         throw new TypeError('[helper-font] DEFAULT_FAMILY must be a non-empty string');
       }
 
@@ -38,10 +38,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateManifest: function (manifest) {
 
+      // Reject non-object or array manifests
       if (!Lib.Utils.isObject(manifest) || Array.isArray(manifest)) {
         return ERRORS.INVALID_MANIFEST;
       }
 
+      // Valid manifest
       return null;
 
     },
@@ -57,10 +59,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateFamilyName: function (name) {
 
-      if (!Lib.Utils.isString(name) || name.length === 0) {
+      // Reject non-string or empty names
+      if (!Lib.Utils.isString(name) || Lib.Utils.isEmptyString(name)) {
         return ERRORS.INVALID_FAMILY_NAME;
       }
 
+      // Valid family name
       return null;
 
     },
@@ -81,7 +85,8 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     assertFamilyName: function (name, fn_name) {
 
-      if (!Lib.Utils.isString(name) || name.length === 0) {
+      // Throw on non-string or empty names
+      if (!Lib.Utils.isString(name) || Lib.Utils.isEmptyString(name)) {
         throw new TypeError(
           '[helper-font] ' + fn_name + ': family_name must be a non-empty string'
         );
@@ -100,10 +105,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateToken: function (token) {
 
-      if (!Lib.Utils.isString(token) || token.length === 0) {
+      // Reject non-string or empty tokens
+      if (!Lib.Utils.isString(token) || Lib.Utils.isEmptyString(token)) {
         return ERRORS.INVALID_TOKEN;
       }
 
+      // Valid token
       return null;
 
     },
@@ -119,10 +126,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateUrl: function (url) {
 
-      if (!Lib.Utils.isString(url) || url.length === 0) {
+      // Reject non-string or empty URLs
+      if (!Lib.Utils.isString(url) || Lib.Utils.isEmptyString(url)) {
         return ERRORS.INVALID_URL;
       }
 
+      // Valid URL
       return null;
 
     },
@@ -138,14 +147,17 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateWeight: function (weight) {
 
+      // Null or undefined weight is valid (optional field)
       if (weight === null || weight === undefined) {
         return null;
       }
 
-      if (!Lib.Utils.isString(weight) || weight.length === 0) {
+      // Reject non-string or empty weights
+      if (!Lib.Utils.isString(weight) || Lib.Utils.isEmptyString(weight)) {
         return ERRORS.INVALID_WEIGHT;
       }
 
+      // Valid weight
       return null;
 
     },
@@ -161,14 +173,17 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateStyle: function (style) {
 
+      // Undefined or null style is valid (optional field)
       if (style === undefined || style === null) {
         return null;
       }
 
+      // Reject non-string or invalid style values
       if (!Lib.Utils.isString(style) || (style !== 'normal' && style !== 'italic')) {
         return ERRORS.INVALID_STYLE;
       }
 
+      // Valid style
       return null;
 
     },
@@ -185,18 +200,22 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateStyleEntry: function (entry) {
 
+      // Reject non-object entries
       if (!Lib.Utils.isObject(entry)) {
         return ERRORS.MISSING_SOURCE;
       }
 
-      const hasUrl = Lib.Utils.isString(entry.url) && entry.url.length > 0;
-      const hasPath = Lib.Utils.isString(entry.path) && entry.path.length > 0;
+      // Check for at least one source field
+      const hasUrl = Lib.Utils.isString(entry.url) && !Lib.Utils.isEmptyString(entry.url);
+      const hasPath = Lib.Utils.isString(entry.path) && !Lib.Utils.isEmptyString(entry.path);
       const hasAsset = entry.asset !== undefined && entry.asset !== null;
 
+      // Reject entries with no source field
       if (!hasUrl && !hasPath && !hasAsset) {
         return ERRORS.MISSING_SOURCE;
       }
 
+      // Valid entry
       return null;
 
     },
@@ -212,10 +231,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateRoles: function (roles) {
 
+      // Reject non-object or array roles
       if (!Lib.Utils.isObject(roles) || Array.isArray(roles)) {
         return ERRORS.INVALID_ROLES;
       }
 
+      // Valid roles mapping
       return null;
 
     }

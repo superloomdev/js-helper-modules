@@ -146,6 +146,14 @@ Font.isRegistered('Unknown');
 // false
 ```
 
+### markLoaded(familyName)
+
+Records a platform adapter's successful completion for a family registered in this core instance. Returns `true` on the first mark and `false` when already loaded. An unknown or malformed family throws `TypeError`; registration alone never implies loading.
+
+### isFamilyLoaded(familyName)
+
+Returns whether a platform adapter has confirmed the registered family loaded. This is independent from `isRegistered`, so a known family can remain unloaded while its asynchronous platform operation is pending or failed.
+
 ## Adapter Contract
 
 Extensions (`-ext-web`, `-ext-rn`, `-ext-expo`) must export a loader function
@@ -170,7 +178,7 @@ Each extension implements platform-specific loading:
 function isReady() -> Boolean
 ```
 
-Check whether all registered fonts have finished loading.
+Check whether every font style requested in the adapter's latest load cycle completed successfully. A partial failure leaves readiness false even when adapter policy returns a non-fatal success envelope.
 
 ## Error Catalog
 

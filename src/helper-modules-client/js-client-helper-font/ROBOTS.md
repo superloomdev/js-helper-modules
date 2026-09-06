@@ -80,7 +80,8 @@ isRegistered(familyName) -> Boolean | async:no
 markLoaded(familyName) -> Boolean | async:no
   Marks a family as confirmed loaded by the platform adapter. Called by
   the adapter after it confirms the font face is available for rendering.
-  Returns true if the family was not previously marked loaded.
+  Returns true if the registered family was not previously marked loaded.
+  Throws TypeError when the family is not registered in this core instance.
 
 isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a family has been confirmed loaded by the adapter.
@@ -111,7 +112,7 @@ extension's `loadManifest()`.
 
 ## Patterns
 
-- **Singleton**: one Font per process; module-scope registry holds families, token mappings, and role mappings
+- **Factory-per-loader**: each call owns an independent family, role, token, and loaded-state registry
 - **System family seeded at construction**: 'System' is always present
 - **Token = family name by default**: `registerFamilies` creates token mappings from family names
 - **Role mapping**: `registerRoles` maps theme tokens to concrete family names; roles checked first in `resolveFamily`

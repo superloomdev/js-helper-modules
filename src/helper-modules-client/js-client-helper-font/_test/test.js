@@ -387,6 +387,15 @@ test('isFamilyLoaded returns false for an unregistered family', function () {
 
 });
 
+test('should reject an unregistered family when markLoaded is called', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  assert.throws(function () {
+    Isolated.markLoaded('NotRegistered');
+  }, /family must be registered/);
+
+});
+
 test('markLoaded throws TypeError on empty string', function () {
 
   assert.throws(function () {
@@ -566,6 +575,22 @@ test('registerRoles rejects array', function () {
 
 });
 
+
+test('should keep families, roles, and loaded state isolated when two core instances are created', function () {
+
+  const First = fontLoader({ Utils: utilsLoader() }, { ROLES: { primary: 'FirstFamily' } });
+  const Second = fontLoader({ Utils: utilsLoader() }, { ROLES: { primary: 'SecondFamily' } });
+  First.registerFamilies({ FirstFamily: { url: 'https://example.com/first.woff2' } });
+  Second.registerFamilies({ SecondFamily: { url: 'https://example.com/second.woff2' } });
+  First.markLoaded('FirstFamily');
+  assert.strictEqual(First.resolveFamily('primary').family, 'FirstFamily');
+  assert.strictEqual(Second.resolveFamily('primary').family, 'SecondFamily');
+  assert.strictEqual(First.isRegistered('SecondFamily'), false);
+  assert.strictEqual(Second.isRegistered('FirstFamily'), false);
+  assert.strictEqual(First.isFamilyLoaded('FirstFamily'), true);
+  assert.strictEqual(Second.isFamilyLoaded('FirstFamily'), false);
+
+});
 
 // ~~~~~~~~~~~~~~~~~~~~ Config roles seeding ~~~~~~~~~~~~~~~~~~~~
 
