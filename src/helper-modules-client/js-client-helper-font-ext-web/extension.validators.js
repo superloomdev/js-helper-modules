@@ -15,7 +15,7 @@ export default function (Lib, ERRORS) {
     validateConfig: function (CONFIG) {
 
       // PARENT_SELECTOR must be a non-empty string
-      if (!Lib.Utils.isString(CONFIG.PARENT_SELECTOR) || CONFIG.PARENT_SELECTOR.length === 0) {
+      if (!Lib.Utils.isString(CONFIG.PARENT_SELECTOR) || Lib.Utils.isEmptyString(CONFIG.PARENT_SELECTOR)) {
         throw new TypeError('[helper-font-ext-web] PARENT_SELECTOR must be a non-empty string');
       }
 
@@ -32,10 +32,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateManifest: function (manifest) {
 
+      // Reject non-object or array manifests
       if (!Lib.Utils.isObject(manifest) || Array.isArray(manifest)) {
         return ERRORS.INVALID_MANIFEST;
       }
 
+      // Valid manifest
       return null;
 
     },
@@ -52,14 +54,17 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateStyleEntry: function (entry) {
 
+      // Reject non-object entries
       if (!Lib.Utils.isObject(entry)) {
         return ERRORS.MISSING_URL;
       }
 
-      if (!Lib.Utils.isString(entry.url) || entry.url.length === 0) {
+      // Reject entries without a url field
+      if (!Lib.Utils.isString(entry.url) || Lib.Utils.isEmptyString(entry.url)) {
         return ERRORS.MISSING_URL;
       }
 
+      // Valid entry
       return null;
 
     }

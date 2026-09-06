@@ -52,10 +52,11 @@ loadManifest(manifest) -> Promise<{ success, error }> | async:yes
   Builds @font-face CSS strings via Font.buildFontFaceString for entries
   with a url field, creates a <style> node, and appends it to the DOM.
   Entries with only path or asset (native/Expo-only) are silently skipped.
+  Overlapping calls execute FIFO per instance; faces inside one manifest remain parallel.
   manifest is the output of Font.getManifest().
 
 isReady() -> Boolean | async:no
-  Returns whether all fonts have been loaded (style node injected).
+  Returns whether every requested web face completed successfully. The FontFaceSet API and at least one matching face are required; style injection alone is not readiness. Incremental or queued work clears readiness until every accepted cycle settles.
 
 isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a specific font family has been loaded by this adapter.

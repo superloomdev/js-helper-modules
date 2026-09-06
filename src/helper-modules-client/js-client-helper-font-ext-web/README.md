@@ -7,7 +7,7 @@ Web DOM font loader adapter for the font family system. Injects `@font-face` CSS
 
 ## What This Is
 
-The web extension of `js-client-helper-font`. It implements the adapter contract: `loadManifest` and `isReady`. The core builds `@font-face` CSS strings; this extension creates a `<style>` node and appends it to the DOM.
+The web extension of `js-client-helper-font`. It implements the adapter contract: `loadManifest` and `isReady`. The core builds `@font-face` CSS strings; this extension injects them and waits for browser face checks when the FontFaceSet API is available before reporting readiness. Overlapping manifest calls execute FIFO per adapter instance while faces within one manifest load concurrently.
 
 No React, no react-native. Pure DOM manipulation. Tests run in Node with a minimal `document` stub.
 

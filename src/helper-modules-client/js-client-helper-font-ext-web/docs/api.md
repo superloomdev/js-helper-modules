@@ -26,7 +26,7 @@ const WebFontAdapter = fontExtWeb(shared_libs, config);
 
 ### loadManifest(manifest)
 
-Async. Builds `@font-face` CSS strings via the core for entries that have a `url` field, creates a `<style>` node, and appends it to the DOM. Entries with only `path` or `asset` (native/Expo-only) are silently skipped.
+Async. Builds `@font-face` CSS strings via the core for entries that have a `url` field, creates a `<style>` node, and appends it to the DOM. Entries with only `path` or `asset` (native/Expo-only) are silently skipped. Overlapping calls on one adapter instance execute in FIFO order; styles within each manifest still load concurrently, and families completed by an earlier call are skipped by later queued calls.
 
 ```javascript
 const { success, error } = await WebFontAdapter.loadManifest(Font.getManifest().manifest);
@@ -34,7 +34,7 @@ const { success, error } = await WebFontAdapter.loadManifest(Font.getManifest().
 
 ### isReady()
 
-Returns whether all fonts have been loaded.
+Returns true only when every requested web face completed successfully. Starting an incremental or queued load clears readiness until every accepted cycle settles. `document.fonts.load` must exist and return at least one matching face; style injection alone, an absent API, or an empty result is not readiness. Partial failures retain CSS and loaded state only for successful families, while rejected families remain retryable. `clearManifest` removes style nodes retained across all incremental cycles.
 
 ```javascript
 const ready = WebFontAdapter.isReady();

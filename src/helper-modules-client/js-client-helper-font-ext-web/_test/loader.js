@@ -60,6 +60,11 @@ function createDocumentStub () {
       if (selector === 'head') return head;
       return null;
     },
+    fonts: {
+      load: function () {
+        return Promise.resolve([{}]);
+      }
+    },
     head: head,
     documentElement: head
   };
