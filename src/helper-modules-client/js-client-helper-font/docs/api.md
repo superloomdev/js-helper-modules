@@ -96,6 +96,8 @@ Resolves a theme token to a concrete font-family string. Lookup order:
 2. **Direct family name** - if the token matches a registered family (e.g. `'Poppins'` → `'Poppins'`)
 3. **DEFAULT_FAMILY fallback** - falls back to `'System'`
 
+After resolving the family name, returns the platform-resolved name recorded via `registerPlatformName` when one exists, otherwise the family name unchanged.
+
 ```javascript
 Font.resolveFamily('primary');
 // { success: true, family: 'Poppins_400Regular', error: null }
@@ -153,6 +155,33 @@ Records a platform adapter's successful completion for a family registered in th
 ### isFamilyLoaded(familyName)
 
 Returns whether a platform adapter has confirmed the registered family loaded. This is independent from `isRegistered`, so a known family can remain unloaded while its asynchronous platform operation is pending or failed.
+
+### registerPlatformName(family_name, platform_name)
+
+Records the name a platform adapter actually registered a font under. A platform may register a font under a name that differs from the core family name (e.g. iOS uses the PostScript name embedded in the font file). After recording, `resolveFamily` returns the platform name for that family so text renders in the correct face.
+
+```javascript
+Font.registerFamilies({ IBMPlexSans: { styles: { '400': { url: 'https://.../plex.woff2' } } } });
+Font.registerPlatformName('IBMPlexSans', 'IBM Plex Sans');
+// { success: true, error: null }
+
+Font.resolveFamily('IBMPlexSans');
+// { success: true, family: 'IBM Plex Sans', error: null }
+```
+
+Throws `TypeError` when the family is not registered or either argument is not a non-empty string.
+
+### getPlatformName(family_name)
+
+Returns the platform-resolved name recorded for a family, or `null` when no platform name was recorded.
+
+```javascript
+Font.getPlatformName('IBMPlexSans');
+// { success: true, platform_name: 'IBM Plex Sans', error: null }
+
+Font.getPlatformName('Poppins');
+// { success: true, platform_name: null, error: null }
+```
 
 ## Adapter Contract
 

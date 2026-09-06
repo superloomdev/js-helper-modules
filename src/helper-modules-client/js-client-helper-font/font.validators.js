@@ -50,6 +50,74 @@ export default function (Lib, ERRORS) {
 
 
     /********************************************************************
+    Prevalidate every family and style entry in a manifest before any
+    mutation. Returns an error envelope for a malformed manifest or
+    family name; throws the same TypeError registerStyle throws for a
+    style entry with no source field. Called by registerFamilies so a
+    later invalid entry cannot leave earlier registrations committed.
+
+    @param {Object} manifest - Family manifest object (already shape-validated)
+
+    @return {Object|null} - Error object or null
+    @throws {TypeError} - When a style entry has no source field
+    *********************************************************************/
+    validateManifestEntries: function (manifest) {
+
+      // Walk every family in the manifest
+      const familyNames = Object.keys(manifest);
+
+      for (let i = 0; i < familyNames.length; i++) {
+
+        const familyName = familyNames[i];
+
+        // Validate the family name
+        const nameError = Validators.validateFamilyName(familyName);
+        if (nameError) {
+
+          return nameError;
+
+        }
+
+        // Inspect the family entry's styles
+        const entry = manifest[familyName];
+
+        // Handle a styles map (multiple weights)
+        if (entry.styles && Lib.Utils.isObject(entry.styles)) {
+
+          const styleKeys = Object.keys(entry.styles);
+
+          for (let j = 0; j < styleKeys.length; j++) {
+
+            const styleEntry = entry.styles[styleKeys[j]];
+
+            // A style entry with no source is a programmer error: throw.
+            // This matches the message registerStyle throws today.
+            const sourceError = Validators.validateStyleEntry(styleEntry);
+            if (sourceError) {
+              throw new TypeError('[helper-font] registerStyle: styleEntry must have at least one source field');
+            }
+
+          }
+
+        } else {
+
+          // Handle a flat entry as a single style: validate it has a source
+          const sourceError = Validators.validateStyleEntry(entry);
+          if (sourceError) {
+            throw new TypeError('[helper-font] registerStyle: styleEntry must have at least one source field');
+          }
+
+        }
+
+      }
+
+      // All entries valid
+      return null;
+
+    },
+
+
+    /********************************************************************
     Validate a family name. Returns the error object when invalid,
     null when valid.
 
@@ -154,6 +222,12 @@ export default function (Lib, ERRORS) {
 
       // Reject non-string or empty weights
       if (!Lib.Utils.isString(weight) || Lib.Utils.isEmptyString(weight)) {
+        return ERRORS.INVALID_WEIGHT;
+      }
+
+      // Accept only a three-digit hundred value (100-900) or a keyword.
+      // This prevents CSS injection through the weight field.
+      if (!/^(?:[1-9]00|normal|bold|lighter|bolder)$/.test(weight)) {
         return ERRORS.INVALID_WEIGHT;
       }
 

@@ -21,7 +21,7 @@ None. All dependencies are peer dependencies.
 
 - `font.config.js` - keys: `DEFAULT_FAMILY` (default `'System'`), `roles` (default `{}`)
 - `font.errors.js` - constants: `INVALID_MANIFEST`, `INVALID_FAMILY_NAME`, `INVALID_TOKEN`, `INVALID_URL`, `INVALID_WEIGHT`, `INVALID_STYLE`, `UNREGISTERED_FAMILY`, `MISSING_SOURCE`, `INVALID_ROLES`
-- `font.validators.js` - functions: `validateConfig(CONFIG)`, `validateManifest(manifest)`, `validateFamilyName(name)`, `validateToken(token)`, `validateUrl(url)`, `validateWeight(weight)`, `validateStyle(style)`, `validateStyleEntry(entry)`, `validateRoles(roles)`
+- `font.validators.js` - functions: `validateConfig(CONFIG)`, `validateManifest(manifest)`, `validateManifestEntries(manifest)`, `validateFamilyName(name)`, `validateToken(token)`, `validateUrl(url)`, `validateWeight(weight)`, `validateStyle(style)`, `validateStyleEntry(entry)`, `validateRoles(roles)`
 
 ## Loader Pattern
 
@@ -44,7 +44,7 @@ const Font = font({
 | `DEFAULT_FAMILY` | string | `'System'` | No |
 | `roles` | object | `{}` | No |
 
-## Exported Functions (9 total)
+## Exported Functions (11 total)
 
 ```
 registerFamilies(manifest) -> { success, error } | async:no
@@ -61,6 +61,9 @@ resolveFamily(token) -> { success, family, error } | async:no
   1. Role mapping (e.g. 'primary' -> 'Poppins_400Regular')
   2. Direct family name (e.g. 'Poppins' -> 'Poppins')
   3. DEFAULT_FAMILY fallback (e.g. 'System')
+  After resolving the family name, returns the platform-resolved name
+  recorded via registerPlatformName when one exists, otherwise the
+  family name unchanged.
 
 buildFontFaceString(name, url, weight, style) -> { success, css, error } | async:no
   Builds a @font-face CSS string. Pure computation; the web extension
@@ -87,6 +90,19 @@ isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a family has been confirmed loaded by the adapter.
   A family can be registered but not loaded; text using such a family
   renders in a fallback. This check distinguishes the two states.
+
+registerPlatformName(family_name, platform_name) -> { success, error } | async:no
+  Records the name a platform adapter actually registered a font under.
+  A platform may register a font under a name that differs from the
+  core family name (e.g. iOS uses the PostScript name in the font file).
+  After recording, resolveFamily returns the platform name for that
+  family. Throws TypeError when the family is not registered or either
+  argument is not a non-empty string.
+
+getPlatformName(family_name) -> { success, platform_name, error } | async:no
+  Returns the platform-resolved name recorded for a family, or null
+  when no platform name was recorded. Throws TypeError on a non-string
+  or empty family name.
 ```
 
 ## Adapter Contract

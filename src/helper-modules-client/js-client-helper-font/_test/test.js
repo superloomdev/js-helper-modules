@@ -648,3 +648,262 @@ test('getManifest returns null for absent source fields', function () {
   assert.strictEqual(result.manifest.UrlOnly.styles['400'].asset, null);
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ F1: prototype-unsafe registry maps ~~~~~~~~~~~~~~~~~~~~
+
+test('F1 resolveFamily does not return the inherited toString function for the toString token', function () {
+
+  const result = Font.resolveFamily('toString');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.family, 'System');
+  assert.strictEqual(result.error, null);
+
+});
+
+test('F1 resolveFamily does not return the inherited Object constructor for the constructor token', function () {
+
+  const result = Font.resolveFamily('constructor');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.family, 'System');
+  assert.strictEqual(result.error, null);
+
+});
+
+test('F1 registerFamilies registers a family literally named __proto__ without silent data loss', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  // Use Object.create(null) so __proto__ is an own property, not the prototype setter.
+  // A normal {} literal would set the prototype, hiding the key from Object.keys.
+  const manifest = Object.create(null);
+  manifest['__proto__'] = { url: 'https://example.com/proto.woff2' };
+  const result = Isolated.registerFamilies(manifest);
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.error, null);
+
+  // The family must appear in the registry, not be swallowed by Object.prototype
+  const families = Isolated.getRegisteredFamilies();
+  assert.ok(families.families.includes('__proto__'));
+
+  // The manifest must also include it
+  const manifestResult = Isolated.getManifest();
+  assert.ok(manifestResult.manifest['__proto__']);
+
+});
+
+test('F1 registerFamilies does not throw when registering a family named constructor', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  const result = Isolated.registerFamilies({ constructor: { url: 'https://example.com/ctor.woff2' } });
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.error, null);
+  assert.strictEqual(Isolated.isRegistered('constructor'), true);
+
+});
+
+test('F1 registering __proto__ does not pollute Object.prototype', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  const manifest = Object.create(null);
+  manifest['__proto__'] = { url: 'https://example.com/proto.woff2' };
+  Isolated.registerFamilies(manifest);
+
+  // Object.prototype must not gain any new own property from the registration.
+  // Note: __proto__ is a built-in accessor on Object.prototype, so checking for
+  // it would always be true. Instead, verify no new property was added.
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted'), false);
+  assert.strictEqual({}.polluted, undefined);
+  assert.strictEqual(Object.getPrototypeOf({}), Object.prototype);
+
+});
+
+test('F1 getManifest output survives JSON.stringify after registering a __proto__ family', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  const manifest = Object.create(null);
+  manifest['__proto__'] = { url: 'https://example.com/proto.woff2' };
+  Isolated.registerFamilies(manifest);
+
+  const manifestResult = Isolated.getManifest();
+
+  // Must not throw and must include the family
+  const serialized = JSON.stringify(manifestResult.manifest);
+  assert.ok(serialized.indexOf('__proto__') !== -1);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ F2: registerFamilies atomicity ~~~~~~~~~~~~~~~~~~~~
+
+test('F2 registerFamilies is atomic: a later invalid family does not leave earlier registrations committed', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+
+  // Good is valid, Bad has a style entry with no source field
+  assert.throws(function () {
+
+    Isolated.registerFamilies({
+      Good: { url: 'https://example.com/good.woff2' },
+      Bad: { styles: { '400': { weight: '400' } } }
+    });
+
+  }, /styleEntry must have at least one source field/);
+
+  // Good must NOT be registered: the failed call left nothing behind
+  assert.strictEqual(Isolated.isRegistered('Good'), false);
+  assert.strictEqual(Isolated.isRegistered('Bad'), false);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ F3: @font-face CSS escaping and weight validation ~~~~~~~~~~~~~~~~~~~~
+
+test('F3 buildFontFaceString escapes single quotes in family name and URL', function () {
+
+  const result = Font.buildFontFaceString(
+    'O\x27Brien',
+    'https://example.com/a\x27b.woff2',
+    '400',
+    'normal'
+  );
+
+  assert.strictEqual(result.success, true);
+
+  // The family name must be escaped, not interpolated raw
+  assert.ok(result.css.indexOf('O\\\'Brien') !== -1);
+  // The URL must be escaped, not interpolated raw
+  assert.ok(result.css.indexOf('a\\\'b.woff2') !== -1);
+  // The rule must not contain an unescaped broken quote sequence
+  assert.ok(result.css.indexOf("'O'Brien'") === -1);
+
+});
+
+test('F3 buildFontFaceString rejects an injection weight string with INVALID_WEIGHT', function () {
+
+  const result = Font.buildFontFaceString(
+    'X',
+    'https://example.com/x.woff2',
+    '400; } body { display:none } @font-face { font-weight:900',
+    'normal'
+  );
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.css, null);
+  assert.strictEqual(result.error.type, 'helper-font/invalid-weight');
+
+});
+
+test('F3 validateWeight accepts 400, 600, normal, and bold', function () {
+
+  for (const w of ['400', '600', 'normal', 'bold']) {
+
+    const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', w, 'normal');
+    assert.strictEqual(result.success, true, 'weight ' + w + ' should be accepted');
+    assert.strictEqual(result.error, null);
+
+  }
+
+});
+
+test('F3 validateWeight rejects a numeric 400', function () {
+
+  const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', 400, 'normal');
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.css, null);
+  assert.strictEqual(result.error.type, 'helper-font/invalid-weight');
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ F4: platform-name channel ~~~~~~~~~~~~~~~~~~~~
+
+test('F4 registerPlatformName and getPlatformName exist on the public interface', function () {
+
+  assert.strictEqual(typeof Font.registerPlatformName, 'function');
+  assert.strictEqual(typeof Font.getPlatformName, 'function');
+
+});
+
+test('F4 recording a platform name changes resolveFamily output for that family', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ IBMPlexSans: { styles: { '400': { url: 'https://example.com/plex.woff2' } } } });
+
+  // Before recording, resolveFamily returns the family name unchanged
+  assert.strictEqual(Isolated.resolveFamily('IBMPlexSans').family, 'IBMPlexSans');
+
+  // Record the platform-resolved name
+  const recordResult = Isolated.registerPlatformName('IBMPlexSans', 'IBM Plex Sans');
+  assert.strictEqual(recordResult.success, true);
+  assert.strictEqual(recordResult.error, null);
+
+  // After recording, resolveFamily returns the platform name
+  assert.strictEqual(Isolated.resolveFamily('IBMPlexSans').family, 'IBM Plex Sans');
+
+});
+
+test('F4 recording a platform name changes resolveFamily output for a role pointing at that family', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ IBMPlexSans: { styles: { '400': { url: 'https://example.com/plex.woff2' } } } });
+  Isolated.registerRoles({ primary: 'IBMPlexSans' });
+
+  assert.strictEqual(Isolated.resolveFamily('primary').family, 'IBMPlexSans');
+
+  Isolated.registerPlatformName('IBMPlexSans', 'IBM Plex Sans');
+
+  assert.strictEqual(Isolated.resolveFamily('primary').family, 'IBM Plex Sans');
+
+});
+
+test('F4 an unrecorded family resolves unchanged', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ NoPlatform: { styles: { '400': { url: 'https://example.com/n.woff2' } } } });
+
+  assert.strictEqual(Isolated.resolveFamily('NoPlatform').family, 'NoPlatform');
+
+});
+
+test('F4 registerPlatformName throws for an unregistered family', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+
+  assert.throws(function () {
+    Isolated.registerPlatformName('NotRegistered', 'Whatever');
+  }, /family must be registered/);
+
+});
+
+test('F4 getPlatformName returns null when no platform name was recorded', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ NoPlatform: { styles: { '400': { url: 'https://example.com/n.woff2' } } } });
+
+  const result = Isolated.getPlatformName('NoPlatform');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.platform_name, null);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('F4 two core instances keep platform names isolated', function () {
+
+  const First = fontLoader({ Utils: utilsLoader() });
+  const Second = fontLoader({ Utils: utilsLoader() });
+  First.registerFamilies({ Shared: { styles: { '400': { url: 'https://example.com/s.woff2' } } } });
+  Second.registerFamilies({ Shared: { styles: { '400': { url: 'https://example.com/s.woff2' } } } });
+
+  First.registerPlatformName('Shared', 'FirstPlatform');
+
+  assert.strictEqual(First.resolveFamily('Shared').family, 'FirstPlatform');
+  // Second instance must not see First's platform name
+  assert.strictEqual(Second.resolveFamily('Shared').family, 'Shared');
+
+});

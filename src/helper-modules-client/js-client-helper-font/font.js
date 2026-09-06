@@ -4,13 +4,14 @@
 // and @font-face CSS string construction. Zero platform dependencies:
 // no DOM, no React, no react-native, no Expo. Testable in pure Node.
 //
-// The adapter contract (see docs/api.md) defines the function set an
+// The adapter contract (see the API reference) defines the function set an
 // -ext-* extension must implement. The core builds @font-face strings;
 // extensions inject them into the platform (DOM, native, Expo).
 //
 // Provides: registerFamilies, resolveFamily, buildFontFaceString,
 //           getManifest, getRegisteredFamilies, isRegistered,
-//           markLoaded, isFamilyLoaded.
+//           markLoaded, isFamilyLoaded, registerPlatformName,
+//           getPlatformName.
 //
 // Compatibility: Node.js 24+ and any JavaScript runtime. No platform
 // dependencies.
@@ -48,8 +49,18 @@ export default function loader (shared_libs, config) {
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
-  // Create isolated mutable state and seed the platform System family
-  const state = { families: { System: { styles: {} } }, tokenMap: { System: 'System' }, loaded: new Set(), roles: {} };
+  // Create isolated mutable state and seed the platform System family.
+  // All three maps use Object.create(null) so family, role, and token names
+  // cannot collide with inherited Object.prototype members.
+  const state = {
+    families: Object.create(null),
+    tokenMap: Object.create(null),
+    loaded: new Set(),
+    roles: Object.create(null),
+    platformNames: Object.create(null)
+  };
+  state.families.System = { styles: Object.create(null) };
+  state.tokenMap.System = 'System';
 
   // Seed role mappings from config (if provided)
   if (CONFIG.ROLES && Lib.Utils.isObject(CONFIG.ROLES)) {
@@ -105,7 +116,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     registerFamilies: function (manifest) {
 
-      // Validate manifest
+      // Validate manifest shape
       const manifestError = Validators.validateManifest(manifest);
       if (manifestError) {
 
@@ -115,6 +126,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         };
 
       }
+
+      // Prevalidate every family and style entry before any mutation.
+      // Returns an error envelope for a malformed manifest or family name;
+      // throws the same TypeError registerStyle throws for a missing source.
+      // Either way, nothing in state has been mutated yet.
+      Validators.validateManifestEntries(manifest);
 
       // Process each family in the manifest
       const familyNames = Object.keys(manifest);
@@ -218,25 +235,27 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       }
 
-      // 1. Check role mapping first (e.g. 'primary' -> 'Poppins_400Regular')
-      if (state.roles[token]) {
+      // 1. Check role mapping first (e.g. 'primary' -> 'Poppins_400Regular').
+      //    Use hasOwnProperty so inherited names like 'toString' do not match.
+      if (Object.prototype.hasOwnProperty.call(state.roles, token)) {
 
         return {
           success: true,
-          family: state.roles[token],
+          family: _Font.resolvePlatformName(state.roles[token]),
           error: null
         };
 
       }
 
-      // 2. Check direct family-name lookup (e.g. 'Poppins' -> 'Poppins')
-      const family = state.tokenMap[token];
+      // 2. Check direct family-name lookup (e.g. 'Poppins' -> 'Poppins').
+      //    Use hasOwnProperty so inherited names do not match.
+      if (Object.prototype.hasOwnProperty.call(state.tokenMap, token)) {
 
-      if (family) {
+        const family = state.tokenMap[token];
 
         return {
           success: true,
-          family: family,
+          family: _Font.resolvePlatformName(family),
           error: null
         };
 
@@ -337,8 +356,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     getManifest: function () {
 
-      // Build a serializable manifest from the registry
-      const manifest = {};
+      // Build a serializable manifest from the registry.
+      // Use Object.create(null) for the manifest and nested styles objects
+      // so a family named __proto__ or constructor survives JSON.stringify
+      // and Object.keys. The internal null-prototype maps are not
+      // returned directly; values are copied key by key.
+      const manifest = Object.create(null);
 
       const familyNames = Object.keys(state.families);
 
@@ -351,7 +374,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         // Only include families with actual style entries
         if (!Lib.Utils.isEmptyArray(styleKeys)) {
 
-          manifest[familyName] = { styles: {} };
+          manifest[familyName] = { styles: Object.create(null) };
 
           // Copy each style entry into the manifest
           for (let j = 0; j < styleKeys.length; j++) {
@@ -471,6 +494,73 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       // Check the loaded set for the family name
       return state.loaded.has(familyName);
 
+    },
+
+
+    /********************************************************************
+    Record the name a platform adapter actually registered a font under.
+    A platform may register a font under a name that differs from the
+    family name the core knows (e.g. iOS uses the PostScript name embedded
+    in the font file). After recording, resolveFamily returns the
+    platform name for that family so text renders in the correct face.
+
+    @param {String} family_name   - The core family name (must be registered)
+    @param {String} platform_name - The platform-resolved name
+
+    @return {Object} - { success, error }
+    *********************************************************************/
+    registerPlatformName: function (family_name, platform_name) {
+
+      // Validate both arguments as non-empty strings (programmer error)
+      Validators.assertFamilyName(family_name, 'registerPlatformName');
+      if (!Lib.Utils.isString(platform_name) || Lib.Utils.isEmptyString(platform_name)) {
+        throw new TypeError(
+          '[helper-font] registerPlatformName: platform_name must be a non-empty string'
+        );
+      }
+
+      // Reject a platform name for a family this registry does not own
+      if (!Object.prototype.hasOwnProperty.call(state.families, family_name)) {
+        throw new TypeError('[helper-font] registerPlatformName: family must be registered');
+      }
+
+      // Record the platform-name mapping
+      state.platformNames[family_name] = platform_name;
+
+      // Return the success envelope
+      return {
+        success: true,
+        error: null
+      };
+
+    },
+
+
+    /********************************************************************
+    Get the platform-resolved name recorded for a family, if any.
+
+    @param {String} family_name - The core family name
+
+    @return {Object} - { success, platform_name, error }
+    *********************************************************************/
+    getPlatformName: function (family_name) {
+
+      // Validate the family name (throws TypeError on programmer error)
+      Validators.assertFamilyName(family_name, 'getPlatformName');
+
+      // Return the recorded platform name or null when none was recorded.
+      // Use hasOwnProperty so an inherited name does not match.
+      const platform_name = Object.prototype.hasOwnProperty.call(state.platformNames, family_name)
+        ? state.platformNames[family_name]
+        : null;
+
+      // Return the envelope
+      return {
+        success: true,
+        platform_name: platform_name,
+        error: null
+      };
+
     }
 
 
@@ -491,9 +581,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     registerFamily: function (familyName, entry) {
 
-      // Ensure the family exists in the registry
-      if (!state.families[familyName]) {
-        state.families[familyName] = { styles: {} };
+      // Ensure the family exists in the registry.
+      // Use hasOwnProperty so an inherited name does not mask a missing family.
+      if (!Object.prototype.hasOwnProperty.call(state.families, familyName)) {
+        state.families[familyName] = { styles: Object.create(null) };
       }
 
       // Check for a styles map and register each style entry
@@ -570,10 +661,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     buildFontFaceCss: function (name, url, weight, style) {
 
-      // Build the font-family and src declarations
+      // Build the font-family and src declarations.
+      // Escape the family name and URL for a single-quoted CSS string.
       const declarations = [
-        'font-family: \'' + name + '\';',
-        'src: url(\'' + url + '\');'
+        'font-family: \'' + _Font.escapeCssString(name) + '\';',
+        'src: url(\'' + _Font.escapeCssString(url) + '\');'
       ];
 
       // Add weight declaration when provided
@@ -586,6 +678,62 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Assemble the @font-face rule
       return '@font-face { ' + declarations.join(' ') + ' }';
+
+    },
+
+
+    /********************************************************************
+    Escape a value for interpolation inside a single-quoted CSS string.
+    Backslash is escaped to backslash-backslash, single quote to
+    backslash-quote, and any character below U+0020 is removed.
+
+    @param {String} value - The value to escape
+
+    @return {String} - The escaped value
+    *********************************************************************/
+    escapeCssString: function (value) {
+
+      // Escape backslash first so it does not double-escape later replacements,
+      // then escape the single quote, then drop control characters below U+0020
+      let escaped = value.replace(/\\/g, '\\\\');
+      escaped = escaped.replace(/'/g, '\\\'');
+
+      // Drop control characters below U+0020 (cannot appear in a CSS string).
+      // Use charCodeAt instead of a control-character regex to satisfy lint.
+      let filtered = '';
+      for (let c = 0; c < escaped.length; c++) {
+        if (escaped.charCodeAt(c) >= 0x20) {
+          filtered += escaped.charAt(c);
+        }
+      }
+
+      // Return the escaped and filtered value
+      return filtered;
+
+    },
+
+
+    /********************************************************************
+    Resolve the platform name for a family, if one was recorded. When
+    no platform name exists, the family name is returned unchanged so
+    resolveFamily behavior is backward-compatible.
+
+    @param {String} family_name - The core family name
+
+    @return {String} - The platform name or the family name unchanged
+    *********************************************************************/
+    resolvePlatformName: function (family_name) {
+
+      // Return the recorded platform name, or the family name when none exists.
+      // Use hasOwnProperty so an inherited name does not match.
+      if (Object.prototype.hasOwnProperty.call(state.platformNames, family_name)) {
+
+        return state.platformNames[family_name];
+
+      }
+
+      // Return the family name unchanged when no platform name was recorded
+      return family_name;
 
     }
 
