@@ -66,6 +66,7 @@ export default function loader (shared_libs, config) {
     loaded: false,
     styleNodes: [],
     loadedFamilies: new Set(),
+    loadedStyles: new Set(),
     loadQueue: null,
     pendingLoads: 0
   };
@@ -156,21 +157,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       try {
 
-        // Build CSS and browser load checks without changing loaded state yet
+        // Build CSS and browser load checks without changing loaded state yet.
+        // Skip at the style level (not family level) so a later weight for an
+        // already-loaded family is still requested.
         const cssStrings = [];
         const cssEntries = [];
         const loadEntries = [];
         const familyNames = Object.keys(manifest);
+        const SEPARATOR = '\u001F';
 
         for (let i = 0; i < familyNames.length; i++) {
 
           const familyName = familyNames[i];
-
-          // Skip families already loaded (incremental loading)
-          if (state.loadedFamilies.has(familyName)) {
-            continue;
-          }
-
           const family = manifest[familyName];
           const styleKeys = Object.keys(family.styles);
 
@@ -185,6 +183,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
               continue;
             }
 
+            // Skip styles already loaded (style-level incremental loading).
+            // The composite key uses \u001F (ASCII Unit Separator) so it cannot
+            // collide with any human-readable identifier.
+            const compositeKey = familyName + SEPARATOR + styleKey;
+            if (state.loadedStyles.has(compositeKey)) {
+              continue;
+            }
+
             // Build the @font-face string from the core
             const result = Lib.Font.buildFontFaceString(
               familyName,
@@ -195,8 +201,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
             if (result.success) {
               cssStrings.push(result.css);
-              cssEntries.push({ familyName: familyName, css: result.css });
-              loadEntries.push({ familyName: familyName, entry: entry });
+              cssEntries.push({ familyName: familyName, styleKey: styleKey, css: result.css });
+              loadEntries.push({ familyName: familyName, styleKey: styleKey, entry: entry });
             }
 
           }
@@ -217,14 +223,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           state.styleNodes.push(styleNode);
         }
 
-        // Wait for every browser face check when the FontFaceSet API is available
+        // Wait for every browser face check when the FontFaceSet API is available.
+        // Escape the family name for a double-quoted CSS string so a name
+        // containing " or ; cannot corrupt the descriptor.
         const checks = loadEntries.map(function (item) {
           if (!doc.fonts || !Lib.Utils.isFunction(doc.fonts.load)) {
             return Promise.reject(new Error('browser font checks unavailable'));
           }
           const style = item.entry.style || 'normal';
           const weight = item.entry.weight || '400';
-          return doc.fonts.load(style + ' ' + weight + ' 1em "' + item.familyName + '"').then(function (faces) {
+          const escapedName = _Web.escapeDoubleQuoted(item.familyName);
+          return doc.fonts.load(style + ' ' + weight + ' 1em "' + escapedName + '"').then(function (faces) {
             if (!Array.isArray(faces) || Lib.Utils.isEmptyArray(faces)) {
               throw new Error('browser font check returned no matching faces');
             }
@@ -243,17 +252,35 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           }
         }
 
-        // Mark only families whose loadable faces all completed successfully
+        // Mark only families whose loadable faces all completed successfully.
+        // Add each completed style's composite key to loadedStyles, and add
+        // the family to loadedFamilies only when every style seen so far has
+        // completed.
         const completedFamilies = Array.from(successfulFamilies);
         for (let i = 0; i < completedFamilies.length; i++) {
           const familyName = completedFamilies[i];
           if (!failedFamilies.has(familyName)) {
+
+            // Add each successful style's composite key
+            for (let j = 0; j < loadEntries.length; j++) {
+              if (loadEntries[j].familyName === familyName) {
+                state.loadedStyles.add(familyName + SEPARATOR + loadEntries[j].styleKey);
+              }
+            }
+
             state.loadedFamilies.add(familyName);
             if (Lib.Font.isRegistered(familyName)) {
               Lib.Font.markLoaded(familyName);
             }
           }
         }
+
+        // Remove families that had any failed style from loadedFamilies
+        const failedFamilyList = Array.from(failedFamilies);
+        for (let i = 0; i < failedFamilyList.length; i++) {
+          state.loadedFamilies.delete(failedFamilyList[i]);
+        }
+
         state.loaded = failedFamilies.size === 0;
 
         // Retain only declarations whose whole family completed successfully
@@ -273,10 +300,12 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           }
         }
 
-        // A browser load rejection is an operational failure, not readiness
+        // A browser load rejection is an operational failure, not readiness.
+        // Return LOAD_FAILED when style injection succeeded but one or more
+        // face checks failed; keep DOCUMENT_UNAVAILABLE for missing DOM.
         return completeLoad(state.loaded
           ? { success: true, error: null }
-          : { success: false, error: ERRORS.DOCUMENT_UNAVAILABLE });
+          : { success: false, error: ERRORS.LOAD_FAILED });
 
       } catch (domError) {
 
@@ -344,10 +373,46 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       state.styleNodes = [];
       state.loaded = false;
       state.loadedFamilies.clear();
+      state.loadedStyles.clear();
 
     }
 
   };///////////////////////////Public Functions END//////////////////////////////
+
+  // Private helpers
+  const _Web = {
+
+    /********************************************************************
+    Escape a family name for a double-quoted CSS string used inside a
+    FontFaceSet.load() descriptor. Backslash is escaped first so the
+    sequence is idempotent, then double quotes are escaped. Control
+    characters below U+0020 are dropped.
+
+    @param {String} value - Raw family name
+    @return {String} - Escaped family name
+    *********************************************************************/
+    escapeDoubleQuoted: function (value) {
+
+      // Escape backslash first so the escape sequence is idempotent
+      let escaped = value.replace(/\\/g, '\\\\');
+
+      // Escape double quotes
+      escaped = escaped.replace(/"/g, '\\"');
+
+      // Drop control characters below U+0020
+      let filtered = '';
+      for (let c = 0; c < escaped.length; c++) {
+        if (escaped.charCodeAt(c) >= 0x20) {
+          filtered += escaped.charAt(c);
+        }
+      }
+
+      // Return the escaped and filtered value
+      return filtered;
+
+    }
+
+  };
 
   return WebFontAdapter;
 

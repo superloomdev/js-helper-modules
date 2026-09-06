@@ -107,7 +107,7 @@ test('should preserve results when a failed browser load is followed by a queued
   shouldFail = false;
   const results = await Promise.all([first, second]);
   assert.equal(results[0].success, false);
-  assert.equal(results[0].error.type, 'helper-font-ext-web/document-unavailable');
+  assert.equal(results[0].error.type, 'helper-font-ext-web/load-failed');
   assert.deepEqual(results[1], { success: true, error: null });
   assert.equal(Adapter.isFamilyLoaded('QueuedRetryWeb'), true);
   assert.equal(Adapter.isReady(), true);
@@ -502,5 +502,181 @@ test('loadManifest skips entries without url (native/Expo-only)', async function
   assert.ok(styleNode.textContent.indexOf('NativeOnlyFont') === -1);
 
   FreshAdapter.clearManifest();
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ FW1: style-level incremental loading ~~~~~~~~~~~~~~~~~~~~
+
+test('FW1 a later weight IS requested on the second loadManifest call', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ Plex: { styles: { '400': { url: 'https://x/400.woff2', weight: '400' } } } });
+  const Document = createDocumentStub();
+  const requested = [];
+  Document.fonts.load = function (desc) {
+    requested.push(desc);
+    return Promise.resolve([{}]);
+  };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  // First load: weight 400
+  await Adapter.loadManifest(Core.getManifest().manifest);
+
+  // Register weight 600 and load again
+  Core.registerFamilies({ Plex: { styles: { '600': { url: 'https://x/600.woff2', weight: '600' } } } });
+  await Adapter.loadManifest(Core.getManifest().manifest);
+
+  // Weight 600 must have been requested
+  assert.ok(requested.some(function (d) { return d.indexOf('600') !== -1; }), 'weight 600 must be requested');
+  // Weight 400 must appear exactly once (not re-requested)
+  const count400 = requested.filter(function (d) { return d.indexOf('400') !== -1; }).length;
+  assert.equal(count400, 1, 'weight 400 must be requested exactly once');
+
+  Adapter.clearManifest();
+
+});
+
+test('FW1 a family whose second style fails leaves isFamilyLoaded false while the first stays loaded', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ MixedPlex: { styles: { '400': { url: 'https://x/400.woff2', weight: '400' } } } });
+  const Document = createDocumentStub();
+  Document.fonts.load = function (desc) {
+    if (desc.indexOf('600') !== -1) {
+      return Promise.reject(new Error('600 failed'));
+    }
+    return Promise.resolve([{}]);
+  };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  // First load: weight 400 succeeds
+  await Adapter.loadManifest(Core.getManifest().manifest);
+  assert.equal(Adapter.isFamilyLoaded('MixedPlex'), true);
+
+  // Register weight 600 and load again; 600 fails
+  Core.registerFamilies({ MixedPlex: { styles: { '600': { url: 'https://x/600.woff2', weight: '600' } } } });
+  await Adapter.loadManifest(Core.getManifest().manifest);
+
+  // The family should no longer be considered fully loaded after the 600 failure
+  assert.equal(Adapter.isFamilyLoaded('MixedPlex'), false);
+
+  Adapter.clearManifest();
+
+});
+
+test('FW1 adding an already-loaded style twice requests it once', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ OncePlex: { styles: { '400': { url: 'https://x/400.woff2', weight: '400' } } } });
+  const Document = createDocumentStub();
+  const requested = [];
+  Document.fonts.load = function (desc) {
+    requested.push(desc);
+    return Promise.resolve([{}]);
+  };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  await Adapter.loadManifest(Core.getManifest().manifest);
+  await Adapter.loadManifest(Core.getManifest().manifest);
+
+  // Weight 400 must be requested exactly once across both calls
+  const count400 = requested.filter(function (d) { return d.indexOf('400') !== -1; }).length;
+  assert.equal(count400, 1);
+
+  Adapter.clearManifest();
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ FW2: load-failed error taxonomy ~~~~~~~~~~~~~~~~~~~~
+
+test('FW2 a face-check rejection returns load-failed', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ FaceReject: { url: '/reject.woff2', weight: '400' } });
+  const Document = createDocumentStub();
+  Document.fonts.load = function () { return Promise.reject(new Error('font failed')); };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  const result = await Adapter.loadManifest(Core.getManifest().manifest);
+
+  assert.equal(result.success, false);
+  assert.equal(result.error.type, 'helper-font-ext-web/load-failed');
+
+  Adapter.clearManifest();
+
+});
+
+test('FW2 an empty face result returns load-failed', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ EmptyFace: { url: '/empty.woff2', weight: '400' } });
+  const Document = createDocumentStub();
+  Document.fonts.load = function () { return Promise.resolve([]); };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  const result = await Adapter.loadManifest(Core.getManifest().manifest);
+
+  assert.equal(result.success, false);
+  assert.equal(result.error.type, 'helper-font-ext-web/load-failed');
+
+  Adapter.clearManifest();
+
+});
+
+test('FW2 an absent document.fonts.load returns load-failed', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ NoFontsLoad: { url: '/nofontsload.woff2', weight: '400' } });
+  const Document = createDocumentStub();
+  delete Document.fonts;
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  const result = await Adapter.loadManifest(Core.getManifest().manifest);
+
+  assert.equal(result.success, false);
+  assert.equal(result.error.type, 'helper-font-ext-web/load-failed');
+
+  Adapter.clearManifest();
+
+});
+
+test('FW2 a missing document still returns document-unavailable', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ NoDoc: { url: '/nodoc.woff2', weight: '400' } });
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core });
+
+  const result = await Adapter.loadManifest(Core.getManifest().manifest);
+
+  assert.equal(result.success, false);
+  assert.equal(result.error.type, 'helper-font-ext-web/document-unavailable');
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ FW3: escaped family name in FontFaceSet descriptor ~~~~~~~~~~~~~~~~~~~~
+
+test('FW3 a family name containing a double quote produces a descriptor with intact quoting', async function () {
+
+  const Core = fontLoader({ Utils, Debug });
+  Core.registerFamilies({ 'Bad"Name': { styles: { '400': { url: 'https://x/bad.woff2', weight: '400' } } } });
+  const Document = createDocumentStub();
+  const requested = [];
+  Document.fonts.load = function (desc) {
+    requested.push(desc);
+    return Promise.resolve([{}]);
+  };
+  const Adapter = webFontExtWebLoader({ Utils, Debug, Font: Core, Document });
+
+  await Adapter.loadManifest(Core.getManifest().manifest);
+
+  // The descriptor must have been requested for the family
+  assert.equal(requested.length, 1);
+  // The double quote must be escaped so the descriptor quoting is intact
+  assert.ok(requested[0].indexOf('\\"') !== -1, 'double quote must be escaped in the descriptor');
+
+  Adapter.clearManifest();
 
 });

@@ -21,7 +21,7 @@ None. All dependencies are peer dependencies.
 ## Companion Files
 
 - `extension.config.js` - keys: `PARENT_SELECTOR` (default `'head'`)
-- `extension.errors.js` - constants: `DOCUMENT_UNAVAILABLE`, `INVALID_MANIFEST`, `FONT_CORE_UNAVAILABLE`, `MISSING_URL`
+- `extension.errors.js` - constants: `DOCUMENT_UNAVAILABLE`, `LOAD_FAILED`, `INVALID_MANIFEST`, `FONT_CORE_UNAVAILABLE`, `MISSING_URL`
 - `extension.validators.js` - functions: `validateConfig(CONFIG)`, `validateManifest(manifest)`, `validateStyleEntry(entry)`
 
 ## Loader Pattern
@@ -53,6 +53,10 @@ loadManifest(manifest) -> Promise<{ success, error }> | async:yes
   with a url field, creates a <style> node, and appends it to the DOM.
   Entries with only path or asset (native/Expo-only) are silently skipped.
   Overlapping calls execute FIFO per instance; faces inside one manifest remain parallel.
+  Incremental loading operates at the style level: a later weight for an
+  already-loaded family is still requested, while already-loaded styles are skipped.
+  The family name is escaped for the FontFaceSet.load() descriptor so names
+  containing double quotes cannot corrupt the descriptor string.
   manifest is the output of Font.getManifest().
 
 isReady() -> Boolean | async:no
@@ -61,6 +65,8 @@ isReady() -> Boolean | async:no
 isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a specific font family has been loaded by this adapter.
   Used for incremental loading to skip already-loaded families.
+  A family is loaded only when every style seen so far completed successfully;
+  a later style failure removes the family from the loaded set.
 
 clearManifest() -> void | async:no
   Removes the injected <style> node from the DOM. Useful for hot reload or cleanup.
@@ -71,6 +77,8 @@ clearManifest() -> void | async:no
 - **Factory-per-loader**: each loader call returns an independent instance
 - **Core builds, extension injects**: `@font-face` strings come from `Font.buildFontFaceString`, never rebuilt locally
 - **URL-only filtering**: entries without `url` (native/Expo-only) are silently skipped
+- **Style-level incremental loading**: already-loaded styles are skipped; a later weight for an already-loaded family is still requested
+- **Descriptor escaping**: family names are escaped for the FontFaceSet.load() descriptor so names containing double quotes cannot corrupt the string
 - **Document injection**: `shared_libs.Document` for testing; falls back to global `document`
 - **No React, no react-native**: pure DOM manipulation
 
@@ -79,6 +87,7 @@ clearManifest() -> void | async:no
 | Constant | Type | Trigger |
 |---|---|---|
 | `DOCUMENT_UNAVAILABLE` | `helper-font-ext-web/document-unavailable` | No document object available |
+| `LOAD_FAILED` | `helper-font-ext-web/load-failed` | One or more requested font faces did not load (rejection, empty result, or missing FontFaceSet API) |
 | `INVALID_MANIFEST` | `helper-font-ext-web/invalid-manifest` | Manifest is not a plain object |
 | `FONT_CORE_UNAVAILABLE` | `helper-font-ext-web/font-core-unavailable` | Font core not injected |
 | `MISSING_URL` | `helper-font-ext-web/missing-url` | Style entry has no `url` field (entries skipped, not errored) |

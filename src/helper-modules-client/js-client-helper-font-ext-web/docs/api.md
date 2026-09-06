@@ -26,7 +26,7 @@ const WebFontAdapter = fontExtWeb(shared_libs, config);
 
 ### loadManifest(manifest)
 
-Async. Builds `@font-face` CSS strings via the core for entries that have a `url` field, creates a `<style>` node, and appends it to the DOM. Entries with only `path` or `asset` (native/Expo-only) are silently skipped. Overlapping calls on one adapter instance execute in FIFO order; styles within each manifest still load concurrently, and families completed by an earlier call are skipped by later queued calls.
+Async. Builds `@font-face` CSS strings via the core for entries that have a `url` field, creates a `<style>` node, and appends it to the DOM. Entries with only `path` or `asset` (native/Expo-only) are silently skipped. Overlapping calls on one adapter instance execute in FIFO order; styles within each manifest still load concurrently. Incremental loading operates at the style level: already-loaded styles are skipped, while a later weight for an already-loaded family is still requested. The family name is escaped for the `document.fonts.load()` descriptor so names containing double quotes cannot corrupt the descriptor string.
 
 ```javascript
 const { success, error } = await WebFontAdapter.loadManifest(Font.getManifest().manifest);
@@ -42,7 +42,7 @@ const ready = WebFontAdapter.isReady();
 
 ### isFamilyLoaded(familyName)
 
-Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families.
+Checks whether a specific font family has been loaded by this adapter. Used for incremental loading to skip already-loaded families. A family is loaded only when every style seen so far completed successfully; a later style failure removes the family from the loaded set.
 
 ```javascript
 const loaded = WebFontAdapter.isFamilyLoaded('Poppins');
@@ -61,6 +61,7 @@ WebFontAdapter.clearManifest();
 | Constant | Type | Trigger |
 |---|---|---|
 | `DOCUMENT_UNAVAILABLE` | `helper-font-ext-web/document-unavailable` | No document object available |
+| `LOAD_FAILED` | `helper-font-ext-web/load-failed` | One or more requested font faces did not load (rejection, empty result, or missing FontFaceSet API) |
 | `INVALID_MANIFEST` | `helper-font-ext-web/invalid-manifest` | Manifest is not a plain object |
 | `FONT_CORE_UNAVAILABLE` | `helper-font-ext-web/font-core-unavailable` | Font core not injected |
 | `MISSING_URL` | `helper-font-ext-web/missing-url` | Style entry has no `url` field (used internally; entries are skipped, not errored) |

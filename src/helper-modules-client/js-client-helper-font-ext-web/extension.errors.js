@@ -8,6 +8,11 @@ export default Object.freeze({
     message: 'document is not available. This adapter requires a browser DOM environment'
   },
 
+  LOAD_FAILED: {
+    type: 'helper-font-ext-web/load-failed',
+    message: 'one or more requested font faces did not load'
+  },
+
   INVALID_MANIFEST: {
     type: 'helper-font-ext-web/invalid-manifest',
     message: 'Manifest must be a plain object with family entries'
