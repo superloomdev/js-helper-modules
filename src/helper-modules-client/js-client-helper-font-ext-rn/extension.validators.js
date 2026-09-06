@@ -32,10 +32,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateManifest: function (manifest) {
 
+      // Reject non-object or array manifests
       if (!Lib.Utils.isObject(manifest) || Array.isArray(manifest)) {
         return ERRORS.INVALID_MANIFEST;
       }
 
+      // Valid manifest
       return null;
 
     },
@@ -52,14 +54,17 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateStyleEntry: function (entry) {
 
+      // Reject non-object entries
       if (!Lib.Utils.isObject(entry)) {
         return ERRORS.MISSING_PATH;
       }
 
-      if (!Lib.Utils.isString(entry.path) || entry.path.length === 0) {
+      // Reject entries without a path field
+      if (!Lib.Utils.isString(entry.path) || Lib.Utils.isEmptyString(entry.path)) {
         return ERRORS.MISSING_PATH;
       }
 
+      // Valid entry
       return null;
 
     }

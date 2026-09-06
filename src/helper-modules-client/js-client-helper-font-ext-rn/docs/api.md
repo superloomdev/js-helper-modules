@@ -29,7 +29,7 @@ The extension requires `@vitrion/react-native-load-fonts` directly at module sco
 
 ### loadManifest(manifest)
 
-Async. Iterates the manifest, validates each style entry has a `path` (local file path), calls `loadFontFromFile` via the native loader, and tracks success/failure counts.
+Async. Iterates the manifest, validates each style entry has a `path` (local file path), calls `loadFontFromFile` via the native loader, and tracks success/failure counts. Overlapping calls on one adapter instance execute in FIFO order; styles within each manifest still load concurrently, and families completed by an earlier call are skipped by later queued calls.
 
 ```javascript
 const { success, error } = await RNFontAdapter.loadManifest(Font.getManifest().manifest);
@@ -37,7 +37,7 @@ const { success, error } = await RNFontAdapter.loadManifest(Font.getManifest().m
 
 ### isReady()
 
-Returns whether all fonts have been loaded.
+Returns true only when every requested native font style completed successfully. Starting an incremental or queued load clears readiness until every accepted cycle settles. A partial or strict failure leaves readiness false even when `FAIL_ON_ERROR` controls only the returned envelope.
 
 ```javascript
 const ready = RNFontAdapter.isReady();

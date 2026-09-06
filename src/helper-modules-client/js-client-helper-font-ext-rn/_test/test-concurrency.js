@@ -115,6 +115,23 @@ test('loadManifest with empty manifest returns success with zero loaded', async 
 
 // ~~~~~~~~~~~~~~~~~~~~ Partial failure with stub failure ~~~~~~~~~~~~~~~~~~~~
 
+test('should mark a family only when every native style succeeds', async function () {
+
+  NativeLoaderStub._clearLoadedFonts();
+  NativeLoaderStub._setShouldFail(true);
+  const adapter = createAdapter();
+  const manifest = { LifecycleFailRN: { styles: { '400': { path: '/fonts/fail.ttf' } } } };
+  const result = await adapter.loadManifest(manifest);
+  NativeLoaderStub._setShouldFail(false);
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(adapter.isFamilyLoaded('LifecycleFailRN'), false);
+  if (Utils.isFunction(Font.isFamilyLoaded)) {
+    assert.strictEqual(Font.isFamilyLoaded('LifecycleFailRN'), false);
+  }
+  assert.strictEqual(adapter.isReady(), false);
+
+});
+
 test('loadManifest tallies partial failure when native loader rejects', async function () {
 
   NativeLoaderStub._clearLoadedFonts();
@@ -192,6 +209,76 @@ test('loadManifest tallies mixed success and failure when some entries lack path
 
 });
 
+
+test('should clear readiness while an incremental native load is pending', async function () {
+
+  NativeLoaderStub._clearLoadedFonts();
+  const adapter = createAdapter();
+  await adapter.loadManifest({ ReadyRN: { styles: { '400': { path: '/fonts/ready.ttf' } } } });
+  assert.strictEqual(adapter.isReady(), true);
+  NativeLoaderStub._setDeferred(true);
+  const loading = adapter.loadManifest({ PendingRN: { styles: { '400': { path: '/fonts/pending.ttf' } } } });
+  assert.strictEqual(adapter.isReady(), false);
+  NativeLoaderStub._resolveDeferred();
+  await loading;
+  assert.strictEqual(adapter.isReady(), true);
+  NativeLoaderStub._setDeferred(false);
+
+});
+
+test('should serialize overlapping manifest loads and skip duplicate native work', async function () {
+
+  NativeLoaderStub._clearLoadedFonts();
+  NativeLoaderStub._setDeferred(true);
+  const adapter = createAdapter();
+  const manifest = { OverlapRN: { styles: { '400': { path: '/fonts/overlap.ttf' } } } };
+  const first = adapter.loadManifest(manifest);
+  const second = adapter.loadManifest(manifest);
+  assert.strictEqual(NativeLoaderStub._getPendingCount(), 1);
+  assert.strictEqual(adapter.isReady(), false);
+  NativeLoaderStub._resolveDeferred();
+  const results = await Promise.all([first, second]);
+  assert.deepStrictEqual(results, [
+    { success: true, error: null },
+    { success: true, error: null }
+  ]);
+  assert.strictEqual(NativeLoaderStub._getPendingCount(), 0);
+  assert.strictEqual(adapter.isFamilyLoaded('OverlapRN'), true);
+  assert.strictEqual(adapter.isReady(), true);
+  NativeLoaderStub._setDeferred(false);
+
+});
+
+test('should preserve results when a failed native load is followed by a queued retry', async function () {
+
+  NativeLoaderStub._clearLoadedFonts();
+  NativeLoaderStub._setShouldFail(true);
+  const adapter = createAdapter({ FAIL_ON_ERROR: true });
+  const manifest = { QueuedRetryRN: { styles: { '400': { path: '/fonts/retry.ttf' } } } };
+  const first = adapter.loadManifest(manifest);
+  const second = adapter.loadManifest(manifest);
+  NativeLoaderStub._setShouldFail(false);
+  const results = await Promise.all([first, second]);
+  assert.strictEqual(results[0].success, false);
+  assert.strictEqual(results[0].error.type, 'helper-font-ext-rn/load-failed');
+  assert.deepStrictEqual(results[1], { success: true, error: null });
+  assert.strictEqual(adapter.isFamilyLoaded('QueuedRetryRN'), true);
+  assert.strictEqual(adapter.isReady(), true);
+
+});
+
+test('should leave readiness false when a strict incremental native load fails', async function () {
+
+  NativeLoaderStub._clearLoadedFonts();
+  const adapter = createAdapter({ FAIL_ON_ERROR: true });
+  await adapter.loadManifest({ ReadyStrictRN: { styles: { '400': { path: '/fonts/ready.ttf' } } } });
+  NativeLoaderStub._setShouldFail(true);
+  const result = await adapter.loadManifest({ FailedStrictRN: { styles: { '400': { path: '/fonts/fail.ttf' } } } });
+  NativeLoaderStub._setShouldFail(false);
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(adapter.isReady(), false);
+
+});
 
 // ~~~~~~~~~~~~~~~~~~~~ Factory independence ~~~~~~~~~~~~~~~~~~~~
 

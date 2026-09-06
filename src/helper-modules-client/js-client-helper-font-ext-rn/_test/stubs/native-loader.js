@@ -8,13 +8,21 @@
 
 const _state = globalThis.__nativeFontStub = globalThis.__nativeFontStub || {
   loadedFonts: {},
-  shouldFail: false
+  shouldFail: false,
+  deferred: false,
+  pending: []
 };
 
 export function loadFontFromFile (name, filePath) {
 
   if (_state.shouldFail) {
     return Promise.reject(new Error('stub: font load failed for ' + name));
+  }
+
+  if (_state.deferred) {
+    return new Promise(function (resolve, reject) {
+      _state.pending.push({ name: name, filePath: filePath, resolve: resolve, reject: reject });
+    });
   }
 
   _state.loadedFonts[name] = filePath;
@@ -27,6 +35,22 @@ export function _setShouldFail (shouldFail) {
   _state.shouldFail = shouldFail;
 }
 
+export function _setDeferred (deferred) {
+  _state.deferred = deferred;
+}
+
+export function _resolveDeferred () {
+  const pending = _state.pending.splice(0);
+  for (let i = 0; i < pending.length; i++) {
+    _state.loadedFonts[pending[i].name] = pending[i].filePath;
+    pending[i].resolve(pending[i].name);
+  }
+}
+
+export function _getPendingCount () {
+  return _state.pending.length;
+}
+
 export function _getLoadedFonts () {
   const copy = {};
   const keys = Object.keys(_state.loadedFonts);
@@ -37,6 +61,8 @@ export function _getLoadedFonts () {
 }
 
 export function _clearLoadedFonts () {
+  _state.deferred = false;
+  _state.pending = [];
   const keys = Object.keys(_state.loadedFonts);
   for (let i = 0; i < keys.length; i++) {
     delete _state.loadedFonts[keys[i]];

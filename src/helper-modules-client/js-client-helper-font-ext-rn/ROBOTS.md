@@ -51,11 +51,12 @@ Missing `shared_libs.Font` throws at construction time. The native loader (`@vit
 ```
 loadManifest(manifest) -> Promise<{ success, error }> | async:yes
   Iterates the manifest, validates each style entry has a `path`,
-  calls loadFontFromFile(name, path) for each. manifest is the
-  output of Font.getManifest().
+  calls loadFontFromFile(name, path) for each. Overlapping calls execute
+  FIFO per instance; styles inside one manifest remain parallel. manifest
+  is the output of Font.getManifest().
 
 isReady() -> Boolean | async:no
-  Returns whether all fonts have been loaded.
+  Returns true only when every requested native font style completed successfully. Incremental or queued work clears readiness until every accepted cycle settles; any style failure leaves it false.
 
 isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a specific font family has been loaded by this adapter.
