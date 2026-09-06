@@ -162,6 +162,23 @@ test('loadManifest with empty manifest returns success with zero loaded', async 
 });
 
 
+test('should mark a family only when every Expo style succeeds', async function () {
+
+  ExpoFontStub._clearLoadedFonts();
+  ExpoFontStub._setShouldFail(true);
+  const adapter = createAdapter();
+  const manifest = { LifecycleFailExpo: { styles: { '400': { asset: 1 } } } };
+  const result = await adapter.loadManifest(manifest);
+  ExpoFontStub._setShouldFail(false);
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(adapter.isFamilyLoaded('LifecycleFailExpo'), false);
+  if (Utils.isFunction(Font.isFamilyLoaded)) {
+    assert.strictEqual(Font.isFamilyLoaded('LifecycleFailExpo'), false);
+  }
+  assert.strictEqual(adapter.isReady(), false);
+
+});
+
 // ~~~~~~~~~~~~~~~~~~~~ Partial failure with stub failure ~~~~~~~~~~~~~~~~~~~~
 
 test('loadManifest tallies partial failure when expo-font rejects some fonts', async function () {
@@ -242,6 +259,76 @@ test('loadManifest tallies mixed success and failure when some fonts fail', asyn
 
 });
 
+
+test('should clear readiness while an incremental Expo load is pending', async function () {
+
+  ExpoFontStub._clearLoadedFonts();
+  const adapter = createAdapter();
+  await adapter.loadManifest({ ReadyExpo: { styles: { '400': { asset: 1 } } } });
+  assert.strictEqual(adapter.isReady(), true);
+  ExpoFontStub._setDeferred(true);
+  const loading = adapter.loadManifest({ PendingExpo: { styles: { '400': { asset: 2 } } } });
+  assert.strictEqual(adapter.isReady(), false);
+  ExpoFontStub._resolveDeferred();
+  await loading;
+  assert.strictEqual(adapter.isReady(), true);
+  ExpoFontStub._setDeferred(false);
+
+});
+
+test('should serialize overlapping manifest loads and skip duplicate Expo work', async function () {
+
+  ExpoFontStub._clearLoadedFonts();
+  ExpoFontStub._setDeferred(true);
+  const adapter = createAdapter();
+  const manifest = { OverlapExpo: { styles: { '400': { asset: 1 } } } };
+  const first = adapter.loadManifest(manifest);
+  const second = adapter.loadManifest(manifest);
+  assert.strictEqual(ExpoFontStub._getPendingCount(), 1);
+  assert.strictEqual(adapter.isReady(), false);
+  ExpoFontStub._resolveDeferred();
+  const results = await Promise.all([first, second]);
+  assert.deepStrictEqual(results, [
+    { success: true, error: null },
+    { success: true, error: null }
+  ]);
+  assert.strictEqual(ExpoFontStub._getPendingCount(), 0);
+  assert.strictEqual(adapter.isFamilyLoaded('OverlapExpo'), true);
+  assert.strictEqual(adapter.isReady(), true);
+  ExpoFontStub._setDeferred(false);
+
+});
+
+test('should preserve results when a failed Expo load is followed by a queued retry', async function () {
+
+  ExpoFontStub._clearLoadedFonts();
+  ExpoFontStub._setShouldFail(true);
+  const adapter = createAdapter({ FAIL_ON_ERROR: true });
+  const manifest = { QueuedRetryExpo: { styles: { '400': { asset: 1 } } } };
+  const first = adapter.loadManifest(manifest);
+  const second = adapter.loadManifest(manifest);
+  ExpoFontStub._setShouldFail(false);
+  const results = await Promise.all([first, second]);
+  assert.strictEqual(results[0].success, false);
+  assert.strictEqual(results[0].error.type, 'helper-font-ext-expo/load-failed');
+  assert.deepStrictEqual(results[1], { success: true, error: null });
+  assert.strictEqual(adapter.isFamilyLoaded('QueuedRetryExpo'), true);
+  assert.strictEqual(adapter.isReady(), true);
+
+});
+
+test('should leave readiness false when a strict incremental Expo load fails', async function () {
+
+  ExpoFontStub._clearLoadedFonts();
+  const adapter = createAdapter({ FAIL_ON_ERROR: true });
+  await adapter.loadManifest({ ReadyStrictExpo: { styles: { '400': { asset: 1 } } } });
+  ExpoFontStub._setShouldFail(true);
+  const result = await adapter.loadManifest({ FailedStrictExpo: { styles: { '400': { asset: 2 } } } });
+  ExpoFontStub._setShouldFail(false);
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(adapter.isReady(), false);
+
+});
 
 // ~~~~~~~~~~~~~~~~~~~~ Factory independence ~~~~~~~~~~~~~~~~~~~~
 

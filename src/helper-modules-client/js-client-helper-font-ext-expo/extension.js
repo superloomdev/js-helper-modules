@@ -67,7 +67,9 @@ export default function loader (shared_libs, config) {
     loaded: false,
     loadedCount: 0,
     failedCount: 0,
-    loadedFamilies: new Set()
+    loadedFamilies: new Set(),
+    loadQueue: null,
+    pendingLoads: 0
   };
 
   return createInterface(Lib, CONFIG, ERRORS, Validators, state);
@@ -119,12 +121,37 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       }
 
-      // Reset counters for this load cycle (loaded state stays true for incremental loading)
+      // Queue this cycle so overlapping calls cannot duplicate Expo work
+      const previousLoad = state.loadQueue;
+      let releaseLoad;
+      const currentLoad = new Promise(function (resolve) {
+        releaseLoad = resolve;
+      });
+      state.pendingLoads++;
+      state.loaded = false;
+      state.loadQueue = currentLoad;
+      if (previousLoad) {
+        await previousLoad;
+      }
+      const completeLoad = function (result) {
+        state.pendingLoads--;
+        if (state.pendingLoads > 0) {
+          state.loaded = false;
+        }
+        releaseLoad();
+        if (state.loadQueue === currentLoad) {
+          state.loadQueue = null;
+        }
+        return result;
+      };
+
+      // Reset counters for this load cycle
       state.loadedCount = 0;
       state.failedCount = 0;
+      state.loaded = false;
 
       const familyNames = Object.keys(manifest);
-      const loadPromises = [];
+      const loadEntries = [];
 
       for (let i = 0; i < familyNames.length; i++) {
 
@@ -149,48 +176,61 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
             familyName, styleKey, entry
           );
 
-          loadPromises.push(loadPromise);
+          loadEntries.push({ familyName: familyName, promise: loadPromise });
 
-        }
-
-        // Track this family as loaded in both the adapter and the core
-        state.loadedFamilies.add(familyName);
-        if (Lib.Font && typeof Lib.Font.markLoaded === 'function') {
-          Lib.Font.markLoaded(familyName);
         }
 
       }
 
       // Wait for all font loads to settle
-      const results = await Promise.allSettled(loadPromises);
+      const results = await Promise.allSettled(loadEntries.map(function (item) {
+        return item.promise;
+      }));
 
-      // Tally results
+      // Tally results and collect family-level completion state
+      const successfulFamilies = new Set();
+      const failedFamilies = new Set();
       for (let k = 0; k < results.length; k++) {
 
         if (results[k].status === 'fulfilled') {
           state.loadedCount++;
+          successfulFamilies.add(loadEntries[k].familyName);
         } else {
           state.failedCount++;
+          failedFamilies.add(loadEntries[k].familyName);
         }
 
       }
 
+      // Mark a family only when every requested style completed successfully
+      const completedFamilies = Array.from(successfulFamilies);
+      for (let i = 0; i < completedFamilies.length; i++) {
+        const familyName = completedFamilies[i];
+        if (!failedFamilies.has(familyName)) {
+          state.loadedFamilies.add(familyName);
+          if (Lib.Utils.isFunction(Lib.Font.markLoaded) && Lib.Font.isRegistered(familyName)) {
+            Lib.Font.markLoaded(familyName);
+          }
+        }
+      }
+
+      // Set readiness before either strict failure or lenient success returns
+      state.loaded = state.failedCount === 0;
+
       // Determine overall success
       if (state.failedCount > 0 && CONFIG.FAIL_ON_ERROR) {
 
-        return {
+        return completeLoad({
           success: false,
           error: ERRORS.LOAD_FAILED
-        };
+        });
 
       }
 
-      state.loaded = true;
-
-      return {
+      return completeLoad({
         success: true,
         error: null
-      };
+      });
 
     },
 
@@ -326,12 +366,12 @@ const _Expo = {
     }
 
     // Check for URL source (web, also works on native with remote fonts)
-    if (Lib.Utils.isString(entry.url) && entry.url.length > 0) {
+    if (Lib.Utils.isString(entry.url) && !Lib.Utils.isEmptyString(entry.url)) {
       return entry.url;
     }
 
     // Check for path source (local file, fallback on native)
-    if (Lib.Utils.isString(entry.path) && entry.path.length > 0) {
+    if (Lib.Utils.isString(entry.path) && !Lib.Utils.isEmptyString(entry.path)) {
       return entry.path;
     }
 

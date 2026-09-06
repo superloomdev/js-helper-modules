@@ -51,11 +51,12 @@ Missing `shared_libs.Font` throws at construction time. The `expo-font` package 
 ```
 loadManifest(manifest) -> Promise<{ success, error }> | async:yes
   Iterates the manifest, resolves the best source per entry
-  (asset > url > path), calls expo-font loadAsync for each.
-  manifest is the output of Font.getManifest().
+  (asset > url > path), calls expo-font loadAsync for each. Overlapping
+  calls execute FIFO per instance; styles inside one manifest remain
+  parallel. manifest is the output of Font.getManifest().
 
 isReady() -> Boolean | async:no
-  Returns whether all fonts have been loaded.
+  Returns true only when every requested Expo font style completed successfully. Incremental or queued work clears readiness until every accepted cycle settles; any style failure leaves it false.
 
 isFamilyLoaded(familyName) -> Boolean | async:no
   Checks whether a specific font family has been loaded by this adapter.

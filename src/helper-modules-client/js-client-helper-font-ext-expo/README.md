@@ -7,7 +7,7 @@ Expo font loader adapter for the font family system. Loads fonts via `expo-font`
 
 ## What This Is
 
-The Expo extension of `js-client-helper-font`. It implements the adapter contract: `loadManifest` and `isReady`. The core provides the manifest; this extension resolves the best source for each entry (`asset` on native, `url` on web, `path` as fallback) and calls `expo-font`'s `loadAsync`.
+The Expo extension of `js-client-helper-font`. It implements the adapter contract: `loadManifest` and `isReady`. The core provides the manifest; this extension resolves the best source, calls `expo-font`'s `loadAsync`, and marks a family loaded only after all of its requested styles succeed. Overlapping manifest calls execute FIFO per adapter instance while styles within one manifest load concurrently.
 
 No React import, no hooks, no components. The `expo-font` package is a direct dependency - imported at module scope via `import * as`, not injected by the app. Tests stub it via a `package.json` alias.
 

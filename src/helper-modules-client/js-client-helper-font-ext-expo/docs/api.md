@@ -29,7 +29,7 @@ The extension requires `expo-font` directly at module scope. It is not injected 
 
 ### loadManifest(manifest)
 
-Async. Iterates the manifest, resolves the best source for each entry, calls `expo-font`'s `loadAsync`, and tracks success/failure counts.
+Async. Iterates the manifest, resolves the best source for each entry, calls `expo-font`'s `loadAsync`, and tracks success/failure counts. Overlapping calls on one adapter instance execute in FIFO order; styles within each manifest still load concurrently, and families completed by an earlier call are skipped by later queued calls.
 
 Source resolution priority: `asset` > `url` > `path`.
 
@@ -39,7 +39,7 @@ const { success, error } = await ExpoFontAdapter.loadManifest(Font.getManifest()
 
 ### isReady()
 
-Returns whether all fonts have been loaded.
+Returns true only when every requested Expo font style completed successfully. Starting an incremental or queued load clears readiness until every accepted cycle settles. A partial or strict failure leaves readiness false even when `FAIL_ON_ERROR` controls only the returned envelope.
 
 ```javascript
 const ready = ExpoFontAdapter.isReady();

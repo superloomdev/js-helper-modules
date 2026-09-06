@@ -32,10 +32,12 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateManifest: function (manifest) {
 
+      // Reject non-object or array manifests
       if (!Lib.Utils.isObject(manifest) || Array.isArray(manifest)) {
         return ERRORS.INVALID_MANIFEST;
       }
 
+      // Valid manifest
       return null;
 
     },
@@ -52,18 +54,22 @@ export default function (Lib, ERRORS) {
     *********************************************************************/
     validateStyleEntry: function (entry) {
 
+      // Reject non-object entries
       if (!Lib.Utils.isObject(entry)) {
         return ERRORS.MISSING_SOURCE;
       }
 
+      // Check for at least one source field
       const hasAsset = !Lib.Utils.isNullOrUndefined(entry.asset);
-      const hasPath = Lib.Utils.isString(entry.path) && entry.path.length > 0;
-      const hasUrl = Lib.Utils.isString(entry.url) && entry.url.length > 0;
+      const hasPath = Lib.Utils.isString(entry.path) && !Lib.Utils.isEmptyString(entry.path);
+      const hasUrl = Lib.Utils.isString(entry.url) && !Lib.Utils.isEmptyString(entry.url);
 
+      // Reject entries with no source field
       if (!hasAsset && !hasPath && !hasUrl) {
         return ERRORS.MISSING_SOURCE;
       }
 
+      // Valid entry
       return null;
 
     }
