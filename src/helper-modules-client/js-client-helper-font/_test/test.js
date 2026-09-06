@@ -907,3 +907,174 @@ test('F4 two core instances keep platform names isolated', function () {
   assert.strictEqual(Second.resolveFamily('Shared').family, 'Shared');
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ D1: getManifest plain-prototype contract ~~~~~~~~~~~~~~~~~~~~
+
+test('D1 getManifest output has Object.prototype as its prototype', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ Probe: { styles: { '400': { url: 'https://example.com/p.woff2' } } } });
+
+  const result = Isolated.getManifest();
+
+  assert.strictEqual(Object.getPrototypeOf(result.manifest), Object.prototype);
+
+});
+
+test('D1 getManifest nested styles objects have Object.prototype as their prototype', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ Probe: { styles: { '400': { url: 'https://example.com/p.woff2' } } } });
+
+  const result = Isolated.getManifest();
+
+  assert.strictEqual(Object.getPrototypeOf(result.manifest.Probe.styles), Object.prototype);
+
+});
+
+test('D1 getManifest output supports hasOwnProperty without throwing', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ Probe: { styles: { '400': { url: 'https://example.com/p.woff2' } } } });
+
+  const result = Isolated.getManifest();
+
+  assert.strictEqual(result.manifest.hasOwnProperty('Probe'), true);
+
+});
+
+test('D1 a family literally named __proto__ appears in Object.keys of getManifest output', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  const input = Object.create(null);
+  input['__proto__'] = { url: 'https://example.com/proto.woff2' };
+  Isolated.registerFamilies(input);
+
+  const result = Isolated.getManifest();
+
+  assert.ok(Object.keys(result.manifest).includes('__proto__'));
+
+});
+
+test('D1 registering __proto__ does not pollute Object.prototype after getManifest', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  const input = Object.create(null);
+  input['__proto__'] = { url: 'https://example.com/proto.woff2' };
+  Isolated.registerFamilies(input);
+  Isolated.getManifest();
+
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(Object.prototype, 'polluted'), false);
+  assert.strictEqual({}.polluted, undefined);
+  assert.strictEqual(Object.getPrototypeOf({}), Object.prototype);
+
+});
+
+test('D1 getManifest output survives JSON.stringify after registering a __proto__ family with plain prototype', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  const input = Object.create(null);
+  input['__proto__'] = { url: 'https://example.com/proto.woff2' };
+  Isolated.registerFamilies(input);
+
+  const result = Isolated.getManifest();
+
+  const serialized = JSON.stringify(result.manifest);
+  assert.ok(serialized.indexOf('__proto__') !== -1);
+
+});
+
+test('D1 mutating the returned manifest does not change a second getManifest call', function () {
+
+  const Isolated = fontLoader({ Utils: utilsLoader() });
+  Isolated.registerFamilies({ Probe: { styles: { '400': { url: 'https://example.com/p.woff2' } } } });
+
+  const first = Isolated.getManifest();
+  first.manifest.Probe.styles['400'].url = 'tampered';
+  first.manifest.Tampered = { styles: {} };
+
+  const second = Isolated.getManifest();
+
+  assert.strictEqual(second.manifest.Probe.styles['400'].url, 'https://example.com/p.woff2');
+  assert.strictEqual(second.manifest.Tampered, undefined);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ D2: validateWeight CSS grammar ~~~~~~~~~~~~~~~~~~~~
+
+test('D2 validateWeight accepts 350, 450, 1000, and 1', function () {
+
+  for (const w of ['350', '450', '1000', '1']) {
+
+    const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', w, 'normal');
+    assert.strictEqual(result.success, true, 'weight ' + w + ' should be accepted');
+    assert.strictEqual(result.error, null);
+
+  }
+
+});
+
+test('D2 validateWeight accepts the two-value range 100 900', function () {
+
+  const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', '100 900', 'normal');
+
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(result.error, null);
+
+});
+
+test('D2 validateWeight accepts lighter and bolder', function () {
+
+  for (const w of ['lighter', 'bolder']) {
+
+    const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', w, 'normal');
+    assert.strictEqual(result.success, true, 'weight ' + w + ' should be accepted');
+    assert.strictEqual(result.error, null);
+
+  }
+
+});
+
+test('D2 validateWeight rejects 0, 1001, 007, and semibold', function () {
+
+  for (const w of ['0', '1001', '007', 'semibold']) {
+
+    const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', w, 'normal');
+    assert.strictEqual(result.success, false, 'weight ' + w + ' should be rejected');
+    assert.strictEqual(result.error.type, 'helper-font/invalid-weight');
+
+  }
+
+});
+
+test('D2 validateWeight rejects malformed spacing in weight values', function () {
+
+  for (const w of ['400 ', ' 400', '100  900', '100 900 400']) {
+
+    const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', w, 'normal');
+    assert.strictEqual(result.success, false, 'weight ' + JSON.stringify(w) + ' should be rejected');
+    assert.strictEqual(result.error.type, 'helper-font/invalid-weight');
+
+  }
+
+});
+
+test('D2 validateWeight rejects an empty string', function () {
+
+  const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', '', 'normal');
+
+  assert.strictEqual(result.success, false);
+  assert.strictEqual(result.error.type, 'helper-font/invalid-weight');
+
+});
+
+test('D2 buildFontFaceString emits font-weight 100 900 unchanged for a range input', function () {
+
+  const result = Font.buildFontFaceString('X', 'https://example.com/x.woff2', '100 900', 'normal');
+
+  assert.strictEqual(result.success, true);
+  assert.ok(result.css.indexOf('font-weight: 100 900;') !== -1);
+
+});

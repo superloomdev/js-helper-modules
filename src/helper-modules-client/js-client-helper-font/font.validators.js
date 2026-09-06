@@ -225,10 +225,28 @@ export default function (Lib, ERRORS) {
         return ERRORS.INVALID_WEIGHT;
       }
 
-      // Accept only a three-digit hundred value (100-900) or a keyword.
-      // This prevents CSS injection through the weight field.
-      if (!/^(?:[1-9]00|normal|bold|lighter|bolder)$/.test(weight)) {
+      // Split on a single space to support variable-font ranges (e.g. "100 900").
+      // One or two parts are accepted; more than two, or empty parts from
+      // leading/trailing/double spaces, are rejected.
+      const parts = weight.split(' ');
+
+      if (parts.length < 1 || parts.length > 2) {
         return ERRORS.INVALID_WEIGHT;
+      }
+
+      // Each part must be a keyword or an integer 1-1000 without leading zeros.
+      // The integer pattern accepts 1-999 (no leading zero) and the exact 1000.
+      // This grammar admits only ASCII letters, digits, and a single interior
+      // space, so no accepted weight can carry a quote, semicolon, or brace.
+      const keywordPattern = /^(?:normal|bold|lighter|bolder)$/;
+      const integerPattern = /^(?:1000|[1-9][0-9]{0,2})$/;
+
+      for (let i = 0; i < parts.length; i++) {
+
+        if (Lib.Utils.isEmptyString(parts[i]) || (!keywordPattern.test(parts[i]) && !integerPattern.test(parts[i]))) {
+          return ERRORS.INVALID_WEIGHT;
+        }
+
       }
 
       // Valid weight

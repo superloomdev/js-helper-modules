@@ -25,7 +25,7 @@ export default Object.freeze({
 
   INVALID_WEIGHT: {
     type: 'helper-font/invalid-weight',
-    message: 'Weight must be a string (e.g. "400", "600") or null'
+    message: 'Weight must be a string keyword (normal, bold, lighter, bolder), an integer 1-1000, or two such values separated by a single space, or null'
   },
 
   INVALID_STYLE: {

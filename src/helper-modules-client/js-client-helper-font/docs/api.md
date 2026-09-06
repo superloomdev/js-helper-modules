@@ -24,7 +24,7 @@ Each family in the manifest is keyed by family name. Each style entry must have 
 | `url` | `string` | ext-web | Remote URL for `@font-face` (browser fetches) |
 | `path` | `string` | ext-rn | Local file path (app provides the file) |
 | `asset` | `number` | ext-expo | Requireable module ID from Metro's `require()` |
-| `weight` | `string` | All | Font weight ('400', '600', etc.) - optional |
+| `weight` | `string` | All | Font weight: a keyword (`normal`, `bold`, `lighter`, `bolder`), an integer 1-1000, or two values separated by a single space for a variable-font range (e.g. `100 900`). Must be a string; numeric values are rejected. Optional |
 | `style` | `string` | All | Font style ('normal' or 'italic') - optional, default 'normal' |
 
 ```javascript
@@ -120,7 +120,7 @@ Font.buildFontFaceString('Poppins', 'https://fonts.gstatic.com/.../poppins-400.w
 
 ### getManifest()
 
-Returns the current manifest of registered families and their styles. Includes all source fields (`url`, `path`, `asset`) that were present at registration.
+Returns the current manifest of registered families and their styles. The returned manifest is a plain prototype-bearing object (constructed from `{}`), safe to inspect with `Object.prototype` helpers like `hasOwnProperty` and to serialize with `JSON.stringify`. A family literally named `__proto__` is preserved as an own enumerable key. The manifest is a copy; mutating it does not affect internal state. Includes all source fields (`url`, `path`, `asset`) that were present at registration.
 
 ```javascript
 Font.getManifest();
@@ -217,7 +217,7 @@ Check whether every font style requested in the adapter's latest load cycle comp
 | `INVALID_FAMILY_NAME` | `helper-font/invalid-family-name` | Family name is not a non-empty string |
 | `INVALID_TOKEN` | `helper-font/invalid-token` | Token is not a non-empty string |
 | `INVALID_URL` | `helper-font/invalid-url` | URL is not a non-empty string |
-| `INVALID_WEIGHT` | `helper-font/invalid-weight` | Weight is not a string or null |
+| `INVALID_WEIGHT` | `helper-font/invalid-weight` | Weight is not a string keyword, integer 1-1000, two-value range, or null |
 | `INVALID_STYLE` | `helper-font/invalid-style` | Style is not 'normal' or 'italic' |
 | `UNREGISTERED_FAMILY` | `helper-font/unregistered-family` | Token resolves to a family not in the registry |
 | `MISSING_SOURCE` | `helper-font/missing-source` | Style entry has no `url`, `path`, or `asset` |

@@ -356,12 +356,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
     *********************************************************************/
     getManifest: function () {
 
-      // Build a serializable manifest from the registry.
-      // Use Object.create(null) for the manifest and nested styles objects
-      // so a family named __proto__ or constructor survives JSON.stringify
-      // and Object.keys. The internal null-prototype maps are not
-      // returned directly; values are copied key by key.
-      const manifest = Object.create(null);
+      // Build a serializable manifest copy from the internal null-prototype
+      // registry. The returned manifest and every nested styles object are
+      // ordinary {} literals so consumers can use Object.prototype helpers
+      // like hasOwnProperty. The assignOwn helper preserves a literal
+      // __proto__ family name as an own enumerable key without invoking the
+      // Object.prototype setter.
+      const manifest = {};
 
       const familyNames = Object.keys(state.families);
 
@@ -374,7 +375,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         // Only include families with actual style entries
         if (!Lib.Utils.isEmptyArray(styleKeys)) {
 
-          manifest[familyName] = { styles: Object.create(null) };
+          const familyEntry = { styles: {} };
+          _Font.assignOwn(manifest, familyName, familyEntry);
 
           // Copy each style entry into the manifest
           for (let j = 0; j < styleKeys.length; j++) {
@@ -382,7 +384,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
             const styleKey = styleKeys[j];
             const entry = family.styles[styleKey];
 
-            manifest[familyName].styles[styleKey] = {
+            familyEntry.styles[styleKey] = {
               url: entry.url || null,
               path: entry.path || null,
               asset: entry.asset !== undefined ? entry.asset : null,
@@ -709,6 +711,40 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
       // Return the escaped and filtered value
       return filtered;
+
+    },
+
+
+    /********************************************************************
+    Assign an own enumerable property on a plain object even when the
+    key is __proto__. A plain assignment to __proto__ invokes the
+    Object.prototype setter and sets the prototype instead of creating
+    an own property, so Object.defineProperty is used for that key
+    alone. For every other key, a plain assignment is sufficient and
+    faster.
+
+    @param {Object} target - A plain object (constructed from {})
+    @param {String} key    - The property key
+    @param {*}      value  - The property value
+
+    @return {void}
+    *********************************************************************/
+    assignOwn: function (target, key, value) {
+
+      // Use defineProperty for __proto__ so the prototype setter is not invoked
+      if (key === '__proto__') {
+        Object.defineProperty(target, key, {
+          value: value,
+          enumerable: true,
+          writable: true,
+          configurable: true
+        });
+
+        return;
+      }
+
+      // Plain assignment for every other key
+      target[key] = value;
 
     },
 

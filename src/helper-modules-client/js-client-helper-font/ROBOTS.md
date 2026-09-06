@@ -71,7 +71,9 @@ buildFontFaceString(name, url, weight, style) -> { success, css, error } | async
 
 getManifest() -> { success, manifest, error } | async:no
   Returns the current manifest of registered families and their styles.
-  Includes url, path, asset fields per style entry.
+  The manifest is a plain prototype-bearing copy; hasOwnProperty and
+  JSON.stringify are safe. A __proto__ family name is preserved as an
+  own enumerable key. Includes url, path, asset fields per style entry.
 
 getRegisteredFamilies() -> { success, families, error } | async:no
   Returns the list of registered family names, including 'System'.
@@ -144,7 +146,7 @@ extension's `loadManifest()`.
 | `INVALID_FAMILY_NAME` | `helper-font/invalid-family-name` | Family name is not a non-empty string |
 | `INVALID_TOKEN` | `helper-font/invalid-token` | Token is not a non-empty string |
 | `INVALID_URL` | `helper-font/invalid-url` | URL is not a non-empty string |
-| `INVALID_WEIGHT` | `helper-font/invalid-weight` | Weight is not a string or null |
+| `INVALID_WEIGHT` | `helper-font/invalid-weight` | Weight is not a string keyword, integer 1-1000, two-value range, or null |
 | `INVALID_STYLE` | `helper-font/invalid-style` | Style is not 'normal' or 'italic' |
 | `UNREGISTERED_FAMILY` | `helper-font/unregistered-family` | Token resolves to a family not in the registry |
 | `MISSING_SOURCE` | `helper-font/missing-source` | Style entry has no `url`, `path`, or `asset` |
