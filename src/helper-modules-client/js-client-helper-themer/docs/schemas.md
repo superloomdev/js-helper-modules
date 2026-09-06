@@ -93,10 +93,12 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 | Field | Type | Required | Note |
 |---|---|---|---|
 | `type_set` | `Boolean` | Yes | Must be `true`. Distinguishes a type set from a generator, since both name a scale |
-| `step` | `Number` | Yes | Position on the type scale |
-| `scale` | `String` | No | Defaults to `carbonType` |
-| `line_height` | `Number` | No | A ratio. Zero or greater |
-| `letter_spacing` | `Number` | No | In pixels |
+| `step` | `Number` | One of `step` or `font_size` | Position on the type scale. Conflicts with `font_size` |
+| `scale` | `String` | No | Defaults to `carbonType`; valid only with `step` |
+| `font_size` | `Number` or alias | One of `font_size` or `step` | Exact unit-free size. Finite and greater than zero; never rounded |
+| `line_height` | `Number` | No | Legacy unitless ratio. Zero or greater; conflicts with `line_height_px` |
+| `line_height_px` | `Number` or alias | No | Exact unit-free absolute line height. Finite and zero or greater; conflicts with `line_height` |
+| `letter_spacing` | `Number` | No | Unit-free spacing; omitted from output when absent |
 | `weight` | `Number` | No | Omitted from emit when absent, never stringified |
 | `font_family` | `String` | No | A **token**, never a family name and never a font stack |
 
@@ -121,7 +123,7 @@ Layer geometry validation:
 | `opacity` | `Number` | 0 to 1 inclusive. Defaults to 1 when absent |
 | `inset` | `Boolean` | Optional. Defaults to `false` |
 
-Shadow color and layer opacity compose once. The engine does not apply opacity twice.
+Shadow color accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, `rgb(R, G, B)`, or `rgba(R, G, B, A)`. RGB channels are integers from 0 through 255; alpha is between 0 and 1; percentages and other CSS color syntaxes are unsupported. Invalid arithmetic input throws. Shadow color alpha and layer opacity multiply exactly once.
 
 ### Metadata fields
 
@@ -141,7 +143,7 @@ Layers are applied in array order, so the last layer to pin a token wins. Every 
 |---|---|---|
 | `name` | `String` | Free-form label, used in no logic |
 | `tokens` | `Object` | Sparse map of token name to entry, in any of the six shapes |
-| `scales` | `Object` | Sparse seed overrides, merged per scale |
+| `scales` | `Object` | Sparse seed overrides. Named scale seed objects merge by key; `base_font_size` replaces the scalar root size and must be finite and greater than zero |
 | `polarity` | `String` | `'light'` or `'dark'` |
 | `motion_factor` | `Number` | Between 0 and 1 inclusive. Scales every token in the `duration` group |
 
@@ -157,7 +159,7 @@ The optional per-call bundle passed to `resolve` and `buildTheme`.
 |---|---|---|---|
 | `contrast` | `String` | `'correct'` | `'correct'` rewrites failing colors; any other value only reports them |
 | `min_contrast_ratio` | `Number` | `CONFIG.MIN_CONTRAST_RATIO` | Between 1 and 21 inclusive |
-| `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive |
+| `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive. An explicit per-call value, including zero, overrides the layer factor |
 | `shadow_mode` | `String` | `'legacy'` | `'legacy'` collapses to a dominant layer with loss reporting; `'box_shadow'` preserves all layers, inset, and spread where the platform supports them |
 
 Omitted options normalize to their defaults and produce output identical to the existing three-argument call. Options that affect output join the cache key alongside the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
@@ -219,7 +221,7 @@ A `lossy` entry carries `token`, `fact`, and `reason`. A value that vanishes wit
 Stated explicitly, because the gaps are deliberate rather than oversights.
 
 - **Whether a `font_family` token names a real typeface.** The engine has no font registry and does no I/O. It emits the token unchanged; `helper-font` resolves it to a registered family name. See [Philosophy](philosophy.md) for why the two modules do not depend on each other.
-- **Whether a color is a valid hex string.** The parser supports `#RGB`, `#RGBA`, `#RRGGBB`, and `#RRGGBBAA` forms. A malformed hex produces `NaN` channels rather than a throw. Templates are authored artifacts, and a build-time check is the right place for this.
+- **Whether an unused literal color is valid.** Literal tokens pass through without arithmetic validation. When color arithmetic, shadow composition, or contrast reads a value, the engine validates the supported hex/rgb/rgba grammar and throws on malformed input.
 - **Whether a theme document came from a trusted source.** Schema shape is not provenance.
 - **Whether the emitted values look right.** Contrast rules are the only aesthetic constraint the engine enforces.
 
@@ -245,6 +247,9 @@ Every throw follows the framework's programmer-error format: an alias prefix, th
 | `[helper-themer] tokens.brand.op must name an operation this engine provides` | Unknown operation name |
 | `[helper-themer] platform must be one of: web, native` | Unknown emit target |
 | `[helper-themer] tokens bad (group: nonsense) must name a known emitter group` | Token metadata names a group no emitter table recognizes |
+| `[helper-themer] options.shadow_mode must be one of: legacy, box_shadow` | Unknown shadow projection mode |
+| `[helper-themer] color must be a supported numeric color` | Color arithmetic received malformed or unsupported color syntax |
+| `[helper-themer] color must have an opaque compositing background` | Contrast rule named a translucent background without a further backdrop |
 | `[helper-themer] CONFIG.CACHE_CAPACITY must be a whole number of 1 or greater` | Misconfigured at load time |
 
 The expected-shape clauses live in `themer.errors.js`, so the format stays in one place and every message reads alike.

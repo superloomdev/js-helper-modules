@@ -15,7 +15,7 @@
 // own result cache. A host that renders one theme makes one instance and keeps
 // it; a build tool that sweeps many themes makes one and discards it.
 import CONFIG_DEFAULTS from './themer.config.js';
-import ERRORS_CATALOG from './themer.errors.js';
+import ERRORS from './themer.errors.js';
 import createValidators from './themer.validators.js';
 import createColor from './parts/color.js';
 import createScale from './parts/scale.js';
@@ -49,10 +49,7 @@ export default function loader (shared_libs, config) {
     config || {}
   );
 
-  // Error catalog (frozen, owned by the main module)
-  const ERRORS = ERRORS_CATALOG;
-
-  // Validators singleton - Lib and ERRORS injected here
+  // Validators instance - Lib and ERRORS captured independently here
   const Validators = createValidators(Lib, ERRORS);
 
   // Validate config immediately so misconfiguration fails at startup
@@ -123,6 +120,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     buildTheme: function (template, layers, platform, options) {
 
       // Split options into resolve-side and emit-side bundles
+      Validators.validateOptions(options);
       const resolveOpts = options ? {
         contrast: options.contrast,
         min_contrast_ratio: options.min_contrast_ratio,
@@ -210,6 +208,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
       // Validate the platform so an unknown target fails instead of passing values through
       Validators.validatePlatform(platform, Parts.Emit.platforms());
+      Validators.validateTemplate(template);
+      Validators.validateGroups(template.meta, Parts.Emit.groups());
+      Validators.validateOptions(options);
 
       // Normalize options: omitted or null becomes the legacy defaults
       const normalized = _Themer.normalizeEmitOptions(options);
@@ -556,7 +557,7 @@ const _Themer = {
   normalizeEmitOptions: function (options) {
 
     // Omitted or null normalizes to the legacy defaults
-    if (!options || typeof options !== 'object') {
+    if (!options) {
       return { shadow_mode: 'legacy' };
     }
 

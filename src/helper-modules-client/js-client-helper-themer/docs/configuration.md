@@ -84,7 +84,7 @@ The engine is pure, so several responsibilities sit with the application rather 
 | Responsibility | Owner | Note |
 |---|---|---|
 | Fetching a theme document | The host, or a loader module | The engine takes an already-parsed object |
-| Validating an untrusted document | The host | `validateTemplate` throws; the host decides what to do about it |
+| Validating an untrusted document | The host | `validateTemplate` returns structural findings; resolution can still throw for invalid token entries |
 | Deciding what to do with `violations` | The host | A build tool fails, a runtime accepts the correction |
 | Deciding what to do with `lossy` and `substituted` | The host | Both are ordinary return values, not warnings |
 | Loading fonts | `helper-font` and its extensions | Theming never waits on it |

@@ -10,7 +10,7 @@
 // Shared dependencies injected by loader (uniform parts signature)
 let Lib;               // eslint-disable-line no-unused-vars
 let CONFIG;            // eslint-disable-line no-unused-vars
-let ERRORS;            // eslint-disable-line no-unused-vars
+let ERRORS;
 
 
 // Grouping a palette walks every entry, and a palette is stable for the life of
@@ -67,8 +67,30 @@ const Color = {
   *********************************************************************/
   parseHex: function (hex) {
 
-    // Strip the hash so both written forms parse through one path
-    const body = String(hex).replace('#', '');
+    // Parse numeric rgb/rgba forms before the compact hexadecimal forms
+    const source = String(hex).trim();
+    const functional = source.match(/^rgba?\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)(?:\s*,\s*([+-]?\d+(?:\.\d+)?))?\s*\)$/i);
+    if (functional) {
+      const hasAlpha = source.slice(0, 4).toLowerCase() === 'rgba';
+      if (hasAlpha !== (functional[4] !== undefined)) {
+        throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
+      }
+      const channels = [Number(functional[1]), Number(functional[2]), Number(functional[3])];
+      const alpha = hasAlpha ? Number(functional[4]) : 1;
+      if (channels.some(function (value) {
+        return !Number.isInteger(value) || value < 0 || value > 255;
+      }) || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+        throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
+      }
+      return { r: channels[0], g: channels[1], b: channels[2], a: alpha };
+    }
+
+    // Strip one optional leading hash and validate the complete written form
+    const match = source.match(/^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+    if (!match) {
+      throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
+    }
+    const body = match[1];
 
     // Expand the shorthand form (3 or 4 digits) by doubling each digit
     const full = (body.length === 3 || body.length === 4) ? body.split('').map(function (d) {
@@ -78,14 +100,13 @@ const Color = {
     // Extract alpha if present (8-digit form after expansion)
     const hasAlpha = full.length === 8;
     const alphaHex = hasAlpha ? full.slice(6, 8) : 'ff';
-    const a = parseInt(alphaHex, 16) / 255;
 
-    // Return the channels; alpha defaults to 1 when not present
+    // Return validated channels; alpha defaults to 1 when not present
     return {
       r: parseInt(full.slice(0, 2), 16),
       g: parseInt(full.slice(2, 4), 16),
       b: parseInt(full.slice(4, 6), 16),
-      a: a
+      a: parseInt(alphaHex, 16) / 255
     };
 
   },
@@ -104,7 +125,10 @@ const Color = {
   toHex: function (rgb) {
 
     // Clamp and pad each channel so arithmetic overflow cannot produce a short string
-    return '#' + _Color.channelToPair(rgb.r) + _Color.channelToPair(rgb.g) + _Color.channelToPair(rgb.b);
+    const color = '#' + _Color.channelToPair(rgb.r) + _Color.channelToPair(rgb.g) + _Color.channelToPair(rgb.b);
+    return rgb.a === undefined || rgb.a === 1
+      ? color
+      : color + _Color.channelToPair(rgb.a * 255);
 
   },
 
@@ -209,14 +233,14 @@ const Color = {
   *********************************************************************/
   luminance: function (hex) {
 
-    // Expand each channel out of gamma before weighting
+    // Luminance alone has no background on which to composite translucent input
     const rgb = Color.parseHex(hex);
-    const r = _Color.channelLuminance(rgb.r);
-    const g = _Color.channelLuminance(rgb.g);
-    const b = _Color.channelLuminance(rgb.b);
+    if (rgb.a !== 1) {
+      throw new TypeError('[helper-themer] color ' + ERRORS.MUST_HAVE_OPAQUE_BACKGROUND);
+    }
 
-    // Weight the channels by how strongly the eye responds to each
-    return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+    // Weight gamma-expanded channels by how strongly the eye responds to each
+    return _Color.luminanceChannels(rgb);
 
   },
 
@@ -231,9 +255,21 @@ const Color = {
   *********************************************************************/
   contrastRatio: function (hex_a, hex_b) {
 
-    // Order the two luminances so the ratio is always at least 1
-    const a = Color.luminance(hex_a);
-    const b = Color.luminance(hex_b);
+    // The second color is the declared compositing background and must be opaque
+    const foreground = Color.parseHex(hex_a);
+    const background = Color.parseHex(hex_b);
+    if (background.a !== 1) {
+      throw new TypeError('[helper-themer] color ' + ERRORS.MUST_HAVE_OPAQUE_BACKGROUND);
+    }
+
+    // Composite the foreground once before measuring the displayed colors
+    const displayed = {
+      r: (foreground.r * foreground.a) + (background.r * (1 - foreground.a)),
+      g: (foreground.g * foreground.a) + (background.g * (1 - foreground.a)),
+      b: (foreground.b * foreground.a) + (background.b * (1 - foreground.a))
+    };
+    const a = _Color.luminanceChannels(displayed);
+    const b = _Color.luminanceChannels(background);
 
     // The constant keeps very dark pairs from producing an unbounded ratio
     return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
@@ -264,7 +300,8 @@ const Color = {
     return Color.toHex({
       r: (a.r * w) + (b.r * (1 - w)),
       g: (a.g * w) + (b.g * (1 - w)),
-      b: (a.b * w) + (b.b * (1 - w))
+      b: (a.b * w) + (b.b * (1 - w)),
+      a: (a.a * w) + (b.a * (1 - w))
     });
 
   },
@@ -283,7 +320,7 @@ const Color = {
     // Both platforms accept the rgba form, so no per-platform branch is needed
     const rgb = Color.parseHex(hex);
 
-    return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + opacity + ')';
+    return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + (rgb.a * opacity) + ')';
 
   },
 
@@ -421,6 +458,23 @@ const _Color = {
     const c = value / 255;
 
     return (c <= 0.03928) ? (c / 12.92) : Math.pow((c + 0.055) / 1.055, 2.4);
+
+  },
+
+
+  /********************************************************************
+  Compute luminance from already validated RGB channels.
+
+  @param {Object} rgb - Channel values
+
+  @return {Number} - Relative luminance, 0 to 1
+  *********************************************************************/
+  luminanceChannels: function (rgb) {
+
+    // Weight gamma-expanded channels by how strongly the eye responds to each
+    return (0.2126 * _Color.channelLuminance(rgb.r))
+      + (0.7152 * _Color.channelLuminance(rgb.g))
+      + (0.0722 * _Color.channelLuminance(rgb.b));
 
   },
 

@@ -9,19 +9,8 @@
 // Resolution is platform independent. It produces canonical, unit-free values;
 // projecting them onto a platform is the emit part's job.
 //
-// Loader pattern: SINGLETON part. Lib, CONFIG, and ERRORS are assigned once
-// from the uniform parts signature; the public object closes over them.
-
-
-// Shared dependencies injected by loader (uniform parts signature)
-let Lib;
-let CONFIG;
-let ERRORS;
-
-// Sibling parts and validators, injected on the container by the parent
-let Color;
-let Scale;
-let Validators;
+// Loader pattern: FACTORY part. Lib, CONFIG, and ERRORS are captured per call
+// from the uniform parts signature; each public object closes over its own values.
 
 
 // Shadow geometry per elevation level. Authored rather than derived because no
@@ -54,8 +43,8 @@ const ELEVATION = {
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton part loader. Assigns the uniform part dependencies plus
-the sibling parts and validators, and returns the shared Resolve
+Factory part loader. Captures the uniform part dependencies plus
+the sibling parts and validators, and returns an isolated Resolve
 object.
 
 @param {Object} shared_libs - Lib container with Utils, Color, Scale, Validators
@@ -66,899 +55,1072 @@ object.
 *********************************************************************/
 export default function loader (shared_libs, config, errors) {
 
-  // Assign to module-scope vars so the public object can close over them
-  Lib = shared_libs;
-  CONFIG = config;
-  ERRORS = errors;
+  // Capture local bindings so this instance's public object can close over them
+  const Lib = shared_libs;
+  const CONFIG = config;
+  const ERRORS = errors;
 
   // Siblings ride in on the container, keeping the parts signature uniform
-  Color = shared_libs.Color;
-  Scale = shared_libs.Scale;
-  Validators = shared_libs.Validators;
-
-  return Resolve;
+  return createInterface(Lib, CONFIG, ERRORS);
 
 };/////////////////////////// Module-Loader END /////////////////////////////////
 
 
 
-/////////////////////////// Public Functions START /////////////////////////////
-const Resolve = {
+// Shared dependencies injected by loader (uniform parts signature)
+const createInterface = function (Lib, CONFIG, ERRORS) {
+
+  // Sibling parts and validators, injected on the container by the parent
+  const Color = Lib.Color;
+  const Scale = Lib.Scale;
+  const Validators = Lib.Validators;
+
+  /////////////////////////// Public Functions START /////////////////////////////
+  const Resolve = {
 
 
-  /********************************************************************
-  Resolve a template plus a cascade of layers into a complete,
-  platform-independent token map.
+    /********************************************************************
+    Resolve a template plus a cascade of layers into a complete,
+    platform-independent token map.
 
-  Layers apply in array order, so the last layer to pin a token
-  wins. A layer may also override scale seeds, which is what makes
-  a density change a one-number edit rather than a second theme.
+    Layers apply in array order, so the last layer to pin a token
+    wins. A layer may also override scale seeds, which is what makes
+    a density change a one-number edit rather than a second theme.
 
-  @param {Object} template - The template being resolved
-  @param {Object[]} layers - Ordered sparse overlays
-  @param {Object} options - Per-call overrides
-  @param {String} [options.contrast] - 'correct' to rewrite violations, anything else to only report
-  @param {Number} [options.min_contrast_ratio] - Overrides the configured floor
-  @param {Number} [options.motion_factor] - Scales every duration token
+    @param {Object} template - The template being resolved
+    @param {Object[]} layers - Ordered sparse overlays
+    @param {Object} options - Per-call overrides
+    @param {String} [options.contrast] - 'correct' to rewrite violations, anything else to only report
+    @param {Number} [options.min_contrast_ratio] - Overrides the configured floor
+    @param {Number} [options.motion_factor] - Scales every duration token
 
-  @return {Object} - Resolution result
-  @return {Object} .tokens - Canonical value per token name
-  @return {Object} .scales - Merged scale seeds after the cascade
-  @return {String} .polarity - Effective polarity
-  @return {Object} .stats - Route and source counts
-  @return {Object[]} .corrections - Contrast rewrites that were applied
-  @return {Object[]} .violations - Contrast failures that were found
-  *********************************************************************/
-  run: function (template, layers, options) {
+    @return {Object} - Resolution result
+    @return {Object} .tokens - Canonical value per token name
+    @return {Object} .scales - Merged scale seeds after the cascade
+    @return {String} .polarity - Effective polarity
+    @return {Object} .stats - Route and source counts
+    @return {Object[]} .corrections - Contrast rewrites that were applied
+    @return {Object[]} .violations - Contrast failures that were found
+    *********************************************************************/
+    run: function (template, layers, options) {
 
-    // Build the cascade context once, so token resolution reads a settled world
-    const context = _Resolve.buildContext(template, layers, options);
+      // Build the cascade context once, so token resolution reads a settled world
+      const context = _Resolve.buildContext(template, layers, options);
 
-    // Resolve every declared token, following aliases and rules as they appear
-    const names = Object.keys(template.tokens);
+      // Resolve every declared token, following aliases and rules as they appear
+      const names = Object.keys(template.tokens);
 
-    for (let i = 0; i < names.length; i++) {
-      _Resolve.resolveToken(names[i], context);
-    }
-
-    // Scale durations after resolution so the factor reaches literals and rules alike
-    _Resolve.applyMotionFactor(template, context);
-
-    // Enforce contrast last, so the pass sees final values whatever route produced them
-    _Resolve.applyContrastRules(template, context);
-
-    return {
-      tokens: context.resolved,
-      scales: context.scales,
-      polarity: context.polarity,
-      anchor_index: context.anchor_index,
-      motion_factor: context.motion_factor,
-      contrast_mode: context.contrast_mode,
-      stats: context.stats,
-      corrections: context.corrections,
-      violations: context.violations
-    };
-
-  }
-
-};/////////////////////////// Public Functions END //////////////////////////////
-
-
-
-/////////////////////////// Private Functions START ////////////////////////////
-const _Resolve = {
-
-
-  // ~~~~~~~~~~~~~~~~~~~~ Cascade Setup ~~~~~~~~~~~~~~~~~~~~
-  // Flattening the layer stack into the single world token resolution reads.
-
-  /********************************************************************
-  Flatten the layer stack into a resolution context.
-
-  @param {Object} template - The template being resolved
-  @param {Object[]} layers - Ordered sparse overlays
-  @param {Object} options - Per-call overrides
-
-  @return {Object} - Resolution context
-  *********************************************************************/
-  buildContext: function (template, layers, options) {
-
-    // Deep copy the seeds so a layer override cannot mutate the shared template
-    const settings = options || {};
-    const scales = JSON.parse(JSON.stringify(template.scales || {}));
-    const overlay = {};
-
-    // Apply each layer in order, so a later layer overwrites an earlier pin
-    for (let i = 0; i < layers.length; i++) {
-      _Resolve.applyLayer(layers[i], overlay, scales);
-    }
-
-    // Polarity comes from the last layer that states one, else the template
-    const polarity = _Resolve.effectivePolarity(template, layers);
-    const ramp = template.ramp || [];
-
-    return {
-      overlay: overlay,
-      scales: scales,
-      polarity: polarity,
-      ramp: ramp,
-      anchor_index: _Resolve.anchorIndex(ramp, polarity, overlay),
-      palette: template.palette || {},
-      tokens: template.tokens,
-      resolved: {},
-      in_progress: {},
-      motion_factor: _Resolve.effectiveMotionFactor(layers),
-      contrast_mode: settings.contrast || 'correct',
-      min_contrast_ratio: Lib.Utils.isNumber(settings.min_contrast_ratio) ? settings.min_contrast_ratio : CONFIG.MIN_CONTRAST_RATIO,
-      corrections: [],
-      violations: [],
-      stats: {
-        route: { literal: 0, alias: 0, rule: 0, generator: 0, type_set: 0, shadow: 0 },
-        source: { theme: 0, default: 0 }
+      for (let i = 0; i < names.length; i++) {
+        _Resolve.resolveToken(names[i], context);
       }
-    };
 
-  },
+      // Scale durations after resolution so the factor reaches literals and rules alike
+      _Resolve.applyMotionFactor(template, context);
 
+      // Enforce contrast last, so the pass sees final values whatever route produced them
+      _Resolve.applyContrastRules(template, context);
 
-  /********************************************************************
-  Fold one layer into the overlay and the scale seeds.
+      return {
+        tokens: context.resolved,
+        scales: context.scales,
+        polarity: context.polarity,
+        anchor_index: context.anchor_index,
+        motion_factor: context.motion_factor,
+        contrast_mode: context.contrast_mode,
+        stats: context.stats,
+        corrections: context.corrections,
+        violations: context.violations
+      };
 
-  @param {Object} layer - One sparse overlay
-  @param {Object} overlay - Accumulated token pins
-  @param {Object} scales - Accumulated scale seeds
-
-  @return {void}
-  *********************************************************************/
-  applyLayer: function (layer, overlay, scales) {
-
-    // Copy each pinned token forward, letting this layer win over earlier ones
-    const token_pins = layer.tokens || {};
-    const token_names = Object.keys(token_pins);
-
-    for (let i = 0; i < token_names.length; i++) {
-      overlay[token_names[i]] = token_pins[token_names[i]];
     }
 
-    // Merge scale seeds per scale, so a layer can change one seed without restating the rest
-    const scale_pins = layer.scales || {};
-    const scale_names = Object.keys(scale_pins);
-
-    for (let i = 0; i < scale_names.length; i++) {
-      scales[scale_names[i]] = Object.assign({}, scales[scale_names[i]], scale_pins[scale_names[i]]);
-    }
-
-  },
+  };/////////////////////////// Public Functions END //////////////////////////////
 
 
-  /********************************************************************
-  Determine the effective polarity for this cascade.
 
-  @param {Object} template - The template being resolved
-  @param {Object[]} layers - Ordered sparse overlays
+  /////////////////////////// Private Functions START ////////////////////////////
+  const _Resolve = {
 
-  @return {String} - 'light' or 'dark'
-  *********************************************************************/
-  effectivePolarity: function (template, layers) {
 
-    // Start from the template and let any layer that states a polarity replace it
-    let polarity = template.polarity || 'light';
+    // ~~~~~~~~~~~~~~~~~~~~ Cascade Setup ~~~~~~~~~~~~~~~~~~~~
+    // Flattening the layer stack into the single world token resolution reads.
 
-    for (let i = 0; i < layers.length; i++) {
-      if (layers[i].polarity) {
-        polarity = layers[i].polarity;
+    /********************************************************************
+    Flatten the layer stack into a resolution context.
+
+    @param {Object} template - The template being resolved
+    @param {Object[]} layers - Ordered sparse overlays
+    @param {Object} options - Per-call overrides
+
+    @return {Object} - Resolution context
+    *********************************************************************/
+    buildContext: function (template, layers, options) {
+
+      // Deep copy the seeds so a layer override cannot mutate the shared template
+      const settings = options || {};
+      const scales = JSON.parse(JSON.stringify(template.scales || {}));
+      const overlay = {};
+
+      // Apply each layer in order, so a later layer overwrites an earlier pin
+      for (let i = 0; i < layers.length; i++) {
+        _Resolve.applyLayer(layers[i], overlay, scales);
       }
-    }
 
-    return polarity;
+      // Polarity comes from the last layer that states one, else the template
+      const polarity = _Resolve.effectivePolarity(template, layers);
+      const ramp = template.ramp || [];
 
-  },
+      return {
+        overlay: overlay,
+        scales: scales,
+        polarity: polarity,
+        ramp: ramp,
+        anchor_index: _Resolve.anchorIndex(ramp, polarity, overlay),
+        palette: template.palette || {},
+        tokens: template.tokens,
+        resolved: {},
+        in_progress: {},
+        motion_factor: Lib.Utils.isNumber(settings.motion_factor) ? settings.motion_factor : _Resolve.effectiveMotionFactor(layers),
+        contrast_mode: settings.contrast || 'correct',
+        min_contrast_ratio: Lib.Utils.isNumber(settings.min_contrast_ratio) ? settings.min_contrast_ratio : CONFIG.MIN_CONTRAST_RATIO,
+        corrections: [],
+        violations: [],
+        refreshing: false,
+        stats: {
+          route: { literal: 0, alias: 0, rule: 0, generator: 0, type_set: 0, shadow: 0 },
+          source: { theme: 0, default: 0 }
+        }
+      };
+
+    },
 
 
-  /********************************************************************
-  Determine the effective motion factor for this cascade.
+    /********************************************************************
+    Fold one layer into the overlay and the scale seeds.
 
-  @param {Object[]} layers - Ordered sparse overlays
+    @param {Object} layer - One sparse overlay
+    @param {Object} overlay - Accumulated token pins
+    @param {Object} scales - Accumulated scale seeds
 
-  @return {Number} - Factor every duration is multiplied by
-  *********************************************************************/
-  effectiveMotionFactor: function (layers) {
+    @return {void}
+    *********************************************************************/
+    applyLayer: function (layer, overlay, scales) {
 
-    // Unscaled unless a layer says otherwise
-    let factor = 1;
+      // Copy each pinned token forward, letting this layer win over earlier ones
+      const token_pins = layer.tokens || {};
+      const token_names = Object.keys(token_pins);
 
-    for (let i = 0; i < layers.length; i++) {
-      if (Lib.Utils.isNumber(layers[i].motion_factor)) {
-        Validators.assertUnitInterval(layers[i].motion_factor, 'layers[' + i + '].motion_factor');
-        factor = layers[i].motion_factor;
+      for (let i = 0; i < token_names.length; i++) {
+        overlay[token_names[i]] = token_pins[token_names[i]];
       }
-    }
 
-    return factor;
+      // Merge scale seeds per scale, so a layer can change one seed without restating the rest
+      const scale_pins = layer.scales || {};
+      const scale_names = Object.keys(scale_pins);
 
-  },
-
-
-  /********************************************************************
-  Locate the position on the neutral ramp that the page background
-  occupies, which is where ramp-relative rules count from.
-
-  @param {String[]} ramp - Ordered neutral ramp
-  @param {String} polarity - Effective polarity
-  @param {Object} overlay - Accumulated token pins
-
-  @return {Number} - Index into the ramp
-  *********************************************************************/
-  anchorIndex: function (ramp, polarity, overlay) {
-
-    // A light theme starts at the light end of the ramp, a dark theme at the dark end
-    let index = (polarity === 'light') ? 0 : Math.max(0, ramp.length - 1);
-
-    // A pinned background that exists on the ramp moves the anchor to that step
-    const background = overlay['background'];
-
-    if (Lib.Utils.isString(background) && background.charAt(0) === '#') {
-      const found = ramp.indexOf(background.toLowerCase());
-
-      if (found !== -1) {
-        index = found;
+      for (let i = 0; i < scale_names.length; i++) {
+        const name = scale_names[i];
+        scales[name] = name === 'base_font_size'
+          ? scale_pins[name]
+          : Object.assign({}, scales[name], scale_pins[name]);
       }
-    }
 
-    return index;
-
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Token Resolution ~~~~~~~~~~~~~~~~~~~~
-  // One token at a time, recursing through aliases and rule operands.
+    /********************************************************************
+    Determine the effective polarity for this cascade.
 
-  /********************************************************************
-  Resolve one token by name, memoizing the result for this run.
+    @param {Object} template - The template being resolved
+    @param {Object[]} layers - Ordered sparse overlays
 
-  @param {String} name - Token name
-  @param {Object} context - Resolution context
+    @return {String} - 'light' or 'dark'
+    *********************************************************************/
+    effectivePolarity: function (template, layers) {
 
-  @return {*} - The canonical value
-  *********************************************************************/
-  resolveToken: function (name, context) {
+      // Start from the template and let any layer that states a polarity replace it
+      let polarity = template.polarity || 'light';
 
-    // Return the settled value when this token was already reached
-    if (Object.prototype.hasOwnProperty.call(context.resolved, name)) {
-      return context.resolved[name];
-    }
+      for (let i = 0; i < layers.length; i++) {
+        if (layers[i].polarity) {
+          polarity = layers[i].polarity;
+        }
+      }
 
-    // A token reached while it is still resolving means the aliases form a loop
-    if (context.in_progress[name]) {
-      Validators.fail('tokens.' + name, ERRORS.MUST_NOT_CYCLE);
-    }
+      return polarity;
 
-    context.in_progress[name] = true;
-
-    // A layer pin wins over the template default, and the source is recorded
-    const from_theme = Object.prototype.hasOwnProperty.call(context.overlay, name);
-    const entry = from_theme ? context.overlay[name] : context.tokens[name];
-
-    // An alias can name a token nothing declares, which is a template defect
-    if (entry === undefined) {
-      delete context.in_progress[name];
-      Validators.fail('tokens.' + name, ERRORS.MUST_BE_DECLARED_TOKEN);
-    }
-
-    // Dispatch on the entry's shape, which is what makes the routes uniform
-    const value = _Resolve.valueOf(name, entry, context, from_theme);
-
-    // Release the cycle guard and memoize before returning
-    delete context.in_progress[name];
-    context.resolved[name] = value;
-
-    return value;
-
-  },
+    },
 
 
-  /********************************************************************
-  Produce the canonical value for one template entry.
+    /********************************************************************
+    Determine the effective motion factor for this cascade.
 
-  @param {String} name - Token name, for error messages
-  @param {*} entry - The template or overlay entry
-  @param {Object} context - Resolution context
-  @param {Boolean} from_theme - Whether a layer supplied the entry
+    @param {Object[]} layers - Ordered sparse overlays
 
-  @return {*} - The canonical value
-  *********************************************************************/
-  valueOf: function (name, entry, context, from_theme) {
+    @return {Number} - Factor every duration is multiplied by
+    *********************************************************************/
+    effectiveMotionFactor: function (layers) {
 
-    // Each branch records the route it took, so a theme's real shape is measurable
-    if (_Resolve.isAlias(entry)) {
-      _Resolve.countRoute(context, 'alias', from_theme);
+      // Unscaled unless a layer says otherwise
+      let factor = 1;
 
-      return _Resolve.resolveToken(entry.slice(1, -1), context);
-    }
+      for (let i = 0; i < layers.length; i++) {
+        if (Lib.Utils.isNumber(layers[i].motion_factor)) {
+          Validators.assertUnitInterval(layers[i].motion_factor, 'layers[' + i + '].motion_factor');
+          factor = layers[i].motion_factor;
+        }
+      }
 
-    if (_Resolve.isTypeSet(entry)) {
-      _Resolve.countRoute(context, 'type_set', from_theme);
+      return factor;
 
-      return _Resolve.typeSetValue(name, entry, context);
-    }
-
-    if (_Resolve.isShadow(entry)) {
-      _Resolve.countRoute(context, 'shadow', from_theme);
-
-      return _Resolve.shadowValue(name, entry, context);
-    }
-
-    if (_Resolve.isGenerator(entry)) {
-      _Resolve.countRoute(context, 'generator', from_theme);
-
-      return Scale.byName(entry.scale, name)(entry, context.scales[entry.scale] || {});
-    }
-
-    if (_Resolve.isRule(entry)) {
-      _Resolve.countRoute(context, 'rule', from_theme);
-
-      return _Resolve.ruleValue(name, entry, context);
-    }
-
-    if (_Resolve.isLiteral(entry)) {
-      _Resolve.countRoute(context, 'literal', from_theme);
-
-      return _Resolve.literalValue(entry);
-    }
-
-    // Nothing matched, so the entry is a shape this engine has no route for
-    delete context.in_progress[name];
-    Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
-
-  },
+    },
 
 
-  /********************************************************************
-  Build a type set value.
+    /********************************************************************
+    Locate the position on the neutral ramp that the page background
+    occupies, which is where ramp-relative rules count from.
 
-  A type set resolves to an object rather than to separate sibling
-  tokens. That is what makes an absolute native line height
-  computable at emit time: the font size it depends on is already
-  inside the same object, so emit never reaches across tokens.
+    @param {String[]} ramp - Ordered neutral ramp
+    @param {String} polarity - Effective polarity
+    @param {Object} overlay - Accumulated token pins
 
-  @param {String} name - Token name, for error messages
-  @param {Object} entry - Type set entry
-  @param {Object} context - Resolution context
+    @return {Number} - Index into the ramp
+    *********************************************************************/
+    anchorIndex: function (ramp, polarity, overlay) {
 
-  @return {Object} - Canonical type set
-  *********************************************************************/
-  typeSetValue: function (name, entry, context) {
+      // A light theme starts at the light end of the ramp, a dark theme at the dark end
+      let index = (polarity === 'light') ? 0 : Math.max(0, ramp.length - 1);
 
-    // A negative line height would invert the text box
-    if (!Lib.Utils.isNullOrUndefined(entry.line_height)) {
-      Validators.assertNonNegativeNumber(entry.line_height, 'tokens.' + name + '.line_height');
-    }
+      // A pinned background that exists on the ramp moves the anchor to that step
+      const background = overlay['background'];
 
-    // The family is a token, so it must be a plain string and never an object
-    if (!Lib.Utils.isNullOrUndefined(entry.font_family) && !Lib.Utils.isString(entry.font_family)) {
-      Validators.fail('tokens.' + name + '.font_family', ERRORS.MUST_BE_KNOWN_ENTRY);
-    }
+      if (Lib.Utils.isString(background) && background.charAt(0) === '#') {
+        const found = ramp.indexOf(background.toLowerCase());
 
-    // Size comes off the type scale, so one seed moves the whole ramp
-    const value = {
-      fontSize: Scale.byName(entry.scale || 'carbonType', name)({ step: entry.step }, context.scales[entry.scale || 'carbonType'] || {}),
-      lineHeight: entry.line_height,
-      letterSpacing: entry.letter_spacing
-    };
+        if (found !== -1) {
+          index = found;
+        }
+      }
 
-    // An unset weight stays unset, so emit can omit it rather than invent one
-    if (entry.weight !== undefined) {
-      value.fontWeight = entry.weight;
-    }
+      return index;
 
-    // Carried through untranslated. The engine has no font registry and does no
-    // I/O, so it cannot know which typeface a token names or whether it loaded.
-    // Resolving the token to a family name, and loading the file, belong to the
-    // font module. React Native accepts one family, so a CSS-style fallback
-    // list could not be represented here even if the engine wanted to emit one.
-    if (entry.font_family !== undefined) {
-      value.fontFamily = entry.font_family;
-    }
-
-    return value;
-
-  },
+    },
 
 
-  /********************************************************************
-  Build a shadow value.
+    // ~~~~~~~~~~~~~~~~~~~~ Token Resolution ~~~~~~~~~~~~~~~~~~~~
+    // One token at a time, recursing through aliases and rule operands.
 
-  A shadow resolves to an object for the same reason a type set
-  does: emit needs every layer together to build one platform
-  value, and sibling tokens would force cross-token reads.
+    /********************************************************************
+    Resolve one token by name, memoizing the result for this run.
 
-  @param {String} name - Token name, for error messages
-  @param {Object} entry - Shadow entry
-  @param {Object} context - Resolution context
+    @param {String} name - Token name
+    @param {Object} context - Resolution context
 
-  @return {Object} - Canonical shadow
-  *********************************************************************/
-  shadowValue: function (name, entry, context) {
+    @return {*} - The canonical value
+    *********************************************************************/
+    resolveToken: function (name, context) {
 
-    // Geometry comes either from an elevation level or from explicit layers
-    const layers = _Resolve.shadowLayers(name, entry, context);
+      // Return the settled value when this token was already reached
+      if (Object.prototype.hasOwnProperty.call(context.resolved, name)) {
+        return context.resolved[name];
+      }
 
-    // The color may itself be an alias, so it resolves through the same chain
-    const resolved_color = _Resolve.shadowColor(entry, context);
+      // A token reached while it is still resolving means the aliases form a loop
+      if (context.in_progress[name]) {
+        Validators.fail('tokens.' + name, ERRORS.MUST_NOT_CYCLE);
+      }
 
-    // Stamp the resolved color onto every layer so emit needs no second lookup
-    const composed = layers.map(function (l) {
-      return Object.assign({ color: resolved_color }, l);
-    });
+      context.in_progress[name] = true;
 
-    return {
-      layers: composed,
-      elevation: (entry.elevation !== undefined) ? entry.elevation : (entry.level || 0)
-    };
+      // A layer pin wins over the template default, and the source is recorded
+      const from_theme = Object.prototype.hasOwnProperty.call(context.overlay, name);
+      const entry = from_theme ? context.overlay[name] : context.tokens[name];
 
-  },
-
-
-  /********************************************************************
-  Select the layer geometry for a shadow entry.
-
-  @param {String} name - Token name, for error messages
-  @param {Object} entry - Shadow entry
-  @param {Object} context - Resolution context
-
-  @return {Object[]} - Copied layer geometry
-  *********************************************************************/
-  shadowLayers: function (name, entry, context) {
-
-    // A level seeds the geometry from the authored elevation table
-    if (entry.level !== undefined) {
-
-      if (!ELEVATION[entry.level]) {
+      // An alias can name a token nothing declares, which is a template defect
+      if (entry === undefined) {
         delete context.in_progress[name];
-        Validators.fail('tokens.' + name + '.level', ERRORS.MUST_BE_KNOWN_ENTRY);
+        Validators.fail('tokens.' + name, ERRORS.MUST_BE_DECLARED_TOKEN);
       }
 
-      return ELEVATION[entry.level].map(function (l) {
-        return Object.assign({}, l);
-      });
-    }
+      // Dispatch on the entry's shape, which is what makes the routes uniform
+      const value = _Resolve.valueOf(name, entry, context, from_theme);
 
-    // Explicit layers let a template state geometry the table does not cover
-    if (Array.isArray(entry.layers)) {
-      return entry.layers.map(function (l) {
-
-        // Validate geometry: blur must be non-negative, offsets must be finite
-        if (l.blur !== undefined && (typeof l.blur !== 'number' || !isFinite(l.blur) || l.blur < 0)) {
-          delete context.in_progress[name];
-          Validators.fail('tokens.' + name + '.layers[].blur', 'must be a finite number of zero or greater');
-        }
-
-        if (l.offset_x !== undefined && (typeof l.offset_x !== 'number' || !isFinite(l.offset_x))) {
-          delete context.in_progress[name];
-          Validators.fail('tokens.' + name + '.layers[].offset_x', 'must be a finite number');
-        }
-
-        if (l.offset_y !== undefined && (typeof l.offset_y !== 'number' || !isFinite(l.offset_y))) {
-          delete context.in_progress[name];
-          Validators.fail('tokens.' + name + '.layers[].offset_y', 'must be a finite number');
-        }
-
-        if (l.spread !== undefined && (typeof l.spread !== 'number' || !isFinite(l.spread))) {
-          delete context.in_progress[name];
-          Validators.fail('tokens.' + name + '.layers[].spread', 'must be a finite number');
-        }
-
-        // Normalize absent opacity to 1
-        const copy = Object.assign({}, l);
-        if (copy.opacity === undefined) {
-          copy.opacity = 1;
-        }
-
-        return copy;
-      });
-    }
-
-    // Neither route was declared, so there is no geometry to emit
-    delete context.in_progress[name];
-    Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
-
-  },
-
-
-  /********************************************************************
-  Resolve the color a shadow paints with.
-
-  @param {Object} entry - Shadow entry
-  @param {Object} context - Resolution context
-
-  @return {String} - Hex color
-  *********************************************************************/
-  shadowColor: function (entry, context) {
-
-    // Default to black, which is what an unstated shadow color means
-    if (!entry.color) {
-      return '#000000';
-    }
-
-    // An alias routes through token resolution so a themed shadow follows the theme
-    if (_Resolve.isAlias(entry.color)) {
-      return _Resolve.resolveToken(entry.color.slice(1, -1), context);
-    }
-
-    return entry.color;
-
-  },
-
-
-  /********************************************************************
-  Evaluate a rule entry through its named operation.
-
-  @param {String} name - Token name, for error messages
-  @param {Object} entry - Rule entry
-  @param {Object} context - Resolution context
-
-  @return {*} - The operation's result
-  *********************************************************************/
-  ruleValue: function (name, entry, context) {
-
-    // An unknown operation would otherwise resolve the token to undefined
-    const operation = _Operations[entry.op];
-
-    if (!operation) {
+      // Release the cycle guard and memoize before returning
       delete context.in_progress[name];
-      Validators.fail('tokens.' + name + '.op', ERRORS.MUST_BE_KNOWN_OPERATION);
-    }
+      context.resolved[name] = value;
 
-    return operation(entry.args || [], context);
+      return value;
 
-  },
-
-
-  /********************************************************************
-  Normalize a literal entry.
-
-  @param {*} entry - Literal entry
-
-  @return {*} - The normalized value
-  *********************************************************************/
-  literalValue: function (entry) {
-
-    // Lowercase hex so later identity comparisons against the palette match
-    if (Lib.Utils.isString(entry) && entry.charAt(0) === '#') {
-      return entry.toLowerCase();
-    }
-
-    return entry;
-
-  },
+    },
 
 
-  /********************************************************************
-  Record which route produced a value and where the entry came from.
+    /********************************************************************
+    Produce the canonical value for one template entry.
 
-  Route is how the value was produced; source is where the entry
-  came from. Conflating them hides which parts of the chain a theme
-  actually uses.
+    @param {String} name - Token name, for error messages
+    @param {*} entry - The template or overlay entry
+    @param {Object} context - Resolution context
+    @param {Boolean} from_theme - Whether a layer supplied the entry
 
-  @param {Object} context - Resolution context
-  @param {String} route - Route name
-  @param {Boolean} from_theme - Whether a layer supplied the entry
+    @return {*} - The canonical value
+    *********************************************************************/
+    valueOf: function (name, entry, context, from_theme) {
 
-  @return {void}
-  *********************************************************************/
-  countRoute: function (context, route, from_theme) {
+      // Each branch records the route it took, so a theme's real shape is measurable
+      if (_Resolve.isAlias(entry)) {
+        _Resolve.countRoute(context, 'alias', from_theme);
 
-    // Two independent counters, incremented together on every resolved token
-    context.stats.route[route]++;
-    context.stats.source[from_theme ? 'theme' : 'default']++;
-
-  },
-
-
-  // ~~~~~~~~~~~~~~~~~~~~ Post Passes ~~~~~~~~~~~~~~~~~~~~
-  // Derivations that run once over the settled token map.
-
-  /********************************************************************
-  Scale every duration token by the effective motion factor.
-
-  Reduced motion is a derivation over the durations a theme already
-  has, not a second theme to author and keep in step.
-
-  @param {Object} template - The template being resolved
-  @param {Object} context - Resolution context
-
-  @return {void}
-  *********************************************************************/
-  applyMotionFactor: function (template, context) {
-
-    // Nothing to do at full motion, which is the common case
-    if (context.motion_factor === 1) {
-      return;
-    }
-
-    // Scale only the tokens the template marks as durations
-    const meta = template.meta || {};
-    const names = Object.keys(meta);
-
-    for (let i = 0; i < names.length; i++) {
-      if (meta[names[i]].group === 'duration' && Lib.Utils.isNumber(context.resolved[names[i]])) {
-        context.resolved[names[i]] = Math.round(context.resolved[names[i]] * context.motion_factor);
+        return _Resolve.resolveToken(entry.slice(1, -1), context);
       }
+
+      if (_Resolve.isTypeSet(entry)) {
+        _Resolve.countRoute(context, 'type_set', from_theme);
+
+        return _Resolve.typeSetValue(name, entry, context);
+      }
+
+      if (_Resolve.isShadow(entry)) {
+        _Resolve.countRoute(context, 'shadow', from_theme);
+
+        return _Resolve.shadowValue(name, entry, context);
+      }
+
+      if (_Resolve.isGenerator(entry)) {
+        _Resolve.countRoute(context, 'generator', from_theme);
+
+        return Scale.byName(entry.scale, name)(entry, context.scales[entry.scale] || {});
+      }
+
+      if (_Resolve.isRule(entry)) {
+        _Resolve.countRoute(context, 'rule', from_theme);
+
+        return _Resolve.ruleValue(name, entry, context);
+      }
+
+      if (_Resolve.isLiteral(entry)) {
+        _Resolve.countRoute(context, 'literal', from_theme);
+
+        return _Resolve.literalValue(entry);
+      }
+
+      // Nothing matched, so the entry is a shape this engine has no route for
+      delete context.in_progress[name];
+      Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
+
+    },
+
+
+    /********************************************************************
+    Build a type set value.
+
+    A type set resolves to an object rather than to separate sibling
+    tokens. That is what makes an absolute native line height
+    computable at emit time: the font size it depends on is already
+    inside the same object, so emit never reaches across tokens.
+
+    @param {String} name - Token name, for error messages
+    @param {Object} entry - Type set entry
+    @param {Object} context - Resolution context
+
+    @return {Object} - Canonical type set
+    *********************************************************************/
+    typeSetValue: function (name, entry, context) {
+
+      // Exact and scale-derived forms are alternatives, never simultaneous inputs
+      if (!Lib.Utils.isNullOrUndefined(entry.font_size) && !Lib.Utils.isNullOrUndefined(entry.step)) {
+        Validators.fail('tokens.' + name + '.font_size', ERRORS.MUST_NOT_CONFLICT);
+      }
+      if (!Lib.Utils.isNullOrUndefined(entry.line_height_px) && !Lib.Utils.isNullOrUndefined(entry.line_height)) {
+        Validators.fail('tokens.' + name + '.line_height_px', ERRORS.MUST_NOT_CONFLICT);
+      }
+      if (Lib.Utils.isNullOrUndefined(entry.font_size) && Lib.Utils.isNullOrUndefined(entry.step)) {
+        Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
+      }
+
+      // Resolve an exact size alias or derive the legacy size from its named scale
+      let fontSize;
+      if (!Lib.Utils.isNullOrUndefined(entry.font_size)) {
+        fontSize = _Resolve.compositeNumber(name, 'font_size', entry.font_size, context, true);
+      } else {
+        const scale = entry.scale || 'carbonType';
+        fontSize = Scale.byName(scale, name)({ step: entry.step }, context.scales[scale] || {});
+      }
+
+      // Preserve either exact absolute line height or the legacy unitless ratio
+      const value = { fontSize: fontSize };
+      if (!Lib.Utils.isNullOrUndefined(entry.line_height_px)) {
+        value.lineHeightPx = _Resolve.compositeNumber(name, 'line_height_px', entry.line_height_px, context, false);
+      } else if (!Lib.Utils.isNullOrUndefined(entry.line_height)) {
+        Validators.assertNonNegativeNumber(entry.line_height, 'tokens.' + name + '.line_height');
+        value.lineHeight = entry.line_height;
+      }
+      if (!Lib.Utils.isNullOrUndefined(entry.letter_spacing)) {
+        if (!Lib.Utils.isNumber(entry.letter_spacing)) {
+          Validators.fail('tokens.' + name + '.letter_spacing', ERRORS.MUST_BE_NON_NEGATIVE_NUMBER);
+        }
+        value.letterSpacing = entry.letter_spacing;
+      }
+
+      // An unset weight stays unset, so emit can omit it rather than invent one
+      if (entry.weight !== undefined) {
+        value.fontWeight = entry.weight;
+      }
+
+      // Carried through untranslated. The engine has no font registry and does no
+      // I/O, so it cannot know which typeface a token names or whether it loaded.
+      // Resolving the token to a family name, and loading the file, belong to the
+      // font module. React Native accepts one family, so a CSS-style fallback
+      // list could not be represented here even if the engine wanted to emit one.
+      if (entry.font_family !== undefined) {
+        if (!Lib.Utils.isString(entry.font_family)) {
+          Validators.fail('tokens.' + name + '.font_family', ERRORS.MUST_BE_KNOWN_ENTRY);
+        }
+        value.fontFamily = entry.font_family;
+      }
+
+      return value;
+
+    },
+
+
+    /********************************************************************
+    Resolve and validate a numeric field inside a composite token.
+
+    @param {String} name - Composite token name
+    @param {String} field - Field name for errors
+    @param {*} declared - Literal number or token alias
+    @param {Object} context - Resolution context
+    @param {Boolean} positive - Whether zero is excluded
+
+    @return {Number} - Resolved finite numeric value
+    *********************************************************************/
+    compositeNumber: function (name, field, declared, context, positive) {
+
+      // Resolve aliases through the normal token graph so cycles stay detectable
+      const value = _Resolve.isAlias(declared)
+        ? _Resolve.resolveToken(declared.slice(1, -1), context)
+        : declared;
+
+      // Apply the field's sign constraint after alias resolution
+      if (positive) {
+        Validators.assertPositiveNumber(value, 'tokens.' + name + '.' + field);
+      } else {
+        Validators.assertNonNegativeNumber(value, 'tokens.' + name + '.' + field);
+      }
+
+      return value;
+
+    },
+
+
+    /********************************************************************
+    Build a shadow value.
+
+    A shadow resolves to an object for the same reason a type set
+    does: emit needs every layer together to build one platform
+    value, and sibling tokens would force cross-token reads.
+
+    @param {String} name - Token name, for error messages
+    @param {Object} entry - Shadow entry
+    @param {Object} context - Resolution context
+
+    @return {Object} - Canonical shadow
+    *********************************************************************/
+    shadowValue: function (name, entry, context) {
+
+      // Geometry comes either from an elevation level or from explicit layers
+      const layers = _Resolve.shadowLayers(name, entry, context);
+
+      // The color may itself be an alias, so it resolves through the same chain
+      const resolved_color = _Resolve.shadowColor(entry, context);
+
+      // Stamp the resolved color onto every layer so emit needs no second lookup
+      const composed = layers.map(function (l) {
+        return Object.assign({ color: resolved_color }, l);
+      });
+
+      return {
+        layers: composed,
+        elevation: (entry.elevation !== undefined) ? entry.elevation : (entry.level || 0)
+      };
+
+    },
+
+
+    /********************************************************************
+    Select the layer geometry for a shadow entry.
+
+    @param {String} name - Token name, for error messages
+    @param {Object} entry - Shadow entry
+    @param {Object} context - Resolution context
+
+    @return {Object[]} - Copied layer geometry
+    *********************************************************************/
+    shadowLayers: function (name, entry, context) {
+
+      // A level seeds the geometry from the authored elevation table
+      if (entry.level !== undefined) {
+
+        if (!ELEVATION[entry.level]) {
+          delete context.in_progress[name];
+          Validators.fail('tokens.' + name + '.level', ERRORS.MUST_BE_KNOWN_ENTRY);
+        }
+
+        return ELEVATION[entry.level].map(function (l) {
+          return Object.assign({}, l);
+        });
+      }
+
+      // Explicit layers let a template state geometry the table does not cover
+      if (Array.isArray(entry.layers) && !Lib.Utils.isEmptyArray(entry.layers)) {
+        return entry.layers.map(function (l, index) {
+
+          // Every layer must declare finite geometry before projection
+          const path = 'tokens.' + name + '.layers[' + index + ']';
+          if (!Lib.Utils.isObject(l) || Array.isArray(l)) {
+            Validators.fail(path, ERRORS.MUST_BE_KNOWN_ENTRY);
+          }
+          for (const field of ['offset_x', 'offset_y', 'blur', 'spread']) {
+            if (!Lib.Utils.isNumber(l[field]) || !Number.isFinite(l[field])) {
+              Validators.fail(path + '.' + field, ERRORS.MUST_BE_FINITE_NUMBER);
+            }
+          }
+          if (l.blur < 0) {
+            Validators.fail(path + '.blur', ERRORS.MUST_BE_NON_NEGATIVE_NUMBER);
+          }
+          if (!Lib.Utils.isNullOrUndefined(l.opacity)) {
+            Validators.assertUnitInterval(l.opacity, path + '.opacity');
+          }
+          if (!Lib.Utils.isNullOrUndefined(l.inset) && !Lib.Utils.isBoolean(l.inset)) {
+            Validators.fail(path + '.inset', ERRORS.MUST_BE_BOOLEAN);
+          }
+
+          // Normalize optional projection fields without mutating authored input
+          const copy = Object.assign({}, l);
+          copy.opacity = Lib.Utils.isNullOrUndefined(copy.opacity) ? 1 : copy.opacity;
+          copy.inset = Lib.Utils.isNullOrUndefined(copy.inset) ? false : copy.inset;
+
+          return copy;
+        });
+      }
+
+      // Neither route was declared, so there is no geometry to emit
+      delete context.in_progress[name];
+      Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
+
+    },
+
+
+    /********************************************************************
+    Resolve the color a shadow paints with.
+
+    @param {Object} entry - Shadow entry
+    @param {Object} context - Resolution context
+
+    @return {String} - Hex color
+    *********************************************************************/
+    shadowColor: function (entry, context) {
+
+      // Default to black, which is what an unstated shadow color means
+      if (!entry.color) {
+        return '#000000';
+      }
+
+      // An alias routes through token resolution so a themed shadow follows the theme
+      if (_Resolve.isAlias(entry.color)) {
+        return _Resolve.resolveToken(entry.color.slice(1, -1), context);
+      }
+
+      return entry.color;
+
+    },
+
+
+    /********************************************************************
+    Evaluate a rule entry through its named operation.
+
+    @param {String} name - Token name, for error messages
+    @param {Object} entry - Rule entry
+    @param {Object} context - Resolution context
+
+    @return {*} - The operation's result
+    *********************************************************************/
+    ruleValue: function (name, entry, context) {
+
+      // An unknown operation would otherwise resolve the token to undefined
+      const operation = _Operations[entry.op];
+
+      if (!operation) {
+        delete context.in_progress[name];
+        Validators.fail('tokens.' + name + '.op', ERRORS.MUST_BE_KNOWN_OPERATION);
+      }
+
+      return operation(entry.args || [], context);
+
+    },
+
+
+    /********************************************************************
+    Normalize a literal entry.
+
+    @param {*} entry - Literal entry
+
+    @return {*} - The normalized value
+    *********************************************************************/
+    literalValue: function (entry) {
+
+      // Lowercase hex so later identity comparisons against the palette match
+      if (Lib.Utils.isString(entry) && entry.charAt(0) === '#') {
+        return entry.toLowerCase();
+      }
+
+      return entry;
+
+    },
+
+
+    /********************************************************************
+    Record which route produced a value and where the entry came from.
+
+    Route is how the value was produced; source is where the entry
+    came from. Conflating them hides which parts of the chain a theme
+    actually uses.
+
+    @param {Object} context - Resolution context
+    @param {String} route - Route name
+    @param {Boolean} from_theme - Whether a layer supplied the entry
+
+    @return {void}
+    *********************************************************************/
+    countRoute: function (context, route, from_theme) {
+
+      // Recomputing a dependent changes its value, not its original route count
+      if (!context.refreshing) {
+        context.stats.route[route]++;
+        context.stats.source[from_theme ? 'theme' : 'default']++;
+      }
+
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Post Passes ~~~~~~~~~~~~~~~~~~~~
+    // Derivations that run once over the settled token map.
+
+    /********************************************************************
+    Scale every duration token by the effective motion factor.
+
+    Reduced motion is a derivation over the durations a theme already
+    has, not a second theme to author and keep in step.
+
+    @param {Object} template - The template being resolved
+    @param {Object} context - Resolution context
+
+    @return {void}
+    *********************************************************************/
+    applyMotionFactor: function (template, context) {
+
+      // Nothing to do at full motion, which is the common case
+      if (context.motion_factor === 1) {
+        return;
+      }
+
+      // Scale only the tokens the template marks as durations
+      const meta = template.meta || {};
+      const names = Object.keys(meta);
+
+      for (let i = 0; i < names.length; i++) {
+        if (meta[names[i]].group === 'duration' && Lib.Utils.isNumber(context.resolved[names[i]])) {
+          context.resolved[names[i]] = Math.round(context.resolved[names[i]] * context.motion_factor);
+        }
+      }
+
+    },
+
+
+    /********************************************************************
+    Enforce the template's contrast rules over the settled values.
+
+    Enforcement runs after resolution so it covers literals, aliases,
+    and rules alike. Whether a violation is corrected or only recorded
+    is the caller's policy: a build tool reports and fails, a runtime
+    corrects so a bad remote theme degrades instead of blanking the
+    screen.
+
+    @param {Object} template - The template being resolved
+    @param {Object} context - Resolution context
+
+    @return {void}
+    *********************************************************************/
+    applyContrastRules: function (template, context) {
+
+      // Each rule names a foreground token, its background, and the required ratio
+      const rules = template.contrast_rules || [];
+
+      for (let i = 0; i < rules.length; i++) {
+        _Resolve.applyOneContrastRule(rules[i], i, context);
+      }
+
+    },
+
+
+    /********************************************************************
+    Check one contrast rule and record or correct the outcome.
+
+    @param {Array} rule - Triple of token name, background name, ratio
+    @param {Number} index - Rule position, for error messages
+    @param {Object} context - Resolution context
+
+    @return {void}
+    *********************************************************************/
+    applyOneContrastRule: function (rule, index, context) {
+
+      // A ratio above the representable maximum can never be satisfied
+      const min_ratio = Lib.Utils.isNumber(rule[2]) ? rule[2] : context.min_contrast_ratio;
+      Validators.assertContrastRatio(min_ratio, 'template.contrast_rules[' + index + '][2]');
+
+      // Only a pair of resolved color strings can be measured
+      const before = context.resolved[rule[0]];
+      const against = context.resolved[rule[1]];
+
+      if (!Lib.Utils.isString(before) || !Lib.Utils.isString(against)) {
+        return;
+      }
+
+      // A compliant pair needs no record at all
+      const ratio_before = Color.contrastRatio(before, against);
+
+      if (ratio_before >= min_ratio) {
+        return;
+      }
+
+      // Translucent foregrounds can be measured but cannot be corrected without changing authored alpha
+      if (Color.parseHex(before).a !== 1) {
+        context.violations.push({
+          token: rule[0],
+          against: rule[1],
+          value: before,
+          ratio: Number(ratio_before.toFixed(2)),
+          required: min_ratio,
+          suggested: null,
+          strategy: 'unsupported-alpha-correction'
+        });
+        return;
+      }
+
+      // Find the replacement once, then decide whether policy applies it
+      const suggestion = Color.correctForContrast(before, against, min_ratio, context.palette);
+
+      context.violations.push({
+        token: rule[0],
+        against: rule[1],
+        value: before,
+        ratio: Number(ratio_before.toFixed(2)),
+        required: min_ratio,
+        suggested: suggestion.value,
+        strategy: suggestion.strategy
+      });
+
+      // Reporting mode stops here, leaving the failing value in place
+      if (context.contrast_mode !== 'correct') {
+        return;
+      }
+
+      // Correcting mode rewrites the token and refreshes values derived from it
+      context.resolved[rule[0]] = suggestion.value;
+      _Resolve.refreshDependents(rule[0], context);
+
+      context.corrections.push({
+        token: rule[0],
+        from: before,
+        to: suggestion.value,
+        strategy: suggestion.strategy,
+        ratio_before: Number(ratio_before.toFixed(2)),
+        ratio_after: Number(Color.contrastRatio(suggestion.value, against).toFixed(2))
+      });
+
+    },
+
+
+    /********************************************************************
+    Refresh every resolved token derived from a corrected dependency.
+
+    @param {String} changed - Token whose value changed
+    @param {Object} context - Resolution context
+
+    @return {void}
+    *********************************************************************/
+    refreshDependents: function (changed, context) {
+
+      // Discover the complete affected graph before invalidating or recomputing any value
+      const queue = [changed];
+      const affected = new Set();
+      const names = Object.keys(context.tokens);
+      while (!Lib.Utils.isEmptyArray(queue)) {
+        const dependency = queue.shift();
+        for (let i = 0; i < names.length; i++) {
+          const name = names[i];
+          if (name === changed || affected.has(name)) {
+            continue;
+          }
+          const entry = Object.prototype.hasOwnProperty.call(context.overlay, name)
+            ? context.overlay[name]
+            : context.tokens[name];
+          if (_Resolve.entryDependencies(entry).includes(dependency)) {
+            affected.add(name);
+            queue.push(name);
+          }
+        }
+      }
+
+      // Invalidate every affected value together so recursive resolution sees no stale input
+      const affectedNames = Array.from(affected);
+      for (let i = 0; i < affectedNames.length; i++) {
+        delete context.resolved[affectedNames[i]];
+      }
+
+      // Resolve in declaration order; recursion supplies fresh forward dependencies as needed
+      context.refreshing = true;
+      try {
+        for (let i = 0; i < names.length; i++) {
+          if (affected.has(names[i])) {
+            _Resolve.resolveToken(names[i], context);
+          }
+        }
+      } finally {
+        context.refreshing = false;
+      }
+
+    },
+
+
+    /********************************************************************
+    List token dependencies declared by one entry shape.
+
+    @param {*} entry - Token entry
+
+    @return {String[]} - Direct dependency names
+    *********************************************************************/
+    entryDependencies: function (entry) {
+
+      // Alias entries have exactly one dependency
+      if (_Resolve.isAlias(entry)) {
+        return [entry.slice(1, -1)];
+      }
+
+      // Only operation arguments that name tokens are dependencies
+      if (_Resolve.isRule(entry)) {
+        if (entry.op === 'mix') {
+          return entry.args.slice(0, 2);
+        }
+        if (entry.op === 'scaleBy') {
+          return entry.args.slice(0, 1);
+        }
+      }
+
+      // Typed composites may carry aliases inside exact metrics or shadow color
+      if (_Resolve.isTypeSet(entry)) {
+        return [entry.font_size, entry.line_height_px]
+          .filter(function (value) {
+            return _Resolve.isAlias(value);
+          })
+          .map(function (value) {
+            return value.slice(1, -1);
+          });
+      }
+      if (_Resolve.isShadow(entry) && _Resolve.isAlias(entry.color)) {
+        return [entry.color.slice(1, -1)];
+      }
+
+      return [];
+
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Entry Shape Tests ~~~~~~~~~~~~~~~~~~~~
+    // Which of the six routes an entry declares. Order matters at the call site,
+    // because a type set and a shadow are both plain objects.
+
+    /********************************************************************
+    Report whether an entry is an alias reference.
+
+    @param {*} entry - Template entry
+
+    @return {Boolean} - True when the entry names another token
+    *********************************************************************/
+    isAlias: function (entry) {
+
+      // Braces are the alias marker, chosen so a hex literal can never collide
+      return Lib.Utils.isString(entry) && entry.charAt(0) === '{' && entry.charAt(entry.length - 1) === '}';
+
+    },
+
+
+    /********************************************************************
+    Report whether an entry is a rule.
+
+    @param {*} entry - Template entry
+
+    @return {Boolean} - True when the entry names an operation
+    *********************************************************************/
+    isRule: function (entry) {
+
+      // A rule is identified by carrying an operation name
+      return Lib.Utils.isObject(entry) && !Array.isArray(entry) && Lib.Utils.isString(entry.op);
+
+    },
+
+
+    /********************************************************************
+    Report whether an entry is a generator.
+
+    @param {*} entry - Template entry
+
+    @return {Boolean} - True when the entry names a scale
+    *********************************************************************/
+    isGenerator: function (entry) {
+
+      // A generator is identified by naming the scale it draws from
+      return Lib.Utils.isObject(entry) && !Array.isArray(entry) && Lib.Utils.isString(entry.scale) && entry.type_set !== true;
+
+    },
+
+
+    /********************************************************************
+    Report whether an entry is a type set.
+
+    @param {*} entry - Template entry
+
+    @return {Boolean} - True when the entry declares a type set
+    *********************************************************************/
+    isTypeSet: function (entry) {
+
+      // An explicit marker, because a type set and a generator both name a scale
+      return Lib.Utils.isObject(entry) && entry.type_set === true;
+
+    },
+
+
+    /********************************************************************
+    Report whether an entry is a shadow.
+
+    @param {*} entry - Template entry
+
+    @return {Boolean} - True when the entry declares a shadow
+    *********************************************************************/
+    isShadow: function (entry) {
+
+      // An explicit marker, because a shadow and a type set are both plain objects
+      return Lib.Utils.isObject(entry) && entry.shadow === true;
+
+    },
+
+
+    /********************************************************************
+    Report whether an entry is a literal value.
+
+    @param {*} entry - Template entry
+
+    @return {Boolean} - True when the entry is a directly usable value
+    *********************************************************************/
+    isLiteral: function (entry) {
+
+      // Anything scalar that reached here is its own value
+      return Lib.Utils.isString(entry) || Lib.Utils.isNumber(entry) || Lib.Utils.isBoolean(entry) || Array.isArray(entry);
+
     }
 
-  },
+  };/////////////////////////// Private Functions END /////////////////////////////
 
 
-  /********************************************************************
-  Enforce the template's contrast rules over the settled values.
 
-  Enforcement runs after resolution so it covers literals, aliases,
-  and rules alike. Whether a violation is corrected or only recorded
-  is the caller's policy: a build tool reports and fails, a runtime
-  corrects so a bad remote theme degrades instead of blanking the
-  screen.
+  /////////////////////////// Operations START ///////////////////////////////////
+  const _Operations = {
 
-  @param {Object} template - The template being resolved
-  @param {Object} context - Resolution context
+    /********************************************************************
+    Step a fixed distance along the neutral ramp from the page
+    background.
 
-  @return {void}
-  *********************************************************************/
-  applyContrastRules: function (template, context) {
+    Polarity aware: on a light theme it walks darker, on a dark theme
+    it walks lighter, so one rule serves both.
 
-    // Each rule names a foreground token, its background, and the required ratio
-    const rules = template.contrast_rules || [];
+    @param {Array} args - Operation arguments
+    @param {Object} context - Resolution context
 
-    for (let i = 0; i < rules.length; i++) {
-      _Resolve.applyOneContrastRule(rules[i], i, context);
+    @return {String} - Hex color from the ramp
+    *********************************************************************/
+    rampStep: function (args, context) {
+
+      // Walk away from the background, whichever direction that is for this polarity
+      const direction = (context.polarity === 'light') ? 1 : -1;
+      const target = context.anchor_index + (args[0] * direction);
+
+      // Clamp so a deep step saturates at the end of the ramp instead of failing
+      const clamped = Math.max(0, Math.min(context.ramp.length - 1, target));
+
+      return context.ramp[clamped];
+
+    },
+
+
+    /********************************************************************
+    Read a named step from a palette hue family.
+
+    @param {Array} args - Family name and step number
+    @param {Object} context - Resolution context
+
+    @return {String} - Hex color from the palette
+    *********************************************************************/
+    hue: function (args, context) {
+
+      // Compose the palette key the two arguments name
+      const key = args[0] + args[1];
+
+      // A missing entry means the template names a color its palette lacks
+      if (!context.palette[key]) {
+        Validators.fail('template.palette.' + key, ERRORS.MUST_BE_DECLARED_TOKEN);
+      }
+
+      return context.palette[key];
+
+    },
+
+
+    /********************************************************************
+    Blend two resolved tokens.
+
+    @param {Array} args - Two token references and a weight
+    @param {Object} context - Resolution context
+
+    @return {String} - Blended hex color
+    *********************************************************************/
+    mix: function (args, context) {
+
+      // Both operands resolve through the same chain, so either may itself be derived
+      const a = _Resolve.resolveToken(args[0], context);
+      const b = _Resolve.resolveToken(args[1], context);
+
+      return Color.mix(a, b, args[2]);
+
+    },
+
+
+    /********************************************************************
+    Scale an already-resolved numeric token.
+
+    @param {Array} args - Token reference and multiplier
+    @param {Object} context - Resolution context
+
+    @return {Number} - The scaled value
+    *********************************************************************/
+    scaleBy: function (args, context) {
+
+      // Resolving first lets a density variant scale a generated value
+      return _Resolve.resolveToken(args[0], context) * args[1];
+
     }
 
-  },
+  };/////////////////////////// Operations END ////////////////////////////////////
 
+  return Resolve;
 
-  /********************************************************************
-  Check one contrast rule and record or correct the outcome.
-
-  @param {Array} rule - Triple of token name, background name, ratio
-  @param {Number} index - Rule position, for error messages
-  @param {Object} context - Resolution context
-
-  @return {void}
-  *********************************************************************/
-  applyOneContrastRule: function (rule, index, context) {
-
-    // A ratio above the representable maximum can never be satisfied
-    const min_ratio = Lib.Utils.isNumber(rule[2]) ? rule[2] : context.min_contrast_ratio;
-    Validators.assertContrastRatio(min_ratio, 'template.contrast_rules[' + index + '][2]');
-
-    // Only a pair of resolved color strings can be measured
-    const before = context.resolved[rule[0]];
-    const against = context.resolved[rule[1]];
-
-    if (!Lib.Utils.isString(before) || !Lib.Utils.isString(against)) {
-      return;
-    }
-
-    // A compliant pair needs no record at all
-    const ratio_before = Color.contrastRatio(before, against);
-
-    if (ratio_before >= min_ratio) {
-      return;
-    }
-
-    // Find the replacement once, then decide whether policy applies it
-    const suggestion = Color.correctForContrast(before, against, min_ratio, context.palette);
-
-    context.violations.push({
-      token: rule[0],
-      against: rule[1],
-      value: before,
-      ratio: Number(ratio_before.toFixed(2)),
-      required: min_ratio,
-      suggested: suggestion.value,
-      strategy: suggestion.strategy
-    });
-
-    // Reporting mode stops here, leaving the failing value in place
-    if (context.contrast_mode !== 'correct') {
-      return;
-    }
-
-    // Correcting mode rewrites the token and records what changed
-    context.resolved[rule[0]] = suggestion.value;
-
-    context.corrections.push({
-      token: rule[0],
-      from: before,
-      to: suggestion.value,
-      strategy: suggestion.strategy,
-      ratio_before: Number(ratio_before.toFixed(2)),
-      ratio_after: Number(Color.contrastRatio(suggestion.value, against).toFixed(2))
-    });
-
-  },
-
-
-  // ~~~~~~~~~~~~~~~~~~~~ Entry Shape Tests ~~~~~~~~~~~~~~~~~~~~
-  // Which of the six routes an entry declares. Order matters at the call site,
-  // because a type set and a shadow are both plain objects.
-
-  /********************************************************************
-  Report whether an entry is an alias reference.
-
-  @param {*} entry - Template entry
-
-  @return {Boolean} - True when the entry names another token
-  *********************************************************************/
-  isAlias: function (entry) {
-
-    // Braces are the alias marker, chosen so a hex literal can never collide
-    return Lib.Utils.isString(entry) && entry.charAt(0) === '{' && entry.charAt(entry.length - 1) === '}';
-
-  },
-
-
-  /********************************************************************
-  Report whether an entry is a rule.
-
-  @param {*} entry - Template entry
-
-  @return {Boolean} - True when the entry names an operation
-  *********************************************************************/
-  isRule: function (entry) {
-
-    // A rule is identified by carrying an operation name
-    return Lib.Utils.isObject(entry) && !Array.isArray(entry) && Lib.Utils.isString(entry.op);
-
-  },
-
-
-  /********************************************************************
-  Report whether an entry is a generator.
-
-  @param {*} entry - Template entry
-
-  @return {Boolean} - True when the entry names a scale
-  *********************************************************************/
-  isGenerator: function (entry) {
-
-    // A generator is identified by naming the scale it draws from
-    return Lib.Utils.isObject(entry) && !Array.isArray(entry) && Lib.Utils.isString(entry.scale) && entry.type_set !== true;
-
-  },
-
-
-  /********************************************************************
-  Report whether an entry is a type set.
-
-  @param {*} entry - Template entry
-
-  @return {Boolean} - True when the entry declares a type set
-  *********************************************************************/
-  isTypeSet: function (entry) {
-
-    // An explicit marker, because a type set and a generator both name a scale
-    return Lib.Utils.isObject(entry) && entry.type_set === true;
-
-  },
-
-
-  /********************************************************************
-  Report whether an entry is a shadow.
-
-  @param {*} entry - Template entry
-
-  @return {Boolean} - True when the entry declares a shadow
-  *********************************************************************/
-  isShadow: function (entry) {
-
-    // An explicit marker, because a shadow and a type set are both plain objects
-    return Lib.Utils.isObject(entry) && entry.shadow === true;
-
-  },
-
-
-  /********************************************************************
-  Report whether an entry is a literal value.
-
-  @param {*} entry - Template entry
-
-  @return {Boolean} - True when the entry is a directly usable value
-  *********************************************************************/
-  isLiteral: function (entry) {
-
-    // Anything scalar that reached here is its own value
-    return Lib.Utils.isString(entry) || Lib.Utils.isNumber(entry) || Lib.Utils.isBoolean(entry) || Array.isArray(entry);
-
-  }
-
-};/////////////////////////// Private Functions END /////////////////////////////
-
-
-
-/////////////////////////// Operations START ///////////////////////////////////
-const _Operations = {
-
-  /********************************************************************
-  Step a fixed distance along the neutral ramp from the page
-  background.
-
-  Polarity aware: on a light theme it walks darker, on a dark theme
-  it walks lighter, so one rule serves both.
-
-  @param {Array} args - Operation arguments
-  @param {Object} context - Resolution context
-
-  @return {String} - Hex color from the ramp
-  *********************************************************************/
-  rampStep: function (args, context) {
-
-    // Walk away from the background, whichever direction that is for this polarity
-    const direction = (context.polarity === 'light') ? 1 : -1;
-    const target = context.anchor_index + (args[0] * direction);
-
-    // Clamp so a deep step saturates at the end of the ramp instead of failing
-    const clamped = Math.max(0, Math.min(context.ramp.length - 1, target));
-
-    return context.ramp[clamped];
-
-  },
-
-
-  /********************************************************************
-  Read a named step from a palette hue family.
-
-  @param {Array} args - Family name and step number
-  @param {Object} context - Resolution context
-
-  @return {String} - Hex color from the palette
-  *********************************************************************/
-  hue: function (args, context) {
-
-    // Compose the palette key the two arguments name
-    const key = args[0] + args[1];
-
-    // A missing entry means the template names a color its palette lacks
-    if (!context.palette[key]) {
-      Validators.fail('template.palette.' + key, ERRORS.MUST_BE_DECLARED_TOKEN);
-    }
-
-    return context.palette[key];
-
-  },
-
-
-  /********************************************************************
-  Blend two resolved tokens.
-
-  @param {Array} args - Two token references and a weight
-  @param {Object} context - Resolution context
-
-  @return {String} - Blended hex color
-  *********************************************************************/
-  mix: function (args, context) {
-
-    // Both operands resolve through the same chain, so either may itself be derived
-    const a = _Resolve.resolveToken(args[0], context);
-    const b = _Resolve.resolveToken(args[1], context);
-
-    return Color.mix(a, b, args[2]);
-
-  },
-
-
-  /********************************************************************
-  Scale an already-resolved numeric token.
-
-  @param {Array} args - Token reference and multiplier
-  @param {Object} context - Resolution context
-
-  @return {Number} - The scaled value
-  *********************************************************************/
-  scaleBy: function (args, context) {
-
-    // Resolving first lets a density variant scale a generated value
-    return _Resolve.resolveToken(args[0], context) * args[1];
-
-  }
-
-};/////////////////////////// Operations END ////////////////////////////////////
+};

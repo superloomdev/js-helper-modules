@@ -269,6 +269,7 @@ const _Emit = {
     const rendered = v.layers.map(function (l) {
 
       const parts = [
+        (l.inset ? 'inset' : null),
         l.offset_x + 'px',
         l.offset_y + 'px',
         l.blur + 'px',
@@ -347,11 +348,13 @@ const _Emit = {
     // Record what this projection could not carry
     _Emit.reportShadowLoss(v, ctx);
 
+    // Split color channels from composed alpha so React Native applies opacity once
+    const color = Color.parseHex(dominant.color);
     return {
-      shadowColor: dominant.color,
+      shadowColor: Color.toHex({ r: color.r, g: color.g, b: color.b }),
       shadowOffset: { width: dominant.offset_x, height: dominant.offset_y },
       shadowRadius: dominant.blur,
-      shadowOpacity: dominant.opacity,
+      shadowOpacity: color.a * dominant.opacity,
       elevation: v.elevation
     };
 
@@ -394,6 +397,13 @@ const _Emit = {
           reason: 'spread has no React Native equivalent, so ' + v.layers[i].spread + ' was discarded'
         });
       }
+      if (v.layers[i].inset) {
+        ctx.lossy.push({
+          token: ctx.token,
+          fact: 'inset',
+          reason: 'inset has no legacy React Native equivalent and was discarded'
+        });
+      }
     }
 
   },
@@ -409,12 +419,18 @@ const _Emit = {
   *********************************************************************/
   webTypeSet: function (v, ctx) {
 
-    // Size and spacing carry units; the line height stays a bare ratio
+    // Size carries units while legacy line height remains a bare ratio
     const out = {
-      fontSize: (v.fontSize / ctx.base_font_size) + 'rem',
-      lineHeight: String(v.lineHeight),
-      letterSpacing: v.letterSpacing + 'px'
+      fontSize: (v.fontSize / ctx.base_font_size) + 'rem'
     };
+    if (v.lineHeightPx !== undefined) {
+      out.lineHeight = (v.lineHeightPx / ctx.base_font_size) + 'rem';
+    } else if (v.lineHeight !== undefined) {
+      out.lineHeight = String(v.lineHeight);
+    }
+    if (v.letterSpacing !== undefined) {
+      out.letterSpacing = v.letterSpacing + 'px';
+    }
 
     // A type set may legitimately leave the weight unset, so the key is
     // omitted rather than emitted empty. CSS then inherits, which is what a
@@ -447,12 +463,18 @@ const _Emit = {
   *********************************************************************/
   nativeTypeSet: function (v) {
 
-    // Multiply the ratio out, since React Native reads line height in points
+    // Preserve exact absolute line height; retain rounded legacy ratio behavior
     const out = {
-      fontSize: v.fontSize,
-      lineHeight: Math.round(v.fontSize * v.lineHeight),
-      letterSpacing: v.letterSpacing
+      fontSize: v.fontSize
     };
+    if (v.lineHeightPx !== undefined) {
+      out.lineHeight = v.lineHeightPx;
+    } else if (v.lineHeight !== undefined) {
+      out.lineHeight = Math.round(v.fontSize * v.lineHeight);
+    }
+    if (v.letterSpacing !== undefined) {
+      out.letterSpacing = v.letterSpacing;
+    }
 
     // Stringify only a weight that exists. Applied blindly, String() turns an
     // absent weight into the literal 'undefined', which React Native would

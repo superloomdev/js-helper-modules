@@ -39,7 +39,7 @@ Validated at load. Bad config throws immediately.
 ```javascript
 buildTheme(template, layers, platform, options?) -> { tokens, substituted, lossy, corrections, violations, stats }
 resolve(template, layers, options?)              -> { tokens, scales, polarity, anchor_index, motion_factor, contrast_mode, stats, corrections, violations }
-emit(resolved, template, platform)               -> { tokens, substituted, lossy }
+emit(resolved, template, platform, options?)     -> { tokens, substituted, lossy }
 validateTemplate(template)                       -> { success, errors }
 platforms()                                      -> ['web', 'native']
 cacheStats()                                     -> { hits, misses, evictions, size }
@@ -85,7 +85,8 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 { op: 'rampStep', args: [5] }                                // rule
 { scale: 'miniUnit', multiplier: 2 }                         // generator
 { type_set: true, step: 1, weight: 400, line_height: 1.33,
-  letter_spacing: 0.32, font_family: 'mono' }                // type set
+  letter_spacing: 0.32, font_family: 'mono' }                // legacy type set
+{ type_set: true, font_size: 14.5, line_height_px: 20.25 }   // exact type set
 { shadow: true, level: 2 }                                   // shadow
 ```
 
@@ -105,7 +106,7 @@ A token with no `meta` entry defaults to `raw`. A token with a `platforms` list 
 
 ## Options
 
-`contrast` (`'correct'` rewrites, anything else only reports), `min_contrast_ratio`, `motion_factor`.
+`contrast` (`'correct'` rewrites, anything else only reports), `min_contrast_ratio`, `motion_factor`, `shadow_mode` (`'legacy'` or `'box_shadow'`). An explicit `motion_factor`, including zero, overrides the layer stack.
 
 ## Gotchas
 

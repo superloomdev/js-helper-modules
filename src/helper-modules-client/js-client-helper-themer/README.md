@@ -85,7 +85,7 @@ Both platforms emit the same token keys, so no caller has to guard against `unde
 |---|---|
 | `buildTheme(template, layers, platform, options)` | Derive and emit in one call |
 | `resolve(template, layers, options)` | Derive a platform-independent token map |
-| `emit(resolved, template, platform)` | Project a resolved map onto one platform |
+| `emit(resolved, template, platform, options)` | Project a resolved map onto one platform with validated emission options |
 | `validateTemplate(template)` | Check a template and report every finding |
 | `platforms()` | List the platforms this engine emits for |
 | `cacheStats()` / `clearCache()` | Inspect and reset the per-instance cache |

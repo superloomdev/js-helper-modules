@@ -137,7 +137,7 @@ A layer can override a seed, which is what makes a density change a one-number e
 |---|---|---|
 | `rampStep` | `[steps]` | A color that distance along the neutral ramp, away from the background |
 | `hue` | `[family, step]` | The named palette entry, for example `blue` and `60` |
-| `mix` | `[token_a, token_b, weight]` | A blend of two resolved tokens, weighted toward the first |
+| `mix` | `[token_a, token_b, weight]` | A blend of two resolved numeric colors, including alpha, weighted toward the first |
 | `scaleBy` | `[token, multiplier]` | An already-resolved number, scaled |
 
 `rampStep` is polarity aware. On a light theme it walks darker, on a dark theme it walks lighter, so one rule serves both:
@@ -165,7 +165,19 @@ code01: {
 
 **`font_family` is a token, never a family name and never a font stack.** The engine passes it through untranslated; `helper-font` maps it to a registered family. Writing `'IBM Plex Mono, monospace'` here is wrong twice over: it hard-codes a vendor into a generic template, and React Native cannot represent a fallback list at all.
 
-**Leaving `weight` out is legitimate.** Some design systems deliberately leave certain type sets without a weight. The emitters omit the key rather than inventing a value, so CSS inherits and React Native is not handed the string `'undefined'`.
+An exact type set replaces `step` with `font_size` and may replace the ratio with `line_height_px`. Both exact fields accept a number or a normal token alias. Exact values are unit-free, finite, and never rounded. A type set must not declare both `step` and `font_size`, or both `line_height` and `line_height_px`.
+
+```javascript
+body01: {
+  type_set: true,
+  font_size: '{bodySize}',
+  line_height_px: 20.25,
+  letter_spacing: 0.16,
+  weight: 400
+}
+```
+
+**Leaving `weight`, `line_height`, or `letter_spacing` out is legitimate.** The emitters omit absent properties rather than inventing a value, so CSS inherits and React Native is not handed `undefined` or `NaN`.
 
 ---
 
@@ -188,7 +200,7 @@ customShadow: {
 }
 ```
 
-Web renders every layer. React Native collapses to the layer with the greatest blur and drops `spread`, and both losses appear in the emit result's `lossy` list rather than happening silently.
+Web and native `box_shadow` mode render every layer, including `inset` and `spread`. Legacy native mode collapses to the layer with the greatest blur and drops `spread` and `inset`; every discarded fact appears in `lossy`. A color's own alpha multiplies the layer opacity exactly once. Legacy native output places opaque RGB in `shadowColor` and the composed alpha in `shadowOpacity`, never alpha in both fields.
 
 ---
 
@@ -203,13 +215,13 @@ contrast_rules: [
 ]
 ```
 
-Enforcement runs after resolution, so it covers literals, aliases, and rules alike. A failing color is corrected by one of three strategies, tried in order:
+Enforcement runs after resolution, so it covers literals, aliases, and rules alike. After a correction, the engine discovers and invalidates the complete dependent token subgraph before recomputing it, so forward references, aliases, and diamond-shaped rule graphs cannot retain stale values. A failing color is corrected by one of three strategies, tried in order:
 
 1. **Snap** to a compliant step in the value's own palette family. Keeps the result inside the design system.
 2. **Shift lightness** while holding hue and saturation. Keeps a brand color recognizable.
 3. **Mix** toward white or black. Last resort, because it invents a color the palette does not contain.
 
-Pass `{ contrast: 'report' }` to record violations without rewriting anything, which is what a build-time check wants.
+Pass `{ contrast: 'report' }` to record violations without rewriting anything, which is what a build-time check wants. For translucent foregrounds, the named background is the compositing background and must be opaque. The engine measures the displayed composite but reports `unsupported-alpha-correction` instead of changing authored alpha. A translucent named background has no complete compositing context and throws.
 
 ---
 

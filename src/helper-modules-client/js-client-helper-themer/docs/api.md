@@ -43,7 +43,7 @@ Derives a theme and emits it for one platform. Runs `resolve` then `emit`, and c
 | `template` | `Object` | Yes | The template to derive from |
 | `layers` | `Object[]` | Yes | Ordered sparse overlays |
 | `platform` | `String` | Yes | `'web'` or `'native'` |
-| `options` | `Object` | No | Per-call overrides |
+| `options` | `Object` | No | Per-call `contrast`, `min_contrast_ratio`, `motion_factor`, and `shadow_mode` overrides |
 
 ```javascript
 const theme = Themer.buildTheme(carbonTemplate, [
@@ -72,9 +72,9 @@ resolved.violations;            // contrast failures that were found
 
 Resolution is cached per instance. Calling again with equal layer content returns the same object, which is what makes a framework provider's freshly built array cheap.
 
-### `emit(resolved, template, platform)`
+### `emit(resolved, template, platform, options)`
 
-Projects a resolved token map onto one platform. Both platforms emit the same token keys.
+Projects a resolved token map onto one platform. Both platforms emit the same token keys. The optional options object accepts `shadow_mode: 'legacy' | 'box_shadow'`; omitted or null options use legacy mode. Invalid option shapes, invalid shadow modes, malformed template structure, and unknown metadata groups throw before cache lookup.
 
 ```javascript
 const resolved = Themer.resolve(carbonTemplate, layers);

@@ -18,6 +18,8 @@ export default Object.freeze({
 
   MUST_BE_PLATFORM: 'must be one of: web, native',
 
+  MUST_BE_SHADOW_MODE: 'must be one of: legacy, box_shadow',
+
 
   // ~~~~~~~~~~~~~~~~~~~~ Template Entries ~~~~~~~~~~~~~~~~~~~~
 
@@ -33,12 +35,20 @@ export default Object.freeze({
 
   MUST_BE_KNOWN_GROUP: 'must name a known emitter group',
 
+  MUST_BE_COLOR: 'must be a supported numeric color',
+
+  MUST_HAVE_OPAQUE_BACKGROUND: 'must have an opaque compositing background',
+
+  MUST_NOT_CONFLICT: 'must not be declared with its alternate field',
+
 
   // ~~~~~~~~~~~~~~~~~~~~ Numeric Range ~~~~~~~~~~~~~~~~~~~~
 
   MUST_BE_POSITIVE_NUMBER: 'must be a number greater than zero',
 
   MUST_BE_NON_NEGATIVE_NUMBER: 'must be a number of zero or greater',
+
+  MUST_BE_FINITE_NUMBER: 'must be a finite number',
 
   MUST_BE_UNIT_INTERVAL: 'must be a number between 0 and 1 inclusive',
 
