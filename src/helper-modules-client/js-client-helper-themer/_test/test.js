@@ -479,13 +479,14 @@ describe('emit', () => {
 
   });
 
-  it('should collapse to the layer with the greatest blur when the platform is native', () => {
+  it('should emit every layer as a boxShadow string when the platform is native', () => {
 
     const resolved = Themer.resolve(TEMPLATE, BASE_LAYER);
     const native = Themer.emit(resolved, TEMPLATE, 'native');
 
-    assert.equal(native.tokens.cardShadow.shadowRadius, 6);
-    assert.equal(native.tokens.cardShadow.shadowOpacity, 0.16);
+    assert.equal(typeof native.tokens.cardShadow.boxShadow, 'string');
+    assert.ok(native.tokens.cardShadow.boxShadow.indexOf('0px 3px 6px rgba(0, 0, 0, 0.16)') !== -1);
+    assert.ok(native.tokens.cardShadow.boxShadow.indexOf('0px 3px 6px rgba(0, 0, 0, 0.23)') !== -1);
 
   });
 
@@ -538,23 +539,23 @@ describe('emit', () => {
 
   });
 
-  it('should report the collapsed layers when the platform is native', () => {
+  it('should report no loss for multi-layer shadows when the platform is native', () => {
 
     const resolved = Themer.resolve(TEMPLATE, BASE_LAYER);
     const native = Themer.emit(resolved, TEMPLATE, 'native');
-    const found = native.lossy.filter((l) => l.token === 'cardShadow' && l.fact === 'layers');
+    const found = native.lossy.filter((l) => l.token === 'cardShadow');
 
-    assert.equal(found.length, 1);
+    assert.deepEqual(found, []);
 
   });
 
-  it('should report the discarded spread and name its token when the platform is native', () => {
+  it('should preserve spread in the boxShadow string and report no loss when the platform is native', () => {
 
     const resolved = Themer.resolve(TEMPLATE, BASE_LAYER);
     const native = Themer.emit(resolved, TEMPLATE, 'native');
-    const found = native.lossy.filter((l) => l.token === 'spreadShadow' && l.fact === 'spread');
+    const found = native.lossy.filter((l) => l.token === 'spreadShadow');
 
-    assert.equal(found.length, 1);
+    assert.deepEqual(found, []);
 
   });
 

@@ -44,7 +44,7 @@ Two conventions meet in this module, and the boundary between them is deliberate
 |---|---|---|
 | Template keys, layer keys, options keys, result keys | `snake_case` | These are this module's own public shapes |
 | Scale names and operation names | `camelCase` | These are identifiers naming an engine capability (`stepPairIncrement`, `rampStep`), not data fields |
-| Keys **inside** an emitted token value | `camelCase` | These are React Native and CSS-in-JS property names (`fontSize`, `shadowRadius`). Renaming them would produce a style object neither platform accepts |
+| Keys **inside** an emitted token value | `camelCase` | These are React Native and CSS-in-JS property names (`fontSize`, `boxShadow`). Renaming them would produce a style object neither platform accepts |
 
 ---
 
@@ -99,7 +99,7 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 | `step` | `Number` | One of `step` or `font_size` | Position on the type scale. Conflicts with `font_size` |
 | `scale` | `String` | No | Defaults to `stepPairIncrement`; valid only with `step` |
 | `font_size` | `Number` or alias | One of `font_size` or `step` | Exact unit-free size. Finite and greater than zero; never rounded |
-| `line_height` | `Number` | No | Legacy unitless ratio. Zero or greater; conflicts with `line_height_px` |
+| `line_height` | `Number` | No | Unitless ratio. Zero or greater; conflicts with `line_height_px` |
 | `line_height_px` | `Number` or alias | No | Exact unit-free absolute line height. Finite and zero or greater; conflicts with `line_height` |
 | `letter_spacing` | `Number` | No | Unit-free spacing; omitted from output when absent |
 | `weight` | `Number` | No | Omitted from emit when absent, never stringified |
@@ -110,7 +110,7 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 | Field | Type | Required | Note |
 |---|---|---|---|
 | `shadow` | `Boolean` | Yes | Must be `true` |
-| `layers` | `Object[]` | Yes | Explicit geometry. Each entry is `{ x, y, blur, spread, color }` |
+| `layers` | `Object[]` | Yes | Explicit geometry. Each entry is `{ x, y, blur, spread, color, inset? }` |
 
 Layer geometry validation:
 
@@ -121,6 +121,7 @@ Layer geometry validation:
 | `blur` | `Number` | Finite, zero or greater. Negative blur is rejected |
 | `spread` | `Number` | Finite. May be negative |
 | `color` | `String` | Required. Hex or rgb/rgba. Accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, `rgb(R, G, B)`, or `rgba(R, G, B, A)`. RGB channels are integers from 0 through 255; alpha is between 0 and 1; percentages and other CSS color syntaxes are unsupported. Invalid arithmetic input throws |
+| `inset` | `Boolean` | No | Paints the layer inside the border box; defaults to false |
 
 ### Metadata fields
 
@@ -157,9 +158,8 @@ The optional per-call bundle passed to `resolve` and `buildTheme`.
 | `contrast` | `String` | `'correct'` | `'correct'` rewrites failing colors; any other value only reports them |
 | `min_contrast_ratio` | `Number` | `CONFIG.MIN_CONTRAST_RATIO` | Between 1 and 21 inclusive |
 | `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive. An explicit per-call value, including zero, overrides the layer factor |
-| `shadow_mode` | `String` | `'legacy'` | `'legacy'` collapses to a dominant layer with loss reporting; `'box_shadow'` preserves all layers and spread where the platform supports them |
 
-Omitted options normalize to their defaults and produce output identical to the existing three-argument call. Options that affect output join the cache key alongside the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
+Deprecated emission modes are rejected. Omitted options produce output identical to the existing three-argument call. The cache key is the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
 
 ---
 
@@ -219,7 +219,7 @@ Returned by `emit`. `buildTheme` returns the same three keys plus `corrections`,
 |---|---|---|
 | `tokens` | `Object` | Platform-ready value per token name |
 | `substituted` | `Object[]` | Tokens the platform cannot carry, replaced by their declared fallback |
-| `lossy` | `Object[]` | Facts a projection could not represent |
+| `lossy` | `Object[]` | Facts a projection could not carry. Empty for every current emitter; kept so a future emitter that must drop a fact has somewhere to say so |
 
 Both platforms emit **the same token keys**. A token unavailable on a platform takes its fallback rather than disappearing, because omitting the key would force every caller to guard against `undefined`.
 
@@ -258,7 +258,7 @@ Every throw follows the framework's programmer-error format: an alias prefix, th
 | `[helper-themer] tokens.brand.op must name an operation this engine provides` | Unknown operation name |
 | `[helper-themer] platform must be one of: web, native` | Unknown emit target |
 | `[helper-themer] tokens bad (group: nonsense) must name a known emitter group` | Token metadata names a group no emitter table recognizes |
-| `[helper-themer] options.shadow_mode must be one of: legacy, box_shadow` | Unknown shadow projection mode |
+| `[helper-themer] options.<deprecated> must not be present` | A deprecated emission mode option was passed |
 | `[helper-themer] color must be a supported numeric color` | Color arithmetic received malformed or unsupported color syntax |
 | `[helper-themer] color must have an opaque compositing background` | Contrast rule named a translucent background without a further backdrop |
 | `[helper-themer] CONFIG.CACHE_CAPACITY must be a whole number of 1 or greater` | Misconfigured at load time |

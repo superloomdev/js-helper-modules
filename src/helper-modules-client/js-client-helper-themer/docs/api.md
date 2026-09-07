@@ -43,7 +43,7 @@ Derives a theme and emits it for one platform. Runs `resolve` then `emit`, and c
 | `template` | `Object` | Yes | The template to derive from |
 | `layers` | `Object[]` | Yes | Ordered sparse overlays |
 | `platform` | `String` | Yes | `'web'` or `'native'` |
-| `options` | `Object` | No | Per-call `contrast`, `min_contrast_ratio`, `motion_factor`, and `shadow_mode` overrides |
+| `options` | `Object` | No | Per-call `contrast`, `min_contrast_ratio`, and `motion_factor` overrides |
 
 ```javascript
 const theme = Themer.buildTheme(myTemplate, [
@@ -74,7 +74,7 @@ Resolution is cached per instance. Calling again with equal layer content return
 
 ### `emit(resolved, template, platform, options)`
 
-Projects a resolved token map onto one platform. Both platforms emit the same token keys. The optional options object accepts `shadow_mode: 'legacy' | 'box_shadow'`; omitted or null options use legacy mode. Invalid option shapes, invalid shadow modes, malformed template structure, and unknown metadata groups throw before cache lookup.
+Projects a resolved token map onto one platform. Both platforms emit the same token keys. An options argument may be passed for symmetry with `resolve`; it must not carry deprecated emission modes. Malformed template structure and unknown metadata groups throw before cache lookup.
 
 ```javascript
 const resolved = Themer.resolve(myTemplate, layers);
@@ -134,7 +134,7 @@ contract.meta;       // derived metadata, can be attached to a template as templ
 
 ### `validateContract(theme, options)`
 
-Checks `theme.tokens` against the contract. Returns `{ success, errors, warnings }` and never throws.
+Checks `theme.tokens` against the contract. Returns `{ success, errors, warnings }`. Throws `TypeError` when `theme`, `theme.tokens`, or an options list is malformed; reports every content finding.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -192,7 +192,7 @@ Themer.clearCache();
 
 ## Failure Behavior
 
-Every failure throws `TypeError`, with `validateTemplate` and `validateContract` as the deliberate exceptions described above. There is no `{ success, error }` **operational** envelope anywhere in this module, because a pure engine has no operational failures to report. The full reasoning is in [Philosophy](philosophy.md); the message format and the complete list are in [Schemas](schemas.md).
+Every failure throws `TypeError`, with `validateTemplate` as the deliberate exception described above. `validateContract` throws `TypeError` for malformed arguments and reports content findings as `{ success, errors, warnings }`. There is no `{ success, error }` **operational** envelope anywhere in this module, because a pure engine has no operational failures to report. The full reasoning is in [Philosophy](philosophy.md); the message format and the complete list are in [Schemas](schemas.md).
 
 ```javascript
 Themer.emit(resolved, template, 'android');

@@ -39,9 +39,9 @@ This is also why a type set resolves to an **object** rather than to separate si
 
 ## 3. Nothing Disappears Quietly
 
-Some facts cannot cross a platform boundary. A CSS shadow can have a spread radius and many layers; React Native supports neither. The tempting behavior is to drop what does not fit.
+Some facts cannot cross a platform boundary. The tempting behavior is to drop what does not fit.
 
-The cautionary example is in the platform bridge itself: `react-native-web` silently discards shadow properties it cannot map, so a multi-layer shadow with per-layer colors collapses to a single layer with no warning. A value vanishes, the screen looks subtly wrong, and nothing anywhere says why.
+The cautionary example is in the platform bridge itself: `react-native-web` silently discards shadow properties it cannot map, so a multi-layer shadow with per-layer colors can collapse to a single layer with no warning. A value vanishes, the screen looks subtly wrong, and nothing anywhere says why.
 
 Themer reports instead. Every emit returns two lists beside the tokens:
 

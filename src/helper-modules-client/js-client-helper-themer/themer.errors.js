@@ -18,8 +18,6 @@ export default Object.freeze({
 
   MUST_BE_PLATFORM: 'must be one of: web, native',
 
-  MUST_BE_SHADOW_MODE: 'must be one of: legacy, box_shadow',
-
 
   // ~~~~~~~~~~~~~~~~~~~~ Template Entries ~~~~~~~~~~~~~~~~~~~~
 
@@ -66,15 +64,19 @@ export default Object.freeze({
 
   MUST_BE_BOOLEAN: 'must be true or false',
 
+  MUST_BE_STRING_ARRAY: 'must be an array of strings',
+
+  MUST_NOT_BE_PRESENT: 'must not be present',
+
 
   // ~~~~~~~~~~~~~~~~~~~~ Token Contract ~~~~~~~~~~~~~~~~~~~~
 
-  CONTRACT_MISSING_TOKEN: 'is a required contract token absent from the theme',
+  CONTRACT_MISSING_TOKEN: Object.freeze({ type: 'helper-themer/contract-missing-token', message: 'is a required contract token absent from the theme' }),
 
-  CONTRACT_UNKNOWN_TOKEN: 'is not a token in the contract',
+  CONTRACT_UNKNOWN_TOKEN: Object.freeze({ type: 'helper-themer/contract-unknown-token', message: 'is not a token in the contract' }),
 
-  CONTRACT_INVALID_VALUE: 'is not a valid value for this token type',
+  CONTRACT_INVALID_VALUE: Object.freeze({ type: 'helper-themer/contract-invalid-value', message: 'is not a valid value for this token type' }),
 
-  CONTRACT_UNSUPPORTED_TOKEN: 'is not supported by this component system'
+  CONTRACT_UNSUPPORTED_TOKEN: Object.freeze({ type: 'helper-themer/contract-unsupported-token', message: 'is not supported by this component system' })
 
 });

@@ -1,11 +1,9 @@
-// Info: Failing tests for additive Themer capabilities.
+// Info: Tests for additive Themer capabilities.
 //
-// These tests expose G02 (cache key omits template metadata and emission
-// options), G11 (color parser ignores alpha in 8-digit hex and rgb/rgba),
-// and G12 (shadow emission lacks modern mode and explicit geometry support).
+// These tests cover G11 (color parser ignores alpha in 8-digit hex and rgb/rgba)
+// and G12 (shadow emission as a preserved box-shadow list).
 //
-// The tests are written to fail against the current implementation and pass
-// after Step 2.2 implements the additive capabilities.
+// The tests pass against the current implementation.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -115,7 +113,7 @@ describe('recovery - public boundaries', function () {
     const engine = themerLoader(Lib, {});
     const template = shadowTemplate();
     const resolved = engine.resolve(template, []);
-    for (const options of [false, 1, 'box_shadow']) {
+    for (const options of [false, 1, 'invalid-string']) {
       assert.throws(function () { engine.buildTheme(template, [], 'native', options); }, TypeError);
       assert.throws(function () { engine.emit(resolved, template, 'native', options); }, TypeError);
     }
@@ -197,12 +195,6 @@ describe('recovery - exact authored values', function () {
     assert.equal(result.tokens.mixed, '#80008080');
   });
 
-  it('should reject an unknown shadow emission mode', function () {
-    assert.throws(function () {
-      Themer.buildTheme(shadowTemplate(), [], 'native', { shadow_mode: 'unknown' });
-    }, TypeError);
-  });
-
   it('should measure translucent foreground contrast against its declared opaque background', function () {
     const engine = themerLoader(Lib, {});
     const result = engine.buildTheme({
@@ -249,15 +241,12 @@ describe('recovery - exact authored values', function () {
     }
   });
 
-  it('should emit native shadow color and composed alpha exactly once', function () {
+  it('should emit a native shadow as one boxShadow string carrying the layer color', function () {
     const template = shadowTemplate();
     template.tokens.cardShadow.layers = [{ x: 0, y: 2, blur: 6, spread: 0, color: '#00000080' }];
     const result = Themer.buildTheme(template, [], 'native');
     assert.deepEqual(result.tokens.cardShadow, {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowRadius: 6,
-      shadowOpacity: 128 / 255
+      boxShadow: '0px 2px 6px #00000080'
     });
   });
 
@@ -430,32 +419,14 @@ describe('G11 - alpha-aware color parsing', () => {
 });
 
 
-describe('G12 - shadow emission modes', () => {
+describe('G12 - shadow emission', () => {
 
-  it('should emit legacy native shadow by default (3-argument emit)', () => {
+  it('should emit a native shadow as a boxShadow string', () => {
 
     const resolved = Themer.resolve(shadowTemplate(), [{ name: 'base' }]);
     const emitted = Themer.emit(resolved, shadowTemplate(), 'native');
 
-    // Legacy native emission collapses to a dominant layer
-    assert.equal(typeof emitted.tokens.cardShadow.shadowColor, 'string');
-    assert.equal(typeof emitted.tokens.cardShadow.shadowOffset, 'object');
-    assert.equal(typeof emitted.tokens.cardShadow.shadowRadius, 'number');
-    assert.equal(typeof emitted.tokens.cardShadow.shadowOpacity, 'number');
-
-  });
-
-  it('should emit box_shadow mode preserving all layers when options specify it', () => {
-
-    const resolved = Themer.resolve(shadowTemplate(), [{ name: 'base' }]);
-    const emitted = Themer.emit(resolved, shadowTemplate(), 'native', {
-      shadow_mode: 'box_shadow'
-    });
-
-    // Modern box_shadow mode should preserve all layer geometry
-    // The exact shape depends on implementation, but it should carry
-    // more information than the legacy collapsed single-layer form
-    assert.ok(emitted.tokens.cardShadow, 'shadow token must be emitted');
+    assert.equal(typeof emitted.tokens.cardShadow.boxShadow, 'string');
 
   });
 
@@ -471,76 +442,10 @@ describe('G12 - shadow emission modes', () => {
 
   });
 
-  it('should report loss in legacy mode but not in box_shadow mode', () => {
-
-    const resolved = Themer.resolve(shadowTemplate(), [{ name: 'base' }]);
-
-    const legacyResult = Themer.emit(resolved, shadowTemplate(), 'native');
-    const modernResult = Themer.emit(resolved, shadowTemplate(), 'native', {
-      shadow_mode: 'box_shadow'
-    });
-
-    // Legacy mode should report loss (spread dropped, single layer collapsed)
-    const legacyLoss = (legacyResult.lossy || []).filter(l => l.token === 'cardShadow');
-    assert.ok(legacyLoss.length > 0, 'legacy mode should report loss for multi-layer shadow');
-
-    // Modern mode should not report loss for the same shadow
-    const modernLoss = (modernResult.lossy || []).filter(l => l.token === 'cardShadow');
-    assert.equal(modernLoss.length, 0, 'box_shadow mode should not report loss');
-
-  });
-
 });
 
 
-describe('G02 - cache key includes emission options', () => {
 
-  it('should not share cache entries between legacy and box_shadow modes', () => {
-
-    const themer = themerLoader(Lib, { CACHE_ENABLED: true });
-    const template = shadowTemplate();
-    const resolved = themer.resolve(template, [{ name: 'base' }]);
-
-    // Emit with legacy mode
-    themer.emit(resolved, template, 'native', { shadow_mode: 'legacy' });
-    const statsAfterLegacy = themer.cacheStats();
-
-    // Emit with box_shadow mode - should be a cache miss, not a hit
-    themer.emit(resolved, template, 'native', { shadow_mode: 'box_shadow' });
-    const statsAfterModern = themer.cacheStats();
-
-    // The cache should have grown (new entry for the different mode)
-    assert.ok(
-      statsAfterModern.size > statsAfterLegacy.size,
-      'different shadow modes should not share a cache entry (size: ' + statsAfterLegacy.size + ' -> ' + statsAfterModern.size + ')'
-    );
-
-  });
-
-  it('should share cache entries for omitted vs explicitly defaulted options', () => {
-
-    const themer = themerLoader(Lib, { CACHE_ENABLED: true });
-    const template = shadowTemplate();
-    const resolved = themer.resolve(template, [{ name: 'base' }]);
-
-    // Emit with no options
-    themer.emit(resolved, template, 'native');
-    const statsAfterFirst = themer.cacheStats();
-
-    // Emit with empty options - should be a cache hit
-    themer.emit(resolved, template, 'native', {});
-    const statsAfterSecond = themer.cacheStats();
-
-    // The cache size should not have grown (same entry reused)
-    assert.equal(
-      statsAfterSecond.size,
-      statsAfterFirst.size,
-      'omitted options and empty options should share a cache entry'
-    );
-
-  });
-
-});
 
 
 describe('G12 - explicit shadow geometry validation', () => {
@@ -588,6 +493,34 @@ describe('G12 - explicit shadow geometry validation', () => {
     const resolved = Themer.resolve(template, [{ name: 'base' }]);
     assert.ok(resolved.tokens.cardShadow, 'shadow with color alias should resolve');
     assert.equal(resolved.tokens.cardShadow.layers[0].color, '#000000');
+
+  });
+
+});
+
+
+describe('G02 - cache key omits emission options', () => {
+
+  it('should share cache entries for omitted vs explicitly defaulted options', () => {
+
+    const themer = themerLoader(Lib, { CACHE_ENABLED: true });
+    const template = shadowTemplate();
+    const resolved = themer.resolve(template, [{ name: 'base' }]);
+
+    // Emit with no options
+    themer.emit(resolved, template, 'native');
+    const statsAfterFirst = themer.cacheStats();
+
+    // Emit with empty options - should be a cache hit
+    themer.emit(resolved, template, 'native', {});
+    const statsAfterSecond = themer.cacheStats();
+
+    // The cache size should not have grown (same entry reused)
+    assert.equal(
+      statsAfterSecond.size,
+      statsAfterFirst.size,
+      'omitted options and empty options should share a cache entry'
+    );
 
   });
 

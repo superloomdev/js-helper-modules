@@ -56,7 +56,7 @@ clearCache()                                     -> undefined
 
 **Everything throws `TypeError`. There is no operational envelope.**
 
-The single exception is `validateTemplate`, which returns `{ success, errors }` and never throws. It is a pre-resolution reporting surface, so it collects every finding. `validateContract` also returns `{ success, errors, warnings }` and never throws.
+The single exception is `validateTemplate`, which returns `{ success, errors }` and never throws. It is a pre-resolution reporting surface, so it collects every finding. `validateContract` returns `{ success, errors, warnings }` for content findings but throws `TypeError` when `theme`, `theme.tokens`, or an options list is malformed.
 
 Message format: `[helper-themer] <field-path> <expected-shape>`
 
@@ -79,7 +79,7 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 |---|---|
 | Template / layer / options / result keys | `snake_case` |
 | Scale and operation identifiers | camelCase (stepPairIncrement, miniUnit, geometric, rampStep, hue, mix, scaleBy) |
-| Keys **inside** an emitted token value | `camelCase` (`fontSize`, `lineHeight`, `shadowRadius`) - React Native's contract, do not rename |
+| Keys **inside** an emitted token value | `camelCase` (`fontSize`, `lineHeight`, `boxShadow`) - React Native's contract, do not rename |
 
 ## Template Entry Shapes
 
@@ -89,13 +89,13 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 { op: 'rampStep', args: [5] }                                // rule
 { scale: 'miniUnit', multiplier: 2 }                         // generator
 { type_set: true, step: 1, weight: 400, line_height: 1.33,
-  letter_spacing: 0.32, font_family: 'mono' }                // legacy type set
+  letter_spacing: 0.32, font_family: 'mono' }                // scale-derived type set
 { type_set: true, font_size: 14.5, line_height_px: 20.25 }   // exact type set
-{ shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033' } ] }  // shadow
+{ shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033', inset: false } ] }  // shadow
 ```
 
 Type set and shadow require their boolean marker. Shadow must declare `layers`, an array of
-`{ x, y, blur, spread, color }` objects.
+`{ x, y, blur, spread, color, inset? }` objects.
 
 ## Metadata Groups
 
@@ -109,7 +109,7 @@ A token with no `meta` entry defaults to `raw`. A token with a `platforms` list 
 
 ## Options
 
-`contrast` (`'correct'` rewrites, anything else only reports), `min_contrast_ratio`, `motion_factor`, `shadow_mode` (`'legacy'` or `'box_shadow'`). An explicit `motion_factor`, including zero, overrides the layer stack.
+`contrast` (`'correct'` rewrites, anything else only reports), `min_contrast_ratio`, `motion_factor`. An explicit `motion_factor`, including zero, overrides the layer stack. Deprecated emission modes are rejected.
 
 ## Gotchas
 

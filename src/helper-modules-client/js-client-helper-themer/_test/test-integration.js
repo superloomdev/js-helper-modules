@@ -66,20 +66,19 @@ describe('lossy projection reporting', () => {
 
   });
 
-  it('should report the collapsed multi-layer shadow on native', () => {
+  it('should report no loss for multi-layer shadows on native', () => {
 
-    const found = native.lossy.filter((l) => l.token === 'cardShadow' && l.fact === 'layers');
+    const found = native.lossy.filter((l) => l.token === 'cardShadow');
 
-    assert.equal(found.length, 1);
-    assert.match(found[0].reason, /2 layers collapsed/);
+    assert.deepEqual(found, []);
 
   });
 
-  it('should report the discarded spread on native, naming the token', () => {
+  it('should preserve spread on native and report no loss', () => {
 
     const found = native.lossy.filter((l) => l.token === 'cardShadow' && l.fact === 'spread');
 
-    assert.equal(found.length, 1);
+    assert.deepEqual(found, []);
 
   });
 

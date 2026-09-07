@@ -135,7 +135,7 @@ See [Philosophy](docs/philosophy.md).
 
 ## Error Handling
 
-Every failure throws `TypeError`, because a pure engine has no operational failures. The exceptions are `validateTemplate`, which reports `{ success, errors }` so a build tool sees every problem at once, and `validateContract`, which reports `{ success, errors, warnings }` so a caller sees every contract finding at once.
+Every failure throws `TypeError`, because a pure engine has no operational failures. The exception is `validateTemplate`, which reports `{ success, errors }` so a build tool sees every problem at once. `validateContract` throws `TypeError` for malformed arguments and reports `{ success, errors, warnings }` for content findings.
 
 ```javascript
 Themer.emit(resolved, template, 'android');

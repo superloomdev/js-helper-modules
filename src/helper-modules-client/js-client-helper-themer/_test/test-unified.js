@@ -103,7 +103,7 @@ describe('unified engine - conformance against Carbon', () => {
   it('should reproduce all 13 Carbon spacing steps exactly', () => {
 
     const CARBON_SPACING = [2, 4, 8, 12, 16, 24, 32, 40, 48, 64, 80, 96, 160];
-    const gotSpacing = SPACING_MULTIPLIERS.map(function (_, i) {
+    const gotSpacing = SPACING_MULTIPLIERS.map(function (value, i) {
       return light.tokens['spacing' + String(i + 1).padStart(2, '0')];
     });
 
@@ -114,7 +114,7 @@ describe('unified engine - conformance against Carbon', () => {
   it('should reproduce all 23 Carbon type scale steps exactly', () => {
 
     const CARBON_TYPE = [12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 54, 60, 68, 76, 84, 92, 102, 112, 122, 132, 144, 156];
-    const gotType = CARBON_TYPE.map(function (_, i) {
+    const gotType = CARBON_TYPE.map(function (value, i) {
       return light.tokens['scale' + String(i + 1).padStart(2, '0')];
     });
 

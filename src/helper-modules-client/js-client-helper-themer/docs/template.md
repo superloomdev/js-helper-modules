@@ -195,9 +195,9 @@ cardShadow: {
 }
 ```
 
-Each layer is `{ x, y, blur, spread, color }`. `x` and `y` are pixel offsets and may be negative. `blur` is zero or greater. `spread` may be negative. `color` is a hex or rgb/rgba string and is required on every layer.
+Each layer is `{ x, y, blur, spread, color, inset? }`. `x` and `y` are pixel offsets and may be negative. `blur` is zero or greater. `spread` may be negative. `color` is a hex or rgb/rgba string and is required on every layer. `inset` is optional and defaults to false; when true, the layer paints inside the border box.
 
-Web and native `box_shadow` mode render every layer, including `spread`. Legacy native mode collapses to the layer with the greatest blur and drops `spread`; every discarded fact appears in `lossy`. Legacy native output places opaque RGB in `shadowColor` and the composed alpha in `shadowOpacity`, never alpha in both fields.
+Web emits the list as a CSS `box-shadow` string. Native emits `{ boxShadow: '<list>' }` using React Native 0.76+ `boxShadow` support, preserving every layer, spread, and inset. `lossy` is empty for every current emitter.
 
 ---
 

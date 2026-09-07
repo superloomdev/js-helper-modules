@@ -50,14 +50,17 @@ export default function loader (shared_libs, config) {
     config || {}
   );
 
-  // Validators instance - Lib and ERRORS captured independently here
-  const Validators = createValidators(Lib, ERRORS);
+  // Color depends on nothing but Lib, so it builds first and serves the validators
+  const Color = createColor(Lib, CONFIG, ERRORS);
+
+  // Validators instance - Lib, ERRORS, and Color captured independently here
+  const Validators = createValidators(Lib, ERRORS, Color);
 
   // Validate config immediately so misconfiguration fails at startup
   Validators.validateConfig(CONFIG);
 
   // Build the pure parts, threading siblings through the uniform parts container
-  const Parts = _Themer.buildParts(Lib, CONFIG, ERRORS, Validators);
+  const Parts = _Themer.buildParts(Lib, CONFIG, ERRORS, Validators, Color);
 
   // Validate DEFAULT_TYPE_SCALE names a known generator after merge with SCALE_GENERATORS
   // This check runs after buildParts so the Scale part is available with custom generators
@@ -124,7 +127,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     *********************************************************************/
     buildTheme: function (template, layers, platform, options) {
 
-      // Split options into resolve-side and emit-side bundles
+      // Split options into resolve-side bundle
       Validators.validateOptions(options);
       const resolveOpts = options ? {
         contrast: options.contrast,
@@ -132,15 +135,11 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
         motion_factor: options.motion_factor
       } : undefined;
 
-      const emitOpts = options ? {
-        shadow_mode: options.shadow_mode
-      } : undefined;
-
       // Resolve first, so the emitted result and the reports share one derivation
       const resolved = Themer.resolve(template, layers, resolveOpts);
 
       // Project the resolved tokens onto the requested platform
-      const emitted = Themer.emit(resolved, template, platform, emitOpts);
+      const emitted = Themer.emit(resolved, template, platform);
 
       // Carry the contrast reports through, since they belong to the derivation
       return {
@@ -202,7 +201,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     @param {Object} resolved - Output of resolve
     @param {Object} template - The template that produced it
     @param {String} platform - 'web' or 'native'
-    @param {Object} [options] - Per-call emission options
+    @param {Object} [options] - Per-call options; must not carry deprecated emission modes
 
     @return {Object} - Emitted result
     @return {Object} .tokens - Platform-ready value per token name
@@ -217,11 +216,8 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       Validators.validateGroups(template.meta, Parts.Emit.groups());
       Validators.validateOptions(options);
 
-      // Normalize options: omitted or null becomes the legacy defaults
-      const normalized = _Themer.normalizeEmitOptions(options);
-
-      // Serve a cached projection when this resolved/template/platform/options combo was emitted before
-      const key = _Themer.emitKey(state, resolved, template, platform, normalized);
+      // Serve a cached projection when this resolved/template/platform combo was emitted before
+      const key = _Themer.emitKey(state, resolved, template, platform);
       const cached = _Themer.getCache(state, key);
 
       if (cached) {
@@ -229,7 +225,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       }
 
       // Project every token, collecting substitutions and losses as it goes
-      const result = _Themer.project(Parts, CONFIG, resolved, template, platform, normalized);
+      const result = _Themer.project(Parts, CONFIG, resolved, template, platform);
       _Themer.writeCache(state, CONFIG, key, result);
 
       return result;
@@ -286,7 +282,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     /********************************************************************
     Validate a resolved theme against the token contract.
 
-    Reports rather than throws. Returns { success, errors, warnings }.
+    Returns { success, errors, warnings }. Throws TypeError only when
+    theme, theme.tokens, or an options list is malformed; reports every
+    content finding.
 
     @param {Object} theme - A theme object with a tokens map
     @param {Object} [options] - Validation options
@@ -382,13 +380,13 @@ const _Themer = {
   @param {Object} CONFIG - Merged config for this instance
   @param {Object} ERRORS - Frozen error catalog
   @param {Object} Validators - Validators singleton
+  @param {Object} Color - Color part built by the loader
 
   @return {Object} - Map of part name to part interface
   *********************************************************************/
-  buildParts: function (Lib, CONFIG, ERRORS, Validators) {
+  buildParts: function (Lib, CONFIG, ERRORS, Validators, Color) {
 
-    // Color and scale depend on nothing but Lib, so they build first
-    const Color = createColor(Lib, CONFIG, ERRORS);
+    // Scale depends on nothing but Lib; color arrives already built
     const Scale = createScale(Lib, CONFIG, ERRORS);
 
     // Emit needs color to render shadow layers as rgba
@@ -422,11 +420,10 @@ const _Themer = {
   @param {Object} resolved - Output of resolve
   @param {Object} template - The template that produced it
   @param {String} platform - Target platform
-  @param {Object} [options] - Normalized emission options
 
   @return {Object} - Emitted result with its two reports
   *********************************************************************/
-  project: function (Parts, CONFIG, resolved, template, platform, options) {
+  project: function (Parts, CONFIG, resolved, template, platform) {
 
     // The template's own base size wins, so one template can restate the root
     const scales = resolved.scales || {};
@@ -438,17 +435,11 @@ const _Themer = {
     const substituted = [];
     const lossy = [];
 
-    // Build the emission context that each emitter receives
-    const ctx = {
-      base_font_size: base_font_size,
-      options: options || { shadow_mode: 'legacy' }
-    };
-
     // Project each token through the emitter its group names
     const names = Object.keys(resolved.tokens);
 
     for (let i = 0; i < names.length; i++) {
-      _Themer.projectOne(Parts, names[i], resolved, meta, platform, supported, base_font_size, out, substituted, lossy, ctx);
+      _Themer.projectOne(Parts, names[i], resolved, meta, platform, supported, base_font_size, out, substituted, lossy);
     }
 
     return {
@@ -474,11 +465,10 @@ const _Themer = {
   @param {Object} out - Accumulated emitted tokens
   @param {Object[]} substituted - Accumulated substitution reports
   @param {Object[]} lossy - Accumulated loss reports
-  @param {Object} ctx - Emission context with options
 
   @return {void}
   *********************************************************************/
-  projectOne: function (Parts, name, resolved, meta, platform, supported, base_font_size, out, substituted, lossy, ctx) {
+  projectOne: function (Parts, name, resolved, meta, platform, supported, base_font_size, out, substituted, lossy) {
 
     // A token with no metadata passes through as a raw value
     const entry_meta = meta[name] || { group: 'raw' };
@@ -500,14 +490,11 @@ const _Themer = {
       return;
     }
 
-    // The token name and emission options travel with the context so a lossy
-    // emitter can name it and an option-aware emitter can select its mode.
-    // Without it a loss report says what was dropped but not where.
+    // The token name travels with the context so a lossy emitter can name it.
     const context = {
       base_font_size: base_font_size,
       token: name,
-      lossy: lossy,
-      options: (ctx && ctx.options) || { shadow_mode: 'legacy' }
+      lossy: lossy
     };
 
     out[name] = Parts.Emit.value(value, entry_meta.group, platform, context);
@@ -551,19 +538,14 @@ const _Themer = {
   Build the cache key for an emit call.
 
   Keyed on the resolved object's identity, the template's identity,
-  the platform, and the normalized emission options. A cached
-  resolve returns the same reference, so identity is already an
-  exact proxy for content here, and serializing a whole token map
-  per call would cost more than the projection it avoids.
+  and the platform. A cached resolve returns the same reference, so
+  identity is already an exact proxy for content here, and serializing
+  a whole token map per call would cost more than the projection it
+  avoids.
 
   Template identity joins the key because template metadata drives
   emitter selection. Two templates producing the same resolved values
   but with different metadata may emit differently.
-
-  Normalized options join the key because they select emission modes
-  (such as shadow_mode) that change the output. Omitted and
-  explicitly-defaulted options normalize to the same string, so
-  they share a cache entry.
 
   A hand-built resolved object gets a fresh id and simply misses
   every time, which is correct but uncached.
@@ -572,46 +554,16 @@ const _Themer = {
   @param {Object} resolved - Output of resolve
   @param {Object} template - The template that produced the resolved values
   @param {String} platform - Target platform
-  @param {Object} normalized - Normalized emission options
 
   @return {String} - Cache key
   *********************************************************************/
-  emitKey: function (state, resolved, template, platform, normalized) {
+  emitKey: function (state, resolved, template, platform) {
 
     // Platform and template identity join the key so different targets
     // or different templates never serve each other's result
     return _Themer.idOf(state, resolved)
       + '|' + _Themer.idOf(state, template)
-      + '|emit|' + platform
-      + '|' + JSON.stringify(normalized);
-
-  },
-
-
-  /********************************************************************
-  Normalize emission options.
-
-  Omitted or null options become the legacy defaults. Unknown keys
-  are preserved but do not affect output. The normalized form is
-  deterministic so it can join the cache key.
-
-  @param {Object|undefined} options - Raw options argument
-
-  @return {Object} - Normalized options
-  *********************************************************************/
-  normalizeEmitOptions: function (options) {
-
-    // Omitted or null normalizes to the legacy defaults
-    if (!options) {
-      return { shadow_mode: 'legacy' };
-    }
-
-    // shadow_mode defaults to legacy when absent or not a known value
-    const shadow_mode = (options.shadow_mode === 'box_shadow')
-      ? 'box_shadow'
-      : 'legacy';
-
-    return { shadow_mode: shadow_mode };
+      + '|emit|' + platform;
 
   },
 

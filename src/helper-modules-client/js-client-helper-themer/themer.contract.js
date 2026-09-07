@@ -7,9 +7,8 @@
 // never embeds a vendor name.
 //
 // The contract is versioned. Version 1 is the initial Superloom contract
-// derived from Carbon v11 names in snake_case, with web-only concepts
-// removed and Superloom additions for font roles, structure knobs, and
-// shadow recipes.
+// in snake_case, with web-only concepts removed and Superloom additions
+// for font roles, structure knobs, and shadow recipes.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////

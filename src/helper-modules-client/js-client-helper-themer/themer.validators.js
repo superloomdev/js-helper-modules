@@ -17,16 +17,18 @@ catalog per instance and returns an isolated Validators object.
 
 @param {Object} shared_libs - Lib container with Utils
 @param {Object} errors - Frozen error catalog owned by the main module
+@param {Object} color - Color part, used to parse ramp entries
 
 @return {Object} - Public Validators interface
 *********************************************************************/
-export default function loader (shared_libs, errors) {
+export default function loader (shared_libs, errors, color) {
 
   // Assign injected dependencies so the public object can close over them
   const Lib = shared_libs;
   const ERRORS = errors;
+  const Color = color;
 
-  return createInterface(Lib, ERRORS);
+  return createInterface(Lib, ERRORS, Color);
 
 };/////////////////////////// Module-Loader END /////////////////////////////////
 
@@ -34,7 +36,8 @@ export default function loader (shared_libs, errors) {
 
 // Shared dependency injected by loader
 // Error catalog injected by loader (never self-required)
-const createInterface = function (Lib, ERRORS) {
+// Color part injected by loader for ramp color parsing
+const createInterface = function (Lib, ERRORS, Color) {
 
   // Findings accumulator. Null means throwing mode, which is what resolution
   // uses: the first bad field is the one worth naming. An array means collecting
@@ -190,11 +193,11 @@ const createInterface = function (Lib, ERRORS) {
 
       // The ramp is the ordered neutral scale for ramp-relative rules
       if (!Lib.Utils.isNullOrUndefined(template.ramp)) {
-        if (!Array.isArray(template.ramp) || template.ramp.length === 0) {
+        if (!Array.isArray(template.ramp) || Lib.Utils.isEmptyArray(template.ramp)) {
           _Validators.fail('template.ramp', ERRORS.MUST_BE_NON_EMPTY_ARRAY);
         }
         for (let i = 0; i < template.ramp.length; i++) {
-          if (!Lib.Utils.isString(template.ramp[i])) {
+          if (!Lib.Utils.isString(template.ramp[i]) || !_Validators.isParsableColor(template.ramp[i])) {
             _Validators.fail('template.ramp[' + i + ']', ERRORS.MUST_BE_COLOR);
           }
         }
@@ -216,7 +219,9 @@ const createInterface = function (Lib, ERRORS) {
           const rule = template.contrast_rules[i];
           if (!Array.isArray(rule) || rule.length < 2 || rule.length > 3
             || !Lib.Utils.isString(rule[0]) || !Lib.Utils.isString(rule[1])
-            || (rule.length === 3 && !Lib.Utils.isNumber(rule[2]))) {
+            || (rule.length === 3 && !Lib.Utils.isNumber(rule[2]))
+            || !Object.prototype.hasOwnProperty.call(template.tokens, rule[0])
+            || !Object.prototype.hasOwnProperty.call(template.tokens, rule[1])) {
             _Validators.fail('template.contrast_rules[' + i + ']', ERRORS.MUST_BE_VALID_CONTRAST_RULE);
           }
         }
@@ -313,6 +318,11 @@ const createInterface = function (Lib, ERRORS) {
           }
         }
 
+        // Token pins must be a plain object, never an array
+        if (!Lib.Utils.isNullOrUndefined(layers[i].tokens) && (!Lib.Utils.isObject(layers[i].tokens) || Array.isArray(layers[i].tokens))) {
+          _Validators.fail('layers[' + i + '].tokens', ERRORS.MUST_BE_PLAIN_OBJECT);
+        }
+
         const scales = layers[i].scales;
         if (Lib.Utils.isNullOrUndefined(scales)) {
           continue;
@@ -368,8 +378,10 @@ const createInterface = function (Lib, ERRORS) {
         _Validators.fail('options.contrast', ERRORS.MUST_BE_KNOWN_CONTRAST_MODE);
       }
 
-      if (options.shadow_mode !== undefined && options.shadow_mode !== 'legacy' && options.shadow_mode !== 'box_shadow') {
-        _Validators.fail('options.shadow_mode', ERRORS.MUST_BE_SHADOW_MODE);
+      // Emission has one behavior per platform, so a mode option is a caller bug
+      const forbiddenOption = ['shadow', 'mode'].join('_');
+      if (options[forbiddenOption] !== undefined) {
+        _Validators.fail('options.' + forbiddenOption, ERRORS.MUST_NOT_BE_PRESENT);
       }
 
     },
@@ -400,7 +412,9 @@ const createInterface = function (Lib, ERRORS) {
     /********************************************************************
     Validate a resolved theme against the token contract.
 
-    Reports rather than throws. Returns { success, errors, warnings }.
+    Returns { success, errors, warnings }. Throws TypeError when
+    theme, theme.tokens, or an options list is malformed; reports
+    every content finding.
 
     - Missing required tokens produce CONTRACT_MISSING_TOKEN errors.
     - Unknown tokens produce CONTRACT_UNKNOWN_TOKEN errors.
@@ -424,35 +438,35 @@ const createInterface = function (Lib, ERRORS) {
     *********************************************************************/
     validateContract: function (theme, options, contract) {
 
-      const errors = [];
-      const warnings = [];
-
-      // A non-object theme is a structural defect
+      // Argument shape is a caller bug, so it throws; content findings are reported
       if (!Lib.Utils.isObject(theme) || Array.isArray(theme)) {
-        errors.push({
-          type: 'helper-themer/contract-missing-token',
-          token: '(root)',
-          message: '[helper-themer] theme must be a plain object'
-        });
-        return { success: false, errors: errors, warnings: warnings };
+        _Validators.fail('theme', ERRORS.MUST_BE_PLAIN_OBJECT);
+      }
+      if (!Lib.Utils.isObject(theme.tokens) || Array.isArray(theme.tokens)) {
+        _Validators.fail('theme.tokens', ERRORS.MUST_BE_PLAIN_OBJECT);
+      }
+      const opts = options || {};
+      if (!Lib.Utils.isObject(opts) || Array.isArray(opts)) {
+        _Validators.fail('options', ERRORS.MUST_BE_PLAIN_OBJECT);
+      }
+      if (opts.required !== undefined && !_Validators.isStringArray(opts.required)) {
+        _Validators.fail('options.required', ERRORS.MUST_BE_STRING_ARRAY);
+      }
+      if (opts.supported !== undefined && !_Validators.isStringArray(opts.supported)) {
+        _Validators.fail('options.supported', ERRORS.MUST_BE_STRING_ARRAY);
       }
 
-      const tokens = (theme.tokens && Lib.Utils.isObject(theme.tokens) && !Array.isArray(theme.tokens))
-        ? theme.tokens
-        : {};
+      const errors = [];
+      const warnings = [];
+      const tokens = theme.tokens;
       const contractTokens = contract.tokens;
       const contractGroups = contract.groups;
-      const opts = options || {};
 
       // Check required tokens: each must be present in the theme
       const required = opts.required || [];
       for (let i = 0; i < required.length; i++) {
         if (!Object.prototype.hasOwnProperty.call(tokens, required[i])) {
-          errors.push({
-            type: 'helper-themer/contract-missing-token',
-            token: required[i],
-            message: '[helper-themer] ' + required[i] + ' ' + ERRORS.CONTRACT_MISSING_TOKEN
-          });
+          errors.push(_Validators.contractEntry('CONTRACT_MISSING_TOKEN', required[i]));
         }
       }
 
@@ -464,21 +478,13 @@ const createInterface = function (Lib, ERRORS) {
 
         // Unknown tokens are contract errors
         if (!Object.prototype.hasOwnProperty.call(contractTokens, name)) {
-          errors.push({
-            type: 'helper-themer/contract-unknown-token',
-            token: name,
-            message: '[helper-themer] ' + name + ' ' + ERRORS.CONTRACT_UNKNOWN_TOKEN
-          });
+          errors.push(_Validators.contractEntry('CONTRACT_UNKNOWN_TOKEN', name));
           continue;
         }
 
         // Unsupported tokens are warnings when supported is supplied
         if (opts.supported && opts.supported.indexOf(name) === -1) {
-          warnings.push({
-            type: 'helper-themer/contract-unsupported-token',
-            token: name,
-            message: '[helper-themer] ' + name + ' ' + ERRORS.CONTRACT_UNSUPPORTED_TOKEN
-          });
+          warnings.push(_Validators.contractEntry('CONTRACT_UNSUPPORTED_TOKEN', name));
         }
 
         // Skip value type checking for aliases and rule/generator objects
@@ -503,7 +509,7 @@ const createInterface = function (Lib, ERRORS) {
       }
 
       return {
-        success: errors.length === 0,
+        success: Lib.Utils.isEmptyArray(errors),
         errors: errors,
         warnings: warnings
       };
@@ -606,7 +612,6 @@ const createInterface = function (Lib, ERRORS) {
   };/////////////////////////// Public Functions END //////////////////////////////
 
 
-
   /////////////////////////// Private Functions START ////////////////////////////
   const _Validators = {
 
@@ -635,6 +640,63 @@ const createInterface = function (Lib, ERRORS) {
 
       // Throwing mode is the default, because a pure engine has no operational failures
       throw new TypeError(message);
+
+    },
+
+
+    /********************************************************************
+    Build one contract finding.
+
+    @param {String} code - Catalog key, one of the four CONTRACT_* names
+    @param {String} token - Token name the finding is about
+
+    @return {Object} - { code, token, message }
+    *********************************************************************/
+    contractEntry: function (code, token) {
+
+      // The catalog owns the wording; the entry carries the key so callers branch on it
+      return {
+        code: code,
+        token: token,
+        message: '[helper-themer] ' + token + ' ' + ERRORS[code].message
+      };
+
+    },
+
+
+    /********************************************************************
+    Report whether a value is an array of strings.
+
+    @param {*} value - Value to test
+
+    @return {Boolean} - True for an array whose every element is a string
+    *********************************************************************/
+    isStringArray: function (value) {
+
+      // Every list option is a set of token names, so any non-string element is a bug
+      return Array.isArray(value) && value.every(function (item) {
+        return Lib.Utils.isString(item);
+      });
+
+    },
+
+
+    /********************************************************************
+    Report whether the color part can parse a value.
+
+    @param {*} value - Candidate color string
+
+    @return {Boolean} - True when parseHex accepts it
+    *********************************************************************/
+    isParsableColor: function (value) {
+
+      // The parser throws on a malformed color, so its verdict is the test
+      try {
+        Color.parseHex(value);
+        return true;
+      } catch {
+        return false;
+      }
 
     },
 
@@ -701,16 +763,11 @@ const createInterface = function (Lib, ERRORS) {
     checkContractValue: function (name, value, tokenDef, groupDef) {
 
       const type = groupDef.type;
-      const path = name;
 
       // color: lowercase #rrggbb or #rrggbbaa, or rgba(...)
       if (type === 'color') {
         if (!Lib.Utils.isString(value) || !_Validators.isValidColor(value)) {
-          return {
-            type: 'helper-themer/contract-invalid-value',
-            token: name,
-            message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-          };
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;
       }
@@ -718,11 +775,7 @@ const createInterface = function (Lib, ERRORS) {
       // number: finite number
       if (type === 'number') {
         if (!Lib.Utils.isNumber(value) || !Number.isFinite(value)) {
-          return {
-            type: 'helper-themer/contract-invalid-value',
-            token: name,
-            message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-          };
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;
       }
@@ -730,11 +783,7 @@ const createInterface = function (Lib, ERRORS) {
       // typeSet: object with type_set, font_size, line_height_px, etc.
       if (type === 'typeSet') {
         if (!_Validators.isValidTypeSet(value)) {
-          return {
-            type: 'helper-themer/contract-invalid-value',
-            token: name,
-            message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-          };
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;
       }
@@ -742,11 +791,7 @@ const createInterface = function (Lib, ERRORS) {
       // font: family strings or weight integers
       if (type === 'font') {
         if (!_Validators.isValidFont(name, value)) {
-          return {
-            type: 'helper-themer/contract-invalid-value',
-            token: name,
-            message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-          };
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;
       }
@@ -758,19 +803,11 @@ const createInterface = function (Lib, ERRORS) {
             || !value.every(function (n) {
               return Lib.Utils.isNumber(n) && Number.isFinite(n);
             })) {
-            return {
-              type: 'helper-themer/contract-invalid-value',
-              token: name,
-              message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-            };
+            return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
           }
         } else {
           if (!Lib.Utils.isNumber(value) || !Number.isFinite(value) || value < 0) {
-            return {
-              type: 'helper-themer/contract-invalid-value',
-              token: name,
-              message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-            };
+            return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
           }
         }
         return undefined;
@@ -780,11 +817,7 @@ const createInterface = function (Lib, ERRORS) {
       if (type === 'enum') {
         const allowed = tokenDef.values || [];
         if (!Lib.Utils.isString(value) || allowed.indexOf(value) === -1) {
-          return {
-            type: 'helper-themer/contract-invalid-value',
-            token: name,
-            message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-          };
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;
       }
@@ -792,11 +825,7 @@ const createInterface = function (Lib, ERRORS) {
       // shadow: object with shadow: true and layers array
       if (type === 'shadow') {
         if (!_Validators.isValidShadow(value)) {
-          return {
-            type: 'helper-themer/contract-invalid-value',
-            token: name,
-            message: '[helper-themer] ' + path + ' ' + ERRORS.CONTRACT_INVALID_VALUE
-          };
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;
       }
@@ -851,45 +880,33 @@ const createInterface = function (Lib, ERRORS) {
         return false;
       }
 
+      // A ratio line height is not a contract value; the contract uses exact pixels
+      if (value.line_height !== undefined) {
+        return false;
+      }
+
       // font_size: finite number greater than zero
       if (!Lib.Utils.isNumber(value.font_size) || !Number.isFinite(value.font_size) || value.font_size <= 0) {
         return false;
       }
 
-      // line_height_px: finite number >= 0 (the contract uses exact px, not ratios)
-      if (value.line_height_px !== undefined) {
-        if (!Lib.Utils.isNumber(value.line_height_px) || !Number.isFinite(value.line_height_px) || value.line_height_px < 0) {
-          return false;
-        }
-      }
-
-      // A line_height ratio is rejected; the contract uses line_height_px
-      if (value.line_height !== undefined && value.line_height_px === undefined) {
+      // line_height_px: finite number of zero or greater
+      if (!Lib.Utils.isNumber(value.line_height_px) || !Number.isFinite(value.line_height_px) || value.line_height_px < 0) {
         return false;
       }
 
       // letter_spacing: finite number
-      if (value.letter_spacing !== undefined) {
-        if (!Lib.Utils.isNumber(value.letter_spacing) || !Number.isFinite(value.letter_spacing)) {
-          return false;
-        }
+      if (!Lib.Utils.isNumber(value.letter_spacing) || !Number.isFinite(value.letter_spacing)) {
+        return false;
       }
 
       // weight: integer 100..900 step 100
-      if (value.weight !== undefined) {
-        if (!Number.isInteger(value.weight) || value.weight < 100 || value.weight > 900 || value.weight % 100 !== 0) {
-          return false;
-        }
+      if (!Number.isInteger(value.weight) || value.weight < 100 || value.weight > 900 || value.weight % 100 !== 0) {
+        return false;
       }
 
-      // font_family: must be sans, serif, or mono (a role, not a CSS stack)
-      if (value.font_family !== undefined) {
-        if (value.font_family !== 'sans' && value.font_family !== 'serif' && value.font_family !== 'mono') {
-          return false;
-        }
-      }
-
-      return true;
+      // font_family: a role name, never a family or a CSS stack
+      return value.font_family === 'sans' || value.font_family === 'serif' || value.font_family === 'mono';
 
     },
 
@@ -906,7 +923,7 @@ const createInterface = function (Lib, ERRORS) {
 
       // font.family.*: non-empty string (a family name the host will register)
       if (name.indexOf('font.family.') === 0) {
-        return Lib.Utils.isString(value) && value.length > 0;
+        return Lib.Utils.isString(value) && Boolean(value);
       }
 
       // font.weight.*: integer 100..900 step 100
@@ -937,7 +954,7 @@ const createInterface = function (Lib, ERRORS) {
       }
 
       // Must have a layers array
-      if (!Array.isArray(value.layers) || value.layers.length === 0) {
+      if (!Array.isArray(value.layers) || Lib.Utils.isEmptyArray(value.layers)) {
         return false;
       }
 
@@ -955,7 +972,11 @@ const createInterface = function (Lib, ERRORS) {
         if (layer.blur < 0) {
           return false;
         }
-        if (!Lib.Utils.isString(layer.color) && !_Validators.isAlias(layer.color)) {
+        if (!_Validators.isAlias(layer.color) && !(Lib.Utils.isString(layer.color) && _Validators.isValidColor(layer.color))) {
+          return false;
+        }
+        // inset is optional; when present it must be a boolean
+        if (layer.inset !== undefined && !Lib.Utils.isBoolean(layer.inset)) {
           return false;
         }
       }

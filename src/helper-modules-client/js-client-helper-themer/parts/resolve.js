@@ -410,7 +410,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
       }
 
-      // Resolve an exact size alias or derive the legacy size from its named scale
+      // Resolve an exact size alias or derive the scale-derived size from its named scale
       let fontSize;
       if (!Lib.Utils.isNullOrUndefined(entry.font_size)) {
         fontSize = _Resolve.compositeNumber(name, 'font_size', entry.font_size, context, true);
@@ -419,7 +419,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         fontSize = Scale.byName(scale, name)({ step: entry.step }, context.scales[scale] || {});
       }
 
-      // Preserve either exact absolute line height or the legacy unitless ratio
+      // Preserve either exact absolute line height or the unitless ratio
       const value = { fontSize: fontSize };
       if (!Lib.Utils.isNullOrUndefined(entry.line_height_px)) {
         value.lineHeightPx = _Resolve.compositeNumber(name, 'line_height_px', entry.line_height_px, context, false);
@@ -493,9 +493,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     does: emit needs every layer together to build one platform
     value, and sibling tokens would force cross-token reads.
 
-    Each layer carries its own color, which may be a literal or an
-    alias string in braces. Aliases resolve through the token graph
-    so a themed shadow follows the theme and cycles stay detectable.
+    Each layer carries its own color and an inset flag. Aliases resolve
+    through the token graph so a themed shadow follows the theme and
+    cycles stay detectable.
 
     @param {String} name - Token name, for error messages
     @param {Object} entry - Shadow entry
@@ -523,7 +523,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         const color = _Resolve.isAlias(l.color)
           ? _Resolve.resolveToken(l.color.slice(1, -1), context)
           : l.color;
-        return { x: l.x, y: l.y, blur: l.blur, spread: l.spread, color: color };
+        return { x: l.x, y: l.y, blur: l.blur, spread: l.spread, color: color, inset: l.inset };
       });
 
       return { layers: resolved };
@@ -562,8 +562,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           if (!Lib.Utils.isString(l.color) && !_Resolve.isAlias(l.color)) {
             Validators.fail(path + '.color', ERRORS.MUST_BE_COLOR);
           }
+          if (l.inset !== undefined && !Lib.Utils.isBoolean(l.inset)) {
+            Validators.fail(path + '.inset', ERRORS.MUST_BE_BOOLEAN);
+          }
 
-          return { x: l.x, y: l.y, blur: l.blur, spread: l.spread, color: l.color };
+          return { x: l.x, y: l.y, blur: l.blur, spread: l.spread, color: l.color, inset: l.inset === true };
         });
       }
 
@@ -586,7 +589,8 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     ruleValue: function (name, entry, context) {
 
       // An unknown operation would otherwise resolve the token to undefined
-      const operation = _Operations[entry.op];
+      const known = Lib.Utils.isString(entry.op) && entry.op in _Operations;
+      const operation = known ? _Operations[entry.op] : undefined;
 
       if (!operation) {
         delete context.in_progress[name];
@@ -978,7 +982,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
 
   /////////////////////////// Operations START ///////////////////////////////////
-  const _Operations = {
+  const _Operations = Object.assign(Object.create(null), {
 
     /********************************************************************
     Step a fixed distance along the neutral ramp from the page
@@ -1063,7 +1067,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
     }
 
-  };/////////////////////////// Operations END ////////////////////////////////////
+  });/////////////////////////// Operations END ////////////////////////////////////
 
   return Resolve;
 

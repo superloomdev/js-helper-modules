@@ -12,9 +12,8 @@
 // from the uniform parts signature; each public object closes over its own values.
 
 
-// Platforms this engine emits for. React Native tolerates a style object that
-// carries both the iOS shadow properties and the Android elevation, so the two
-// native targets share one emitter rather than forcing a third platform.
+// Platforms this engine emits for. React Native renders one boxShadow style prop
+// on iOS and Android alike, so the two native targets share one emitter.
 const PLATFORMS = ['web', 'native'];
 
 
@@ -59,7 +58,7 @@ Build the emit interface for one engine instance.
 @param {Object} Lib - Dependency container with Utils
 @param {Object} CONFIG - Merged config for this instance
 @param {Object} ERRORS - Frozen error catalog
-@param {Object} Color - Color part for shadow rgba composition
+@param {Object} Color - Color part for shadow color validation
 
 @return {Object} - Public Emit interface
 *********************************************************************/
@@ -257,23 +256,27 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
 
 
     /********************************************************************
-    Project a shadow onto CSS.
+    Render a canonical shadow as one CSS shadow list.
 
-    Web is the only target that can express a layered shadow, so
-    every layer survives. CSS paints the first layer on top. Each
-    layer's color is output directly, carrying its own alpha.
+    Every layer survives; CSS and React Native paint the first layer
+    on top. The spread slot is written only when it is non-zero, and
+    the inset keyword only when the layer asks for it.
 
     @param {Object} v - Canonical shadow value
     @param {Object[]} v.layers - Ordered shadow layers
 
-    @return {String} - CSS box-shadow value
+    @return {String} - Comma-joined shadow list
     *********************************************************************/
-    webShadow: function (v) {
+    shadowList: function (v) {
 
-      // Render each layer, dropping the spread slot only when it is zero
+      // Render each layer in CSS order: inset, offsets, blur, spread, color
       const rendered = v.layers.map(function (l) {
 
+        // Validate the color through the Color part so a malformed value is caught here
+        Color.parseHex(l.color);
+
         const parts = [
+          (l.inset ? 'inset' : null),
           l.x + 'px',
           l.y + 'px',
           l.blur + 'px',
@@ -285,8 +288,24 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
 
       });
 
-      // Comma-join so the browser paints them as one stacked shadow
+      // Comma-join so the renderer paints them as one stacked shadow
       return rendered.join(', ');
+
+    },
+
+
+    /********************************************************************
+    Project a shadow onto CSS. Every layer survives as one box-shadow list.
+
+    @param {Object} v - Canonical shadow value
+    @param {Object[]} v.layers - Ordered shadow layers
+
+    @return {String} - CSS box-shadow value
+    *********************************************************************/
+    webShadow: function (v) {
+
+      // Web takes the list as the box-shadow value itself
+      return _Emit.shadowList(v);
 
     },
 
@@ -294,110 +313,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
     /********************************************************************
     Project a shadow onto React Native.
 
-    One object carries both families: iOS reads the shadow properties
-    and ignores elevation, Android reads elevation and ignores the
-    rest. That tolerance is what keeps the shadow group at two emit
-    targets instead of three.
-
-    In legacy mode (the default), iOS supports one shadow, so the
-    layer with the greatest blur is selected as dominant and the rest
-    are collapsed with loss reporting.
-
-    In box_shadow mode, all layers are preserved in a box-shadow
-    compatible string so a RNW consumer can paint them as CSS. Loss
-    is not reported because no geometry is discarded.
+    React Native 0.76 and later render the boxShadow style prop on iOS
+    and Android with every layer, spread, and inset preserved, so the
+    native projection carries the same list the web projection does
+    and reports no loss.
 
     @param {Object} v - Canonical shadow value
     @param {Object[]} v.layers - Ordered shadow layers
-    @param {Object} ctx - Emit context carrying the loss collector and options
 
     @return {Object} - React Native style fragment
     *********************************************************************/
-    nativeShadow: function (v, ctx) {
+    nativeShadow: function (v) {
 
-      // Check the emission mode from the context options
-      const mode = (ctx && ctx.options && ctx.options.shadow_mode) || 'legacy';
-
-      // In box_shadow mode, preserve all layers as a CSS box-shadow string
-      if (mode === 'box_shadow') {
-
-        const rendered = v.layers.map(function (l) {
-
-          const parts = [
-            l.x + 'px',
-            l.y + 'px',
-            l.blur + 'px',
-            (l.spread ? l.spread + 'px' : null),
-            l.color
-          ];
-
-          return parts.filter(Boolean).join(' ');
-
-        });
-
-        return {
-          boxShadow: rendered.join(', ')
-        };
-
-      }
-
-      // Legacy mode: iOS supports one shadow, so keep the layer whose blur carries the height cue
-      const dominant = v.layers.reduce(function (acc, l) {
-        return (l.blur > acc.blur) ? l : acc;
-      }, v.layers[0]);
-
-      // Record what this projection could not carry
-      _Emit.reportShadowLoss(v, ctx);
-
-      // Split color channels so React Native applies alpha from the color itself
-      const color = Color.parseHex(dominant.color);
+      // One style prop carries the whole list on both native platforms
       return {
-        shadowColor: Color.toHex({ r: color.r, g: color.g, b: color.b }),
-        shadowOffset: { width: dominant.x, height: dominant.y },
-        shadowRadius: dominant.blur,
-        shadowOpacity: color.a
+        boxShadow: _Emit.shadowList(v)
       };
-
-    },
-
-
-    /********************************************************************
-    Report the facts a native shadow projection discards.
-
-    A value that vanishes with no record is the failure this reporting
-    exists to prevent.
-
-    @param {Object} v - Canonical shadow value
-    @param {Object} ctx - Emit context carrying the loss collector
-
-    @return {void}
-    *********************************************************************/
-    reportShadowLoss: function (v, ctx) {
-
-      // Nothing to report when the caller did not ask for a loss list
-      if (!ctx.lossy) {
-        return;
-      }
-
-      // Collapsing layers loses every layer but one
-      if (v.layers.length > 1) {
-        ctx.lossy.push({
-          token: ctx.token,
-          fact: 'layers',
-          reason: 'React Native supports one shadow, so ' + v.layers.length + ' layers collapsed to the one with the greatest blur'
-        });
-      }
-
-      // Spread has no React Native equivalent, so each non-zero value is dropped
-      for (let i = 0; i < v.layers.length; i++) {
-        if (v.layers[i].spread) {
-          ctx.lossy.push({
-            token: ctx.token,
-            fact: 'spread',
-            reason: 'spread has no React Native equivalent, so ' + v.layers[i].spread + ' was discarded'
-          });
-        }
-      }
 
     },
 
@@ -412,7 +343,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
     *********************************************************************/
     webTypeSet: function (v, ctx) {
 
-      // Size carries units while legacy line height remains a bare ratio
+      // Size carries units while ratio line height remains a bare ratio
       const out = {
         fontSize: (v.fontSize / ctx.base_font_size) + 'rem'
       };
@@ -456,7 +387,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
     *********************************************************************/
     nativeTypeSet: function (v) {
 
-      // Preserve exact absolute line height; retain rounded legacy ratio behavior
+      // Preserve exact absolute line height; retain the rounded ratio behavior
       const out = {
         fontSize: v.fontSize
       };

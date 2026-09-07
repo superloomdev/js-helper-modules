@@ -116,7 +116,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     /********************************************************************
     Produce a value from a plain geometric scale.
 
-    Included so a template is not obliged to adopt the Carbon type
+    Included so a template is not obliged to adopt the step-pair
     curve; a ratio-based scale is the common alternative.
 
     @param {Object} params - Token parameters

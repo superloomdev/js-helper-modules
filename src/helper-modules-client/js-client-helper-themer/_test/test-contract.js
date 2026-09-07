@@ -243,7 +243,7 @@ describe('validateContract - missing token', () => {
     const result = Themer.validateContract(theme, { required: ['color.background'] });
     assert.equal(result.success, false);
     assert.equal(result.errors.length, 1);
-    assert.equal(result.errors[0].type, 'helper-themer/contract-missing-token');
+    assert.equal(result.errors[0].code, 'CONTRACT_MISSING_TOKEN');
     assert.equal(result.errors[0].token, 'color.background');
     assert.match(result.errors[0].message, /required contract token absent/);
   });
@@ -264,7 +264,7 @@ describe('validateContract - unknown token', () => {
     const result = Themer.validateContract(theme, {});
     assert.equal(result.success, false);
     assert.equal(result.errors.length, 1);
-    assert.equal(result.errors[0].type, 'helper-themer/contract-unknown-token');
+    assert.equal(result.errors[0].code, 'CONTRACT_UNKNOWN_TOKEN');
     assert.equal(result.errors[0].token, 'color.not_a_token');
     assert.match(result.errors[0].message, /not a token in the contract/);
   });
@@ -278,7 +278,7 @@ describe('validateContract - invalid color values', () => {
     const theme = { tokens: { 'color.background': '#FFFFFF' } };
     const result = Themer.validateContract(theme, {});
     assert.equal(result.success, false);
-    assert.equal(result.errors[0].type, 'helper-themer/contract-invalid-value');
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
   });
 
   it('should reject named colors', () => {
@@ -559,7 +559,7 @@ describe('validateContract - unsupported token warnings', () => {
     const result = Themer.validateContract(theme, { supported: ['color.background'] });
     assert.equal(result.success, true);
     assert.equal(result.warnings.length, 1);
-    assert.equal(result.warnings[0].type, 'helper-themer/contract-unsupported-token');
+    assert.equal(result.warnings[0].code, 'CONTRACT_UNSUPPORTED_TOKEN');
     assert.equal(result.warnings[0].token, 'color.layer_01');
   });
 
@@ -599,23 +599,23 @@ describe('validateContract - error type and message semantics', () => {
 
   it('should use helper-themer/contract-missing-token for missing tokens', () => {
     const result = Themer.validateContract({ tokens: {} }, { required: ['color.background'] });
-    assert.equal(result.errors[0].type, 'helper-themer/contract-missing-token');
+    assert.equal(result.errors[0].code, 'CONTRACT_MISSING_TOKEN');
     assert.equal(typeof result.errors[0].message, 'string');
   });
 
   it('should use helper-themer/contract-unknown-token for unknown tokens', () => {
     const result = Themer.validateContract({ tokens: { 'unknown.token': 1 } }, {});
-    assert.equal(result.errors[0].type, 'helper-themer/contract-unknown-token');
+    assert.equal(result.errors[0].code, 'CONTRACT_UNKNOWN_TOKEN');
   });
 
   it('should use helper-themer/contract-invalid-value for invalid values', () => {
     const result = Themer.validateContract({ tokens: { 'color.background': 'bad' } }, {});
-    assert.equal(result.errors[0].type, 'helper-themer/contract-invalid-value');
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
   });
 
   it('should use helper-themer/contract-unsupported-token for unsupported warnings', () => {
     const result = Themer.validateContract({ tokens: { 'color.background': '#ffffff' } }, { supported: [] });
-    assert.equal(result.warnings[0].type, 'helper-themer/contract-unsupported-token');
+    assert.equal(result.warnings[0].code, 'CONTRACT_UNSUPPORTED_TOKEN');
   });
 
 });
@@ -738,19 +738,246 @@ describe('contract - custom scale generators', () => {
 });
 
 
-describe('contract - factory isolation', () => {
+describe('contract - CP1 repair', () => {
 
-  it('should keep two engine instances with different ERRORS isolated', () => {
-    const customErrors = Object.freeze(Object.assign({}, Lib, {
-      // Engines share the same ERRORS catalog; this test verifies the instances
-      // do not overwrite each other's dependencies
-    }));
-    const first = themerLoader(Lib, { CACHE_ENABLED: false });
-    const second = themerLoader(Lib, { CACHE_ENABLED: false });
-    const r1 = first.buildTheme({ tokens: { bg: '#ffffff' } }, [], 'native');
-    const r2 = second.buildTheme({ tokens: { bg: '#000000' } }, [], 'native');
-    assert.equal(r1.tokens.bg, '#ffffff');
-    assert.equal(r2.tokens.bg, '#000000');
+  it('should return code, token, and message on a missing token entry', () => {
+    assert.deepEqual(
+      Themer.validateContract({ tokens: {} }, { required: ['color.background'] }).errors[0],
+      { code: 'CONTRACT_MISSING_TOKEN', token: 'color.background', message: '[helper-themer] color.background is a required contract token absent from the theme' }
+    );
+  });
+
+  it('should return code CONTRACT_UNKNOWN_TOKEN on an unknown token entry', () => {
+    const result = Themer.validateContract({ tokens: { 'color.not_a_token': '#ffffff' } }, {});
+    assert.deepEqual(
+      result.errors[0],
+      { code: 'CONTRACT_UNKNOWN_TOKEN', token: 'color.not_a_token', message: '[helper-themer] color.not_a_token is not a token in the contract' }
+    );
+  });
+
+  it('should return code CONTRACT_INVALID_VALUE on an invalid literal entry', () => {
+    const result = Themer.validateContract({ tokens: { 'color.background': '#FFFFFF' } }, {});
+    assert.deepEqual(
+      result.errors[0],
+      { code: 'CONTRACT_INVALID_VALUE', token: 'color.background', message: '[helper-themer] color.background is not a valid value for this token type' }
+    );
+  });
+
+  it('should return code CONTRACT_UNSUPPORTED_TOKEN on a warning entry', () => {
+    const result = Themer.validateContract(
+      { tokens: { 'color.background': '#ffffff' } },
+      { supported: [] }
+    );
+    assert.deepEqual(
+      result.warnings[0],
+      { code: 'CONTRACT_UNSUPPORTED_TOKEN', token: 'color.background', message: '[helper-themer] color.background is not supported by this component system' }
+    );
+  });
+
+  it('should carry no type field on any entry', () => {
+    const missingResult = Themer.validateContract({ tokens: {} }, { required: ['color.background'] });
+    const unsupportedResult = Themer.validateContract(
+      { tokens: { 'color.background': '#ffffff' } },
+      { supported: [] }
+    );
+    assert.equal(Object.prototype.hasOwnProperty.call(missingResult.errors[0], 'type'), false);
+    assert.equal(Object.prototype.hasOwnProperty.call(unsupportedResult.warnings[0], 'type'), false);
+  });
+
+  it('should expose contract errors as type and message objects', async () => {
+    const ERRORS = (await import('helper-themer/themer.errors.js')).default;
+    const kebabs = {
+      CONTRACT_MISSING_TOKEN: 'missing-token',
+      CONTRACT_UNKNOWN_TOKEN: 'unknown-token',
+      CONTRACT_INVALID_VALUE: 'invalid-value',
+      CONTRACT_UNSUPPORTED_TOKEN: 'unsupported-token'
+    };
+    for (const key of Object.keys(kebabs)) {
+      assert.equal(ERRORS[key].type, 'helper-themer/contract-' + kebabs[key]);
+      assert.equal(typeof ERRORS[key].message, 'string');
+    }
+  });
+
+  it('should throw when theme is not a plain object', () => {
+    assert.throws(() => Themer.validateContract(null, {}), /^TypeError: \[helper-themer\] theme must be a plain object$/);
+    assert.throws(() => Themer.validateContract([], {}), /^TypeError: \[helper-themer\] theme must be a plain object$/);
+  });
+
+  it('should throw when theme.tokens is not a plain object', () => {
+    assert.throws(() => Themer.validateContract({ tokens: [] }, {}), /^TypeError: \[helper-themer\] theme\.tokens must be a plain object$/);
+  });
+
+  it('should throw when options.required is not an array of strings', () => {
+    assert.throws(() => Themer.validateContract({ tokens: {} }, { required: 'color.background' }), /^TypeError: \[helper-themer\] options\.required must be an array of strings$/);
+    assert.throws(() => Themer.validateContract({ tokens: {} }, { required: [1] }), /^TypeError: \[helper-themer\] options\.required must be an array of strings$/);
+  });
+
+  it('should throw when options.supported is not an array of strings', () => {
+    assert.throws(() => Themer.validateContract({ tokens: {} }, { supported: 'color.background' }), /^TypeError: \[helper-themer\] options\.supported must be an array of strings$/);
+    assert.throws(() => Themer.validateContract({ tokens: {} }, { supported: new Set() }), /^TypeError: \[helper-themer\] options\.supported must be an array of strings$/);
+  });
+
+  it('should reject a type set missing line_height_px', () => {
+    const result = Themer.validateContract({
+      tokens: { 'type.body01': { type_set: true, font_size: 14, letter_spacing: 0.16, weight: 400, font_family: 'sans' } }
+    }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+  it('should reject a type set missing letter_spacing, weight, or font_family', () => {
+    const withoutLetterSpacing = { type_set: true, font_size: 14, line_height_px: 20, weight: 400, font_family: 'sans' };
+    delete withoutLetterSpacing.letter_spacing;
+    const withoutWeight = { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.16, font_family: 'sans' };
+    delete withoutWeight.weight;
+    const withoutFamily = { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.16, weight: 400 };
+    delete withoutFamily.font_family;
+    for (const value of [withoutLetterSpacing, withoutWeight, withoutFamily]) {
+      const result = Themer.validateContract({ tokens: { 'type.body01': value } }, {});
+      assert.equal(result.success, false);
+    }
+  });
+
+  it('should reject a type set that carries line_height even with line_height_px', () => {
+    const result = Themer.validateContract({
+      tokens: { 'type.body01': { type_set: true, font_size: 14, line_height_px: 20, line_height: 1.4, letter_spacing: 0.16, weight: 400, font_family: 'sans' } }
+    }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject a shadow layer whose color is not a color or alias', () => {
+    const result = Themer.validateContract({
+      tokens: { 'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: 'not-a-color' }] } }
+    }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+  it('should accept a shadow layer rgba color', () => {
+    const result = Themer.validateContract({
+      tokens: { 'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: 'rgba(0, 0, 0, 0.2)' }] } }
+    }, {});
+    assert.equal(result.success, true);
+  });
+
+  it('should reject constructor, toString, and __proto__ as operation names', () => {
+    const engine = themerLoader(Lib, {});
+    for (const name of ['constructor', 'toString', '__proto__']) {
+      assert.throws(() => engine.buildTheme({ tokens: { x: { op: name, args: [] } } }, [], 'native'),
+        /^TypeError: \[helper-themer\] tokens\.x\.op must name an operation this engine provides$/);
+    }
+  });
+
+  it('should reject a ramp entry that is not a parsable color', () => {
+    const engine = themerLoader(Lib, {});
+    assert.throws(() => engine.buildTheme({ tokens: { a: '#ffffff' }, ramp: ['not-a-color', '#ffffff'] }, [], 'native'),
+      /^TypeError: \[helper-themer\] template\.ramp\[0\] must be a supported numeric color$/);
+  });
+
+  it('should reject a contrast rule naming an undeclared token', () => {
+    const engine = themerLoader(Lib, {});
+    assert.throws(() => engine.buildTheme({ tokens: { a: '#ffffff' }, contrast_rules: [['a', 'zzz']] }, [], 'native'),
+      /^TypeError: \[helper-themer\] template\.contrast_rules\[0\] must be a \[String, String, Number\?\] triple naming two declared tokens$/);
+    assert.throws(() => engine.buildTheme({ tokens: { a: '#ffffff' }, contrast_rules: [['zzz', 'a']] }, [], 'native'),
+      /^TypeError: \[helper-themer\] template\.contrast_rules\[0\] must be a \[String, String, Number\?\] triple naming two declared tokens$/);
+  });
+
+  it('should reject a layer whose tokens field is an array', () => {
+    assert.throws(() => Themer.buildTheme({ tokens: { a: 1 } }, [{ tokens: [] }], 'native'),
+      /^TypeError: \[helper-themer\] layers\[0\]\.tokens must be a plain object$/);
+  });
+
+  it('should keep two color parts with different error catalogs apart', async () => {
+    const createColor = (await import('helper-themer/parts/color.js')).default;
+    const CONFIG_DEFAULTS = (await import('helper-themer/themer.config.js')).default;
+    const a = createColor(Lib, CONFIG_DEFAULTS, Object.freeze({ MUST_BE_COLOR: 'catalog A' }));
+    const b = createColor(Lib, CONFIG_DEFAULTS, Object.freeze({ MUST_BE_COLOR: 'catalog B' }));
+    assert.throws(() => a.parseHex('zzz'), /catalog A$/);
+    assert.throws(() => b.parseHex('zzz'), /catalog B$/);
+    assert.throws(() => a.parseHex('zzz'), /catalog A$/);
+  });
+
+  it('should keep two emit parts with different color parts apart', async () => {
+    const createColor = (await import('helper-themer/parts/color.js')).default;
+    const createEmit = (await import('helper-themer/parts/emit.js')).default;
+    const CONFIG_DEFAULTS = (await import('helper-themer/themer.config.js')).default;
+    const a = createColor(Lib, CONFIG_DEFAULTS, Object.freeze({ MUST_BE_COLOR: 'catalog A' }));
+    const b = createColor(Lib, CONFIG_DEFAULTS, Object.freeze({ MUST_BE_COLOR: 'catalog B' }));
+    const emitA = createEmit(Object.assign({}, Lib, { Color: a }), CONFIG_DEFAULTS, {});
+    const emitB = createEmit(Object.assign({}, Lib, { Color: b }), CONFIG_DEFAULTS, {});
+    const shadow = { layers: [{ x: 0, y: 1, blur: 2, spread: 0, color: 'zzz' }] };
+    assert.throws(() => emitA.value(shadow, 'shadow', 'native', { token: 't', lossy: [] }), /catalog A$/);
+    assert.throws(() => emitB.value(shadow, 'shadow', 'native', { token: 't', lossy: [] }), /catalog B$/);
+  });
+
+  it('should emit identical native shadow output with and without an options argument', () => {
+    const template = {
+      tokens: {
+        cardShadow: { shadow: true, layers: [{ x: 0, y: 1, blur: 2, spread: 0, color: '#00000033' }] }
+      },
+      meta: { cardShadow: { group: 'shadow' } }
+    };
+    const resolved = Themer.resolve(template, []);
+    assert.deepEqual(
+      Themer.emit(resolved, template, 'native').tokens,
+      Themer.emit(resolved, template, 'native', {}).tokens
+    );
+  });
+
+  it('should emit every layer, spread, and inset as one boxShadow string on native', () => {
+    const engine = themerLoader(Lib, {});
+    const template = {
+      tokens: {
+        cardShadow: { shadow: true, layers: [
+          { x: 0, y: 1, blur: 2, spread: 0, color: '#00000033' },
+          { x: 0, y: 4, blur: 8, spread: 1, color: '#0000001a', inset: true }
+        ] }
+      },
+      meta: { cardShadow: { group: 'shadow' } }
+    };
+    const result = engine.buildTheme(template, [], 'native');
+    assert.deepEqual(result.tokens.cardShadow, { boxShadow: '0px 1px 2px #00000033, inset 0px 4px 8px 1px #0000001a' });
+    assert.deepEqual(result.lossy, []);
+  });
+
+  it('should emit the same shadow list as a CSS string on web', () => {
+    const engine = themerLoader(Lib, {});
+    const template = {
+      tokens: {
+        cardShadow: { shadow: true, layers: [
+          { x: 0, y: 1, blur: 2, spread: 0, color: '#00000033' },
+          { x: 0, y: 4, blur: 8, spread: 1, color: '#0000001a', inset: true }
+        ] }
+      },
+      meta: { cardShadow: { group: 'shadow' } }
+    };
+    const result = engine.buildTheme(template, [], 'web');
+    assert.equal(result.tokens.cardShadow, '0px 1px 2px #00000033, inset 0px 4px 8px 1px #0000001a');
+  });
+
+  it('should not accept a shadow_mode option', () => {
+    assert.throws(() => Themer.buildTheme({ tokens: { a: 1 } }, [], 'native', { shadow_mode: 'anything' }),
+      /^TypeError: \[helper-themer\] options\.shadow_mode must not be present$/);
+  });
+
+  it('should reject a non-boolean inset on a shadow layer', () => {
+    const engine = themerLoader(Lib, {});
+    const template = {
+      tokens: {
+        cardShadow: { shadow: true, layers: [{ x: 0, y: 1, blur: 2, spread: 0, color: '#00000033', inset: 'yes' }] }
+      },
+      meta: { cardShadow: { group: 'shadow' } }
+    };
+    assert.throws(() => engine.buildTheme(template, [], 'native'),
+      /^TypeError: \[helper-themer\] tokens\.cardShadow\.layers\[0\]\.inset must be true or false$/);
+  });
+
+  it('should reject a non-boolean inset in a contract shadow value', () => {
+    const result = Themer.validateContract({
+      tokens: { 'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '#000000', inset: 'yes' }] } }
+    }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
   });
 
 });
