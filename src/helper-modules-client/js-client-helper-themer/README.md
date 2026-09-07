@@ -110,7 +110,8 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   { code, token, message } with codes CONTRACT_MISSING_TOKEN, CONTRACT_UNKNOWN_TOKEN,
   CONTRACT_INVALID_VALUE (errors) and CONTRACT_UNSUPPORTED_TOKEN (warnings). success is true when
   errors is empty. Structure and routes are validateTemplate's job; this function checks names and
-  literal value types only. Alias strings are accepted for every type.
+  literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
+  theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
 
 ## Configuration
 

@@ -484,9 +484,7 @@ describe('emit', () => {
     const resolved = Themer.resolve(TEMPLATE, BASE_LAYER);
     const native = Themer.emit(resolved, TEMPLATE, 'native');
 
-    assert.equal(typeof native.tokens.cardShadow.boxShadow, 'string');
-    assert.ok(native.tokens.cardShadow.boxShadow.indexOf('0px 3px 6px rgba(0, 0, 0, 0.16)') !== -1);
-    assert.ok(native.tokens.cardShadow.boxShadow.indexOf('0px 3px 6px rgba(0, 0, 0, 0.23)') !== -1);
+    assert.deepEqual(native.tokens.cardShadow, { boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.23)' });
 
   });
 

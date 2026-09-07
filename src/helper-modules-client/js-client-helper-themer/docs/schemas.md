@@ -111,6 +111,7 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 |---|---|---|---|
 | `shadow` | `Boolean` | Yes | Must be `true` |
 | `layers` | `Object[]` | Yes | Explicit geometry. Each entry is `{ x, y, blur, spread, color, inset? }` |
+| `inset` | `Boolean` | No | Paints the layer inside the border box; defaults to false |
 
 Layer geometry validation:
 
@@ -121,7 +122,6 @@ Layer geometry validation:
 | `blur` | `Number` | Finite, zero or greater. Negative blur is rejected |
 | `spread` | `Number` | Finite. May be negative |
 | `color` | `String` | Required. Hex or rgb/rgba. Accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, `rgb(R, G, B)`, or `rgba(R, G, B, A)`. RGB channels are integers from 0 through 255; alpha is between 0 and 1; percentages and other CSS color syntaxes are unsupported. Invalid arithmetic input throws |
-| `inset` | `Boolean` | No | Paints the layer inside the border box; defaults to false |
 
 ### Metadata fields
 
@@ -159,7 +159,7 @@ The optional per-call bundle passed to `resolve` and `buildTheme`.
 | `min_contrast_ratio` | `Number` | `CONFIG.MIN_CONTRAST_RATIO` | Between 1 and 21 inclusive |
 | `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive. An explicit per-call value, including zero, overrides the layer factor |
 
-Deprecated emission modes are rejected. Omitted options produce output identical to the existing three-argument call. The cache key is the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
+Any key outside these three throws by name. Omitted options produce output identical to the existing three-argument call. The cache key is the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
 
 ---
 
@@ -199,7 +199,7 @@ A non-object template is reported as a single finding, because there are no fiel
 
 ## Contract Check Result Schema
 
-Returned by `validateContract`. Never throws.
+Returned by `validateContract`. Throws `TypeError` only for a malformed `theme`, `theme.tokens`, `options.required`, or `options.supported`; every content finding is reported.
 
 | Key | Type | Description |
 |---|---|---|
@@ -258,7 +258,8 @@ Every throw follows the framework's programmer-error format: an alias prefix, th
 | `[helper-themer] tokens.brand.op must name an operation this engine provides` | Unknown operation name |
 | `[helper-themer] platform must be one of: web, native` | Unknown emit target |
 | `[helper-themer] tokens bad (group: nonsense) must name a known emitter group` | Token metadata names a group no emitter table recognizes |
-| `[helper-themer] options.<deprecated> must not be present` | A deprecated emission mode option was passed |
+| `[helper-themer] options.mode must be one of: contrast, min_contrast_ratio, motion_factor` | An option key this engine does not define |
+| `[helper-themer] options.required must be an array of strings` | `validateContract` received a `required` or `supported` list that is not an array of strings |
 | `[helper-themer] color must be a supported numeric color` | Color arithmetic received malformed or unsupported color syntax |
 | `[helper-themer] color must have an opaque compositing background` | Contrast rule named a translucent background without a further backdrop |
 | `[helper-themer] CONFIG.CACHE_CAPACITY must be a whole number of 1 or greater` | Misconfigured at load time |

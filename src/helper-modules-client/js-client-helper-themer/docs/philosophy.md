@@ -31,7 +31,7 @@ The costly mistake in cross-platform theming is maintaining two themes. They sta
 Themer splits the work in two:
 
 - **Resolve** produces canonical, unit-free values. A spacing token is the number `16`, not `'1rem'` and not `16`-with-an-implied-unit.
-- **Emit** projects those values onto one platform. Web wants `'1rem'` and a `box-shadow` string; React Native wants `16` and a style object.
+- **Emit** projects those values onto one platform. Web wants `'1rem'` and a `box-shadow` string; React Native wants `16` and a `{ boxShadow }` style object carrying the same list.
 
 One derivation, two projections. There is no second theme to keep in step, and the difference between the platforms lives in one table rather than scattered through the token values.
 
@@ -41,7 +41,7 @@ This is also why a type set resolves to an **object** rather than to separate si
 
 Some facts cannot cross a platform boundary. The tempting behavior is to drop what does not fit.
 
-The cautionary example is in the platform bridge itself: `react-native-web` silently discards shadow properties it cannot map, so a multi-layer shadow with per-layer colors can collapse to a single layer with no warning. A value vanishes, the screen looks subtly wrong, and nothing anywhere says why.
+The cautionary example is the shadow. Before React Native 0.76, a native shadow was one color, one offset, one radius, one opacity, so a two-layer design shadow reached the screen as one layer and nothing said so. A value vanishes, the screen looks subtly wrong, and nothing anywhere says why.
 
 Themer reports instead. Every emit returns two lists beside the tokens:
 

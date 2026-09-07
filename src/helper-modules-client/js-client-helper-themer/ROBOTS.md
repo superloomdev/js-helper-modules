@@ -52,11 +52,30 @@ clearCache()                                     -> undefined
 
 `platform` is `'web'` or `'native'`. `layers` is always an array, never a single object.
 
+## Token Contract
+
+The engine core is vocabulary-agnostic: buildTheme accepts any token names. Superloom's
+vocabulary, the token contract, ships in this package as data and is read through two functions.
+
+getContract() -> Object | async:no
+  Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
+  ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
+  Same reference on every call. Never throws.
+
+validateContract(theme, options) -> { success, errors, warnings } | async:no
+  Checks theme.tokens against the contract. options.required (string[]) makes absence an error;
+  options.supported (string[]) makes presence-without-support a warning. Entries are
+  { code, token, message } with codes CONTRACT_MISSING_TOKEN, CONTRACT_UNKNOWN_TOKEN,
+  CONTRACT_INVALID_VALUE (errors) and CONTRACT_UNSUPPORTED_TOKEN (warnings). success is true when
+  errors is empty. Structure and routes are validateTemplate's job; this function checks names and
+  literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
+  theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
+
 ## Failure Model
 
 **Everything throws `TypeError`. There is no operational envelope.**
 
-The single exception is `validateTemplate`, which returns `{ success, errors }` and never throws. It is a pre-resolution reporting surface, so it collects every finding. `validateContract` returns `{ success, errors, warnings }` for content findings but throws `TypeError` when `theme`, `theme.tokens`, or an options list is malformed.
+The single exception is `validateTemplate`, which returns `{ success, errors }` and never throws. It is a pre-resolution reporting surface, so it collects every finding. `validateContract` returns `{ success, errors, warnings }` for content findings but throws `TypeError` only when `theme`, `theme.tokens`, `options.required`, or `options.supported` is malformed.
 
 Message format: `[helper-themer] <field-path> <expected-shape>`
 
@@ -109,7 +128,7 @@ A token with no `meta` entry defaults to `raw`. A token with a `platforms` list 
 
 ## Options
 
-`contrast` (`'correct'` rewrites, anything else only reports), `min_contrast_ratio`, `motion_factor`. An explicit `motion_factor`, including zero, overrides the layer stack. Deprecated emission modes are rejected.
+`contrast` (`'correct'` rewrites, anything else only reports), `min_contrast_ratio`, `motion_factor`. An explicit `motion_factor`, including zero, overrides the layer stack. Any other key throws.
 
 ## Gotchas
 

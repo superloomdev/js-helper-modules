@@ -98,7 +98,7 @@ tokens: {
 | `duration` | `'110ms'` | `110` |
 | `easing` | `'cubic-bezier(0.2, 0, 0.38, 0.9)'` | `[0.2, 0, 0.38, 0.9]` |
 | `typeSet` | declaration block with a ratio line height | style object with an absolute line height |
-| `shadow` | `box-shadow` string, every layer | style object, one layer |
+| `shadow` | `box-shadow` string, every layer | `{ boxShadow: '<list>' }`, every layer |
 | `raw` | unchanged | unchanged |
 
 ```javascript

@@ -74,7 +74,7 @@ Resolution is cached per instance. Calling again with equal layer content return
 
 ### `emit(resolved, template, platform, options)`
 
-Projects a resolved token map onto one platform. Both platforms emit the same token keys. An options argument may be passed for symmetry with `resolve`; it must not carry deprecated emission modes. Malformed template structure and unknown metadata groups throw before cache lookup.
+Projects a resolved token map onto one platform. Both platforms emit the same token keys. An options argument may be passed for symmetry with `resolve`; a key outside `contrast`, `min_contrast_ratio`, and `motion_factor` throws by name. Malformed template structure and unknown metadata groups throw before cache lookup.
 
 ```javascript
 const resolved = Themer.resolve(myTemplate, layers);
@@ -134,7 +134,7 @@ contract.meta;       // derived metadata, can be attached to a template as templ
 
 ### `validateContract(theme, options)`
 
-Checks `theme.tokens` against the contract. Returns `{ success, errors, warnings }`. Throws `TypeError` when `theme`, `theme.tokens`, or an options list is malformed; reports every content finding.
+Checks `theme.tokens` against the contract. Returns `{ success, errors, warnings }`. Throws `TypeError` only when `theme`, `theme.tokens`, `options.required`, or `options.supported` is malformed; reports every content finding.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -148,8 +148,8 @@ Checks `theme.tokens` against the contract. Returns `{ success, errors, warnings
 
 ```javascript
 const result = Themer.validateContract(theme, {
-  required: ['background', 'textPrimary'],
-  supported: ['fluidGutter']
+  required: ['color.background', 'color.text_primary'],
+  supported: ['color.background', 'color.text_primary', 'spacing.spacing_05']
 });
 
 result.success;     // true when errors is empty

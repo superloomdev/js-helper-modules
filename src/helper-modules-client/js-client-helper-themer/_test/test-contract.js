@@ -870,8 +870,12 @@ describe('contract - CP1 repair', () => {
 
   it('should reject a ramp entry that is not a parsable color', () => {
     const engine = themerLoader(Lib, {});
-    assert.throws(() => engine.buildTheme({ tokens: { a: '#ffffff' }, ramp: ['not-a-color', '#ffffff'] }, [], 'native'),
+    const template = { tokens: { a: '#ffffff' }, ramp: ['not-a-color', '#ffffff'] };
+    assert.throws(() => engine.buildTheme(template, [], 'native'),
       /^TypeError: \[helper-themer\] template\.ramp\[0\] must be a supported numeric color$/);
+    const report = engine.validateTemplate(template);
+    assert.equal(report.success, false);
+    assert.equal(report.errors[0], '[helper-themer] template.ramp[0] must be a supported numeric color');
   });
 
   it('should reject a contrast rule naming an undeclared token', () => {
@@ -913,7 +917,10 @@ describe('contract - CP1 repair', () => {
   it('should emit identical native shadow output with and without an options argument', () => {
     const template = {
       tokens: {
-        cardShadow: { shadow: true, layers: [{ x: 0, y: 1, blur: 2, spread: 0, color: '#00000033' }] }
+        cardShadow: { shadow: true, layers: [
+          { x: 0, y: 1, blur: 2, spread: 0, color: '#00000033' },
+          { x: 0, y: 4, blur: 8, spread: 1, color: '#0000001a', inset: true }
+        ] }
       },
       meta: { cardShadow: { group: 'shadow' } }
     };
@@ -957,7 +964,7 @@ describe('contract - CP1 repair', () => {
 
   it('should not accept a shadow_mode option', () => {
     assert.throws(() => Themer.buildTheme({ tokens: { a: 1 } }, [], 'native', { shadow_mode: 'anything' }),
-      /^TypeError: \[helper-themer\] options\.shadow_mode must not be present$/);
+      /^TypeError: \[helper-themer\] options\.shadow_mode must be one of: contrast, min_contrast_ratio, motion_factor$/);
   });
 
   it('should reject a non-boolean inset on a shadow layer', () => {

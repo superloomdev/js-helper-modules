@@ -201,7 +201,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     @param {Object} resolved - Output of resolve
     @param {Object} template - The template that produced it
     @param {String} platform - 'web' or 'native'
-    @param {Object} [options] - Per-call options; must not carry deprecated emission modes
+    @param {Object} [options] - Per-call options: contrast, min_contrast_ratio, motion_factor
 
     @return {Object} - Emitted result
     @return {Object} .tokens - Platform-ready value per token name
@@ -283,7 +283,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     Validate a resolved theme against the token contract.
 
     Returns { success, errors, warnings }. Throws TypeError only when
-    theme, theme.tokens, or an options list is malformed; reports every
+    theme, theme.tokens, options.required, or options.supported is malformed; reports every
     content finding.
 
     @param {Object} theme - A theme object with a tokens map

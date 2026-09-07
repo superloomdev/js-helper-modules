@@ -47,6 +47,8 @@ export default Object.freeze({
 
   MUST_BE_KNOWN_CONTRAST_MODE: 'must be one of: correct, report',
 
+  MUST_BE_KNOWN_OPTION: 'must be one of: contrast, min_contrast_ratio, motion_factor',
+
 
   // ~~~~~~~~~~~~~~~~~~~~ Numeric Range ~~~~~~~~~~~~~~~~~~~~
 
@@ -65,8 +67,6 @@ export default Object.freeze({
   MUST_BE_BOOLEAN: 'must be true or false',
 
   MUST_BE_STRING_ARRAY: 'must be an array of strings',
-
-  MUST_NOT_BE_PRESENT: 'must not be present',
 
 
   // ~~~~~~~~~~~~~~~~~~~~ Token Contract ~~~~~~~~~~~~~~~~~~~~

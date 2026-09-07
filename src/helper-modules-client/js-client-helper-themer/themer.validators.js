@@ -363,6 +363,13 @@ const createInterface = function (Lib, ERRORS, Color) {
         _Validators.fail('options', ERRORS.MUST_BE_PLAIN_OBJECT);
       }
 
+      // Every option key is one of three; anything else is a caller bug and fails by name
+      for (const key of Object.keys(options)) {
+        if (key !== 'contrast' && key !== 'min_contrast_ratio' && key !== 'motion_factor') {
+          _Validators.fail('options.' + key, ERRORS.MUST_BE_KNOWN_OPTION);
+        }
+      }
+
       // An unsatisfiable ratio would loop the correction pass to no purpose
       if (!Lib.Utils.isNullOrUndefined(options.min_contrast_ratio)) {
         Validators.assertContrastRatio(options.min_contrast_ratio, 'options.min_contrast_ratio');
@@ -377,13 +384,6 @@ const createInterface = function (Lib, ERRORS, Color) {
       if (options.contrast !== undefined && options.contrast !== 'correct' && options.contrast !== 'report') {
         _Validators.fail('options.contrast', ERRORS.MUST_BE_KNOWN_CONTRAST_MODE);
       }
-
-      // Emission has one behavior per platform, so a mode option is a caller bug
-      const forbiddenOption = ['shadow', 'mode'].join('_');
-      if (options[forbiddenOption] !== undefined) {
-        _Validators.fail('options.' + forbiddenOption, ERRORS.MUST_NOT_BE_PRESENT);
-      }
-
     },
 
 
@@ -413,7 +413,7 @@ const createInterface = function (Lib, ERRORS, Color) {
     Validate a resolved theme against the token contract.
 
     Returns { success, errors, warnings }. Throws TypeError when
-    theme, theme.tokens, or an options list is malformed; reports
+    theme, theme.tokens, options.required, or options.supported is malformed; reports
     every content finding.
 
     - Missing required tokens produce CONTRACT_MISSING_TOKEN errors.
