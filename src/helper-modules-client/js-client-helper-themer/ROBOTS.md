@@ -31,6 +31,8 @@ Not a dependency: `helper-font`. The two modules are independent by design.
 | `CACHE_CAPACITY` | Number | `32` | whole, `>= 1` |
 | `CACHE_ENABLED` | Boolean | `true` | strict boolean |
 | `MIN_CONTRAST_RATIO` | Number | `4.5` | `1` to `21` |
+| `DEFAULT_TYPE_SCALE` | String | `'stepPairIncrement'` | Must name a generator this engine provides |
+| `SCALE_GENERATORS` | Object | `{}` | Custom scale generator overrides |
 
 Validated at load. Bad config throws immediately.
 
@@ -41,6 +43,8 @@ buildTheme(template, layers, platform, options?) -> { tokens, substituted, lossy
 resolve(template, layers, options?)              -> { tokens, scales, polarity, anchor_index, motion_factor, contrast_mode, stats, corrections, violations }
 emit(resolved, template, platform, options?)     -> { tokens, substituted, lossy }
 validateTemplate(template)                       -> { success, errors }
+getContract()                                    -> Object
+validateContract(theme, options?)                -> { success, errors, warnings }
 platforms()                                      -> ['web', 'native']
 cacheStats()                                     -> { hits, misses, evictions, size }
 clearCache()                                     -> undefined
@@ -52,7 +56,7 @@ clearCache()                                     -> undefined
 
 **Everything throws `TypeError`. There is no operational envelope.**
 
-The single exception is `validateTemplate`, which returns `{ success, errors }` and never throws. It is a pre-resolution reporting surface, so it collects every finding.
+The single exception is `validateTemplate`, which returns `{ success, errors }` and never throws. It is a pre-resolution reporting surface, so it collects every finding. `validateContract` also returns `{ success, errors, warnings }` and never throws.
 
 Message format: `[helper-themer] <field-path> <expected-shape>`
 
@@ -74,7 +78,7 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 | Surface | Case |
 |---|---|
 | Template / layer / options / result keys | `snake_case` |
-| Scale and operation identifiers | `camelCase` (`carbonType`, `miniUnit`, `geometric`, `rampStep`, `hue`, `mix`, `scaleBy`) |
+| Scale and operation identifiers | camelCase (stepPairIncrement, miniUnit, geometric, rampStep, hue, mix, scaleBy) |
 | Keys **inside** an emitted token value | `camelCase` (`fontSize`, `lineHeight`, `shadowRadius`) - React Native's contract, do not rename |
 
 ## Template Entry Shapes
@@ -87,12 +91,11 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 { type_set: true, step: 1, weight: 400, line_height: 1.33,
   letter_spacing: 0.32, font_family: 'mono' }                // legacy type set
 { type_set: true, font_size: 14.5, line_height_px: 20.25 }   // exact type set
-{ shadow: true, level: 2 }                                   // shadow
+{ shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033' } ] }  // shadow
 ```
 
-Type set and shadow require their boolean marker. Shadow needs `level` (1-5) **or** `layers`.
-
-Shadow layer geometry: `offset_x`, `offset_y`, `blur`, `spread`, `opacity`.
+Type set and shadow require their boolean marker. Shadow must declare `layers`, an array of
+`{ x, y, blur, spread, color }` objects.
 
 ## Metadata Groups
 

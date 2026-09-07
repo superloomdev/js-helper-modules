@@ -25,7 +25,7 @@ function baseTemplate () {
     polarity: 'light',
     ramp: ['#ffffff', '#f4f4f4', '#e0e0e0', '#c6c6c6', '#a8a8a8', '#8d8d8d', '#6f6f6f', '#525252', '#393939', '#262626', '#161616'],
     palette: { red60: '#da1e28' },
-    scales: { base_font_size: 16, miniUnit: { base: 8 }, carbonType: { base: 12 } },
+    scales: { base_font_size: 16, miniUnit: { base: 8 }, stepPairIncrement: { base: 12 } },
     tokens: {
       background: { op: 'rampStep', args: [0] },
       textPrimary: { op: 'rampStep', args: [10] }

@@ -19,7 +19,7 @@ function makeTemplate (accentHex) {
     polarity: 'light',
     ramp: ['#ffffff', '#161616'],
     palette: {},
-    scales: { base_font_size: 16, carbonType: { base: 12 }, miniUnit: { base: 8 } },
+    scales: { base_font_size: 16, stepPairIncrement: { base: 12 }, miniUnit: { base: 8 } },
     tokens: {
       brand: accentHex,
       bodyText: { type_set: true, step: 2, weight: 400, line_height: 1.42857, letter_spacing: 0.16 },
@@ -27,14 +27,14 @@ function makeTemplate (accentHex) {
       cardShadow: {
         shadow: true,
         layers: [
-          { offset_x: 0, offset_y: 2, blur: 4, spread: 1, color: '#000000', opacity: 0.2 },
-          { offset_x: 0, offset_y: 8, blur: 16, spread: 0, color: '#000000', opacity: 0.1 }
+          { x: 0, y: 2, blur: 4, spread: 1, color: 'rgba(0, 0, 0, 0.2)' },
+          { x: 0, y: 8, blur: 16, spread: 0, color: 'rgba(0, 0, 0, 0.1)' }
         ]
       },
       flatShadow: {
         shadow: true,
         layers: [
-          { offset_x: 0, offset_y: 1, blur: 2, spread: 0, color: '#000000', opacity: 0.3 }
+          { x: 0, y: 1, blur: 2, spread: 0, color: 'rgba(0, 0, 0, 0.3)' }
         ]
       }
     },

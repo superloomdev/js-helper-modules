@@ -28,7 +28,7 @@ const template = {
   scales: {
     base_font_size: 16,
     miniUnit: { base: 8 },
-    carbonType: { base: 12 },
+    stepPairIncrement: { base: 12 },
     geometric: { base: 16, ratio: 1.25 }
   },
   tokens: {},
@@ -59,7 +59,7 @@ SPACING_MULTIPLIERS.forEach(function (multiplier, i) {
 
 // Type scale, every step from the recurrence
 for (let step = 1; step <= 23; step++) {
-  declare('scale' + String(step).padStart(2, '0'), { scale: 'carbonType', step: step }, { group: 'fontSize' });
+  declare('scale' + String(step).padStart(2, '0'), { scale: 'stepPairIncrement', step: step }, { group: 'fontSize' });
 }
 
 // Type sets, which resolve to objects

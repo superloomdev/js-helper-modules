@@ -46,7 +46,7 @@ Derives a theme and emits it for one platform. Runs `resolve` then `emit`, and c
 | `options` | `Object` | No | Per-call `contrast`, `min_contrast_ratio`, `motion_factor`, and `shadow_mode` overrides |
 
 ```javascript
-const theme = Themer.buildTheme(carbonTemplate, [
+const theme = Themer.buildTheme(myTemplate, [
   { name: 'brand', tokens: { brand: '#0f62fe' } },
   { name: 'dark', polarity: 'dark' }
 ], 'native');
@@ -63,7 +63,7 @@ theme.corrections;         // contrast rewrites that were applied
 Derives a platform-independent token map. Use this directly when emitting for both platforms from one derivation, or when inspecting a theme without rendering it.
 
 ```javascript
-const resolved = Themer.resolve(carbonTemplate, layers);
+const resolved = Themer.resolve(myTemplate, layers);
 
 resolved.tokens.spacing03;      // 16, canonical and unit-free
 resolved.stats.route;           // { literal: 4, alias: 1, rule: 3, ... }
@@ -77,10 +77,10 @@ Resolution is cached per instance. Calling again with equal layer content return
 Projects a resolved token map onto one platform. Both platforms emit the same token keys. The optional options object accepts `shadow_mode: 'legacy' | 'box_shadow'`; omitted or null options use legacy mode. Invalid option shapes, invalid shadow modes, malformed template structure, and unknown metadata groups throw before cache lookup.
 
 ```javascript
-const resolved = Themer.resolve(carbonTemplate, layers);
+const resolved = Themer.resolve(myTemplate, layers);
 
-const web = Themer.emit(resolved, carbonTemplate, 'web');
-const native = Themer.emit(resolved, carbonTemplate, 'native');
+const web = Themer.emit(resolved, myTemplate, 'web');
+const native = Themer.emit(resolved, myTemplate, 'native');
 
 web.tokens.spacing03;      // '1rem'
 native.tokens.spacing03;   // 16
@@ -98,7 +98,7 @@ native.lossy;
 Checks a template's structural shape without deriving from it. **This is the one function here that reports instead of throwing**, because it exists to be called before resolution, and both of its callers want every problem at once.
 
 ```javascript
-Themer.validateTemplate(carbonTemplate);
+Themer.validateTemplate(myTemplate);
 // { success: true, errors: [] }
 
 Themer.validateTemplate({ tokens: 'oops', meta: 'oops' });
@@ -114,6 +114,51 @@ Themer.validateTemplate({ tokens: 'oops', meta: 'oops' });
 Use it at build time to fail a theme package, or in the layer that accepts a theme document from a server. Raising the first finding would turn checking a package into a five-round guessing game, which is why this surface differs from every other one in the module.
 
 Resolution still throws. By the time a template reaches `resolve` it has been checked, so a malformed one is a caller bug rather than a document under review.
+
+## Token Contract
+
+The engine core is vocabulary-agnostic: `buildTheme` accepts any token names. Superloom's vocabulary, the token contract, ships in this package as data and is read through two functions.
+
+### `getContract()`
+
+Returns the frozen token contract registry. Same reference on every call. Never throws.
+
+```javascript
+const contract = Themer.getContract();
+
+contract.version;    // contract version string
+contract.groups;     // emitter group names
+contract.tokens;     // one entry per contract token: { group, emit?, values? }
+contract.meta;       // derived metadata, can be attached to a template as template.meta
+```
+
+### `validateContract(theme, options)`
+
+Checks `theme.tokens` against the contract. Returns `{ success, errors, warnings }` and never throws.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `theme` | `Object` | Yes | The theme to check. Must have a `tokens` map |
+| `options` | `Object` | No | Validation options |
+
+| Option | Type | Description |
+|---|---|---|
+| `options.required` | `String[]` | Token names whose absence is an error |
+| `options.supported` | `String[]` | Token names whose presence without support is a warning |
+
+```javascript
+const result = Themer.validateContract(theme, {
+  required: ['background', 'textPrimary'],
+  supported: ['fluidGutter']
+});
+
+result.success;     // true when errors is empty
+result.errors;      // [{ code, token, message }] with codes CONTRACT_MISSING_TOKEN,
+                    //   CONTRACT_UNKNOWN_TOKEN, CONTRACT_INVALID_VALUE
+result.warnings;    // [{ code, token, message }] with code CONTRACT_UNSUPPORTED_TOKEN
+```
+
+Structure and routes are `validateTemplate`'s job; this function checks names and literal value types only. Alias strings are accepted for every type.
 
 ## Inspection
 
@@ -147,7 +192,7 @@ Themer.clearCache();
 
 ## Failure Behavior
 
-Every failure throws `TypeError`, with `validateTemplate` as the single deliberate exception described above. There is no `{ success, error }` **operational** envelope anywhere in this module, because a pure engine has no operational failures to report. The full reasoning is in [Philosophy](philosophy.md); the message format and the complete list are in [Schemas](schemas.md).
+Every failure throws `TypeError`, with `validateTemplate` and `validateContract` as the deliberate exceptions described above. There is no `{ success, error }` **operational** envelope anywhere in this module, because a pure engine has no operational failures to report. The full reasoning is in [Philosophy](philosophy.md); the message format and the complete list are in [Schemas](schemas.md).
 
 ```javascript
 Themer.emit(resolved, template, 'android');

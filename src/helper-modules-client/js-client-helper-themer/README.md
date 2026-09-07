@@ -87,10 +87,30 @@ Both platforms emit the same token keys, so no caller has to guard against `unde
 | `resolve(template, layers, options)` | Derive a platform-independent token map |
 | `emit(resolved, template, platform, options)` | Project a resolved map onto one platform with validated emission options |
 | `validateTemplate(template)` | Check a template and report every finding |
+| `getContract()` | Return the frozen token contract registry |
+| `validateContract(theme, options)` | Check theme tokens against the contract |
 | `platforms()` | List the platforms this engine emits for |
 | `cacheStats()` / `clearCache()` | Inspect and reset the per-instance cache |
 
 Full signatures and return shapes: [API Reference](docs/api.md).
+
+## Token Contract
+
+The engine core is vocabulary-agnostic: buildTheme accepts any token names. Superloom's
+vocabulary, the token contract, ships in this package as data and is read through two functions.
+
+getContract() -> Object | async:no
+  Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
+  ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
+  Same reference on every call. Never throws.
+
+validateContract(theme, options) -> { success, errors, warnings } | async:no
+  Checks theme.tokens against the contract. options.required (string[]) makes absence an error;
+  options.supported (string[]) makes presence-without-support a warning. Entries are
+  { code, token, message } with codes CONTRACT_MISSING_TOKEN, CONTRACT_UNKNOWN_TOKEN,
+  CONTRACT_INVALID_VALUE (errors) and CONTRACT_UNSUPPORTED_TOKEN (warnings). success is true when
+  errors is empty. Structure and routes are validateTemplate's job; this function checks names and
+  literal value types only. Alias strings are accepted for every type.
 
 ## Configuration
 
@@ -100,6 +120,8 @@ Full signatures and return shapes: [API Reference](docs/api.md).
 | `CACHE_CAPACITY` | `32` | Maximum cached results per instance |
 | `CACHE_ENABLED` | `true` | Set false to derive fresh every call |
 | `MIN_CONTRAST_RATIO` | `4.5` | Default floor for contrast rules |
+| `DEFAULT_TYPE_SCALE` | `'stepPairIncrement'` | Default scale for type sets that omit `scale` |
+| `SCALE_GENERATORS` | `{}` | Custom scale generator overrides |
 
 See [Configuration](docs/configuration.md).
 
@@ -113,7 +135,7 @@ See [Philosophy](docs/philosophy.md).
 
 ## Error Handling
 
-Every failure throws `TypeError`, because a pure engine has no operational failures. The one exception is `validateTemplate`, which reports `{ success, errors }` so a build tool sees every problem at once.
+Every failure throws `TypeError`, because a pure engine has no operational failures. The exceptions are `validateTemplate`, which reports `{ success, errors }` so a build tool sees every problem at once, and `validateContract`, which reports `{ success, errors, warnings }` so a caller sees every contract finding at once.
 
 ```javascript
 Themer.emit(resolved, template, 'android');

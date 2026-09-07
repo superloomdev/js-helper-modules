@@ -57,6 +57,8 @@ Config is validated at load time, so a misconfigured value fails at startup rath
 | `CACHE_CAPACITY` | `Number` | `32` | Maximum results held per instance. Bounds a live theme editor, which would otherwise mint an unbounded number of entries |
 | `CACHE_ENABLED` | `Boolean` | `true` | Set false to make every call derive fresh. Useful when measuring cold cost |
 | `MIN_CONTRAST_RATIO` | `Number` | `4.5` | Default floor for contrast rules that do not state their own. 4.5 is the WCAG AA threshold for body text |
+| `DEFAULT_TYPE_SCALE` | `String` | `'stepPairIncrement'` | Default scale name used when a type set omits `scale`. Must name a generator the engine provides |
+| `SCALE_GENERATORS` | `Object` | `{}` | Custom scale generator overrides. Keys are scale names, values are generator definitions. Empty by default, so the built-in generators are used |
 
 A template may override the root size for itself with `scales.base_font_size`, which wins over `CONFIG.BASE_FONT_SIZE`.
 

@@ -41,7 +41,7 @@ This is also why a type set resolves to an **object** rather than to separate si
 
 Some facts cannot cross a platform boundary. A CSS shadow can have a spread radius and many layers; React Native supports neither. The tempting behavior is to drop what does not fit.
 
-The cautionary example is in the platform bridge itself: `react-native-web` lists `elevation` among its ignored properties and discards it with no warning. A value vanishes, the screen looks subtly wrong, and nothing anywhere says why.
+The cautionary example is in the platform bridge itself: `react-native-web` silently discards shadow properties it cannot map, so a multi-layer shadow with per-layer colors collapses to a single layer with no warning. A value vanishes, the screen looks subtly wrong, and nothing anywhere says why.
 
 Themer reports instead. Every emit returns two lists beside the tokens:
 
@@ -86,7 +86,7 @@ Themer does no I/O. Every failure it can produce is the caller passing something
 
 This has a consequence worth stating plainly. A theme document arriving from a server is untrusted input, and handing a malformed one straight to the engine throws. That check belongs to the layer that fetched it, because that layer is the one with a real operational failure to report.
 
-There is exactly one exception, and it proves the rule rather than weakening it. `validateTemplate` returns `{ success, errors }` instead of throwing, because it is the function you call **before** the template is in use, when the document is under review. A reviewer wants every finding at once; raising the first one makes checking a theme package an iterative guessing game. That is a reporting surface, not an operational envelope, and it is the same distinction that gives contrast enforcement a `report` mode alongside `correct`. Once a template reaches `resolve`, the review is over and a defect is a caller bug again.
+There is exactly one exception, and it proves the rule rather than weakening it. `validateTemplate` returns `{ success, errors }` instead of throwing, and `validateContract` returns `{ success, errors, warnings }`, because these are the functions you call **before** the template is in use, when the document is under review. A reviewer wants every finding at once; raising the first one makes checking a theme package an iterative guessing game. That is a reporting surface, not an operational envelope, and it is the same distinction that gives contrast enforcement a `report` mode alongside `correct`. Once a template reaches `resolve`, the review is over and a defect is a caller bug again.
 
 ## See Also
 

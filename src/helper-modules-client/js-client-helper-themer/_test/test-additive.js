@@ -31,11 +31,9 @@ function shadowTemplate () {
       cardShadow: {
         shadow: true,
         layers: [
-          { offset_x: 0, offset_y: 2, blur: 6, spread: 0, opacity: 0.3 },
-          { offset_x: 0, offset_y: 4, blur: 8, spread: 1, opacity: 0.2 }
-        ],
-        color: '{shadowColor}',
-        elevation: 2
+          { x: 0, y: 2, blur: 6, spread: 0, color: '{shadowColor}' },
+          { x: 0, y: 4, blur: 8, spread: 1, color: '{shadowColor}' }
+        ]
       }
     },
     meta: {
@@ -129,7 +127,7 @@ describe('recovery - exact authored values', function () {
 
   it('should preserve explicit fractional type metrics through native emission', function () {
     const template = {
-      scales: { base_font_size: 16, carbonType: { base: 12 } },
+      scales: { base_font_size: 16, stepPairIncrement: { base: 12 } },
       tokens: { body: { type_set: true, font_size: 14.5, line_height_px: 20.25, letter_spacing: 0.16, weight: 400 } },
       meta: { body: { group: 'typeSet' } }
     };
@@ -145,7 +143,7 @@ describe('recovery - exact authored values', function () {
 
   it('should resolve aliases in exact type metrics', function () {
     const template = {
-      scales: { base_font_size: 16, carbonType: { base: 12 } },
+      scales: { base_font_size: 16, stepPairIncrement: { base: 12 } },
       tokens: { size: 14.5, height: 20.25, body: { type_set: true, font_size: '{size}', line_height_px: '{height}', letter_spacing: 0 } },
       meta: { body: { group: 'typeSet' } }
     };
@@ -162,7 +160,7 @@ describe('recovery - exact authored values', function () {
     ];
     for (const body of entries) {
       assert.throws(function () {
-        engine.resolve({ tokens: { body }, scales: { carbonType: { base: 12 } } }, []);
+        engine.resolve({ tokens: { body }, scales: { stepPairIncrement: { base: 12 } } }, []);
       }, TypeError);
     }
   });
@@ -175,18 +173,16 @@ describe('recovery - exact authored values', function () {
 
   it('should compose shadow color alpha and layer opacity exactly once', function () {
     const template = shadowTemplate();
-    template.tokens.shadowColor = '#00000080';
-    template.tokens.cardShadow.layers = [{ offset_x: 0, offset_y: 2, blur: 6, spread: 0, opacity: 0.5 }];
+    template.tokens.cardShadow.layers = [{ x: 0, y: 2, blur: 6, spread: 0, color: '#00000080' }];
     const result = Themer.buildTheme(template, [], 'web');
-    assert.equal(result.tokens.cardShadow, '0px 2px 6px rgba(0, 0, 0, ' + (128 / 255 * 0.5) + ')');
+    assert.equal(result.tokens.cardShadow, '0px 2px 6px #00000080');
   });
 
   it('should use numeric rgba colors in shadow arithmetic', function () {
     const template = shadowTemplate();
-    template.tokens.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    template.tokens.cardShadow.layers = [{ offset_x: 0, offset_y: 2, blur: 6, spread: 0, opacity: 0.5 }];
+    template.tokens.cardShadow.layers = [{ x: 0, y: 2, blur: 6, spread: 0, color: 'rgba(0, 0, 0, 0.5)' }];
     const result = Themer.buildTheme(template, [], 'web');
-    assert.equal(result.tokens.cardShadow, '0px 2px 6px rgba(0, 0, 0, 0.25)');
+    assert.equal(result.tokens.cardShadow, '0px 2px 6px rgba(0, 0, 0, 0.5)');
   });
 
   it('should preserve interpolated alpha in mix operations', function () {
@@ -229,12 +225,12 @@ describe('recovery - exact authored values', function () {
     }, /opaque compositing background/);
   });
 
-  it('should reject malformed numeric colors when arithmetic reads them', function () {
+  it('should reject malformed numeric colors when native shadow parses them', function () {
     const engine = themerLoader(Lib, {});
     for (const color of ['rgb(0, 0, 256)', 'rgba(0, 0, 0, 2)', 'rgb(0%, 0%, 0%)', '#xyz']) {
       const template = shadowTemplate();
       template.tokens.shadowColor = color;
-      assert.throws(function () { engine.buildTheme(template, [], 'web'); }, /supported numeric color/);
+      assert.throws(function () { engine.buildTheme(template, [], 'native'); }, /supported numeric color/);
     }
   });
 
@@ -243,8 +239,8 @@ describe('recovery - exact authored values', function () {
     const layers = [
       [],
       [{}],
-      [{ offset_x: 0, offset_y: 0, blur: 1, spread: 0, opacity: 2 }],
-      [{ offset_x: 0, offset_y: 0, blur: 1, spread: 0, inset: 'yes' }]
+      [{ x: 0, y: 0, blur: 1, spread: 0, color: '#000000', blur: -1 }],
+      [{ x: 0, y: 0, blur: 1, spread: 0 }]
     ];
     for (const value of layers) {
       const template = shadowTemplate();
@@ -255,23 +251,21 @@ describe('recovery - exact authored values', function () {
 
   it('should emit native shadow color and composed alpha exactly once', function () {
     const template = shadowTemplate();
-    template.tokens.shadowColor = '#00000080';
-    template.tokens.cardShadow.layers = [{ offset_x: 0, offset_y: 2, blur: 6, spread: 0, opacity: 0.5 }];
+    template.tokens.cardShadow.layers = [{ x: 0, y: 2, blur: 6, spread: 0, color: '#00000080' }];
     const result = Themer.buildTheme(template, [], 'native');
     assert.deepEqual(result.tokens.cardShadow, {
       shadowColor: '#000000',
       shadowOffset: { width: 0, height: 2 },
       shadowRadius: 6,
-      shadowOpacity: (128 / 255) * 0.5,
-      elevation: 2
+      shadowOpacity: 128 / 255
     });
   });
 
-  it('should report inset loss in legacy native emission', function () {
+  it('should reject level and elevation keys in a shadow entry', function () {
+    const engine = themerLoader(Lib, {});
     const template = shadowTemplate();
-    template.tokens.cardShadow.layers = [{ offset_x: 0, offset_y: 2, blur: 6, spread: 0, opacity: 0.5, inset: true }];
-    const result = Themer.buildTheme(template, [], 'native');
-    assert.deepEqual(result.lossy.map(function (entry) { return entry.fact; }), ['inset']);
+    template.tokens.cardShadow.level = 2;
+    assert.throws(function () { engine.buildTheme(template, [], 'web'); }, /level/);
   });
 
 });
@@ -566,11 +560,11 @@ describe('G12 - explicit shadow geometry validation', () => {
   it('should reject non-finite offset values', () => {
 
     const template = shadowTemplate();
-    template.tokens.cardShadow.layers[0].offset_y = Infinity;
+    template.tokens.cardShadow.layers[0].y = Infinity;
 
     assert.throws(
       () => Themer.resolve(template, [{ name: 'base' }]),
-      /offset|finite/
+      /y|finite/
     );
 
   });
@@ -578,8 +572,8 @@ describe('G12 - explicit shadow geometry validation', () => {
   it('should accept signed offsets and spread', () => {
 
     const template = shadowTemplate();
-    template.tokens.cardShadow.layers[0].offset_x = -2;
-    template.tokens.cardShadow.layers[0].offset_y = -3;
+    template.tokens.cardShadow.layers[0].x = -2;
+    template.tokens.cardShadow.layers[0].y = -3;
     template.tokens.cardShadow.layers[0].spread = -1;
 
     // Should not throw - negative offsets and spread are valid
@@ -588,13 +582,12 @@ describe('G12 - explicit shadow geometry validation', () => {
 
   });
 
-  it('should normalize absent opacity to 1', () => {
+  it('should accept a layer with a color alias that resolves through the token graph', () => {
 
     const template = shadowTemplate();
-    delete template.tokens.cardShadow.layers[0].opacity;
-
     const resolved = Themer.resolve(template, [{ name: 'base' }]);
-    assert.ok(resolved.tokens.cardShadow, 'shadow without opacity should resolve');
+    assert.ok(resolved.tokens.cardShadow, 'shadow with color alias should resolve');
+    assert.equal(resolved.tokens.cardShadow.layers[0].color, '#000000');
 
   });
 

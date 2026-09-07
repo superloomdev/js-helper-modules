@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --test test.js test-failures.js test-integration.js test-typesets.js test-unified.js test-carbon.js test-additive.js"
+    "test": "node --test test.js test-failures.js test-integration.js test-typesets.js test-unified.js test-carbon.js test-additive.js test-contract.js"
   },
   "dependencies": {
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",

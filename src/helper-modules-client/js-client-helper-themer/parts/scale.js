@@ -78,7 +78,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
 
     /********************************************************************
-    Produce a type size from the Carbon type scale.
+    Produce a type size from a step-pair increment scale.
 
     The scale grows by a widening increment: each group of four steps
     adds two more pixels per step than the group before it, which is
@@ -94,11 +94,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
     @return {Number} - The generated size
     *********************************************************************/
-    carbonType: function (params, seeds) {
+    stepPairIncrement: function (params, seeds) {
 
       // A missing base leaves every step on the scale undefined
       if (!Lib.Utils.isNumber(seeds.base) || seeds.base <= 0) {
-        throw new TypeError('[helper-themer] template.scales.carbonType.base ' + ERRORS.MUST_BE_POSITIVE_NUMBER);
+        throw new TypeError('[helper-themer] template.scales.stepPairIncrement.base ' + ERRORS.MUST_BE_POSITIVE_NUMBER);
       }
 
       // Walk up from the base, widening the increment every four steps
@@ -151,6 +151,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     Return the generator a template named, or throw when it does not
     exist.
 
+    Built-in generators are looked up on a null-prototype map so a
+    prototype name like constructor or toString cannot be mistaken
+    for a scale. Custom generators from CONFIG.SCALE_GENERATORS are
+    merged in after the built-ins.
+
     @param {String} name - Generator name from the token entry
     @param {String} token_name - Token being resolved, for the message
 
@@ -158,12 +163,18 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     byName: function (name, token_name) {
 
+      // A null-prototype lookup prevents prototype names from masquerading as generators
+      const lookup = _Scale.generatorLookup();
+      const generator = Object.prototype.hasOwnProperty.call(lookup, name)
+        ? lookup[name]
+        : undefined;
+
       // An unknown generator would otherwise resolve the token to undefined
-      if (!Lib.Utils.isFunction(Scale[name]) || _Scale.isReserved(name)) {
+      if (!Lib.Utils.isFunction(generator)) {
         throw new TypeError('[helper-themer] tokens.' + token_name + '.scale ' + ERRORS.MUST_BE_KNOWN_SCALE);
       }
 
-      return Scale[name];
+      return generator;
 
     },
 
@@ -188,6 +199,38 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
 
   /////////////////////////// Private Functions START ///////////////////////////
   const _Scale = {
+
+    /********************************************************************
+    Build a null-prototype lookup of every available generator,
+    built-ins first, then custom generators from CONFIG.SCALE_GENERATORS.
+
+    @return {Object} - Null-prototype map of generator name to function
+    *********************************************************************/
+    generatorLookup: function () {
+
+      // Start with a null-prototype object so hasOwnProperty is the only path
+      const lookup = Object.create(null);
+
+      // Built-in generators are every public key except the lookup helpers
+      const keys = Object.keys(Scale);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (!_Scale.isReserved(key)) {
+          lookup[key] = Scale[key];
+        }
+      }
+
+      // Custom generators from config merge in after built-ins
+      const custom = CONFIG.SCALE_GENERATORS || {};
+      const customKeys = Object.keys(custom);
+      for (let i = 0; i < customKeys.length; i++) {
+        lookup[customKeys[i]] = custom[customKeys[i]];
+      }
+
+      return lookup;
+
+    },
+
 
     /********************************************************************
     Report whether a key on the public object is a lookup helper

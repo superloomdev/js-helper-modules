@@ -6,6 +6,7 @@
   "exports": {
     ".": "./themer.js",
     "./themer.config.js": "./themer.config.js",
+    "./themer.contract.js": "./themer.contract.js",
     "./themer.errors.js": "./themer.errors.js",
     "./themer.validators.js": "./themer.validators.js",
     "./parts/color.js": "./parts/color.js",

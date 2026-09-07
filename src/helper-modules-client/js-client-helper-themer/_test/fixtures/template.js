@@ -33,7 +33,7 @@ export default function buildTemplate (accent) {
     scales: {
       base_font_size: 16,
       miniUnit: { base: 8 },
-      carbonType: { base: 12 },
+      stepPairIncrement: { base: 12 },
       geometric: { base: 10, ratio: 2 }
     },
 
@@ -71,14 +71,17 @@ export default function buildTemplate (accent) {
       // Type set that deliberately leaves the weight unset, as Carbon does
       helperText01: { type_set: true, step: 1, line_height: 1.33333, letter_spacing: 0.32 },
 
-      // Shadow seeded from the elevation table, which is multi-layer
-      cardShadow: { shadow: true, level: 2 },
+      // Shadow with explicit multi-layer geometry
+      cardShadow: { shadow: true, layers: [
+        { x: 0, y: 3, blur: 6, spread: 0, color: 'rgba(0, 0, 0, 0.16)' },
+        { x: 0, y: 3, blur: 6, spread: 0, color: 'rgba(0, 0, 0, 0.23)' }
+      ] },
 
       // Shadow with explicit geometry carrying a spread native cannot represent
       spreadShadow: {
         shadow: true,
         layers: [
-          { offset_x: 0, offset_y: 2, blur: 4, spread: 3, opacity: 0.2 }
+          { x: 0, y: 2, blur: 4, spread: 3, color: 'rgba(0, 0, 0, 0.2)' }
         ]
       },
 

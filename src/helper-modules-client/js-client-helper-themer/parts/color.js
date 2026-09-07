@@ -3,27 +3,15 @@
 // Pure arithmetic over hex strings: parsing, luminance, contrast ratio, mixing,
 // and the HSL round trip that lets lightness move without dragging the hue.
 //
-// Loader pattern: SINGLETON part. Lib, CONFIG, and ERRORS are assigned once
-// from the uniform parts signature; the public object closes over them.
-
-
-// Shared dependencies injected by loader (uniform parts signature)
-let Lib;               // eslint-disable-line no-unused-vars
-let CONFIG;            // eslint-disable-line no-unused-vars
-let ERRORS;
-
-
-// Grouping a palette walks every entry, and a palette is stable for the life of
-// a template. Without this cache a theme with several contrast violations
-// re-indexes the whole palette once per violation.
-const palette_family_cache = new WeakMap();
+// Loader pattern: FACTORY part. Lib, CONFIG, and ERRORS are captured per call
+// from the uniform parts signature; each public object closes over its own values.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
-Singleton part loader. Assigns the uniform part dependencies to
-module scope and returns the shared Color object.
+Factory part loader. Captures the uniform part dependencies and
+returns an isolated Color object with its own palette cache.
 
 @param {Object} shared_libs - Lib container with Utils
 @param {Object} config - Merged config from the parent module
@@ -33,25 +21,45 @@ module scope and returns the shared Color object.
 *********************************************************************/
 export default function loader (shared_libs, config, errors) {
 
-  // Assign to module-scope vars so the public object can close over them
-  Lib = shared_libs;
-  CONFIG = config;
-  ERRORS = errors;
+  // Capture local bindings so this instance's public object can close over them
+  const Lib = shared_libs;
+  const CONFIG = config;
+  const ERRORS = errors;
 
-  return Color;
+  // Per-instance cache: grouping a palette walks every entry, and a palette is
+  // stable for the life of a template. Without this cache a theme with several
+  // contrast violations re-indexes the whole palette once per violation.
+  const palette_family_cache = new WeakMap();
 
-};/////////////////////////// Module-Loader END /////////////////////////////////
+  return createInterface(Lib, CONFIG, ERRORS, palette_family_cache);
+
+};/////////////////////////// Module-Loader END ////////////////////////////////
 
 
 
-/////////////////////////// Public Functions START /////////////////////////////
-const Color = {
+/////////////////////////// createInterface START //////////////////////////////
+
+/********************************************************************
+Build the color interface for one engine instance.
+
+@param {Object} Lib - Dependency container with Utils
+@param {Object} CONFIG - Merged config for this instance
+@param {Object} ERRORS - Frozen error catalog
+@param {WeakMap} palette_family_cache - Per-instance palette grouping cache
+
+@return {Object} - Public Color interface
+*********************************************************************/
+const createInterface = function (Lib, CONFIG, ERRORS, palette_family_cache) {
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Conversion ~~~~~~~~~~~~~~~~~~~~
-  // Hex to channels and back, the base every other function here builds on.
+  /////////////////////////// Public Functions START /////////////////////////////
+  const Color = {
 
-  /********************************************************************
+
+    // ~~~~~~~~~~~~~~~~~~~~ Conversion ~~~~~~~~~~~~~~~~~~~~
+    // Hex to channels and back, the base every other function here builds on.
+
+    /********************************************************************
   Parse a hex color into red, green, and blue channels.
 
   Accepts both the three-digit and six-digit forms, with or without
@@ -65,54 +73,54 @@ const Color = {
   @return {Number} .b - Blue channel, 0 to 255
   @return {Number} .a - Alpha channel, 0 to 1 (defaults to 1 when absent)
   *********************************************************************/
-  parseHex: function (hex) {
+    parseHex: function (hex) {
 
-    // Parse numeric rgb/rgba forms before the compact hexadecimal forms
-    const source = String(hex).trim();
-    const functional = source.match(/^rgba?\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)(?:\s*,\s*([+-]?\d+(?:\.\d+)?))?\s*\)$/i);
-    if (functional) {
-      const hasAlpha = source.slice(0, 4).toLowerCase() === 'rgba';
-      if (hasAlpha !== (functional[4] !== undefined)) {
+      // Parse numeric rgb/rgba forms before the compact hexadecimal forms
+      const source = String(hex).trim();
+      const functional = source.match(/^rgba?\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)(?:\s*,\s*([+-]?\d+(?:\.\d+)?))?\s*\)$/i);
+      if (functional) {
+        const hasAlpha = source.slice(0, 4).toLowerCase() === 'rgba';
+        if (hasAlpha !== (functional[4] !== undefined)) {
+          throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
+        }
+        const channels = [Number(functional[1]), Number(functional[2]), Number(functional[3])];
+        const alpha = hasAlpha ? Number(functional[4]) : 1;
+        if (channels.some(function (value) {
+          return !Number.isInteger(value) || value < 0 || value > 255;
+        }) || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+          throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
+        }
+        return { r: channels[0], g: channels[1], b: channels[2], a: alpha };
+      }
+
+      // Strip one optional leading hash and validate the complete written form
+      const match = source.match(/^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+      if (!match) {
         throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
       }
-      const channels = [Number(functional[1]), Number(functional[2]), Number(functional[3])];
-      const alpha = hasAlpha ? Number(functional[4]) : 1;
-      if (channels.some(function (value) {
-        return !Number.isInteger(value) || value < 0 || value > 255;
-      }) || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
-        throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
-      }
-      return { r: channels[0], g: channels[1], b: channels[2], a: alpha };
-    }
+      const body = match[1];
 
-    // Strip one optional leading hash and validate the complete written form
-    const match = source.match(/^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
-    if (!match) {
-      throw new TypeError('[helper-themer] color ' + ERRORS.MUST_BE_COLOR);
-    }
-    const body = match[1];
+      // Expand the shorthand form (3 or 4 digits) by doubling each digit
+      const full = (body.length === 3 || body.length === 4) ? body.split('').map(function (d) {
+        return d + d;
+      }).join('') : body;
 
-    // Expand the shorthand form (3 or 4 digits) by doubling each digit
-    const full = (body.length === 3 || body.length === 4) ? body.split('').map(function (d) {
-      return d + d;
-    }).join('') : body;
+      // Extract alpha if present (8-digit form after expansion)
+      const hasAlpha = full.length === 8;
+      const alphaHex = hasAlpha ? full.slice(6, 8) : 'ff';
 
-    // Extract alpha if present (8-digit form after expansion)
-    const hasAlpha = full.length === 8;
-    const alphaHex = hasAlpha ? full.slice(6, 8) : 'ff';
+      // Return validated channels; alpha defaults to 1 when not present
+      return {
+        r: parseInt(full.slice(0, 2), 16),
+        g: parseInt(full.slice(2, 4), 16),
+        b: parseInt(full.slice(4, 6), 16),
+        a: parseInt(alphaHex, 16) / 255
+      };
 
-    // Return validated channels; alpha defaults to 1 when not present
-    return {
-      r: parseInt(full.slice(0, 2), 16),
-      g: parseInt(full.slice(2, 4), 16),
-      b: parseInt(full.slice(4, 6), 16),
-      a: parseInt(alphaHex, 16) / 255
-    };
-
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Compose red, green, and blue channels into a hex color.
 
   @param {Object} rgb - Channel values
@@ -122,18 +130,18 @@ const Color = {
 
   @return {String} - Hex color with a leading hash
   *********************************************************************/
-  toHex: function (rgb) {
+    toHex: function (rgb) {
 
-    // Clamp and pad each channel so arithmetic overflow cannot produce a short string
-    const color = '#' + _Color.channelToPair(rgb.r) + _Color.channelToPair(rgb.g) + _Color.channelToPair(rgb.b);
-    return rgb.a === undefined || rgb.a === 1
-      ? color
-      : color + _Color.channelToPair(rgb.a * 255);
+      // Clamp and pad each channel so arithmetic overflow cannot produce a short string
+      const color = '#' + _Color.channelToPair(rgb.r) + _Color.channelToPair(rgb.g) + _Color.channelToPair(rgb.b);
+      return rgb.a === undefined || rgb.a === 1
+        ? color
+        : color + _Color.channelToPair(rgb.a * 255);
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Convert a hex color to hue, saturation, and lightness.
 
   Lightness is the axis the contrast pass moves, and moving it in
@@ -147,45 +155,45 @@ const Color = {
   @return {Number} .s - Saturation, 0 to 1
   @return {Number} .l - Lightness, 0 to 1
   *********************************************************************/
-  rgbToHsl: function (hex) {
+    rgbToHsl: function (hex) {
 
-    // Normalize the channels to the unit interval the HSL formula expects
-    const rgb = Color.parseHex(hex);
-    const rn = rgb.r / 255;
-    const gn = rgb.g / 255;
-    const bn = rgb.b / 255;
+      // Normalize the channels to the unit interval the HSL formula expects
+      const rgb = Color.parseHex(hex);
+      const rn = rgb.r / 255;
+      const gn = rgb.g / 255;
+      const bn = rgb.b / 255;
 
-    // Lightness is the midpoint of the widest and narrowest channel
-    const max = Math.max(rn, gn, bn);
-    const min = Math.min(rn, gn, bn);
-    const delta = max - min;
-    const l = (max + min) / 2;
+      // Lightness is the midpoint of the widest and narrowest channel
+      const max = Math.max(rn, gn, bn);
+      const min = Math.min(rn, gn, bn);
+      const delta = max - min;
+      const l = (max + min) / 2;
 
-    // A zero spread means grey, which has no meaningful hue to compute
-    if (delta === 0) {
+      // A zero spread means grey, which has no meaningful hue to compute
+      if (delta === 0) {
+        return {
+          h: 0,
+          s: 0,
+          l: l
+        };
+      }
+
+      // Saturation scales the spread against how much room the lightness leaves
+      const s = delta / (1 - Math.abs((2 * l) - 1));
+
+      // Hue is the angle toward whichever channel dominates
+      const h = _Color.hueFromChannels(rn, gn, bn, max, delta);
+
       return {
-        h: 0,
-        s: 0,
+        h: (h + 360) % 360,
+        s: s,
         l: l
       };
-    }
 
-    // Saturation scales the spread against how much room the lightness leaves
-    const s = delta / (1 - Math.abs((2 * l) - 1));
-
-    // Hue is the angle toward whichever channel dominates
-    const h = _Color.hueFromChannels(rn, gn, bn, max, delta);
-
-    return {
-      h: (h + 360) % 360,
-      s: s,
-      l: l
-    };
-
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Convert hue, saturation, and lightness back to a hex color.
 
   @param {Object} hsl - HSL triple
@@ -195,32 +203,32 @@ const Color = {
 
   @return {String} - Hex color with a leading hash
   *********************************************************************/
-  hslToRgb: function (hsl) {
+    hslToRgb: function (hsl) {
 
-    // Chroma is the channel spread this lightness and saturation allow
-    const c = (1 - Math.abs((2 * hsl.l) - 1)) * hsl.s;
-    const hp = hsl.h / 60;
-    const x = c * (1 - Math.abs((hp % 2) - 1));
+      // Chroma is the channel spread this lightness and saturation allow
+      const c = (1 - Math.abs((2 * hsl.l) - 1)) * hsl.s;
+      const hp = hsl.h / 60;
+      const x = c * (1 - Math.abs((hp % 2) - 1));
 
-    // Place chroma and the intermediate value into the sextant the hue falls in
-    const rgb = _Color.sextantChannels(hp, c, x);
+      // Place chroma and the intermediate value into the sextant the hue falls in
+      const rgb = _Color.sextantChannels(hp, c, x);
 
-    // Lift all three channels so the midpoint lands on the requested lightness
-    const m = hsl.l - (c / 2);
+      // Lift all three channels so the midpoint lands on the requested lightness
+      const m = hsl.l - (c / 2);
 
-    return Color.toHex({
-      r: (rgb[0] + m) * 255,
-      g: (rgb[1] + m) * 255,
-      b: (rgb[2] + m) * 255
-    });
+      return Color.toHex({
+        r: (rgb[0] + m) * 255,
+        g: (rgb[1] + m) * 255,
+        b: (rgb[2] + m) * 255
+      });
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Measurement ~~~~~~~~~~~~~~~~~~~~
-  // The two readings the contrast rules are written against.
+    // ~~~~~~~~~~~~~~~~~~~~ Measurement ~~~~~~~~~~~~~~~~~~~~
+    // The two readings the contrast rules are written against.
 
-  /********************************************************************
+    /********************************************************************
   Compute the relative luminance of a hex color.
 
   Follows the WCAG definition, including the per-channel gamma
@@ -231,21 +239,21 @@ const Color = {
 
   @return {Number} - Relative luminance, 0 to 1
   *********************************************************************/
-  luminance: function (hex) {
+    luminance: function (hex) {
 
-    // Luminance alone has no background on which to composite translucent input
-    const rgb = Color.parseHex(hex);
-    if (rgb.a !== 1) {
-      throw new TypeError('[helper-themer] color ' + ERRORS.MUST_HAVE_OPAQUE_BACKGROUND);
-    }
+      // Luminance alone has no background on which to composite translucent input
+      const rgb = Color.parseHex(hex);
+      if (rgb.a !== 1) {
+        throw new TypeError('[helper-themer] color ' + ERRORS.MUST_HAVE_OPAQUE_BACKGROUND);
+      }
 
-    // Weight gamma-expanded channels by how strongly the eye responds to each
-    return _Color.luminanceChannels(rgb);
+      // Weight gamma-expanded channels by how strongly the eye responds to each
+      return _Color.luminanceChannels(rgb);
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Compute the contrast ratio between two hex colors.
 
   @param {String} hex_a - First color
@@ -253,34 +261,34 @@ const Color = {
 
   @return {Number} - Ratio from 1 to 21
   *********************************************************************/
-  contrastRatio: function (hex_a, hex_b) {
+    contrastRatio: function (hex_a, hex_b) {
 
-    // The second color is the declared compositing background and must be opaque
-    const foreground = Color.parseHex(hex_a);
-    const background = Color.parseHex(hex_b);
-    if (background.a !== 1) {
-      throw new TypeError('[helper-themer] color ' + ERRORS.MUST_HAVE_OPAQUE_BACKGROUND);
-    }
+      // The second color is the declared compositing background and must be opaque
+      const foreground = Color.parseHex(hex_a);
+      const background = Color.parseHex(hex_b);
+      if (background.a !== 1) {
+        throw new TypeError('[helper-themer] color ' + ERRORS.MUST_HAVE_OPAQUE_BACKGROUND);
+      }
 
-    // Composite the foreground once before measuring the displayed colors
-    const displayed = {
-      r: (foreground.r * foreground.a) + (background.r * (1 - foreground.a)),
-      g: (foreground.g * foreground.a) + (background.g * (1 - foreground.a)),
-      b: (foreground.b * foreground.a) + (background.b * (1 - foreground.a))
-    };
-    const a = _Color.luminanceChannels(displayed);
-    const b = _Color.luminanceChannels(background);
+      // Composite the foreground once before measuring the displayed colors
+      const displayed = {
+        r: (foreground.r * foreground.a) + (background.r * (1 - foreground.a)),
+        g: (foreground.g * foreground.a) + (background.g * (1 - foreground.a)),
+        b: (foreground.b * foreground.a) + (background.b * (1 - foreground.a))
+      };
+      const a = _Color.luminanceChannels(displayed);
+      const b = _Color.luminanceChannels(background);
 
-    // The constant keeps very dark pairs from producing an unbounded ratio
-    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      // The constant keeps very dark pairs from producing an unbounded ratio
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Derivation ~~~~~~~~~~~~~~~~~~~~
-  // Producing a new color from existing ones.
+    // ~~~~~~~~~~~~~~~~~~~~ Derivation ~~~~~~~~~~~~~~~~~~~~
+    // Producing a new color from existing ones.
 
-  /********************************************************************
+    /********************************************************************
   Blend two hex colors by weight.
 
   @param {String} hex_a - Color the weight applies to
@@ -289,25 +297,25 @@ const Color = {
 
   @return {String} - Blended hex color
   *********************************************************************/
-  mix: function (hex_a, hex_b, weight_percent) {
+    mix: function (hex_a, hex_b, weight_percent) {
 
-    // Convert the percentage to a fraction once for all three channels
-    const a = Color.parseHex(hex_a);
-    const b = Color.parseHex(hex_b);
-    const w = weight_percent / 100;
+      // Convert the percentage to a fraction once for all three channels
+      const a = Color.parseHex(hex_a);
+      const b = Color.parseHex(hex_b);
+      const w = weight_percent / 100;
 
-    // Interpolate each channel independently
-    return Color.toHex({
-      r: (a.r * w) + (b.r * (1 - w)),
-      g: (a.g * w) + (b.g * (1 - w)),
-      b: (a.b * w) + (b.b * (1 - w)),
-      a: (a.a * w) + (b.a * (1 - w))
-    });
+      // Interpolate each channel independently
+      return Color.toHex({
+        r: (a.r * w) + (b.r * (1 - w)),
+        g: (a.g * w) + (b.g * (1 - w)),
+        b: (a.b * w) + (b.b * (1 - w)),
+        a: (a.a * w) + (b.a * (1 - w))
+      });
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Express a hex color as an rgba string at a given opacity.
 
   @param {String} hex - Hex color
@@ -315,76 +323,76 @@ const Color = {
 
   @return {String} - CSS rgba string
   *********************************************************************/
-  rgbaFrom: function (hex, opacity) {
+    rgbaFrom: function (hex, opacity) {
 
-    // Both platforms accept the rgba form, so no per-platform branch is needed
-    const rgb = Color.parseHex(hex);
+      // Both platforms accept the rgba form, so no per-platform branch is needed
+      const rgb = Color.parseHex(hex);
 
-    return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + (rgb.a * opacity) + ')';
+      return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + (rgb.a * opacity) + ')';
 
-  },
+    },
 
 
-  // ~~~~~~~~~~~~~~~~~~~~ Contrast Correction ~~~~~~~~~~~~~~~~~~~~
-  // Three strategies in a deliberate order. The earlier ones keep the corrected
-  // value inside the design system; mixing toward black or white invents a
-  // color that exists nowhere in the palette, so it is the last resort.
+    // ~~~~~~~~~~~~~~~~~~~~ Contrast Correction ~~~~~~~~~~~~~~~~~~~~
+    // Three strategies in a deliberate order. The earlier ones keep the corrected
+    // value inside the design system; mixing toward black or white invents a
+    // color that exists nowhere in the palette, so it is the last resort.
 
-  /********************************************************************
+    /********************************************************************
   Group a flat palette into hue families with ordered steps.
 
   @param {Object} palette - Flat map such as { red60: '#da1e28' }
 
   @return {Object} - Map of family name to steps, ascending by step
   *********************************************************************/
-  groupPalette: function (palette) {
+    groupPalette: function (palette) {
 
-    // Reuse the grouping when the same palette object is seen again
-    const cached = palette_family_cache.get(palette);
-    if (cached) {
-      return cached;
-    }
-
-    // Split every key that reads as a family name followed by a step number
-    const families = {};
-    const keys = Object.keys(palette);
-
-    for (let i = 0; i < keys.length; i++) {
-      const match = /^([a-zA-Z]+)(\d+)$/.exec(keys[i]);
-
-      // Skip keys that carry no step, such as a one-off named accent
-      if (!match) {
-        continue;
+      // Reuse the grouping when the same palette object is seen again
+      const cached = palette_family_cache.get(palette);
+      if (cached) {
+        return cached;
       }
 
-      // File the entry under its family, creating the bucket on first sight
-      const family = match[1];
-      families[family] = families[family] || [];
+      // Split every key that reads as a family name followed by a step number
+      const families = {};
+      const keys = Object.keys(palette);
 
-      // Lowercase the hex so later identity comparisons are case-insensitive
-      families[family].push({
-        step: Number(match[2]),
-        hex: String(palette[keys[i]]).toLowerCase()
-      });
-    }
+      for (let i = 0; i < keys.length; i++) {
+        const match = /^([a-zA-Z]+)(\d+)$/.exec(keys[i]);
 
-    // Order each family so a walk toward lighter or darker is a simple slice
-    const family_names = Object.keys(families);
-    for (let i = 0; i < family_names.length; i++) {
-      families[family_names[i]].sort(function (a, b) {
-        return a.step - b.step;
-      });
-    }
+        // Skip keys that carry no step, such as a one-off named accent
+        if (!match) {
+          continue;
+        }
 
-    // Cache against the palette object identity, which is stable per template
-    palette_family_cache.set(palette, families);
+        // File the entry under its family, creating the bucket on first sight
+        const family = match[1];
+        families[family] = families[family] || [];
 
-    return families;
+        // Lowercase the hex so later identity comparisons are case-insensitive
+        families[family].push({
+          step: Number(match[2]),
+          hex: String(palette[keys[i]]).toLowerCase()
+        });
+      }
 
-  },
+      // Order each family so a walk toward lighter or darker is a simple slice
+      const family_names = Object.keys(families);
+      for (let i = 0; i < family_names.length; i++) {
+        families[family_names[i]].sort(function (a, b) {
+          return a.step - b.step;
+        });
+      }
+
+      // Cache against the palette object identity, which is stable per template
+      palette_family_cache.set(palette, families);
+
+      return families;
+
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Find a compliant replacement for a color that fails a contrast
   threshold against its background.
 
@@ -397,89 +405,89 @@ const Color = {
   @return {String} .value - The replacement color
   @return {String} .strategy - Which strategy produced the replacement
   *********************************************************************/
-  correctForContrast: function (before, against, min_ratio, palette) {
+    correctForContrast: function (before, against, min_ratio, palette) {
 
-    // A dark background needs a lighter foreground, and the reverse
-    const needs_lighter = Color.luminance(against) <= 0.45;
-    const families = Color.groupPalette(palette || {});
+      // A dark background needs a lighter foreground, and the reverse
+      const needs_lighter = Color.luminance(against) <= 0.45;
+      const families = Color.groupPalette(palette || {});
 
-    // Strategy 1: the failing value is itself a palette entry, so walk its own
-    // family to the nearest compliant step and stay inside the design system
-    const snapped = _Color.snapWithinFamily(before, against, min_ratio, families, needs_lighter);
-    if (snapped) {
-      return snapped;
+      // Strategy 1: the failing value is itself a palette entry, so walk its own
+      // family to the nearest compliant step and stay inside the design system
+      const snapped = _Color.snapWithinFamily(before, against, min_ratio, families, needs_lighter);
+      if (snapped) {
+        return snapped;
+      }
+
+      // Strategy 2: a custom brand color, so move lightness while holding hue
+      const shifted = _Color.shiftLightness(before, against, min_ratio, needs_lighter);
+      if (shifted) {
+        return shifted;
+      }
+
+      // Strategy 3: nothing else satisfied the threshold, so mix toward the extreme
+      return _Color.mixToExtreme(before, against, min_ratio, needs_lighter);
+
     }
 
-    // Strategy 2: a custom brand color, so move lightness while holding hue
-    const shifted = _Color.shiftLightness(before, against, min_ratio, needs_lighter);
-    if (shifted) {
-      return shifted;
-    }
-
-    // Strategy 3: nothing else satisfied the threshold, so mix toward the extreme
-    return _Color.mixToExtreme(before, against, min_ratio, needs_lighter);
-
-  }
-
-};/////////////////////////// Public Functions END //////////////////////////////
+  };/////////////////////////// Public Functions END //////////////////////////////
 
 
 
-/////////////////////////// Private Functions START ////////////////////////////
-const _Color = {
+  /////////////////////////// Private Functions START ////////////////////////////
+  const _Color = {
 
-  /********************************************************************
+    /********************************************************************
   Clamp a channel to the byte range and render it as a hex pair.
 
   @param {Number} value - Raw channel value
 
   @return {String} - Two-character hex pair
   *********************************************************************/
-  channelToPair: function (value) {
+    channelToPair: function (value) {
 
-    // Clamp before rounding so arithmetic overshoot cannot wrap the value
-    const clamped = Math.max(0, Math.min(255, Math.round(value)));
+      // Clamp before rounding so arithmetic overshoot cannot wrap the value
+      const clamped = Math.max(0, Math.min(255, Math.round(value)));
 
-    return clamped.toString(16).padStart(2, '0');
+      return clamped.toString(16).padStart(2, '0');
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Expand one channel out of gamma for the luminance calculation.
 
   @param {Number} value - Channel value, 0 to 255
 
   @return {Number} - Linear channel value, 0 to 1
   *********************************************************************/
-  channelLuminance: function (value) {
+    channelLuminance: function (value) {
 
-    // The low end is linear; above the knee the response is a power curve
-    const c = value / 255;
+      // The low end is linear; above the knee the response is a power curve
+      const c = value / 255;
 
-    return (c <= 0.03928) ? (c / 12.92) : Math.pow((c + 0.055) / 1.055, 2.4);
+      return (c <= 0.03928) ? (c / 12.92) : Math.pow((c + 0.055) / 1.055, 2.4);
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Compute luminance from already validated RGB channels.
 
   @param {Object} rgb - Channel values
 
   @return {Number} - Relative luminance, 0 to 1
   *********************************************************************/
-  luminanceChannels: function (rgb) {
+    luminanceChannels: function (rgb) {
 
-    // Weight gamma-expanded channels by how strongly the eye responds to each
-    return (0.2126 * _Color.channelLuminance(rgb.r))
+      // Weight gamma-expanded channels by how strongly the eye responds to each
+      return (0.2126 * _Color.channelLuminance(rgb.r))
       + (0.7152 * _Color.channelLuminance(rgb.g))
       + (0.0722 * _Color.channelLuminance(rgb.b));
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Compute the hue angle from normalized channels.
 
   @param {Number} rn - Red channel, 0 to 1
@@ -490,23 +498,23 @@ const _Color = {
 
   @return {Number} - Hue in degrees, possibly negative
   *********************************************************************/
-  hueFromChannels: function (rn, gn, bn, max, delta) {
+    hueFromChannels: function (rn, gn, bn, max, delta) {
 
-    // The dominant channel decides which 120 degree arc the hue sits in
-    if (max === rn) {
-      return 60 * (((gn - bn) / delta) % 6);
-    }
+      // The dominant channel decides which 120 degree arc the hue sits in
+      if (max === rn) {
+        return 60 * (((gn - bn) / delta) % 6);
+      }
 
-    if (max === gn) {
-      return 60 * (((bn - rn) / delta) + 2);
-    }
+      if (max === gn) {
+        return 60 * (((bn - rn) / delta) + 2);
+      }
 
-    return 60 * (((rn - gn) / delta) + 4);
+      return 60 * (((rn - gn) / delta) + 4);
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Place chroma into the correct sextant of the color wheel.
 
   @param {Number} hp - Hue divided by 60
@@ -515,35 +523,35 @@ const _Color = {
 
   @return {Number[]} - Red, green, and blue components before lifting
   *********************************************************************/
-  sextantChannels: function (hp, c, x) {
+    sextantChannels: function (hp, c, x) {
 
-    // Each sextant assigns chroma, the intermediate, and zero to a fixed order
-    if (hp < 1) {
-      return [c, x, 0];
-    }
+      // Each sextant assigns chroma, the intermediate, and zero to a fixed order
+      if (hp < 1) {
+        return [c, x, 0];
+      }
 
-    if (hp < 2) {
-      return [x, c, 0];
-    }
+      if (hp < 2) {
+        return [x, c, 0];
+      }
 
-    if (hp < 3) {
-      return [0, c, x];
-    }
+      if (hp < 3) {
+        return [0, c, x];
+      }
 
-    if (hp < 4) {
-      return [0, x, c];
-    }
+      if (hp < 4) {
+        return [0, x, c];
+      }
 
-    if (hp < 5) {
-      return [x, 0, c];
-    }
+      if (hp < 5) {
+        return [x, 0, c];
+      }
 
-    return [c, 0, x];
+      return [c, 0, x];
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Walk the failing color's own palette family to the nearest
   compliant step.
 
@@ -555,46 +563,46 @@ const _Color = {
 
   @return {Object|null} - Correction result, or null when not applicable
   *********************************************************************/
-  snapWithinFamily: function (before, against, min_ratio, families, needs_lighter) {
+    snapWithinFamily: function (before, against, min_ratio, families, needs_lighter) {
 
-    // Look for the failing value among the palette entries
-    const family_names = Object.keys(families);
-    const target = before.toLowerCase();
+      // Look for the failing value among the palette entries
+      const family_names = Object.keys(families);
+      const target = before.toLowerCase();
 
-    for (let i = 0; i < family_names.length; i++) {
-      const steps = families[family_names[i]];
-      const index = _Color.indexOfHex(steps, target);
+      for (let i = 0; i < family_names.length; i++) {
+        const steps = families[family_names[i]];
+        const index = _Color.indexOfHex(steps, target);
 
-      // Not this family, so keep looking
-      if (index === -1) {
-        continue;
-      }
+        // Not this family, so keep looking
+        if (index === -1) {
+          continue;
+        }
 
-      // Order the remaining steps so the nearest compliant one is reached first
-      const ordered = needs_lighter
-        ? steps.slice(0, index).reverse()
-        : steps.slice(index + 1);
+        // Order the remaining steps so the nearest compliant one is reached first
+        const ordered = needs_lighter
+          ? steps.slice(0, index).reverse()
+          : steps.slice(index + 1);
 
-      // Take the first step that clears the threshold
-      for (let j = 0; j < ordered.length; j++) {
-        if (Color.contrastRatio(ordered[j].hex, against) >= min_ratio) {
+        // Take the first step that clears the threshold
+        for (let j = 0; j < ordered.length; j++) {
+          if (Color.contrastRatio(ordered[j].hex, against) >= min_ratio) {
 
-          return {
-            value: ordered[j].hex,
-            strategy: 'snap:' + family_names[i] + ordered[j].step
-          };
+            return {
+              value: ordered[j].hex,
+              strategy: 'snap:' + family_names[i] + ordered[j].step
+            };
 
+          }
         }
       }
-    }
 
-    // The value is not a palette entry, or its family has no compliant step
-    return null;
+      // The value is not a palette entry, or its family has no compliant step
+      return null;
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Move a color's lightness while holding its hue and saturation.
 
   @param {String} before - The failing color
@@ -604,44 +612,44 @@ const _Color = {
 
   @return {Object|null} - Correction result, or null when not applicable
   *********************************************************************/
-  shiftLightness: function (before, against, min_ratio, needs_lighter) {
+    shiftLightness: function (before, against, min_ratio, needs_lighter) {
 
-    // A near-grey color has no hue worth preserving, so this strategy adds nothing
-    const hsl = Color.rgbToHsl(before);
-    if (hsl.s <= 0.05) {
-      return null;
-    }
-
-    // Step lightness one percent at a time until the threshold is cleared
-    for (let i = 1; i <= 100; i++) {
-      const l = needs_lighter
-        ? Math.min(1, hsl.l + (i / 100))
-        : Math.max(0, hsl.l - (i / 100));
-
-      const candidate = Color.hslToRgb({
-        h: hsl.h,
-        s: hsl.s,
-        l: l
-      });
-
-      // Accept the first compliant lightness, which is the smallest change
-      if (Color.contrastRatio(candidate, against) >= min_ratio) {
-
-        return {
-          value: candidate,
-          strategy: 'lightness'
-        };
-
+      // A near-grey color has no hue worth preserving, so this strategy adds nothing
+      const hsl = Color.rgbToHsl(before);
+      if (hsl.s <= 0.05) {
+        return null;
       }
-    }
 
-    // Even full lightness travel could not satisfy the threshold
-    return null;
+      // Step lightness one percent at a time until the threshold is cleared
+      for (let i = 1; i <= 100; i++) {
+        const l = needs_lighter
+          ? Math.min(1, hsl.l + (i / 100))
+          : Math.max(0, hsl.l - (i / 100));
 
-  },
+        const candidate = Color.hslToRgb({
+          h: hsl.h,
+          s: hsl.s,
+          l: l
+        });
+
+        // Accept the first compliant lightness, which is the smallest change
+        if (Color.contrastRatio(candidate, against) >= min_ratio) {
+
+          return {
+            value: candidate,
+            strategy: 'lightness'
+          };
+
+        }
+      }
+
+      // Even full lightness travel could not satisfy the threshold
+      return null;
+
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Mix the color toward white or black until it complies.
 
   This is the last resort, because the result is a color that
@@ -654,35 +662,35 @@ const _Color = {
 
   @return {Object} - Correction result
   *********************************************************************/
-  mixToExtreme: function (before, against, min_ratio, needs_lighter) {
+    mixToExtreme: function (before, against, min_ratio, needs_lighter) {
 
-    // Choose the extreme that moves away from the background
-    const extreme = needs_lighter ? '#ffffff' : '#000000';
+      // Choose the extreme that moves away from the background
+      const extreme = needs_lighter ? '#ffffff' : '#000000';
 
-    // Increase the share of the extreme until the threshold is cleared
-    for (let i = 1; i <= 100; i++) {
-      const candidate = Color.mix(extreme, before, i);
+      // Increase the share of the extreme until the threshold is cleared
+      for (let i = 1; i <= 100; i++) {
+        const candidate = Color.mix(extreme, before, i);
 
-      if (Color.contrastRatio(candidate, against) >= min_ratio) {
+        if (Color.contrastRatio(candidate, against) >= min_ratio) {
 
-        return {
-          value: candidate,
-          strategy: 'mix'
-        };
+          return {
+            value: candidate,
+            strategy: 'mix'
+          };
 
+        }
       }
-    }
 
-    // Full travel to the extreme is the best available answer
-    return {
-      value: extreme,
-      strategy: 'mix'
-    };
+      // Full travel to the extreme is the best available answer
+      return {
+        value: extreme,
+        strategy: 'mix'
+      };
 
-  },
+    },
 
 
-  /********************************************************************
+    /********************************************************************
   Find the index of a hex value within an ordered family.
 
   @param {Object[]} steps - Family steps from groupPalette
@@ -690,17 +698,23 @@ const _Color = {
 
   @return {Number} - Index, or -1 when absent
   *********************************************************************/
-  indexOfHex: function (steps, target) {
+    indexOfHex: function (steps, target) {
 
-    // Scan for an exact match on the lowercased hex
-    for (let i = 0; i < steps.length; i++) {
-      if (steps[i].hex === target) {
-        return i;
+      // Scan for an exact match on the lowercased hex
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].hex === target) {
+          return i;
+        }
       }
+
+      return -1;
+
     }
 
-    return -1;
+  };/////////////////////////// Private Functions END /////////////////////////////
 
-  }
 
-};/////////////////////////// Private Functions END /////////////////////////////
+  // Return the instance's isolated color interface
+  return Color;
+
+};/////////////////////////// createInterface END //////////////////////////////

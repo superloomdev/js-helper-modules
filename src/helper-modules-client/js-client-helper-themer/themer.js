@@ -21,6 +21,7 @@ import createColor from './parts/color.js';
 import createScale from './parts/scale.js';
 import createEmit from './parts/emit.js';
 import createResolve from './parts/resolve.js';
+import contract from './themer.contract.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -57,6 +58,10 @@ export default function loader (shared_libs, config) {
 
   // Build the pure parts, threading siblings through the uniform parts container
   const Parts = _Themer.buildParts(Lib, CONFIG, ERRORS, Validators);
+
+  // Validate DEFAULT_TYPE_SCALE names a known generator after merge with SCALE_GENERATORS
+  // This check runs after buildParts so the Scale part is available with custom generators
+  Parts.Scale.byName(CONFIG.DEFAULT_TYPE_SCALE, 'CONFIG.DEFAULT_TYPE_SCALE');
 
   // Mutable per-instance state (the result cache lives here)
   const state = {
@@ -257,6 +262,46 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
       // Delegate so the rules live in exactly one place
       return Validators.checkTemplate(template);
+
+    },
+
+
+    /********************************************************************
+    Return the Superloom token contract registry.
+
+    The registry is a frozen object with version, groups, tokens, and
+    meta. Component libraries consume subsets of it through
+    validateContract. The same reference is returned on every call.
+
+    @return {Object} - Frozen contract registry
+    *********************************************************************/
+    getContract: function () {
+
+      // Return the frozen registry; the import is already immutable
+      return contract;
+
+    },
+
+
+    /********************************************************************
+    Validate a resolved theme against the token contract.
+
+    Reports rather than throws. Returns { success, errors, warnings }.
+
+    @param {Object} theme - A theme object with a tokens map
+    @param {Object} [options] - Validation options
+    @param {String[]} [options.required] - Token names that must be present
+    @param {String[]} [options.supported] - Token names this consumer supports
+
+    @return {Object} - Validation result
+    @return {Boolean} .success - True when errors is empty
+    @return {Object[]} .errors - One entry per contract error
+    @return {Object[]} .warnings - One entry per unsupported token warning
+    *********************************************************************/
+    validateContract: function (theme, options) {
+
+      // Delegate to the validator, threading the contract registry
+      return Validators.validateContract(theme, options, contract);
 
     },
 

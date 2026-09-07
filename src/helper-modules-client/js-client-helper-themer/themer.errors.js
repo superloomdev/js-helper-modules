@@ -41,6 +41,14 @@ export default Object.freeze({
 
   MUST_NOT_CONFLICT: 'must not be declared with its alternate field',
 
+  MUST_BE_NON_EMPTY_ARRAY: 'must be a non-empty array',
+
+  MUST_BE_KNOWN_POLARITY: 'must be one of: light, dark',
+
+  MUST_BE_VALID_CONTRAST_RULE: 'must be a [String, String, Number?] triple naming two declared tokens',
+
+  MUST_BE_KNOWN_CONTRAST_MODE: 'must be one of: correct, report',
+
 
   // ~~~~~~~~~~~~~~~~~~~~ Numeric Range ~~~~~~~~~~~~~~~~~~~~
 
@@ -56,6 +64,17 @@ export default Object.freeze({
 
   MUST_BE_CACHE_CAPACITY: 'must be a whole number of 1 or greater',
 
-  MUST_BE_BOOLEAN: 'must be true or false'
+  MUST_BE_BOOLEAN: 'must be true or false',
+
+
+  // ~~~~~~~~~~~~~~~~~~~~ Token Contract ~~~~~~~~~~~~~~~~~~~~
+
+  CONTRACT_MISSING_TOKEN: 'is a required contract token absent from the theme',
+
+  CONTRACT_UNKNOWN_TOKEN: 'is not a token in the contract',
+
+  CONTRACT_INVALID_VALUE: 'is not a valid value for this token type',
+
+  CONTRACT_UNSUPPORTED_TOKEN: 'is not supported by this component system'
 
 });

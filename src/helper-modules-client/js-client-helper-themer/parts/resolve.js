@@ -13,33 +13,6 @@
 // from the uniform parts signature; each public object closes over its own values.
 
 
-// Shadow geometry per elevation level. Authored rather than derived because no
-// formula reproduces the two-layer construction a designer expects: a tight
-// contact shadow plus a wider ambient one, whose ratio changes with height.
-const ELEVATION = {
-  1: [
-    { offset_x: 0, offset_y: 1, blur: 3, spread: 0, opacity: 0.12 },
-    { offset_x: 0, offset_y: 1, blur: 2, spread: 0, opacity: 0.24 }
-  ],
-  2: [
-    { offset_x: 0, offset_y: 3, blur: 6, spread: 0, opacity: 0.16 },
-    { offset_x: 0, offset_y: 3, blur: 6, spread: 0, opacity: 0.23 }
-  ],
-  3: [
-    { offset_x: 0, offset_y: 10, blur: 20, spread: 0, opacity: 0.19 },
-    { offset_x: 0, offset_y: 6, blur: 6, spread: 0, opacity: 0.23 }
-  ],
-  4: [
-    { offset_x: 0, offset_y: 14, blur: 28, spread: 0, opacity: 0.25 },
-    { offset_x: 0, offset_y: 10, blur: 10, spread: 0, opacity: 0.22 }
-  ],
-  5: [
-    { offset_x: 0, offset_y: 19, blur: 38, spread: 0, opacity: 0.30 },
-    { offset_x: 0, offset_y: 15, blur: 12, spread: 0, opacity: 0.22 }
-  ]
-};
-
-
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 /********************************************************************
@@ -442,7 +415,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       if (!Lib.Utils.isNullOrUndefined(entry.font_size)) {
         fontSize = _Resolve.compositeNumber(name, 'font_size', entry.font_size, context, true);
       } else {
-        const scale = entry.scale || 'carbonType';
+        const scale = entry.scale || CONFIG.DEFAULT_TYPE_SCALE;
         fontSize = Scale.byName(scale, name)({ step: entry.step }, context.scales[scale] || {});
       }
 
@@ -520,6 +493,10 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     does: emit needs every layer together to build one platform
     value, and sibling tokens would force cross-token reads.
 
+    Each layer carries its own color, which may be a literal or an
+    alias string in braces. Aliases resolve through the token graph
+    so a themed shadow follows the theme and cycles stay detectable.
+
     @param {String} name - Token name, for error messages
     @param {Object} entry - Shadow entry
     @param {Object} context - Resolution context
@@ -528,27 +505,34 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     shadowValue: function (name, entry, context) {
 
-      // Geometry comes either from an elevation level or from explicit layers
+      // level and elevation keys are removed; their presence is a programmer error
+      if (entry.level !== undefined) {
+        delete context.in_progress[name];
+        Validators.fail('tokens.' + name + '.level', ERRORS.MUST_BE_KNOWN_ENTRY);
+      }
+      if (entry.elevation !== undefined) {
+        delete context.in_progress[name];
+        Validators.fail('tokens.' + name + '.elevation', ERRORS.MUST_BE_KNOWN_ENTRY);
+      }
+
+      // Layers are required; a shadow without geometry is a template defect
       const layers = _Resolve.shadowLayers(name, entry, context);
 
-      // The color may itself be an alias, so it resolves through the same chain
-      const resolved_color = _Resolve.shadowColor(entry, context);
-
-      // Stamp the resolved color onto every layer so emit needs no second lookup
-      const composed = layers.map(function (l) {
-        return Object.assign({ color: resolved_color }, l);
+      // Resolve each layer's color, which may be a literal or an alias
+      const resolved = layers.map(function (l) {
+        const color = _Resolve.isAlias(l.color)
+          ? _Resolve.resolveToken(l.color.slice(1, -1), context)
+          : l.color;
+        return { x: l.x, y: l.y, blur: l.blur, spread: l.spread, color: color };
       });
 
-      return {
-        layers: composed,
-        elevation: (entry.elevation !== undefined) ? entry.elevation : (entry.level || 0)
-      };
+      return { layers: resolved };
 
     },
 
 
     /********************************************************************
-    Select the layer geometry for a shadow entry.
+    Validate and copy the layer geometry for a shadow entry.
 
     @param {String} name - Token name, for error messages
     @param {Object} entry - Shadow entry
@@ -558,29 +542,16 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     shadowLayers: function (name, entry, context) {
 
-      // A level seeds the geometry from the authored elevation table
-      if (entry.level !== undefined) {
-
-        if (!ELEVATION[entry.level]) {
-          delete context.in_progress[name];
-          Validators.fail('tokens.' + name + '.level', ERRORS.MUST_BE_KNOWN_ENTRY);
-        }
-
-        return ELEVATION[entry.level].map(function (l) {
-          return Object.assign({}, l);
-        });
-      }
-
-      // Explicit layers let a template state geometry the table does not cover
+      // Explicit layers are the only route; level/elevation are rejected above
       if (Array.isArray(entry.layers) && !Lib.Utils.isEmptyArray(entry.layers)) {
         return entry.layers.map(function (l, index) {
 
-          // Every layer must declare finite geometry before projection
+          // Every layer must declare finite geometry and a color before projection
           const path = 'tokens.' + name + '.layers[' + index + ']';
           if (!Lib.Utils.isObject(l) || Array.isArray(l)) {
             Validators.fail(path, ERRORS.MUST_BE_KNOWN_ENTRY);
           }
-          for (const field of ['offset_x', 'offset_y', 'blur', 'spread']) {
+          for (const field of ['x', 'y', 'blur', 'spread']) {
             if (!Lib.Utils.isNumber(l[field]) || !Number.isFinite(l[field])) {
               Validators.fail(path + '.' + field, ERRORS.MUST_BE_FINITE_NUMBER);
             }
@@ -588,50 +559,17 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
           if (l.blur < 0) {
             Validators.fail(path + '.blur', ERRORS.MUST_BE_NON_NEGATIVE_NUMBER);
           }
-          if (!Lib.Utils.isNullOrUndefined(l.opacity)) {
-            Validators.assertUnitInterval(l.opacity, path + '.opacity');
-          }
-          if (!Lib.Utils.isNullOrUndefined(l.inset) && !Lib.Utils.isBoolean(l.inset)) {
-            Validators.fail(path + '.inset', ERRORS.MUST_BE_BOOLEAN);
+          if (!Lib.Utils.isString(l.color) && !_Resolve.isAlias(l.color)) {
+            Validators.fail(path + '.color', ERRORS.MUST_BE_COLOR);
           }
 
-          // Normalize optional projection fields without mutating authored input
-          const copy = Object.assign({}, l);
-          copy.opacity = Lib.Utils.isNullOrUndefined(copy.opacity) ? 1 : copy.opacity;
-          copy.inset = Lib.Utils.isNullOrUndefined(copy.inset) ? false : copy.inset;
-
-          return copy;
+          return { x: l.x, y: l.y, blur: l.blur, spread: l.spread, color: l.color };
         });
       }
 
-      // Neither route was declared, so there is no geometry to emit
+      // No layers declared, so there is no geometry to emit
       delete context.in_progress[name];
       Validators.fail('tokens.' + name, ERRORS.MUST_BE_KNOWN_ENTRY);
-
-    },
-
-
-    /********************************************************************
-    Resolve the color a shadow paints with.
-
-    @param {Object} entry - Shadow entry
-    @param {Object} context - Resolution context
-
-    @return {String} - Hex color
-    *********************************************************************/
-    shadowColor: function (entry, context) {
-
-      // Default to black, which is what an unstated shadow color means
-      if (!entry.color) {
-        return '#000000';
-      }
-
-      // An alias routes through token resolution so a themed shadow follows the theme
-      if (_Resolve.isAlias(entry.color)) {
-        return _Resolve.resolveToken(entry.color.slice(1, -1), context);
-      }
-
-      return entry.color;
 
     },
 
@@ -927,8 +865,14 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
             return value.slice(1, -1);
           });
       }
-      if (_Resolve.isShadow(entry) && _Resolve.isAlias(entry.color)) {
-        return [entry.color.slice(1, -1)];
+      if (_Resolve.isShadow(entry) && Array.isArray(entry.layers)) {
+        const deps = [];
+        for (let i = 0; i < entry.layers.length; i++) {
+          if (_Resolve.isAlias(entry.layers[i].color)) {
+            deps.push(entry.layers[i].color.slice(1, -1));
+          }
+        }
+        return deps;
       }
 
       return [];

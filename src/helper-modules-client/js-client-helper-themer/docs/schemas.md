@@ -14,6 +14,7 @@ An application that receives a theme document from a server forwards it in exact
 - [Options Schema](#options-schema)
 - [Resolution Result Schema](#resolution-result-schema)
 - [Template Check Result Schema](#template-check-result-schema)
+- [Contract Check Result Schema](#contract-check-result-schema)
 - [Emitted Theme Schema](#emitted-theme-schema)
 - [What This Module Does Not Validate](#what-this-module-does-not-validate)
 - [Error Messages](#error-messages)
@@ -25,11 +26,11 @@ An application that receives a theme document from a server forwards it in exact
 | Category | Trigger | Mechanism | When |
 |---|---|---|---|
 | **Programmer error** | Malformed template, malformed layer, bad option, unknown platform | Throws `TypeError` | At the call, before any derivation |
-| **Review finding** | A template submitted to `validateTemplate` | Returns `{ success, errors }` | Before resolution, by deliberate choice |
+| **Review finding** | A template submitted to `validateTemplate`, or a theme submitted to `validateContract` | Returns `{ success, errors }` or `{ success, errors, warnings }` | Before resolution, by deliberate choice |
 
 The engine is a pure engine: synchronous derivation with no I/O, no network, and no external state. Its **operational** error set is empty, so there is no `{ success, error }` operational envelope anywhere in this module.
 
-The second row is not an operational envelope. `validateTemplate` exists to inspect a document that is under review rather than in use, and a reviewer wants every finding at once. Raising the first one makes checking a theme package iterative for no reason. Once a template reaches `resolve`, it has been reviewed, and any remaining defect is a caller bug that throws like everything else.
+The second row is not an operational envelope. `validateTemplate` and `validateContract` exist to inspect a document that is under review rather than in use, and a reviewer wants every finding at once. Raising the first one makes checking a theme package iterative for no reason. Once a template reaches `resolve`, it has been reviewed, and any remaining defect is a caller bug that throws like everything else.
 
 This places a duty on the host. A theme document arriving over the network is **not** trusted input, and handing a malformed one straight to `resolve` throws. Validate and handle the failure before calling, or wrap the call. The loader module that owns fetching is the correct place for that, because it is the layer that does I/O and therefore has operational errors to report.
 
@@ -42,7 +43,7 @@ Two conventions meet in this module, and the boundary between them is deliberate
 | Surface | Convention | Why |
 |---|---|---|
 | Template keys, layer keys, options keys, result keys | `snake_case` | These are this module's own public shapes |
-| Scale names and operation names | `camelCase` | These are identifiers naming an engine capability (`carbonType`, `rampStep`), not data fields |
+| Scale names and operation names | `camelCase` | These are identifiers naming an engine capability (`stepPairIncrement`, `rampStep`), not data fields |
 | Keys **inside** an emitted token value | `camelCase` | These are React Native and CSS-in-JS property names (`fontSize`, `shadowRadius`). Renaming them would produce a style object neither platform accepts |
 
 ---
@@ -57,6 +58,8 @@ The merged `CONFIG` object passed to the loader. Validated by `validateConfig`. 
 | `CACHE_CAPACITY` | `Number` | `32` | Whole number, one or greater |
 | `CACHE_ENABLED` | `Boolean` | `true` | Must be a real boolean, not a truthy value |
 | `MIN_CONTRAST_RATIO` | `Number` | `4.5` | Between 1 and 21 inclusive |
+| `DEFAULT_TYPE_SCALE` | `String` | `'stepPairIncrement'` | Must name a generator this engine provides |
+| `SCALE_GENERATORS` | `Object` | `{}` | Custom scale generator overrides. Keys are scale names, values are generator definitions |
 
 ---
 
@@ -86,7 +89,7 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 | **Rule** | Object with `op` and `args` | `{ op: 'rampStep', args: [5] }` |
 | **Generator** | Object with `scale` | `{ scale: 'miniUnit', multiplier: 2 }` |
 | **Type set** | Object with `type_set: true` | `{ type_set: true, step: 1, weight: 400, line_height: 1.33333 }` |
-| **Shadow** | Object with `shadow: true` | `{ shadow: true, level: 2 }` |
+| **Shadow** | Object with `shadow: true` | `{ shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033' } ] }` |
 
 ### Type set fields
 
@@ -94,7 +97,7 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 |---|---|---|---|
 | `type_set` | `Boolean` | Yes | Must be `true`. Distinguishes a type set from a generator, since both name a scale |
 | `step` | `Number` | One of `step` or `font_size` | Position on the type scale. Conflicts with `font_size` |
-| `scale` | `String` | No | Defaults to `carbonType`; valid only with `step` |
+| `scale` | `String` | No | Defaults to `stepPairIncrement`; valid only with `step` |
 | `font_size` | `Number` or alias | One of `font_size` or `step` | Exact unit-free size. Finite and greater than zero; never rounded |
 | `line_height` | `Number` | No | Legacy unitless ratio. Zero or greater; conflicts with `line_height_px` |
 | `line_height_px` | `Number` or alias | No | Exact unit-free absolute line height. Finite and zero or greater; conflicts with `line_height` |
@@ -107,23 +110,17 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 | Field | Type | Required | Note |
 |---|---|---|---|
 | `shadow` | `Boolean` | Yes | Must be `true` |
-| `level` | `Number` | One of `level` or `layers` | 1 through 5. Seeds geometry from the built-in elevation table |
-| `layers` | `Object[]` | One of `level` or `layers` | Explicit geometry: `offset_x`, `offset_y`, `blur`, `spread`, `opacity`, `inset` |
-| `color` | `String` | No | Hex or an alias. Defaults to `'#000000'` |
-| `elevation` | `Number` | No | Android elevation. Defaults to `level` |
+| `layers` | `Object[]` | Yes | Explicit geometry. Each entry is `{ x, y, blur, spread, color }` |
 
 Layer geometry validation:
 
 | Field | Type | Constraint |
 |---|---|---|
-| `offset_x` | `Number` | Finite. May be negative |
-| `offset_y` | `Number` | Finite. May be negative |
+| `x` | `Number` | Finite. May be negative |
+| `y` | `Number` | Finite. May be negative |
 | `blur` | `Number` | Finite, zero or greater. Negative blur is rejected |
 | `spread` | `Number` | Finite. May be negative |
-| `opacity` | `Number` | 0 to 1 inclusive. Defaults to 1 when absent |
-| `inset` | `Boolean` | Optional. Defaults to `false` |
-
-Shadow color accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, `rgb(R, G, B)`, or `rgba(R, G, B, A)`. RGB channels are integers from 0 through 255; alpha is between 0 and 1; percentages and other CSS color syntaxes are unsupported. Invalid arithmetic input throws. Shadow color alpha and layer opacity multiply exactly once.
+| `color` | `String` | Required. Hex or rgb/rgba. Accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, `rgb(R, G, B)`, or `rgba(R, G, B, A)`. RGB channels are integers from 0 through 255; alpha is between 0 and 1; percentages and other CSS color syntaxes are unsupported. Invalid arithmetic input throws |
 
 ### Metadata fields
 
@@ -160,7 +157,7 @@ The optional per-call bundle passed to `resolve` and `buildTheme`.
 | `contrast` | `String` | `'correct'` | `'correct'` rewrites failing colors; any other value only reports them |
 | `min_contrast_ratio` | `Number` | `CONFIG.MIN_CONTRAST_RATIO` | Between 1 and 21 inclusive |
 | `motion_factor` | `Number` | From the layer stack | Between 0 and 1 inclusive. An explicit per-call value, including zero, overrides the layer factor |
-| `shadow_mode` | `String` | `'legacy'` | `'legacy'` collapses to a dominant layer with loss reporting; `'box_shadow'` preserves all layers, inset, and spread where the platform supports them |
+| `shadow_mode` | `String` | `'legacy'` | `'legacy'` collapses to a dominant layer with loss reporting; `'box_shadow'` preserves all layers and spread where the platform supports them |
 
 Omitted options normalize to their defaults and produce output identical to the existing three-argument call. Options that affect output join the cache key alongside the resolved-object identity, template identity, and platform string. Two calls with semantically equivalent options (one omitted, one explicitly defaulted) share a cache entry.
 
@@ -197,6 +194,20 @@ Returned by `validateTemplate`. Never throws, including when the argument is not
 | `errors` | `String[]` | Every finding, in the order found, in the standard message format |
 
 A non-object template is reported as a single finding, because there are no fields left to go on checking.
+
+---
+
+## Contract Check Result Schema
+
+Returned by `validateContract`. Never throws.
+
+| Key | Type | Description |
+|---|---|---|
+| `success` | `Boolean` | True when `errors` is empty. Warnings do not affect success |
+| `errors` | `Object[]` | Findings with `CONTRACT_MISSING_TOKEN`, `CONTRACT_UNKNOWN_TOKEN`, or `CONTRACT_INVALID_VALUE` |
+| `warnings` | `Object[]` | Findings with `CONTRACT_UNSUPPORTED_TOKEN` |
+
+Each entry is `{ code, token, message }`. `validateContract` checks token names and literal value types against the contract; structure and routes are `validateTemplate`'s job. Alias strings are accepted for every type.
 
 ---
 
@@ -251,5 +262,14 @@ Every throw follows the framework's programmer-error format: an alias prefix, th
 | `[helper-themer] color must be a supported numeric color` | Color arithmetic received malformed or unsupported color syntax |
 | `[helper-themer] color must have an opaque compositing background` | Contrast rule named a translucent background without a further backdrop |
 | `[helper-themer] CONFIG.CACHE_CAPACITY must be a whole number of 1 or greater` | Misconfigured at load time |
+
+`validateContract` returns its findings as `{ code, token, message }` entries rather than formatted strings:
+
+| Code | Severity | Cause |
+|---|---|---|
+| `CONTRACT_MISSING_TOKEN` | Error | A token in `options.required` is absent from `theme.tokens` |
+| `CONTRACT_UNKNOWN_TOKEN` | Error | `theme.tokens` contains a token the contract does not define |
+| `CONTRACT_INVALID_VALUE` | Error | A token's literal value does not match its contract type |
+| `CONTRACT_UNSUPPORTED_TOKEN` | Warning | A token in `theme.tokens` is not in `options.supported` |
 
 The expected-shape clauses live in `themer.errors.js`, so the format stays in one place and every message reads alike.

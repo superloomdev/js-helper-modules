@@ -40,7 +40,7 @@ A template is data. It ships as its own package or arrives from a server, and it
   scales: {
     base_font_size: 16,
     miniUnit: { base: 8 },
-    carbonType: { base: 12 }
+    stepPairIncrement: { base: 12 }
   },
   tokens: { },
   meta: { },
@@ -75,8 +75,8 @@ tokens: {
   // 5. Type set - a complete text style, as one object
   body01: { type_set: true, step: 2, weight: 400, line_height: 1.42857, letter_spacing: 0.16 },
 
-  // 6. Shadow - layered geometry plus an elevation
-  cardShadow: { shadow: true, level: 2 }
+  // 6. Shadow - layered geometry with per-layer colors
+  cardShadow: { shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033' } ] }
 
 }
 ```
@@ -98,7 +98,7 @@ tokens: {
 | `duration` | `'110ms'` | `110` |
 | `easing` | `'cubic-bezier(0.2, 0, 0.38, 0.9)'` | `[0.2, 0, 0.38, 0.9]` |
 | `typeSet` | declaration block with a ratio line height | style object with an absolute line height |
-| `shadow` | `box-shadow` string, every layer | style object, one layer plus elevation |
+| `shadow` | `box-shadow` string, every layer | style object, one layer |
 | `raw` | unchanged | unchanged |
 
 ```javascript
@@ -118,7 +118,7 @@ A scale turns a step or multiplier into a number, so one seed moves the whole ra
 | Scale | Parameters | Seeds | Produces |
 |---|---|---|---|
 | `miniUnit` | `multiplier` | `base` | `base * multiplier` |
-| `carbonType` | `step` | `base` | A widening curve: each group of four steps adds two more pixels per step |
+| `stepPairIncrement` | `step` | `base` | A widening curve: each group of four steps adds two more pixels per step |
 | `geometric` | `step` | `base`, `ratio` | `base * ratio^(step-1)` |
 
 Scale names are `camelCase` because they are identifiers naming an engine capability, not data fields.
@@ -183,24 +183,21 @@ body01: {
 
 ## Shadows
 
-Geometry comes from either an elevation level or explicit layers.
+A shadow declares `layers`, an array of geometry objects. Each layer carries its own color.
 
 ```javascript
-// Seeded from the built-in elevation table, levels 1 through 5
-cardShadow: { shadow: true, level: 2 },
-
-// Explicit geometry
-customShadow: {
+cardShadow: {
   shadow: true,
   layers: [
-    { offset_x: 0, offset_y: 2, blur: 4, spread: 3, opacity: 0.2 }
-  ],
-  color: '{shadowColor}',
-  elevation: 2
+    { x: 0, y: 1, blur: 2, spread: 0, color: '#00000033' },
+    { x: 0, y: 4, blur: 8, spread: -1, color: '#0000001a' }
+  ]
 }
 ```
 
-Web and native `box_shadow` mode render every layer, including `inset` and `spread`. Legacy native mode collapses to the layer with the greatest blur and drops `spread` and `inset`; every discarded fact appears in `lossy`. A color's own alpha multiplies the layer opacity exactly once. Legacy native output places opaque RGB in `shadowColor` and the composed alpha in `shadowOpacity`, never alpha in both fields.
+Each layer is `{ x, y, blur, spread, color }`. `x` and `y` are pixel offsets and may be negative. `blur` is zero or greater. `spread` may be negative. `color` is a hex or rgb/rgba string and is required on every layer.
+
+Web and native `box_shadow` mode render every layer, including `spread`. Legacy native mode collapses to the layer with the greatest blur and drops `spread`; every discarded fact appears in `lossy`. Legacy native output places opaque RGB in `shadowColor` and the composed alpha in `shadowOpacity`, never alpha in both fields.
 
 ---
 

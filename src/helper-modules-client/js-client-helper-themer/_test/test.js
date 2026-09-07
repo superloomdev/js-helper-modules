@@ -162,13 +162,12 @@ describe('resolve', () => {
 
   });
 
-  it('should seed shadow geometry from the elevation table when a level is declared', () => {
+  it('should resolve a multi-layer shadow with per-layer colors', () => {
 
     const result = Themer.resolve(TEMPLATE, BASE_LAYER);
 
     assert.equal(result.tokens.cardShadow.layers.length, 2);
-    assert.equal(result.tokens.cardShadow.elevation, 2);
-    assert.equal(result.tokens.cardShadow.layers[0].color, '#000000');
+    assert.equal(result.tokens.cardShadow.layers[0].color, 'rgba(0, 0, 0, 0.16)');
 
   });
 
@@ -486,7 +485,7 @@ describe('emit', () => {
     const native = Themer.emit(resolved, TEMPLATE, 'native');
 
     assert.equal(native.tokens.cardShadow.shadowRadius, 6);
-    assert.equal(native.tokens.cardShadow.elevation, 2);
+    assert.equal(native.tokens.cardShadow.shadowOpacity, 0.16);
 
   });
 

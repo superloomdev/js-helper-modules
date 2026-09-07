@@ -99,7 +99,7 @@ const template = {
   polarity: 'light',
   ramp: ['#ffffff', '#161616'],
   palette: {},
-  scales: { base_font_size: 16, carbonType: { base: 12 } },
+  scales: { base_font_size: 16, stepPairIncrement: { base: 12 } },
   tokens: {},
   meta: {},
   contrast_rules: []

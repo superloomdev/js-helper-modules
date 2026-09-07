@@ -18,6 +18,14 @@ export default {
 
   // Minimum contrast ratio the correction pass enforces between a foreground
   // token and its declared background. 4.5 is the WCAG AA threshold for body text.
-  MIN_CONTRAST_RATIO: 4.5
+  MIN_CONTRAST_RATIO: 4.5,
+
+  // Default scale generator for type sets that declare a step without naming
+  // a scale. Must name a known generator after merge with SCALE_GENERATORS.
+  DEFAULT_TYPE_SCALE: 'stepPairIncrement',
+
+  // Custom scale generators a host registers at load time. Each value must be
+  // a function. Built-in generators are always available; these add to them.
+  SCALE_GENERATORS: {}
 
 };
