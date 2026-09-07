@@ -4,8 +4,8 @@
 // ThemeContext. The provider holds the layer stack as React state,
 // derives through the pure themer engine on change, and exposes the
 // result via context. A transform seam lets the app inject
-// engine-agnostic logic (token bridging, font validation, component
-// building) without coupling the module to any vocabulary.
+// font role validation and component system construction without
+// coupling the module to either.
 //
 // Compatibility: React 18+, React Native, React Native Web.
 //
@@ -53,7 +53,7 @@ export default function loader (shared_libs, config) {
   // Error catalog (frozen, owned by the main module)
   // ERRORS imported at top level
 
-  // Validators singleton - Lib and ERRORS injected here
+  // Validators built per instance - Lib and ERRORS captured here
   const Validators = createValidators(Lib, ERRORS);
 
   // Validate injected dependencies so a missing React or Themer fails at startup
@@ -81,7 +81,7 @@ over the provided Lib, CONFIG, ERRORS, Validators, and state.
 @param {Object} Lib       - Dependency container (React, Themer, Utils, Debug)
 @param {Object} CONFIG    - Merged configuration for this instance
 @param {Object} ERRORS    - Frozen error catalog
-@param {Object} Validators - Validators singleton
+@param {Object} Validators - Validators built for this instance
 @param {Object} state     - Per-instance state (holds the React context)
 
 @return {Object} - Public interface for this module
@@ -145,7 +145,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           update_layers: setLayers
         };
 
-        // Apply the transform seam when provided - the app owns vocabulary bridging
+        // Apply the transform seam when provided - the app builds its component system here
         if (props.transform) {
 
           const transformed = props.transform(built, currentLayers);

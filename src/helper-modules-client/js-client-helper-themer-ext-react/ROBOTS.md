@@ -51,16 +51,17 @@ Factory. Each call returns an independent instance with its own React context. T
 
 ## The Transform Seam
 
-The module knows nothing about token vocabularies, fonts, or components. The `transform` prop is the app's injection point:
+The module knows nothing about fonts or components. The `transform` prop is the app's injection point:
 
 ```javascript
 function transform(built, layers) {
   return {
-    theme: bridgeTokens(built.tokens),
-    components: buildComponentRegistry(built.tokens)
+    components: Components.createSystem(shared_libs, config, built, breakpoint)
   };
 }
 ```
+
+`transform(built, layers)` is where the application turns the engine's output into what its screens consume: it validates font roles against the font registry and builds its component system with `Components.createSystem(shared_libs, config, built, breakpoint)`. There is no vocabulary bridging in the transform; the engine's token names are the contract's names, and the component system reads them directly.
 
 Runs inside `useMemo`, re-computes only on theme change. Receives full `buildTheme` result, not just tokens.
 
@@ -83,7 +84,7 @@ Runs inside `useMemo`, re-computes only on theme change. Receives full `buildThe
 - **`useTheme` returns `null` outside a provider.** Guard against this in components that may render above the provider
 - **Two factory instances do not share context.** Render both to assert isolation in tests
 - **The transform runs inside `useMemo`.** It re-computes only when `template`, `layers`, `platform`, `options`, or `transform` change
-- **The module owns no token names.** All vocabulary logic lives in the transform
+- **The module reads no token names.** Font role validation and component system construction live in the transform
 
 ## Testing
 

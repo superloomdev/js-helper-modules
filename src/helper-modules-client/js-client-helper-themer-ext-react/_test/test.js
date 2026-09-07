@@ -215,7 +215,7 @@ describe('transform', () => {
     function transform (built, layers) {
 
       return {
-        customField: 'bridged:' + built.tokens.spacing03,
+        customField: 'mapped:' + built.tokens.spacing03,
         theme: { customTheme: true }
       };
 
@@ -239,7 +239,7 @@ describe('transform', () => {
     );
 
     // The transform's custom field is readable
-    assert.strictEqual(captured.customField, 'bridged:16');
+    assert.strictEqual(captured.customField, 'mapped:16');
 
     // The transform's theme overrides the default
     assert.deepStrictEqual(captured.theme, { customTheme: true });
@@ -428,6 +428,17 @@ describe('factory isolation', () => {
     // Instance 1 sees native tokens (numbers), instance 2 sees web tokens (rem strings)
     assert.strictEqual(captured1.theme.spacing03, 16);
     assert.strictEqual(captured2.theme.spacing03, '1rem');
+
+  });
+
+  it('should keep two validator instances with different error catalogs apart', async () => {
+
+    const createValidators = (await import('helper-themer-ext-react/extension.validators.js')).default;
+    const a = createValidators({ Utils: Utils }, Object.freeze({ MUST_BE_PLATFORM: 'catalog A' }));
+    const b = createValidators({ Utils: Utils }, Object.freeze({ MUST_BE_PLATFORM: 'catalog B' }));
+    assert.throws(() => a.validatePlatform('bogus'), /^TypeError: \[helper-themer-ext-react\] platform catalog A$/);
+    assert.throws(() => b.validatePlatform('bogus'), /^TypeError: \[helper-themer-ext-react\] platform catalog B$/);
+    assert.throws(() => a.validatePlatform('bogus'), /^TypeError: \[helper-themer-ext-react\] platform catalog A$/);
 
   });
 

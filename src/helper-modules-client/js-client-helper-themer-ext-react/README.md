@@ -4,14 +4,14 @@ React extension for [js-client-helper-themer](https://github.com/superloomdev/su
 
 ## What This Is
 
-A thin React binding that sits between the pure themer engine and a component tree. The provider holds the layer stack as React state, derives through the engine on change, and exposes the result via context. A `transform` seam lets the app inject engine-agnostic logic (token bridging, font validation, component building) without coupling the module to any vocabulary.
+A thin React binding that sits between the pure themer engine and a component tree. The provider holds the layer stack as React state, derives through the engine on change, and exposes the result via context. A `transform` seam is where the app validates font roles and builds its component system from the engine's output.
 
 ## Why
 
 - **One derivation, one context.** The provider calls `buildTheme` inside `useMemo`, so the theme is derived once per change and every consumer reads the same object
 - **Live re-derive.** `update_layers` with a new array re-derives and re-renders, so dark mode, density, and tenant brand are live layer swaps
 - **Factory isolation.** Each loader call creates its own React context, so two apps or two test cases never share state
-- **The transform seam.** The module owns the plumbing; the app owns the vocabulary. Token bridging, font validation, and component building stay in the app
+- **The transform seam.** The module owns the plumbing; the app validates font roles and builds its component system in `transform`
 
 ## Hot-Swappable
 
@@ -74,11 +74,14 @@ function MyComponent() {
 ```javascript
 function transform(built, layers) {
   return {
-    theme: bridgeTokens(built.tokens),
-    components: buildComponentRegistry(built.tokens)
+    components: Components.createSystem(shared_libs, config, built, breakpoint)
   };
 }
+```
 
+`transform(built, layers)` is where the application turns the engine's output into what its screens consume: it validates font roles against the font registry and builds its component system with `Components.createSystem(shared_libs, config, built, breakpoint)`. There is no vocabulary bridging in the transform; the engine's token names are the contract's names, and the component system reads them directly.
+
+```javascript
 React.createElement(ThemeProvider, {
   template: carbonTemplate,
   layers: layers,
