@@ -28,7 +28,6 @@ function buildTemplate () {
     scales: {
       base_font_size: 16,
       miniUnit: { base: 8 },
-      carbonType: { base: 12 },
       geometric: { base: 10, ratio: 2 }
     },
     tokens: {

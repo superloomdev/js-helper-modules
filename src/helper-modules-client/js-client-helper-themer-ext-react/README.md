@@ -79,7 +79,7 @@ function transform(built, layers) {
 }
 ```
 
-`transform(built, layers)` is where the application turns the engine's output into what its screens consume: it validates font roles against the font registry and builds its component system with `Components.createSystem(shared_libs, config, built, breakpoint)`. There is no vocabulary bridging in the transform; the engine's token names are the contract's names, and the component system reads them directly.
+`transform(built, layers)` is where the application turns the engine's output into what its screens consume: it validates font roles against the font registry and builds its component system with `Components.createSystem(shared_libs, config, built, breakpoint)`. The transform maps no names; the engine's token names are the contract's names, and the component system reads them directly.
 
 ```javascript
 React.createElement(ThemeProvider, {

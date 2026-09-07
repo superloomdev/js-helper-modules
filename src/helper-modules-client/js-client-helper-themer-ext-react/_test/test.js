@@ -6,6 +6,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import themerExtReactLoader from 'helper-themer-ext-react';
+import createValidators from 'helper-themer-ext-react/extension.validators.js';
 
 import {
   React,
@@ -431,9 +432,8 @@ describe('factory isolation', () => {
 
   });
 
-  it('should keep two validator instances with different error catalogs apart', async () => {
+  it('should keep two validator instances with different error catalogs apart', () => {
 
-    const createValidators = (await import('helper-themer-ext-react/extension.validators.js')).default;
     const a = createValidators({ Utils: Utils }, Object.freeze({ MUST_BE_PLATFORM: 'catalog A' }));
     const b = createValidators({ Utils: Utils }, Object.freeze({ MUST_BE_PLATFORM: 'catalog B' }));
     assert.throws(() => a.validatePlatform('bogus'), /^TypeError: \[helper-themer-ext-react\] platform catalog A$/);

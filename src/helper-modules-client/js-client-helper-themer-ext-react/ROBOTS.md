@@ -61,7 +61,7 @@ function transform(built, layers) {
 }
 ```
 
-`transform(built, layers)` is where the application turns the engine's output into what its screens consume: it validates font roles against the font registry and builds its component system with `Components.createSystem(shared_libs, config, built, breakpoint)`. There is no vocabulary bridging in the transform; the engine's token names are the contract's names, and the component system reads them directly.
+`transform(built, layers)` is where the application turns the engine's output into what its screens consume: it validates font roles against the font registry and builds its component system with `Components.createSystem(shared_libs, config, built, breakpoint)`. The transform maps no names; the engine's token names are the contract's names, and the component system reads them directly.
 
 Runs inside `useMemo`, re-computes only on theme change. Receives full `buildTheme` result, not just tokens.
 
@@ -72,7 +72,7 @@ Runs inside `useMemo`, re-computes only on theme change. Receives full `buildThe
 | Trigger | Message |
 |---|---|
 | missing React | `shared_libs.React is required (inject React via the loader)` |
-| missing Themer | `shared_libs.Thermer is required (inject a built Themer instance via the loader)` |
+| missing Themer | `shared_libs.Themer is required (inject a built Themer instance via the loader)` |
 | non-object template | `template must be a plain object` |
 | non-array layers | `layers must be an array of layer objects` |
 | bad platform | `platform must be one of: web, native` |
