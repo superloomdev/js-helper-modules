@@ -113,6 +113,42 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
   theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
 
+### Contract version 2
+
+Version 2 adds the approved Section 14.5 items. The contract registry now carries 379 tokens in 15 groups.
+
+**New structure groups:**
+
+- **C2 `grid`** (13 tokens): `grid.columns_sm`, `grid.columns_md`, `grid.columns_lg`, `grid.columns_xlg`, `grid.columns_max`, `grid.gutter`, `grid.gutter_condensed`, `grid.gutter_narrow`, `grid.margin_sm`, `grid.margin_md`, `grid.margin_lg`, `grid.margin_xlg`, `grid.margin_max`
+- **M3 `state`** (6 tokens): `state.hover_opacity`, `state.focus_opacity`, `state.pressed_opacity`, `state.dragged_opacity`, `state.disabled_content_opacity`, `state.disabled_container_opacity`. The `state` group declares `range: [0, 1]`; values outside that range are rejected.
+- **M5 `tint`** (5 tokens): `tint.level_01`, `tint.level_02`, `tint.level_03`, `tint.level_04`, `tint.level_05`. The `tint` group declares `range: [0, 1]`; values outside that range are rejected.
+
+**New value types:**
+
+- **C3 `viewport`**: `{ viewport: true, vw: Number }` with `vw` finite and >= 0. Four tokens: `spacing.fluid_01`, `spacing.fluid_02`, `spacing.fluid_03`, `spacing.fluid_04`. Web emit produces `'2vw'`; native emit returns the object unchanged.
+- **M10 `spring`**: `{ spring: true, stiffness, damping, mass }` with all three finite and greater than zero. `damping` is a coefficient in React Native `Animated.spring` terms, not a damping ratio. Where source data provides a ratio, `damping = ratio * 2 * Math.sqrt(stiffness * mass)`. Six tokens: `motion.spring_spatial_default`, `motion.spring_spatial_fast`, `motion.spring_spatial_slow`, `motion.spring_effects_default`, `motion.spring_effects_fast`, `motion.spring_effects_slow`. Both platforms emit the object unchanged.
+- **M11 `segments`**: `{ segments: true, curves: [[t, [x1, y1, x2, y2]], ...] }` with `t` finite in `[0, 1]`, strictly increasing, and each inner array exactly four finite numbers. No new token; the type is accepted on any `emit: 'easing'` token.
+
+**Type-set `breakpoints` (C4):** A type set may carry an optional `breakpoints` object whose keys are breakpoint names and whose values are type-set field objects with the same field rules (minus `type_set` and nested `breakpoints`). Each breakpoint is resolved and emitted through the same projection as the base.
+
+**Icon sizes (C5):** `size.icon_03`, `size.icon_04`.
+
+**Border width rename (C14):** `border.width_03` was 4 and is now 3; the 4 moved to `border.width_04`. This is an intentional breaking rename.
+
+**Shadow levels (M4):** `shadow.level_04`, `shadow.level_05`.
+
+**Shape radii (M6):** `shape.radius_12`, `shape.radius_28`.
+
+**Font weights (M8):** `font.weight.thin`, `font.weight.extralight`, `font.weight.medium`, `font.weight.extrabold`, `font.weight.black`.
+
+**Focus enum (F1):** `feedback.focus` with values `['outline', 'inset', 'underline']`.
+
+**Duration slots (M9):** `motion.duration_fast_03`, `motion.duration_fast_04`, `motion.duration_moderate_03`, `motion.duration_moderate_04`, `motion.duration_slow_03`, `motion.duration_slow_04`, `motion.duration_extra_slow_01`, `motion.duration_extra_slow_02`, `motion.duration_extra_slow_03`, `motion.duration_extra_slow_04`.
+
+**Linear easing (M9b):** `motion.easing_linear` with `emit: 'easing'`.
+
+No new error codes: every new rejection reuses `CONTRACT_INVALID_VALUE`.
+
 ## Configuration
 
 | Key | Default | Purpose |

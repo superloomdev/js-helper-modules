@@ -19,7 +19,7 @@ const PLATFORMS = ['web', 'native'];
 
 // Emitter group names, frozen so the validator and the tables cannot drift apart.
 // Exported through the public Emit interface as groups().
-const GROUPS = Object.freeze(['color', 'dimension', 'fontSize', 'letterSpacing', 'duration', 'easing', 'typeSet', 'shadow', 'raw']);
+const GROUPS = Object.freeze(['color', 'dimension', 'fontSize', 'letterSpacing', 'duration', 'easing', 'typeSet', 'shadow', 'raw', 'spring', 'viewport']);
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -193,11 +193,22 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
         },
 
         easing: function (v) {
+          if (Lib.Utils.isObject(v) && !Array.isArray(v) && v.segments === true) {
+            return v;
+          }
           return 'cubic-bezier(' + v.join(', ') + ')';
         },
 
         raw: function (v) {
           return v;
+        },
+
+        spring: function (v) {
+          return v;
+        },
+
+        viewport: function (v) {
+          return v.vw + 'vw';
         },
 
         shadow: _Emit.webShadow,
@@ -243,6 +254,14 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
         },
 
         raw: function (v) {
+          return v;
+        },
+
+        spring: function (v) {
+          return v;
+        },
+
+        viewport: function (v) {
           return v;
         },
 
@@ -369,6 +388,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
         out.fontFamily = v.fontFamily;
       }
 
+      // v2 C4: per-breakpoint overrides, each emitted through the same projection
+      if (v.breakpoints !== undefined) {
+        out.breakpoints = {};
+        const bpKeys = Object.keys(v.breakpoints);
+        for (let i = 0; i < bpKeys.length; i++) {
+          out.breakpoints[bpKeys[i]] = _Emit.webTypeSet(v.breakpoints[bpKeys[i]], ctx);
+        }
+      }
+
       return out;
 
     },
@@ -412,6 +440,15 @@ const createInterface = function (Lib, CONFIG, ERRORS, Color) {
       // guessing here would produce a name nothing has registered.
       if (v.fontFamily !== undefined) {
         out.fontFamily = v.fontFamily;
+      }
+
+      // v2 C4: per-breakpoint overrides, each emitted through the same projection
+      if (v.breakpoints !== undefined) {
+        out.breakpoints = {};
+        const bpKeys = Object.keys(v.breakpoints);
+        for (let i = 0; i < bpKeys.length; i++) {
+          out.breakpoints[bpKeys[i]] = _Emit.nativeTypeSet(v.breakpoints[bpKeys[i]]);
+        }
       }
 
       return out;

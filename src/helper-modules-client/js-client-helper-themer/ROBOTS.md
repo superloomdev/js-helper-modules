@@ -111,6 +111,9 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
   letter_spacing: 0.32, font_family: 'mono' }                // scale-derived type set
 { type_set: true, font_size: 14.5, line_height_px: 20.25 }   // exact type set
 { shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033', inset: false } ] }  // shadow
+{ viewport: true, vw: 2 }                                    // viewport literal (v2)
+{ spring: true, stiffness: 700, damping: 47.62, mass: 1 }   // spring literal (v2)
+{ segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] }  // segments literal (v2)
 ```
 
 Type set and shadow require their boolean marker. Shadow must declare `layers`, an array of
@@ -118,7 +121,7 @@ Type set and shadow require their boolean marker. Shadow must declare `layers`, 
 
 ## Metadata Groups
 
-`color`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`.
+`color`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`, `spring`, `viewport`.
 
 A token with no `meta` entry defaults to `raw`. A token with a `platforms` list that excludes a platform **must** declare `fallback` for it. An unknown `group` is a build-time `TypeError` naming every offending token, not a silent pass-through.
 

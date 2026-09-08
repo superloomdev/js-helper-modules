@@ -772,10 +772,23 @@ const createInterface = function (Lib, ERRORS, Color) {
         return undefined;
       }
 
-      // number: finite number
+      // viewport: object with viewport: true and vw >= 0 (v2 C3)
+      if (tokenDef.emit === 'viewport') {
+        if (!_Validators.isValidViewport(value)) {
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
+        }
+        return undefined;
+      }
+
+      // number: finite number; groups with range: [min, max] enforce it
       if (type === 'number') {
         if (!Lib.Utils.isNumber(value) || !Number.isFinite(value)) {
           return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
+        }
+        if (Array.isArray(groupDef.range)) {
+          if (value < groupDef.range[0] || value > groupDef.range[1]) {
+            return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
+          }
         }
         return undefined;
       }
@@ -796,10 +809,18 @@ const createInterface = function (Lib, ERRORS, Color) {
         return undefined;
       }
 
-      // motion: duration (number >= 0) or easing (array of 4)
+      // motion: duration (number >= 0), easing (array of 4 or segments object), or spring object
       if (type === 'motion') {
-        if (tokenDef.emit === 'easing') {
-          if (!Array.isArray(value) || value.length !== 4
+        if (tokenDef.emit === 'spring') {
+          if (!_Validators.isValidSpring(value)) {
+            return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
+          }
+        } else if (tokenDef.emit === 'easing') {
+          if (Lib.Utils.isObject(value) && !Array.isArray(value) && value.segments === true) {
+            if (!_Validators.isValidSegments(value)) {
+              return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
+            }
+          } else if (!Array.isArray(value) || value.length !== 4
             || !value.every(function (n) {
               return Lib.Utils.isNumber(n) && Number.isFinite(n);
             })) {
@@ -906,7 +927,49 @@ const createInterface = function (Lib, ERRORS, Color) {
       }
 
       // font_family: a role name, never a family or a CSS stack
-      return value.font_family === 'sans' || value.font_family === 'serif' || value.font_family === 'mono';
+      if (value.font_family !== 'sans' && value.font_family !== 'serif' && value.font_family !== 'mono') {
+        return false;
+      }
+
+      // v2 C4: optional per-breakpoint overrides
+      if (value.breakpoints !== undefined) {
+        if (!Lib.Utils.isObject(value.breakpoints) || Array.isArray(value.breakpoints)) {
+          return false;
+        }
+        const bpKeys = Object.keys(value.breakpoints);
+        for (let i = 0; i < bpKeys.length; i++) {
+          const bp = value.breakpoints[bpKeys[i]];
+          if (!Lib.Utils.isObject(bp) || Array.isArray(bp)) {
+            return false;
+          }
+          if (bp.type_set !== undefined && bp.type_set !== true) {
+            return false;
+          }
+          if (bp.line_height !== undefined) {
+            return false;
+          }
+          if (!Lib.Utils.isNumber(bp.font_size) || !Number.isFinite(bp.font_size) || bp.font_size <= 0) {
+            return false;
+          }
+          if (bp.line_height_px !== undefined && (!Lib.Utils.isNumber(bp.line_height_px) || !Number.isFinite(bp.line_height_px) || bp.line_height_px < 0)) {
+            return false;
+          }
+          if (bp.letter_spacing !== undefined && (!Lib.Utils.isNumber(bp.letter_spacing) || !Number.isFinite(bp.letter_spacing))) {
+            return false;
+          }
+          if (bp.weight !== undefined && (!Number.isInteger(bp.weight) || bp.weight < 100 || bp.weight > 900 || bp.weight % 100 !== 0)) {
+            return false;
+          }
+          if (bp.font_family !== undefined && bp.font_family !== 'sans' && bp.font_family !== 'serif' && bp.font_family !== 'mono') {
+            return false;
+          }
+          if (bp.breakpoints !== undefined) {
+            return false;
+          }
+        }
+      }
+
+      return true;
 
     },
 
@@ -983,6 +1046,128 @@ const createInterface = function (Lib, ERRORS, Color) {
 
       // level and elevation keys are forbidden
       if (value.level !== undefined || value.elevation !== undefined) {
+        return false;
+      }
+
+      return true;
+
+    },
+
+
+    /********************************************************************
+    Test whether a value is a valid viewport literal (v2 C3).
+
+    Accepts { viewport: true, vw: Number } with vw finite and >= 0.
+    No other keys are allowed.
+
+    @param {*} value - Value to test
+
+    @return {Boolean} - True when valid
+    *********************************************************************/
+    isValidViewport: function (value) {
+
+      if (!Lib.Utils.isObject(value) || Array.isArray(value)) {
+        return false;
+      }
+      if (value.viewport !== true) {
+        return false;
+      }
+      if (!Lib.Utils.isNumber(value.vw) || !Number.isFinite(value.vw) || value.vw < 0) {
+        return false;
+      }
+      const keys = Object.keys(value);
+      if (keys.length !== 2) {
+        return false;
+      }
+
+      return true;
+
+    },
+
+
+    /********************************************************************
+    Test whether a value is a valid spring literal (v2 M10).
+
+    Accepts { spring: true, stiffness, damping, mass } with all three
+    finite numbers greater than zero. No other keys are allowed.
+    damping is a coefficient in React Native Animated.spring terms,
+    not a damping ratio.
+
+    @param {*} value - Value to test
+
+    @return {Boolean} - True when valid
+    *********************************************************************/
+    isValidSpring: function (value) {
+
+      if (!Lib.Utils.isObject(value) || Array.isArray(value)) {
+        return false;
+      }
+      if (value.spring !== true) {
+        return false;
+      }
+      if (!Lib.Utils.isNumber(value.stiffness) || !Number.isFinite(value.stiffness) || value.stiffness <= 0) {
+        return false;
+      }
+      if (!Lib.Utils.isNumber(value.damping) || !Number.isFinite(value.damping) || value.damping <= 0) {
+        return false;
+      }
+      if (!Lib.Utils.isNumber(value.mass) || !Number.isFinite(value.mass) || value.mass <= 0) {
+        return false;
+      }
+      const keys = Object.keys(value);
+      if (keys.length !== 4) {
+        return false;
+      }
+
+      return true;
+
+    },
+
+
+    /********************************************************************
+    Test whether a value is a valid segments literal (v2 M11).
+
+    Accepts { segments: true, curves: Array } where curves has at least
+    one entry and every entry is [t, [x1, y1, x2, y2]] with t finite in
+    0..1, strictly increasing across entries, and the inner array exactly
+    4 finite numbers. No other keys are allowed.
+
+    @param {*} value - Value to test
+
+    @return {Boolean} - True when valid
+    *********************************************************************/
+    isValidSegments: function (value) {
+
+      if (!Lib.Utils.isObject(value) || Array.isArray(value)) {
+        return false;
+      }
+      if (value.segments !== true) {
+        return false;
+      }
+      if (!Array.isArray(value.curves) || value.curves.length < 1) {
+        return false;
+      }
+      let prevT = -Infinity;
+      for (let i = 0; i < value.curves.length; i++) {
+        const entry = value.curves[i];
+        if (!Array.isArray(entry) || entry.length !== 2) {
+          return false;
+        }
+        const t = entry[0];
+        if (!Lib.Utils.isNumber(t) || !Number.isFinite(t) || t < 0 || t > 1 || t <= prevT) {
+          return false;
+        }
+        const curve = entry[1];
+        if (!Array.isArray(curve) || curve.length !== 4 ||
+          !curve.every(function (n) {
+            return Lib.Utils.isNumber(n) && Number.isFinite(n);
+          })) {
+          return false;
+        }
+        prevT = t;
+      }
+      const keys = Object.keys(value);
+      if (keys.length !== 2) {
         return false;
       }
 

@@ -80,7 +80,7 @@ The template passed to `resolve`, `buildTheme`, and `validateTemplate`. Validate
 
 ### Token entry shapes
 
-A token entry takes one of six shapes. The engine dispatches on shape, and nothing downstream can tell which route produced a value.
+A token entry takes one of nine shapes. The engine dispatches on shape, and nothing downstream can tell which route produced a value.
 
 | Route | Shape | Example |
 |---|---|---|
@@ -90,6 +90,9 @@ A token entry takes one of six shapes. The engine dispatches on shape, and nothi
 | **Generator** | Object with `scale` | `{ scale: 'miniUnit', multiplier: 2 }` |
 | **Type set** | Object with `type_set: true` | `{ type_set: true, step: 1, weight: 400, line_height: 1.33333 }` |
 | **Shadow** | Object with `shadow: true` | `{ shadow: true, layers: [ { x: 0, y: 2, blur: 4, spread: 3, color: '#00000033' } ] }` |
+| **Viewport** (v2) | Object with `viewport: true` | `{ viewport: true, vw: 2 }` |
+| **Spring** (v2) | Object with `spring: true` | `{ spring: true, stiffness: 700, damping: 47.62, mass: 1 }` |
+| **Segments** (v2) | Object with `segments: true` | `{ segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] }` |
 
 ### Type set fields
 
@@ -123,11 +126,46 @@ Layer geometry validation:
 | `spread` | `Number` | Finite. May be negative |
 | `color` | `String` | Required. Hex or rgb/rgba. Accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, `rgb(R, G, B)`, or `rgba(R, G, B, A)`. RGB channels are integers from 0 through 255; alpha is between 0 and 1; percentages and other CSS color syntaxes are unsupported. Invalid arithmetic input throws |
 
+### Viewport fields (v2)
+
+A viewport literal carries a fluid spacing value in viewport-width units.
+
+| Field | Type | Required | Constraint |
+|---|---|---|---|
+| `viewport` | `Boolean` | Yes | Must be `true` |
+| `vw` | `Number` | Yes | Finite, zero or greater |
+
+No other keys are allowed. Web emit produces `String(vw) + 'vw'`; native emit returns the object unchanged.
+
+### Spring fields (v2)
+
+A spring literal carries React Native `Animated.spring` physics parameters.
+
+| Field | Type | Required | Constraint |
+|---|---|---|---|
+| `spring` | `Boolean` | Yes | Must be `true` |
+| `stiffness` | `Number` | Yes | Finite, greater than zero |
+| `damping` | `Number` | Yes | Finite, greater than zero. A coefficient, not a damping ratio. Where source data provides a ratio, `damping = ratio * 2 * Math.sqrt(stiffness * mass)` |
+| `mass` | `Number` | Yes | Finite, greater than zero |
+
+No other keys are allowed. Both web and native emit return the object unchanged.
+
+### Segments fields (v2)
+
+A segments literal carries an ordered list of bezier curves with split points.
+
+| Field | Type | Required | Constraint |
+|---|---|---|---|
+| `segments` | `Boolean` | Yes | Must be `true` |
+| `curves` | `Array` | Yes | At least one entry. Each entry is `[t, [x1, y1, x2, y2]]` where `t` is finite in `[0, 1]`, strictly increasing across entries, and the inner array is exactly four finite numbers |
+
+No other keys are allowed.
+
 ### Metadata fields
 
 | Field | Type | Required | Note |
 |---|---|---|---|
-| `group` | `String` | No | Selects the emitter: `color`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`. An unknown group is a build-time `TypeError` naming every offending token, not a silent pass-through |
+| `group` | `String` | No | Selects the emitter: `color`, `dimension`, `fontSize`, `letterSpacing`, `duration`, `easing`, `typeSet`, `shadow`, `raw`, `spring`, `viewport`. An unknown group is a build-time `TypeError` naming every offending token, not a silent pass-through |
 | `platforms` | `String[]` | No | Platforms this token is available on. Defaults to all |
 | `fallback` | `Object` | Required when `platforms` excludes a platform | Value to substitute per excluded platform |
 

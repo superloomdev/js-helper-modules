@@ -451,6 +451,16 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         value.fontFamily = entry.font_family;
       }
 
+      // v2 C4: per-breakpoint overrides, resolved the same way as the base
+      if (entry.breakpoints !== undefined) {
+        value.breakpoints = {};
+        const bpKeys = Object.keys(entry.breakpoints);
+        for (let i = 0; i < bpKeys.length; i++) {
+          const bpKey = bpKeys[i];
+          value.breakpoints[bpKey] = _Resolve.typeSetValue(name + '.breakpoints.' + bpKey, entry.breakpoints[bpKey], context);
+        }
+      }
+
       return value;
 
     },
@@ -973,7 +983,16 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     isLiteral: function (entry) {
 
       // Anything scalar that reached here is its own value
-      return Lib.Utils.isString(entry) || Lib.Utils.isNumber(entry) || Lib.Utils.isBoolean(entry) || Array.isArray(entry);
+      if (Lib.Utils.isString(entry) || Lib.Utils.isNumber(entry) || Lib.Utils.isBoolean(entry) || Array.isArray(entry)) {
+        return true;
+      }
+
+      // v2 value-type literals: objects with a marker key set to true
+      if (Lib.Utils.isObject(entry) && !Array.isArray(entry)) {
+        return entry.viewport === true || entry.spring === true || entry.segments === true;
+      }
+
+      return false;
 
     }
 

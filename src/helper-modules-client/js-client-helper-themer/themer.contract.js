@@ -9,6 +9,12 @@
 // The contract is versioned. Version 1 is the initial Superloom contract
 // in snake_case, with web-only concepts removed and Superloom additions
 // for font roles, structure knobs, and shadow recipes.
+//
+// Version 2 adds the approved Section 14.5 items (C2 C3 C4 C5 C14 M3 M4
+// M5 M6 M8 F1 M9 M9b M10 M11): new structure groups (grid, state, tint),
+// the viewport, spring, and segments value types, per-breakpoint type
+// sets, and the border width 3 slot (the former width_03 value 4 became
+// width_04).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -37,7 +43,10 @@ function buildContract () {
     motion:     Object.freeze({ tier: 'structure', type: 'motion',  emit: 'duration' }),
     feedback:   Object.freeze({ tier: 'structure', type: 'enum',    emit: 'raw' }),
     shadow:     Object.freeze({ tier: 'structure', type: 'shadow',  emit: 'shadow' }),
-    breakpoint: Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' })
+    breakpoint: Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
+    grid:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
+    state:      Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] }),
+    tint:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] })
   });
 
 
@@ -267,7 +276,7 @@ function buildContract () {
     'color.tag_hover_warm_gray': Object.freeze({ group: 'color' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ spacing.* (13 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ spacing.* (17 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'spacing.spacing_01': Object.freeze({ group: 'spacing' }),
     'spacing.spacing_02': Object.freeze({ group: 'spacing' }),
@@ -282,9 +291,13 @@ function buildContract () {
     'spacing.spacing_11': Object.freeze({ group: 'spacing' }),
     'spacing.spacing_12': Object.freeze({ group: 'spacing' }),
     'spacing.spacing_13': Object.freeze({ group: 'spacing' }),
+    'spacing.fluid_01': Object.freeze({ group: 'spacing', emit: 'viewport' }),
+    'spacing.fluid_02': Object.freeze({ group: 'spacing', emit: 'viewport' }),
+    'spacing.fluid_03': Object.freeze({ group: 'spacing', emit: 'viewport' }),
+    'spacing.fluid_04': Object.freeze({ group: 'spacing', emit: 'viewport' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ size.* (20 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ size.* (22 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'size.container_01': Object.freeze({ group: 'size' }),
     'size.container_02': Object.freeze({ group: 'size' }),
@@ -306,6 +319,8 @@ function buildContract () {
     'size.layout_05': Object.freeze({ group: 'size' }),
     'size.layout_06': Object.freeze({ group: 'size' }),
     'size.layout_07': Object.freeze({ group: 'size' }),
+    'size.icon_03': Object.freeze({ group: 'size' }),
+    'size.icon_04': Object.freeze({ group: 'size' }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ type.* (58 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -370,7 +385,7 @@ function buildContract () {
     'type.quotation02': Object.freeze({ group: 'type' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ font.* (7 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ font.* (12 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'font.family.sans': Object.freeze({ group: 'font' }),
     'font.family.serif': Object.freeze({ group: 'font' }),
@@ -379,9 +394,14 @@ function buildContract () {
     'font.weight.regular': Object.freeze({ group: 'font' }),
     'font.weight.semibold': Object.freeze({ group: 'font' }),
     'font.weight.bold': Object.freeze({ group: 'font' }),
+    'font.weight.thin': Object.freeze({ group: 'font' }),
+    'font.weight.extralight': Object.freeze({ group: 'font' }),
+    'font.weight.medium': Object.freeze({ group: 'font' }),
+    'font.weight.extrabold': Object.freeze({ group: 'font' }),
+    'font.weight.black': Object.freeze({ group: 'font' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ motion.* (12 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ motion.* (29 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'motion.duration_fast_01': Object.freeze({ group: 'motion' }),
     'motion.duration_fast_02': Object.freeze({ group: 'motion' }),
@@ -395,9 +415,26 @@ function buildContract () {
     'motion.easing_entrance_expressive': Object.freeze({ group: 'motion', emit: 'easing', values: ['array4'] }),
     'motion.easing_exit_productive': Object.freeze({ group: 'motion', emit: 'easing', values: ['array4'] }),
     'motion.easing_exit_expressive': Object.freeze({ group: 'motion', emit: 'easing', values: ['array4'] }),
+    'motion.duration_fast_03': Object.freeze({ group: 'motion' }),
+    'motion.duration_fast_04': Object.freeze({ group: 'motion' }),
+    'motion.duration_moderate_03': Object.freeze({ group: 'motion' }),
+    'motion.duration_moderate_04': Object.freeze({ group: 'motion' }),
+    'motion.duration_slow_03': Object.freeze({ group: 'motion' }),
+    'motion.duration_slow_04': Object.freeze({ group: 'motion' }),
+    'motion.duration_extra_slow_01': Object.freeze({ group: 'motion' }),
+    'motion.duration_extra_slow_02': Object.freeze({ group: 'motion' }),
+    'motion.duration_extra_slow_03': Object.freeze({ group: 'motion' }),
+    'motion.duration_extra_slow_04': Object.freeze({ group: 'motion' }),
+    'motion.easing_linear': Object.freeze({ group: 'motion', emit: 'easing', values: ['array4'] }),
+    'motion.spring_spatial_default': Object.freeze({ group: 'motion', emit: 'spring' }),
+    'motion.spring_spatial_fast': Object.freeze({ group: 'motion', emit: 'spring' }),
+    'motion.spring_spatial_slow': Object.freeze({ group: 'motion', emit: 'spring' }),
+    'motion.spring_effects_default': Object.freeze({ group: 'motion', emit: 'spring' }),
+    'motion.spring_effects_fast': Object.freeze({ group: 'motion', emit: 'spring' }),
+    'motion.spring_effects_slow': Object.freeze({ group: 'motion', emit: 'spring' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ shape.* (7 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ shape.* (9 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'shape.radius_00': Object.freeze({ group: 'shape' }),
     'shape.radius_02': Object.freeze({ group: 'shape' }),
@@ -406,13 +443,16 @@ function buildContract () {
     'shape.radius_16': Object.freeze({ group: 'shape' }),
     'shape.radius_24': Object.freeze({ group: 'shape' }),
     'shape.radius_max': Object.freeze({ group: 'shape' }),
+    'shape.radius_12': Object.freeze({ group: 'shape' }),
+    'shape.radius_28': Object.freeze({ group: 'shape' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ border.* (3 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ border.* (4 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'border.width_01': Object.freeze({ group: 'border' }),
     'border.width_02': Object.freeze({ group: 'border' }),
     'border.width_03': Object.freeze({ group: 'border' }),
+    'border.width_04': Object.freeze({ group: 'border' }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ focus.* (2 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -421,16 +461,19 @@ function buildContract () {
     'focus.offset': Object.freeze({ group: 'focus' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ feedback.* (1 token) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ feedback.* (2 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'feedback.press': Object.freeze({ group: 'feedback', values: ['highlight', 'opacity', 'ripple'] }),
+    'feedback.focus': Object.freeze({ group: 'feedback', values: ['outline', 'inset', 'underline'] }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ shadow.* (3 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'shadow.level_01': Object.freeze({ group: 'shadow' }),
     'shadow.level_02': Object.freeze({ group: 'shadow' }),
     'shadow.level_03': Object.freeze({ group: 'shadow' }),
+    'shadow.level_04': Object.freeze({ group: 'shadow' }),
+    'shadow.level_05': Object.freeze({ group: 'shadow' }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ breakpoint.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -439,7 +482,43 @@ function buildContract () {
     'breakpoint.md': Object.freeze({ group: 'breakpoint' }),
     'breakpoint.lg': Object.freeze({ group: 'breakpoint' }),
     'breakpoint.xlg': Object.freeze({ group: 'breakpoint' }),
-    'breakpoint.max': Object.freeze({ group: 'breakpoint' })
+    'breakpoint.max': Object.freeze({ group: 'breakpoint' }),
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ grid.* (13 tokens) ~~~~~~~~~~~~~~~~~~~
+
+    'grid.columns_sm': Object.freeze({ group: 'grid' }),
+    'grid.columns_md': Object.freeze({ group: 'grid' }),
+    'grid.columns_lg': Object.freeze({ group: 'grid' }),
+    'grid.columns_xlg': Object.freeze({ group: 'grid' }),
+    'grid.columns_max': Object.freeze({ group: 'grid' }),
+    'grid.gutter': Object.freeze({ group: 'grid' }),
+    'grid.gutter_condensed': Object.freeze({ group: 'grid' }),
+    'grid.gutter_narrow': Object.freeze({ group: 'grid' }),
+    'grid.margin_sm': Object.freeze({ group: 'grid' }),
+    'grid.margin_md': Object.freeze({ group: 'grid' }),
+    'grid.margin_lg': Object.freeze({ group: 'grid' }),
+    'grid.margin_xlg': Object.freeze({ group: 'grid' }),
+    'grid.margin_max': Object.freeze({ group: 'grid' }),
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ state.* (6 tokens) ~~~~~~~~~~~~~~~~~~~
+
+    'state.hover_opacity': Object.freeze({ group: 'state' }),
+    'state.focus_opacity': Object.freeze({ group: 'state' }),
+    'state.pressed_opacity': Object.freeze({ group: 'state' }),
+    'state.dragged_opacity': Object.freeze({ group: 'state' }),
+    'state.disabled_content_opacity': Object.freeze({ group: 'state' }),
+    'state.disabled_container_opacity': Object.freeze({ group: 'state' }),
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ tint.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
+
+    'tint.level_01': Object.freeze({ group: 'tint' }),
+    'tint.level_02': Object.freeze({ group: 'tint' }),
+    'tint.level_03': Object.freeze({ group: 'tint' }),
+    'tint.level_04': Object.freeze({ group: 'tint' }),
+    'tint.level_05': Object.freeze({ group: 'tint' })
 
   });
 
@@ -456,7 +535,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 1,
+    version: 2,
     groups: groups,
     tokens: tokens,
     meta: Object.freeze(meta)

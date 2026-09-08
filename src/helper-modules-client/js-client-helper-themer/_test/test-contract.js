@@ -42,20 +42,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 321 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 321);
+  it('should expose exactly 379 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 379);
   });
 
-  it('should expose exactly 12 groups', () => {
-    assert.equal(Object.keys(contract.groups).length, 12);
+  it('should expose exactly 15 groups', () => {
+    assert.equal(Object.keys(contract.groups).length, 15);
   });
 
-  it('should expose exactly 321 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 321);
+  it('should expose exactly 379 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 379);
   });
 
-  it('should report contract version 1', () => {
-    assert.equal(contract.version, 1);
+  it('should report contract version 2', () => {
+    assert.equal(contract.version, 2);
   });
 
   it('should be a frozen object', () => {
@@ -80,17 +80,20 @@ describe('contract registry - group counts', () => {
 
   const expected = {
     color: 190,
-    spacing: 13,
-    size: 20,
+    spacing: 17,
+    size: 22,
     type: 58,
-    font: 7,
-    motion: 12,
-    shape: 7,
-    border: 3,
+    font: 12,
+    motion: 29,
+    shape: 9,
+    border: 4,
     focus: 2,
-    feedback: 1,
-    shadow: 3,
-    breakpoint: 5
+    feedback: 2,
+    shadow: 5,
+    breakpoint: 5,
+    grid: 13,
+    state: 6,
+    tint: 5
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -207,7 +210,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 321 tokens and theme has all 321', () => {
+  it('should return success true when required is all 379 tokens and theme has all 379', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -221,11 +224,20 @@ describe('validateContract - happy path', () => {
       } else if (group.type === 'font') {
         theme.tokens[name] = name.indexOf('font.family.') === 0 ? 'Sans' : 400;
       } else if (group.type === 'motion') {
-        theme.tokens[name] = def.emit === 'easing' ? [0.2, 0, 0.38, 0.9] : 70;
+        if (def.emit === 'easing') {
+          theme.tokens[name] = [0.2, 0, 0.38, 0.9];
+        } else if (def.emit === 'spring') {
+          theme.tokens[name] = { spring: true, stiffness: 700, damping: 47.62, mass: 1 };
+        } else {
+          theme.tokens[name] = 70;
+        }
       } else if (group.type === 'enum') {
-        theme.tokens[name] = 'highlight';
+        theme.tokens[name] = contract.tokens[name].values[0];
       } else if (group.type === 'shadow') {
         theme.tokens[name] = { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '#000000' }] };
+      }
+      if (def.emit === 'viewport') {
+        theme.tokens[name] = { viewport: true, vw: 2 };
       }
     }
     const result = Themer.validateContract(theme, { required: tokenNames });
@@ -985,6 +997,351 @@ describe('contract - CP1 repair', () => {
     }, {});
     assert.equal(result.success, false);
     assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+});
+
+
+describe('contract v2 - C2 grid group', () => {
+
+  it('should have 13 grid tokens in the grid group', () => {
+    const gridTokens = tokenNames.filter(function (n) { return contract.tokens[n].group === 'grid'; });
+    assert.equal(gridTokens.length, 13);
+  });
+
+  it('should set tier structure and emit raw for the grid group', () => {
+    assert.equal(contract.groups.grid.tier, 'structure');
+    assert.equal(contract.groups.grid.emit, 'raw');
+  });
+
+});
+
+describe('contract v2 - C3 viewport value type', () => {
+
+  it('should have 4 spacing.fluid tokens with emit viewport', () => {
+    const fluidTokens = tokenNames.filter(function (n) { return contract.tokens[n].emit === 'viewport'; });
+    assert.equal(fluidTokens.length, 4);
+    assert.deepEqual(fluidTokens, ['spacing.fluid_01', 'spacing.fluid_02', 'spacing.fluid_03', 'spacing.fluid_04']);
+  });
+
+  it('should reject a bare number on a viewport token', () => {
+    const result = Themer.validateContract({ tokens: { 'spacing.fluid_02': 16 } }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+  it('should reject negative vw', () => {
+    const result = Themer.validateContract({ tokens: { 'spacing.fluid_02': { viewport: true, vw: -1 } } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject an extra key', () => {
+    const result = Themer.validateContract({ tokens: { 'spacing.fluid_02': { viewport: true, vw: 2, extra: 1 } } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should accept a valid viewport object', () => {
+    const result = Themer.validateContract({ tokens: { 'spacing.fluid_02': { viewport: true, vw: 2 } } }, {});
+    assert.equal(result.success, true);
+  });
+
+  it('should emit 2vw on web', () => {
+    const engine = themerLoader(Lib, {});
+    const template = {
+      tokens: { 'spacing.fluid_02': { viewport: true, vw: 2 } },
+      meta: { 'spacing.fluid_02': { group: 'viewport' } }
+    };
+    const result = engine.buildTheme(template, [], 'web');
+    assert.equal(result.tokens['spacing.fluid_02'], '2vw');
+  });
+
+  it('should emit the object unchanged on native', () => {
+    const engine = themerLoader(Lib, {});
+    const vp = { viewport: true, vw: 2 };
+    const template = {
+      tokens: { 'spacing.fluid_02': vp },
+      meta: { 'spacing.fluid_02': { group: 'viewport' } }
+    };
+    const result = engine.buildTheme(template, [], 'native');
+    assert.deepEqual(result.tokens['spacing.fluid_02'], vp);
+  });
+
+});
+
+describe('contract v2 - C4 type-set breakpoints', () => {
+
+  it('should accept a type set with breakpoints', () => {
+    const result = Themer.validateContract({
+      tokens: { 'type.body01': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0, weight: 400, font_family: 'sans', breakpoints: { md: { font_size: 16, line_height_px: 22, letter_spacing: 0, weight: 400, font_family: 'sans' } } } }
+    }, {});
+    assert.equal(result.success, true);
+  });
+
+  it('should reject nested breakpoints', () => {
+    const result = Themer.validateContract({
+      tokens: { 'type.body01': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0, weight: 400, font_family: 'sans', breakpoints: { md: { font_size: 16, line_height_px: 22, letter_spacing: 0, weight: 400, font_family: 'sans', breakpoints: {} } } } }
+    }, {});
+    assert.equal(result.success, false);
+  });
+
+});
+
+describe('contract v2 - C5 icon sizes', () => {
+
+  it('should have size.icon_03 and size.icon_04', () => {
+    assert.equal(contract.tokens['size.icon_03'].group, 'size');
+    assert.equal(contract.tokens['size.icon_04'].group, 'size');
+  });
+
+});
+
+describe('contract v2 - C14 border width rename', () => {
+
+  it('should have border.width_03 and border.width_04', () => {
+    assert.ok(contract.tokens['border.width_03']);
+    assert.ok(contract.tokens['border.width_04']);
+  });
+
+  it('should report contract version 2', () => {
+    assert.equal(contract.version, 2);
+  });
+
+});
+
+describe('contract v2 - M3 state group with range', () => {
+
+  it('should have 6 state tokens', () => {
+    const stateTokens = tokenNames.filter(function (n) { return contract.tokens[n].group === 'state'; });
+    assert.equal(stateTokens.length, 6);
+  });
+
+  it('should declare range [0, 1] on the state group', () => {
+    assert.deepEqual(contract.groups.state.range, [0, 1]);
+  });
+
+  it('should reject state.hover_opacity 1.5', () => {
+    const result = Themer.validateContract({ tokens: { 'state.hover_opacity': 1.5 } }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+  it('should reject tint.level_01 -0.1', () => {
+    const result = Themer.validateContract({ tokens: { 'tint.level_01': -0.1 } }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+  it('should accept 0 and 1 for state and tint tokens', () => {
+    const r1 = Themer.validateContract({ tokens: { 'state.hover_opacity': 0 } }, {});
+    const r2 = Themer.validateContract({ tokens: { 'state.hover_opacity': 1 } }, {});
+    assert.equal(r1.success, true);
+    assert.equal(r2.success, true);
+  });
+
+});
+
+describe('contract v2 - M4 shadow levels 4 and 5', () => {
+
+  it('should have shadow.level_04 and shadow.level_05', () => {
+    assert.ok(contract.tokens['shadow.level_04']);
+    assert.ok(contract.tokens['shadow.level_05']);
+  });
+
+});
+
+describe('contract v2 - M5 tint group with range', () => {
+
+  it('should have 5 tint tokens', () => {
+    const tintTokens = tokenNames.filter(function (n) { return contract.tokens[n].group === 'tint'; });
+    assert.equal(tintTokens.length, 5);
+  });
+
+  it('should declare range [0, 1] on the tint group', () => {
+    assert.deepEqual(contract.groups.tint.range, [0, 1]);
+  });
+
+});
+
+describe('contract v2 - M6 radii 12 and 28', () => {
+
+  it('should have shape.radius_12 and shape.radius_28', () => {
+    assert.ok(contract.tokens['shape.radius_12']);
+    assert.ok(contract.tokens['shape.radius_28']);
+  });
+
+});
+
+describe('contract v2 - M8 full weight scale', () => {
+
+  it('should have 12 font tokens (3 families + 9 weights)', () => {
+    const fontTokens = tokenNames.filter(function (n) { return contract.tokens[n].group === 'font'; });
+    assert.equal(fontTokens.length, 12);
+  });
+
+  it('should have font.weight.thin through black', () => {
+    for (const w of ['thin', 'extralight', 'medium', 'extrabold', 'black']) {
+      assert.ok(contract.tokens['font.weight.' + w], 'missing font.weight.' + w);
+    }
+  });
+
+});
+
+describe('contract v2 - F1 feedback.focus enum', () => {
+
+  it('should declare values for feedback.focus', () => {
+    assert.deepEqual(contract.tokens['feedback.focus'].values, ['outline', 'inset', 'underline']);
+  });
+
+  it('should reject a value not in the declared values list', () => {
+    const result = Themer.validateContract({ tokens: { 'feedback.focus': 'ring' } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should accept outline', () => {
+    const result = Themer.validateContract({ tokens: { 'feedback.focus': 'outline' } }, {});
+    assert.equal(result.success, true);
+  });
+
+});
+
+describe('contract v2 - M9 duration slots', () => {
+
+  it('should have 10 new duration tokens', () => {
+    const newDurations = ['motion.duration_fast_03', 'motion.duration_fast_04', 'motion.duration_moderate_03', 'motion.duration_moderate_04', 'motion.duration_slow_03', 'motion.duration_slow_04', 'motion.duration_extra_slow_01', 'motion.duration_extra_slow_02', 'motion.duration_extra_slow_03', 'motion.duration_extra_slow_04'];
+    for (const d of newDurations) {
+      assert.ok(contract.tokens[d], 'missing ' + d);
+    }
+  });
+
+});
+
+describe('contract v2 - M9b easing_linear', () => {
+
+  it('should have motion.easing_linear with emit easing', () => {
+    assert.equal(contract.tokens['motion.easing_linear'].emit, 'easing');
+  });
+
+});
+
+describe('contract v2 - M10 spring value type', () => {
+
+  it('should have 6 spring tokens with emit spring', () => {
+    const springTokens = tokenNames.filter(function (n) { return contract.tokens[n].emit === 'spring'; });
+    assert.equal(springTokens.length, 6);
+    assert.deepEqual(springTokens, ['motion.spring_spatial_default', 'motion.spring_spatial_fast', 'motion.spring_spatial_slow', 'motion.spring_effects_default', 'motion.spring_effects_fast', 'motion.spring_effects_slow']);
+  });
+
+  it('should reject a spring with stiffness 0', () => {
+    const result = Themer.validateContract({ tokens: { 'motion.spring_spatial_default': { spring: true, stiffness: 0, damping: 47.62, mass: 1 } } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject a spring with a missing mass', () => {
+    const result = Themer.validateContract({ tokens: { 'motion.spring_spatial_default': { spring: true, stiffness: 700, damping: 47.62 } } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject a spring with an extra key', () => {
+    const result = Themer.validateContract({ tokens: { 'motion.spring_spatial_default': { spring: true, stiffness: 700, damping: 47.62, mass: 1, extra: 1 } } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject a spring passed as an array', () => {
+    const result = Themer.validateContract({ tokens: { 'motion.spring_spatial_default': [0.2, 0, 0.38, 0.9] } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should accept a valid spring object', () => {
+    const result = Themer.validateContract({ tokens: { 'motion.spring_spatial_default': { spring: true, stiffness: 700, damping: 47.62, mass: 1 } } }, {});
+    assert.equal(result.success, true);
+  });
+
+  it('should reject a spring object on a duration token', () => {
+    const result = Themer.validateContract({ tokens: { 'motion.duration_fast_01': { spring: true, stiffness: 700, damping: 47.62, mass: 1 } } }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should emit the spring object unchanged on web', () => {
+    const engine = themerLoader(Lib, {});
+    const spring = { spring: true, stiffness: 700, damping: 47.62, mass: 1 };
+    const template = {
+      tokens: { 'motion.spring_spatial_default': spring },
+      meta: { 'motion.spring_spatial_default': { group: 'spring' } }
+    };
+    const result = engine.buildTheme(template, [], 'web');
+    assert.deepEqual(result.tokens['motion.spring_spatial_default'], spring);
+  });
+
+  it('should emit the spring object unchanged on native', () => {
+    const engine = themerLoader(Lib, {});
+    const spring = { spring: true, stiffness: 700, damping: 47.62, mass: 1 };
+    const template = {
+      tokens: { 'motion.spring_spatial_default': spring },
+      meta: { 'motion.spring_spatial_default': { group: 'spring' } }
+    };
+    const result = engine.buildTheme(template, [], 'native');
+    assert.deepEqual(result.tokens['motion.spring_spatial_default'], spring);
+  });
+
+});
+
+describe('contract v2 - M11 segments value type', () => {
+
+  it('should accept a segments object on an easing token', () => {
+    const result = Themer.validateContract({
+      tokens: { 'motion.easing_standard_expressive': { segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] } }
+    }, {});
+    assert.equal(result.success, true);
+  });
+
+  it('should reject empty curves', () => {
+    const result = Themer.validateContract({
+      tokens: { 'motion.easing_standard_expressive': { segments: true, curves: [] } }
+    }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject non-increasing t', () => {
+    const result = Themer.validateContract({
+      tokens: { 'motion.easing_standard_expressive': { segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [0.5, [0.3, 0, 0.8, 0.15]]] } }
+    }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject t outside 0..1', () => {
+    const result = Themer.validateContract({
+      tokens: { 'motion.easing_standard_expressive': { segments: true, curves: [[1.5, [0.05, 0.7, 0.1, 1]]] } }
+    }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should reject an inner array of length 3', () => {
+    const result = Themer.validateContract({
+      tokens: { 'motion.easing_standard_expressive': { segments: true, curves: [[0.5, [0.05, 0.7, 0.1]]] } }
+    }, {});
+    assert.equal(result.success, false);
+  });
+
+  it('should emit the segments object unchanged on web', () => {
+    const engine = themerLoader(Lib, {});
+    const segments = { segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] };
+    const template = {
+      tokens: { 'motion.easing_standard_expressive': segments },
+      meta: { 'motion.easing_standard_expressive': { group: 'easing' } }
+    };
+    const result = engine.buildTheme(template, [], 'web');
+    assert.deepEqual(result.tokens['motion.easing_standard_expressive'], segments);
+  });
+
+  it('should emit the segments object unchanged on native', () => {
+    const engine = themerLoader(Lib, {});
+    const segments = { segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] };
+    const template = {
+      tokens: { 'motion.easing_standard_expressive': segments },
+      meta: { 'motion.easing_standard_expressive': { group: 'easing' } }
+    };
+    const result = engine.buildTheme(template, [], 'native');
+    assert.deepEqual(result.tokens['motion.easing_standard_expressive'], segments);
   });
 
 });

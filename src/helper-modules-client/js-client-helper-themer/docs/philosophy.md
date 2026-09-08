@@ -88,6 +88,10 @@ This has a consequence worth stating plainly. A theme document arriving from a s
 
 There is exactly one exception, and it proves the rule rather than weakening it. `validateTemplate` returns `{ success, errors }` instead of throwing, and `validateContract` returns `{ success, errors, warnings }`, because these are the functions you call **before** the template is in use, when the document is under review. A reviewer wants every finding at once; raising the first one makes checking a theme package an iterative guessing game. That is a reporting surface, not an operational envelope, and it is the same distinction that gives contrast enforcement a `report` mode alongside `correct`. Once a template reaches `resolve`, the review is over and a defect is a caller bug again.
 
+## What is not a token
+
+A concept that is not a plain data token has exactly one of three causes. **Platform:** React Native cannot render it on iOS or Android at the supported floor (variable-font axes, backdrop blur); these are the only exceptions, each recorded in the plan's exception register with owner approval and revisited at every floor change. **Web-only form:** the concept exists everywhere but arrives in a web-shaped unit (`rem`, `vw`, media queries, font stacks); the engine or the component system projects it and it is never an exception. **Anatomy:** structural behavior a number cannot carry (choreography, stacking, ripple spread, grid layout, focus movement); it lives in the component system, selected by a generic enum where design systems differ.
+
 ## See Also
 
 - [API Reference](api.md) - every function, its arguments, and its return shape
