@@ -1,0 +1,11 @@
+@superloomdev/js-client-helper-themer-template-carbon
+
+This package contains design token values derived from the IBM Carbon Design System:
+@carbon/themes, @carbon/type, @carbon/motion, and @carbon/layout, as published by
+IBM Corp. under the Apache License, Version 2.0.
+https://github.com/carbon-design-system/carbon
+
+Carbon Design System
+Copyright IBM Corp. 2016, 2026
+
+The Superloom package itself is licensed under the MIT License; see LICENSE.
