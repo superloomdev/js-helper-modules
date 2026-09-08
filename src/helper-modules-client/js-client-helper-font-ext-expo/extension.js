@@ -68,6 +68,8 @@ export default function loader (shared_libs, config) {
     loadedCount: 0,
     failedCount: 0,
     loadedFamilies: new Set(),
+    loadedStyles: new Set(),
+    failedStyles: new Set(),
     loadQueue: null,
     pendingLoads: 0
   };
@@ -150,18 +152,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       state.failedCount = 0;
       state.loaded = false;
 
+      const SEPARATOR = '\u001F';
       const familyNames = Object.keys(manifest);
       const loadEntries = [];
 
       for (let i = 0; i < familyNames.length; i++) {
 
         const familyName = familyNames[i];
-
-        // Skip families already loaded (incremental loading)
-        if (state.loadedFamilies.has(familyName)) {
-          continue;
-        }
-
         const family = manifest[familyName];
         const styleKeys = Object.keys(family.styles);
 
@@ -170,13 +167,21 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
           const styleKey = styleKeys[j];
           const entry = family.styles[styleKey];
 
+          // Skip styles already loaded (style-level incremental loading).
+          // The composite key uses \u001F (ASCII Unit Separator) so it cannot
+          // collide with any human-readable identifier.
+          const compositeKey = familyName + SEPARATOR + styleKey;
+          if (state.loadedStyles.has(compositeKey)) {
+            continue;
+          }
+
           // Build the load promise for this font
           const loadPromise = _Expo.loadFont(
             Lib, CONFIG, ERRORS, Validators, state,
             familyName, styleKey, entry
           );
 
-          loadEntries.push({ familyName: familyName, promise: loadPromise });
+          loadEntries.push({ familyName: familyName, styleKey: styleKey, promise: loadPromise });
 
         }
 
@@ -187,35 +192,62 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         return item.promise;
       }));
 
-      // Tally results and collect family-level completion state
-      const successfulFamilies = new Set();
-      const failedFamilies = new Set();
+      // Track success and failure at the style level (not family level)
+      // so a successful style from a partially failing call is retained.
+      const successfulStyleKeys = new Set();
+      const failedStyleKeys = new Set();
       for (let k = 0; k < results.length; k++) {
-
+        const compositeKey = loadEntries[k].familyName + SEPARATOR + loadEntries[k].styleKey;
         if (results[k].status === 'fulfilled') {
           state.loadedCount++;
-          successfulFamilies.add(loadEntries[k].familyName);
+          successfulStyleKeys.add(compositeKey);
         } else {
           state.failedCount++;
-          failedFamilies.add(loadEntries[k].familyName);
+          failedStyleKeys.add(compositeKey);
         }
-
       }
 
-      // Mark a family only when every requested style completed successfully
-      const completedFamilies = Array.from(successfulFamilies);
-      for (let i = 0; i < completedFamilies.length; i++) {
-        const familyName = completedFamilies[i];
-        if (!failedFamilies.has(familyName)) {
-          state.loadedFamilies.add(familyName);
-          if (Lib.Utils.isFunction(Lib.Font.markLoaded) && Lib.Font.isRegistered(familyName)) {
-            Lib.Font.markLoaded(familyName);
+      // Record every successful style independently of family completion.
+      // Remove it from failedStyles in case a prior call had marked it failed.
+      for (let i = 0; i < loadEntries.length; i++) {
+        const compositeKey = loadEntries[i].familyName + SEPARATOR + loadEntries[i].styleKey;
+        if (successfulStyleKeys.has(compositeKey)) {
+          state.loadedStyles.add(compositeKey);
+          state.failedStyles.delete(compositeKey);
+        } else {
+          state.failedStyles.add(compositeKey);
+        }
+      }
+
+      // Determine family-level loaded status. A family is loaded only when
+      // every style in this call succeeded and no prior failure remains.
+      const familyOutcomes = {};
+      for (let i = 0; i < loadEntries.length; i++) {
+        const fn = loadEntries[i].familyName;
+        if (!(fn in familyOutcomes)) {
+          familyOutcomes[fn] = { allSuccess: true };
+        }
+        const key = fn + SEPARATOR + loadEntries[i].styleKey;
+        if (failedStyleKeys.has(key)) {
+          familyOutcomes[fn].allSuccess = false;
+        }
+      }
+
+      const outcomeFamilyNames = Object.keys(familyOutcomes);
+      for (let i = 0; i < outcomeFamilyNames.length; i++) {
+        const fn = outcomeFamilyNames[i];
+        if (familyOutcomes[fn].allSuccess) {
+          state.loadedFamilies.add(fn);
+          if (Lib.Utils.isFunction(Lib.Font.markLoaded) && Lib.Font.isRegistered(fn)) {
+            Lib.Font.markLoaded(fn);
           }
+        } else {
+          state.loadedFamilies.delete(fn);
         }
       }
 
       // Set readiness before either strict failure or lenient success returns
-      state.loaded = state.failedCount === 0;
+      state.loaded = failedStyleKeys.size === 0;
 
       // Determine overall success
       if (state.failedCount > 0 && CONFIG.FAIL_ON_ERROR) {
@@ -291,6 +323,27 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         count: state.failedCount,
         error: null
       };
+
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ Cleanup ~~~~~~~~~~~~~~~~~~~~
+
+    /********************************************************************
+    Reset all loaded state. Useful for hot reload or test cleanup.
+    Clears loadedFamilies, loadedStyles, and failedStyles so a
+    subsequent loadManifest call reloads every style from scratch.
+
+    @return {void}
+    *********************************************************************/
+    clearManifest: function () {
+
+      state.loaded = false;
+      state.loadedCount = 0;
+      state.failedCount = 0;
+      state.loadedFamilies.clear();
+      state.loadedStyles.clear();
+      state.failedStyles.clear();
 
     }
 

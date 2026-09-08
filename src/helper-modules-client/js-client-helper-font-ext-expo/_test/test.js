@@ -340,3 +340,152 @@ test('loadManifest with partial manifest loads only new families', async functio
   assert.strictEqual(loadedResult.count, 1);
 
 });
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Style-level incremental loading (D.1) ~~~~~~~~~~~~~~~~~~~~
+
+test('loadManifest loads a new weight for an already-loaded family on second call', async function () {
+
+  const FreshAdapter = fontExtExpoLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest1 = {
+    StyleFont1: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  // First load - one style
+  await FreshAdapter.loadManifest(manifest1);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont1'), true);
+
+  // Second load - same family, add a new weight
+  const manifest2 = {
+    StyleFont1: {
+      styles: {
+        '600': { asset: 2, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  await FreshAdapter.loadManifest(manifest2);
+
+  // The new weight should have been loaded (style-level incremental, not family-level skip)
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 1, 'new weight should be loaded on second call');
+
+});
+
+test('loadManifest does not reload an already-loaded style', async function () {
+
+  const FreshAdapter = fontExtExpoLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest = {
+    StyleFont2: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  // First load
+  await FreshAdapter.loadManifest(manifest);
+  assert.strictEqual(FreshAdapter.getLoadedCount().count, 1);
+
+  // Second load - same style
+  await FreshAdapter.loadManifest(manifest);
+
+  // The already-loaded style should not be reloaded
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 0, 'already-loaded style should not be reloaded');
+
+});
+
+test('loadManifest with a partially failing family stays isFamilyLoaded false and retry requests only the failed style', async function () {
+
+  const FreshAdapter = fontExtExpoLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  }, {
+    FAIL_ON_ERROR: false
+  });
+
+  // Load a family where one style has no source (will fail validation)
+  const manifest = {
+    StyleFont3: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' },
+        '600': { url: null, path: null, asset: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  const result = await FreshAdapter.loadManifest(manifest);
+
+  // The family should not be marked as loaded (one style failed)
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont3'), false);
+
+  // One style should have failed
+  const failedResult = FreshAdapter.getFailedCount();
+  assert.strictEqual(failedResult.count, 1);
+
+  // Retry with only the failed style, now with a valid source
+  const retryManifest = {
+    StyleFont3: {
+      styles: {
+        '600': { asset: 2, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  const retryResult = await FreshAdapter.loadManifest(retryManifest);
+
+  // Now the family should be loaded (both styles succeeded)
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont3'), true);
+
+  // The retry should have loaded only the previously-failed style
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 1, 'retry should load only the failed style');
+
+});
+
+test('clearManifest resets all loaded state including loadedStyles and failedStyles', async function () {
+
+  const FreshAdapter = fontExtExpoLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest = {
+    StyleFont4: {
+      styles: {
+        '400': { asset: 1, url: null, path: null, weight: null, style: 'normal' }
+      }
+    }
+  };
+
+  await FreshAdapter.loadManifest(manifest);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont4'), true);
+  assert.strictEqual(FreshAdapter.isReady(), true);
+
+  FreshAdapter.clearManifest();
+
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont4'), false);
+  assert.strictEqual(FreshAdapter.isReady(), false);
+
+  // After clear, reloading should work from scratch
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 0);
+
+});
