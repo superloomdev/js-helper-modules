@@ -1,0 +1,10 @@
+@superloomdev/js-client-helper-themer-template-material
+
+This package contains design token values derived from Material Design 3 by Google LLC,
+as published in @material/web and @material/material-color-utilities under the
+Apache License, Version 2.0.
+https://github.com/material-components/material-web
+
+Copyright Google LLC
+
+The Superloom package itself is licensed under the MIT License; see LICENSE.

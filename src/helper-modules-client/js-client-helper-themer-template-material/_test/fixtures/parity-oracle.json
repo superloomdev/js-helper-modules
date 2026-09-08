@@ -1,0 +1,33 @@
+{
+  "light": {
+    "primary": "#65558f",
+    "on_primary": "#ffffff",
+    "surface": "#fdf7ff",
+    "background": "#fdf7ff",
+    "on_surface": "#1d1b20",
+    "on_surface_variant": "#49454e",
+    "error": "#ba1a1a",
+    "outline": "#7a757f",
+    "shadow": "#000000",
+    "body_medium": {
+      "size": 14,
+      "weight": 400,
+      "line_height": 20,
+      "tracking": 0.25
+    },
+    "shape_medium": 12,
+    "elevation_level1": {
+      "layers": 2,
+      "y1": 1,
+      "blur1": 2,
+      "y2": 1,
+      "blur2": 3,
+      "spread2": 1
+    }
+  },
+  "dark": {
+    "primary": "#cfbdfe",
+    "surface": "#141218",
+    "on_surface": "#e6e0e9"
+  }
+}
