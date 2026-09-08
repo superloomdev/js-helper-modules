@@ -1,0 +1,4 @@
+scripts/
+_test/
+eslint.config.js
+.gitignore
