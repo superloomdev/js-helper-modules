@@ -10,7 +10,8 @@ const _state = globalThis.__nativeFontStub = globalThis.__nativeFontStub || {
   loadedFonts: {},
   shouldFail: false,
   deferred: false,
-  pending: []
+  pending: [],
+  resolvedName: null
 };
 
 export function loadFontFromFile (name, filePath) {
@@ -26,7 +27,8 @@ export function loadFontFromFile (name, filePath) {
   }
 
   _state.loadedFonts[name] = filePath;
-  return Promise.resolve(name);
+  // Return the resolved name if set, otherwise return the name itself
+  return Promise.resolve(_state.resolvedName || name);
 
 }
 
@@ -43,7 +45,7 @@ export function _resolveDeferred () {
   const pending = _state.pending.splice(0);
   for (let i = 0; i < pending.length; i++) {
     _state.loadedFonts[pending[i].name] = pending[i].filePath;
-    pending[i].resolve(pending[i].name);
+    pending[i].resolve(_state.resolvedName || pending[i].name);
   }
 }
 
@@ -63,8 +65,18 @@ export function _getLoadedFonts () {
 export function _clearLoadedFonts () {
   _state.deferred = false;
   _state.pending = [];
+  _state.resolvedName = null;
   const keys = Object.keys(_state.loadedFonts);
   for (let i = 0; i < keys.length; i++) {
     delete _state.loadedFonts[keys[i]];
   }
+}
+
+// FN1: resolved name stub helpers
+export function _setResolvedName (name) {
+  _state.resolvedName = name;
+}
+
+export function _clearResolvedName () {
+  _state.resolvedName = null;
 }

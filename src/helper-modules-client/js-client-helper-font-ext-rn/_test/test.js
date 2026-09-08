@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fontExtRnLoader from 'helper-font-ext-rn';
+import fontLoader from 'helper-font';
 
 import {
   RNFontAdapter,
@@ -323,5 +324,282 @@ test('loadManifest with partial manifest loads only new families', async functio
   // Only the new family should have been loaded
   const loadedResult = FreshAdapter.getLoadedCount();
   assert.strictEqual(loadedResult.count, 1);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Style-level incremental loading (FN2) ~~~~~~~~~~~~~~~~~~~~
+
+test('loadManifest loads a new weight for an already-loaded family on second call', async function () {
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest1 = {
+    StyleFont1: {
+      styles: {
+        '400': { path: '/app/fonts/style1-400.ttf' }
+      }
+    }
+  };
+
+  // First load - one style
+  await FreshAdapter.loadManifest(manifest1);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont1'), true);
+
+  // Second load - same family, add a new weight
+  const manifest2 = {
+    StyleFont1: {
+      styles: {
+        '600': { path: '/app/fonts/style1-600.ttf' }
+      }
+    }
+  };
+
+  await FreshAdapter.loadManifest(manifest2);
+
+  // The new weight should have been loaded (style-level incremental, not family-level skip)
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 1, 'new weight should be loaded on second call');
+
+});
+
+test('loadManifest does not reload an already-loaded style', async function () {
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest = {
+    StyleFont2: {
+      styles: {
+        '400': { path: '/app/fonts/style2-400.ttf' }
+      }
+    }
+  };
+
+  // First load
+  await FreshAdapter.loadManifest(manifest);
+  assert.strictEqual(FreshAdapter.getLoadedCount().count, 1);
+
+  // Second load - same style
+  await FreshAdapter.loadManifest(manifest);
+
+  // The already-loaded style should not be reloaded
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 0, 'already-loaded style should not be reloaded');
+
+});
+
+test('loadManifest with a partially failing family stays isFamilyLoaded false and retry requests only the failed style', async function () {
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  }, {
+    FAIL_ON_ERROR: false
+  });
+
+  // Load a family where one style has no path (will fail validation)
+  const manifest = {
+    StyleFont3: {
+      styles: {
+        '400': { path: '/app/fonts/style3-400.ttf' },
+        '600': { path: null }
+      }
+    }
+  };
+
+  const result = await FreshAdapter.loadManifest(manifest);
+
+  // The family should not be marked as loaded (one style failed)
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont3'), false);
+
+  // One style should have failed
+  const failedResult = FreshAdapter.getFailedCount();
+  assert.strictEqual(failedResult.count, 1);
+
+  // Retry with only the failed style, now with a valid path
+  const retryManifest = {
+    StyleFont3: {
+      styles: {
+        '600': { path: '/app/fonts/style3-600.ttf' }
+      }
+    }
+  };
+
+  const retryResult = await FreshAdapter.loadManifest(retryManifest);
+
+  // Now the family should be loaded (both styles succeeded)
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont3'), true);
+
+  // The retry should have loaded only the previously-failed style
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 1, 'retry should load only the failed style');
+
+});
+
+test('clearManifest resets all loaded state including loadedStyles and failedStyles', async function () {
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: Font
+  });
+
+  const manifest = {
+    StyleFont4: {
+      styles: {
+        '400': { path: '/app/fonts/style4-400.ttf' }
+      }
+    }
+  };
+
+  await FreshAdapter.loadManifest(manifest);
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont4'), true);
+  assert.strictEqual(FreshAdapter.isReady(), true);
+
+  FreshAdapter.clearManifest();
+
+  assert.strictEqual(FreshAdapter.isFamilyLoaded('StyleFont4'), false);
+  assert.strictEqual(FreshAdapter.isReady(), false);
+
+  // After clear, reloading should work from scratch
+  const loadedResult = FreshAdapter.getLoadedCount();
+  assert.strictEqual(loadedResult.count, 0);
+
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Resolved name capture (FN1) ~~~~~~~~~~~~~~~~~~~~
+
+test('FN1: stub resolving IBM Plex Sans for family IBMPlexSans makes resolveFamily return IBM Plex Sans', async function () {
+
+  // Use a fresh Font core so we can register IBMPlexSans independently
+  const RNFont = fontLoader({ Utils: Utils, Debug: Debug });
+  RNFont.registerFamilies({
+    IBMPlexSans: {
+      styles: {
+        '400': { path: '/app/fonts/ibm-plex-sans-400.ttf' }
+      }
+    }
+  });
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: RNFont
+  });
+
+  // Set the stub to resolve a different name
+  const stub = await import('./stubs/native-loader.js');
+  stub._clearLoadedFonts();
+  stub._setResolvedName('IBM Plex Sans');
+
+  await FreshAdapter.loadManifest({
+    IBMPlexSans: {
+      styles: {
+        '400': { path: '/app/fonts/ibm-plex-sans-400.ttf' }
+      }
+    }
+  });
+
+  // After loading, resolveFamily should return the platform-resolved name
+  const result = RNFont.resolveFamily('IBMPlexSans');
+  assert.strictEqual(result.family, 'IBM Plex Sans');
+
+  // Cleanup
+  stub._clearResolvedName();
+  stub._clearLoadedFonts();
+
+});
+
+test('FN1: same resolved name as family name leaves it unchanged', async function () {
+
+  const RNFont = fontLoader({ Utils: Utils, Debug: Debug });
+  RNFont.registerFamilies({
+    SameNameFont: {
+      styles: {
+        '400': { path: '/app/fonts/samename-400.ttf' }
+      }
+    }
+  });
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: RNFont
+  });
+
+  // Set the stub to resolve the same name
+  const stub = await import('./stubs/native-loader.js');
+  stub._clearLoadedFonts();
+  stub._setResolvedName('SameNameFont');
+
+  await FreshAdapter.loadManifest({
+    SameNameFont: {
+      styles: {
+        '400': { path: '/app/fonts/samename-400.ttf' }
+      }
+    }
+  });
+
+  // resolveFamily should return the family name unchanged
+  const result = RNFont.resolveFamily('SameNameFont');
+  assert.strictEqual(result.family, 'SameNameFont');
+
+  // Cleanup
+  stub._clearResolvedName();
+  stub._clearLoadedFonts();
+
+});
+
+test('FN1: a failed load records no platform name', async function () {
+
+  const RNFont = fontLoader({ Utils: Utils, Debug: Debug });
+  RNFont.registerFamilies({
+    FailFont: {
+      styles: {
+        '400': { path: '/app/fonts/fail-400.ttf' }
+      }
+    }
+  });
+
+  const FreshAdapter = fontExtRnLoader({
+    Utils: Utils,
+    Debug: Debug,
+    Font: RNFont
+  }, {
+    FAIL_ON_ERROR: false
+  });
+
+  // Set the stub to fail
+  const stub = await import('./stubs/native-loader.js');
+  stub._clearLoadedFonts();
+  stub._setShouldFail(true);
+  stub._setResolvedName('Should Not Be Recorded');
+
+  await FreshAdapter.loadManifest({
+    FailFont: {
+      styles: {
+        '400': { path: '/app/fonts/fail-400.ttf' }
+      }
+    }
+  });
+
+  // resolveFamily should NOT return the platform name (load failed)
+  const result = RNFont.resolveFamily('FailFont');
+  assert.strictEqual(result.family, 'FailFont');
+
+  // Cleanup
+  stub._setShouldFail(false);
+  stub._clearResolvedName();
+  stub._clearLoadedFonts();
 
 });
