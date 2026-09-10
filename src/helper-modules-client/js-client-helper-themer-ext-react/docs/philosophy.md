@@ -14,7 +14,7 @@ Font registration and component construction are app concerns. That logic stays 
 
 ## 3. Why Factory, Not Singleton
 
-The provider calls `Lib.React.useState`. A singleton would share one state object across every caller, so two providers mounting the same hook would write into one layer stack. The factory pattern gives each loader call its own React context and its own state, which is the module-level equivalent of the isolation `React.createContext` provides at the tree level.
+The provider calls `Lib.React.useState` for the imperative override state. A singleton would share one state object across every caller, so two providers mounting the same hook would write into one override. The factory pattern gives each loader call its own React context and its own state, which is the module-level equivalent of the isolation `React.createContext` provides at the tree level.
 
 Two loader calls produce two independent extensions. Two providers rendered from the same factory instance share one context, which is correct when they are part of the same tree. Two providers rendered from different factory instances are fully isolated, which is correct when they belong to different apps or different test cases.
 

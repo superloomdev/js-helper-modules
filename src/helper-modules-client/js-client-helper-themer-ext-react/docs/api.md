@@ -30,7 +30,7 @@ Each loader call returns an independent instance with its own React context. A h
 
 ### `ThemeProvider`
 
-Holds the layer stack as React state, derives a theme through the pure themer engine, and provides it via context.
+Derives from `template` and `layers` props and re-derives a theme through the pure themer engine when either reference changes. `update_layers` is an imperative override that lasts until the next `layers` prop change. Callers must pass stable references (memoize `layers`, `template`, `options`, `transform`) or the theme re-derives every render.
 
 | Prop | Type | Required | Description |
 |---|---|---|---|
@@ -121,7 +121,7 @@ const { ThemeContext } = Extension;
 
 ## `update_layers`
 
-The context value carries `update_layers`, which is the React state setter for the layer stack. Calling it with a new array triggers a re-derive and re-render.
+The context value carries `update_layers`, an imperative override for the layer stack. Calling it with a new array triggers a re-derive and re-render. The override lasts until the next `layers` prop change, at which point the prop takes precedence.
 
 ```javascript
 const ctx = Extension.useThemeController();

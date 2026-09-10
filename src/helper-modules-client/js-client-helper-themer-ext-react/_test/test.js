@@ -529,3 +529,274 @@ describe('provider prop validation', () => {
   });
 
 });
+
+
+// ============================================================================
+// 8. PROP-DRIVEN PROVIDER
+// ============================================================================
+
+describe('prop-driven provider', () => {
+
+  it('should re-derive when props.layers reference changes', () => {
+
+    const t = buildTemplate();
+    let capturedTheme = null;
+
+    function Consumer () {
+
+      capturedTheme = useTheme();
+      return null;
+
+    }
+
+    const renderer = ReactTestRenderer.create(
+      React.createElement(ThemeProvider, {
+        template: t,
+        layers: [{ name: 'base' }],
+        platform: 'native'
+      }, React.createElement(Consumer))
+    );
+
+    // Before: background is the template literal
+    assert.strictEqual(capturedTheme.background, '#ffffff');
+
+    // Rerender with a new layers array that overrides background
+    ReactTestRenderer.act(function () {
+
+      renderer.update(
+        React.createElement(ThemeProvider, {
+          template: t,
+          layers: [{ name: 'dark', tokens: { background: '#161616' } }],
+          platform: 'native'
+        }, React.createElement(Consumer))
+      );
+
+    });
+
+    // After: the new layers take effect
+    assert.strictEqual(capturedTheme.background, '#161616');
+
+    renderer.unmount();
+
+  });
+
+  it('should re-derive when props.template reference changes', () => {
+
+    let capturedTheme = null;
+
+    function Consumer () {
+
+      capturedTheme = useTheme();
+      return null;
+
+    }
+
+    const t1 = buildTemplate();
+    const renderer = ReactTestRenderer.create(
+      React.createElement(ThemeProvider, {
+        template: t1,
+        layers: [{ name: 'base' }],
+        platform: 'native'
+      }, React.createElement(Consumer))
+    );
+
+    assert.strictEqual(capturedTheme.background, '#ffffff');
+
+    // Rerender with a new template that has a different background
+    const t2 = buildTemplate();
+    t2.tokens.background = '#f0f0f0';
+
+    ReactTestRenderer.act(function () {
+
+      renderer.update(
+        React.createElement(ThemeProvider, {
+          template: t2,
+          layers: [{ name: 'base' }],
+          platform: 'native'
+        }, React.createElement(Consumer))
+      );
+
+    });
+
+    assert.strictEqual(capturedTheme.background, '#f0f0f0');
+
+    renderer.unmount();
+
+  });
+
+  it('should not re-derive when props.layers reference is unchanged across a parent re-render', () => {
+
+    const t = buildTemplate();
+    const stableLayers = [{ name: 'base' }];
+    let transformCalls = 0;
+
+    function transform () {
+
+      transformCalls++;
+      return null;
+
+    }
+
+    function Parent () {
+
+      const [count, setCount] = React.useState(0);
+      // Expose setter for the test
+      Parent.setCount = setCount;
+      return React.createElement(ThemeProvider, {
+        template: t,
+        layers: stableLayers,
+        platform: 'native',
+        transform: transform
+      }, React.createElement('div', null, String(count)));
+
+    }
+
+    const renderer = ReactTestRenderer.create(React.createElement(Parent));
+
+    const callsAfterMount = transformCalls;
+
+    // Force a parent re-render without changing layers
+    ReactTestRenderer.act(function () {
+
+      Parent.setCount(1);
+
+    });
+
+    // The transform should not have been called again
+    assert.strictEqual(transformCalls, callsAfterMount);
+
+    renderer.unmount();
+
+  });
+
+  it('should let update_layers override props.layers until props.layers changes', () => {
+
+    const t = buildTemplate();
+    let capturedTheme = null;
+    let updateFn = null;
+
+    function Consumer () {
+
+      const ctx = useThemeController();
+      capturedTheme = ctx.theme;
+      updateFn = ctx.update_layers;
+      return null;
+
+    }
+
+    const renderer = ReactTestRenderer.create(
+      React.createElement(ThemeProvider, {
+        template: t,
+        layers: [{ name: 'base' }],
+        platform: 'native'
+      }, React.createElement(Consumer))
+    );
+
+    // Call update_layers with an override
+    ReactTestRenderer.act(function () {
+
+      updateFn([{ name: 'dark', tokens: { background: '#161616' } }]);
+
+    });
+
+    assert.strictEqual(capturedTheme.background, '#161616');
+
+    // Rerender with a new props.layers - the override should be discarded
+    ReactTestRenderer.act(function () {
+
+      renderer.update(
+        React.createElement(ThemeProvider, {
+          template: t,
+          layers: [{ name: 'light', tokens: { background: '#fafafa' } }],
+          platform: 'native'
+        }, React.createElement(Consumer))
+      );
+
+    });
+
+    assert.strictEqual(capturedTheme.background, '#fafafa');
+
+    renderer.unmount();
+
+  });
+
+  it('should reject a non-array from update_layers with the layers error', () => {
+
+    const t = buildTemplate();
+    let updateFn = null;
+
+    function Consumer () {
+
+      const ctx = useThemeController();
+      updateFn = ctx.update_layers;
+      return null;
+
+    }
+
+    const renderer = ReactTestRenderer.create(
+      React.createElement(ThemeProvider, {
+        template: t,
+        layers: [{ name: 'base' }],
+        platform: 'native'
+      }, React.createElement(Consumer))
+    );
+
+    assert.throws(
+      function () {
+
+        updateFn({ name: 'not-an-array' });
+
+      },
+      /^TypeError: \[helper-themer-ext-react\] layers must be an array of layer objects$/
+    );
+
+    renderer.unmount();
+
+  });
+
+  it('should keep update_layers referentially stable across renders', () => {
+
+    const t = buildTemplate();
+    let firstFn = null;
+    let secondFn = null;
+
+    function Consumer () {
+
+      const ctx = useThemeController();
+      if (!firstFn) {
+        firstFn = ctx.update_layers;
+      } else {
+        secondFn = ctx.update_layers;
+      }
+      return null;
+
+    }
+
+    const renderer = ReactTestRenderer.create(
+      React.createElement(ThemeProvider, {
+        template: t,
+        layers: [{ name: 'base' }],
+        platform: 'native'
+      }, React.createElement(Consumer))
+    );
+
+    // Rerender with the same props
+    ReactTestRenderer.act(function () {
+
+      renderer.update(
+        React.createElement(ThemeProvider, {
+          template: t,
+          layers: [{ name: 'base' }],
+          platform: 'native'
+        }, React.createElement(Consumer))
+      );
+
+    });
+
+    assert.strictEqual(firstFn, secondFn);
+
+    renderer.unmount();
+
+  });
+
+});

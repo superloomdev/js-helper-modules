@@ -32,7 +32,7 @@ Factory. Each call returns an independent instance with its own React context. T
 
 | Export | Kind | Contract |
 |---|---|---|
-| `ThemeProvider` | Component | Props: `template` (required), `layers` (required array), `platform` (required, `'web'`/`'native'`), `options` (optional), `transform` (optional function), `children`. Holds `layers` in `useState`; inside `useMemo` calls `Themer.buildTheme(template, layers, platform, options)`; if `transform` provided, calls `transform(built, layers)` and spreads return into context; provides `{ built, theme, update_layers, ...transformed }` |
+| `ThemeProvider` | Component | Props: `template` (required), `layers` (required array), `platform` (required, `'web'`/`'native'`), `options` (optional), `transform` (optional function), `children`. Derives from `template` and `layers` props; re-derives inside `useMemo` when either reference changes; `update_layers` is an imperative override that lasts until the next `layers` prop change; if `transform` provided, calls `transform(built, layers)` and spreads return into context; provides `{ built, theme, update_layers, ...transformed }` |
 | `useThemeController` | Hook | Returns full context value, or `null` outside a provider |
 | `useTheme` | Hook | Returns `ctx.theme` (transform's `theme` when set, else `built.tokens`), or `null` |
 | `useTokens` | Hook | Returns `ctx.built.tokens` (raw emitted map), or `null` |
@@ -44,7 +44,7 @@ Factory. Each call returns an independent instance with its own React context. T
 {
   built: { tokens, substituted, lossy, corrections, violations, stats },
   theme: built.tokens,           // or transform's theme field
-  update_layers: setLayers,      // React state setter
+  update_layers: <callback>,   // imperative override; lasts until props.layers changes
   ...transformed                 // spread of transform's return value
 }
 ```
@@ -80,7 +80,7 @@ Runs inside `useMemo`, re-computes only on theme change. Receives full `buildThe
 
 ## Gotchas
 
-- **`update_layers` is a React state setter.** Pass a new array, not a mutation of the old one
+- **`update_layers` is an imperative override.** Pass a new array, not a mutation of the old one. The override lasts until the next `layers` prop change, at which point the prop takes precedence
 - **`useTheme` returns `null` outside a provider.** Guard against this in components that may render above the provider
 - **Two factory instances do not share context.** Render both to assert isolation in tests
 - **The transform runs inside `useMemo`.** It re-computes only when `template`, `layers`, `platform`, `options`, or `transform` change

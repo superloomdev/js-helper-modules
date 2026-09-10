@@ -124,8 +124,37 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
       Validators.validatePlatform(props.platform);
       Validators.validateTransform(props.transform);
 
-      // Hold layers in state so update_layers can trigger a re-derive
-      const [currentLayers, setLayers] = Lib.React.useState(props.layers);
+      // The provider is prop-driven: it re-derives whenever props.template
+      // or props.layers reference changes. An imperative override via
+      // update_layers is also supported; the override lasts until the next
+      // props.layers change, at which point the prop takes precedence.
+      // Callers must pass stable references (memoize layers, template,
+      // options, transform) or the theme re-derives every render.
+      const [override, setOverride] = Lib.React.useState(null);
+
+      // Track the current props.layers reference so update_layers can
+      // record which prop version it overrides. A ref is used because
+      // update_layers is a useCallback with empty deps.
+      const propsLayersRef = Lib.React.useRef(props.layers);
+      propsLayersRef.current = props.layers;
+
+      // Resolve the effective layers: the override's layers when it was
+      // set against the current props.layers, otherwise props.layers.
+      // When props.layers changes, the override's base no longer matches,
+      // so the prop takes precedence and the override is discarded.
+      const currentLayers = (override && override.base === props.layers)
+        ? override.layers
+        : props.layers;
+
+      // Imperative override setter. Stable across renders (useCallback
+      // with empty deps; setOverride is stable from useState). Validates
+      // the input the same way the prop validator does.
+      const update_layers = Lib.React.useCallback(function (layers) {
+
+        Validators.validateLayers(layers);
+        setOverride({ base: propsLayersRef.current, layers: layers });
+
+      }, []);
 
       // Derive the theme and build the context value, recomputed only on input change
       const value = Lib.React.useMemo(function () {
@@ -142,7 +171,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
         const result = {
           built: built,
           theme: built.tokens,
-          update_layers: setLayers
+          update_layers: update_layers
         };
 
         // Apply the transform seam when provided - the app builds its component system here
@@ -160,7 +189,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, state) {
 
         return result;
 
-      }, [props.template, currentLayers, props.platform, props.options, props.transform]);
+      }, [props.template, currentLayers, props.platform, props.options, props.transform, update_layers]);
 
       // Provide the value to the subtree
       return Lib.React.createElement(state.context.Provider, { value: value }, props.children);

@@ -4,7 +4,7 @@ React extension for [js-client-helper-themer](https://github.com/superloomdev/su
 
 ## What This Is
 
-A thin React binding that sits between the pure themer engine and a component tree. The provider holds the layer stack as React state, derives through the engine on change, and exposes the result via context. A `transform` seam is where the app validates font roles and builds its component system from the engine's output.
+A thin React binding that sits between the pure themer engine and a component tree. The provider derives from `template` and `layers` props and re-derives when either reference changes. An imperative `update_layers` override is also supported; the override lasts until the next `layers` prop change. A `transform` seam is where the app validates font roles and builds its component system from the engine's output. Callers must pass stable references (memoize `layers`, `template`, `options`, `transform`) or the theme re-derives every render.
 
 ## Why
 
