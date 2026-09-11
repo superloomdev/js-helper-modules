@@ -70,29 +70,72 @@ const SPRINGS = {
   'motion.spring_effects_slow': { spring: true, stiffness: 800, damping: 56.57, mass: 1 }
 };
 
-// --- Type set step assignments -------------------------------------------
-// 58 type sets, step 1..58 on stepPairIncrement(base 12).
-// Steps produce: 12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 54, 60, 68, ...
-const TYPE_NAMES = [
-  'body01', 'body02', 'body_compact_01', 'body_compact_02',
-  'body_long_01', 'body_long_02', 'body_short_01', 'body_short_02',
-  'caption01', 'caption02', 'code01', 'code02',
-  'display01', 'display02', 'display03', 'display04',
-  'expressive_heading_01', 'expressive_heading_02', 'expressive_heading_03',
-  'expressive_heading_04', 'expressive_heading_05', 'expressive_heading_06',
-  'expressive_paragraph_01',
-  'fluid_display_01', 'fluid_display_02', 'fluid_display_03', 'fluid_display_04',
-  'fluid_heading_03', 'fluid_heading_04', 'fluid_heading_05', 'fluid_heading_06',
-  'fluid_paragraph_01', 'fluid_quotation_01', 'fluid_quotation_02',
-  'heading01', 'heading02', 'heading03', 'heading04', 'heading05', 'heading06', 'heading07',
-  'heading_compact_01', 'heading_compact_02',
-  'helper_text_01', 'helper_text_02',
-  'label01', 'label02',
-  'legal01', 'legal02',
-  'productive_heading_01', 'productive_heading_02', 'productive_heading_03',
-  'productive_heading_04', 'productive_heading_05', 'productive_heading_06', 'productive_heading_07',
-  'quotation01', 'quotation02'
-];
+// --- Type set font sizes and line heights --------------------------------
+// 58 type sets with explicit font_size and line_height_px values. The base
+// template uses the same type metrics as the Carbon reference to ensure the
+// neutral profile renders at readable sizes. The previous step-based
+// assignment used alphabetical order, which placed headings at steps 35-58
+// and produced font sizes of 392px+.
+const TYPE_METRICS = {
+  'body01': { font_size: 14, line_height_px: 20 },
+  'body02': { font_size: 16, line_height_px: 24 },
+  'body_compact_01': { font_size: 14, line_height_px: 18 },
+  'body_compact_02': { font_size: 16, line_height_px: 22 },
+  'body_long_01': { font_size: 14, line_height_px: 20 },
+  'body_long_02': { font_size: 16, line_height_px: 24 },
+  'body_short_01': { font_size: 14, line_height_px: 18 },
+  'body_short_02': { font_size: 16, line_height_px: 22 },
+  'caption01': { font_size: 12, line_height_px: 16 },
+  'caption02': { font_size: 14, line_height_px: 18 },
+  'code01': { font_size: 12, line_height_px: 16 },
+  'code02': { font_size: 14, line_height_px: 20 },
+  'display01': { font_size: 42, line_height_px: 50 },
+  'display02': { font_size: 42, line_height_px: 50 },
+  'display03': { font_size: 42, line_height_px: 50 },
+  'display04': { font_size: 42, line_height_px: 50 },
+  'expressive_heading_01': { font_size: 14, line_height_px: 18 },
+  'expressive_heading_02': { font_size: 16, line_height_px: 24 },
+  'expressive_heading_03': { font_size: 20, line_height_px: 28 },
+  'expressive_heading_04': { font_size: 28, line_height_px: 36 },
+  'expressive_heading_05': { font_size: 32, line_height_px: 40 },
+  'expressive_heading_06': { font_size: 32, line_height_px: 40 },
+  'expressive_paragraph_01': { font_size: 24, line_height_px: 32 },
+  'fluid_display_01': { font_size: 42, line_height_px: 50 },
+  'fluid_display_02': { font_size: 42, line_height_px: 50 },
+  'fluid_display_03': { font_size: 42, line_height_px: 50 },
+  'fluid_display_04': { font_size: 42, line_height_px: 50 },
+  'fluid_heading_03': { font_size: 20, line_height_px: 28 },
+  'fluid_heading_04': { font_size: 28, line_height_px: 36 },
+  'fluid_heading_05': { font_size: 32, line_height_px: 40 },
+  'fluid_heading_06': { font_size: 32, line_height_px: 40 },
+  'fluid_paragraph_01': { font_size: 24, line_height_px: 32 },
+  'fluid_quotation_01': { font_size: 20, line_height_px: 26 },
+  'fluid_quotation_02': { font_size: 32, line_height_px: 40 },
+  'heading01': { font_size: 14, line_height_px: 20 },
+  'heading02': { font_size: 16, line_height_px: 24 },
+  'heading03': { font_size: 20, line_height_px: 28 },
+  'heading04': { font_size: 28, line_height_px: 36 },
+  'heading05': { font_size: 32, line_height_px: 40 },
+  'heading06': { font_size: 42, line_height_px: 50 },
+  'heading07': { font_size: 54, line_height_px: 65 },
+  'heading_compact_01': { font_size: 14, line_height_px: 18 },
+  'heading_compact_02': { font_size: 16, line_height_px: 22 },
+  'helper_text_01': { font_size: 12, line_height_px: 16 },
+  'helper_text_02': { font_size: 14, line_height_px: 18 },
+  'label01': { font_size: 12, line_height_px: 16 },
+  'label02': { font_size: 14, line_height_px: 18 },
+  'legal01': { font_size: 12, line_height_px: 16 },
+  'legal02': { font_size: 14, line_height_px: 18 },
+  'productive_heading_01': { font_size: 14, line_height_px: 18 },
+  'productive_heading_02': { font_size: 16, line_height_px: 22 },
+  'productive_heading_03': { font_size: 20, line_height_px: 28 },
+  'productive_heading_04': { font_size: 28, line_height_px: 36 },
+  'productive_heading_05': { font_size: 32, line_height_px: 40 },
+  'productive_heading_06': { font_size: 42, line_height_px: 50 },
+  'productive_heading_07': { font_size: 54, line_height_px: 65 },
+  'quotation01': { font_size: 20, line_height_px: 26 },
+  'quotation02': { font_size: 32, line_height_px: 40 }
+};
 
 // Heading-like names get weight 600; body/caption/code/legal/helper/label get 400.
 function weightFor (name) {
@@ -344,12 +387,11 @@ function buildTokens () {
     // --- Type tokens ---
     if (group === 'type') {
       const shortName = name.replace('type.', '');
-      const step = TYPE_NAMES.indexOf(shortName) + 1;
+      const metrics = TYPE_METRICS[shortName];
       tokens[name] = {
         type_set: true,
-        scale: 'stepPairIncrement',
-        step: step,
-        line_height: 1.43,
+        font_size: metrics.font_size,
+        line_height_px: metrics.line_height_px,
         letter_spacing: 0,
         weight: weightFor(shortName),
         font_family: familyFor(shortName)
