@@ -26,10 +26,23 @@ const built = Themer.buildTheme(profile.schemes.light, [], 'native');
 ## Generator
 
 ```bash
+npm install
 node scripts/generate.js
 ```
 
 Reads pinned `@material/web@2.5.0` SCSS token files and `@material/material-color-utilities@0.4.0` scheme generation, maps through `data/mapping.js`, completes from the base template, and writes six scheme files to `data/`.
+
+### Provenance
+
+Every generated scheme carries a `provenance` object recording the base template identity:
+
+| Field | Description |
+|---|---|
+| `base_version` | The base template package version used for completion |
+| `base_shasum` | The distribution shasum of the installed base template |
+| `generator_schema` | The generator schema revision |
+
+The generator verifies the installed base shasum matches the registry shasum before writing. A mismatch aborts generation. After a same-version base republish, regenerate all six schemes and republish Material at the same version; every consumer lockfile must be refreshed.
 
 ## License
 

@@ -336,3 +336,95 @@ describe('material template - regeneration test', () => {
   });
 
 });
+
+
+describe('material template - generation provenance', () => {
+
+  it('should declare provenance with base version, shasum, and schema in every scheme', () => {
+    for (const name of SCHEME_NAMES) {
+      const p = profile.schemes[name].provenance;
+      assert.ok(p, name + ' missing provenance');
+      assert.equal(p.base_version, '1.0.0', name + ' base_version');
+      assert.ok(p.base_shasum, name + ' missing base_shasum');
+      assert.ok(p.generator_schema, name + ' missing generator_schema');
+    }
+  });
+
+  it('should have identical provenance across all six schemes', () => {
+    const ref = JSON.stringify(profile.schemes.light.provenance);
+    for (const name of SCHEME_NAMES) {
+      assert.equal(
+        JSON.stringify(profile.schemes[name].provenance),
+        ref,
+        name + ' provenance differs from light'
+      );
+    }
+  });
+
+  it('should have base shasum matching the registry base shasum', () => {
+    const registryShasum = execSync(
+      'npm view @superloomdev/js-client-helper-themer-template-base@1.0.0 dist.shasum',
+      { encoding: 'utf8', stdio: 'pipe' }
+    ).trim();
+    for (const name of SCHEME_NAMES) {
+      assert.equal(
+        profile.schemes[name].provenance.base_shasum,
+        registryShasum,
+        name + ' base_shasum does not match registry'
+      );
+    }
+  });
+
+});
+
+
+describe('material template - explicit type roles', () => {
+
+  const EXPLICIT_ROLES = [
+    'type.body02', 'type.body01', 'type.caption01',
+    'type.display01', 'type.display02', 'type.display03',
+    'type.heading05', 'type.heading04', 'type.heading03',
+    'type.heading02', 'type.heading01', 'type.heading_compact_01',
+    'type.label01', 'type.label02', 'type.legal01'
+  ];
+
+  for (const role of EXPLICIT_ROLES) {
+
+    it('should have explicit font_size and line_height_px for ' + role, () => {
+      const ts = profile.schemes.light.tokens[role];
+      assert.ok(ts.font_size, role + ' missing font_size');
+      assert.ok(ts.line_height_px, role + ' missing line_height_px');
+      assert.equal(ts.scale, undefined, role + ' should not have scale');
+      assert.equal(ts.step, undefined, role + ' should not have step');
+    });
+
+  }
+
+  it('should have caption02 deepEqual to corrected base value (14px/18px)', () => {
+    assert.deepEqual(
+      profile.schemes.light.tokens['type.caption02'],
+      baseProfile.schemes.light.tokens['type.caption02']
+    );
+    assert.equal(profile.schemes.light.tokens['type.caption02'].font_size, 14);
+    assert.equal(profile.schemes.light.tokens['type.caption02'].line_height_px, 18);
+  });
+
+  it('should have no type set with line_height_px below font_size', () => {
+    for (const name of SCHEME_NAMES) {
+      const tokens = profile.schemes[name].tokens;
+      for (const key of Object.keys(tokens)) {
+        if (key.startsWith('type.') && tokens[key] && tokens[key].type_set) {
+          const ts = tokens[key];
+          if (ts.font_size && ts.line_height_px) {
+            assert.ok(
+              ts.line_height_px >= ts.font_size,
+              name + ' ' + key + ' line_height_px ' + ts.line_height_px +
+                ' < font_size ' + ts.font_size
+            );
+          }
+        }
+      }
+    }
+  });
+
+});

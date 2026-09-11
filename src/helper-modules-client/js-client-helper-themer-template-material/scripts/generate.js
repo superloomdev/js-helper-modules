@@ -6,10 +6,15 @@
 // to Superloom contract keys, completes from the base template, and
 // writes six scheme data files.
 //
+// Provenance: captures the base package version and distribution shasum,
+// verifies installed/registry shasum match before writing, and records
+// the provenance in every generated scheme.
+//
 // Run: node scripts/generate.js [output-dir]
 import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 
 import { SchemeTonalSpot, Hct, hexFromArgb } from '@material/material-color-utilities';
 
@@ -23,6 +28,43 @@ const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
 const outDir = process.argv[2] || resolve(moduleRoot, 'data');
 const scssDir = resolve(moduleRoot, 'node_modules/@material/web/tokens/versions/v0_192');
+
+// --- Provenance capture ---------------------------------------------------
+const basePkgJson = JSON.parse(
+  readFileSync(resolve(moduleRoot, 'node_modules/helper-themer-template-base/package.json'), 'utf8')
+);
+const baseVersion = basePkgJson.version;
+const baseDir = resolve(moduleRoot, 'node_modules/helper-themer-template-base');
+
+// Step 1: Compute installed base shasum via npm pack --dry-run from the installed directory
+const packOutput = execSync('npm pack --dry-run 2>&1', {
+  cwd: baseDir,
+  encoding: 'utf8',
+  stdio: 'pipe'
+});
+const installedShasumMatch = packOutput.match(/shasum:\s*([a-f0-9]+)/);
+const installedShasum = installedShasumMatch ? installedShasumMatch[1] : null;
+
+// Step 2: Query registry shasum
+const registryShasum = execSync(
+  'npm view @superloomdev/js-client-helper-themer-template-base@' + baseVersion + ' dist.shasum',
+  { encoding: 'utf8', stdio: 'pipe' }
+).trim();
+
+// Step 3: Pre-write guard - refuse to write on mismatch
+if (installedShasum !== registryShasum) {
+  throw new Error(
+    'Base shasum mismatch: installed=' + installedShasum +
+    ' registry=' + registryShasum +
+    '. Refusing to generate from a base whose installed and registry shasums differ.'
+  );
+}
+
+const provenance = Object.freeze({
+  base_version: baseVersion,
+  base_shasum: installedShasum,
+  generator_schema: 'v1'
+});
 
 // --- Engine setup ---------------------------------------------------------
 const Lib = {};
@@ -409,7 +451,8 @@ function buildScheme (schemeName) {
     },
     tokens: tokens,
     meta: meta,
-    from_base: fromBase
+    from_base: fromBase,
+    provenance: provenance
   };
 }
 
