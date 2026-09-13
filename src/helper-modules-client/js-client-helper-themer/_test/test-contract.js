@@ -42,16 +42,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 379 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 379);
+  it('should expose exactly 380 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 380);
   });
 
   it('should expose exactly 15 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 15);
   });
 
-  it('should expose exactly 379 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 379);
+  it('should expose exactly 380 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 380);
   });
 
   it('should report contract version 2', () => {
@@ -88,7 +88,7 @@ describe('contract registry - group counts', () => {
     shape: 9,
     border: 4,
     focus: 2,
-    feedback: 2,
+    feedback: 3,
     shadow: 5,
     breakpoint: 5,
     grid: 13,
@@ -193,6 +193,10 @@ describe('contract registry - enum values', () => {
     assert.deepEqual(contract.tokens['feedback.press'].values, ['highlight', 'opacity', 'ripple']);
   });
 
+  it('should declare values for feedback.field', () => {
+    assert.deepEqual(contract.tokens['feedback.field'].values, ['underline', 'outline']);
+  });
+
   it('should declare values for easing tokens', () => {
     assert.deepEqual(contract.tokens['motion.easing_standard_productive'].values, ['array4']);
   });
@@ -210,7 +214,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 379 tokens and theme has all 379', () => {
+  it('should return success true when required is all 380 tokens and theme has all 380', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];

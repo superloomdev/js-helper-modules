@@ -461,10 +461,11 @@ function buildContract () {
     'focus.offset': Object.freeze({ group: 'focus' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ feedback.* (2 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ feedback.* (3 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'feedback.press': Object.freeze({ group: 'feedback', values: ['highlight', 'opacity', 'ripple'] }),
     'feedback.focus': Object.freeze({ group: 'feedback', values: ['outline', 'inset', 'underline'] }),
+    'feedback.field': Object.freeze({ group: 'feedback', values: ['underline', 'outline'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
