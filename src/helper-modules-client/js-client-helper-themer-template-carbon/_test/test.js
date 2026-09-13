@@ -242,6 +242,15 @@ describe('carbon template - engine build', () => {
 
 });
 
+describe('carbon template - feedback field', () => {
+
+  it('should have feedback.field = underline', () => {
+    const built = Themer.buildTheme(profile.schemes.white, [], 'native');
+    assert.equal(built.tokens['feedback.field'], 'underline');
+  });
+
+});
+
 
 describe('carbon template - regeneration test', () => {
 
