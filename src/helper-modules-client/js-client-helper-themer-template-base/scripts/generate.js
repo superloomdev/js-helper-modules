@@ -473,6 +473,9 @@ function buildTokens () {
       if (name === 'feedback.focus') {
         tokens[name] = 'outline';
       }
+      if (name === 'feedback.field') {
+        tokens[name] = 'underline';
+      }
       continue;
     }
 
@@ -600,6 +603,11 @@ for (let i = 1; i < DURATION_SLOTS.length; i++) {
 // Assert feedback.focus
 if (tokens['feedback.focus'] !== 'outline') {
   throw new Error('feedback.focus must be outline');
+}
+
+// Assert feedback.field
+if (tokens['feedback.field'] !== 'underline') {
+  throw new Error('feedback.field must be underline');
 }
 
 // Assert token count

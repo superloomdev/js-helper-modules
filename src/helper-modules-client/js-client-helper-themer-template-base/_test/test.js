@@ -248,6 +248,11 @@ describe('base template - feedback focus', () => {
     assert.equal(built.tokens['feedback.focus'], 'outline');
   });
 
+  it('should have feedback.field = underline', () => {
+    const built = Themer.buildTheme(profile.schemes.light, [], 'native');
+    assert.equal(built.tokens['feedback.field'], 'underline');
+  });
+
 });
 
 

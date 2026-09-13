@@ -1793,6 +1793,7 @@ export default Object.freeze({
     'focus.offset': 0,
     'feedback.press': 'highlight',
     'feedback.focus': 'outline',
+    'feedback.field': 'underline',
     'shadow.level_01': {
       'shadow': true,
       'layers': [
@@ -2917,6 +2918,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'feedback.focus': {
+      'group': 'raw'
+    },
+    'feedback.field': {
       'group': 'raw'
     },
     'shadow.level_01': {
