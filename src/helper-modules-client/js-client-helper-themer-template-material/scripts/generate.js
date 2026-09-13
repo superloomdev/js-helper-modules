@@ -282,7 +282,8 @@ const STRUCTURE_KNOBS = {
   'focus.width': 2,
   'focus.offset': 0,
   'feedback.press': 'ripple',
-  'feedback.focus': 'outline'
+  'feedback.focus': 'outline',
+  'feedback.field': 'outline'
 };
 
 // Breakpoints (Material has its own, but we use Carbon's for consistency)

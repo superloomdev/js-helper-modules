@@ -311,6 +311,15 @@ describe('material template - engine build', () => {
 
 });
 
+describe('material template - feedback field', () => {
+
+  it('should have feedback.field = outline', () => {
+    const built = Themer.buildTheme(profile.schemes.light, [], 'native');
+    assert.equal(built.tokens['feedback.field'], 'outline');
+  });
+
+});
+
 
 describe('material template - regeneration test', () => {
 

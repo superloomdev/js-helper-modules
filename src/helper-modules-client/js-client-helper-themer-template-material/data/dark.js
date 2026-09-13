@@ -383,6 +383,7 @@ export default Object.freeze({
     'focus.offset': 0,
     'feedback.press': 'ripple',
     'feedback.focus': 'outline',
+    'feedback.field': 'outline',
     'font.family.sans': 'Roboto',
     'font.family.serif': 'Roboto',
     'font.family.mono': 'Roboto Mono',
@@ -2790,6 +2791,9 @@ export default Object.freeze({
     'feedback.focus': {
       'group': 'raw'
     },
+    'feedback.field': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -3136,7 +3140,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'base_version': '1.0.0',
-    'base_shasum': '9938ac6ee4e56088536d253d6fa6e35e7583d00f',
+    'base_shasum': '3c161121520b86b90aefc6bbb17f109d626eb568',
     'generator_schema': 'v1'
   }
 });
