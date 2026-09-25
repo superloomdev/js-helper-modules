@@ -210,6 +210,14 @@ describe('carbon template - from_base correctness', () => {
         schemeName + ' from_base is not sorted');
     });
 
+    it('should not list stacking tokens in from_base in ' + schemeName, () => {
+      const fromBase = profile.schemes[schemeName].from_base;
+      for (const key of fromBase) {
+        assert.ok(!key.startsWith('stacking.'),
+          schemeName + ' inherits ' + key + ' from base, expected explicit Carbon value');
+      }
+    });
+
   }
 
 });
