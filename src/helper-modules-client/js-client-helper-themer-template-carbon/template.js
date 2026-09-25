@@ -10,7 +10,7 @@ import g100 from './data/g100.js';
 
 export default Object.freeze({
   id: 'carbon-v11',
-  contract_version: 2,
+  contract_version: 3,
   reference: {
     themes: '@carbon/themes@11.80.0',
     type: '@carbon/type@11.66.0',

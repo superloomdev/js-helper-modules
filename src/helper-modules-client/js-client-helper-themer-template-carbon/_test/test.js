@@ -31,8 +31,8 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.id, 'carbon-v11');
   });
 
-  it('should export contract_version 2', () => {
-    assert.equal(profile.contract_version, 2);
+  it('should export contract_version 3', () => {
+    assert.equal(profile.contract_version, 3);
   });
 
   it('should export reference with Carbon package versions', () => {

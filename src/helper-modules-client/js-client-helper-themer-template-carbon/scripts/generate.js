@@ -199,7 +199,12 @@ const D9_STRUCTURE = {
   'feedback.field': 'underline',
   'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow}' }] },
   'shadow.level_02': { shadow: true, layers: [{ x: 0, y: 4, blur: 8, spread: 0, color: '{color.shadow}' }] },
-  'shadow.level_03': { shadow: true, layers: [{ x: 0, y: 8, blur: 16, spread: 0, color: '{color.shadow}' }] }
+  'shadow.level_03': { shadow: true, layers: [{ x: 0, y: 8, blur: 16, spread: 0, color: '{color.shadow}' }] },
+  'stacking.dropdown': 9100,
+  'stacking.modal': 9000,
+  'stacking.header': 8000,
+  'stacking.overlay': 6000,
+  'stacking.floating': 6000
 };
 
 // Section 5.5 font tokens

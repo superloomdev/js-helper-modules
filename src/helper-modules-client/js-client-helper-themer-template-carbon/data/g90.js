@@ -808,6 +808,11 @@ export default Object.freeze({
         }
       ]
     },
+    'stacking.dropdown': 9100,
+    'stacking.modal': 9000,
+    'stacking.header': 8000,
+    'stacking.overlay': 6000,
+    'stacking.floating': 6000,
     'font.family.sans': 'IBM Plex Sans',
     'font.family.serif': 'IBM Plex Serif',
     'font.family.mono': 'IBM Plex Mono',
@@ -2064,6 +2069,21 @@ export default Object.freeze({
       'group': 'raw'
     },
     'tint.level_05': {
+      'group': 'raw'
+    },
+    'stacking.dropdown': {
+      'group': 'raw'
+    },
+    'stacking.modal': {
+      'group': 'raw'
+    },
+    'stacking.header': {
+      'group': 'raw'
+    },
+    'stacking.overlay': {
+      'group': 'raw'
+    },
+    'stacking.floating': {
       'group': 'raw'
     }
   },
