@@ -14,7 +14,7 @@ import darkHighContrast from './data/dark_high_contrast.js';
 export default Object.freeze({
 
   id: 'material-v0_192',
-  contract_version: 2,
+  contract_version: 3,
 
   reference: {
     material_web: '@material/web@2.5.0',

@@ -1753,7 +1753,12 @@ export default Object.freeze({
     'font.weight.extrabold': 800,
     'font.weight.black': 900,
     'shape.radius_02': 2,
-    'shape.radius_24': 24
+    'shape.radius_24': 24,
+    'stacking.dropdown': 9100,
+    'stacking.modal': 9000,
+    'stacking.header': 8000,
+    'stacking.overlay': 6000,
+    'stacking.floating': 6000
   },
   'meta': {
     'color.background': {
@@ -2895,6 +2900,21 @@ export default Object.freeze({
     },
     'tint.level_05': {
       'group': 'raw'
+    },
+    'stacking.dropdown': {
+      'group': 'raw'
+    },
+    'stacking.modal': {
+      'group': 'raw'
+    },
+    'stacking.header': {
+      'group': 'raw'
+    },
+    'stacking.overlay': {
+      'group': 'raw'
+    },
+    'stacking.floating': {
+      'group': 'raw'
     }
   },
   'from_base': [
@@ -3094,6 +3114,11 @@ export default Object.freeze({
     'spacing.spacing_11',
     'spacing.spacing_12',
     'spacing.spacing_13',
+    'stacking.dropdown',
+    'stacking.floating',
+    'stacking.header',
+    'stacking.modal',
+    'stacking.overlay',
     'type.body_compact_01',
     'type.body_compact_02',
     'type.body_long_01',
@@ -3140,7 +3165,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'base_version': '1.0.0',
-    'base_shasum': '3c161121520b86b90aefc6bbb17f109d626eb568',
+    'base_shasum': '9d955729f3c70b4817967cd7bf9fb59ac661feb0',
     'generator_schema': 'v1'
   }
 });

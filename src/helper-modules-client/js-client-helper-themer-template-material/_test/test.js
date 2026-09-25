@@ -48,8 +48,8 @@ describe('material template - profile identity', () => {
     assert.equal(profile.id, 'material-v0_192');
   });
 
-  it('should export contract_version 2', () => {
-    assert.equal(profile.contract_version, 2);
+  it('should export contract_version 3', () => {
+    assert.equal(profile.contract_version, 3);
   });
 
   it('should export reference with Material package versions', () => {
@@ -267,6 +267,14 @@ describe('material template - from_base correctness', () => {
       const sorted = [...fromBase].sort();
       assert.deepEqual(fromBase, sorted,
         schemeName + ' from_base is not sorted');
+    });
+
+    it('should inherit all five stacking tokens from base in ' + schemeName, () => {
+      const fromBase = profile.schemes[schemeName].from_base;
+      for (const key of ['stacking.dropdown', 'stacking.modal', 'stacking.header', 'stacking.overlay', 'stacking.floating']) {
+        assert.ok(fromBase.includes(key),
+          schemeName + ' missing stacking provenance ' + key);
+      }
     });
 
   }
