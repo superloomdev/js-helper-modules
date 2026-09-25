@@ -15,6 +15,9 @@
 // the viewport, spring, and segments value types, per-breakpoint type
 // sets, and the border width 3 slot (the former width_03 value 4 became
 // width_04).
+//
+// Version 3 adds the stacking structure group so component systems read
+// named surface order from the theme instead of carrying a private table.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -46,7 +49,8 @@ function buildContract () {
     breakpoint: Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
     grid:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
     state:      Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] }),
-    tint:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] })
+    tint:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] }),
+    stacking:   Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' })
   });
 
 
@@ -519,7 +523,16 @@ function buildContract () {
     'tint.level_02': Object.freeze({ group: 'tint' }),
     'tint.level_03': Object.freeze({ group: 'tint' }),
     'tint.level_04': Object.freeze({ group: 'tint' }),
-    'tint.level_05': Object.freeze({ group: 'tint' })
+    'tint.level_05': Object.freeze({ group: 'tint' }),
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ stacking.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
+
+    'stacking.dropdown': Object.freeze({ group: 'stacking' }),
+    'stacking.modal': Object.freeze({ group: 'stacking' }),
+    'stacking.header': Object.freeze({ group: 'stacking' }),
+    'stacking.overlay': Object.freeze({ group: 'stacking' }),
+    'stacking.floating': Object.freeze({ group: 'stacking' })
 
   });
 
@@ -536,7 +549,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 2,
+    version: 3,
     groups: groups,
     tokens: tokens,
     meta: Object.freeze(meta)

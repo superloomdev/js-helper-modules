@@ -34,7 +34,8 @@ function minimalTheme () {
       'focus.offset': 0,
       'feedback.press': 'highlight',
       'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow}' }] },
-      'breakpoint.sm': 320
+      'breakpoint.sm': 320,
+      'stacking.modal': 9000
     }
   };
 }
@@ -42,20 +43,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 380 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 380);
+  it('should expose exactly 385 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 385);
   });
 
-  it('should expose exactly 15 groups', () => {
-    assert.equal(Object.keys(contract.groups).length, 15);
+  it('should expose exactly 16 groups', () => {
+    assert.equal(Object.keys(contract.groups).length, 16);
   });
 
-  it('should expose exactly 380 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 380);
+  it('should expose exactly 385 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 385);
   });
 
-  it('should report contract version 2', () => {
-    assert.equal(contract.version, 2);
+  it('should report contract version 3', () => {
+    assert.equal(contract.version, 3);
   });
 
   it('should be a frozen object', () => {
@@ -93,7 +94,8 @@ describe('contract registry - group counts', () => {
     breakpoint: 5,
     grid: 13,
     state: 6,
-    tint: 5
+    tint: 5,
+    stacking: 5
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -118,7 +120,7 @@ describe('contract registry - group metadata', () => {
     assert.equal(contract.groups.font.tier, 'value');
   });
 
-  it('should set tier structure for shape, border, focus, motion, feedback, shadow, breakpoint', () => {
+  it('should set tier structure for shape, border, focus, motion, feedback, shadow, breakpoint, stacking', () => {
     assert.equal(contract.groups.shape.tier, 'structure');
     assert.equal(contract.groups.border.tier, 'structure');
     assert.equal(contract.groups.focus.tier, 'structure');
@@ -126,6 +128,7 @@ describe('contract registry - group metadata', () => {
     assert.equal(contract.groups.feedback.tier, 'structure');
     assert.equal(contract.groups.shadow.tier, 'structure');
     assert.equal(contract.groups.breakpoint.tier, 'structure');
+    assert.equal(contract.groups.stacking.tier, 'structure');
   });
 
   it('should set emit color for color group', () => {
@@ -152,10 +155,11 @@ describe('contract registry - group metadata', () => {
     assert.equal(contract.groups.shadow.emit, 'shadow');
   });
 
-  it('should set emit raw for font, feedback, breakpoint groups', () => {
+  it('should set emit raw for font, feedback, breakpoint, stacking groups', () => {
     assert.equal(contract.groups.font.emit, 'raw');
     assert.equal(contract.groups.feedback.emit, 'raw');
     assert.equal(contract.groups.breakpoint.emit, 'raw');
+    assert.equal(contract.groups.stacking.emit, 'raw');
   });
 
 });
@@ -214,7 +218,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 380 tokens and theme has all 380', () => {
+  it('should return success true when required is all 385 tokens and theme has all 385', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1106,8 +1110,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 2', () => {
-    assert.equal(contract.version, 2);
+  it('should report contract version 3', () => {
+    assert.equal(contract.version, 3);
   });
 
 });
@@ -1165,6 +1169,30 @@ describe('contract v2 - M5 tint group with range', () => {
   });
 
 });
+
+describe('contract v3 - stacking group', () => {
+
+  it('should expose five raw numeric structure tokens', () => {
+    const stackingTokens = tokenNames.filter(function (name) {
+      return contract.tokens[name].group === 'stacking';
+    });
+
+    assert.deepEqual(stackingTokens, [
+      'stacking.dropdown',
+      'stacking.modal',
+      'stacking.header',
+      'stacking.overlay',
+      'stacking.floating'
+    ]);
+    assert.deepEqual(contract.groups.stacking, {
+      tier: 'structure',
+      type: 'number',
+      emit: 'raw'
+    });
+  });
+
+});
+
 
 describe('contract v2 - M6 radii 12 and 28', () => {
 

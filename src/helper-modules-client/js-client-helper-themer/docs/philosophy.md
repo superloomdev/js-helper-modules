@@ -90,7 +90,7 @@ There is exactly one exception, and it proves the rule rather than weakening it.
 
 ## What is not a token
 
-A concept that is not a plain data token has exactly one of three causes. **Platform:** React Native cannot render it on iOS or Android at the supported floor (variable-font axes, backdrop blur); these are the only exceptions, each recorded in the plan's exception register with owner approval and revisited at every floor change. **Web-only form:** the concept exists everywhere but arrives in a web-shaped unit (`rem`, `vw`, media queries, font stacks); the engine or the component system projects it and it is never an exception. **Anatomy:** structural behavior a number cannot carry (choreography, stacking, ripple spread, grid layout, focus movement); it lives in the component system, selected by a generic enum where design systems differ.
+A concept that is not a plain data token has exactly one of three causes. **Platform:** React Native cannot render it on iOS or Android at the supported floor (variable-font axes, backdrop blur); these are the only exceptions, each recorded in the exception register with owner approval and revisited at every floor change. **Web-only form:** the concept exists everywhere but arrives in a web-shaped unit (`rem`, `vw`, media queries, font stacks); the engine or the component system projects it and it is never an exception. **Anatomy:** structural behavior a number cannot carry (choreography, which element creates a stacking context, ripple spread, grid layout, focus movement); it lives in the component system, selected by a generic enum where design systems differ. The named surface order itself is numeric theme data in `stacking.*`; components decide where to apply it.
 
 ## See Also
 

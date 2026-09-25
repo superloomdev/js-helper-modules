@@ -60,7 +60,8 @@ vocabulary, the token contract, ships in this package as data and is read throug
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
   ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
-  Same reference on every call. Never throws.
+  Same reference on every call. Never throws. Version 3 has 385 tokens in 16 groups, including
+  `stacking.dropdown|modal|header|overlay|floating` as raw numeric structure tokens.
 
 validateContract(theme, options) -> { success, errors, warnings } | async:no
   Checks theme.tokens against the contract. options.required (string[]) makes absence an error;

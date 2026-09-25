@@ -113,11 +113,13 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
   theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
 
-### Contract version 2
+### Contract version 3
 
-Version 2 adds the approved Section 14.5 items. The contract registry now carries 379 tokens in 15 groups.
+Version 3 adds the `stacking` structure group: `stacking.dropdown`, `stacking.modal`, `stacking.header`, `stacking.overlay`, and `stacking.floating`. These raw numeric tokens let each design-system template publish its surface order without a component library carrying a private z-index table. The contract registry now carries 385 tokens in 16 groups.
 
-**New structure groups:**
+Version 2 added the approved Section 14.5 items:
+
+**Version 2 structure groups:**
 
 - **C2 `grid`** (13 tokens): `grid.columns_sm`, `grid.columns_md`, `grid.columns_lg`, `grid.columns_xlg`, `grid.columns_max`, `grid.gutter`, `grid.gutter_condensed`, `grid.gutter_narrow`, `grid.margin_sm`, `grid.margin_md`, `grid.margin_lg`, `grid.margin_xlg`, `grid.margin_max`
 - **M3 `state`** (6 tokens): `state.hover_opacity`, `state.focus_opacity`, `state.pressed_opacity`, `state.dragged_opacity`, `state.disabled_content_opacity`, `state.disabled_container_opacity`. The `state` group declares `range: [0, 1]`; values outside that range are rejected.
