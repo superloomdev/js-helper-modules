@@ -65,8 +65,8 @@ describe('base template - profile identity', () => {
     assert.equal(profile.id, 'superloom-base');
   });
 
-  it('should export contract_version 2', () => {
-    assert.equal(profile.contract_version, 2);
+  it('should export contract_version 3', () => {
+    assert.equal(profile.contract_version, 3);
   });
 
   it('should have light and dark schemes', () => {

@@ -22,7 +22,7 @@ const built = Themer.buildTheme(profile.schemes.light, [], 'native');
 ## What this package is
 
 - **Data only**: no loader, no React, no side effects.
-- **Every contract key** (379 at contract version 2) has a value.
+- **Every contract key** (385 at contract version 3) has a value.
 - **Derived where possible**: colors from `rampStep`, type sets from `stepPairIncrement`, spacing from `miniUnit`.
 - **Literals where the engine cannot derive**: sixteen durations (integers from a geometric run 70 to 700), six springs (physics from Compose `StandardMotionTokens`), and the one hand-picked color `#0f62fe` for `interactive`/`focus` and their aliases.
 - **Regeneration**: `node scripts/generate.js` (dev only) must produce no diff.

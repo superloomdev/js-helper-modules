@@ -7,7 +7,7 @@ import dark from './data/dark.js';
 
 export default Object.freeze({
   id: 'superloom-base',
-  contract_version: 2,
+  contract_version: 3,
   schemes: {
     light: light,
     dark: dark

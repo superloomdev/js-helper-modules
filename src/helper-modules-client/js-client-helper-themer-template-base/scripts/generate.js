@@ -531,6 +531,20 @@ function buildTokens () {
       tokens[name] = 0;
       continue;
     }
+
+    // --- Stacking tokens (v3) ---
+    // Named surface order. Carbon publishes this exact scale as its z-index
+    // utility map; the same order is the base default so templates whose
+    // design system does not publish one inherit a defined answer.
+    if (group === 'stacking') {
+      const stackingMap = {
+        'stacking.dropdown': 9100, 'stacking.modal': 9000,
+        'stacking.header': 8000, 'stacking.overlay': 6000,
+        'stacking.floating': 6000
+      };
+      tokens[name] = stackingMap[name];
+      continue;
+    }
   }
 
   return tokens;

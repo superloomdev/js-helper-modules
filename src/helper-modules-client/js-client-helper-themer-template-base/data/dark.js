@@ -1882,7 +1882,12 @@ export default Object.freeze({
     'tint.level_02': 0,
     'tint.level_03': 0,
     'tint.level_04': 0,
-    'tint.level_05': 0
+    'tint.level_05': 0,
+    'stacking.dropdown': 9100,
+    'stacking.modal': 9000,
+    'stacking.header': 8000,
+    'stacking.overlay': 6000,
+    'stacking.floating': 6000
   },
   'meta': {
     'color.background': {
@@ -3023,6 +3028,21 @@ export default Object.freeze({
       'group': 'raw'
     },
     'tint.level_05': {
+      'group': 'raw'
+    },
+    'stacking.dropdown': {
+      'group': 'raw'
+    },
+    'stacking.modal': {
+      'group': 'raw'
+    },
+    'stacking.header': {
+      'group': 'raw'
+    },
+    'stacking.overlay': {
+      'group': 'raw'
+    },
+    'stacking.floating': {
       'group': 'raw'
     }
   }
