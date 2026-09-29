@@ -178,6 +178,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       const key = _Themer.resolveKey(state, template, layers, options);
       const cached = _Themer.getCache(state, key);
 
+      // Cache hit: return the earlier derivation untouched
       if (cached) {
         return cached;
       }
@@ -220,12 +221,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       const key = _Themer.emitKey(state, resolved, template, platform);
       const cached = _Themer.getCache(state, key);
 
+      // Cache hit: return the earlier projection untouched
       if (cached) {
         return cached;
       }
 
       // Project every token, collecting substitutions and losses as it goes
-      const result = _Themer.project(Parts, CONFIG, resolved, template, platform);
+      const result = _Themer.project(Lib, Parts, CONFIG, resolved, template, platform);
       _Themer.writeCache(state, CONFIG, key, result);
 
       return result;
@@ -309,7 +311,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
     @return {String[]} - Platform names
     *********************************************************************/
-    platforms: function () {
+    getPlatforms: function () {
 
       // Delegate to the emit part, which owns the platform tables
       return Parts.Emit.platforms();
@@ -326,7 +328,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     @return {Number} .evictions - Entries dropped to stay within capacity
     @return {Number} .size - Entries currently held
     *********************************************************************/
-    cacheStats: function () {
+    getCacheStats: function () {
 
       // Copy so a caller cannot mutate the live counters
       return {
@@ -415,6 +417,7 @@ const _Themer = {
   /********************************************************************
   Project every resolved token onto one platform.
 
+  @param {Object} Lib - Dependency container
   @param {Object} Parts - Pure parts
   @param {Object} CONFIG - Merged config for this instance
   @param {Object} resolved - Output of resolve
@@ -423,7 +426,7 @@ const _Themer = {
 
   @return {Object} - Emitted result with its two reports
   *********************************************************************/
-  project: function (Parts, CONFIG, resolved, template, platform) {
+  project: function (Lib, Parts, CONFIG, resolved, template, platform) {
 
     // The template's own base size wins, so one template can restate the root
     const scales = resolved.scales || {};
@@ -439,7 +442,7 @@ const _Themer = {
     const names = Object.keys(resolved.tokens);
 
     for (let i = 0; i < names.length; i++) {
-      _Themer.projectOne(Parts, names[i], resolved, meta, platform, supported, base_font_size, out, substituted, lossy);
+      _Themer.projectOne(Lib, Parts, names[i], resolved, meta, platform, supported, base_font_size, out, substituted, lossy);
     }
 
     return {
@@ -455,6 +458,7 @@ const _Themer = {
   Project one token, recording a substitution when the platform
   cannot carry it at all.
 
+  @param {Object} Lib - Dependency container
   @param {Object} Parts - Pure parts
   @param {String} name - Token name
   @param {Object} resolved - Output of resolve
@@ -468,7 +472,7 @@ const _Themer = {
 
   @return {void}
   *********************************************************************/
-  projectOne: function (Parts, name, resolved, meta, platform, supported, base_font_size, out, substituted, lossy) {
+  projectOne: function (Lib, Parts, name, resolved, meta, platform, supported, base_font_size, out, substituted, lossy) {
 
     // A token with no metadata passes through as a raw value
     const entry_meta = meta[name] || { group: 'raw' };
@@ -478,7 +482,7 @@ const _Themer = {
     // Unavailable here, so emit the declared fallback rather than omitting the
     // key. Omitting it would force every caller to guard against undefined,
     // and a value that vanishes with no record is exactly what this reports.
-    if (platforms.indexOf(platform) === -1) {
+    if (!Lib.Utils.inArray(platforms, platform)) {
       out[name] = entry_meta.fallback ? entry_meta.fallback[platform] : null;
 
       substituted.push({

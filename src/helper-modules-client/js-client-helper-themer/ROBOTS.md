@@ -45,8 +45,8 @@ emit(resolved, template, platform, options?)     -> { tokens, substituted, lossy
 validateTemplate(template)                       -> { success, errors }
 getContract()                                    -> Object
 validateContract(theme, options?)                -> { success, errors, warnings }
-platforms()                                      -> ['web', 'native']
-cacheStats()                                     -> { hits, misses, evictions, size }
+getPlatforms()                                   -> ['web', 'native']
+getCacheStats()                                  -> { hits, misses, evictions, size }
 clearCache()                                     -> undefined
 ```
 

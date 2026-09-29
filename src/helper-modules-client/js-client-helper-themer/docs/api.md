@@ -162,23 +162,23 @@ Structure and routes are `validateTemplate`'s job; this function checks names an
 
 ## Inspection
 
-### `platforms()`
+### `getPlatforms()`
 
 Lists the platforms this engine emits for.
 
 ```javascript
-Themer.platforms();
+Themer.getPlatforms();
 // ['web', 'native']
 ```
 
 Returns a copy, so a caller cannot mutate the engine's own list.
 
-### `cacheStats()`
+### `getCacheStats()`
 
 Reports this instance's cache counters.
 
 ```javascript
-Themer.cacheStats();
+Themer.getCacheStats();
 // { hits: 12, misses: 3, evictions: 0, size: 3 }
 ```
 

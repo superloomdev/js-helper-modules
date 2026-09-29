@@ -1,6 +1,9 @@
 # Test directory - not for production
 _test/
 
+# Engineering journal - not for production
+THOUGHTS.md
+
 # Dependencies
 node_modules/
 package-lock.json

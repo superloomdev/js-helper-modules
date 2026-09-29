@@ -273,7 +273,7 @@ const createInterface = function (Lib, ERRORS, Color) {
           continue;
         }
 
-        if (knownGroups.indexOf(entry.group) === -1) {
+        if (!Lib.Utils.inArray(knownGroups, entry.group)) {
           unknown.push(names[i] + ' (group: ' + entry.group + ')');
         }
 
@@ -399,7 +399,7 @@ const createInterface = function (Lib, ERRORS, Color) {
     validatePlatform: function (platform, supported) {
 
       // An unknown platform would otherwise return a token map with no emitters applied
-      if (!Lib.Utils.isString(platform) || supported.indexOf(platform) === -1) {
+      if (!Lib.Utils.isString(platform) || !Lib.Utils.inArray(supported, platform)) {
         _Validators.fail('platform', ERRORS.MUST_BE_PLATFORM);
       }
 
@@ -483,7 +483,7 @@ const createInterface = function (Lib, ERRORS, Color) {
         }
 
         // Unsupported tokens are warnings when supported is supplied
-        if (opts.supported && opts.supported.indexOf(name) === -1) {
+        if (opts.supported && !Lib.Utils.inArray(opts.supported, name)) {
           warnings.push(_Validators.contractEntry('CONTRACT_UNSUPPORTED_TOKEN', name));
         }
 
@@ -837,7 +837,7 @@ const createInterface = function (Lib, ERRORS, Color) {
       // enum: string in the token's values list
       if (type === 'enum') {
         const allowed = tokenDef.values || [];
-        if (!Lib.Utils.isString(value) || allowed.indexOf(value) === -1) {
+        if (!Lib.Utils.isString(value) || !Lib.Utils.inArray(allowed, value)) {
           return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
         }
         return undefined;

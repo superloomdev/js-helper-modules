@@ -26,8 +26,8 @@ describe('loader', () => {
     assert.equal(typeof instance.resolve, 'function');
     assert.equal(typeof instance.emit, 'function');
     assert.equal(typeof instance.validateTemplate, 'function');
-    assert.equal(typeof instance.platforms, 'function');
-    assert.equal(typeof instance.cacheStats, 'function');
+    assert.equal(typeof instance.getPlatforms, 'function');
+    assert.equal(typeof instance.getCacheStats, 'function');
     assert.equal(typeof instance.clearCache, 'function');
 
   });
@@ -80,8 +80,8 @@ describe('loader', () => {
 
     first.resolve(TEMPLATE, BASE_LAYER);
 
-    assert.equal(first.cacheStats().size, 1);
-    assert.equal(second.cacheStats().size, 0);
+    assert.equal(first.getCacheStats().size, 1);
+    assert.equal(second.getCacheStats().size, 0);
 
   });
 
@@ -669,26 +669,26 @@ describe('validateTemplate', () => {
 });
 
 
-describe('platforms', () => {
+describe('getPlatforms', () => {
 
   it('should list web and native when asked which platforms are supported', () => {
 
-    assert.deepEqual(Themer.platforms(), ['web', 'native']);
+    assert.deepEqual(Themer.getPlatforms(), ['web', 'native']);
 
   });
 
   it('should return a copy a caller cannot use to mutate the engine', () => {
 
-    Themer.platforms().push('android');
+    Themer.getPlatforms().push('android');
 
-    assert.deepEqual(Themer.platforms(), ['web', 'native']);
+    assert.deepEqual(Themer.getPlatforms(), ['web', 'native']);
 
   });
 
 });
 
 
-describe('cacheStats', () => {
+describe('getCacheStats', () => {
 
   it('should hit when the same layer content arrives in a fresh array', () => {
 
@@ -697,8 +697,8 @@ describe('cacheStats', () => {
     instance.resolve(TEMPLATE, [{ name: 'base' }]);
     instance.resolve(TEMPLATE, [{ name: 'base' }]);
 
-    assert.equal(instance.cacheStats().hits, 1);
-    assert.equal(instance.cacheStats().misses, 1);
+    assert.equal(instance.getCacheStats().hits, 1);
+    assert.equal(instance.getCacheStats().misses, 1);
 
   });
 
@@ -709,7 +709,7 @@ describe('cacheStats', () => {
     instance.resolve(TEMPLATE, [{ name: 'base' }]);
     instance.resolve(TEMPLATE, [{ name: 'other' }]);
 
-    assert.equal(instance.cacheStats().misses, 2);
+    assert.equal(instance.getCacheStats().misses, 2);
 
   });
 
@@ -741,7 +741,7 @@ describe('cacheStats', () => {
     instance.resolve(TEMPLATE, BASE_LAYER, { contrast: 'correct' });
     instance.resolve(TEMPLATE, BASE_LAYER, { contrast: 'report' });
 
-    assert.equal(instance.cacheStats().misses, 2);
+    assert.equal(instance.getCacheStats().misses, 2);
 
   });
 
@@ -753,8 +753,8 @@ describe('cacheStats', () => {
       instance.resolve(TEMPLATE, [{ name: 'layer' + i }]);
     }
 
-    assert.equal(instance.cacheStats().size, 3);
-    assert.equal(instance.cacheStats().evictions, 2);
+    assert.equal(instance.getCacheStats().size, 3);
+    assert.equal(instance.getCacheStats().evictions, 2);
 
   });
 
@@ -770,13 +770,13 @@ describe('cacheStats', () => {
     instance.resolve(TEMPLATE, [{ name: 'a' }]);
     instance.resolve(TEMPLATE, [{ name: 'd' }]);
 
-    const hits_before = instance.cacheStats().hits;
+    const hits_before = instance.getCacheStats().hits;
     instance.resolve(TEMPLATE, [{ name: 'a' }]);
-    assert.equal(instance.cacheStats().hits, hits_before + 1);
+    assert.equal(instance.getCacheStats().hits, hits_before + 1);
 
-    const misses_before = instance.cacheStats().misses;
+    const misses_before = instance.getCacheStats().misses;
     instance.resolve(TEMPLATE, [{ name: 'b' }]);
-    assert.equal(instance.cacheStats().misses, misses_before + 1);
+    assert.equal(instance.getCacheStats().misses, misses_before + 1);
 
   });
 
@@ -787,9 +787,9 @@ describe('cacheStats', () => {
     instance.resolve(TEMPLATE, BASE_LAYER);
     instance.resolve(TEMPLATE, BASE_LAYER);
 
-    assert.equal(instance.cacheStats().size, 0);
-    assert.equal(instance.cacheStats().hits, 0);
-    assert.equal(instance.cacheStats().misses, 2);
+    assert.equal(instance.getCacheStats().size, 0);
+    assert.equal(instance.getCacheStats().hits, 0);
+    assert.equal(instance.getCacheStats().misses, 2);
 
   });
 
@@ -817,7 +817,7 @@ describe('clearCache', () => {
     instance.resolve(TEMPLATE, BASE_LAYER);
     instance.clearCache();
 
-    assert.deepEqual(instance.cacheStats(), {
+    assert.deepEqual(instance.getCacheStats(), {
       hits: 0,
       misses: 0,
       evictions: 0,
@@ -833,14 +833,14 @@ describe('clearCache', () => {
     instance.resolve(TEMPLATE, BASE_LAYER);
     instance.resolve(TEMPLATE, BASE_LAYER);
 
-    assert.equal(instance.cacheStats().hits, 1);
+    assert.equal(instance.getCacheStats().hits, 1);
 
     instance.clearCache();
 
     instance.resolve(TEMPLATE, BASE_LAYER);
 
-    assert.equal(instance.cacheStats().hits, 0);
-    assert.equal(instance.cacheStats().misses, 1);
+    assert.equal(instance.getCacheStats().hits, 0);
+    assert.equal(instance.getCacheStats().misses, 1);
 
   });
 
