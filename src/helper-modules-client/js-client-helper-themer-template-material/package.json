@@ -20,7 +20,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "cd _test && npm install && npm test",
-    "prepare": "node scripts/postinstall.js"
+    "prepare": "node scripts/postinstall.js",
+    "generate": "node scripts/generate.js",
+    "sync-icon-map": "node scripts/sync-icon-map.js"
   },
   "peerDependencies": {},
   "devDependencies": {
@@ -32,7 +34,8 @@
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
     "helper-themer": "npm:@superloomdev/js-client-helper-themer@^1.0.0",
-    "helper-themer-template-base": "npm:@superloomdev/js-client-helper-themer-template-base@^1.0.0"
+    "helper-themer-template-default": "npm:@superloomdev/js-client-helper-themer-template-default@^1.0.0",
+    "@material-symbols/svg-400": "0.47.4"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

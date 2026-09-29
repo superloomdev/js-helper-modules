@@ -10,6 +10,6 @@ Peer dependencies: none.
 
 `absent` export: the list of Material upstream tokens deliberately not mapped, with one reason each.
 
-Regeneration: `node scripts/generate.js` (dev only) must produce no diff.
+Regeneration: `npm run generate` (dev only) must produce no diff; `npm run sync-icon-map` refreshes `scripts/icon-map.json` from `rnw-components-v2/data/icons.json`.
 
-Tests assert: the full contract key count (379), contract validity with `required` equal to every key, parity oracle values, expressive springs (D19), unit gate, engine build with two-layer shadows, brand layer, and byte-identical regeneration.
+Tests assert: the full contract key count (469 at contract version 4), contract validity with `required` equal to every key, parity oracle values, expressive springs (D19), Material's six `anatomy.*` values, 78 valid `icon.*` literals from Material Symbols (outlined) with provenance, unit gate, engine build with two-layer shadows, brand layer, and byte-identical regeneration.

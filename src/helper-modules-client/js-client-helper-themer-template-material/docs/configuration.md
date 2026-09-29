@@ -18,7 +18,7 @@ No `main` field. No peer dependencies. Dev dependencies pinned to `@material/web
 
 ## Generator
 
-`scripts/generate.js` reads the pinned Material packages, generates six color schemes via `SchemeTonalSpot` at contrast levels 0, 0.5, and 1.0, parses SCSS token files for type, motion, shape, state, and elevation values, maps through `data/mapping.js`, completes from the base template, and writes six scheme files to `data/`.
+`scripts/generate.js` reads the pinned Material packages, generates six color schemes via `SchemeTonalSpot` at contrast levels 0, 0.5, and 1.0, parses SCSS token files for type, motion, shape, state, and elevation values, maps through `data/mapping.js`, completes from the default template, and writes six scheme files to `data/`.
 
 Run: `node scripts/generate.js [output-dir]`
 

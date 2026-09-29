@@ -3,10 +3,10 @@
 // Reads pinned @material packages, generates six color schemes via
 // material-color-utilities, parses SCSS token files for type, motion,
 // shape, state, and elevation values, maps them through data/mapping.js
-// to Superloom contract keys, completes from the base template, and
+// to Superloom contract keys, completes from the default template, and
 // writes six scheme data files.
 //
-// Provenance: captures the base package version and distribution shasum,
+// Provenance: captures the default package version and distribution shasum,
 // verifies installed/registry shasum match before writing, and records
 // the provenance in every generated scheme.
 //
@@ -21,8 +21,9 @@ import { SchemeTonalSpot, Hct, hexFromArgb } from '@material/material-color-util
 import utilsLoader from 'helper-utils';
 import debugLoader from 'helper-debug';
 import themerLoader from 'helper-themer';
-import baseProfile from 'helper-themer-template-base';
+import defaultProfile from 'helper-themer-template-default';
 import mapping from '../data/mapping.js';
+import buildMaterialIcons from './icons-material.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
@@ -30,15 +31,15 @@ const outDir = process.argv[2] || resolve(moduleRoot, 'data');
 const scssDir = resolve(moduleRoot, 'node_modules/@material/web/tokens/versions/v0_192');
 
 // --- Provenance capture ---------------------------------------------------
-const basePkgJson = JSON.parse(
-  readFileSync(resolve(moduleRoot, 'node_modules/helper-themer-template-base/package.json'), 'utf8')
+const defaultPkgJson = JSON.parse(
+  readFileSync(resolve(moduleRoot, 'node_modules/helper-themer-template-default/package.json'), 'utf8')
 );
-const baseVersion = basePkgJson.version;
-const baseDir = resolve(moduleRoot, 'node_modules/helper-themer-template-base');
+const defaultVersion = defaultPkgJson.version;
+const defaultDir = resolve(moduleRoot, 'node_modules/helper-themer-template-default');
 
-// Step 1: Compute installed base shasum via npm pack --dry-run from the installed directory
+// Step 1: Compute installed default shasum via npm pack --dry-run from the installed directory
 const packOutput = execSync('npm pack --dry-run 2>&1', {
-  cwd: baseDir,
+  cwd: defaultDir,
   encoding: 'utf8',
   stdio: 'pipe'
 });
@@ -47,24 +48,48 @@ const installedShasum = installedShasumMatch ? installedShasumMatch[1] : null;
 
 // Step 2: Query registry shasum
 const registryShasum = execSync(
-  'npm view @superloomdev/js-client-helper-themer-template-base@' + baseVersion + ' dist.shasum',
+  'npm view @superloomdev/js-client-helper-themer-template-default@' + defaultVersion + ' dist.shasum',
   { encoding: 'utf8', stdio: 'pipe' }
 ).trim();
 
 // Step 3: Pre-write guard - refuse to write on mismatch
 if (installedShasum !== registryShasum) {
   throw new Error(
-    'Base shasum mismatch: installed=' + installedShasum +
+    'Default shasum mismatch: installed=' + installedShasum +
     ' registry=' + registryShasum +
-    '. Refusing to generate from a base whose installed and registry shasums differ.'
+    '. Refusing to generate from a default template whose installed and registry shasums differ.'
   );
 }
 
+// --- Icons (v4) -----------------------------------------------------------
+// Material Symbols, outlined style, named by the committed snapshot
+// scripts/icon-map.json (see scripts/sync-icon-map.js).
+const iconMap = JSON.parse(readFileSync(resolve(here, 'icon-map.json'), 'utf8'));
+const materialIcons = buildMaterialIcons(iconMap.icons);
+const ICONS = materialIcons.tokens;
+
 const provenance = Object.freeze({
-  base_version: baseVersion,
-  base_shasum: installedShasum,
-  generator_schema: 'v1'
+  default_version: defaultVersion,
+  default_shasum: installedShasum,
+  generator_schema: 'v2',
+  icons: Object.freeze({
+    package: '@material-symbols/svg-400',
+    version: materialIcons.version,
+    style: materialIcons.style,
+    map_source: iconMap.source,
+    map_sha256: iconMap.source_sha256
+  })
 });
+
+// --- Anatomy (v4): Material's shape choices --------------------------------
+const ANATOMY = {
+  'anatomy.label': 'floating',
+  'anatomy.switch_handle': 'grows',
+  'anatomy.status_marker': 'plain',
+  'anatomy.dialog_actions': 'trailing',
+  'anatomy.caret': 'hidden',
+  'anatomy.slider_handle': 'bar'
+};
 
 // --- Engine setup ---------------------------------------------------------
 const Lib = {};
@@ -413,23 +438,33 @@ function buildTokens (schemeName) {
     tokens[sKey] = value;
   }
 
+  // Anatomy enums (v4)
+  for (const [sKey, value] of Object.entries(ANATOMY)) {
+    tokens[sKey] = value;
+  }
+
+  // Icon literals (v4)
+  for (const [sKey, value] of Object.entries(ICONS)) {
+    tokens[sKey] = value;
+  }
+
   return tokens;
 }
 
-// --- Complete from base ---------------------------------------------------
-function completeFromBase (tokens) {
-  const fromBase = [];
-  const baseLight = baseProfile.schemes.light;
+// --- Complete from default template -------------------------------------
+function completeFromDefault (tokens) {
+  const fromDefault = [];
+  const defaultLight = defaultProfile.schemes.light;
 
   for (const key of contractKeys) {
     if (!(key in tokens)) {
-      tokens[key] = baseLight.tokens[key];
-      fromBase.push(key);
+      tokens[key] = defaultLight.tokens[key];
+      fromDefault.push(key);
     }
   }
 
-  fromBase.sort();
-  return fromBase;
+  fromDefault.sort();
+  return fromDefault;
 }
 
 // --- Serialize with single quotes ----------------------------------------
@@ -441,7 +476,7 @@ function serialize (obj, indent) {
 function buildScheme (schemeName) {
   const polarity = SCHEMES[schemeName].polarity;
   const tokens = buildTokens(schemeName);
-  const fromBase = completeFromBase(tokens);
+  const fromDefault = completeFromDefault(tokens);
 
   return {
     polarity: polarity,
@@ -452,7 +487,7 @@ function buildScheme (schemeName) {
     },
     tokens: tokens,
     meta: meta,
-    from_base: fromBase,
+    from_default: fromDefault,
     provenance: provenance
   };
 }
@@ -493,7 +528,14 @@ for (const schemeName of SCHEME_NAMES) {
     }
   }
 
-  console.log(schemeName + ': ' + keyCount + ' tokens, ' + scheme.from_base.length + ' from base');
+  // Every anatomy and icon token is Material's own, never completed from the default template
+  for (const key of scheme.from_default) {
+    if (key.indexOf('anatomy.') === 0 || key.indexOf('icon.') === 0) {
+      throw new Error(schemeName + ' completed ' + key + ' from the default template');
+    }
+  }
+
+  console.log(schemeName + ': ' + keyCount + ' tokens, ' + scheme.from_default.length + ' from default template, ' + Object.keys(ICONS).length + ' icons');
 }
 
 // --- Write files ----------------------------------------------------------

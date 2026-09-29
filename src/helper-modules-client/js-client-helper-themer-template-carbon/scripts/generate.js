@@ -1,11 +1,11 @@
 // Info: Generator script for the Carbon reference template.
 //
 // Reads pinned @carbon packages, converts names and values per the plan,
-// completes missing keys from the Superloom base template, and writes
+// completes missing keys from the Superloom default template, and writes
 // data/white.js, data/g10.js, data/g90.js, data/g100.js.
 //
 // Run: node scripts/generate.js [output-dir]
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,7 +20,8 @@ import * as carbonLayout from '@carbon/layout';
 import utilsLoader from 'helper-utils';
 import debugLoader from 'helper-debug';
 import themerLoader from 'helper-themer';
-import baseProfile from 'helper-themer-template-base';
+import defaultProfile from 'helper-themer-template-default';
+import buildCarbonIcons from './icons-carbon.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
@@ -34,6 +35,31 @@ const Themer = themerLoader(Lib, {});
 const contract = Themer.getContract();
 const contractKeys = Object.keys(contract.tokens);
 const meta = contract.meta;
+
+// --- Icons (v4) -----------------------------------------------------------
+// Carbon's own glyphs from the pinned @carbon/icons package, named by the
+// committed snapshot scripts/icon-map.json (see scripts/sync-icon-map.js).
+const iconMap = JSON.parse(readFileSync(resolve(here, 'icon-map.json'), 'utf8'));
+const carbonIcons = buildCarbonIcons(iconMap.icons);
+const ICONS = carbonIcons.tokens;
+const PROVENANCE = {
+  icons: {
+    package: '@carbon/icons',
+    version: carbonIcons.version,
+    map_source: iconMap.source,
+    map_sha256: iconMap.source_sha256
+  }
+};
+
+// --- Anatomy (v4): Carbon's shape choices ----------------------------------
+const ANATOMY = {
+  'anatomy.label': 'above',
+  'anatomy.switch_handle': 'fixed',
+  'anatomy.status_marker': 'bar_icon',
+  'anatomy.dialog_actions': 'stretched',
+  'anatomy.caret': 'shown',
+  'anatomy.slider_handle': 'round'
+};
 
 // --- Name conversion: Carbon camelCase -> Superloom snake_case -----------
 function toSnake (carbonName) {
@@ -380,23 +406,33 @@ function buildTokens (schemeName) {
     tokens[sKey] = value;
   }
 
+  // Anatomy enums (v4)
+  for (const [sKey, value] of Object.entries(ANATOMY)) {
+    tokens[sKey] = value;
+  }
+
+  // Icon literals (v4)
+  for (const [sKey, value] of Object.entries(ICONS)) {
+    tokens[sKey] = value;
+  }
+
   return tokens;
 }
 
-// --- Complete from base ---------------------------------------------------
-function completeFromBase (tokens) {
-  const fromBase = [];
-  const baseLight = baseProfile.schemes.light;
+// --- Complete from default template -------------------------------------
+function completeFromDefault (tokens) {
+  const fromDefault = [];
+  const defaultLight = defaultProfile.schemes.light;
 
   for (const key of contractKeys) {
     if (!(key in tokens)) {
-      tokens[key] = baseLight.tokens[key];
-      fromBase.push(key);
+      tokens[key] = defaultLight.tokens[key];
+      fromDefault.push(key);
     }
   }
 
-  fromBase.sort();
-  return fromBase;
+  fromDefault.sort();
+  return fromDefault;
 }
 
 // --- Serialize with single quotes ----------------------------------------
@@ -408,14 +444,15 @@ function serialize (obj, indent) {
 function buildScheme (schemeName) {
   const polarity = SCHEME_POLARITY[schemeName];
   const tokens = buildTokens(schemeName);
-  const fromBase = completeFromBase(tokens);
+  const fromDefault = completeFromDefault(tokens);
 
   return {
     polarity: polarity,
     scales: { base_font_size: 16 },
     tokens: tokens,
     meta: meta,
-    from_base: fromBase
+    from_default: fromDefault,
+    provenance: PROVENANCE
   };
 }
 
@@ -455,7 +492,14 @@ for (const schemeName of SCHEME_NAMES) {
     throw new Error(schemeName + ' has ' + tagKeys.length + ' tag tokens, expected 40');
   }
 
-  console.log(schemeName + ': ' + keyCount + ' tokens, ' + scheme.from_base.length + ' from base, ' + tagKeys.length + ' tags');
+  // Every anatomy and icon token is Carbon's own, never completed from the default template
+  for (const key of scheme.from_default) {
+    if (key.indexOf('anatomy.') === 0 || key.indexOf('icon.') === 0) {
+      throw new Error(schemeName + ' completed ' + key + ' from the default template');
+    }
+  }
+
+  console.log(schemeName + ': ' + keyCount + ' tokens, ' + scheme.from_default.length + ' from default template, ' + tagKeys.length + ' tags, ' + Object.keys(ICONS).length + ' icons');
 }
 
 // --- Write files ----------------------------------------------------------

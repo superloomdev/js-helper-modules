@@ -1,9 +1,11 @@
 @superloomdev/js-client-helper-themer-template-material
 
 This package contains design token values derived from Material Design 3 by Google LLC,
-as published in @material/web and @material/material-color-utilities under the
+as published in @material/web and @material/material-color-utilities, and icon path data
+derived from Material Symbols as published in @material-symbols/svg-400, all under the
 Apache License, Version 2.0.
 https://github.com/material-components/material-web
+https://github.com/google/material-design-icons
 
 Copyright Google LLC
 
