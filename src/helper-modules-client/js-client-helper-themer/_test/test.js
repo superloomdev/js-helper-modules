@@ -115,6 +115,14 @@ describe('resolve', () => {
 
   });
 
+  it('should throw when a rampStep rule is used by a template with no ramp', () => {
+
+    const rampless = Object.assign({}, TEMPLATE, { ramp: undefined });
+
+    assert.throws(() => Themer.resolve(rampless, BASE_LAYER), /template\.ramp must be a non-empty array/);
+
+  });
+
   it('should read the named palette step when the rule is hue', () => {
 
     const result = Themer.resolve(TEMPLATE, BASE_LAYER);

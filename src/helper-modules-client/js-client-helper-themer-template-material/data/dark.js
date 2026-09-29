@@ -11,6 +11,20 @@ export default Object.freeze({
       'base': 12
     }
   },
+  'ramp': [
+    '#fffbff',
+    '#f8f2fa',
+    '#e6e0e9',
+    '#cac5cc',
+    '#aea9b1',
+    '#938f96',
+    '#79767d',
+    '#605d64',
+    '#48464c',
+    '#322f35',
+    '#1d1b20'
+  ],
+  'palette': {},
   'tokens': {
     'color.interactive': '#cfbdfe',
     'color.text_on_color': '#690005',

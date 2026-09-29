@@ -1017,6 +1017,11 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
     *********************************************************************/
     rampStep: function (args, context) {
 
+      // A ramp-relative rule with no ramp would resolve to nothing; fail loudly instead
+      if (Lib.Utils.isEmptyArray(context.ramp)) {
+        Validators.fail('template.ramp', ERRORS.MUST_BE_NON_EMPTY_ARRAY);
+      }
+
       // Walk away from the background, whichever direction that is for this polarity
       const direction = (context.polarity === 'light') ? 1 : -1;
       const target = context.anchor_index + (args[0] * direction);

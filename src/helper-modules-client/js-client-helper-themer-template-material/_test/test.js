@@ -523,3 +523,33 @@ describe('material template - explicit type roles', () => {
   });
 
 });
+
+
+describe('material template - every scheme resolves every token', () => {
+
+  const HEX = /^#[0-9a-f]{6}$/;
+
+  for (const schemeName of Object.keys(profile.schemes)) {
+
+    it('should carry an eleven-step neutral ramp of lowercase hex colors in ' + schemeName, () => {
+      const ramp = profile.schemes[schemeName].ramp;
+      assert.equal(ramp.length, 11);
+      for (const step of ramp) {
+        assert.match(step, HEX);
+      }
+      assert.equal(new Set(ramp).size, 11, 'ramp steps are distinct');
+    });
+
+    for (const platform of ['native', 'web']) {
+      it('should emit a value for all 469 tokens of ' + schemeName + ' on ' + platform, () => {
+        const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
+        const names = Object.keys(built.tokens);
+        assert.equal(names.length, 469);
+        const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
+        assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
+      });
+    }
+
+  }
+
+});

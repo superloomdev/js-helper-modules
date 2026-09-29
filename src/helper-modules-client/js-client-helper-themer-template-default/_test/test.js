@@ -416,3 +416,20 @@ describe('default template - regeneration test', () => {
   });
 
 });
+
+
+describe('default template - every scheme resolves every token', () => {
+
+  for (const schemeName of Object.keys(profile.schemes)) {
+    for (const platform of ['native', 'web']) {
+      it('should emit a value for all 469 tokens of ' + schemeName + ' on ' + platform, () => {
+        const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
+        const names = Object.keys(built.tokens);
+        assert.equal(names.length, 469);
+        const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
+        assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
+      });
+    }
+  }
+
+});

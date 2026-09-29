@@ -187,6 +187,19 @@ const SCHEMES = {
   dark_high_contrast: { scheme: new SchemeTonalSpot(seed, true, 1.0), polarity: 'dark' }
 };
 
+// --- Neutral ramp ---------------------------------------------------------
+// Tokens the default template completes with `rampStep` rules need a ramp
+// to step along. Each scheme carries eleven steps of its own neutral tonal
+// palette, light end first (the engine anchors by polarity), so completed
+// roles read Material's neutrals, not the default template's.
+const RAMP_TONES = [99, 96, 90, 80, 70, 60, 50, 40, 30, 20, 10];
+
+function neutralRamp (scheme) {
+  return RAMP_TONES.map(function (tone) {
+    return hexFromArgb(scheme.neutralPalette.tone(tone));
+  });
+}
+
 // Material color property name -> camelCase for scheme property access
 function materialToCamel (materialName) {
   return materialName.replace(/_([a-z])/g, function (match, c) {
@@ -452,13 +465,13 @@ function buildTokens (schemeName) {
 }
 
 // --- Complete from default template -------------------------------------
-function completeFromDefault (tokens) {
+function completeFromDefault (tokens, polarity) {
   const fromDefault = [];
-  const defaultLight = defaultProfile.schemes.light;
+  const defaultScheme = defaultProfile.schemes[polarity];
 
   for (const key of contractKeys) {
     if (!(key in tokens)) {
-      tokens[key] = defaultLight.tokens[key];
+      tokens[key] = defaultScheme.tokens[key];
       fromDefault.push(key);
     }
   }
@@ -476,7 +489,7 @@ function serialize (obj, indent) {
 function buildScheme (schemeName) {
   const polarity = SCHEMES[schemeName].polarity;
   const tokens = buildTokens(schemeName);
-  const fromDefault = completeFromDefault(tokens);
+  const fromDefault = completeFromDefault(tokens, polarity);
 
   return {
     polarity: polarity,
@@ -485,6 +498,8 @@ function buildScheme (schemeName) {
       miniUnit: { base: 2 },
       stepPairIncrement: { base: 12 }
     },
+    ramp: neutralRamp(SCHEMES[schemeName].scheme),
+    palette: {},
     tokens: tokens,
     meta: meta,
     from_default: fromDefault,
