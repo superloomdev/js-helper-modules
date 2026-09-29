@@ -23,9 +23,9 @@ Each scheme (`light`, `dark`, `light_medium_contrast`, `light_high_contrast`, `d
 |---|---|---|
 | `polarity` | string | `'light'` or `'dark'` |
 | `scales` | object | `{ base_font_size, miniUnit, stepPairIncrement }` |
-| `tokens` | object | 379 contract tokens, unit-free |
+| `tokens` | object | 469 contract tokens, unit-free (contract version 4) |
 | `meta` | object | Contract metadata |
-| `from_base` | string[] | Sorted keys completed from the base template |
+| `from_default` | string[] | Sorted keys completed from the default template |
 
 ## Reference metadata
 
@@ -34,7 +34,8 @@ profile.reference = {
   material_web: '@material/web@2.5.0',
   material_color_utilities: '@material/material-color-utilities@0.4.0',
   token_set_version: 'v0_192',
-  compose_material3_motion_tokens: 'ExpressiveMotionTokens.kt, androidx-main, read 2026-09-08'
+  compose_material3_motion_tokens: 'ExpressiveMotionTokens.kt, androidx-main, read 2026-09-08',
+  icons: '@material-symbols/svg-400@0.47.4 (outlined)'
 };
 ```
 

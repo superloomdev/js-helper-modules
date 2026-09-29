@@ -10,8 +10,8 @@ None.
 
 ## Export shape
 
-`schemes.<name>` is `{ polarity, scales, tokens, meta, from_base }`; `from_base` is a sorted array of key strings.
+`schemes.<name>` is `{ polarity, scales, tokens, meta, from_default, provenance }`; `from_default` is a sorted array of key strings and never contains a `stacking.*`, `anatomy.*` or `icon.*` key; `provenance.icons` is `{ package, version, map_source, map_sha256 }`.
 
 ## Regeneration
 
-`node scripts/generate.js` (dev only) must produce no diff. Tests assert the full contract key count per scheme, contract validity, oracle parity, `from_base` correctness, unit gate, engine build.
+`npm run generate` (dev only) must produce no diff; `npm run sync-icon-map` refreshes `scripts/icon-map.json` from `rnw-components-v2/data/icons.json`. Tests assert the full contract key count per scheme (469 at contract version 4), contract validity, oracle parity, `from_default` correctness, Carbon's six `anatomy.*` values, 78 valid `icon.*` literals from `@carbon/icons` with size variants and provenance, unit gate, engine build.

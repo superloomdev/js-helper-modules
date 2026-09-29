@@ -2,7 +2,7 @@
 //
 // Verifies the Carbon reference template: profile identity, scheme count,
 // contract validity, parity oracle values, unit gate, regeneration,
-// engine build, brand layer, and from_base correctness.
+// engine build, brand layer, and from_default correctness.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 import loader from './loader.js';
 import themerLoader from 'helper-themer';
-import baseProfile from 'helper-themer-template-base';
+import defaultProfile from 'helper-themer-template-default';
 import profile from 'helper-themer-template-carbon';
 import oracle from './fixtures/parity-oracle.json' with { type: 'json' };
 
@@ -31,8 +31,8 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.id, 'carbon-v11');
   });
 
-  it('should export contract_version 3', () => {
-    assert.equal(profile.contract_version, 3);
+  it('should export contract_version 4', () => {
+    assert.equal(profile.contract_version, 4);
   });
 
   it('should export reference with Carbon package versions', () => {
@@ -40,6 +40,7 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.reference.type, '@carbon/type@11.66.0');
     assert.equal(profile.reference.motion, '@carbon/motion@11.51.0');
     assert.equal(profile.reference.layout, '@carbon/layout@11.58.0');
+    assert.equal(profile.reference.icons, '@carbon/icons@11.89.0');
   });
 
   it('should have four schemes', () => {
@@ -184,41 +185,127 @@ describe('carbon template - unit gate', () => {
 });
 
 
-describe('carbon template - from_base correctness', () => {
+describe('carbon template - from_default correctness', () => {
 
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
 
-    it('should have non-empty from_base in ' + schemeName, () => {
-      assert.ok(profile.schemes[schemeName].from_base.length,
-        schemeName + ' from_base is empty');
+    it('should have non-empty from_default in ' + schemeName, () => {
+      assert.ok(profile.schemes[schemeName].from_default.length,
+        schemeName + ' from_default is empty');
     });
 
-    it('should have every from_base key deepEqual the base value in ' + schemeName, () => {
-      const fromBase = profile.schemes[schemeName].from_base;
-      const baseScheme = baseProfile.schemes.light;
-      for (const key of fromBase) {
+    it('should have every from_default key deepEqual the default value in ' + schemeName, () => {
+      const fromDefault = profile.schemes[schemeName].from_default;
+      const defaultScheme = defaultProfile.schemes.light;
+      for (const key of fromDefault) {
         assert.deepEqual(profile.schemes[schemeName].tokens[key],
-          baseScheme.tokens[key],
-          schemeName + ' from_base key ' + key + ' does not match base');
+          defaultScheme.tokens[key],
+          schemeName + ' from_default key ' + key + ' does not match the default template');
       }
     });
 
-    it('should have sorted from_base in ' + schemeName, () => {
-      const fromBase = profile.schemes[schemeName].from_base;
-      const sorted = [...fromBase].sort();
-      assert.deepEqual(fromBase, sorted,
-        schemeName + ' from_base is not sorted');
+    it('should have sorted from_default in ' + schemeName, () => {
+      const fromDefault = profile.schemes[schemeName].from_default;
+      const sorted = [...fromDefault].sort();
+      assert.deepEqual(fromDefault, sorted,
+        schemeName + ' from_default is not sorted');
     });
 
-    it('should not list stacking tokens in from_base in ' + schemeName, () => {
-      const fromBase = profile.schemes[schemeName].from_base;
-      for (const key of fromBase) {
-        assert.ok(!key.startsWith('stacking.'),
-          schemeName + ' inherits ' + key + ' from base, expected explicit Carbon value');
+    it('should not list stacking, anatomy or icon tokens in from_default in ' + schemeName, () => {
+      const fromDefault = profile.schemes[schemeName].from_default;
+      for (const key of fromDefault) {
+        assert.ok(!key.startsWith('stacking.') && !key.startsWith('anatomy.') && !key.startsWith('icon.'),
+          schemeName + ' inherits ' + key + ' from the default template, expected explicit Carbon value');
       }
     });
 
   }
+
+});
+
+
+describe('carbon template - anatomy enums (v4)', () => {
+
+  const ANATOMY = {
+    'anatomy.label': 'above',
+    'anatomy.switch_handle': 'fixed',
+    'anatomy.status_marker': 'bar_icon',
+    'anatomy.dialog_actions': 'stretched',
+    'anatomy.caret': 'shown',
+    'anatomy.slider_handle': 'round'
+  };
+
+  for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+
+    it('should hold Carbon\'s shape choice for every anatomy enum in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      const actual = {};
+      for (const name of Object.keys(ANATOMY)) {
+        actual[name] = tokens[name];
+      }
+      assert.deepEqual(actual, ANATOMY);
+    });
+
+  }
+
+});
+
+
+describe('carbon template - icon literals (v4)', () => {
+
+  const iconKeys = contractKeys.filter(function (name) {
+    return contract.tokens[name].group === 'icon';
+  });
+  const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
+  const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
+
+  it('should carry 78 valid icon literals, identical across the four schemes', () => {
+    assert.equal(iconKeys.length, 78);
+    const subset = {};
+    for (const name of iconKeys) {
+      const literal = profile.schemes.white.tokens[name];
+      assert.equal(literal.icon, true, name + ' lacks the icon marker');
+      subset[name] = literal;
+      for (const schemeName of ['g10', 'g90', 'g100']) {
+        assert.deepEqual(profile.schemes[schemeName].tokens[name], literal, schemeName + ' ' + name);
+      }
+    }
+    assert.deepEqual(Themer.validateContract({ tokens: subset }, { required: iconKeys }).errors, []);
+  });
+
+  it('should keep the set\'s own 16, 20 and 24 pixel glyphs under sizes with their own viewBox', () => {
+    const close = profile.schemes.white.tokens['icon.close'];
+    assert.deepEqual(Object.keys(close.sizes), ['16', '20', '24']);
+    const arrow = profile.schemes.white.tokens['icon.arrow_right'];
+    assert.equal(arrow.sizes['16'].viewBox, '0 0 16 16');
+    const circle = profile.schemes.white.tokens['icon.circle_filled'];
+    assert.equal(circle.viewBox, '0 0 16 16');
+    assert.equal(circle.sizes, undefined);
+  });
+
+  it('should convert every element to a path and bake every transform', () => {
+    const iconValues = iconKeys.map(function (name) { return profile.schemes.white.tokens[name]; });
+    const serialized = JSON.stringify(iconValues);
+    assert.equal(serialized.indexOf('"transform"'), -1);
+    assert.equal(serialized.indexOf('switch'), -1);
+    assert.equal(serialized.indexOf('inner-path'), -1);
+    assert.equal(profile.schemes.white.tokens['icon.error_outline'].paths[0].d, 'M8.9996 10.5553L10.5553 8.9996L22.9997 21.444L21.444 22.9997Z');
+  });
+
+  it('should record icon provenance that matches the pinned package and the mapping snapshot', () => {
+    assert.equal(iconPkg.version, '11.89.0');
+    for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+      assert.deepEqual(profile.schemes[schemeName].provenance, {
+        icons: {
+          package: '@carbon/icons',
+          version: iconPkg.version,
+          map_source: iconMap.source,
+          map_sha256: iconMap.source_sha256
+        }
+      });
+    }
+    assert.deepEqual(Object.keys(iconMap.icons).map(function (name) { return 'icon.' + name; }), iconKeys);
+  });
 
 });
 

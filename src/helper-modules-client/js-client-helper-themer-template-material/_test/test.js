@@ -3,7 +3,7 @@
 // Verifies the Material 3 reference template: profile identity, scheme count,
 // contract validity, parity oracle values, expressive springs (D19), unit gate,
 // regeneration, engine build with two-layer shadows, brand layer, and
-// from_base correctness.
+// from_default correctness.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 import loader from './loader.js';
 import themerLoader from 'helper-themer';
-import baseProfile from 'helper-themer-template-base';
+import defaultProfile from 'helper-themer-template-default';
 import profile from 'helper-themer-template-material';
 import oracle from './fixtures/parity-oracle.json' with { type: 'json' };
 
@@ -48,8 +48,8 @@ describe('material template - profile identity', () => {
     assert.equal(profile.id, 'material-v0_192');
   });
 
-  it('should export contract_version 3', () => {
-    assert.equal(profile.contract_version, 3);
+  it('should export contract_version 4', () => {
+    assert.equal(profile.contract_version, 4);
   });
 
   it('should export reference with Material package versions', () => {
@@ -243,36 +243,36 @@ describe('material template - unit gate', () => {
 });
 
 
-describe('material template - from_base correctness', () => {
+describe('material template - from_default correctness', () => {
 
   for (const schemeName of SCHEME_NAMES) {
 
-    it('should have non-empty from_base in ' + schemeName, () => {
-      assert.ok(profile.schemes[schemeName].from_base.length,
-        schemeName + ' from_base is empty');
+    it('should have non-empty from_default in ' + schemeName, () => {
+      assert.ok(profile.schemes[schemeName].from_default.length,
+        schemeName + ' from_default is empty');
     });
 
-    it('should have every from_base key deepEqual the base value in ' + schemeName, () => {
-      const fromBase = profile.schemes[schemeName].from_base;
-      const baseScheme = baseProfile.schemes.light;
-      for (const key of fromBase) {
+    it('should have every from_default key deepEqual the default value in ' + schemeName, () => {
+      const fromDefault = profile.schemes[schemeName].from_default;
+      const defaultScheme = defaultProfile.schemes.light;
+      for (const key of fromDefault) {
         assert.deepEqual(profile.schemes[schemeName].tokens[key],
-          baseScheme.tokens[key],
-          schemeName + ' from_base key ' + key + ' does not match base');
+          defaultScheme.tokens[key],
+          schemeName + ' from_default key ' + key + ' does not match the default template');
       }
     });
 
-    it('should have sorted from_base in ' + schemeName, () => {
-      const fromBase = profile.schemes[schemeName].from_base;
-      const sorted = [...fromBase].sort();
-      assert.deepEqual(fromBase, sorted,
-        schemeName + ' from_base is not sorted');
+    it('should have sorted from_default in ' + schemeName, () => {
+      const fromDefault = profile.schemes[schemeName].from_default;
+      const sorted = [...fromDefault].sort();
+      assert.deepEqual(fromDefault, sorted,
+        schemeName + ' from_default is not sorted');
     });
 
-    it('should inherit all five stacking tokens from base in ' + schemeName, () => {
-      const fromBase = profile.schemes[schemeName].from_base;
+    it('should inherit all five stacking tokens from the default template in ' + schemeName, () => {
+      const fromDefault = profile.schemes[schemeName].from_default;
       for (const key of ['stacking.dropdown', 'stacking.modal', 'stacking.header', 'stacking.overlay', 'stacking.floating']) {
-        assert.ok(fromBase.includes(key),
+        assert.ok(fromDefault.includes(key),
           schemeName + ' missing stacking provenance ' + key);
       }
     });
@@ -357,13 +357,13 @@ describe('material template - regeneration test', () => {
 
 describe('material template - generation provenance', () => {
 
-  it('should declare provenance with base version, shasum, and schema in every scheme', () => {
+  it('should declare provenance with default template version, shasum, and schema in every scheme', () => {
     for (const name of SCHEME_NAMES) {
       const p = profile.schemes[name].provenance;
       assert.ok(p, name + ' missing provenance');
-      assert.equal(p.base_version, '1.0.0', name + ' base_version');
-      assert.ok(p.base_shasum, name + ' missing base_shasum');
-      assert.ok(p.generator_schema, name + ' missing generator_schema');
+      assert.equal(p.default_version, '1.0.0', name + ' default_version');
+      assert.ok(p.default_shasum, name + ' missing default_shasum');
+      assert.equal(p.generator_schema, 'v2', name + ' generator_schema');
     }
   });
 
@@ -378,18 +378,96 @@ describe('material template - generation provenance', () => {
     }
   });
 
-  it('should have base shasum matching the registry base shasum', () => {
+  it('should have default shasum matching the registry default shasum', () => {
     const registryShasum = execSync(
-      'npm view @superloomdev/js-client-helper-themer-template-base@1.0.0 dist.shasum',
+      'npm view @superloomdev/js-client-helper-themer-template-default@1.0.0 dist.shasum',
       { encoding: 'utf8', stdio: 'pipe' }
     ).trim();
     for (const name of SCHEME_NAMES) {
       assert.equal(
-        profile.schemes[name].provenance.base_shasum,
+        profile.schemes[name].provenance.default_shasum,
         registryShasum,
-        name + ' base_shasum does not match registry'
+        name + ' default_shasum does not match registry'
       );
     }
+  });
+
+});
+
+
+describe('material template - anatomy enums (v4)', () => {
+
+  const ANATOMY = {
+    'anatomy.label': 'floating',
+    'anatomy.switch_handle': 'grows',
+    'anatomy.status_marker': 'plain',
+    'anatomy.dialog_actions': 'trailing',
+    'anatomy.caret': 'hidden',
+    'anatomy.slider_handle': 'bar'
+  };
+
+  for (const schemeName of SCHEME_NAMES) {
+
+    it('should hold Material\'s shape choice for every anatomy enum in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      const actual = {};
+      for (const name of Object.keys(ANATOMY)) {
+        actual[name] = tokens[name];
+      }
+      assert.deepEqual(actual, ANATOMY);
+      for (const name of Object.keys(ANATOMY)) {
+        assert.equal(profile.schemes[schemeName].from_default.indexOf(name), -1, name + ' was completed from the default template');
+      }
+    });
+
+  }
+
+});
+
+
+describe('material template - icon literals (v4)', () => {
+
+  const iconKeys = contractKeys.filter(function (name) {
+    return contract.tokens[name].group === 'icon';
+  });
+  const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
+  const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@material-symbols', 'svg-400', 'package.json'), 'utf8'));
+
+  it('should carry 78 Material Symbols literals, every one valid, none completed from the default template', () => {
+    assert.equal(iconKeys.length, 78);
+    for (const schemeName of SCHEME_NAMES) {
+      const scheme = profile.schemes[schemeName];
+      const subset = {};
+      for (const name of iconKeys) {
+        assert.equal(scheme.tokens[name].icon, true, schemeName + ' ' + name + ' lacks the icon marker');
+        assert.equal(scheme.tokens[name].viewBox, '0 -960 960 960', schemeName + ' ' + name + ' viewBox');
+        assert.equal(scheme.tokens[name].paths.length, 1, schemeName + ' ' + name + ' has one path');
+        assert.equal(scheme.tokens[name].sizes, undefined, schemeName + ' ' + name + ' has no size variants');
+        assert.equal(scheme.from_default.indexOf(name), -1, name + ' was completed from the default template');
+        subset[name] = scheme.tokens[name];
+      }
+      assert.deepEqual(Themer.validateContract({ tokens: subset }, { required: iconKeys }).errors, []);
+    }
+  });
+
+  it('should draw a different glyph from the default template for every icon', () => {
+    for (const name of iconKeys) {
+      assert.notDeepEqual(profile.schemes.light.tokens[name], defaultProfile.schemes.light.tokens[name], name);
+    }
+  });
+
+  it('should record icon provenance that matches the pinned package and the mapping snapshot', () => {
+    assert.equal(iconPkg.version, '0.47.4');
+    for (const schemeName of SCHEME_NAMES) {
+      assert.deepEqual(profile.schemes[schemeName].provenance.icons, {
+        package: '@material-symbols/svg-400',
+        version: iconPkg.version,
+        style: 'outlined',
+        map_source: iconMap.source,
+        map_sha256: iconMap.source_sha256
+      });
+    }
+    assert.deepEqual(Object.keys(iconMap.icons).map(function (name) { return 'icon.' + name; }), iconKeys);
   });
 
 });
@@ -417,10 +495,10 @@ describe('material template - explicit type roles', () => {
 
   }
 
-  it('should have caption02 deepEqual to corrected base value (14px/18px)', () => {
+  it('should have caption02 deepEqual to corrected default value (14px/18px)', () => {
     assert.deepEqual(
       profile.schemes.light.tokens['type.caption02'],
-      baseProfile.schemes.light.tokens['type.caption02']
+      defaultProfile.schemes.light.tokens['type.caption02']
     );
     assert.equal(profile.schemes.light.tokens['type.caption02'].font_size, 14);
     assert.equal(profile.schemes.light.tokens['type.caption02'].line_height_px, 18);
