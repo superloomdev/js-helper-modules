@@ -1,4 +1,4 @@
-// Info: Test loader for js-client-helper-themer-template-base
+// Info: Test loader for js-client-helper-themer-template-default
 import utilsLoader from 'helper-utils';
 import debugLoader from 'helper-debug';
 

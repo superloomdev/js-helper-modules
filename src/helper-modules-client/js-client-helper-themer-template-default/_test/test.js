@@ -1,9 +1,9 @@
-// Info: Test suite for js-client-helper-themer-template-base.
+// Info: Test suite for js-client-helper-themer-template-default.
 //
-// Verifies the base template against the D19 rules: every contract key
+// Verifies the default template against the D19 rules: every contract key
 // present, contract validity, engine build, shadow emission, state/tint
-// ranges, spring literals, duration sequence, focus enum, unit gate,
-// and regeneration.
+// ranges, spring literals, duration sequence, focus enum, anatomy enums,
+// icon literals with provenance, unit gate, and regeneration.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 import loader from './loader.js';
 import themerLoader from 'helper-themer';
-import profile from 'helper-themer-template-base';
+import profile from 'helper-themer-template-default';
 
 const { Lib } = loader();
 const Themer = themerLoader(Lib, {});
@@ -59,14 +59,14 @@ const DURATION_SLOTS = [
 ];
 
 
-describe('base template - profile identity', () => {
+describe('default template - profile identity', () => {
 
-  it('should export id superloom-base', () => {
-    assert.equal(profile.id, 'superloom-base');
+  it('should export id superloom-default', () => {
+    assert.equal(profile.id, 'superloom-default');
   });
 
-  it('should export contract_version 3', () => {
-    assert.equal(profile.contract_version, 3);
+  it('should export contract_version 4', () => {
+    assert.equal(profile.contract_version, 4);
   });
 
   it('should have light and dark schemes', () => {
@@ -85,7 +85,7 @@ describe('base template - profile identity', () => {
 });
 
 
-describe('base template - key count', () => {
+describe('default template - key count', () => {
 
   it('should have every contract key in light scheme', () => {
     const keys = Object.keys(profile.schemes.light.tokens);
@@ -106,7 +106,7 @@ describe('base template - key count', () => {
 });
 
 
-describe('base template - contract validity', () => {
+describe('default template - contract validity', () => {
 
   it('should validate light scheme with no warnings', () => {
     const result = Themer.validateContract(
@@ -129,7 +129,7 @@ describe('base template - contract validity', () => {
 });
 
 
-describe('base template - engine build', () => {
+describe('default template - engine build', () => {
 
   it('should build light scheme on native with no violations', () => {
     const template = Object.assign({}, profile.schemes.light, { contrast_rules: CONTRAST_PAIRS });
@@ -160,7 +160,7 @@ describe('base template - engine build', () => {
 });
 
 
-describe('base template - shadow emission', () => {
+describe('default template - shadow emission', () => {
 
   it('should emit every shadow as a boxShadow string on native', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native');
@@ -176,7 +176,7 @@ describe('base template - shadow emission', () => {
 });
 
 
-describe('base template - state and tint ranges', () => {
+describe('default template - state and tint ranges', () => {
 
   it('should have every state.* as a number in 0..1', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native');
@@ -205,7 +205,7 @@ describe('base template - state and tint ranges', () => {
 });
 
 
-describe('base template - spring literals (D19)', () => {
+describe('default template - spring literals (D19)', () => {
 
   it('should deepEqual the six base spring objects', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native');
@@ -217,7 +217,7 @@ describe('base template - spring literals (D19)', () => {
 });
 
 
-describe('base template - durations (D19)', () => {
+describe('default template - durations (D19)', () => {
 
   it('should have duration_fast_01 = 70', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native');
@@ -241,7 +241,7 @@ describe('base template - durations (D19)', () => {
 });
 
 
-describe('base template - feedback focus', () => {
+describe('default template - feedback focus', () => {
 
   it('should have feedback.focus = outline', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native');
@@ -256,7 +256,108 @@ describe('base template - feedback focus', () => {
 });
 
 
-describe('base template - unit gate', () => {
+describe('default template - anatomy enums (v4)', () => {
+
+  const ANATOMY = {
+    'anatomy.label': 'above',
+    'anatomy.switch_handle': 'fixed',
+    'anatomy.status_marker': 'bar_icon',
+    'anatomy.dialog_actions': 'stretched',
+    'anatomy.caret': 'shown',
+    'anatomy.slider_handle': 'round'
+  };
+
+  for (const schemeName of ['light', 'dark']) {
+
+    it('should hold the plainest value of every anatomy enum in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      const actual = {};
+      for (const name of Object.keys(ANATOMY)) {
+        actual[name] = tokens[name];
+      }
+      assert.deepEqual(actual, ANATOMY);
+    });
+
+  }
+
+});
+
+
+describe('default template - icon literals (v4)', () => {
+
+  const iconKeys = contractKeys.filter(function (name) {
+    return contract.tokens[name].group === 'icon';
+  });
+  const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
+  const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
+
+  it('should carry 78 icon tokens, every one a valid icon literal, in both schemes', () => {
+    assert.equal(iconKeys.length, 78);
+    for (const schemeName of ['light', 'dark']) {
+      const tokens = profile.schemes[schemeName].tokens;
+      const subset = {};
+      for (const name of iconKeys) {
+        assert.equal(tokens[name].icon, true, schemeName + ' ' + name + ' lacks the icon marker');
+        subset[name] = tokens[name];
+      }
+      const result = Themer.validateContract({ tokens: subset }, { required: iconKeys });
+      assert.deepEqual(result.errors, []);
+    }
+  });
+
+  it('should hold identical icon values in light and dark', () => {
+    for (const name of iconKeys) {
+      assert.deepEqual(profile.schemes.dark.tokens[name], profile.schemes.light.tokens[name], name);
+    }
+  });
+
+  it('should keep the set\'s own 16, 20 and 24 pixel glyphs under sizes with their own viewBox', () => {
+    const close = profile.schemes.light.tokens['icon.close'];
+    assert.deepEqual(Object.keys(close.sizes), ['16', '20', '24']);
+    assert.equal(close.viewBox, '0 0 32 32');
+    const arrow = profile.schemes.light.tokens['icon.arrow_right'];
+    assert.deepEqual(Object.keys(arrow.sizes), ['16', '20', '24']);
+    assert.equal(arrow.sizes['16'].viewBox, '0 0 16 16');
+    assert.equal(arrow.sizes['24'].viewBox, '0 0 24 24');
+  });
+
+  it('should carry a 16-only glyph as the default with no sizes', () => {
+    const literal = profile.schemes.light.tokens['icon.circle_filled'];
+    assert.equal(literal.viewBox, '0 0 16 16');
+    assert.equal(literal.sizes, undefined);
+    assert.equal(literal.paths.length, 1);
+  });
+
+  it('should convert every element to a path and bake every transform', () => {
+    const iconValues = iconKeys.map(function (name) { return profile.schemes.light.tokens[name]; });
+    const serialized = JSON.stringify(iconValues);
+    assert.equal(serialized.indexOf('"transform"'), -1);
+    assert.equal(serialized.indexOf('switch'), -1);
+    assert.equal(serialized.indexOf('inner-path'), -1);
+    const outline = profile.schemes.light.tokens['icon.error_outline'];
+    assert.equal(outline.paths.length, 2);
+    assert.equal(outline.paths[0].d, 'M8.9996 10.5553L10.5553 8.9996L22.9997 21.444L21.444 22.9997Z');
+  });
+
+  it('should record icon provenance that matches the pinned package and the mapping snapshot', () => {
+    for (const schemeName of ['light', 'dark']) {
+      assert.deepEqual(profile.schemes[schemeName].provenance, {
+        icons: {
+          package: '@carbon/icons',
+          version: iconPkg.version,
+          map_source: iconMap.source,
+          map_sha256: iconMap.source_sha256
+        }
+      });
+    }
+    assert.equal(iconPkg.version, '11.89.0');
+    assert.deepEqual(Object.keys(iconMap.icons).map(function (name) { return 'icon.' + name; }), iconKeys);
+  });
+
+});
+
+
+describe('default template - unit gate', () => {
 
   it('should have no string matching (rem|em|px|vw|vh|%|ms)$ in any scheme', () => {
     const unitRegex = /(rem|em|px|vw|vh|%|ms)$/;
@@ -287,7 +388,7 @@ describe('base template - unit gate', () => {
 });
 
 
-describe('base template - regeneration test', () => {
+describe('default template - regeneration test', () => {
 
   it('should produce byte-identical files when run into a temp directory', () => {
 

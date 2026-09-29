@@ -1,4 +1,4 @@
-// Info: ESLint flat config for js-client-helper-themer-template-base. Delegates to the shared
+// Info: ESLint flat config for js-client-helper-themer-template-default. Delegates to the shared
 // @superloomdev/js-helper-eslint-config package via the `base` preset.
 // No per-module rule overrides are permitted - if the module cannot pass
 // the shared config, the finding goes to the retrospective, not to a local

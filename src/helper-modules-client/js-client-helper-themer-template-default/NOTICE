@@ -1,0 +1,11 @@
+@superloomdev/js-client-helper-themer-template-default
+
+This package redistributes icon path data derived from @carbon/icons, part of
+the IBM Carbon Design System, as published by IBM Corp. under the Apache
+License, Version 2.0.
+https://github.com/carbon-design-system/carbon
+
+Carbon Design System
+Copyright IBM Corp. 2016, 2026
+
+The Superloom package itself is licensed under the MIT License; see LICENSE.
