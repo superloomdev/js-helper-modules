@@ -93,7 +93,7 @@ A token entry takes one of nine shapes. The engine dispatches on shape, and noth
 | **Viewport** (v2) | Object with `viewport: true` | `{ viewport: true, vw: 2 }` |
 | **Spring** (v2) | Object with `spring: true` | `{ spring: true, stiffness: 700, damping: 47.62, mass: 1 }` |
 | **Segments** (v2) | Object with `segments: true` | `{ segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] }` |
-| **Icon** (v4) | Object with `icon: true` | `{ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M8 8h16v16H8z', fillRule: 'evenodd' }], sizes: { '16': [{ d: 'M4 4h8v8H4z' }] } }` |
+| **Icon** (v4) | Object with `icon: true` | `{ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M8 8h16v16H8z', fillRule: 'evenodd' }], sizes: { '16': { viewBox: '0 0 16 16', paths: [{ d: 'M4 4h8v8H4z' }] } } }` |
 
 ### Type set fields
 

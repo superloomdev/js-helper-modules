@@ -1191,8 +1191,9 @@ const createInterface = function (Lib, ERRORS, Color) {
     space-separated finite numbers with positive width and height.
     paths is a non-empty list of { d, fillRule? } with non-empty d and
     fillRule one of nonzero or evenodd. sizes, when present, maps
-    positive integer pixel sizes to path lists of the same shape.
-    No other keys are allowed at any level.
+    positive integer pixel sizes to variants { viewBox, paths } of the
+    same shape, each in its own coordinate space. No other keys are
+    allowed at any level.
 
     @param {*} value - Candidate icon literal
 
@@ -1213,7 +1214,7 @@ const createInterface = function (Lib, ERRORS, Color) {
         return false;
       }
 
-      // sizes: optional map of positive integer keys to path lists
+      // sizes: optional map of positive integer keys to { viewBox, paths } variants
       const keys = Object.keys(value);
       if (Object.prototype.hasOwnProperty.call(value, 'sizes')) {
         if (!Lib.Utils.isObject(value.sizes) || Array.isArray(value.sizes)) {
@@ -1221,7 +1222,12 @@ const createInterface = function (Lib, ERRORS, Color) {
         }
         const sizeKeys = Object.keys(value.sizes);
         for (let i = 0; i < sizeKeys.length; i++) {
-          if (!/^[1-9][0-9]*$/.test(sizeKeys[i]) || !_Validators.isValidIconPaths(value.sizes[sizeKeys[i]])) {
+          const variant = value.sizes[sizeKeys[i]];
+          if (!/^[1-9][0-9]*$/.test(sizeKeys[i]) || !Lib.Utils.isObject(variant) || Array.isArray(variant)) {
+            return false;
+          }
+          if (!_Validators.isValidViewBox(variant.viewBox) || !_Validators.isValidIconPaths(variant.paths)
+              || Object.keys(variant).length !== 2) {
             return false;
           }
         }

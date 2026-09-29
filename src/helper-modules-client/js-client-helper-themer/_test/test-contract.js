@@ -1274,7 +1274,7 @@ describe('contract v4 - icon group', () => {
       icon: true,
       viewBox: '0 -960 960 960',
       paths: [{ d: 'M0 0h1', fillRule: 'evenodd' }, { d: 'M1 1h1' }],
-      sizes: { '16': [{ d: 'M0 0h16' }], '20': [{ d: 'M0 0h20', fillRule: 'nonzero' }] }
+      sizes: { '16': { viewBox: '0 0 16 16', paths: [{ d: 'M0 0h16' }] }, '20': { viewBox: '0 0 32 32', paths: [{ d: 'M0 0h20', fillRule: 'nonzero' }] } }
     };
     assert.equal(check(value).success, true);
   });
@@ -1310,9 +1310,13 @@ describe('contract v4 - icon group', () => {
     assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1', stroke: 1 }] }).success, false);
   });
 
-  it('should reject a sizes map with a non-integer key or invalid paths', () => {
-    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { small: [{ d: 'M0 0h1' }] } }).success, false);
-    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { '16': [] } }).success, false);
+  it('should reject a sizes map with a non-integer key, a bare path list, a missing viewBox, or extra keys', () => {
+    const variant = { viewBox: '0 0 16 16', paths: [{ d: 'M0 0h1' }] };
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { small: variant } }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { '16': [{ d: 'M0 0h1' }] } }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { '16': { paths: [{ d: 'M0 0h1' }] } } }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { '16': { viewBox: '0 0 16 16', paths: [] } } }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { '16': { viewBox: '0 0 16 16', paths: [{ d: 'M0 0h1' }], width: 16 } } }).success, false);
     assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: [] }).success, false);
   });
 

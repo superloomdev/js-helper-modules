@@ -214,12 +214,12 @@ An icon is a value-tier literal (contract version 4): one `icon.*` token per sem
   viewBox: '0 0 32 32',
   paths: [{ d: 'M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z' }],
   sizes: {
-    '16': [{ d: 'M12 4.7l-.7-.7L8 7.3 4.7 4l-.7.7L7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z' }]
+    '16': { viewBox: '0 0 16 16', paths: [{ d: 'M12 4.7l-.7-.7L8 7.3 4.7 4l-.7.7L7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z' }] }
   }
 }
 ```
 
-`viewBox` is four space-separated finite numbers with positive width and height (`'0 -960 960 960'` is valid). `paths` is a non-empty list of `{ d, fillRule? }`; `d` is non-empty SVG path data and `fillRule` is `nonzero` or `evenodd`. `sizes` is optional and maps positive integer pixel sizes to path lists of the same shape, for sets that publish size-tuned glyphs. No other keys are allowed at any level, and no color: the component system supplies the fill from a color token. Both platforms emit the literal unchanged. A layer overrides one icon by supplying a new literal for its token; the template's other icons stand.
+`viewBox` is four space-separated finite numbers with positive width and height (`'0 -960 960 960'` is valid). `paths` is a non-empty list of `{ d, fillRule? }`; `d` is non-empty SVG path data and `fillRule` is `nonzero` or `evenodd`. `sizes` is optional and maps positive integer pixel sizes to variants `{ viewBox, paths }`, each in its own coordinate space, for sets that publish size-tuned glyphs. No other keys are allowed at any level, and no color: the component system supplies the fill from a color token. Both platforms emit the literal unchanged. A layer overrides one icon by supplying a new literal for its token; the template's other icons stand.
 
 ---
 

@@ -117,7 +117,7 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 { spring: true, stiffness: 700, damping: 47.62, mass: 1 }   // spring literal (v2)
 { segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] }  // segments literal (v2)
 { icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M8 8h16v16H8z' }],
-  sizes: { '16': [{ d: 'M4 4h8v8H4z' }] } }                 // icon literal (v4)
+  sizes: { '16': { viewBox: '0 0 16 16', paths: [{ d: 'M4 4h8v8H4z' }] } } }  // icon literal (v4)
 ```
 
 Type set and shadow require their boolean marker. Shadow must declare `layers`, an array of
