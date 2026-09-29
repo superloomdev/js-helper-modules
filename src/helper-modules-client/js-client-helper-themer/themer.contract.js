@@ -18,6 +18,11 @@
 //
 // Version 3 adds the stacking structure group so component systems read
 // named surface order from the theme instead of carrying a private table.
+//
+// Version 4 adds the anatomy structure group (six enum tokens for shape
+// choices design systems answer differently) and the icon value group (one
+// token per semantic glyph name, carrying SVG path data), so a template is
+// theme plus icons and a component system holds no glyph of its own.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -40,11 +45,13 @@ function buildContract () {
     size:       Object.freeze({ tier: 'value',     type: 'number',  emit: 'dimension' }),
     type:       Object.freeze({ tier: 'value',     type: 'typeSet', emit: 'typeSet' }),
     font:       Object.freeze({ tier: 'value',     type: 'font',    emit: 'raw' }),
+    icon:       Object.freeze({ tier: 'value',     type: 'icon',    emit: 'raw' }),
     shape:      Object.freeze({ tier: 'structure', type: 'number',  emit: 'dimension' }),
     border:     Object.freeze({ tier: 'structure', type: 'number',  emit: 'dimension' }),
     focus:      Object.freeze({ tier: 'structure', type: 'number',  emit: 'dimension' }),
     motion:     Object.freeze({ tier: 'structure', type: 'motion',  emit: 'duration' }),
     feedback:   Object.freeze({ tier: 'structure', type: 'enum',    emit: 'raw' }),
+    anatomy:    Object.freeze({ tier: 'structure', type: 'enum',    emit: 'raw' }),
     shadow:     Object.freeze({ tier: 'structure', type: 'shadow',  emit: 'shadow' }),
     breakpoint: Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
     grid:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
@@ -472,6 +479,16 @@ function buildContract () {
     'feedback.field': Object.freeze({ group: 'feedback', values: ['underline', 'outline'] }),
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (6 tokens) ~~~~~~~~~~~~~~~~~~~
+
+    'anatomy.label': Object.freeze({ group: 'anatomy', values: ['above', 'floating'] }),
+    'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
+    'anatomy.status_marker': Object.freeze({ group: 'anatomy', values: ['bar_icon', 'plain'] }),
+    'anatomy.dialog_actions': Object.freeze({ group: 'anatomy', values: ['stretched', 'trailing'] }),
+    'anatomy.caret': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.slider_handle': Object.freeze({ group: 'anatomy', values: ['round', 'bar'] }),
+
+
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'shadow.level_01': Object.freeze({ group: 'shadow' }),
@@ -532,7 +549,91 @@ function buildContract () {
     'stacking.modal': Object.freeze({ group: 'stacking' }),
     'stacking.header': Object.freeze({ group: 'stacking' }),
     'stacking.overlay': Object.freeze({ group: 'stacking' }),
-    'stacking.floating': Object.freeze({ group: 'stacking' })
+    'stacking.floating': Object.freeze({ group: 'stacking' }),
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ icon.* (78 tokens) ~~~~~~~~~~~~~~~~~~~
+    // One token per semantic glyph name, alphabetical. Values are icon
+    // literals: { icon: true, viewBox, paths, sizes? }.
+
+    'icon.accessibility': Object.freeze({ group: 'icon' }),
+    'icon.add': Object.freeze({ group: 'icon' }),
+    'icon.add_filled': Object.freeze({ group: 'icon' }),
+    'icon.ai_label': Object.freeze({ group: 'icon' }),
+    'icon.arrow_right': Object.freeze({ group: 'icon' }),
+    'icon.arrow_up': Object.freeze({ group: 'icon' }),
+    'icon.arrows_vertical': Object.freeze({ group: 'icon' }),
+    'icon.calendar': Object.freeze({ group: 'icon' }),
+    'icon.caret_down': Object.freeze({ group: 'icon' }),
+    'icon.caret_left': Object.freeze({ group: 'icon' }),
+    'icon.caret_right': Object.freeze({ group: 'icon' }),
+    'icon.caution': Object.freeze({ group: 'icon' }),
+    'icon.checkbox': Object.freeze({ group: 'icon' }),
+    'icon.checkbox_unchecked': Object.freeze({ group: 'icon' }),
+    'icon.checkmark': Object.freeze({ group: 'icon' }),
+    'icon.checkmark_filled': Object.freeze({ group: 'icon' }),
+    'icon.checkmark_outline': Object.freeze({ group: 'icon' }),
+    'icon.chevron_down': Object.freeze({ group: 'icon' }),
+    'icon.chevron_left': Object.freeze({ group: 'icon' }),
+    'icon.chevron_right': Object.freeze({ group: 'icon' }),
+    'icon.chevron_up': Object.freeze({ group: 'icon' }),
+    'icon.circle_dash': Object.freeze({ group: 'icon' }),
+    'icon.circle_filled': Object.freeze({ group: 'icon' }),
+    'icon.circle_solid': Object.freeze({ group: 'icon' }),
+    'icon.circle_stroke': Object.freeze({ group: 'icon' }),
+    'icon.close': Object.freeze({ group: 'icon' }),
+    'icon.copy': Object.freeze({ group: 'icon' }),
+    'icon.critical': Object.freeze({ group: 'icon' }),
+    'icon.critical_severity': Object.freeze({ group: 'icon' }),
+    'icon.cube': Object.freeze({ group: 'icon' }),
+    'icon.diamond_filled': Object.freeze({ group: 'icon' }),
+    'icon.document': Object.freeze({ group: 'icon' }),
+    'icon.download': Object.freeze({ group: 'icon' }),
+    'icon.edit': Object.freeze({ group: 'icon' }),
+    'icon.error': Object.freeze({ group: 'icon' }),
+    'icon.error_filled': Object.freeze({ group: 'icon' }),
+    'icon.error_outline': Object.freeze({ group: 'icon' }),
+    'icon.eye': Object.freeze({ group: 'icon' }),
+    'icon.eye_off': Object.freeze({ group: 'icon' }),
+    'icon.favorite': Object.freeze({ group: 'icon' }),
+    'icon.grid': Object.freeze({ group: 'icon' }),
+    'icon.group': Object.freeze({ group: 'icon' }),
+    'icon.home': Object.freeze({ group: 'icon' }),
+    'icon.in_progress': Object.freeze({ group: 'icon' }),
+    'icon.incomplete': Object.freeze({ group: 'icon' }),
+    'icon.info': Object.freeze({ group: 'icon' }),
+    'icon.information_filled': Object.freeze({ group: 'icon' }),
+    'icon.information_square_filled': Object.freeze({ group: 'icon' }),
+    'icon.layers': Object.freeze({ group: 'icon' }),
+    'icon.loading': Object.freeze({ group: 'icon' }),
+    'icon.low_severity': Object.freeze({ group: 'icon' }),
+    'icon.menu': Object.freeze({ group: 'icon' }),
+    'icon.notification': Object.freeze({ group: 'icon' }),
+    'icon.overflow': Object.freeze({ group: 'icon' }),
+    'icon.overflow_vertical': Object.freeze({ group: 'icon' }),
+    'icon.pending_filled': Object.freeze({ group: 'icon' }),
+    'icon.radio_button': Object.freeze({ group: 'icon' }),
+    'icon.radio_button_checked': Object.freeze({ group: 'icon' }),
+    'icon.search': Object.freeze({ group: 'icon' }),
+    'icon.settings': Object.freeze({ group: 'icon' }),
+    'icon.share': Object.freeze({ group: 'icon' }),
+    'icon.subtract': Object.freeze({ group: 'icon' }),
+    'icon.success': Object.freeze({ group: 'icon' }),
+    'icon.task_complete': Object.freeze({ group: 'icon' }),
+    'icon.time': Object.freeze({ group: 'icon' }),
+    'icon.tools': Object.freeze({ group: 'icon' }),
+    'icon.trash': Object.freeze({ group: 'icon' }),
+    'icon.undefined_filled': Object.freeze({ group: 'icon' }),
+    'icon.undo': Object.freeze({ group: 'icon' }),
+    'icon.unknown_filled': Object.freeze({ group: 'icon' }),
+    'icon.user': Object.freeze({ group: 'icon' }),
+    'icon.visibility': Object.freeze({ group: 'icon' }),
+    'icon.visibility_off': Object.freeze({ group: 'icon' }),
+    'icon.warning': Object.freeze({ group: 'icon' }),
+    'icon.warning_alt_filled': Object.freeze({ group: 'icon' }),
+    'icon.warning_alt_inverted_filled': Object.freeze({ group: 'icon' }),
+    'icon.warning_filled': Object.freeze({ group: 'icon' }),
+    'icon.warning_square_filled': Object.freeze({ group: 'icon' })
 
   });
 
@@ -549,7 +650,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 3,
+    version: 4,
     groups: groups,
     tokens: tokens,
     meta: Object.freeze(meta)

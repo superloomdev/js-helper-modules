@@ -60,8 +60,9 @@ vocabulary, the token contract, ships in this package as data and is read throug
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
   ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
-  Same reference on every call. Never throws. Version 3 has 385 tokens in 16 groups, including
-  `stacking.dropdown|modal|header|overlay|floating` as raw numeric structure tokens.
+  Same reference on every call. Never throws. Version 4 has 469 tokens in 18 groups: version 3's
+  385 (including `stacking.*` raw numeric structure tokens) plus the `anatomy` enum group (6) and
+  the `icon` value group (78 semantic glyph tokens carrying SVG path data).
 
 validateContract(theme, options) -> { success, errors, warnings } | async:no
   Checks theme.tokens against the contract. options.required (string[]) makes absence an error;
@@ -115,6 +116,8 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 { viewport: true, vw: 2 }                                    // viewport literal (v2)
 { spring: true, stiffness: 700, damping: 47.62, mass: 1 }   // spring literal (v2)
 { segments: true, curves: [[0.5, [0.05, 0.7, 0.1, 1]], [1, [0.3, 0, 0.8, 0.15]]] }  // segments literal (v2)
+{ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M8 8h16v16H8z' }],
+  sizes: { '16': [{ d: 'M4 4h8v8H4z' }] } }                 // icon literal (v4)
 ```
 
 Type set and shadow require their boolean marker. Shadow must declare `layers`, an array of

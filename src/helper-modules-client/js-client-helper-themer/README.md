@@ -113,9 +113,16 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
   theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
 
+### Contract version 4
+
+Version 4 adds two groups, so a template is theme plus icons and a component system holds no glyph or shape choice of its own:
+
+- **`anatomy`** (structure tier, `enum`, 6 tokens): `anatomy.label` (`above` | `floating`), `anatomy.switch_handle` (`fixed` | `grows`), `anatomy.status_marker` (`bar_icon` | `plain`), `anatomy.dialog_actions` (`stretched` | `trailing`), `anatomy.caret` (`shown` | `hidden`), `anatomy.slider_handle` (`round` | `bar`). Each names a shape choice design systems answer differently; a component system implements every listed value and the template picks one.
+- **`icon`** (value tier, `icon`, 78 tokens): one token per semantic glyph name, `icon.close`, `icon.chevron_down`, `icon.warning`, and so on, alphabetical. The value type is the **icon literal** `{ icon: true, viewBox, paths, sizes? }`: `viewBox` is four space-separated finite numbers with positive width and height; `paths` is a non-empty list of `{ d, fillRule? }` with non-empty `d` and `fillRule` one of `nonzero` or `evenodd`; `sizes`, when present, maps positive integer pixel sizes to path lists of the same shape. No other keys are allowed. Emit passes the literal through unchanged on both platforms; a brand layer overrides an icon like any other token. The contract registry now carries 469 tokens in 18 groups.
+
 ### Contract version 3
 
-Version 3 adds the `stacking` structure group: `stacking.dropdown`, `stacking.modal`, `stacking.header`, `stacking.overlay`, and `stacking.floating`. These raw numeric tokens let each design-system template publish its surface order without a component library carrying a private z-index table. The contract registry now carries 385 tokens in 16 groups.
+Version 3 adds the `stacking` structure group: `stacking.dropdown`, `stacking.modal`, `stacking.header`, `stacking.overlay`, and `stacking.floating`. These raw numeric tokens let each design-system template publish its surface order without a component library carrying a private z-index table. Version 3 carried 385 tokens in 16 groups.
 
 Version 2 added the approved Section 14.5 items:
 

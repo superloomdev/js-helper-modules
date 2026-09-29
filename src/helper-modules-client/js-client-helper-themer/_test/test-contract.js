@@ -33,6 +33,8 @@ function minimalTheme () {
       'focus.width': 2,
       'focus.offset': 0,
       'feedback.press': 'highlight',
+      'anatomy.label': 'above',
+      'icon.close': { icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z' }] },
       'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow}' }] },
       'breakpoint.sm': 320,
       'stacking.modal': 9000
@@ -43,20 +45,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 385 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 385);
+  it('should expose exactly 469 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 469);
   });
 
-  it('should expose exactly 16 groups', () => {
-    assert.equal(Object.keys(contract.groups).length, 16);
+  it('should expose exactly 18 groups', () => {
+    assert.equal(Object.keys(contract.groups).length, 18);
   });
 
-  it('should expose exactly 385 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 385);
+  it('should expose exactly 469 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 469);
   });
 
-  it('should report contract version 3', () => {
-    assert.equal(contract.version, 3);
+  it('should report contract version 4', () => {
+    assert.equal(contract.version, 4);
   });
 
   it('should be a frozen object', () => {
@@ -95,7 +97,9 @@ describe('contract registry - group counts', () => {
     grid: 13,
     state: 6,
     tint: 5,
-    stacking: 5
+    stacking: 5,
+    anatomy: 6,
+    icon: 78
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -218,7 +222,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 385 tokens and theme has all 385', () => {
+  it('should return success true when required is all 469 tokens and theme has all 469', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -243,6 +247,8 @@ describe('validateContract - happy path', () => {
         theme.tokens[name] = contract.tokens[name].values[0];
       } else if (group.type === 'shadow') {
         theme.tokens[name] = { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '#000000' }] };
+      } else if (group.type === 'icon') {
+        theme.tokens[name] = { icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h32v32H0z' }] };
       }
       if (def.emit === 'viewport') {
         theme.tokens[name] = { viewport: true, vw: 2 };
@@ -1110,8 +1116,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 3', () => {
-    assert.equal(contract.version, 3);
+  it('should report contract version 4', () => {
+    assert.equal(contract.version, 4);
   });
 
 });
@@ -1189,6 +1195,151 @@ describe('contract v3 - stacking group', () => {
       type: 'number',
       emit: 'raw'
     });
+  });
+
+});
+
+
+describe('contract v4 - anatomy group', () => {
+
+  it('should expose six enum structure tokens with their literal value lists', () => {
+    const anatomyTokens = tokenNames.filter(function (name) {
+      return contract.tokens[name].group === 'anatomy';
+    });
+
+    assert.deepEqual(anatomyTokens, [
+      'anatomy.label',
+      'anatomy.switch_handle',
+      'anatomy.status_marker',
+      'anatomy.dialog_actions',
+      'anatomy.caret',
+      'anatomy.slider_handle'
+    ]);
+    assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
+    assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
+    assert.deepEqual(contract.tokens['anatomy.switch_handle'].values, ['fixed', 'grows']);
+    assert.deepEqual(contract.tokens['anatomy.status_marker'].values, ['bar_icon', 'plain']);
+    assert.deepEqual(contract.tokens['anatomy.dialog_actions'].values, ['stretched', 'trailing']);
+    assert.deepEqual(contract.tokens['anatomy.caret'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.slider_handle'].values, ['round', 'bar']);
+  });
+
+  it('should accept every listed value and reject an unlisted one', () => {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.caret', 'anatomy.slider_handle']) {
+      for (const value of contract.tokens[name].values) {
+        assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
+      }
+      const rejected = Themer.validateContract({ tokens: { [name]: 'carbon' } }, {});
+      assert.equal(rejected.success, false, name);
+      assert.equal(rejected.errors[0].code, 'CONTRACT_INVALID_VALUE');
+    }
+  });
+
+  it('should emit an anatomy value unchanged on both platforms', () => {
+    const engine = themerLoader(Lib, {});
+    const template = { tokens: { 'anatomy.label': 'floating' }, meta: { 'anatomy.label': { group: 'raw' } } };
+    assert.equal(engine.buildTheme(template, [], 'web').tokens['anatomy.label'], 'floating');
+    assert.equal(engine.buildTheme(template, [], 'native').tokens['anatomy.label'], 'floating');
+  });
+
+});
+
+
+describe('contract v4 - icon group', () => {
+
+  const iconTokens = tokenNames.filter(function (name) {
+    return contract.tokens[name].group === 'icon';
+  });
+  const valid = { icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h32v32H0z' }] };
+  const check = function (value) {
+    return Themer.validateContract({ tokens: { 'icon.close': value } }, {});
+  };
+
+  it('should expose 78 value-tier icon tokens in alphabetical order with raw emission', () => {
+    assert.equal(iconTokens.length, 78);
+    assert.deepEqual(iconTokens, iconTokens.slice().sort());
+    assert.deepEqual(contract.groups.icon, { tier: 'value', type: 'icon', emit: 'raw' });
+    assert.equal(contract.meta['icon.close'].group, 'raw');
+    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add']) {
+      assert.ok(contract.tokens[name], 'missing ' + name);
+    }
+  });
+
+  it('should accept a minimal icon literal', () => {
+    assert.deepEqual(check(valid), { success: true, errors: [], warnings: [] });
+  });
+
+  it('should accept fillRule and size variants', () => {
+    const value = {
+      icon: true,
+      viewBox: '0 -960 960 960',
+      paths: [{ d: 'M0 0h1', fillRule: 'evenodd' }, { d: 'M1 1h1' }],
+      sizes: { '16': [{ d: 'M0 0h16' }], '20': [{ d: 'M0 0h20', fillRule: 'nonzero' }] }
+    };
+    assert.equal(check(value).success, true);
+  });
+
+  it('should reject an icon without the icon marker', () => {
+    assert.equal(check({ viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }] }).success, false);
+  });
+
+  it('should reject a path with a missing d', () => {
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{}] }).success, false);
+  });
+
+  it('should reject a path with an empty d', () => {
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: '' }] }).success, false);
+  });
+
+  it('should reject an empty paths list', () => {
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [] }).success, false);
+  });
+
+  it('should reject a malformed viewBox', () => {
+    for (const viewBox of ['0 0 32', '0 0 32 32 0', 'a b c d', '0 0 0 32', '0 0 32 -1', 32]) {
+      assert.equal(check({ icon: true, viewBox: viewBox, paths: [{ d: 'M0 0h1' }] }).success, false, String(viewBox));
+    }
+  });
+
+  it('should reject an unknown fillRule', () => {
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1', fillRule: 'inherit' }] }).success, false);
+  });
+
+  it('should reject extra keys on the icon and on a path', () => {
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], fill: '#000000' }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1', stroke: 1 }] }).success, false);
+  });
+
+  it('should reject a sizes map with a non-integer key or invalid paths', () => {
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { small: [{ d: 'M0 0h1' }] } }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: { '16': [] } }).success, false);
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{ d: 'M0 0h1' }], sizes: [] }).success, false);
+  });
+
+  it('should reject an icon literal on a non-icon token and report CONTRACT_INVALID_VALUE', () => {
+    const result = Themer.validateContract({ tokens: { 'shape.radius_04': valid } }, {});
+    assert.equal(result.success, false);
+    assert.equal(result.errors[0].code, 'CONTRACT_INVALID_VALUE');
+    assert.equal(check({ icon: true, viewBox: '0 0 32 32', paths: [{}] }).errors[0].code, 'CONTRACT_INVALID_VALUE');
+  });
+
+  it('should resolve an icon literal and emit it unchanged on both platforms', () => {
+    const engine = themerLoader(Lib, {});
+    const template = { tokens: { 'icon.close': valid }, meta: { 'icon.close': { group: 'raw' } } };
+    assert.deepEqual(engine.buildTheme(template, [], 'web').tokens['icon.close'], valid);
+    assert.deepEqual(engine.buildTheme(template, [], 'native').tokens['icon.close'], valid);
+  });
+
+  it('should let a sparse layer replace one icon and leave the rest to the template', () => {
+    const engine = themerLoader(Lib, {});
+    const brand = { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M0 0h24v24H0z' }] };
+    const template = {
+      tokens: { 'icon.close': valid, 'icon.add': valid },
+      meta: { 'icon.close': { group: 'raw' }, 'icon.add': { group: 'raw' } }
+    };
+    const built = engine.buildTheme(template, [{ name: 'brand', polarity: 'light', tokens: { 'icon.close': brand } }], 'native');
+    assert.deepEqual(built.tokens['icon.close'], brand);
+    assert.deepEqual(built.tokens['icon.add'], valid);
   });
 
 });

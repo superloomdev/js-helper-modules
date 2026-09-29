@@ -851,6 +851,14 @@ const createInterface = function (Lib, ERRORS, Color) {
         return undefined;
       }
 
+      // icon: object with icon: true, a viewBox and non-empty path data (v4)
+      if (type === 'icon') {
+        if (!_Validators.isValidIcon(value)) {
+          return _Validators.contractEntry('CONTRACT_INVALID_VALUE', name);
+        }
+        return undefined;
+      }
+
       // Unknown type: no check
       return undefined;
 
@@ -1169,6 +1177,126 @@ const createInterface = function (Lib, ERRORS, Color) {
       const keys = Object.keys(value);
       if (keys.length !== 2) {
         return false;
+      }
+
+      return true;
+
+    },
+
+
+    /********************************************************************
+    Test whether a value is a valid icon literal (v4).
+
+    Shape: { icon: true, viewBox, paths, sizes? }. viewBox is four
+    space-separated finite numbers with positive width and height.
+    paths is a non-empty list of { d, fillRule? } with non-empty d and
+    fillRule one of nonzero or evenodd. sizes, when present, maps
+    positive integer pixel sizes to path lists of the same shape.
+    No other keys are allowed at any level.
+
+    @param {*} value - Candidate icon literal
+
+    @return {Boolean} - True when valid
+    *********************************************************************/
+    isValidIcon: function (value) {
+
+      if (!Lib.Utils.isObject(value) || Array.isArray(value)) {
+        return false;
+      }
+      if (value.icon !== true) {
+        return false;
+      }
+      if (!_Validators.isValidViewBox(value.viewBox)) {
+        return false;
+      }
+      if (!_Validators.isValidIconPaths(value.paths)) {
+        return false;
+      }
+
+      // sizes: optional map of positive integer keys to path lists
+      const keys = Object.keys(value);
+      if (Object.prototype.hasOwnProperty.call(value, 'sizes')) {
+        if (!Lib.Utils.isObject(value.sizes) || Array.isArray(value.sizes)) {
+          return false;
+        }
+        const sizeKeys = Object.keys(value.sizes);
+        for (let i = 0; i < sizeKeys.length; i++) {
+          if (!/^[1-9][0-9]*$/.test(sizeKeys[i]) || !_Validators.isValidIconPaths(value.sizes[sizeKeys[i]])) {
+            return false;
+          }
+        }
+        if (keys.length !== 4) {
+          return false;
+        }
+      } else if (keys.length !== 3) {
+        return false;
+      }
+
+      return true;
+
+    },
+
+
+    /********************************************************************
+    Test whether a string is an SVG viewBox: four space-separated
+    finite numbers, the last two greater than zero.
+
+    @param {*} value - Candidate viewBox
+
+    @return {Boolean} - True when valid
+    *********************************************************************/
+    isValidViewBox: function (value) {
+
+      if (!Lib.Utils.isString(value)) {
+        return false;
+      }
+      const parts = value.split(' ');
+      if (parts.length !== 4) {
+        return false;
+      }
+      for (let i = 0; i < parts.length; i++) {
+        if (!/^-?[0-9]+(\.[0-9]+)?$/.test(parts[i])) {
+          return false;
+        }
+      }
+
+      return Number(parts[2]) > 0 && Number(parts[3]) > 0;
+
+    },
+
+
+    /********************************************************************
+    Test whether a value is a non-empty list of icon path entries,
+    each { d, fillRule? } with a non-empty d and no other keys.
+
+    @param {*} value - Candidate path list
+
+    @return {Boolean} - True when valid
+    *********************************************************************/
+    isValidIconPaths: function (value) {
+
+      if (!Array.isArray(value) || Lib.Utils.isEmptyArray(value)) {
+        return false;
+      }
+      for (let i = 0; i < value.length; i++) {
+        const path = value[i];
+        if (!Lib.Utils.isObject(path) || Array.isArray(path)) {
+          return false;
+        }
+        if (!Lib.Utils.isString(path.d) || Lib.Utils.isEmptyString(path.d)) {
+          return false;
+        }
+        const keys = Object.keys(path);
+        if (Object.prototype.hasOwnProperty.call(path, 'fillRule')) {
+          if (path.fillRule !== 'nonzero' && path.fillRule !== 'evenodd') {
+            return false;
+          }
+          if (keys.length !== 2) {
+            return false;
+          }
+        } else if (keys.length !== 1) {
+          return false;
+        }
       }
 
       return true;

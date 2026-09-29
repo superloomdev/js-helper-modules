@@ -12,9 +12,12 @@ A template declares **which tokens exist** and **how each one is produced**. A t
 - [Operations](#operations)
 - [Type Sets](#type-sets)
 - [Shadows](#shadows)
+- [Icons](#icons)
 - [Contrast Rules](#contrast-rules)
 - [Platform Availability](#platform-availability)
 - [Authoring Checklist](#authoring-checklist)
+- [Motion](#motion)
+- [Anatomy](#anatomy)
 
 ---
 
@@ -201,6 +204,25 @@ Web emits the list as a CSS `box-shadow` string. Native emits `{ boxShadow: '<li
 
 ---
 
+## Icons
+
+An icon is a value-tier literal (contract version 4): one `icon.*` token per semantic glyph name, so a template carries its own glyphs and a component system never ships an icon file.
+
+```javascript
+'icon.close': {
+  icon: true,
+  viewBox: '0 0 32 32',
+  paths: [{ d: 'M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z' }],
+  sizes: {
+    '16': [{ d: 'M12 4.7l-.7-.7L8 7.3 4.7 4l-.7.7L7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z' }]
+  }
+}
+```
+
+`viewBox` is four space-separated finite numbers with positive width and height (`'0 -960 960 960'` is valid). `paths` is a non-empty list of `{ d, fillRule? }`; `d` is non-empty SVG path data and `fillRule` is `nonzero` or `evenodd`. `sizes` is optional and maps positive integer pixel sizes to path lists of the same shape, for sets that publish size-tuned glyphs. No other keys are allowed at any level, and no color: the component system supplies the fill from a color token. Both platforms emit the literal unchanged. A layer overrides one icon by supplying a new literal for its token; the template's other icons stand.
+
+---
+
 ## Contrast Rules
 
 Each rule names a foreground token, its background, and the required ratio.
@@ -261,3 +283,20 @@ Motion has two halves. Curves and timings are data tokens: durations in millisec
 Choreography is the component system: what animates, in which order, and which part moves. The component library implements the three curve interpreters once, in `parts/motion.js`, and every component animates through them. A new curve value is a theme edit. A new curve kind is a new interpreter, which is a component release plus a contract version.
 
 Discrete behaviors that design systems answer differently are enum tokens, and the component system implements every listed value: `feedback.press` selects `highlight` (swap to hover and active colors), `opacity` (paint a state layer at `state.*` opacities), or `ripple` (radial spread from the touch point); `feedback.focus` (contract version 2) selects `outline`, `inset`, or `underline`. Stacking order is template data in contract version 3: `stacking.dropdown`, `stacking.modal`, `stacking.header`, `stacking.overlay`, and `stacking.floating` are raw numeric structure tokens. A component reads the named surface token and never carries a private z-index table.
+
+---
+
+## Anatomy
+
+Where two design systems draw the same component with a different shape, the choice is an enum token in the `anatomy` structure group (contract version 4). A template picks one value per token; a component system implements every listed value; a layer may pick another.
+
+| Token | Values |
+|---|---|
+| `anatomy.label` | `above`, `floating` |
+| `anatomy.switch_handle` | `fixed`, `grows` |
+| `anatomy.status_marker` | `bar_icon`, `plain` |
+| `anatomy.dialog_actions` | `stretched`, `trailing` |
+| `anatomy.caret` | `shown`, `hidden` |
+| `anatomy.slider_handle` | `round`, `bar` |
+
+Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.

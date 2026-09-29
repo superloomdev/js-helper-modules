@@ -987,9 +987,9 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         return true;
       }
 
-      // v2 value-type literals: objects with a marker key set to true
+      // v2 and v4 value-type literals: objects with a marker key set to true
       if (Lib.Utils.isObject(entry) && !Array.isArray(entry)) {
-        return entry.viewport === true || entry.spring === true || entry.segments === true;
+        return entry.viewport === true || entry.spring === true || entry.segments === true || entry.icon === true;
       }
 
       return false;
