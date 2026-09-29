@@ -112,8 +112,8 @@ describe('cache correctness - a stale hit is a silent bug', () => {
     instance.resolve(t, [{ name: 'base' }]);
     instance.resolve(t, [{ name: 'base' }]);
 
-    assert.equal(instance.cacheStats().hits, 1);
-    assert.equal(instance.cacheStats().misses, 1);
+    assert.equal(instance.getCacheStats().hits, 1);
+    assert.equal(instance.getCacheStats().misses, 1);
 
   });
 
@@ -124,7 +124,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
     instance.resolve(t, [{ name: 'base' }]);
     instance.resolve(t, [{ name: 'other' }]);
 
-    assert.equal(instance.cacheStats().misses, 2);
+    assert.equal(instance.getCacheStats().misses, 2);
 
   });
 
@@ -149,7 +149,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
     instance.resolve(t, LAYERS, { min_contrast_ratio: 4.5 });
     instance.resolve(t, LAYERS, { min_contrast_ratio: 7 });
 
-    assert.equal(instance.cacheStats().misses, 2);
+    assert.equal(instance.getCacheStats().misses, 2);
 
   });
 
@@ -186,7 +186,7 @@ describe('cache correctness - a stale hit is a silent bug', () => {
     instance.emit(rr, t, 'native');
     instance.emit(rr, t, 'native');
 
-    assert.equal(instance.cacheStats().hits, 1);
+    assert.equal(instance.getCacheStats().hits, 1);
 
   });
 
@@ -205,8 +205,8 @@ describe('LRU bound', () => {
       instance.resolve(t, [{ name: 'layer' + i }]);
     }
 
-    assert.equal(instance.cacheStats().size, 3);
-    assert.equal(instance.cacheStats().evictions, 2);
+    assert.equal(instance.getCacheStats().size, 3);
+    assert.equal(instance.getCacheStats().evictions, 2);
 
   });
 
@@ -224,13 +224,13 @@ describe('LRU bound', () => {
     // Inserting 'd' must evict 'b', not the re-read 'a'
     instance.resolve(t, [{ name: 'd' }]);
 
-    const hitsBefore = instance.cacheStats().hits;
+    const hitsBefore = instance.getCacheStats().hits;
     instance.resolve(t, [{ name: 'a' }]);
-    assert.equal(instance.cacheStats().hits, hitsBefore + 1);
+    assert.equal(instance.getCacheStats().hits, hitsBefore + 1);
 
-    const missesBefore = instance.cacheStats().misses;
+    const missesBefore = instance.getCacheStats().misses;
     instance.resolve(t, [{ name: 'b' }]);
-    assert.equal(instance.cacheStats().misses, missesBefore + 1);
+    assert.equal(instance.getCacheStats().misses, missesBefore + 1);
 
   });
 
@@ -241,7 +241,7 @@ describe('LRU bound', () => {
     instance.resolve(t, LAYERS);
     instance.clearCache();
 
-    assert.deepEqual(instance.cacheStats(), {
+    assert.deepEqual(instance.getCacheStats(), {
       hits: 0,
       misses: 0,
       evictions: 0,

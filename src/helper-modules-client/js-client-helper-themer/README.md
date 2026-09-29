@@ -89,8 +89,8 @@ Both platforms emit the same token keys, so no caller has to guard against `unde
 | `validateTemplate(template)` | Check a template and report every finding |
 | `getContract()` | Return the frozen token contract registry |
 | `validateContract(theme, options)` | Check theme tokens against the contract |
-| `platforms()` | List the platforms this engine emits for |
-| `cacheStats()` / `clearCache()` | Inspect and reset the per-instance cache |
+| `getPlatforms()` | List the platforms this engine emits for |
+| `getCacheStats()` / `clearCache()` | Inspect and reset the per-instance cache |
 
 Full signatures and return shapes: [API Reference](docs/api.md).
 

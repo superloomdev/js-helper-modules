@@ -105,7 +105,7 @@ Two consequences worth knowing:
 - **A cached result is returned by reference.** Do not mutate it; a later hit would observe the mutation.
 - **A hand-built resolved object misses every time** when passed to `emit`. That is correct, just uncached.
 
-`cacheStats()` reports hits, misses, evictions, and size. `clearCache()` resets all of it.
+`getCacheStats()` reports hits, misses, evictions, and size. `clearCache()` resets all of it.
 
 ---
 

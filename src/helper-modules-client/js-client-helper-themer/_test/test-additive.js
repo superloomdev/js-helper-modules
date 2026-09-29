@@ -509,11 +509,11 @@ describe('G02 - cache key omits emission options', () => {
 
     // Emit with no options
     themer.emit(resolved, template, 'native');
-    const statsAfterFirst = themer.cacheStats();
+    const statsAfterFirst = themer.getCacheStats();
 
     // Emit with empty options - should be a cache hit
     themer.emit(resolved, template, 'native', {});
-    const statsAfterSecond = themer.cacheStats();
+    const statsAfterSecond = themer.getCacheStats();
 
     // The cache size should not have grown (same entry reused)
     assert.equal(
@@ -546,10 +546,10 @@ describe('G02 - cache key includes template metadata', () => {
 
     // Emit both - should produce separate cache entries
     themer.emit(resolved1, template1, 'native');
-    const statsAfterFirst = themer.cacheStats();
+    const statsAfterFirst = themer.getCacheStats();
 
     themer.emit(resolved2, template2, 'native');
-    const statsAfterSecond = themer.cacheStats();
+    const statsAfterSecond = themer.getCacheStats();
 
     // Cache should have grown (different template metadata = different entry)
     assert.ok(
