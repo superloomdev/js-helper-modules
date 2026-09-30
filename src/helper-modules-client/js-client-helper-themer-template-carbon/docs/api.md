@@ -7,7 +7,7 @@ No configuration. This is a data-only package.
 ```js
 {
   id: 'carbon-v11',
-  contract_version: 4,
+  contract_version: 5,
   reference: { ... },
   schemes: { white, g10, g90, g100 }
 }

@@ -45,20 +45,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 469 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 469);
+  it('should expose exactly 490 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 490);
   });
 
-  it('should expose exactly 18 groups', () => {
-    assert.equal(Object.keys(contract.groups).length, 18);
+  it('should expose exactly 19 groups', () => {
+    assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 469 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 469);
+  it('should expose exactly 490 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 490);
   });
 
-  it('should report contract version 4', () => {
-    assert.equal(contract.version, 4);
+  it('should report contract version 5', () => {
+    assert.equal(contract.version, 5);
   });
 
   it('should be a frozen object', () => {
@@ -82,10 +82,10 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 190,
+    color: 198,
     spacing: 17,
     size: 22,
-    type: 58,
+    type: 60,
     font: 12,
     motion: 29,
     shape: 9,
@@ -99,7 +99,8 @@ describe('contract registry - group counts', () => {
     tint: 5,
     stacking: 5,
     anatomy: 6,
-    icon: 78
+    icon: 78,
+    control: 11
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -222,7 +223,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 469 tokens and theme has all 469', () => {
+  it('should return success true when required is all 490 tokens and theme has all 490', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1116,8 +1117,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 4', () => {
-    assert.equal(contract.version, 4);
+  it('should report contract version 5', () => {
+    assert.equal(contract.version, 5);
   });
 
 });
@@ -1195,6 +1196,50 @@ describe('contract v3 - stacking group', () => {
       type: 'number',
       emit: 'raw'
     });
+  });
+
+});
+
+
+describe('contract v5 - control group and role tokens', () => {
+
+  it('should expose eleven dimension structure tokens for per-component geometry', () => {
+    const controlTokens = tokenNames.filter(function (name) {
+      return contract.tokens[name].group === 'control';
+    });
+
+    assert.deepEqual(controlTokens, [
+      'control.button_height',
+      'control.button_radius',
+      'control.button_padding_start',
+      'control.button_padding_end',
+      'control.button_icon_size',
+      'control.field_height',
+      'control.field_radius',
+      'control.field_icon_size',
+      'control.checkbox_size',
+      'control.checkbox_border',
+      'control.option_height'
+    ]);
+    assert.deepEqual(contract.groups.control, { tier: 'structure', type: 'number', emit: 'dimension' });
+    for (const name of controlTokens) {
+      assert.deepEqual(contract.meta[name], { group: 'dimension' });
+    }
+  });
+
+  it('should expose the two role type sets and the eight role colors', () => {
+    assert.deepEqual(contract.tokens['type.button_label'], { group: 'type' });
+    assert.deepEqual(contract.tokens['type.field_label_raised'], { group: 'type' });
+    for (const leaf of ['button_tonal', 'button_tonal_active', 'button_tonal_hover', 'text_on_button_tonal', 'button_elevated', 'button_elevated_active', 'button_elevated_hover', 'control_checked']) {
+      assert.deepEqual(contract.tokens['color.' + leaf], { group: 'color' });
+    }
+  });
+
+  it('should emit a control token as a number on native and a rem string on web', () => {
+    const built = Themer.buildTheme({ tokens: { 'control.button_height': 40 }, meta: { 'control.button_height': { group: 'dimension' } } }, [], 'native');
+    assert.equal(built.tokens['control.button_height'], 40);
+    const web = Themer.buildTheme({ tokens: { 'control.button_height': 40 }, meta: { 'control.button_height': { group: 'dimension' } } }, [], 'web');
+    assert.equal(web.tokens['control.button_height'], '2.5rem');
   });
 
 });

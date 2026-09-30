@@ -113,6 +113,16 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
   theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
 
+### Contract version 5
+
+Version 5 adds per-component roles, so a component reads one role and each template answers it with its own number where the shared scales hold one value for every design system:
+
+- **`control`** (structure tier, `number`, emit `dimension`, 11 tokens): `control.button_height`, `control.button_radius`, `control.button_padding_start`, `control.button_padding_end`, `control.button_icon_size`, `control.field_height`, `control.field_radius`, `control.field_icon_size`, `control.checkbox_size`, `control.checkbox_border`, `control.option_height`. A number on native, a `rem` string on web, like `size.*`.
+- **Role type sets** (`type` group, 2 tokens): `type.button_label`, the set a button label is drawn in; `type.field_label_raised`, the set a floating field label is drawn in once raised.
+- **Role colors** (`color` group, 8 tokens): `color.button_tonal`, `color.button_tonal_hover`, `color.button_tonal_active`, `color.text_on_button_tonal`, `color.button_elevated`, `color.button_elevated_hover`, `color.button_elevated_active`, `color.control_checked` (the fill of a checked checkbox or radio).
+
+The contract registry now carries 490 tokens in 19 groups.
+
 ### Contract version 4
 
 Version 4 adds two groups, so a template is theme plus icons and a component system holds no glyph or shape choice of its own:

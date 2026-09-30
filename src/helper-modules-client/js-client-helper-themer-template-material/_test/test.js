@@ -48,8 +48,8 @@ describe('material template - profile identity', () => {
     assert.equal(profile.id, 'material-v0_192');
   });
 
-  it('should export contract_version 4', () => {
-    assert.equal(profile.contract_version, 4);
+  it('should export contract_version 5', () => {
+    assert.equal(profile.contract_version, 5);
   });
 
   it('should export reference with Material package versions', () => {
@@ -363,7 +363,7 @@ describe('material template - generation provenance', () => {
       assert.ok(p, name + ' missing provenance');
       assert.equal(p.default_version, '1.0.0', name + ' default_version');
       assert.ok(p.default_shasum, name + ' missing default_shasum');
-      assert.equal(p.generator_schema, 'v2', name + ' generator_schema');
+      assert.equal(p.generator_schema, 'v3', name + ' generator_schema');
     }
   });
 
@@ -541,15 +541,73 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 469 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 490 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 469);
+        assert.equal(names.length, 490);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
     }
 
   }
+
+});
+
+
+describe('material template - v5 control roles and role colors', () => {
+
+  const light = profile.schemes.light.tokens;
+
+  it('should state the geometry of its own controls, read from the pinned component tokens', () => {
+    assert.deepEqual({
+      button_height: light['control.button_height'],
+      button_radius: light['control.button_radius'],
+      button_padding_start: light['control.button_padding_start'],
+      button_padding_end: light['control.button_padding_end'],
+      button_icon_size: light['control.button_icon_size'],
+      field_height: light['control.field_height'],
+      field_radius: light['control.field_radius'],
+      field_icon_size: light['control.field_icon_size'],
+      checkbox_size: light['control.checkbox_size'],
+      checkbox_border: light['control.checkbox_border'],
+      option_height: light['control.option_height']
+    }, {
+      button_height: 40, button_radius: 9999, button_padding_start: 24, button_padding_end: 24, button_icon_size: 18,
+      field_height: 56, field_radius: 4, field_icon_size: 24, checkbox_size: 18, checkbox_border: 2, option_height: 48
+    });
+    for (const schemeName of SCHEME_NAMES) {
+      for (const key of Object.keys(profile.schemes[schemeName].tokens).filter((name) => name.indexOf('control.') === 0)) {
+        assert.equal(profile.schemes[schemeName].from_default.includes(key), false, schemeName + ' completed ' + key);
+      }
+    }
+  });
+
+  it('should draw the button label in label-large and the raised field label in body-small', () => {
+    assert.deepEqual(light['type.button_label'], light['type.label01']);
+    assert.deepEqual(light['type.field_label_raised'], light['type.caption01']);
+    assert.equal(light['type.button_label'].font_size, 14);
+    assert.equal(light['type.field_label_raised'].font_size, 12);
+  });
+
+  it('should fill the primary button, the link and the checked control with primary, and put inverse icons on the inverse surface', () => {
+    assert.equal(light['color.button_primary'], light['color.interactive']);
+    assert.equal(light['color.button_primary_hover'], light['color.interactive']);
+    assert.equal(light['color.link_primary'], light['color.interactive']);
+    assert.equal(light['color.control_checked'], light['color.interactive']);
+    assert.equal(light['color.icon_on_color'], light['color.text_on_color']);
+    assert.equal(light['color.icon_inverse'], light['color.text_inverse']);
+    assert.notEqual(light['color.icon_inverse'], light['color.icon_primary']);
+    assert.equal(light['color.icon_primary'], light['color.text_primary']);
+    assert.equal(light['color.focus'], light['color.button_secondary']);
+    assert.notEqual(light['color.focus'], defaultProfile.schemes.light.tokens['color.focus']);
+  });
+
+  it('should fill tonal and elevated buttons from the secondary container and the low surface container', () => {
+    assert.equal(light['color.button_tonal'], light['color.button_secondary_hover']);
+    assert.equal(light['color.button_tonal_hover'], light['color.button_tonal']);
+    assert.notEqual(light['color.text_on_button_tonal'], light['color.text_on_color']);
+    assert.equal(light['color.button_elevated'], light['color.layer_01']);
+  });
 
 });

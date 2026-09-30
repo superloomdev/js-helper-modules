@@ -23,6 +23,14 @@
 // choices design systems answer differently) and the icon value group (one
 // token per semantic glyph name, carrying SVG path data), so a template is
 // theme plus icons and a component system holds no glyph of its own.
+//
+// Version 5 adds the control structure group (per-component geometry a
+// design system states for its own controls - button, field, checkbox,
+// option - where the shared scales hold one value for every system), two
+// role type sets (`type.button_label`, `type.field_label_raised`) and eight
+// role colors (the tonal and elevated button fills, the text on a tonal
+// fill, the checked-control fill), so a component reads a role, and each
+// template answers the role with its own number.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -57,7 +65,8 @@ function buildContract () {
     grid:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
     state:      Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] }),
     tint:       Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw', range: [0, 1] }),
-    stacking:   Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' })
+    stacking:   Object.freeze({ tier: 'structure', type: 'number',  emit: 'raw' }),
+    control:    Object.freeze({ tier: 'structure', type: 'number',  emit: 'dimension' })
   });
 
 
@@ -66,7 +75,7 @@ function buildContract () {
   // default emission or carry an enum values list add those fields.
   const tokens = Object.freeze({
 
-    // ~~~~~~~~~~~~~~~~~~~~ color.* (190 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ color.* (198 tokens) ~~~~~~~~~~~~~~~~~~~
 
     // background (8)
     'color.background': Object.freeze({ group: 'color' }),
@@ -215,7 +224,7 @@ function buildContract () {
     'color.ai_skeleton_background': Object.freeze({ group: 'color' }),
     'color.ai_skeleton_element_background': Object.freeze({ group: 'color' }),
 
-    // button (15)
+    // button (23; v5 adds the tonal and elevated fills, the text on a tonal fill and the checked-control fill)
     'color.button_danger_active': Object.freeze({ group: 'color' }),
     'color.button_danger_hover': Object.freeze({ group: 'color' }),
     'color.button_danger_primary': Object.freeze({ group: 'color' }),
@@ -231,6 +240,14 @@ function buildContract () {
     'color.button_tertiary': Object.freeze({ group: 'color' }),
     'color.button_tertiary_active': Object.freeze({ group: 'color' }),
     'color.button_tertiary_hover': Object.freeze({ group: 'color' }),
+    'color.button_tonal': Object.freeze({ group: 'color' }),
+    'color.button_tonal_active': Object.freeze({ group: 'color' }),
+    'color.button_tonal_hover': Object.freeze({ group: 'color' }),
+    'color.text_on_button_tonal': Object.freeze({ group: 'color' }),
+    'color.button_elevated': Object.freeze({ group: 'color' }),
+    'color.button_elevated_active': Object.freeze({ group: 'color' }),
+    'color.button_elevated_hover': Object.freeze({ group: 'color' }),
+    'color.control_checked': Object.freeze({ group: 'color' }),
 
     // notification (10)
     'color.notification_action_hover': Object.freeze({ group: 'color' }),
@@ -334,7 +351,7 @@ function buildContract () {
     'size.icon_04': Object.freeze({ group: 'size' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ type.* (58 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ type.* (60 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'type.body01': Object.freeze({ group: 'type' }),
     'type.body02': Object.freeze({ group: 'type' }),
@@ -394,6 +411,10 @@ function buildContract () {
     'type.productive_heading_07': Object.freeze({ group: 'type' }),
     'type.quotation01': Object.freeze({ group: 'type' }),
     'type.quotation02': Object.freeze({ group: 'type' }),
+
+    // role type sets (v5): the set a control's label is drawn in
+    'type.button_label': Object.freeze({ group: 'type' }),
+    'type.field_label_raised': Object.freeze({ group: 'type' }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ font.* (12 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -552,6 +573,22 @@ function buildContract () {
     'stacking.floating': Object.freeze({ group: 'stacking' }),
 
 
+    // ~~~~~~~~~~~~~~~~~~~~ control.* (11 tokens) ~~~~~~~~~~~~~~~~~~~
+    // Per-component geometry (v5). Dimensions a design system states for
+    // its own controls; each template answers with its number.
+    'control.button_height': Object.freeze({ group: 'control' }),
+    'control.button_radius': Object.freeze({ group: 'control' }),
+    'control.button_padding_start': Object.freeze({ group: 'control' }),
+    'control.button_padding_end': Object.freeze({ group: 'control' }),
+    'control.button_icon_size': Object.freeze({ group: 'control' }),
+    'control.field_height': Object.freeze({ group: 'control' }),
+    'control.field_radius': Object.freeze({ group: 'control' }),
+    'control.field_icon_size': Object.freeze({ group: 'control' }),
+    'control.checkbox_size': Object.freeze({ group: 'control' }),
+    'control.checkbox_border': Object.freeze({ group: 'control' }),
+    'control.option_height': Object.freeze({ group: 'control' }),
+
+
     // ~~~~~~~~~~~~~~~~~~~~ icon.* (78 tokens) ~~~~~~~~~~~~~~~~~~~
     // One token per semantic glyph name, alphabetical. Values are icon
     // literals: { icon: true, viewBox, paths, sizes? }.
@@ -650,7 +687,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 4,
+    version: 5,
     groups: groups,
     tokens: tokens,
     meta: Object.freeze(meta)

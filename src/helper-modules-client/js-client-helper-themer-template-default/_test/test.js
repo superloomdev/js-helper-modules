@@ -65,8 +65,8 @@ describe('default template - profile identity', () => {
     assert.equal(profile.id, 'superloom-default');
   });
 
-  it('should export contract_version 4', () => {
-    assert.equal(profile.contract_version, 4);
+  it('should export contract_version 5', () => {
+    assert.equal(profile.contract_version, 5);
   });
 
   it('should have light and dark schemes', () => {
@@ -422,14 +422,64 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 469 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 490 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 469);
+        assert.equal(names.length, 490);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
     }
   }
+
+});
+
+
+describe('default template - v5 control roles and corrected inverse steps', () => {
+
+  const light = Themer.buildTheme(profile.schemes.light, [], 'native').tokens;
+  const dark = Themer.buildTheme(profile.schemes.dark, [], 'native').tokens;
+
+  it('should state the primary reference geometry for every control role', () => {
+    assert.deepEqual({
+      button_height: light['control.button_height'],
+      button_radius: light['control.button_radius'],
+      button_padding_start: light['control.button_padding_start'],
+      button_padding_end: light['control.button_padding_end'],
+      button_icon_size: light['control.button_icon_size'],
+      field_height: light['control.field_height'],
+      field_radius: light['control.field_radius'],
+      field_icon_size: light['control.field_icon_size'],
+      checkbox_size: light['control.checkbox_size'],
+      checkbox_border: light['control.checkbox_border'],
+      option_height: light['control.option_height']
+    }, {
+      button_height: 48, button_radius: 0, button_padding_start: 16, button_padding_end: 64, button_icon_size: 16,
+      field_height: 40, field_radius: 0, field_icon_size: 16, checkbox_size: 16, checkbox_border: 1, option_height: 40
+    });
+  });
+
+  it('should draw the button label like compact body text and the raised field label like a label', () => {
+    assert.deepEqual(light['type.button_label'], light['type.body_compact_01']);
+    assert.deepEqual(light['type.field_label_raised'], light['type.label01']);
+  });
+
+  it('should put inverse icons on the page end of the ramp and the inverse background on the far end', () => {
+    for (const tokens of [light, dark]) {
+      assert.equal(tokens['color.icon_inverse'], tokens['color.text_inverse']);
+      assert.equal(tokens['color.icon_on_color'], tokens['color.text_on_color']);
+      assert.notEqual(tokens['color.icon_inverse'], tokens['color.icon_primary']);
+      assert.equal(tokens['color.background_inverse'], tokens['color.text_primary']);
+      assert.notEqual(tokens['color.background_inverse'], tokens['color.background']);
+    }
+  });
+
+  it('should fill tonal and elevated buttons from the layer steps and check controls in the primary icon color', () => {
+    assert.equal(light['color.button_tonal'], light['color.layer_01']);
+    assert.equal(light['color.button_tonal_hover'], light['color.layer_02']);
+    assert.equal(light['color.button_elevated'], light['color.layer_01']);
+    assert.equal(light['color.text_on_button_tonal'], light['color.text_primary']);
+    assert.equal(light['color.control_checked'], light['color.icon_primary']);
+  });
 
 });

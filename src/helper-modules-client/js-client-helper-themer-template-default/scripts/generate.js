@@ -163,11 +163,17 @@ const TYPE_METRICS = {
   'productive_heading_06': { font_size: 42, line_height_px: 50 },
   'productive_heading_07': { font_size: 54, line_height_px: 65 },
   'quotation01': { font_size: 20, line_height_px: 26 },
-  'quotation02': { font_size: 32, line_height_px: 40 }
+  'quotation02': { font_size: 32, line_height_px: 40 },
+  // Role sets (v5): a button label reads like compact body text; a raised field label like a label
+  'button_label': { font_size: 14, line_height_px: 18 },
+  'field_label_raised': { font_size: 12, line_height_px: 16 }
 };
 
 // Heading-like names get weight 600; body/caption/code/legal/helper/label get 400.
 function weightFor (name) {
+  if (name === 'button_label') {
+    return 400;
+  }
   if (/heading|display|label|productive_heading|expressive_heading|fluid_heading|fluid_display/.test(name)) {
     return 600;
   }
@@ -195,6 +201,13 @@ const INTERACTIVE_LITERALS = [
 ];
 
 function colorStep (name) {
+  // Inverse background: the far end of the ramp, its hover one step back
+  if (name === 'color.background_inverse') {
+    return 10;
+  }
+  if (name === 'color.background_inverse_hover') {
+    return 9;
+  }
   // Background and its variants: step 0
   if (/^color\.background/.test(name)) {
     return 0;
@@ -222,9 +235,12 @@ function colorStep (name) {
   if (/^color\.text_error/.test(name)) {
     return 10;
   }
-  // Icon primary/inverse/on_color: step 10
-  if (/^color\.icon_(primary|inverse|on_color)/.test(name)) {
+  // Icon primary: step 10; icon inverse and on-color sit on a dark or colored fill: step 0
+  if (name === 'color.icon_primary') {
     return 10;
+  }
+  if (/^color\.icon_(inverse|on_color)/.test(name)) {
+    return 0;
   }
   // Icon secondary: step 7
   if (name === 'color.icon_secondary') {
@@ -334,6 +350,16 @@ function colorStep (name) {
   // Support: step 8 (dark gray for all)
   if (/^color\.support_/.test(name)) {
     return 8;
+  }
+  // Role fills (v5): tonal and elevated rest on the first layer step, hover and active one deeper
+  if (name === 'color.button_tonal' || name === 'color.button_elevated' || name === 'color.button_elevated_hover') {
+    return 1;
+  }
+  if (/^color\.button_(tonal_hover|tonal_active|elevated_active)$/.test(name)) {
+    return 2;
+  }
+  if (name === 'color.text_on_button_tonal' || name === 'color.control_checked') {
+    return 10;
   }
   // Button (non-primary): steps 2-5
   if (/^color\.button_(danger|secondary|tertiary|disabled|separator)/.test(name)) {
@@ -506,6 +532,19 @@ function buildTokens () {
       continue;
     }
 
+    // --- Control tokens (v5): the neutral template states the primary reference's control geometry ---
+    if (group === 'control') {
+      const controlMap = {
+        'control.button_height': 48, 'control.button_radius': 0,
+        'control.button_padding_start': 16, 'control.button_padding_end': 64, 'control.button_icon_size': 16,
+        'control.field_height': 40, 'control.field_radius': 0, 'control.field_icon_size': 16,
+        'control.checkbox_size': 16, 'control.checkbox_border': 1,
+        'control.option_height': 40
+      };
+      tokens[name] = controlMap[name];
+      continue;
+    }
+
     // --- Feedback tokens ---
     if (group === 'feedback') {
       if (name === 'feedback.press') {
@@ -666,10 +705,10 @@ if (tokens['feedback.field'] !== 'underline') {
   throw new Error('feedback.field must be underline');
 }
 
-// Assert every anatomy and icon token has a value the contract accepts
+// Assert every anatomy, icon and control token has a value the contract accepts
 for (const name of tokenNames) {
   const group = contract.tokens[name].group;
-  if ((group === 'anatomy' || group === 'icon') && tokens[name] === undefined) {
+  if ((group === 'anatomy' || group === 'icon' || group === 'control') && tokens[name] === undefined) {
     throw new Error('No value for ' + name);
   }
 }

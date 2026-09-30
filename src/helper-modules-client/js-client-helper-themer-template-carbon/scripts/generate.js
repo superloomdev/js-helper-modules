@@ -185,6 +185,43 @@ const SHAPE_MAP = {
   'shape.radius_max': 'borderRadiusMax'
 };
 
+// Control roles (v5): the geometry Carbon states for its own controls, read
+// from the same layout scale by the token Carbon's component styles name
+const CONTROL_MAP = {
+  'control.button_height': 'sizeLarge',
+  'control.button_radius': 'borderRadius00',
+  'control.button_padding_start': 'spacing05',
+  'control.button_padding_end': 'spacing10',
+  'control.button_icon_size': 'iconSize01',
+  'control.field_height': 'sizeMedium',
+  'control.field_radius': 'borderRadius00',
+  'control.field_icon_size': 'iconSize01',
+  'control.checkbox_size': 'spacing05',
+  'control.option_height': 'sizeMedium'
+};
+// The checkbox border is Carbon's one-pixel control border
+const CONTROL_LITERALS = {
+  'control.checkbox_border': 1
+};
+
+// Role type sets (v5): the set Carbon draws each control label in
+const TYPE_ROLE_MAP = {
+  'type.button_label': 'bodyCompact01',
+  'type.field_label_raised': 'label01'
+};
+
+// Role colors (v5): the theme token Carbon's component styles read for each role
+const COLOR_ROLE_MAP = {
+  'color.button_tonal': 'layerAccent01',
+  'color.button_tonal_hover': 'layerAccentHover01',
+  'color.button_tonal_active': 'layerAccentActive01',
+  'color.text_on_button_tonal': 'textPrimary',
+  'color.button_elevated': 'layer01',
+  'color.button_elevated_hover': 'layerHover01',
+  'color.button_elevated_active': 'layerActive01',
+  'color.control_checked': 'iconPrimary'
+};
+
 const BREAKPOINT_MAP = {
   'breakpoint.sm': 320,
   'breakpoint.md': 672,
@@ -352,6 +389,19 @@ function buildTokens (schemeName) {
     }
   }
 
+  // Control roles (v5) from @carbon/layout, plus the one literal
+  for (const [sKey, carbonKey] of Object.entries(CONTROL_MAP)) {
+    tokens[sKey] = remToPx(carbonLayout[carbonKey]);
+  }
+  for (const [sKey, value] of Object.entries(CONTROL_LITERALS)) {
+    tokens[sKey] = value;
+  }
+
+  // Role colors (v5) from the scheme
+  for (const [sKey, carbonKey] of Object.entries(COLOR_ROLE_MAP)) {
+    tokens[sKey] = carbonScheme[carbonKey];
+  }
+
   // Breakpoint tokens
   for (const [sKey, value] of Object.entries(BREAKPOINT_MAP)) {
     tokens[sKey] = value;
@@ -384,6 +434,11 @@ function buildTokens (schemeName) {
     if (carbonDef && carbonDef.fontSize !== undefined) {
       tokens['type.' + typeSuperloomName(typeName)] = convertTypeSet(typeName, carbonDef);
     }
+  }
+
+  // Role type sets (v5)
+  for (const [sKey, typeName] of Object.entries(TYPE_ROLE_MAP)) {
+    tokens[sKey] = convertTypeSet(typeName, cType[typeName]);
   }
 
   // Motion durations from @carbon/motion
@@ -492,9 +547,9 @@ for (const schemeName of SCHEME_NAMES) {
     throw new Error(schemeName + ' has ' + tagKeys.length + ' tag tokens, expected 40');
   }
 
-  // Every anatomy and icon token is Carbon's own, never completed from the default template
+  // Every anatomy, icon and control token is Carbon's own, never completed from the default template
   for (const key of scheme.from_default) {
-    if (key.indexOf('anatomy.') === 0 || key.indexOf('icon.') === 0) {
+    if (key.indexOf('anatomy.') === 0 || key.indexOf('icon.') === 0 || key.indexOf('control.') === 0) {
       throw new Error(schemeName + ' completed ' + key + ' from the default template');
     }
   }

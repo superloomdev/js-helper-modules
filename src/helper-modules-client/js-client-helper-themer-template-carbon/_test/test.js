@@ -31,8 +31,8 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.id, 'carbon-v11');
   });
 
-  it('should export contract_version 4', () => {
-    assert.equal(profile.contract_version, 4);
+  it('should export contract_version 5', () => {
+    assert.equal(profile.contract_version, 5);
   });
 
   it('should export reference with Carbon package versions', () => {
@@ -377,14 +377,59 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 469 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 490 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 469);
+        assert.equal(names.length, 490);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
     }
   }
+
+});
+
+
+describe('carbon template - v5 control roles and role colors', () => {
+
+  const white = profile.schemes.white.tokens;
+
+  it('should state the geometry its component styles name, from its own layout scale', () => {
+    assert.deepEqual({
+      button_height: white['control.button_height'],
+      button_radius: white['control.button_radius'],
+      button_padding_start: white['control.button_padding_start'],
+      button_padding_end: white['control.button_padding_end'],
+      button_icon_size: white['control.button_icon_size'],
+      field_height: white['control.field_height'],
+      field_radius: white['control.field_radius'],
+      field_icon_size: white['control.field_icon_size'],
+      checkbox_size: white['control.checkbox_size'],
+      checkbox_border: white['control.checkbox_border'],
+      option_height: white['control.option_height']
+    }, {
+      button_height: 48, button_radius: 0, button_padding_start: 16, button_padding_end: 64, button_icon_size: 16,
+      field_height: 40, field_radius: 0, field_icon_size: 16, checkbox_size: 16, checkbox_border: 1, option_height: 40
+    });
+    for (const key of Object.keys(white).filter((name) => name.indexOf('control.') === 0)) {
+      assert.equal(profile.schemes.white.from_default.includes(key), false, 'completed ' + key);
+    }
+  });
+
+  it('should draw the button label in body compact 01 and the raised field label in label 01', () => {
+    assert.deepEqual(white['type.button_label'], white['type.body_compact_01']);
+    assert.deepEqual(white['type.field_label_raised'], white['type.label01']);
+  });
+
+  it('should fill tonal buttons from the accent layer, elevated from the first layer, and check controls in the primary icon color', () => {
+    assert.equal(white['color.button_tonal'], white['color.layer_accent_01']);
+    assert.equal(white['color.button_tonal_hover'], white['color.layer_accent_hover_01']);
+    assert.equal(white['color.button_tonal_active'], white['color.layer_accent_active_01']);
+    assert.equal(white['color.text_on_button_tonal'], white['color.text_primary']);
+    assert.equal(white['color.button_elevated'], white['color.layer_01']);
+    assert.equal(white['color.button_elevated_hover'], white['color.layer_hover_01']);
+    assert.equal(white['color.button_elevated_active'], white['color.layer_active_01']);
+    assert.equal(white['color.control_checked'], white['color.icon_primary']);
+  });
 
 });

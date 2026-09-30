@@ -23,7 +23,7 @@ const built = Themer.buildTheme(profile.schemes.light, [], 'native');
 ## What this package is
 
 - **Data only**: no loader, no React, no side effects.
-- **Every contract key** (469 at contract version 4) has a value.
+- **Every contract key** (490 at contract version 5) has a value; the `control.*` roles state the primary reference geometry (a 48 button, a 40 field, a 16 checkbox) so the neutral template draws the same controls as its seed.
 - **Anatomy enums** at their plainest value: `label: above`, `switch_handle: fixed`, `status_marker: bar_icon`, `dialog_actions: stretched`, `caret: shown`, `slider_handle: round`.
 - **Icons**: 78 `icon.*` literals generated from the pinned `@carbon/icons` package (Apache-2.0, see `NOTICE`), each `{ icon: true, viewBox, paths, sizes? }` with the set's own 16, 20 and 24 pixel glyphs under `sizes`. The semantic-name -> glyph table is authored once in the component library (`rnw-components-v2/data/icons.json`); `scripts/icon-map.json` is this package's committed snapshot of its column, and every scheme's `provenance.icons` records the package version and the source table's sha256.
 - **Derived where possible**: colors from `rampStep`, type sets from `stepPairIncrement`, spacing from `miniUnit`.

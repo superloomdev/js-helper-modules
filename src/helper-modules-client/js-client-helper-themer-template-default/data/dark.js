@@ -53,13 +53,13 @@ export default Object.freeze({
     'color.background_inverse': {
       'op': 'rampStep',
       'args': [
-        0
+        10
       ]
     },
     'color.background_inverse_hover': {
       'op': 'rampStep',
       'args': [
-        0
+        9
       ]
     },
     'color.background_selected': {
@@ -449,19 +449,19 @@ export default Object.freeze({
     'color.icon_inverse': {
       'op': 'rampStep',
       'args': [
-        10
+        0
       ]
     },
     'color.icon_on_color': {
       'op': 'rampStep',
       'args': [
-        10
+        0
       ]
     },
     'color.icon_on_color_disabled': {
       'op': 'rampStep',
       'args': [
-        10
+        0
       ]
     },
     'color.icon_primary': {
@@ -814,6 +814,54 @@ export default Object.freeze({
       'op': 'rampStep',
       'args': [
         3
+      ]
+    },
+    'color.button_tonal': {
+      'op': 'rampStep',
+      'args': [
+        1
+      ]
+    },
+    'color.button_tonal_active': {
+      'op': 'rampStep',
+      'args': [
+        2
+      ]
+    },
+    'color.button_tonal_hover': {
+      'op': 'rampStep',
+      'args': [
+        2
+      ]
+    },
+    'color.text_on_button_tonal': {
+      'op': 'rampStep',
+      'args': [
+        10
+      ]
+    },
+    'color.button_elevated': {
+      'op': 'rampStep',
+      'args': [
+        1
+      ]
+    },
+    'color.button_elevated_active': {
+      'op': 'rampStep',
+      'args': [
+        2
+      ]
+    },
+    'color.button_elevated_hover': {
+      'op': 'rampStep',
+      'args': [
+        1
+      ]
+    },
+    'color.control_checked': {
+      'op': 'rampStep',
+      'args': [
+        10
       ]
     },
     'color.notification_action_hover': {
@@ -1670,6 +1718,22 @@ export default Object.freeze({
       'weight': 400,
       'font_family': 'sans'
     },
+    'type.button_label': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 18,
+      'letter_spacing': 0,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.field_label_raised': {
+      'type_set': true,
+      'font_size': 12,
+      'line_height_px': 16,
+      'letter_spacing': 0,
+      'weight': 600,
+      'font_family': 'sans'
+    },
     'font.family.sans': 'IBM Plex Sans',
     'font.family.serif': 'IBM Plex Serif',
     'font.family.mono': 'IBM Plex Mono',
@@ -1894,6 +1958,17 @@ export default Object.freeze({
     'stacking.header': 8000,
     'stacking.overlay': 6000,
     'stacking.floating': 6000,
+    'control.button_height': 48,
+    'control.button_radius': 0,
+    'control.button_padding_start': 16,
+    'control.button_padding_end': 64,
+    'control.button_icon_size': 16,
+    'control.field_height': 40,
+    'control.field_radius': 0,
+    'control.field_icon_size': 16,
+    'control.checkbox_size': 16,
+    'control.checkbox_border': 1,
+    'control.option_height': 40,
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -5575,6 +5650,30 @@ export default Object.freeze({
     'color.button_tertiary_hover': {
       'group': 'color'
     },
+    'color.button_tonal': {
+      'group': 'color'
+    },
+    'color.button_tonal_active': {
+      'group': 'color'
+    },
+    'color.button_tonal_hover': {
+      'group': 'color'
+    },
+    'color.text_on_button_tonal': {
+      'group': 'color'
+    },
+    'color.button_elevated': {
+      'group': 'color'
+    },
+    'color.button_elevated_active': {
+      'group': 'color'
+    },
+    'color.button_elevated_hover': {
+      'group': 'color'
+    },
+    'color.control_checked': {
+      'group': 'color'
+    },
     'color.notification_action_hover': {
       'group': 'color'
     },
@@ -6016,6 +6115,12 @@ export default Object.freeze({
     'type.quotation02': {
       'group': 'typeSet'
     },
+    'type.button_label': {
+      'group': 'typeSet'
+    },
+    'type.field_label_raised': {
+      'group': 'typeSet'
+    },
     'font.family.sans': {
       'group': 'raw'
     },
@@ -6327,6 +6432,39 @@ export default Object.freeze({
     },
     'stacking.floating': {
       'group': 'raw'
+    },
+    'control.button_height': {
+      'group': 'dimension'
+    },
+    'control.button_radius': {
+      'group': 'dimension'
+    },
+    'control.button_padding_start': {
+      'group': 'dimension'
+    },
+    'control.button_padding_end': {
+      'group': 'dimension'
+    },
+    'control.button_icon_size': {
+      'group': 'dimension'
+    },
+    'control.field_height': {
+      'group': 'dimension'
+    },
+    'control.field_radius': {
+      'group': 'dimension'
+    },
+    'control.field_icon_size': {
+      'group': 'dimension'
+    },
+    'control.checkbox_size': {
+      'group': 'dimension'
+    },
+    'control.checkbox_border': {
+      'group': 'dimension'
+    },
+    'control.option_height': {
+      'group': 'dimension'
     },
     'icon.accessibility': {
       'group': 'raw'

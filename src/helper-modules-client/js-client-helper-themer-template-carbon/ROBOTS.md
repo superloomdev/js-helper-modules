@@ -14,4 +14,4 @@ None.
 
 ## Regeneration
 
-`npm run generate` (dev only) must produce no diff; `npm run sync-icon-map` refreshes `scripts/icon-map.json` from `rnw-components-v2/data/icons.json`. Tests assert the full contract key count per scheme (469 at contract version 4), contract validity, oracle parity, `from_default` correctness, Carbon's six `anatomy.*` values, 78 valid `icon.*` literals from `@carbon/icons` with size variants and provenance, unit gate, engine build.
+`npm run generate` (dev only) must produce no diff; `npm run sync-icon-map` refreshes `scripts/icon-map.json` from `rnw-components-v2/data/icons.json`. Tests assert the full contract key count per scheme (490 at contract version 5, including the `control.*` roles from Carbon's own layout scale), contract validity, oracle parity, `from_default` correctness, Carbon's six `anatomy.*` values, 78 valid `icon.*` literals from `@carbon/icons` with size variants and provenance, unit gate, engine build.

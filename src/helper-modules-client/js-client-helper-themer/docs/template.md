@@ -18,6 +18,7 @@ A template declares **which tokens exist** and **how each one is produced**. A t
 - [Authoring Checklist](#authoring-checklist)
 - [Motion](#motion)
 - [Anatomy](#anatomy)
+- [Control Roles](#control-roles)
 
 ---
 
@@ -300,3 +301,23 @@ Where two design systems draw the same component with a different shape, the cho
 | `anatomy.slider_handle` | `round`, `bar` |
 
 Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.
+
+---
+
+## Control Roles
+
+Where the shared scales hold one value for every design system but a system states its own geometry for a control (a button 48 tall in one system and 40 in another, both drawn from a `size` scale that reads 48 in both), the geometry is a role token in the `control` structure group (contract version 5). A component reads the role; each template answers it with its own number; a layer may answer differently. Roles emit like `size.*`: a number on native, a `rem` string on web.
+
+| Token | The number a template states |
+|---|---|
+| `control.button_height` | a button's default height |
+| `control.button_radius` | a button's corner radius |
+| `control.button_padding_start`, `control.button_padding_end` | a button's inline paddings, from the border inward |
+| `control.button_icon_size` | the glyph size inside a button |
+| `control.field_height` | a single-line field's height |
+| `control.field_radius` | a field frame's corner radius |
+| `control.field_icon_size` | the glyph size inside a field (status icon, caret) |
+| `control.checkbox_size`, `control.checkbox_border` | a checkbox's box size and border width |
+| `control.option_height` | one option row in a select list |
+
+Two role type sets accompany them in the `type` group: `type.button_label`, the set a button label is drawn in, and `type.field_label_raised`, the set a floating field label is drawn in once raised. Eight role colors accompany them in the `color` group: `color.button_tonal`, `color.button_tonal_hover`, `color.button_tonal_active`, `color.text_on_button_tonal`, `color.button_elevated`, `color.button_elevated_hover`, `color.button_elevated_active` and `color.control_checked`, the fill of a checked checkbox or radio.

@@ -23,7 +23,7 @@ Each scheme (`light`, `dark`, `light_medium_contrast`, `light_high_contrast`, `d
 |---|---|---|
 | `polarity` | string | `'light'` or `'dark'` |
 | `scales` | object | `{ base_font_size, miniUnit, stepPairIncrement }` |
-| `tokens` | object | 469 contract tokens, unit-free (contract version 4) |
+| `tokens` | object | 490 contract tokens, unit-free (contract version 5) |
 | `meta` | object | Contract metadata |
 | `from_default` | string[] | Sorted keys completed from the default template |
 

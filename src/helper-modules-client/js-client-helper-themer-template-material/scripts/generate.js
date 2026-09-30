@@ -29,6 +29,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
 const outDir = process.argv[2] || resolve(moduleRoot, 'data');
 const scssDir = resolve(moduleRoot, 'node_modules/@material/web/tokens/versions/v0_192');
+// Component token files: the pinned version set first, then the package's
+// unversioned set, which alone states the spacing tokens
+const compDirs = [scssDir, resolve(moduleRoot, 'node_modules/@material/web/tokens')];
 
 // --- Provenance capture ---------------------------------------------------
 const defaultPkgJson = JSON.parse(
@@ -71,7 +74,7 @@ const ICONS = materialIcons.tokens;
 const provenance = Object.freeze({
   default_version: defaultVersion,
   default_shasum: installedShasum,
-  generator_schema: 'v2',
+  generator_schema: 'v3',
   icons: Object.freeze({
     package: '@material-symbols/svg-400',
     version: materialIcons.version,
@@ -135,6 +138,26 @@ function parseTypeScale () {
     }
   }
   return roles;
+}
+
+/********************************************************************
+Read one hardcoded pixel value from a component token file
+(`'container-height': if($exclude-hardcoded-values, null, 40px)`).
+
+@param {String} file - File name under the component token directories
+@param {String} name - Token name inside the file
+
+@return {Number} - Pixels
+*********************************************************************/
+function getComponentPx (file, name) {
+  for (const dir of compDirs) {
+    const content = readFileSync(resolve(dir, file), 'utf8');
+    const match = content.match(new RegExp('\'' + name + '\':\\s*if\\(\\$exclude-hardcoded-values, null, (\\d+)px\\)'));
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+  }
+  throw new Error(file + ' does not state ' + name + ' as a pixel value');
 }
 
 // --- Value conversion ----------------------------------------------------
@@ -350,6 +373,27 @@ const GRID_VALUES = {
   'grid.margin_max': 24
 };
 
+// Control roles (v5): the geometry Material states for its own controls,
+// read from the pinned component token files. The field height is the sum
+// of the field's block spaces and its body-large input line height.
+function buildControlValues (typeRoles) {
+  return {
+    'control.button_height': getComponentPx('_md-comp-filled-button.scss', 'container-height'),
+    'control.button_radius': SHAPE_VALUES['shape.radius_max'],
+    'control.button_padding_start': getComponentPx('_md-comp-filled-button.scss', 'leading-space'),
+    'control.button_padding_end': getComponentPx('_md-comp-filled-button.scss', 'trailing-space'),
+    'control.button_icon_size': getComponentPx('_md-comp-filled-button.scss', 'with-icon-icon-size'),
+    'control.field_height': getComponentPx('_md-comp-outlined-text-field.scss', 'top-space') +
+      getComponentPx('_md-comp-outlined-text-field.scss', 'bottom-space') +
+      remToPx(typeRoles['body-large']['line-height']),
+    'control.field_radius': SHAPE_VALUES['shape.radius_04'],
+    'control.field_icon_size': getComponentPx('_md-comp-outlined-text-field.scss', 'trailing-icon-size'),
+    'control.checkbox_size': getComponentPx('_md-comp-checkbox.scss', 'container-size'),
+    'control.checkbox_border': getComponentPx('_md-comp-checkbox.scss', 'unselected-outline-width'),
+    'control.option_height': getComponentPx('_md-comp-outlined-select.scss', 'menu-list-item-container-height')
+  };
+}
+
 // Size values (Material icon defaults)
 const SIZE_VALUES = {
   'size.icon_01': 16,
@@ -364,31 +408,39 @@ function buildTokens (schemeName) {
   const schemeData = SCHEMES[schemeName];
   const scheme = schemeData.scheme;
 
-  // Color tokens from material-color-utilities
-  for (const [materialName, superloomKey] of Object.entries(mapping.color)) {
-    if (!contractKeySet[superloomKey]) {
-      continue;
-    }
+  // Color tokens from material-color-utilities; one Material token may answer several keys
+  for (const [materialName, target] of Object.entries(mapping.color)) {
     const camelName = materialToCamel(materialName);
     const argb = scheme[camelName];
-    if (argb !== undefined) {
-      const hex = hexFromArgb(argb);
-      tokens[superloomKey] = hex;
+    if (argb === undefined) {
+      continue;
+    }
+    for (const superloomKey of [].concat(target)) {
+      if (contractKeySet[superloomKey]) {
+        tokens[superloomKey] = hexFromArgb(argb);
+      }
     }
   }
 
-  // Type tokens from SCSS
+  // Type tokens from SCSS; one Material role may answer several keys
   const typeRoles = parseTypeScale();
-  for (const [materialName, superloomKey] of Object.entries(mapping.type)) {
-    if (!contractKeySet[superloomKey]) {
-      continue;
-    }
+  for (const [materialName, target] of Object.entries(mapping.type)) {
     // Mapping uses underscores, SCSS uses hyphens
     const scssName = materialName.replace(/_/g, '-');
     const def = typeRoles[scssName];
-    if (def && def.size) {
-      tokens[superloomKey] = convertTypeSet(materialName, def);
+    if (!def || !def.size) {
+      continue;
     }
+    for (const superloomKey of [].concat(target)) {
+      if (contractKeySet[superloomKey]) {
+        tokens[superloomKey] = convertTypeSet(materialName, def);
+      }
+    }
+  }
+
+  // Control roles (v5)
+  for (const [sKey, value] of Object.entries(buildControlValues(typeRoles))) {
+    tokens[sKey] = value;
   }
 
   // Motion durations
@@ -543,9 +595,10 @@ for (const schemeName of SCHEME_NAMES) {
     }
   }
 
-  // Every anatomy and icon token is Material's own, never completed from the default template
+  // Every anatomy, icon, control and role token is Material's own, never completed from the default template
   for (const key of scheme.from_default) {
-    if (key.indexOf('anatomy.') === 0 || key.indexOf('icon.') === 0) {
+    if (key.indexOf('anatomy.') === 0 || key.indexOf('icon.') === 0 || key.indexOf('control.') === 0 ||
+        /^color\.(button_tonal|button_elevated|text_on_button_tonal|control_checked)|^type\.(button_label|field_label_raised)/.test(key)) {
       throw new Error(schemeName + ' completed ' + key + ' from the default template');
     }
   }

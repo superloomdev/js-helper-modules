@@ -1,6 +1,9 @@
 // Info: Material 3 to Superloom token mapping table.
 //
-// Maps every Material token at the pinned upstream to a Superloom contract key.
+// Maps every Material token at the pinned upstream to a Superloom contract key,
+// or to a list of keys when one Material token answers several Superloom roles
+// (Material's primary is the filled button, the checked control and the link;
+// Material has no separate hover color, a state layer draws hover instead).
 // Material names appear only in this file; the generator reads this table and
 // produces themes in Superloom's vocabulary.
 //
@@ -11,20 +14,20 @@ export default Object.freeze({
 
   color: {
     // Primary / interactive
-    primary: 'color.interactive',
-    on_primary: 'color.text_on_color',
-    primary_container: 'color.button_primary',
+    primary: ['color.interactive', 'color.button_primary', 'color.button_primary_hover', 'color.button_primary_active', 'color.link_primary', 'color.control_checked'],
+    on_primary: ['color.text_on_color', 'color.icon_on_color'],
+    primary_container: 'color.highlight',
     on_primary_container: 'color.text_on_color_disabled',
-    primary_fixed: 'color.button_primary_hover',
-    primary_fixed_dim: 'color.link_primary',
+    primary_fixed: 'color.link_primary_hover',
+    primary_fixed_dim: 'color.link_inverse',
     on_primary_fixed: 'color.text_on_color',
     on_primary_fixed_variant: 'color.text_on_color',
 
     // Secondary
-    secondary: 'color.button_secondary',
+    secondary: ['color.button_secondary', 'color.focus'],
     on_secondary: 'color.text_on_color',
-    secondary_container: 'color.button_secondary_hover',
-    on_secondary_container: 'color.text_on_color',
+    secondary_container: ['color.button_secondary_hover', 'color.button_tonal', 'color.button_tonal_hover', 'color.button_tonal_active'],
+    on_secondary_container: 'color.text_on_button_tonal',
     secondary_fixed: 'color.button_tertiary',
     secondary_fixed_dim: 'color.link_secondary',
     on_secondary_fixed: 'color.text_on_color',
@@ -50,21 +53,21 @@ export default Object.freeze({
     background: 'color.background',
     on_background: 'color.text_primary',
     surface: 'color.background',
-    on_surface: 'color.text_primary',
+    on_surface: ['color.text_primary', 'color.icon_primary'],
     surface_bright: 'color.background_hover',
     surface_container: 'color.layer_02',
     surface_container_high: 'color.layer_03',
     surface_container_highest: 'color.layer_active_01',
-    surface_container_low: 'color.layer_01',
+    surface_container_low: ['color.layer_01', 'color.button_elevated', 'color.button_elevated_hover', 'color.button_elevated_active'],
     surface_container_lowest: 'color.layer_hover_01',
     surface_dim: 'color.background_selected',
     surface_variant: 'color.field_01',
-    on_surface_variant: 'color.text_secondary',
-    surface_tint: 'color.highlight',
+    on_surface_variant: ['color.text_secondary', 'color.icon_secondary'],
+    surface_tint: 'color.focus_inset',
 
     // Inverse
     inverse_surface: 'color.background_inverse',
-    inverse_on_surface: 'color.text_inverse',
+    inverse_on_surface: ['color.text_inverse', 'color.icon_inverse'],
     inverse_primary: 'color.focus_inverse',
 
     // Outline / border
@@ -79,7 +82,7 @@ export default Object.freeze({
   type: {
     body_large: 'type.body02',
     body_medium: 'type.body01',
-    body_small: 'type.caption01',
+    body_small: ['type.caption01', 'type.field_label_raised'],
     display_large: 'type.display01',
     display_medium: 'type.display02',
     display_small: 'type.display03',
@@ -89,7 +92,7 @@ export default Object.freeze({
     title_large: 'type.heading02',
     title_medium: 'type.heading01',
     title_small: 'type.heading_compact_01',
-    label_large: 'type.label01',
+    label_large: ['type.label01', 'type.button_label'],
     label_medium: 'type.label02',
     label_small: 'type.legal01'
   },
