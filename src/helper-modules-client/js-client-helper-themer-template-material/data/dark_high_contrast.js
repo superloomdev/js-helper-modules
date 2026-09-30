@@ -27,13 +27,24 @@ export default Object.freeze({
   'palette': {},
   'tokens': {
     'color.interactive': '#f5edff',
+    'color.button_primary': '#f5edff',
+    'color.button_primary_hover': '#f5edff',
+    'color.button_primary_active': '#f5edff',
+    'color.link_primary': '#f5edff',
+    'color.control_checked': '#f5edff',
     'color.text_on_color': '#000000',
-    'color.button_primary': '#cbb9fa',
+    'color.icon_on_color': '#000000',
+    'color.highlight': '#cbb9fa',
     'color.text_on_color_disabled': '#0f0033',
-    'color.button_primary_hover': '#e9ddff',
-    'color.link_primary': '#cfbdfe',
+    'color.link_primary_hover': '#e9ddff',
+    'color.link_inverse': '#cfbdfe',
     'color.button_secondary': '#f5edff',
+    'color.focus': '#f5edff',
     'color.button_secondary_hover': '#c8bfd8',
+    'color.button_tonal': '#c8bfd8',
+    'color.button_tonal_hover': '#c8bfd8',
+    'color.button_tonal_active': '#c8bfd8',
+    'color.text_on_button_tonal': '#0d081a',
     'color.button_tertiary': '#e8def8',
     'color.link_secondary': '#cbc2db',
     'color.button_tertiary_hover': '#ffebef',
@@ -45,18 +56,24 @@ export default Object.freeze({
     'color.text_error': '#220001',
     'color.background': '#141218',
     'color.text_primary': '#ffffff',
+    'color.icon_primary': '#ffffff',
     'color.background_hover': '#524f55',
     'color.layer_02': '#322f35',
     'color.layer_03': '#3d3a41',
     'color.layer_active_01': '#48464c',
     'color.layer_01': '#211f24',
+    'color.button_elevated': '#211f24',
+    'color.button_elevated_hover': '#211f24',
+    'color.button_elevated_active': '#211f24',
     'color.layer_hover_01': '#000000',
     'color.background_selected': '#141218',
     'color.field_01': '#49454e',
     'color.text_secondary': '#ffffff',
-    'color.highlight': '#cfbdfe',
+    'color.icon_secondary': '#ffffff',
+    'color.focus_inset': '#cfbdfe',
     'color.background_inverse': '#e6e0e9',
     'color.text_inverse': '#000000',
+    'color.icon_inverse': '#000000',
     'color.focus_inverse': '#4e3f77',
     'color.border_subtle_01': '#f4eef9',
     'color.border_subtle_02': '#c6c0cb',
@@ -79,6 +96,14 @@ export default Object.freeze({
       'font_family': 'sans'
     },
     'type.caption01': {
+      'type_set': true,
+      'font_size': 12,
+      'line_height_px': 16,
+      'letter_spacing': 0.4,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.field_label_raised': {
       'type_set': true,
       'font_size': 12,
       'line_height_px': 16,
@@ -166,6 +191,14 @@ export default Object.freeze({
       'weight': 500,
       'font_family': 'sans'
     },
+    'type.button_label': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 500,
+      'font_family': 'sans'
+    },
     'type.label02': {
       'type_set': true,
       'font_size': 12,
@@ -182,6 +215,17 @@ export default Object.freeze({
       'weight': 500,
       'font_family': 'sans'
     },
+    'control.button_height': 40,
+    'control.button_radius': 9999,
+    'control.button_padding_start': 24,
+    'control.button_padding_end': 24,
+    'control.button_icon_size': 18,
+    'control.field_height': 56,
+    'control.field_radius': 4,
+    'control.field_icon_size': 24,
+    'control.checkbox_size': 18,
+    'control.checkbox_border': 2,
+    'control.option_height': 48,
     'motion.duration_fast_01': 50,
     'motion.duration_fast_02': 100,
     'motion.duration_fast_03': 150,
@@ -1150,7 +1194,7 @@ export default Object.freeze({
     'color.background_inverse_hover': {
       'op': 'rampStep',
       'args': [
-        0
+        9
       ]
     },
     'color.background_selected_hover': {
@@ -1447,42 +1491,10 @@ export default Object.freeze({
         10
       ]
     },
-    'color.icon_inverse': {
-      'op': 'rampStep',
-      'args': [
-        10
-      ]
-    },
-    'color.icon_on_color': {
-      'op': 'rampStep',
-      'args': [
-        10
-      ]
-    },
     'color.icon_on_color_disabled': {
       'op': 'rampStep',
       'args': [
-        10
-      ]
-    },
-    'color.icon_primary': {
-      'op': 'rampStep',
-      'args': [
-        10
-      ]
-    },
-    'color.icon_secondary': {
-      'op': 'rampStep',
-      'args': [
-        7
-      ]
-    },
-    'color.focus': '#0f62fe',
-    'color.focus_inset': '#0f62fe',
-    'color.link_inverse': {
-      'op': 'rampStep',
-      'args': [
-        7
+        0
       ]
     },
     'color.link_inverse_active': {
@@ -1503,7 +1515,6 @@ export default Object.freeze({
         7
       ]
     },
-    'color.link_primary_hover': '{color.interactive}',
     'color.support_caution_major': {
       'op': 'rampStep',
       'args': [
@@ -1738,7 +1749,6 @@ export default Object.freeze({
         3
       ]
     },
-    'color.button_primary_active': '{color.interactive}',
     'color.button_secondary_active': {
       'op': 'rampStep',
       'args': [
@@ -2903,6 +2913,30 @@ export default Object.freeze({
     'color.button_tertiary_hover': {
       'group': 'color'
     },
+    'color.button_tonal': {
+      'group': 'color'
+    },
+    'color.button_tonal_active': {
+      'group': 'color'
+    },
+    'color.button_tonal_hover': {
+      'group': 'color'
+    },
+    'color.text_on_button_tonal': {
+      'group': 'color'
+    },
+    'color.button_elevated': {
+      'group': 'color'
+    },
+    'color.button_elevated_active': {
+      'group': 'color'
+    },
+    'color.button_elevated_hover': {
+      'group': 'color'
+    },
+    'color.control_checked': {
+      'group': 'color'
+    },
     'color.notification_action_hover': {
       'group': 'color'
     },
@@ -3344,6 +3378,12 @@ export default Object.freeze({
     'type.quotation02': {
       'group': 'typeSet'
     },
+    'type.button_label': {
+      'group': 'typeSet'
+    },
+    'type.field_label_raised': {
+      'group': 'typeSet'
+    },
     'font.family.sans': {
       'group': 'raw'
     },
@@ -3656,6 +3696,39 @@ export default Object.freeze({
     'stacking.floating': {
       'group': 'raw'
     },
+    'control.button_height': {
+      'group': 'dimension'
+    },
+    'control.button_radius': {
+      'group': 'dimension'
+    },
+    'control.button_padding_start': {
+      'group': 'dimension'
+    },
+    'control.button_padding_end': {
+      'group': 'dimension'
+    },
+    'control.button_icon_size': {
+      'group': 'dimension'
+    },
+    'control.field_height': {
+      'group': 'dimension'
+    },
+    'control.field_radius': {
+      'group': 'dimension'
+    },
+    'control.field_icon_size': {
+      'group': 'dimension'
+    },
+    'control.checkbox_size': {
+      'group': 'dimension'
+    },
+    'control.checkbox_border': {
+      'group': 'dimension'
+    },
+    'control.option_height': {
+      'group': 'dimension'
+    },
     'icon.accessibility': {
       'group': 'raw'
     },
@@ -3936,7 +4009,6 @@ export default Object.freeze({
     'color.button_danger_primary',
     'color.button_danger_secondary',
     'color.button_disabled',
-    'color.button_primary_active',
     'color.button_secondary_active',
     'color.button_separator',
     'color.button_tertiary_active',
@@ -3945,15 +4017,9 @@ export default Object.freeze({
     'color.field_hover_01',
     'color.field_hover_02',
     'color.field_hover_03',
-    'color.focus',
-    'color.focus_inset',
     'color.icon_disabled',
     'color.icon_interactive',
-    'color.icon_inverse',
-    'color.icon_on_color',
     'color.icon_on_color_disabled',
-    'color.icon_primary',
-    'color.icon_secondary',
     'color.layer_accent_01',
     'color.layer_accent_02',
     'color.layer_accent_03',
@@ -3978,11 +4044,9 @@ export default Object.freeze({
     'color.layer_selected_hover_02',
     'color.layer_selected_hover_03',
     'color.layer_selected_inverse',
-    'color.link_inverse',
     'color.link_inverse_active',
     'color.link_inverse_hover',
     'color.link_inverse_visited',
-    'color.link_primary_hover',
     'color.notification_action_hover',
     'color.notification_action_tertiary_inverse',
     'color.notification_action_tertiary_inverse_active',
@@ -4139,8 +4203,8 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '5aadc2f02ab144fcbf3854e26775f2d34514316a',
-    'generator_schema': 'v2',
+    'default_shasum': '177bd1cc7e43386a3b5cc9d88d49022a9439d941',
+    'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
       'version': '0.47.4',
