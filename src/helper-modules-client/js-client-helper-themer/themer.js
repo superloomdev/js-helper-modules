@@ -310,8 +310,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     /********************************************************************
     Audit a built theme's color roles against the engine's role rules:
     every content role reads on its surface role, roles that mean
-    different things resolve to different values, and every shadow
-    level is translucent. A template test runs this over every scheme
+    different things resolve to different values (and, under highlight
+    press feedback, every hover and active fill differs from its rest),
+    and every shadow level is translucent. A template test runs this over every scheme
     so a value that would draw an unreadable label, or a danger button
     that reads as disabled, is caught before any component draws it.
 
@@ -374,8 +375,10 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
         }
       }
 
-      // Distinct: two roles with different meanings do not share a value
-      for (const pair of ROLES.distinct) {
+      // Distinct: two roles with different meanings do not share a value; under
+      // highlight press feedback a hover or active fill also differs from its rest
+      const distinct = tokens['feedback.press'] === 'highlight' ? ROLES.distinct.concat(ROLES.distinct_highlight) : ROLES.distinct;
+      for (const pair of distinct) {
         if (!present(pair[0]) || !present(pair[1])) {
           continue;
         }

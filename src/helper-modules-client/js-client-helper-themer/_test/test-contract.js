@@ -1660,3 +1660,47 @@ describe('auditRoles', () => {
   });
 
 });
+
+
+describe('auditRoles - highlight press feedback', () => {
+
+  // A theme whose hover and active fills differ from their rest fills
+  function highlightTheme (press) {
+    const theme = readableTheme();
+    Object.assign(theme.tokens, {
+      'feedback.press': press,
+      'color.background_hover': '#f4f4f4', 'color.background_active': '#c6c6c6',
+      'color.button_primary_hover': '#0050e6', 'color.button_primary_active': '#002d9c',
+      'color.button_secondary_hover': '#474747', 'color.button_danger_hover': '#a2191f',
+      'color.button_tertiary_hover': '#0050e6', 'color.button_tonal_hover': '#e0e0e0'
+    });
+    return theme;
+  }
+
+  it('should pass a highlight theme whose hover and active fills step away from their rest fills', () => {
+    assert.deepEqual(Themer.auditRoles(highlightTheme('highlight')).findings, []);
+  });
+
+  it('should report a hover fill equal to its rest fill when the theme shows press by swapping fills', () => {
+    const theme = highlightTheme('highlight');
+    theme.tokens['color.background_hover'] = '#ffffff';
+    assert.deepEqual(Themer.auditRoles(theme).findings, [
+      { rule: 'distinct', tokens: ['color.background_hover', 'color.background'], value: '#ffffff' }
+    ]);
+  });
+
+  it('should not apply the fill rules when the theme shows press with a state layer', () => {
+    const theme = highlightTheme('ripple');
+    theme.tokens['color.background_hover'] = '#ffffff';
+    assert.deepEqual(Themer.auditRoles(theme).findings, []);
+  });
+
+  it('should report a selected surface equal to the page under every press mode', () => {
+    const theme = highlightTheme('ripple');
+    theme.tokens['color.background_selected'] = '#ffffff';
+    assert.deepEqual(Themer.auditRoles(theme).findings, [
+      { rule: 'distinct', tokens: ['color.background_selected', 'color.background'], value: '#ffffff' }
+    ]);
+  });
+
+});

@@ -22,48 +22,53 @@ export default Object.freeze({
     on_primary_container: 'color.text_on_color_disabled',
     primary_fixed: 'color.link_primary_hover',
     primary_fixed_dim: 'color.link_inverse',
-    on_primary_fixed: 'color.text_on_color',
-    on_primary_fixed_variant: 'color.text_on_color',
+    on_primary_fixed: [],
+    on_primary_fixed_variant: [],
 
     // Secondary
     secondary: ['color.button_secondary', 'color.focus'],
-    on_secondary: 'color.text_on_color',
+    on_secondary: [],
     secondary_container: ['color.button_secondary_hover', 'color.button_tonal', 'color.button_tonal_hover', 'color.button_tonal_active'],
     on_secondary_container: 'color.text_on_button_tonal',
     secondary_fixed: [],
     secondary_fixed_dim: 'color.link_secondary',
-    on_secondary_fixed: 'color.text_on_color',
-    on_secondary_fixed_variant: 'color.text_on_color',
+    on_secondary_fixed: [],
+    on_secondary_fixed_variant: [],
 
     // Tertiary
     tertiary: [],
-    on_tertiary: 'color.text_on_color',
+    on_tertiary: [],
     tertiary_container: 'color.notification_background_info',
-    on_tertiary_container: 'color.text_on_color',
+    on_tertiary_container: [],
     tertiary_fixed: 'color.notification_background_success',
     tertiary_fixed_dim: 'color.link_visited',
-    on_tertiary_fixed: 'color.text_on_color',
-    on_tertiary_fixed_variant: 'color.text_on_color',
+    on_tertiary_fixed: [],
+    on_tertiary_fixed_variant: [],
 
     // Error: the system has no danger button; a destructive action takes the error roles (error for fills,
     // icons and text indicating urgency, on-error for text on it), and error text is drawn in error itself
     error: ['color.support_error', 'color.text_error', 'color.button_danger_primary', 'color.button_danger_secondary', 'color.button_danger_hover', 'color.button_danger_active'],
-    on_error: 'color.text_on_color',
+    // Text on a colored fill is one Superloom role, answered by on-primary (the filled button's label);
+    // on-error equals it in the light schemes and reads on error in the dark ones
+    on_error: [],
     error_container: 'color.notification_background_error',
     on_error_container: [],
 
     // Background / surface
     background: 'color.background',
-    on_background: 'color.text_primary',
+    on_background: [],
     surface: 'color.background',
     on_surface: ['color.text_primary', 'color.icon_primary'],
     surface_bright: 'color.background_hover',
     surface_container: 'color.layer_02',
     surface_container_high: 'color.layer_03',
-    surface_container_highest: 'color.layer_active_01',
+    // A selected surface: the highest container, which on-surface text reads on in every scheme (the
+    // secondary container Material selects with needs on-secondary-container text, a role the contract
+    // gains with the selected-state request)
+    surface_container_highest: ['color.layer_active_01', 'color.background_selected'],
     surface_container_low: ['color.layer_01', 'color.button_elevated', 'color.button_elevated_hover', 'color.button_elevated_active'],
     surface_container_lowest: 'color.layer_hover_01',
-    surface_dim: 'color.background_selected',
+    surface_dim: [],
     surface_variant: 'color.field_01',
     on_surface_variant: ['color.text_secondary', 'color.icon_secondary'],
     surface_tint: 'color.focus_inset',
@@ -141,7 +146,7 @@ export default Object.freeze({
   },
 
   elevation: {
-    level0: 'shadow.level_01',
+    level0: [],
     level1: 'shadow.level_01',
     level2: 'shadow.level_02',
     level3: 'shadow.level_03',

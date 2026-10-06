@@ -35,7 +35,7 @@ export default Object.freeze({
     'color.background_active': {
       'op': 'rampStep',
       'args': [
-        0
+        3
       ]
     },
     'color.background_brand': {
@@ -47,7 +47,7 @@ export default Object.freeze({
     'color.background_hover': {
       'op': 'rampStep',
       'args': [
-        0
+        1
       ]
     },
     'color.background_inverse': {
@@ -65,13 +65,13 @@ export default Object.freeze({
     'color.background_selected': {
       'op': 'rampStep',
       'args': [
-        0
+        2
       ]
     },
     'color.background_selected_hover': {
       'op': 'rampStep',
       'args': [
-        0
+        3
       ]
     },
     'color.layer_01': {

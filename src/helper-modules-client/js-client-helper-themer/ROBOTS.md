@@ -80,7 +80,9 @@ auditRoles(theme) -> { success, findings } | async:no
   content role reads on its surface role at the rule's minimum ratio (a translucent content color
   is composited on the surface, a translucent surface on color.background); roles that mean
   different things resolve to different values (a danger fill equal to the disabled fill is a
-  danger button that reads as disabled); every shadow.level_* is translucent. findings entries are
+  danger button that reads as disabled; a selected surface equal to the page), and when
+  feedback.press is highlight every hover and active fill differs from its rest fill; every
+  shadow.level_* is translucent. findings entries are
   { rule: 'contrast', tokens: [content, surface], ratio, minimum } | { rule: 'distinct', tokens, value }
   | { rule: 'shadow', tokens: [level], value } | { rule: 'missing', tokens: [name] }. Placeholder text
   is not a rule: a reference system draws it below 4.5 by design. Throws TypeError only when theme

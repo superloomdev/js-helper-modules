@@ -10,7 +10,8 @@
 //              a translucent content color is composited on the surface first
 //   distinct - two roles that mean different things must not share a value
 //              (a disabled fill equal to a danger fill is a danger button
-//              that reads as disabled)
+//              that reads as disabled); under highlight press feedback a
+//              hover or active fill must also differ from its rest fill
 //   shadow   - every shadow level is drawn translucent; an opaque shadow is
 //              a hard ring, not a lift
 //
@@ -83,7 +84,26 @@ const DISTINCT = Object.freeze([
   ['color.support_error', 'color.border_strong_01'],
   // Inverse is the other polarity
   ['color.background_inverse', 'color.background'],
-  ['color.icon_inverse', 'color.icon_primary']
+  ['color.icon_inverse', 'color.icon_primary'],
+  // A selected surface shows
+  ['color.background_selected', 'color.background']
+]);
+
+
+// ~~~~~~~~~~~~~~~~~~~~ Distinct under highlight ~~~~~~~~~~~~~~~~~~~~
+// [role, role] that must differ when the theme shows hover and press by
+// swapping fills (`feedback.press: highlight`); under a state layer or an
+// opacity fade the fills are not what changes, so these do not apply
+
+const DISTINCT_HIGHLIGHT = Object.freeze([
+  ['color.background_hover', 'color.background'],
+  ['color.background_active', 'color.background'],
+  ['color.button_primary_hover', 'color.button_primary'],
+  ['color.button_primary_active', 'color.button_primary'],
+  ['color.button_secondary_hover', 'color.button_secondary'],
+  ['color.button_danger_hover', 'color.button_danger_primary'],
+  ['color.button_tertiary_hover', 'color.background'],
+  ['color.button_tonal_hover', 'color.button_tonal']
 ]);
 
 
@@ -98,5 +118,6 @@ const SHADOW_LEVELS = Object.freeze([
 export default Object.freeze({
   contrast: CONTRAST,
   distinct: DISTINCT,
+  distinct_highlight: DISTINCT_HIGHLIGHT,
   shadow_levels: SHADOW_LEVELS
 });

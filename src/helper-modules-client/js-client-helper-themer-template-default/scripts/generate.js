@@ -283,7 +283,18 @@ function colorStep (name) {
   if (name === 'color.background_inverse_hover') {
     return 9;
   }
-  // Background and its variants: step 0
+  // Background state fills step away from the page (the press feedback is
+  // highlight, so the fill is what shows hover, press and selection)
+  if (name === 'color.background_hover') {
+    return 1;
+  }
+  if (name === 'color.background_selected') {
+    return 2;
+  }
+  if (name === 'color.background_active' || name === 'color.background_selected_hover') {
+    return 3;
+  }
+  // Background and its other variants: step 0
   if (/^color\.background/.test(name)) {
     return 0;
   }

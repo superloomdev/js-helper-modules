@@ -16,6 +16,7 @@ import themerLoader from 'helper-themer';
 import defaultProfile from 'helper-themer-template-default';
 import profile from 'helper-themer-template-material';
 import oracle from './fixtures/parity-oracle.json' with { type: 'json' };
+import mapping from '../data/mapping.js';
 
 const { Lib } = loader();
 const Themer = themerLoader(Lib, {});
@@ -253,8 +254,9 @@ describe('material template - from_default correctness', () => {
     });
 
     it('should have every from_default key deepEqual the default value in ' + schemeName, () => {
+      // The generator completes each scheme from the default scheme of the same polarity
       const fromDefault = profile.schemes[schemeName].from_default;
-      const defaultScheme = defaultProfile.schemes.light;
+      const defaultScheme = defaultProfile.schemes[profile.schemes[schemeName].polarity];
       for (const key of fromDefault) {
         assert.deepEqual(profile.schemes[schemeName].tokens[key],
           defaultScheme.tokens[key],
@@ -278,6 +280,40 @@ describe('material template - from_default correctness', () => {
     });
 
   }
+
+});
+
+
+describe('material template - mapping', () => {
+
+  // Roles one Superloom key may take from two Material roles, because Material
+  // derives them equal in every scheme (background and surface); every other key
+  // is answered by exactly one role, so the generator never lets the last of
+  // several roles win (on-background and on-surface differ in the contrast schemes)
+  const EQUAL_BY_DEFINITION = {
+    'color.background': ['background', 'surface']
+  };
+
+  it('should answer every Superloom key from one Material role, or from roles Material defines equal', () => {
+    const writers = {};
+    for (const [group, table] of Object.entries(mapping)) {
+      if (!Lib.Utils.isObject(table) || Array.isArray(table)) {
+        continue;
+      }
+      for (const [role, target] of Object.entries(table)) {
+        for (const key of [].concat(target)) {
+          writers[key] = (writers[key] || []).concat(group === 'color' ? role : group + '.' + role);
+        }
+      }
+    }
+    const shared = {};
+    for (const [key, roles] of Object.entries(writers)) {
+      if (roles.length > 1) {
+        shared[key] = roles;
+      }
+    }
+    assert.deepEqual(shared, EQUAL_BY_DEFINITION);
+  });
 
 });
 
@@ -309,7 +345,8 @@ describe('material template - engine build', () => {
     assert.ok(shadow);
     // Native emission: { boxShadow: "layer1, layer2" }
     assert.ok(shadow.boxShadow, 'shadow.level_01 should have boxShadow property');
-    const parts = shadow.boxShadow.split(',').map(function (s) { return s.trim(); });
+    // Layers are comma-separated; a layer's rgba() color carries commas of its own
+    const parts = shadow.boxShadow.split(/,(?![^(]*\))/).map(function (s) { return s.trim(); });
     assert.equal(parts.length, 2, 'shadow.level_01 should have exactly 2 layers');
   });
 
