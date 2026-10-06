@@ -22,6 +22,7 @@ import createScale from './parts/scale.js';
 import createEmit from './parts/emit.js';
 import createResolve from './parts/resolve.js';
 import contract from './themer.contract.js';
+import ROLES from './themer.roles.js';
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -302,6 +303,105 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
       // Delegate to the validator, threading the contract registry
       return Validators.validateContract(theme, options, contract);
+
+    },
+
+
+    /********************************************************************
+    Audit a built theme's color roles against the engine's role rules:
+    every content role reads on its surface role, roles that mean
+    different things resolve to different values, and every shadow
+    level is translucent. A template test runs this over every scheme
+    so a value that would draw an unreadable label, or a danger button
+    that reads as disabled, is caught before any component draws it.
+
+    Returns { success, findings }. Throws TypeError only when theme or
+    theme.tokens is malformed; a missing token is a finding.
+
+    @param {Object} theme - A built theme with a tokens map (native projection)
+
+    @return {Object} - Audit result
+    @return {Boolean} .success - True when findings is empty
+    @return {Object[]} .findings - One entry per failed rule:
+      { rule: 'contrast', tokens: [content, surface], ratio, minimum } |
+      { rule: 'distinct', tokens: [a, b], value } |
+      { rule: 'shadow', tokens: [level], value } |
+      { rule: 'missing', tokens: [name] }
+    *********************************************************************/
+    auditRoles: function (theme) {
+
+      // Argument shape is a caller bug, so it throws
+      if (!Lib.Utils.isObject(theme) || Array.isArray(theme) || !Lib.Utils.isObject(theme.tokens) || Array.isArray(theme.tokens)) {
+        throw new TypeError('[helper-themer] theme.tokens ' + ERRORS.MUST_BE_PLAIN_OBJECT);
+      }
+      const tokens = theme.tokens;
+      const findings = [];
+      const missing = {};
+      const present = function (name) {
+        if (Lib.Utils.isString(tokens[name])) {
+          return true;
+        }
+        if (missing[name] !== true) {
+          missing[name] = true;
+          findings.push({ rule: 'missing', tokens: [name] });
+        }
+        return false;
+      };
+
+      // A translucent surface is seen over the page background
+      const surfaceOf = function (name) {
+        const surface = Parts.Color.parseHex(tokens[name]);
+        if (surface.a === 1 || !present('color.background')) {
+          return tokens[name];
+        }
+        const page = Parts.Color.parseHex(tokens['color.background']);
+        return Parts.Color.toHex({
+          r: surface.r * surface.a + page.r * (1 - surface.a),
+          g: surface.g * surface.a + page.g * (1 - surface.a),
+          b: surface.b * surface.a + page.b * (1 - surface.a),
+          a: 1
+        });
+      };
+
+      // Contrast: the content composited on its surface meets the minimum
+      for (const rule of ROLES.contrast) {
+        if (!present(rule[0]) || !present(rule[1])) {
+          continue;
+        }
+        const ratio = Parts.Color.contrastRatio(tokens[rule[0]], surfaceOf(rule[1]));
+        if (ratio < rule[2]) {
+          findings.push({ rule: 'contrast', tokens: [rule[0], rule[1]], ratio: Math.round(ratio * 100) / 100, minimum: rule[2] });
+        }
+      }
+
+      // Distinct: two roles with different meanings do not share a value
+      for (const pair of ROLES.distinct) {
+        if (!present(pair[0]) || !present(pair[1])) {
+          continue;
+        }
+        if (Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[0]])) === Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[1]]))) {
+          findings.push({ rule: 'distinct', tokens: [pair[0], pair[1]], value: tokens[pair[0]] });
+        }
+      }
+
+      // Shadow: every layer color of every level is translucent
+      for (const level of ROLES.shadow_levels) {
+        const value = tokens[level];
+        const list = Lib.Utils.isObject(value) && Lib.Utils.isString(value.boxShadow) ? value.boxShadow : null;
+        if (list === null) {
+          findings.push({ rule: 'missing', tokens: [level] });
+          continue;
+        }
+        const colors = list.match(/rgba?\([^)]*\)|#[0-9a-fA-F]{3,8}/g) || [];
+        const opaque = colors.some(function (c) {
+          return Parts.Color.parseHex(c).a === 1;
+        });
+        if (colors.length === 0 || opaque) {
+          findings.push({ rule: 'shadow', tokens: [level], value: list });
+        }
+      }
+
+      return { success: findings.length === 0, findings: findings };
 
     },
 

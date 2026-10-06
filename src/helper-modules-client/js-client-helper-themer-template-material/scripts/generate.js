@@ -258,27 +258,31 @@ const TINT_VALUES = {
   'tint.level_05': 0.14
 };
 
-// Elevation shadow recipes (from Material 3 spec, two-layer shadows)
+// Elevation shadow recipes (from Material 3 spec, two-layer shadows): the key
+// shadow is the shadow color at 0.3, the ambient at 0.15; the system's shadow
+// color is black in every scheme, so the layers carry it with its opacity
+const KEY = 'rgba(0, 0, 0, 0.3)';
+const AMBIENT = 'rgba(0, 0, 0, 0.15)';
 const ELEVATION_SHADOWS = {
   'shadow.level_01': { shadow: true, layers: [
-    { x: 0, y: 1, blur: 2, spread: 0, color: '{color.shadow}' },
-    { x: 0, y: 1, blur: 3, spread: 1, color: '{color.shadow}' }
+    { x: 0, y: 1, blur: 2, spread: 0, color: KEY },
+    { x: 0, y: 1, blur: 3, spread: 1, color: AMBIENT }
   ] },
   'shadow.level_02': { shadow: true, layers: [
-    { x: 0, y: 1, blur: 2, spread: 0, color: '{color.shadow}' },
-    { x: 0, y: 2, blur: 6, spread: 2, color: '{color.shadow}' }
+    { x: 0, y: 1, blur: 2, spread: 0, color: KEY },
+    { x: 0, y: 2, blur: 6, spread: 2, color: AMBIENT }
   ] },
   'shadow.level_03': { shadow: true, layers: [
-    { x: 0, y: 1, blur: 3, spread: 0, color: '{color.shadow}' },
-    { x: 0, y: 4, blur: 8, spread: 3, color: '{color.shadow}' }
+    { x: 0, y: 1, blur: 3, spread: 0, color: KEY },
+    { x: 0, y: 4, blur: 8, spread: 3, color: AMBIENT }
   ] },
   'shadow.level_04': { shadow: true, layers: [
-    { x: 0, y: 2, blur: 3, spread: 0, color: '{color.shadow}' },
-    { x: 0, y: 6, blur: 10, spread: 4, color: '{color.shadow}' }
+    { x: 0, y: 2, blur: 3, spread: 0, color: KEY },
+    { x: 0, y: 6, blur: 10, spread: 4, color: AMBIENT }
   ] },
   'shadow.level_05': { shadow: true, layers: [
-    { x: 0, y: 4, blur: 4, spread: 0, color: '{color.shadow}' },
-    { x: 0, y: 8, blur: 12, spread: 6, color: '{color.shadow}' }
+    { x: 0, y: 4, blur: 4, spread: 0, color: KEY },
+    { x: 0, y: 8, blur: 12, spread: 6, color: AMBIENT }
   ] }
 };
 

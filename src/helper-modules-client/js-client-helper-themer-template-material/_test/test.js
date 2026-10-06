@@ -282,6 +282,25 @@ describe('material template - from_default correctness', () => {
 });
 
 
+describe('material template - role audit', () => {
+
+  // The engine's role rules: every content role reads on its surface, roles
+  // that mean different things differ, every shadow level is translucent.
+  // Caught here, at the template, before any component draws the value.
+  for (const schemeName of SCHEME_NAMES) {
+
+    it('should pass the engine role audit for ' + schemeName + ' on native', () => {
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native');
+      const result = Themer.auditRoles(built);
+      assert.deepEqual(result.findings, [], 'role audit findings for ' + schemeName);
+      assert.equal(result.success, true);
+    });
+
+  }
+
+});
+
+
 describe('material template - engine build', () => {
 
   it('should build light on native and emit shadow.level_01 as two-layer boxShadow', () => {

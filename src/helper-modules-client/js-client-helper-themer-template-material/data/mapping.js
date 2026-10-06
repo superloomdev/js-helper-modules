@@ -14,7 +14,9 @@ export default Object.freeze({
 
   color: {
     // Primary / interactive
-    primary: ['color.interactive', 'color.button_primary', 'color.button_primary_hover', 'color.button_primary_active', 'color.link_primary', 'color.control_checked'],
+    // The outlined button draws its label and the text button its label in primary (hover and active fills
+    // equal the rest fill: the press is a state layer), so the tertiary kind's leaves take primary too
+    primary: ['color.interactive', 'color.button_primary', 'color.button_primary_hover', 'color.button_primary_active', 'color.link_primary', 'color.control_checked', 'color.button_tertiary', 'color.button_tertiary_hover', 'color.button_tertiary_active'],
     on_primary: ['color.text_on_color', 'color.icon_on_color'],
     primary_container: 'color.highlight',
     on_primary_container: 'color.text_on_color_disabled',
@@ -28,13 +30,13 @@ export default Object.freeze({
     on_secondary: 'color.text_on_color',
     secondary_container: ['color.button_secondary_hover', 'color.button_tonal', 'color.button_tonal_hover', 'color.button_tonal_active'],
     on_secondary_container: 'color.text_on_button_tonal',
-    secondary_fixed: 'color.button_tertiary',
+    secondary_fixed: [],
     secondary_fixed_dim: 'color.link_secondary',
     on_secondary_fixed: 'color.text_on_color',
     on_secondary_fixed_variant: 'color.text_on_color',
 
     // Tertiary
-    tertiary: 'color.button_tertiary_hover',
+    tertiary: [],
     on_tertiary: 'color.text_on_color',
     tertiary_container: 'color.notification_background_info',
     on_tertiary_container: 'color.text_on_color',
@@ -43,11 +45,12 @@ export default Object.freeze({
     on_tertiary_fixed: 'color.text_on_color',
     on_tertiary_fixed_variant: 'color.text_on_color',
 
-    // Error
-    error: 'color.support_error',
+    // Error: the system has no danger button; a destructive action takes the error roles (error for fills,
+    // icons and text indicating urgency, on-error for text on it), and error text is drawn in error itself
+    error: ['color.support_error', 'color.text_error', 'color.button_danger_primary', 'color.button_danger_secondary', 'color.button_danger_hover', 'color.button_danger_active'],
     on_error: 'color.text_on_color',
     error_container: 'color.notification_background_error',
-    on_error_container: 'color.text_error',
+    on_error_container: [],
 
     // Background / surface
     background: 'color.background',

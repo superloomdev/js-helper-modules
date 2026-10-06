@@ -45,6 +45,7 @@ emit(resolved, template, platform, options?)     -> { tokens, substituted, lossy
 validateTemplate(template)                       -> { success, errors }
 getContract()                                    -> Object
 validateContract(theme, options?)                -> { success, errors, warnings }
+auditRoles(theme)                                -> { success, findings }
 getPlatforms()                                   -> ['web', 'native']
 getCacheStats()                                  -> { hits, misses, evictions, size }
 clearCache()                                     -> undefined
@@ -55,7 +56,7 @@ clearCache()                                     -> undefined
 ## Token Contract
 
 The engine core is vocabulary-agnostic: buildTheme accepts any token names. Superloom's
-vocabulary, the token contract, ships in this package as data and is read through two functions.
+vocabulary, the token contract, ships in this package as data and is read through three functions.
 
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
@@ -73,6 +74,17 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   errors is empty. Structure and routes are validateTemplate's job; this function checks names and
   literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
   theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
+
+auditRoles(theme) -> { success, findings } | async:no
+  Checks a built theme's color roles against the engine's role rules (themer.roles.js): every
+  content role reads on its surface role at the rule's minimum ratio (a translucent content color
+  is composited on the surface, a translucent surface on color.background); roles that mean
+  different things resolve to different values (a danger fill equal to the disabled fill is a
+  danger button that reads as disabled); every shadow.level_* is translucent. findings entries are
+  { rule: 'contrast', tokens: [content, surface], ratio, minimum } | { rule: 'distinct', tokens, value }
+  | { rule: 'shadow', tokens: [level], value } | { rule: 'missing', tokens: [name] }. Placeholder text
+  is not a rule: a reference system draws it below 4.5 by design. Throws TypeError only when theme
+  or theme.tokens is malformed. A template's tests run this over every built scheme.
 
 ## Failure Model
 

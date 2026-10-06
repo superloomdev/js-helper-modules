@@ -290,12 +290,7 @@ export default Object.freeze({
         5
       ]
     },
-    'color.text_error': {
-      'op': 'rampStep',
-      'args': [
-        10
-      ]
-    },
+    'color.text_error': '{color.support_error}',
     'color.text_helper': {
       'op': 'rampStep',
       'args': [
@@ -308,12 +303,7 @@ export default Object.freeze({
         0
       ]
     },
-    'color.text_on_color': {
-      'op': 'rampStep',
-      'args': [
-        0
-      ]
-    },
+    'color.text_on_color': '#ffffff',
     'color.text_on_color_disabled': {
       'op': 'rampStep',
       'args': [
@@ -452,12 +442,7 @@ export default Object.freeze({
         0
       ]
     },
-    'color.icon_on_color': {
-      'op': 'rampStep',
-      'args': [
-        0
-      ]
-    },
+    'color.icon_on_color': '#ffffff',
     'color.icon_on_color_disabled': {
       'op': 'rampStep',
       'args': [
@@ -505,8 +490,22 @@ export default Object.freeze({
         7
       ]
     },
-    'color.link_primary': '{color.interactive}',
-    'color.link_primary_hover': '{color.interactive}',
+    'color.link_primary': {
+      'op': 'mix',
+      'args': [
+        'color.interactive',
+        'color.text_primary',
+        50
+      ]
+    },
+    'color.link_primary_hover': {
+      'op': 'mix',
+      'args': [
+        'color.interactive',
+        'color.text_primary',
+        50
+      ]
+    },
     'color.link_secondary': {
       'op': 'rampStep',
       'args': [
@@ -519,72 +518,45 @@ export default Object.freeze({
         7
       ]
     },
-    'color.support_caution_major': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_caution_minor': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_caution_undefined': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_caution_major': '{color.support_warning}',
+    'color.support_caution_minor': '{color.support_warning}',
+    'color.support_caution_undefined': '{color.support_info}',
     'color.support_error': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.button_danger_primary',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_error_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_error_inverse': '{color.button_danger_primary}',
     'color.support_info': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.interactive',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_info_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_info_inverse': '{color.interactive}',
     'color.support_success': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.support_success_inverse',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_success_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_success_inverse': '#15803d',
     'color.support_warning': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.support_warning_inverse',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_warning_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_warning_inverse': '#b45309',
     'color.toggle_off': {
       'op': 'rampStep',
       'args': [
@@ -609,12 +581,7 @@ export default Object.freeze({
         2
       ]
     },
-    'color.shadow': {
-      'op': 'rampStep',
-      'args': [
-        10
-      ]
-    },
+    'color.shadow': 'rgba(0, 0, 0, 0.3)',
     'color.ai_aura_end': {
       'op': 'rampStep',
       'args': [
@@ -742,29 +709,23 @@ export default Object.freeze({
       ]
     },
     'color.button_danger_active': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        3
+        'color.button_danger_primary',
+        'color.text_primary',
+        70
       ]
     },
     'color.button_danger_hover': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        3
+        'color.button_danger_primary',
+        'color.text_primary',
+        85
       ]
     },
-    'color.button_danger_primary': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_secondary': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
+    'color.button_danger_primary': '#b91c1c',
+    'color.button_danger_secondary': '{color.support_error}',
     'color.button_disabled': {
       'op': 'rampStep',
       'args': [
@@ -772,26 +733,25 @@ export default Object.freeze({
       ]
     },
     'color.button_primary': '{color.interactive}',
-    'color.button_primary_active': '{color.interactive}',
-    'color.button_primary_hover': '{color.interactive}',
-    'color.button_secondary': {
-      'op': 'rampStep',
+    'color.button_primary_active': {
+      'op': 'mix',
       'args': [
-        3
+        'color.interactive',
+        'color.text_primary',
+        70
       ]
     },
-    'color.button_secondary_active': {
-      'op': 'rampStep',
+    'color.button_primary_hover': {
+      'op': 'mix',
       'args': [
-        3
+        'color.interactive',
+        'color.text_primary',
+        85
       ]
     },
-    'color.button_secondary_hover': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
+    'color.button_secondary': '#393939',
+    'color.button_secondary_active': '#525252',
+    'color.button_secondary_hover': '#262626',
     'color.button_separator': {
       'op': 'rampStep',
       'args': [
@@ -799,21 +759,27 @@ export default Object.freeze({
       ]
     },
     'color.button_tertiary': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        3
+        'color.interactive',
+        'color.text_primary',
+        50
       ]
     },
     'color.button_tertiary_active': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        3
+        'color.interactive',
+        'color.text_primary',
+        70
       ]
     },
     'color.button_tertiary_hover': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        3
+        'color.interactive',
+        'color.text_primary',
+        85
       ]
     },
     'color.button_tonal': {

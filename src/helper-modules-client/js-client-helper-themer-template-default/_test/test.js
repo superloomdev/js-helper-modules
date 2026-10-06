@@ -129,6 +129,25 @@ describe('default template - contract validity', () => {
 });
 
 
+describe('default template - role audit', () => {
+
+  // The engine's role rules: every content role reads on its surface, roles
+  // that mean different things differ, every shadow level is translucent.
+  // Caught here, at the template, before any component draws the value.
+  for (const schemeName of ['light', 'dark']) {
+
+    it('should pass the engine role audit for ' + schemeName + ' on native', () => {
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native');
+      const result = Themer.auditRoles(built);
+      assert.deepEqual(result.findings, [], 'role audit findings for ' + schemeName);
+      assert.equal(result.success, true);
+    });
+
+  }
+
+});
+
+
 describe('default template - engine build', () => {
 
   it('should build light scheme on native with no violations', () => {

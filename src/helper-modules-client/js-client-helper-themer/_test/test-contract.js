@@ -1577,3 +1577,86 @@ describe('contract v2 - M11 segments value type', () => {
   });
 
 });
+
+
+// Helper: a built theme whose roles all read, to break one rule at a time
+function readableTheme () {
+  const tokens = {
+    'color.background': '#ffffff', 'color.layer_01': '#f4f4f4', 'color.field_01': '#f4f4f4',
+    'color.background_inverse': '#161616', 'color.background_selected': 'rgba(141, 141, 141, 0.2)',
+    'color.text_primary': '#161616', 'color.text_secondary': '#525252', 'color.text_helper': '#525252',
+    'color.text_error': '#b91c1c', 'color.text_inverse': '#ffffff', 'color.text_on_color': '#ffffff',
+    'color.text_on_button_tonal': '#161616', 'color.text_disabled': '#8d8d8d',
+    'color.link_primary': '#0f62fe', 'color.interactive': '#0f62fe', 'color.focus': '#0f62fe',
+    'color.button_primary': '#0f62fe', 'color.button_secondary': '#393939', 'color.button_tertiary': '#0f62fe',
+    'color.button_danger_primary': '#b91c1c', 'color.button_danger_secondary': '#b91c1c',
+    'color.button_tonal': '#f4f4f4', 'color.button_elevated': '#f4f4f4', 'color.button_disabled': '#c6c6c6',
+    'color.icon_primary': '#161616', 'color.icon_on_color': '#ffffff', 'color.icon_disabled': '#8d8d8d', 'color.icon_inverse': '#ffffff',
+    'color.support_error': '#b91c1c', 'color.border_strong_01': '#8d8d8d', 'color.border_interactive': '#0f62fe'
+  };
+  for (const level of ['01', '02', '03', '04', '05']) {
+    tokens['shadow.level_' + level] = { boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)' };
+  }
+  return { tokens: tokens };
+}
+
+
+describe('auditRoles', () => {
+
+  it('should throw TypeError when the theme or its tokens is not a plain object', () => {
+    assert.throws(() => Themer.auditRoles(null), TypeError);
+    assert.throws(() => Themer.auditRoles({ tokens: [] }), TypeError);
+  });
+
+  it('should pass a theme whose roles all read, differ where they must and lift with translucent shadows', () => {
+    const result = Themer.auditRoles(readableTheme());
+    assert.deepEqual(result, { success: true, findings: [] });
+  });
+
+  it('should report a content role that does not reach its minimum on its surface, with the ratio', () => {
+    const theme = readableTheme();
+    theme.tokens['color.button_danger_primary'] = '#c6c6c6';
+    const result = Themer.auditRoles(theme);
+    assert.equal(result.success, false);
+    const contrast = result.findings.filter((f) => f.rule === 'contrast');
+    assert.deepEqual(contrast[0], { rule: 'contrast', tokens: ['color.text_on_color', 'color.button_danger_primary'], ratio: 1.71, minimum: 4.5 });
+  });
+
+  it('should composite a translucent surface over the background before measuring', () => {
+    const theme = readableTheme();
+    theme.tokens['color.background_selected'] = 'rgba(0, 0, 0, 0.9)';
+    const result = Themer.auditRoles(theme);
+    const finding = result.findings.find((f) => f.rule === 'contrast' && f.tokens[1] === 'color.background_selected');
+    assert.equal(finding.tokens[0], 'color.text_primary');
+    assert.ok(finding.ratio < 1.5);
+  });
+
+  it('should report two roles with different meanings that share one value', () => {
+    const theme = readableTheme();
+    theme.tokens['color.text_error'] = '#161616';
+    const result = Themer.auditRoles(theme);
+    assert.deepEqual(result.findings.filter((f) => f.rule === 'distinct'), [
+      { rule: 'distinct', tokens: ['color.text_error', 'color.text_primary'], value: '#161616' }
+    ]);
+  });
+
+  it('should report an opaque shadow layer and a shadow with no color', () => {
+    const theme = readableTheme();
+    theme.tokens['shadow.level_01'] = { boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px #000000' };
+    theme.tokens['shadow.level_02'] = { boxShadow: '' };
+    const result = Themer.auditRoles(theme);
+    assert.deepEqual(result.findings.filter((f) => f.rule === 'shadow').map((f) => f.tokens[0]), ['shadow.level_01', 'shadow.level_02']);
+  });
+
+  it('should report a role the theme lacks once and skip the rules that need it', () => {
+    const theme = readableTheme();
+    delete theme.tokens['color.button_tonal'];
+    delete theme.tokens['shadow.level_05'];
+    const result = Themer.auditRoles(theme);
+    assert.deepEqual(result.findings, [
+      { rule: 'missing', tokens: ['color.button_tonal'] },
+      { rule: 'missing', tokens: ['shadow.level_05'] }
+    ]);
+  });
+
+});

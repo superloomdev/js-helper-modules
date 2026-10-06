@@ -310,6 +310,25 @@ describe('carbon template - icon literals (v4)', () => {
 });
 
 
+describe('carbon template - role audit', () => {
+
+  // The engine's role rules: every content role reads on its surface, roles
+  // that mean different things differ, every shadow level is translucent.
+  // Caught here, at the template, before any component draws the value.
+  for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+
+    it('should pass the engine role audit for ' + schemeName + ' on native', () => {
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native');
+      const result = Themer.auditRoles(built);
+      assert.deepEqual(result.findings, [], 'role audit findings for ' + schemeName);
+      assert.equal(result.success, true);
+    });
+
+  }
+
+});
+
+
 describe('carbon template - engine build', () => {
 
   it('should build white on native and emit body01 type set', () => {

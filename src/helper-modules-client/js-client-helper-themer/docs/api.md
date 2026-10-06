@@ -162,6 +162,28 @@ Structure and routes are `validateTemplate`'s job; this function checks names an
 
 ## Inspection
 
+### `auditRoles(theme)`
+
+Checks a built theme's color roles against the engine's role rules (`themer.roles.js`). Returns `{ success, findings }`. Throws `TypeError` only when `theme` or `theme.tokens` is malformed; a role the theme lacks is a `missing` finding, not a throw.
+
+Three kinds of rule: `contrast` (a content role on its surface role meets a minimum ratio: 4.5 for text, 3.0 for icons and boundaries; a translucent content color is composited on the surface first, a translucent surface on `color.background`), `distinct` (two roles that mean different things do not share a value: a danger fill equal to the disabled fill is a danger button that reads as disabled), and `shadow` (every `shadow.level_*` layer color is translucent). Placeholder text is deliberately not a rule.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `theme` | `Object` | Yes | A built theme (native projection). Must have a `tokens` map |
+
+```javascript
+const result = Themer.auditRoles(Themer.buildTheme(profile.schemes.light, [], 'native'));
+
+result.success;     // true when findings is empty
+result.findings;    // [{ rule: 'contrast', tokens: [content, surface], ratio, minimum }]
+                    // [{ rule: 'distinct', tokens: [a, b], value }]
+                    // [{ rule: 'shadow', tokens: [level], value }]
+                    // [{ rule: 'missing', tokens: [name] }]
+```
+
+A template's tests run this over every built scheme, so a value that would draw an unreadable label is caught at the template, before any component draws it.
+
 ### `getPlatforms()`
 
 Lists the platforms this engine emits for.

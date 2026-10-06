@@ -89,6 +89,7 @@ Both platforms emit the same token keys, so no caller has to guard against `unde
 | `validateTemplate(template)` | Check a template and report every finding |
 | `getContract()` | Return the frozen token contract registry |
 | `validateContract(theme, options)` | Check theme tokens against the contract |
+| `auditRoles(theme)` | Check a built theme's color roles: contrast, distinctness, translucent shadows |
 | `getPlatforms()` | List the platforms this engine emits for |
 | `getCacheStats()` / `clearCache()` | Inspect and reset the per-instance cache |
 
@@ -97,7 +98,7 @@ Full signatures and return shapes: [API Reference](docs/api.md).
 ## Token Contract
 
 The engine core is vocabulary-agnostic: buildTheme accepts any token names. Superloom's
-vocabulary, the token contract, ships in this package as data and is read through two functions.
+vocabulary, the token contract, ships in this package as data and is read through three functions.
 
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
@@ -112,6 +113,12 @@ validateContract(theme, options) -> { success, errors, warnings } | async:no
   errors is empty. Structure and routes are validateTemplate's job; this function checks names and
   literal value types only. Alias strings are accepted for every type. Throws TypeError only when theme,
   theme.tokens, options.required, or options.supported is malformed; every content finding is reported.
+
+auditRoles(theme) -> { success, findings } | async:no
+  Checks a built theme's color roles against the engine's role rules: every content role reads on
+  its surface role (4.5 for text, 3.0 for icons and boundaries), roles that mean different things
+  differ, every shadow level is translucent. A template's tests run it over every scheme so a value
+  that would draw an unreadable label is caught before any component draws it.
 
 ### Contract version 5
 

@@ -60,8 +60,20 @@ const RAMP = [
   '#8d8d8d', '#6f6f6f', '#525252', '#393939', '#262626', '#161616'
 ];
 
-// --- The one hand-picked color -------------------------------------------
+// --- The hand-picked colors ----------------------------------------------
+// A neutral ramp can say "lighter" and "darker"; it cannot say "interactive"
+// or "error". These four hues are the template's own, not a design
+// system's: one for everything a user can act on, three for what the
+// system is telling the user. Each reads at 4.5:1 or better on white and on
+// the first layer step, and carries white text at 5:1 or better.
 const INTERACTIVE = '#0f62fe';
+const SEMANTIC = {
+  error: '#b91c1c',
+  success: '#15803d',
+  warning: '#b45309'
+};
+// A shadow is black at a third, in both polarities; an opaque shadow is a ring
+const SHADOW = 'rgba(0, 0, 0, 0.3)';
 
 // --- Duration computation (D19) ------------------------------------------
 const DURATION_SLOTS = [
@@ -189,16 +201,79 @@ function familyFor (name) {
 }
 
 // --- Color step assignments ----------------------------------------------
-// Every color token is a rampStep from the page background, except
-// interactive/focus/highlight (literal #0f62fe) and the link/button
-// primaries that alias interactive.
-const INTERACTIVE_ALIASES = [
-  'color.link_primary', 'color.link_primary_hover',
-  'color.button_primary', 'color.button_primary_active', 'color.button_primary_hover'
-];
-const INTERACTIVE_LITERALS = [
-  'color.interactive', 'color.focus', 'color.focus_inset', 'color.focus_inverse', 'color.highlight'
-];
+// Every color token is a rampStep from the page background, except the
+// hand-picked hues, the roles that alias them, the roles that must not flip
+// with polarity (text and icons on a colored fill are white on both; the
+// shadow is black on both; a filled secondary or danger button keeps its
+// full hue on both so its white label reads), and the hover and active
+// fills, which mix a hue toward the primary text so they step toward the
+// reader's polarity. A hue drawn as text or an icon on the dark page is a
+// tint: the hue mixed half way to the primary text (white there), which
+// reads at 4.5:1 or better on the dark page and its layers; on the light
+// page the full hue reads and the role aliases it.
+const COLOR_LITERALS = {
+  'color.interactive': INTERACTIVE,
+  'color.focus': INTERACTIVE,
+  'color.focus_inset': INTERACTIVE,
+  'color.focus_inverse': INTERACTIVE,
+  'color.highlight': INTERACTIVE,
+  'color.text_on_color': '#ffffff',
+  'color.icon_on_color': '#ffffff',
+  'color.shadow': SHADOW,
+  'color.button_secondary': RAMP[8],
+  'color.button_secondary_hover': RAMP[9],
+  'color.button_secondary_active': RAMP[7],
+  'color.button_danger_primary': SEMANTIC.error
+};
+const COLOR_ALIASES = {
+  'color.button_primary': '{color.interactive}',
+  'color.text_error': '{color.support_error}',
+  'color.button_danger_secondary': '{color.support_error}',
+  'color.support_caution_major': '{color.support_warning}',
+  'color.support_caution_minor': '{color.support_warning}',
+  'color.support_caution_undefined': '{color.support_info}'
+};
+const COLOR_MIXES = {
+  'color.button_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 85] },
+  'color.button_primary_active': { op: 'mix', args: ['color.interactive', 'color.text_primary', 70] },
+  'color.button_tertiary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 85] },
+  'color.button_tertiary_active': { op: 'mix', args: ['color.interactive', 'color.text_primary', 70] },
+  'color.button_danger_hover': { op: 'mix', args: ['color.button_danger_primary', 'color.text_primary', 85] },
+  'color.button_danger_active': { op: 'mix', args: ['color.button_danger_primary', 'color.text_primary', 70] }
+};
+// Hues drawn as text, border or icon read as the full hue on the light page
+// and as a tint on the dark page: a mix operand must be a token, so the
+// support role that holds the full hue flips with polarity (`support_*` on
+// light, `support_*_inverse` on dark, each the other's half mix toward the
+// page or the primary text).
+const HUE_ROLES = {
+  light: {
+    'color.link_primary': '{color.interactive}',
+    'color.link_primary_hover': '{color.interactive}',
+    'color.button_tertiary': '{color.interactive}',
+    'color.support_info': '{color.interactive}',
+    'color.support_error': '{color.button_danger_primary}',
+    'color.support_success': SEMANTIC.success,
+    'color.support_warning': SEMANTIC.warning,
+    'color.support_info_inverse': { op: 'mix', args: ['color.interactive', 'color.background', 50] },
+    'color.support_error_inverse': { op: 'mix', args: ['color.button_danger_primary', 'color.background', 50] },
+    'color.support_success_inverse': { op: 'mix', args: ['color.support_success', 'color.background', 50] },
+    'color.support_warning_inverse': { op: 'mix', args: ['color.support_warning', 'color.background', 50] }
+  },
+  dark: {
+    'color.link_primary': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
+    'color.link_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
+    'color.button_tertiary': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
+    'color.support_info': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
+    'color.support_error': { op: 'mix', args: ['color.button_danger_primary', 'color.text_primary', 50] },
+    'color.support_success': { op: 'mix', args: ['color.support_success_inverse', 'color.text_primary', 50] },
+    'color.support_warning': { op: 'mix', args: ['color.support_warning_inverse', 'color.text_primary', 50] },
+    'color.support_info_inverse': '{color.interactive}',
+    'color.support_error_inverse': '{color.button_danger_primary}',
+    'color.support_success_inverse': SEMANTIC.success,
+    'color.support_warning_inverse': SEMANTIC.warning
+  }
+};
 
 function colorStep (name) {
   // Inverse background: the far end of the ramp, its hover one step back
@@ -212,7 +287,7 @@ function colorStep (name) {
   if (/^color\.background/.test(name)) {
     return 0;
   }
-  // Text on colored backgrounds: step 0 (light text on dark/colored bg)
+  // Disabled text on a colored fill: step 0 (the fill is the disabled gray)
   if (/^color\.text_on_color/.test(name)) {
     return 0;
   }
@@ -230,10 +305,6 @@ function colorStep (name) {
   // Disabled text: step 5
   if (/^color\.text_disabled/.test(name)) {
     return 5;
-  }
-  // Error text: step 10 (same as primary for visibility)
-  if (/^color\.text_error/.test(name)) {
-    return 10;
   }
   // Icon primary: step 10; icon inverse and on-color sit on a dark or colored fill: step 0
   if (name === 'color.icon_primary') {
@@ -253,10 +324,6 @@ function colorStep (name) {
   // Icon disabled: step 5
   if (/^color\.icon_disabled/.test(name)) {
     return 5;
-  }
-  // Shadow: step 10 (darkest)
-  if (name === 'color.shadow') {
-    return 10;
   }
   // Overlay: step 8
   if (name === 'color.overlay') {
@@ -347,10 +414,6 @@ function colorStep (name) {
   if (/^color\.link_(secondary|visited|inverse)/.test(name)) {
     return 7;
   }
-  // Support: step 8 (dark gray for all)
-  if (/^color\.support_/.test(name)) {
-    return 8;
-  }
   // Role fills (v5): tonal and elevated rest on the first layer step, hover and active one deeper
   if (name === 'color.button_tonal' || name === 'color.button_elevated' || name === 'color.button_elevated_hover') {
     return 1;
@@ -361,8 +424,8 @@ function colorStep (name) {
   if (name === 'color.text_on_button_tonal' || name === 'color.control_checked') {
     return 10;
   }
-  // Button (non-primary): steps 2-5
-  if (/^color\.button_(danger|secondary|tertiary|disabled|separator)/.test(name)) {
+  // Disabled fill and separator: step 3
+  if (/^color\.button_(disabled|separator)/.test(name)) {
     return 3;
   }
   // Notification backgrounds: step 2
@@ -385,7 +448,7 @@ function colorStep (name) {
 }
 
 // --- Build tokens object --------------------------------------------------
-function buildTokens () {
+function buildTokens (polarity) {
   const tokens = {};
 
   for (const name of tokenNames) {
@@ -394,10 +457,14 @@ function buildTokens () {
 
     // --- Color tokens ---
     if (group === 'color') {
-      if (INTERACTIVE_LITERALS.includes(name)) {
-        tokens[name] = INTERACTIVE;
-      } else if (INTERACTIVE_ALIASES.includes(name)) {
-        tokens[name] = '{color.interactive}';
+      if (name in COLOR_LITERALS) {
+        tokens[name] = COLOR_LITERALS[name];
+      } else if (name in HUE_ROLES[polarity]) {
+        tokens[name] = HUE_ROLES[polarity][name];
+      } else if (name in COLOR_ALIASES) {
+        tokens[name] = COLOR_ALIASES[name];
+      } else if (name in COLOR_MIXES) {
+        tokens[name] = COLOR_MIXES[name];
       } else {
         tokens[name] = { op: 'rampStep', args: [colorStep(name)] };
       }
@@ -650,7 +717,7 @@ function buildScheme (polarity) {
     scales: scales,
     ramp: RAMP,
     palette: {},
-    tokens: buildTokens(),
+    tokens: buildTokens(polarity),
     meta: meta,
     provenance: PROVENANCE
   };
@@ -665,7 +732,7 @@ function writeScheme (polarity, fileName) {
 }
 
 // --- Assertions (D19) -----------------------------------------------------
-const tokens = buildTokens();
+const tokens = buildTokens('light');
 
 // Assert every contract key is present
 for (const name of tokenNames) {
@@ -736,7 +803,7 @@ if (count !== tokenNames.length) {
 
 console.log('Token count: ' + count);
 console.log('Durations: ' + DURATIONS.join(', '));
-console.log('Interactive: ' + INTERACTIVE);
+console.log('Interactive: ' + INTERACTIVE + '; semantic: ' + JSON.stringify(SEMANTIC));
 console.log('Icons: ' + Object.keys(ICONS).length + ' from @carbon/icons@' + carbonIcons.version);
 
 // --- Write files ----------------------------------------------------------

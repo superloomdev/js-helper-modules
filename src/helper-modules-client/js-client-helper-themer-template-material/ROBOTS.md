@@ -12,4 +12,4 @@ Peer dependencies: none.
 
 Regeneration: `npm run generate` (dev only) must produce no diff; `npm run sync-icon-map` refreshes `scripts/icon-map.json` from `rnw-components-v2/data/icons.json`.
 
-Tests assert: the full contract key count (490 at contract version 5), contract validity with `required` equal to every key, parity oracle values, expressive springs (D19), Material's six `anatomy.*` values, 78 valid `icon.*` literals from Material Symbols (outlined) with provenance, unit gate, engine build with two-layer shadows, brand layer, and byte-identical regeneration.
+Tests assert: the full contract key count (490 at contract version 5), contract validity with `required` equal to every key, parity oracle values, expressive springs (D19), Material's six `anatomy.*` values, 78 valid `icon.*` literals from Material Symbols (outlined) with provenance, unit gate, engine build with two-layer shadows, the engine's role audit (`auditRoles`) on every scheme, brand layer, and byte-identical regeneration.
