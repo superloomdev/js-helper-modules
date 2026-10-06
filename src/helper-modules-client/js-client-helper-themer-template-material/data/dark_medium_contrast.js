@@ -32,7 +32,10 @@ export default Object.freeze({
     'color.button_primary_active': '#e3d6ff',
     'color.link_primary': '#e3d6ff',
     'color.control_checked': '#e3d6ff',
-    'color.text_on_color': '#540003',
+    'color.button_tertiary': '#e3d6ff',
+    'color.button_tertiary_hover': '#e3d6ff',
+    'color.button_tertiary_active': '#e3d6ff',
+    'color.text_on_color': '#2b1b52',
     'color.icon_on_color': '#2b1b52',
     'color.highlight': '#9887c5',
     'color.text_on_color_disabled': '#000000',
@@ -45,15 +48,17 @@ export default Object.freeze({
     'color.button_tonal_hover': '#958da4',
     'color.button_tonal_active': '#958da4',
     'color.text_on_button_tonal': '#000000',
-    'color.button_tertiary': '#e8def8',
     'color.link_secondary': '#cbc2db',
-    'color.button_tertiary_hover': '#ffd0dd',
     'color.notification_background_info': '#b58392',
     'color.notification_background_success': '#ffd9e3',
     'color.link_visited': '#efb8c8',
     'color.support_error': '#ffd2cc',
+    'color.text_error': '#ffd2cc',
+    'color.button_danger_primary': '#ffd2cc',
+    'color.button_danger_secondary': '#ffd2cc',
+    'color.button_danger_hover': '#ffd2cc',
+    'color.button_danger_active': '#ffd2cc',
     'color.notification_background_error': '#ff5449',
-    'color.text_error': '#000000',
     'color.background': '#141218',
     'color.text_primary': '#ffffff',
     'color.icon_primary': '#ffffff',
@@ -61,12 +66,12 @@ export default Object.freeze({
     'color.layer_02': '#29272d',
     'color.layer_03': '#343138',
     'color.layer_active_01': '#3f3c43',
+    'color.background_selected': '#3f3c43',
     'color.layer_01': '#1f1d22',
     'color.button_elevated': '#1f1d22',
     'color.button_elevated_hover': '#1f1d22',
     'color.button_elevated_active': '#1f1d22',
     'color.layer_hover_01': '#08070b',
-    'color.background_selected': '#141218',
     'color.field_01': '#49454e',
     'color.text_secondary': '#e0dae5',
     'color.icon_secondary': '#e0dae5',
@@ -346,14 +351,14 @@ export default Object.freeze({
           'y': 1,
           'blur': 2,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 1,
           'blur': 3,
           'spread': 1,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -365,14 +370,14 @@ export default Object.freeze({
           'y': 1,
           'blur': 2,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 2,
           'blur': 6,
           'spread': 2,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -384,14 +389,14 @@ export default Object.freeze({
           'y': 1,
           'blur': 3,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 4,
           'blur': 8,
           'spread': 3,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -403,14 +408,14 @@ export default Object.freeze({
           'y': 2,
           'blur': 3,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 6,
           'blur': 10,
           'spread': 4,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -422,14 +427,14 @@ export default Object.freeze({
           'y': 4,
           'blur': 4,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 8,
           'blur': 12,
           'spread': 6,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -1182,7 +1187,7 @@ export default Object.freeze({
     'color.background_active': {
       'op': 'rampStep',
       'args': [
-        0
+        3
       ]
     },
     'color.background_brand': {
@@ -1200,7 +1205,7 @@ export default Object.freeze({
     'color.background_selected_hover': {
       'op': 'rampStep',
       'args': [
-        0
+        3
       ]
     },
     'color.layer_accent_01': {
@@ -1515,66 +1520,37 @@ export default Object.freeze({
         7
       ]
     },
-    'color.support_caution_major': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_caution_minor': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_caution_undefined': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_error_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_caution_major': '{color.support_warning}',
+    'color.support_caution_minor': '{color.support_warning}',
+    'color.support_caution_undefined': '{color.support_info}',
+    'color.support_error_inverse': '{color.button_danger_primary}',
     'color.support_info': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.interactive',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_info_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_info_inverse': '{color.interactive}',
     'color.support_success': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.support_success_inverse',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_success_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_success_inverse': '#15803d',
     'color.support_warning': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.support_warning_inverse',
+        'color.text_primary',
+        50
       ]
     },
-    'color.support_warning_inverse': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_warning_inverse': '#b45309',
     'color.toggle_off': {
       'op': 'rampStep',
       'args': [
@@ -1719,49 +1695,14 @@ export default Object.freeze({
         2
       ]
     },
-    'color.button_danger_active': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_hover': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_primary': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_secondary': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
     'color.button_disabled': {
       'op': 'rampStep',
       'args': [
         3
       ]
     },
-    'color.button_secondary_active': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
+    'color.button_secondary_active': '#525252',
     'color.button_separator': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_tertiary_active': {
       'op': 'rampStep',
       'args': [
         3
@@ -4004,14 +3945,9 @@ export default Object.freeze({
     'color.border_tile_01',
     'color.border_tile_02',
     'color.border_tile_03',
-    'color.button_danger_active',
-    'color.button_danger_hover',
-    'color.button_danger_primary',
-    'color.button_danger_secondary',
     'color.button_disabled',
     'color.button_secondary_active',
     'color.button_separator',
-    'color.button_tertiary_active',
     'color.field_02',
     'color.field_03',
     'color.field_hover_01',
@@ -4203,7 +4139,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '177bd1cc7e43386a3b5cc9d88d49022a9439d941',
+    'default_shasum': '9adaba4501da141d38677cb55dd05d51963c279f',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

@@ -32,6 +32,9 @@ export default Object.freeze({
     'color.button_primary_active': '#312259',
     'color.link_primary': '#312259',
     'color.control_checked': '#312259',
+    'color.button_tertiary': '#312259',
+    'color.button_tertiary_hover': '#312259',
+    'color.button_tertiary_active': '#312259',
     'color.text_on_color': '#ffffff',
     'color.icon_on_color': '#ffffff',
     'color.highlight': '#4f4078',
@@ -45,15 +48,17 @@ export default Object.freeze({
     'color.button_tonal_hover': '#4c465b',
     'color.button_tonal_active': '#4c465b',
     'color.text_on_button_tonal': '#ffffff',
-    'color.button_tertiary': '#4c465b',
     'color.link_secondary': '#353043',
-    'color.button_tertiary_hover': '#45212e',
     'color.notification_background_info': '#663d4b',
     'color.notification_background_success': '#663d4b',
     'color.link_visited': '#4c2734',
     'color.support_error': '#600004',
+    'color.text_error': '#600004',
+    'color.button_danger_primary': '#600004',
+    'color.button_danger_secondary': '#600004',
+    'color.button_danger_hover': '#600004',
+    'color.button_danger_active': '#600004',
     'color.notification_background_error': '#98000a',
-    'color.text_error': '#ffffff',
     'color.background': '#fdf7ff',
     'color.text_primary': '#000000',
     'color.icon_primary': '#000000',
@@ -61,12 +66,12 @@ export default Object.freeze({
     'color.layer_02': '#e6e0e9',
     'color.layer_03': '#d8d2da',
     'color.layer_active_01': '#cac5cc',
+    'color.background_selected': '#cac5cc',
     'color.layer_01': '#f5eff7',
     'color.button_elevated': '#f5eff7',
     'color.button_elevated_hover': '#f5eff7',
     'color.button_elevated_active': '#f5eff7',
     'color.layer_hover_01': '#ffffff',
-    'color.background_selected': '#bcb7bf',
     'color.field_01': '#e7e0eb',
     'color.text_secondary': '#000000',
     'color.icon_secondary': '#000000',
@@ -346,14 +351,14 @@ export default Object.freeze({
           'y': 1,
           'blur': 2,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 1,
           'blur': 3,
           'spread': 1,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -365,14 +370,14 @@ export default Object.freeze({
           'y': 1,
           'blur': 2,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 2,
           'blur': 6,
           'spread': 2,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -384,14 +389,14 @@ export default Object.freeze({
           'y': 1,
           'blur': 3,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 4,
           'blur': 8,
           'spread': 3,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -403,14 +408,14 @@ export default Object.freeze({
           'y': 2,
           'blur': 3,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 6,
           'blur': 10,
           'spread': 4,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -422,14 +427,14 @@ export default Object.freeze({
           'y': 4,
           'blur': 4,
           'spread': 0,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.3)'
         },
         {
           'x': 0,
           'y': 8,
           'blur': 12,
           'spread': 6,
-          'color': '{color.shadow}'
+          'color': 'rgba(0, 0, 0, 0.15)'
         }
       ]
     },
@@ -1182,7 +1187,7 @@ export default Object.freeze({
     'color.background_active': {
       'op': 'rampStep',
       'args': [
-        0
+        3
       ]
     },
     'color.background_brand': {
@@ -1200,7 +1205,7 @@ export default Object.freeze({
     'color.background_selected_hover': {
       'op': 'rampStep',
       'args': [
-        0
+        3
       ]
     },
     'color.layer_accent_01': {
@@ -1515,64 +1520,42 @@ export default Object.freeze({
         7
       ]
     },
-    'color.support_caution_major': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_caution_minor': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
-    'color.support_caution_undefined': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_caution_major': '{color.support_warning}',
+    'color.support_caution_minor': '{color.support_warning}',
+    'color.support_caution_undefined': '{color.support_info}',
     'color.support_error_inverse': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.button_danger_primary',
+        'color.background',
+        50
       ]
     },
-    'color.support_info': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_info': '{color.interactive}',
     'color.support_info_inverse': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.interactive',
+        'color.background',
+        50
       ]
     },
-    'color.support_success': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_success': '#15803d',
     'color.support_success_inverse': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.support_success',
+        'color.background',
+        50
       ]
     },
-    'color.support_warning': {
-      'op': 'rampStep',
-      'args': [
-        8
-      ]
-    },
+    'color.support_warning': '#b45309',
     'color.support_warning_inverse': {
-      'op': 'rampStep',
+      'op': 'mix',
       'args': [
-        8
+        'color.support_warning',
+        'color.background',
+        50
       ]
     },
     'color.toggle_off': {
@@ -1719,49 +1702,14 @@ export default Object.freeze({
         2
       ]
     },
-    'color.button_danger_active': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_hover': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_primary': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_danger_secondary': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
     'color.button_disabled': {
       'op': 'rampStep',
       'args': [
         3
       ]
     },
-    'color.button_secondary_active': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
+    'color.button_secondary_active': '#525252',
     'color.button_separator': {
-      'op': 'rampStep',
-      'args': [
-        3
-      ]
-    },
-    'color.button_tertiary_active': {
       'op': 'rampStep',
       'args': [
         3
@@ -4004,14 +3952,9 @@ export default Object.freeze({
     'color.border_tile_01',
     'color.border_tile_02',
     'color.border_tile_03',
-    'color.button_danger_active',
-    'color.button_danger_hover',
-    'color.button_danger_primary',
-    'color.button_danger_secondary',
     'color.button_disabled',
     'color.button_secondary_active',
     'color.button_separator',
-    'color.button_tertiary_active',
     'color.field_02',
     'color.field_03',
     'color.field_hover_01',
@@ -4203,7 +4146,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '177bd1cc7e43386a3b5cc9d88d49022a9439d941',
+    'default_shasum': '9adaba4501da141d38677cb55dd05d51963c279f',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
