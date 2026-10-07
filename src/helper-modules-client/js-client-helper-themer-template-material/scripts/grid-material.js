@@ -1,6 +1,6 @@
 // Info: The material template's answer to every cell of the contract's role
 // grid, read from the pinned component token files (`@material/web` 2.5.0,
-// `_md-comp-*.scss`) and resolved in each scheme. A colour Material states
+// `_md-comp-*.scss`) and resolved in each scheme. A color Material states
 // as a role at an opacity stays translucent (`rgba`, exact over any
 // backdrop); a hover or pressed fill of a filled container is the state
 // layer flattened over that container (one opaque paint), of a transparent
@@ -120,13 +120,13 @@ export default function buildMaterialGrid (options) {
   const read = createTokenReader(options.dirs);
   const scheme = options.scheme;
 
-  // A system colour role as #rrggbb
+  // A system color role as #rrggbb
   const hexOf = function (role) {
     const camel = role.replace(/-([a-z])/g, function (match, c) {
       return c.toUpperCase();
     });
     if (scheme[camel] === undefined) {
-      throw new Error('grid-material: no scheme colour ' + role);
+      throw new Error('grid-material: no scheme color ' + role);
     }
     return options.hexFromArgb(scheme[camel]);
   };
@@ -145,8 +145,8 @@ export default function buildMaterialGrid (options) {
       return Math.round(value * (1 - alpha) + l[i] * alpha).toString(16).padStart(2, '0');
     }).join('');
   };
-  // A token's colour, its role substituted where the kind asks for it
-  // Translucent layers stacked into one translucent colour: [[hex, alpha], ...] bottom first
+  // A token's color, its role substituted where the kind asks for it
+  // Translucent layers stacked into one translucent color: [[hex, alpha], ...] bottom first
   const stack = function (layers) {
     let alpha = 0;
     let rgb = [0, 0, 0];
@@ -175,14 +175,14 @@ export default function buildMaterialGrid (options) {
     const role = (roles || {})[value.role] || value.role;
     return { hex: hexOf(role), key: keyOf(role, prefer) };
   };
-  // A paint as a template entry: an alias to its key, else its colour
+  // A paint as a template entry: an alias to its key, else its color
   const entryOf = function (paint) {
     return paint === null ? null : paint.key === null ? paint.hex : '{' + paint.key + '}';
   };
   const colorToken = function (file, name, roles, prefer) {
     return entryOf(paintOf(file, name, roles, prefer));
   };
-  // A paint at an opacity: the alpha rule over its key, else an rgba colour
+  // A paint at an opacity: the alpha rule over its key, else an rgba color
   const atOpacity = function (paint, alpha) {
     if (alpha >= 1) {
       return entryOf(paint);
@@ -231,7 +231,7 @@ export default function buildMaterialGrid (options) {
     }
     return value;
   };
-  // A colour at the opacity its paired token states
+  // A color at the opacity its paired token states
   const translucent = function (file, colorName, opacityName, roles) {
     const paint = required(paintOf(file, colorName, roles), file + ' ' + colorName);
     return atOpacity(paint, read(file, opacityName) === null ? 1 : numberToken(file, opacityName));
@@ -283,7 +283,7 @@ export default function buildMaterialGrid (options) {
     out['shadow.button_' + kind + '_disabled'] = elevation(file, 'disabled-container-elevation');
   }
   // The focus ring: 3px, 2px outside the container, in secondary, keyboard focus only
-  out['color.button_focus_ring'] = required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring colour');
+  out['color.button_focus_ring'] = required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color');
   out['color.button_focus_gap'] = NONE;
   out['control.button_focus_width'] = numberToken('focus-ring', 'width');
   out['control.button_focus_offset'] = numberToken('focus-ring', 'outward-offset');
@@ -392,9 +392,9 @@ export default function buildMaterialGrid (options) {
     'color.selection_helper': '{color.text_helper}',
     'color.selection_message_invalid': '{color.text_error}',
     'color.selection_invalid_icon': '{color.support_error}',
-    'color.selection_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring colour'),
+    'color.selection_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
     'control.selection_focus_width': numberToken('focus-ring', 'width'),
-    // `checkbox/internal/_checkbox.scss`: the ring is a 44px circle centred on the box
+    // `checkbox/internal/_checkbox.scss`: the ring is a 44px circle centered on the box
     'control.selection_focus_offset': (44 - numberToken(box, 'container-size')) / 2,
     'control.selection_focus_radius': '{shape.radius_max}',
     'control.selection_layer_size': numberToken(box, 'state-layer-size')

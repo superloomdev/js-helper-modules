@@ -1,6 +1,6 @@
 // Info: The default template's answer to every cell of the contract's role
 // grid. The default draws the primary reference's anatomy with its own
-// colours, so each cell points at the semantic token or scale step that
+// colors, so each cell points at the semantic token or scale step that
 // part draws in today: an alias, resolved in each scheme, so the neutral
 // template's rendering does not move when a component starts reading a
 // cell. A cell the contract adds and this table does not answer stops the
@@ -16,7 +16,7 @@ const FILLED = Object.freeze({
 });
 
 // Kinds drawn on the page: a fill only while hovered or pressed, and the
-// label colour while that fill shows (`engaged`)
+// label color while that fill shows (`engaged`)
 const ON_PAGE = Object.freeze({
   tertiary: { hover: 'button_tertiary_hover', active: 'button_tertiary_active', label: 'button_tertiary', engaged: 'text_inverse', border: 'button_tertiary', focus: 'button_tertiary' },
   ghost: { hover: 'background_hover', active: 'background_active', label: 'link_primary', engaged: 'link_primary_hover', border: null, focus: null },
@@ -28,9 +28,9 @@ const NONE = 'rgba(0, 0, 0, 0)';
 
 
 /********************************************************************
-An alias to a colour leaf, or the transparent colour for none.
+An alias to a color leaf, or the transparent color for none.
 
-@param {String|null} leaf - Colour leaf
+@param {String|null} leaf - Color leaf
 
 @return {String}
 *********************************************************************/
@@ -164,7 +164,7 @@ export default function buildGridRecipe (grid) {
     'type.field_value': '{type.body_compact_01}',
     'type.field_label': '{type.label01}',
     'type.field_helper': '{type.helper_text_01}',
-    // Button family: a ring drawn inside the edge with a page-colour line inside it
+    // Button family: a ring drawn inside the edge with a page-color line inside it
     'color.button_focus_ring': colorOf('focus'),
     'color.button_focus_gap': colorOf('background'),
     'control.button_focus_width': '{focus.width}',
@@ -173,7 +173,7 @@ export default function buildGridRecipe (grid) {
     'control.button_ghost_padding_start': '{control.button_padding_start}',
     'control.button_ghost_padding_end': '{control.button_padding_start}',
     'control.button_min_width': 0,
-    // Selection family: an icon-coloured box, filled when checked, no state layer
+    // Selection family: an icon-colored box, filled when checked, no state layer
     'color.selection_outline': colorOf('icon_primary'),
     'color.selection_outline_hover': colorOf('icon_primary'),
     'color.selection_outline_active': colorOf('icon_primary'),

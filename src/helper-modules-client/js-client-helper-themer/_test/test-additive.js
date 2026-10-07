@@ -210,7 +210,7 @@ describe('recovery - exact authored values', function () {
     assert.equal(result.tokens.faded, 'rgba(29, 27, 32, 0.38)');
     assert.equal(result.tokens.quarter, 'rgba(255, 0, 0, 0.25)');
     assert.equal(result.tokens.whole, '#1d1b20');
-    // A layer that changes the operand changes the derived colour
+    // A layer that changes the operand changes the derived color
     const layered = engine.buildTheme(template, [{ tokens: { ink: '#ffffff' } }], 'native');
     assert.equal(layered.tokens.faded, 'rgba(255, 255, 255, 0.38)');
   });

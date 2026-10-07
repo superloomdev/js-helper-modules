@@ -72,7 +72,7 @@ const iconMap = JSON.parse(readFileSync(resolve(here, 'icon-map.json'), 'utf8'))
 const materialIcons = buildMaterialIcons(iconMap.icons);
 // The select's indicator is the select's own drawing, not a Symbols glyph:
 // @material/web 2.5.0 `select/internal/select.js` renderTrailingIcon draws a
-// 10 x 5 polygon (7,10 12,15 17,10) centred in its 24px icon slot
+// 10 x 5 polygon (7,10 12,15 17,10) centered in its 24px icon slot
 const DROPDOWN_INDICATOR = Object.freeze({ icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] });
 // The checkbox's own marks: @material/web 2.5.0 `checkbox/internal/_checkbox.scss`
 // draws two 2px rects in an 18px box (the container), transformed by
@@ -572,7 +572,7 @@ function completeFromDefault (tokens, polarity) {
   return fromDefault;
 }
 
-// --- The scheme's Material system colours --------------------------------
+// --- The scheme's Material system colors --------------------------------
 // Every role `_md-sys-color.scss` names, as this scheme resolves it, so a
 // page that draws Material's own components can be themed with exactly the
 // scheme the grid cells were read from

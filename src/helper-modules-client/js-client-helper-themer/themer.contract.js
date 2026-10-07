@@ -34,12 +34,12 @@
 //
 // Version 5 was amended inside its milestone with the role grid: for each
 // component family (field, button per kind, selection), one role per part
-// it draws, per state it draws it in, per property (colour, width, space,
+// it draws, per state it draws it in, per property (color, width, space,
 // type set, elevation), so a per-template difference is data, never a
 // branch in a component. It removes `feedback.focus`, whose ring the grid's
-// focus width, offset and colour cells now draw per family (an offset below
+// focus width, offset and color cells now draw per family (an offset below
 // zero draws the ring inside the edge). It also adds `shadow.level_00` (no elevation),
-// the `feedback.focus_trigger` behaviour (a focus ring on any focus, or on
+// the `feedback.focus_trigger` behavior (a focus ring on any focus, or on
 // keyboard focus only) and four icon roles (`invalid`, `dropdown_indicator`,
 // `checked_indicator`, `mixed_indicator`:
 // the glyph a part shows is an icon role, never an enum), and removes
