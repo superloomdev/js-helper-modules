@@ -114,7 +114,7 @@ Message format: `[helper-themer] <field-path> <expected-shape>`
 | Surface | Case |
 |---|---|
 | Template / layer / options / result keys | `snake_case` |
-| Scale and operation identifiers | camelCase (stepPairIncrement, miniUnit, geometric, rampStep, hue, mix, scaleBy) |
+| Scale and operation identifiers | camelCase (stepPairIncrement, miniUnit, geometric, rampStep, hue, mix, scaleBy, alpha) |
 | Keys **inside** an emitted token value | `camelCase` (`fontSize`, `lineHeight`, `boxShadow`) - React Native's contract, do not rename |
 
 ## Template Entry Shapes

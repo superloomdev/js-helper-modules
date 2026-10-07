@@ -195,6 +195,26 @@ describe('recovery - exact authored values', function () {
     assert.equal(result.tokens.mixed, '#80008080');
   });
 
+  it('should draw a resolved color at an opacity with the alpha operation, following its operand', function () {
+    const engine = themerLoader(Lib, {});
+    const template = {
+      tokens: {
+        ink: '#1d1b20',
+        faded: { op: 'alpha', args: ['ink', 0.38] },
+        half: 'rgba(255, 0, 0, 0.5)',
+        quarter: { op: 'alpha', args: ['half', 0.5] },
+        whole: { op: 'alpha', args: ['ink', 1] }
+      }
+    };
+    const result = engine.buildTheme(template, [], 'native');
+    assert.equal(result.tokens.faded, 'rgba(29, 27, 32, 0.38)');
+    assert.equal(result.tokens.quarter, 'rgba(255, 0, 0, 0.25)');
+    assert.equal(result.tokens.whole, '#1d1b20');
+    // A layer that changes the operand changes the derived colour
+    const layered = engine.buildTheme(template, [{ tokens: { ink: '#ffffff' } }], 'native');
+    assert.equal(layered.tokens.faded, 'rgba(255, 255, 255, 0.38)');
+  });
+
   it('should measure translucent foreground contrast against its declared opaque background', function () {
     const engine = themerLoader(Lib, {});
     const result = engine.buildTheme({

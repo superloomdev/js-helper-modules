@@ -544,6 +544,7 @@ function buildTokens (schemeName) {
     scheme: scheme,
     dirs: compDirs,
     hexFromArgb: hexFromArgb,
+    mapping: mapping.color,
     typeSet: function (role) {
       return convertTypeSet(role, typeRoles[role]);
     }

@@ -11,7 +11,10 @@
 // destructive kind from `error`), as the destructive kinds already are.
 // Parts Material does not draw (a checkbox label, a field ring) take the
 // template's own semantic roles. A cell this module does not answer stops
-// the generator; none is completed from the default template.
+// the generator; none is completed from the default template. A cell drawn
+// in a system role the template maps onto one of its keys is that key (an
+// alias, or an `alpha` or `mix` rule over it), so a brand layer that
+// changes the key reaches every cell drawn in it.
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -157,12 +160,63 @@ export default function buildMaterialGrid (options) {
     }
     return 'rgba(' + rgb.map(Math.round).join(', ') + ', ' + Math.round(alpha * 1000) / 1000 + ')';
   };
-  const colorToken = function (file, name, roles) {
+  // The template key a system role is mapped onto (the first, or a preferred one), so a cell
+  // drawn in that role follows a brand layer that changes the key
+  const keyOf = function (role, prefer) {
+    const keys = [].concat(options.mapping[role.replace(/-/g, '_')] || []);
+    return prefer && keys.includes(prefer) ? prefer : keys.length > 0 ? keys[0] : null;
+  };
+  // A token's paint ({ hex, key }), its role substituted where the kind asks for it
+  const paintOf = function (file, name, roles, prefer) {
     const value = read(file, name);
     if (value === null || value.role === undefined) {
       return null;
     }
-    return hexOf((roles || {})[value.role] || value.role);
+    const role = (roles || {})[value.role] || value.role;
+    return { hex: hexOf(role), key: keyOf(role, prefer) };
+  };
+  // A paint as a template entry: an alias to its key, else its colour
+  const entryOf = function (paint) {
+    return paint === null ? null : paint.key === null ? paint.hex : '{' + paint.key + '}';
+  };
+  const colorToken = function (file, name, roles, prefer) {
+    return entryOf(paintOf(file, name, roles, prefer));
+  };
+  // A paint at an opacity: the alpha rule over its key, else an rgba colour
+  const atOpacity = function (paint, alpha) {
+    if (alpha >= 1) {
+      return entryOf(paint);
+    }
+    return paint.key === null ? rgba(paint.hex, alpha) : { op: 'alpha', args: [paint.key, Math.round(alpha * 1000) / 1000] };
+  };
+  // Layers of one paint stacked: one opacity, 1 - the product of what each lets through
+  const combined = function (alphas) {
+    return 1 - alphas.reduce(function (through, alpha) {
+      return through * (1 - alpha);
+    }, 1);
+  };
+  // State layers [[paint, alpha], ...] over a container paint (null: transparent)
+  const layered = function (container, layers) {
+    const same = layers.every(function (entry) {
+      return entry[0].hex === layers[0][0].hex && entry[0].key === layers[0][0].key;
+    });
+    if (!same) {
+      return container === null ? stack(layers.map(function (entry) {
+        return [entry[0].hex, entry[1]];
+      })) : layers.reduce(function (base, entry) {
+        return flatten(base, entry[0].hex, entry[1]);
+      }, container.hex);
+    }
+    const paint = layers[0][0];
+    const alpha = combined(layers.map(function (entry) {
+      return entry[1];
+    }));
+    if (container === null) {
+      return atOpacity(paint, alpha);
+    }
+    return container.key !== null && paint.key !== null
+      ? { op: 'mix', args: [paint.key, container.key, Math.round(alpha * 100000) / 1000] }
+      : flatten(container.hex, paint.hex, alpha);
   };
   const numberToken = function (file, name) {
     const value = read(file, name);
@@ -179,8 +233,8 @@ export default function buildMaterialGrid (options) {
   };
   // A colour at the opacity its paired token states
   const translucent = function (file, colorName, opacityName, roles) {
-    const hex = required(colorToken(file, colorName, roles), file + ' ' + colorName);
-    return rgba(hex, read(file, opacityName) === null ? 1 : numberToken(file, opacityName));
+    const paint = required(paintOf(file, colorName, roles), file + ' ' + colorName);
+    return atOpacity(paint, read(file, opacityName) === null ? 1 : numberToken(file, opacityName));
   };
   const elevation = function (file, name) {
     const value = read(file, name);
@@ -197,15 +251,13 @@ export default function buildMaterialGrid (options) {
     const put = function (part, state, value) {
       out['color.button_' + kind + '_' + part + state] = value;
     };
-    const container = colorToken(file, 'container-color', roles);
+    const containerPaint = paintOf(file, 'container-color', roles);
+    const container = entryOf(containerPaint);
     // A pressed control keeps its hover layer under the pressed one (md-ripple draws both)
     const layer = function (state) {
-      const layers = (state === 'pressed' ? ['hover', 'pressed'] : [state]).map(function (name) {
-        return [required(colorToken(file, name + '-state-layer-color', roles), file + ' ' + name + ' state layer'), numberToken(file, name + '-state-layer-opacity')];
-      });
-      return container === null ? stack(layers) : layers.reduce(function (base, entry) {
-        return flatten(base, entry[0], entry[1]);
-      }, container);
+      return layered(containerPaint, (state === 'pressed' ? ['hover', 'pressed'] : [state]).map(function (name) {
+        return [required(paintOf(file, name + '-state-layer-color', roles), file + ' ' + name + ' state layer'), numberToken(file, name + '-state-layer-opacity')];
+      }));
     };
     put('container', '', container === null ? NONE : container);
     put('container', '_hover', layer('hover'));
@@ -231,7 +283,7 @@ export default function buildMaterialGrid (options) {
     out['shadow.button_' + kind + '_disabled'] = elevation(file, 'disabled-container-elevation');
   }
   // The focus ring: 3px, 2px outside the container, in secondary, keyboard focus only
-  out['color.button_focus_ring'] = required(colorToken('focus-ring', 'color'), 'focus ring colour');
+  out['color.button_focus_ring'] = required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring colour');
   out['color.button_focus_gap'] = NONE;
   out['control.button_focus_width'] = numberToken('focus-ring', 'width');
   out['control.button_focus_offset'] = numberToken('focus-ring', 'outward-offset');
@@ -310,9 +362,9 @@ export default function buildMaterialGrid (options) {
   // A pressed box keeps its hover layer under the pressed one
   const boxLayer = function (selection, state) {
     const names = state === 'pressed' ? ['hover', 'pressed'] : [state];
-    return stack(names.map(function (name) {
+    return layered(null, names.map(function (name) {
       const prefix = selection + '-' + name;
-      return [boxColor(prefix + '-state-layer-color'), numberToken(box, prefix + '-state-layer-opacity')];
+      return [required(paintOf(box, prefix + '-state-layer-color'), box + ' ' + prefix + ' state layer'), numberToken(box, prefix + '-state-layer-opacity')];
     }));
   };
   Object.assign(out, {
@@ -340,7 +392,7 @@ export default function buildMaterialGrid (options) {
     'color.selection_helper': '{color.text_helper}',
     'color.selection_message_invalid': '{color.text_error}',
     'color.selection_invalid_icon': '{color.support_error}',
-    'color.selection_focus_ring': required(colorToken('focus-ring', 'color'), 'focus ring colour'),
+    'color.selection_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring colour'),
     'control.selection_focus_width': numberToken('focus-ring', 'width'),
     // `checkbox/internal/_checkbox.scss`: the ring is a 44px circle centred on the box
     'control.selection_focus_offset': (44 - numberToken(box, 'container-size')) / 2,

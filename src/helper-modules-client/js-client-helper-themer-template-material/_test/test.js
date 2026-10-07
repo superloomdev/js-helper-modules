@@ -792,3 +792,20 @@ describe('material template - role grid (v5 amendment)', () => {
 
 });
 
+
+describe('material template - brand reach into the role grid', () => {
+
+  it('should carry a brand layer on a mapped key into every cell drawn in that role', () => {
+    const layer = { tokens: { 'color.interactive': '#c2410c', 'color.focus': '#123456' } };
+    const built = Themer.buildTheme(profile.schemes.light, [layer], 'native').tokens;
+    assert.equal(built['color.button_primary_container'], '#c2410c');
+    assert.equal(built['color.field_outline_focus'], '#c2410c');
+    assert.equal(built['color.selection_container'], '#c2410c');
+    assert.equal(built['color.button_focus_ring'], '#123456');
+    assert.equal(built['color.selection_focus_ring'], '#123456');
+    // Derived cells follow too: the translucent hover of an outlined button is the key at the layer's opacity
+    assert.equal(built['color.button_tertiary_container_hover'], 'rgba(194, 65, 12, 0.08)');
+  });
+
+});
+

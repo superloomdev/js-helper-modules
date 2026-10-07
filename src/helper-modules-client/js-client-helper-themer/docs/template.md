@@ -143,6 +143,7 @@ A layer can override a seed, which is what makes a density change a one-number e
 | `hue` | `[family, step]` | The named palette entry, for example `blue` and `60` |
 | `mix` | `[token_a, token_b, weight]` | A blend of two resolved numeric colors, including alpha, weighted toward the first |
 | `scaleBy` | `[token, multiplier]` | An already-resolved number, scaled |
+| `alpha` | `[token, opacity]` | An already-resolved color drawn at an opacity (its alpha times the opacity), as `rgba`; a layer that changes the operand changes the result |
 
 `rampStep` is polarity aware. On a light theme it walks darker, on a dark theme it walks lighter, so one rule serves both:
 

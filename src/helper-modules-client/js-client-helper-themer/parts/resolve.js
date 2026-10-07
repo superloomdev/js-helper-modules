@@ -864,7 +864,7 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
         if (entry.op === 'mix') {
           return entry.args.slice(0, 2);
         }
-        if (entry.op === 'scaleBy') {
+        if (entry.op === 'scaleBy' || entry.op === 'alpha') {
           return entry.args.slice(0, 1);
         }
       }
@@ -1072,6 +1072,27 @@ const createInterface = function (Lib, CONFIG, ERRORS) {
       const b = _Resolve.resolveToken(args[1], context);
 
       return Color.mix(a, b, args[2]);
+
+    },
+
+
+    /********************************************************************
+    A resolved color drawn at an opacity: its own alpha times the
+    opacity, as an rgba color, so a role a design system draws translucent
+    (a disabled label at 38%) follows the token it is derived from.
+
+    @param {Array} args - Token reference and opacity (0..1)
+    @param {Object} context - Resolution context
+
+    @return {String} - rgba color
+    *********************************************************************/
+    alpha: function (args, context) {
+
+      // Resolve the operand, then fold the opacity into its alpha
+      const color = Color.parseHex(_Resolve.resolveToken(args[0], context));
+      const alpha = Math.round(color.a * args[1] * 1000) / 1000;
+
+      return alpha >= 1 ? Color.toHex(color) : 'rgba(' + [color.r, color.g, color.b].map(Math.round).join(', ') + ', ' + alpha + ')';
 
     },
 
