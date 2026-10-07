@@ -20,6 +20,23 @@ import mapping from '../data/mapping.js';
 
 const { Lib } = loader();
 const Themer = themerLoader(Lib, {});
+
+// Material's own values that the engine's role audit reports, each with its
+// source; every entry must keep reproducing, so the list can only shrink
+const AUDIT_EXCEPTIONS = Object.freeze([
+  {
+    scheme: 'light_medium_contrast',
+    rule: 'contrast',
+    tokens: ['color.button_tonal_label_hover', 'color.button_tonal_container_hover'],
+    reason: 'Material lays on-secondary-container at 8% over secondary-container for a hovered tonal button (_md-comp-filled-tonal-button.scss); in the medium-contrast light scheme the label reads 4.36:1'
+  },
+  {
+    scheme: 'light_medium_contrast',
+    rule: 'contrast',
+    tokens: ['color.button_tonal_label_active', 'color.button_tonal_container_active'],
+    reason: 'Material lays on-secondary-container at 12% over secondary-container for a pressed tonal button; in the medium-contrast light scheme the label reads 4.02:1'
+  }
+]);
 const contract = Themer.getContract();
 const contractKeys = Object.keys(contract.tokens);
 
@@ -325,11 +342,26 @@ describe('material template - role audit', () => {
   // Caught here, at the template, before any component draws the value.
   for (const schemeName of SCHEME_NAMES) {
 
-    it('should pass the engine role audit for ' + schemeName + ' on native', () => {
+    it('should pass the engine role audit for ' + schemeName + ' on native, apart from its listed reference exceptions', () => {
       const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native');
       const result = Themer.auditRoles(built);
-      assert.deepEqual(result.findings, [], 'role audit findings for ' + schemeName);
-      assert.equal(result.success, true);
+      const listed = AUDIT_EXCEPTIONS.filter(function (entry) {
+        return entry.scheme === schemeName;
+      });
+      const matches = function (entry, finding) {
+        return entry.rule === finding.rule && entry.tokens.join() === finding.tokens.join();
+      };
+      assert.deepEqual(result.findings.filter(function (finding) {
+        return !listed.some(function (entry) {
+          return matches(entry, finding);
+        });
+      }), [], 'role audit findings for ' + schemeName);
+      // A listed exception that no longer reproduces is stale
+      for (const entry of listed) {
+        assert.ok(result.findings.some(function (finding) {
+          return matches(entry, finding);
+        }), 'stale audit exception ' + entry.tokens.join(' on ') + ' in ' + schemeName + '; remove it');
+      }
     });
 
   }
@@ -458,7 +490,6 @@ describe('material template - anatomy enums (v4)', () => {
     'anatomy.switch_handle': 'grows',
     'anatomy.status_marker': 'plain',
     'anatomy.dialog_actions': 'trailing',
-    'anatomy.caret': 'hidden',
     'anatomy.slider_handle': 'bar'
   };
 
@@ -489,12 +520,20 @@ describe('material template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@material-symbols', 'svg-400', 'package.json'), 'utf8'));
 
-  it('should carry 78 Material Symbols literals, every one valid, none completed from the default template', () => {
-    assert.equal(iconKeys.length, 78);
+  // The select's indicator is the select's own drawing (a 24px box), not a Symbols glyph
+  const DRAWINGS = ['icon.dropdown_indicator'];
+
+  it('should carry 80 icon literals, every one valid, none completed from the default template', () => {
+    assert.equal(iconKeys.length, 80);
     for (const schemeName of SCHEME_NAMES) {
       const scheme = profile.schemes[schemeName];
       const subset = {};
       for (const name of iconKeys) {
+        if (DRAWINGS.includes(name)) {
+          assert.deepEqual(scheme.tokens[name], { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] }, schemeName + ' ' + name);
+          subset[name] = scheme.tokens[name];
+          continue;
+        }
         assert.equal(scheme.tokens[name].icon, true, schemeName + ' ' + name + ' lacks the icon marker');
         assert.equal(scheme.tokens[name].viewBox, '0 -960 960 960', schemeName + ' ' + name + ' viewBox');
         assert.equal(scheme.tokens[name].paths.length, 1, schemeName + ' ' + name + ' has one path');
@@ -520,7 +559,8 @@ describe('material template - icon literals (v4)', () => {
         version: iconPkg.version,
         style: 'outlined',
         map_source: iconMap.source,
-        map_sha256: iconMap.source_sha256
+        map_sha256: iconMap.source_sha256,
+        drawings: { dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon' }
       });
     }
     assert.deepEqual(Object.keys(iconMap.icons).map(function (name) { return 'icon.' + name; }), iconKeys);
@@ -597,10 +637,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 490 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 752 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 490);
+        assert.equal(names.length, 752);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -667,3 +707,49 @@ describe('material template - v5 control roles and role colors', () => {
   });
 
 });
+
+
+describe('material template - role grid (v5 amendment)', () => {
+
+  const cells = Object.keys(contract.grid).flatMap(function (group) {
+    return contract.grid[group].map(function (cell) {
+      return group + '.' + cell;
+    });
+  });
+
+  for (const schemeName of SCHEME_NAMES) {
+
+    it('should answer every grid cell from Material\'s own component tokens in ' + schemeName + ', none completed from the default', () => {
+      const scheme = profile.schemes[schemeName];
+      for (const name of cells) {
+        assert.notEqual(scheme.tokens[name], undefined, name);
+        assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
+      }
+    });
+
+  }
+
+  it('should draw Material\'s field, button and checkbox states', () => {
+    const built = Themer.buildTheme(profile.schemes.light, [], 'native').tokens;
+    // Field: outline turns on-surface on hover, primary and 2px on focus; disabled at 12% and 38%
+    assert.equal(built['color.field_outline_hover'], built['color.text_primary']);
+    assert.equal(built['control.field_outline_width_focus'], 2);
+    assert.match(built['color.field_outline_disabled'], /^rgba\(.*, 0\.12\)$/);
+    assert.match(built['color.field_label_disabled'], /^rgba\(.*, 0\.38\)$/);
+    assert.equal(built['control.field_icon_inset'], 12);
+    assert.equal(built['type.field_value'].fontSize, 16);
+    // Button: no state layer on focus, a ring 3px wide 2px outside on keyboard focus, hover elevation
+    assert.equal(built['color.button_primary_container_focus'], built['color.button_primary_container']);
+    assert.equal(built['control.button_focus_width'], 3);
+    assert.equal(built['control.button_focus_offset'], 2);
+    assert.equal(built['feedback.focus_trigger'], 'keyboard');
+    assert.equal(built['shadow.button_primary_hover'].boxShadow, built['shadow.level_01'].boxShadow);
+    assert.equal(built['control.button_ghost_padding_start'], 12);
+    assert.equal(built['control.button_min_width'], 64);
+    // Checkbox: a 44px ring around an 18px box, state layers per selection
+    assert.equal(built['control.selection_focus_offset'], 13);
+    assert.match(built['color.selection_layer_active'], /^rgba\(.*, 0\.12\)$/);
+  });
+
+});
+

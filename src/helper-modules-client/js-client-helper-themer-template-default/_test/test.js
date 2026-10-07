@@ -282,7 +282,6 @@ describe('default template - anatomy enums (v4)', () => {
     'anatomy.switch_handle': 'fixed',
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
-    'anatomy.caret': 'shown',
     'anatomy.slider_handle': 'round'
   };
 
@@ -310,8 +309,8 @@ describe('default template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 78 icon tokens, every one a valid icon literal, in both schemes', () => {
-    assert.equal(iconKeys.length, 78);
+  it('should carry 80 icon tokens, every one a valid icon literal, in both schemes', () => {
+    assert.equal(iconKeys.length, 80);
     for (const schemeName of ['light', 'dark']) {
       const tokens = profile.schemes[schemeName].tokens;
       const subset = {};
@@ -441,10 +440,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 490 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 752 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 490);
+        assert.equal(names.length, 752);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -502,3 +501,36 @@ describe('default template - v5 control roles and corrected inverse steps', () =
   });
 
 });
+
+
+describe('default template - role grid (v5 amendment)', () => {
+
+  const contract = Themer.getContract();
+  const cells = Object.keys(contract.grid).flatMap(function (group) {
+    return contract.grid[group].map(function (cell) {
+      return group + '.' + cell;
+    });
+  });
+
+  for (const schemeName of ['light', 'dark']) {
+
+    it('should answer every grid cell in ' + schemeName + ' by an alias, a rule or its own literal', () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      for (const name of cells) {
+        assert.notEqual(tokens[name], undefined, name);
+      }
+    });
+
+    it('should draw the primary reference anatomy in ' + schemeName + ': a ring inside the edge, no field hover on a text input', () => {
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens;
+      assert.equal(built['control.button_focus_offset'], -2);
+      assert.equal(built['control.field_focus_offset'], -2);
+      assert.equal(built['color.text_input_container_hover'], built['color.field_container']);
+      assert.equal(built['feedback.focus_trigger'], 'any');
+      assert.equal(built['color.select_outline_disabled'], 'rgba(0, 0, 0, 0)');
+    });
+
+  }
+
+});
+

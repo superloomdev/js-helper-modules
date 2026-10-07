@@ -503,7 +503,7 @@ export default Object.freeze({
       'args': [
         'color.interactive',
         'color.text_primary',
-        50
+        30
       ]
     },
     'color.link_secondary': {
@@ -712,7 +712,7 @@ export default Object.freeze({
       'op': 'mix',
       'args': [
         'color.button_danger_primary',
-        'color.text_primary',
+        'color.background',
         70
       ]
     },
@@ -720,7 +720,7 @@ export default Object.freeze({
       'op': 'mix',
       'args': [
         'color.button_danger_primary',
-        'color.text_primary',
+        'color.background',
         85
       ]
     },
@@ -737,7 +737,7 @@ export default Object.freeze({
       'op': 'mix',
       'args': [
         'color.interactive',
-        'color.text_primary',
+        'color.background',
         70
       ]
     },
@@ -745,7 +745,7 @@ export default Object.freeze({
       'op': 'mix',
       'args': [
         'color.interactive',
-        'color.text_primary',
+        'color.background',
         85
       ]
     },
@@ -1824,11 +1824,11 @@ export default Object.freeze({
     'feedback.press': 'highlight',
     'feedback.focus': 'outline',
     'feedback.field': 'underline',
+    'feedback.focus_trigger': 'any',
     'anatomy.label': 'above',
     'anatomy.switch_handle': 'fixed',
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
-    'anatomy.caret': 'shown',
     'anatomy.slider_handle': 'round',
     'shadow.level_01': {
       'shadow': true,
@@ -3162,6 +3162,41 @@ export default Object.freeze({
         }
       }
     },
+    'icon.dropdown_indicator': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M16 22 6 12 7.4 10.6 16 19.2 24.6 10.6 26 12z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 16 16',
+          'paths': [
+            {
+              'd': 'M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M16 22 6 12 7.4 10.6 16 19.2 24.6 10.6 26 12z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M16 22 6 12 7.4 10.6 16 19.2 24.6 10.6 26 12z'
+            }
+          ]
+        }
+      }
+    },
     'icon.edit': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -3874,6 +3909,41 @@ export default Object.freeze({
           'paths': [
             {
               'd': 'M26,4H6A2,2,0,0,0,4,6V26a2,2,0,0,0,2,2H26a2,2,0,0,0,2-2V6A2,2,0,0,0,26,4ZM16,8a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,16,8Zm4,16.125H12v-2.25h2.875v-5.75H13v-2.25h4.125v8H20Z'
+            }
+          ]
+        }
+      }
+    },
+    'icon.invalid': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14C30,8.3,23.7,2,16,2z M14.9,8h2.2v11h-2.2V8z M16,25\tc-0.8,0-1.5-0.7-1.5-1.5S15.2,22,16,22c0.8,0,1.5,0.7,1.5,1.5S16.8,25,16,25z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 16 16',
+          'paths': [
+            {
+              'd': 'M8,1C4.2,1,1,4.2,1,8s3.2,7,7,7s7-3.1,7-7S11.9,1,8,1z M7.5,4h1v5h-1C7.5,9,7.5,4,7.5,4z M8,12.2\tc-0.4,0-0.8-0.4-0.8-0.8s0.3-0.8,0.8-0.8c0.4,0,0.8,0.4,0.8,0.8S8.4,12.2,8,12.2z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 20 20',
+          'paths': [
+            {
+              'd': 'M10,1c-5,0-9,4-9,9s4,9,9,9s9-4,9-9S15,1,10,1z M9.2,5h1.5v7H9.2V5z M10,16c-0.6,0-1-0.4-1-1s0.4-1,1-1\ts1,0.4,1,1S10.6,16,10,16z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 24 24',
+          'paths': [
+            {
+              'd': 'M12,1C5.9,1,1,5.9,1,12s4.9,11,11,11s11-4.9,11-11C23,5.9,18.1,1,12,1z M11.1,6h1.8v8h-1.8V6z M12,19.2\tc-0.7,0-1.2-0.6-1.2-1.2s0.6-1.2,1.2-1.2s1.2,0.6,1.2,1.2S12.7,19.2,12,19.2z'
             }
           ]
         }
@@ -5193,7 +5263,278 @@ export default Object.freeze({
           ]
         }
       }
-    }
+    },
+    'color.field_container': '{color.field_01}',
+    'color.field_container_hover': '{color.field_hover_01}',
+    'color.field_container_disabled': '{color.field_01}',
+    'color.text_input_container_hover': '{color.field_01}',
+    'color.field_outline': '{color.border_strong_01}',
+    'color.field_outline_hover': '{color.border_strong_01}',
+    'color.field_outline_focus': '{color.border_strong_01}',
+    'color.field_outline_disabled': '{color.border_disabled}',
+    'color.field_outline_invalid': '{color.border_strong_01}',
+    'color.field_outline_invalid_hover': '{color.border_strong_01}',
+    'color.field_outline_invalid_focus': '{color.border_strong_01}',
+    'color.select_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.field_ring_invalid': '{color.support_error}',
+    'color.field_focus_ring': '{color.focus}',
+    'color.field_label': '{color.text_secondary}',
+    'color.field_label_hover': '{color.text_secondary}',
+    'color.field_label_focus': '{color.text_secondary}',
+    'color.field_label_disabled': '{color.text_disabled}',
+    'color.field_label_invalid': '{color.text_secondary}',
+    'color.field_label_invalid_hover': '{color.text_secondary}',
+    'color.field_label_invalid_focus': '{color.text_secondary}',
+    'color.field_value': '{color.text_primary}',
+    'color.field_value_disabled': '{color.text_disabled}',
+    'color.field_placeholder': '{color.text_placeholder}',
+    'color.field_placeholder_disabled': '{color.text_disabled}',
+    'color.field_helper': '{color.text_helper}',
+    'color.field_helper_disabled': '{color.text_disabled}',
+    'color.field_message_invalid': '{color.text_error}',
+    'color.field_indicator': '{color.icon_primary}',
+    'color.field_indicator_disabled': '{color.icon_disabled}',
+    'color.field_indicator_invalid': '{color.icon_primary}',
+    'color.field_invalid_icon': '{color.support_error}',
+    'color.button_primary_container': '{color.button_primary}',
+    'color.button_primary_container_hover': '{color.button_primary_hover}',
+    'color.button_primary_container_active': '{color.button_primary_active}',
+    'color.button_primary_container_focus': '{color.button_primary}',
+    'color.button_primary_container_disabled': '{color.button_disabled}',
+    'color.button_primary_container_selected': '{color.background_selected}',
+    'color.button_primary_label': '{color.text_on_color}',
+    'color.button_primary_label_hover': '{color.text_on_color}',
+    'color.button_primary_label_active': '{color.text_on_color}',
+    'color.button_primary_label_focus': '{color.text_on_color}',
+    'color.button_primary_label_disabled': '{color.text_on_color_disabled}',
+    'color.button_primary_label_selected': '{color.text_primary}',
+    'color.button_primary_border': 'rgba(0, 0, 0, 0)',
+    'color.button_primary_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_primary_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_primary_border_disabled': '{color.button_disabled}',
+    'color.button_secondary_container': '{color.button_secondary}',
+    'color.button_secondary_container_hover': '{color.button_secondary_hover}',
+    'color.button_secondary_container_active': '{color.button_secondary_active}',
+    'color.button_secondary_container_focus': '{color.button_secondary}',
+    'color.button_secondary_container_disabled': '{color.button_disabled}',
+    'color.button_secondary_container_selected': '{color.background_selected}',
+    'color.button_secondary_label': '{color.text_on_color}',
+    'color.button_secondary_label_hover': '{color.text_on_color}',
+    'color.button_secondary_label_active': '{color.text_on_color}',
+    'color.button_secondary_label_focus': '{color.text_on_color}',
+    'color.button_secondary_label_disabled': '{color.text_on_color_disabled}',
+    'color.button_secondary_label_selected': '{color.text_primary}',
+    'color.button_secondary_border': 'rgba(0, 0, 0, 0)',
+    'color.button_secondary_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_secondary_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_secondary_border_disabled': '{color.button_disabled}',
+    'color.button_tertiary_container': 'rgba(0, 0, 0, 0)',
+    'color.button_tertiary_container_hover': '{color.button_tertiary_hover}',
+    'color.button_tertiary_container_active': '{color.button_tertiary_active}',
+    'color.button_tertiary_container_focus': '{color.button_tertiary}',
+    'color.button_tertiary_container_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_tertiary_container_selected': '{color.background_selected}',
+    'color.button_tertiary_label': '{color.button_tertiary}',
+    'color.button_tertiary_label_hover': '{color.text_inverse}',
+    'color.button_tertiary_label_active': '{color.text_inverse}',
+    'color.button_tertiary_label_focus': '{color.text_inverse}',
+    'color.button_tertiary_label_disabled': '{color.text_disabled}',
+    'color.button_tertiary_label_selected': '{color.text_primary}',
+    'color.button_tertiary_border': '{color.button_tertiary}',
+    'color.button_tertiary_border_hover': '{color.button_tertiary}',
+    'color.button_tertiary_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_tertiary_border_disabled': '{color.button_disabled}',
+    'color.button_ghost_container': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_container_hover': '{color.background_hover}',
+    'color.button_ghost_container_active': '{color.background_active}',
+    'color.button_ghost_container_focus': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_container_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_container_selected': '{color.background_selected}',
+    'color.button_ghost_label': '{color.link_primary}',
+    'color.button_ghost_label_hover': '{color.link_primary_hover}',
+    'color.button_ghost_label_active': '{color.link_primary_hover}',
+    'color.button_ghost_label_focus': '{color.link_primary}',
+    'color.button_ghost_label_disabled': '{color.text_disabled}',
+    'color.button_ghost_label_selected': '{color.text_primary}',
+    'color.button_ghost_border': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_border_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_container': '{color.button_danger_primary}',
+    'color.button_danger_container_hover': '{color.button_danger_hover}',
+    'color.button_danger_container_active': '{color.button_danger_active}',
+    'color.button_danger_container_focus': '{color.button_danger_primary}',
+    'color.button_danger_container_disabled': '{color.button_disabled}',
+    'color.button_danger_container_selected': '{color.background_selected}',
+    'color.button_danger_label': '{color.text_on_color}',
+    'color.button_danger_label_hover': '{color.text_on_color}',
+    'color.button_danger_label_active': '{color.text_on_color}',
+    'color.button_danger_label_focus': '{color.text_on_color}',
+    'color.button_danger_label_disabled': '{color.text_on_color_disabled}',
+    'color.button_danger_label_selected': '{color.text_primary}',
+    'color.button_danger_border': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_border_disabled': '{color.button_disabled}',
+    'color.button_danger_tertiary_container': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_tertiary_container_hover': '{color.button_danger_hover}',
+    'color.button_danger_tertiary_container_active': '{color.button_danger_active}',
+    'color.button_danger_tertiary_container_focus': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_tertiary_container_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_tertiary_container_selected': '{color.background_selected}',
+    'color.button_danger_tertiary_label': '{color.button_danger_secondary}',
+    'color.button_danger_tertiary_label_hover': '{color.text_on_color}',
+    'color.button_danger_tertiary_label_active': '{color.text_on_color}',
+    'color.button_danger_tertiary_label_focus': '{color.button_danger_secondary}',
+    'color.button_danger_tertiary_label_disabled': '{color.text_disabled}',
+    'color.button_danger_tertiary_label_selected': '{color.text_primary}',
+    'color.button_danger_tertiary_border': '{color.button_danger_secondary}',
+    'color.button_danger_tertiary_border_hover': '{color.button_danger_hover}',
+    'color.button_danger_tertiary_border_active': '{color.button_danger_secondary}',
+    'color.button_danger_tertiary_border_disabled': '{color.button_disabled}',
+    'color.button_danger_ghost_container': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_ghost_container_hover': '{color.button_danger_hover}',
+    'color.button_danger_ghost_container_active': '{color.button_danger_active}',
+    'color.button_danger_ghost_container_focus': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_ghost_container_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_ghost_container_selected': '{color.background_selected}',
+    'color.button_danger_ghost_label': '{color.button_danger_secondary}',
+    'color.button_danger_ghost_label_hover': '{color.text_on_color}',
+    'color.button_danger_ghost_label_active': '{color.text_on_color}',
+    'color.button_danger_ghost_label_focus': '{color.button_danger_secondary}',
+    'color.button_danger_ghost_label_disabled': '{color.text_disabled}',
+    'color.button_danger_ghost_label_selected': '{color.text_primary}',
+    'color.button_danger_ghost_border': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_ghost_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_ghost_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_ghost_border_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_tonal_container': '{color.button_tonal}',
+    'color.button_tonal_container_hover': '{color.button_tonal_hover}',
+    'color.button_tonal_container_active': '{color.button_tonal_active}',
+    'color.button_tonal_container_focus': '{color.button_tonal}',
+    'color.button_tonal_container_disabled': '{color.button_disabled}',
+    'color.button_tonal_container_selected': '{color.background_selected}',
+    'color.button_tonal_label': '{color.text_on_button_tonal}',
+    'color.button_tonal_label_hover': '{color.text_on_button_tonal}',
+    'color.button_tonal_label_active': '{color.text_on_button_tonal}',
+    'color.button_tonal_label_focus': '{color.text_on_button_tonal}',
+    'color.button_tonal_label_disabled': '{color.text_on_color_disabled}',
+    'color.button_tonal_label_selected': '{color.text_primary}',
+    'color.button_tonal_border': 'rgba(0, 0, 0, 0)',
+    'color.button_tonal_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_tonal_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_tonal_border_disabled': '{color.button_disabled}',
+    'color.button_elevated_container': '{color.button_elevated}',
+    'color.button_elevated_container_hover': '{color.button_elevated_hover}',
+    'color.button_elevated_container_active': '{color.button_elevated_active}',
+    'color.button_elevated_container_focus': '{color.button_elevated}',
+    'color.button_elevated_container_disabled': '{color.button_disabled}',
+    'color.button_elevated_container_selected': '{color.background_selected}',
+    'color.button_elevated_label': '{color.link_primary}',
+    'color.button_elevated_label_hover': '{color.link_primary_hover}',
+    'color.button_elevated_label_active': '{color.link_primary_hover}',
+    'color.button_elevated_label_focus': '{color.link_primary}',
+    'color.button_elevated_label_disabled': '{color.text_on_color_disabled}',
+    'color.button_elevated_label_selected': '{color.text_primary}',
+    'color.button_elevated_border': 'rgba(0, 0, 0, 0)',
+    'color.button_elevated_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_elevated_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_elevated_border_disabled': '{color.button_disabled}',
+    'color.button_focus_ring': '{color.focus}',
+    'color.button_focus_gap': '{color.background}',
+    'color.selection_outline': '{color.icon_primary}',
+    'color.selection_outline_hover': '{color.icon_primary}',
+    'color.selection_outline_active': '{color.icon_primary}',
+    'color.selection_outline_disabled': '{color.icon_disabled}',
+    'color.selection_outline_invalid': '{color.support_error}',
+    'color.selection_container': '{color.control_checked}',
+    'color.selection_container_hover': '{color.control_checked}',
+    'color.selection_container_active': '{color.control_checked}',
+    'color.selection_container_disabled': '{color.icon_disabled}',
+    'color.selection_container_invalid': '{color.control_checked}',
+    'color.selection_mark': '{color.icon_inverse}',
+    'color.selection_mark_disabled': '{color.icon_inverse}',
+    'color.selection_layer_hover': 'rgba(0, 0, 0, 0)',
+    'color.selection_layer_active': 'rgba(0, 0, 0, 0)',
+    'color.selection_layer_selected_hover': 'rgba(0, 0, 0, 0)',
+    'color.selection_layer_selected_active': 'rgba(0, 0, 0, 0)',
+    'color.selection_label': '{color.text_primary}',
+    'color.selection_label_disabled': '{color.text_disabled}',
+    'color.selection_helper': '{color.text_helper}',
+    'color.selection_message_invalid': '{color.text_error}',
+    'color.selection_invalid_icon': '{color.support_error}',
+    'color.selection_focus_ring': '{color.focus}',
+    'control.field_outline_width': '{border.width_01}',
+    'control.field_outline_width_focus': '{border.width_01}',
+    'control.field_invalid_ring_width': '{border.width_02}',
+    'control.field_focus_width': '{focus.width}',
+    'control.field_focus_offset': -2,
+    'control.field_padding_inline': '{spacing.spacing_05}',
+    'control.field_icon_inset': '{spacing.spacing_05}',
+    'control.field_icon_gap': '{spacing.spacing_03}',
+    'control.field_message_inset': 0,
+    'control.field_message_gap': '{spacing.spacing_02}',
+    'control.button_focus_width': '{focus.width}',
+    'control.button_focus_offset': -2,
+    'control.button_focus_gap_width': '{border.width_01}',
+    'control.button_ghost_padding_start': '{control.button_padding_start}',
+    'control.button_ghost_padding_end': '{control.button_padding_start}',
+    'control.button_min_width': 0,
+    'control.selection_focus_width': '{focus.width}',
+    'control.selection_focus_offset': 1,
+    'control.selection_focus_radius': '{shape.radius_02}',
+    'control.selection_layer_size': '{size.size_medium}',
+    'type.field_value': '{type.body_compact_01}',
+    'type.field_label': '{type.label01}',
+    'type.field_helper': '{type.helper_text_01}',
+    'shadow.level_00': {
+      'shadow': true,
+      'layers': [
+        {
+          'x': 0,
+          'y': 0,
+          'blur': 0,
+          'spread': 0,
+          'color': 'rgba(0, 0, 0, 0)'
+        }
+      ]
+    },
+    'shadow.button_primary': '{shadow.level_00}',
+    'shadow.button_primary_hover': '{shadow.level_00}',
+    'shadow.button_primary_active': '{shadow.level_00}',
+    'shadow.button_primary_disabled': '{shadow.level_00}',
+    'shadow.button_secondary': '{shadow.level_00}',
+    'shadow.button_secondary_hover': '{shadow.level_00}',
+    'shadow.button_secondary_active': '{shadow.level_00}',
+    'shadow.button_secondary_disabled': '{shadow.level_00}',
+    'shadow.button_tertiary': '{shadow.level_00}',
+    'shadow.button_tertiary_hover': '{shadow.level_00}',
+    'shadow.button_tertiary_active': '{shadow.level_00}',
+    'shadow.button_tertiary_disabled': '{shadow.level_00}',
+    'shadow.button_ghost': '{shadow.level_00}',
+    'shadow.button_ghost_hover': '{shadow.level_00}',
+    'shadow.button_ghost_active': '{shadow.level_00}',
+    'shadow.button_ghost_disabled': '{shadow.level_00}',
+    'shadow.button_danger': '{shadow.level_00}',
+    'shadow.button_danger_hover': '{shadow.level_00}',
+    'shadow.button_danger_active': '{shadow.level_00}',
+    'shadow.button_danger_disabled': '{shadow.level_00}',
+    'shadow.button_danger_tertiary': '{shadow.level_00}',
+    'shadow.button_danger_tertiary_hover': '{shadow.level_00}',
+    'shadow.button_danger_tertiary_active': '{shadow.level_00}',
+    'shadow.button_danger_tertiary_disabled': '{shadow.level_00}',
+    'shadow.button_danger_ghost': '{shadow.level_00}',
+    'shadow.button_danger_ghost_hover': '{shadow.level_00}',
+    'shadow.button_danger_ghost_active': '{shadow.level_00}',
+    'shadow.button_danger_ghost_disabled': '{shadow.level_00}',
+    'shadow.button_tonal': '{shadow.level_00}',
+    'shadow.button_tonal_hover': '{shadow.level_00}',
+    'shadow.button_tonal_active': '{shadow.level_00}',
+    'shadow.button_tonal_disabled': '{shadow.level_00}',
+    'shadow.button_elevated': '{shadow.level_01}',
+    'shadow.button_elevated_hover': '{shadow.level_01}',
+    'shadow.button_elevated_active': '{shadow.level_01}',
+    'shadow.button_elevated_disabled': '{shadow.level_00}'
   },
   'meta': {
     'color.background': {
@@ -6264,6 +6605,9 @@ export default Object.freeze({
     'feedback.field': {
       'group': 'raw'
     },
+    'feedback.focus_trigger': {
+      'group': 'raw'
+    },
     'anatomy.label': {
       'group': 'raw'
     },
@@ -6274,9 +6618,6 @@ export default Object.freeze({
       'group': 'raw'
     },
     'anatomy.dialog_actions': {
-      'group': 'raw'
-    },
-    'anatomy.caret': {
       'group': 'raw'
     },
     'anatomy.slider_handle': {
@@ -6531,6 +6872,9 @@ export default Object.freeze({
     'icon.download': {
       'group': 'raw'
     },
+    'icon.dropdown_indicator': {
+      'group': 'raw'
+    },
     'icon.edit': {
       'group': 'raw'
     },
@@ -6574,6 +6918,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'icon.information_square_filled': {
+      'group': 'raw'
+    },
+    'icon.invalid': {
       'group': 'raw'
     },
     'icon.layers': {
@@ -6665,6 +7012,786 @@ export default Object.freeze({
     },
     'icon.warning_square_filled': {
       'group': 'raw'
+    },
+    'color.field_container': {
+      'group': 'color'
+    },
+    'color.field_container_hover': {
+      'group': 'color'
+    },
+    'color.field_container_disabled': {
+      'group': 'color'
+    },
+    'color.text_input_container_hover': {
+      'group': 'color'
+    },
+    'color.field_outline': {
+      'group': 'color'
+    },
+    'color.field_outline_hover': {
+      'group': 'color'
+    },
+    'color.field_outline_focus': {
+      'group': 'color'
+    },
+    'color.field_outline_disabled': {
+      'group': 'color'
+    },
+    'color.field_outline_invalid': {
+      'group': 'color'
+    },
+    'color.field_outline_invalid_hover': {
+      'group': 'color'
+    },
+    'color.field_outline_invalid_focus': {
+      'group': 'color'
+    },
+    'color.select_outline_disabled': {
+      'group': 'color'
+    },
+    'color.field_ring_invalid': {
+      'group': 'color'
+    },
+    'color.field_focus_ring': {
+      'group': 'color'
+    },
+    'color.field_label': {
+      'group': 'color'
+    },
+    'color.field_label_hover': {
+      'group': 'color'
+    },
+    'color.field_label_focus': {
+      'group': 'color'
+    },
+    'color.field_label_disabled': {
+      'group': 'color'
+    },
+    'color.field_label_invalid': {
+      'group': 'color'
+    },
+    'color.field_label_invalid_hover': {
+      'group': 'color'
+    },
+    'color.field_label_invalid_focus': {
+      'group': 'color'
+    },
+    'color.field_value': {
+      'group': 'color'
+    },
+    'color.field_value_disabled': {
+      'group': 'color'
+    },
+    'color.field_placeholder': {
+      'group': 'color'
+    },
+    'color.field_placeholder_disabled': {
+      'group': 'color'
+    },
+    'color.field_helper': {
+      'group': 'color'
+    },
+    'color.field_helper_disabled': {
+      'group': 'color'
+    },
+    'color.field_message_invalid': {
+      'group': 'color'
+    },
+    'color.field_indicator': {
+      'group': 'color'
+    },
+    'color.field_indicator_disabled': {
+      'group': 'color'
+    },
+    'color.field_indicator_invalid': {
+      'group': 'color'
+    },
+    'color.field_invalid_icon': {
+      'group': 'color'
+    },
+    'color.button_primary_container': {
+      'group': 'color'
+    },
+    'color.button_primary_container_hover': {
+      'group': 'color'
+    },
+    'color.button_primary_container_active': {
+      'group': 'color'
+    },
+    'color.button_primary_container_focus': {
+      'group': 'color'
+    },
+    'color.button_primary_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_primary_container_selected': {
+      'group': 'color'
+    },
+    'color.button_primary_label': {
+      'group': 'color'
+    },
+    'color.button_primary_label_hover': {
+      'group': 'color'
+    },
+    'color.button_primary_label_active': {
+      'group': 'color'
+    },
+    'color.button_primary_label_focus': {
+      'group': 'color'
+    },
+    'color.button_primary_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_primary_label_selected': {
+      'group': 'color'
+    },
+    'color.button_primary_border': {
+      'group': 'color'
+    },
+    'color.button_primary_border_hover': {
+      'group': 'color'
+    },
+    'color.button_primary_border_active': {
+      'group': 'color'
+    },
+    'color.button_primary_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_secondary_container': {
+      'group': 'color'
+    },
+    'color.button_secondary_container_hover': {
+      'group': 'color'
+    },
+    'color.button_secondary_container_active': {
+      'group': 'color'
+    },
+    'color.button_secondary_container_focus': {
+      'group': 'color'
+    },
+    'color.button_secondary_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_secondary_container_selected': {
+      'group': 'color'
+    },
+    'color.button_secondary_label': {
+      'group': 'color'
+    },
+    'color.button_secondary_label_hover': {
+      'group': 'color'
+    },
+    'color.button_secondary_label_active': {
+      'group': 'color'
+    },
+    'color.button_secondary_label_focus': {
+      'group': 'color'
+    },
+    'color.button_secondary_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_secondary_label_selected': {
+      'group': 'color'
+    },
+    'color.button_secondary_border': {
+      'group': 'color'
+    },
+    'color.button_secondary_border_hover': {
+      'group': 'color'
+    },
+    'color.button_secondary_border_active': {
+      'group': 'color'
+    },
+    'color.button_secondary_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_tertiary_container': {
+      'group': 'color'
+    },
+    'color.button_tertiary_container_hover': {
+      'group': 'color'
+    },
+    'color.button_tertiary_container_active': {
+      'group': 'color'
+    },
+    'color.button_tertiary_container_focus': {
+      'group': 'color'
+    },
+    'color.button_tertiary_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_tertiary_container_selected': {
+      'group': 'color'
+    },
+    'color.button_tertiary_label': {
+      'group': 'color'
+    },
+    'color.button_tertiary_label_hover': {
+      'group': 'color'
+    },
+    'color.button_tertiary_label_active': {
+      'group': 'color'
+    },
+    'color.button_tertiary_label_focus': {
+      'group': 'color'
+    },
+    'color.button_tertiary_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_tertiary_label_selected': {
+      'group': 'color'
+    },
+    'color.button_tertiary_border': {
+      'group': 'color'
+    },
+    'color.button_tertiary_border_hover': {
+      'group': 'color'
+    },
+    'color.button_tertiary_border_active': {
+      'group': 'color'
+    },
+    'color.button_tertiary_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_ghost_container': {
+      'group': 'color'
+    },
+    'color.button_ghost_container_hover': {
+      'group': 'color'
+    },
+    'color.button_ghost_container_active': {
+      'group': 'color'
+    },
+    'color.button_ghost_container_focus': {
+      'group': 'color'
+    },
+    'color.button_ghost_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_ghost_container_selected': {
+      'group': 'color'
+    },
+    'color.button_ghost_label': {
+      'group': 'color'
+    },
+    'color.button_ghost_label_hover': {
+      'group': 'color'
+    },
+    'color.button_ghost_label_active': {
+      'group': 'color'
+    },
+    'color.button_ghost_label_focus': {
+      'group': 'color'
+    },
+    'color.button_ghost_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_ghost_label_selected': {
+      'group': 'color'
+    },
+    'color.button_ghost_border': {
+      'group': 'color'
+    },
+    'color.button_ghost_border_hover': {
+      'group': 'color'
+    },
+    'color.button_ghost_border_active': {
+      'group': 'color'
+    },
+    'color.button_ghost_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_container': {
+      'group': 'color'
+    },
+    'color.button_danger_container_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_container_active': {
+      'group': 'color'
+    },
+    'color.button_danger_container_focus': {
+      'group': 'color'
+    },
+    'color.button_danger_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_container_selected': {
+      'group': 'color'
+    },
+    'color.button_danger_label': {
+      'group': 'color'
+    },
+    'color.button_danger_label_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_label_active': {
+      'group': 'color'
+    },
+    'color.button_danger_label_focus': {
+      'group': 'color'
+    },
+    'color.button_danger_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_label_selected': {
+      'group': 'color'
+    },
+    'color.button_danger_border': {
+      'group': 'color'
+    },
+    'color.button_danger_border_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_border_active': {
+      'group': 'color'
+    },
+    'color.button_danger_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_container': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_container_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_container_active': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_container_focus': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_container_selected': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_label': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_label_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_label_active': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_label_focus': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_label_selected': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_border': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_border_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_border_active': {
+      'group': 'color'
+    },
+    'color.button_danger_tertiary_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_container': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_container_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_container_active': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_container_focus': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_container_selected': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_label': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_label_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_label_active': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_label_focus': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_label_selected': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_border': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_border_hover': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_border_active': {
+      'group': 'color'
+    },
+    'color.button_danger_ghost_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_tonal_container': {
+      'group': 'color'
+    },
+    'color.button_tonal_container_hover': {
+      'group': 'color'
+    },
+    'color.button_tonal_container_active': {
+      'group': 'color'
+    },
+    'color.button_tonal_container_focus': {
+      'group': 'color'
+    },
+    'color.button_tonal_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_tonal_container_selected': {
+      'group': 'color'
+    },
+    'color.button_tonal_label': {
+      'group': 'color'
+    },
+    'color.button_tonal_label_hover': {
+      'group': 'color'
+    },
+    'color.button_tonal_label_active': {
+      'group': 'color'
+    },
+    'color.button_tonal_label_focus': {
+      'group': 'color'
+    },
+    'color.button_tonal_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_tonal_label_selected': {
+      'group': 'color'
+    },
+    'color.button_tonal_border': {
+      'group': 'color'
+    },
+    'color.button_tonal_border_hover': {
+      'group': 'color'
+    },
+    'color.button_tonal_border_active': {
+      'group': 'color'
+    },
+    'color.button_tonal_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_elevated_container': {
+      'group': 'color'
+    },
+    'color.button_elevated_container_hover': {
+      'group': 'color'
+    },
+    'color.button_elevated_container_active': {
+      'group': 'color'
+    },
+    'color.button_elevated_container_focus': {
+      'group': 'color'
+    },
+    'color.button_elevated_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_elevated_container_selected': {
+      'group': 'color'
+    },
+    'color.button_elevated_label': {
+      'group': 'color'
+    },
+    'color.button_elevated_label_hover': {
+      'group': 'color'
+    },
+    'color.button_elevated_label_active': {
+      'group': 'color'
+    },
+    'color.button_elevated_label_focus': {
+      'group': 'color'
+    },
+    'color.button_elevated_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_elevated_label_selected': {
+      'group': 'color'
+    },
+    'color.button_elevated_border': {
+      'group': 'color'
+    },
+    'color.button_elevated_border_hover': {
+      'group': 'color'
+    },
+    'color.button_elevated_border_active': {
+      'group': 'color'
+    },
+    'color.button_elevated_border_disabled': {
+      'group': 'color'
+    },
+    'color.button_focus_ring': {
+      'group': 'color'
+    },
+    'color.button_focus_gap': {
+      'group': 'color'
+    },
+    'color.selection_outline': {
+      'group': 'color'
+    },
+    'color.selection_outline_hover': {
+      'group': 'color'
+    },
+    'color.selection_outline_active': {
+      'group': 'color'
+    },
+    'color.selection_outline_disabled': {
+      'group': 'color'
+    },
+    'color.selection_outline_invalid': {
+      'group': 'color'
+    },
+    'color.selection_container': {
+      'group': 'color'
+    },
+    'color.selection_container_hover': {
+      'group': 'color'
+    },
+    'color.selection_container_active': {
+      'group': 'color'
+    },
+    'color.selection_container_disabled': {
+      'group': 'color'
+    },
+    'color.selection_container_invalid': {
+      'group': 'color'
+    },
+    'color.selection_mark': {
+      'group': 'color'
+    },
+    'color.selection_mark_disabled': {
+      'group': 'color'
+    },
+    'color.selection_layer_hover': {
+      'group': 'color'
+    },
+    'color.selection_layer_active': {
+      'group': 'color'
+    },
+    'color.selection_layer_selected_hover': {
+      'group': 'color'
+    },
+    'color.selection_layer_selected_active': {
+      'group': 'color'
+    },
+    'color.selection_label': {
+      'group': 'color'
+    },
+    'color.selection_label_disabled': {
+      'group': 'color'
+    },
+    'color.selection_helper': {
+      'group': 'color'
+    },
+    'color.selection_message_invalid': {
+      'group': 'color'
+    },
+    'color.selection_invalid_icon': {
+      'group': 'color'
+    },
+    'color.selection_focus_ring': {
+      'group': 'color'
+    },
+    'control.field_outline_width': {
+      'group': 'dimension'
+    },
+    'control.field_outline_width_focus': {
+      'group': 'dimension'
+    },
+    'control.field_invalid_ring_width': {
+      'group': 'dimension'
+    },
+    'control.field_focus_width': {
+      'group': 'dimension'
+    },
+    'control.field_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.field_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.field_icon_inset': {
+      'group': 'dimension'
+    },
+    'control.field_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.field_message_inset': {
+      'group': 'dimension'
+    },
+    'control.field_message_gap': {
+      'group': 'dimension'
+    },
+    'control.button_focus_width': {
+      'group': 'dimension'
+    },
+    'control.button_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.button_focus_gap_width': {
+      'group': 'dimension'
+    },
+    'control.button_ghost_padding_start': {
+      'group': 'dimension'
+    },
+    'control.button_ghost_padding_end': {
+      'group': 'dimension'
+    },
+    'control.button_min_width': {
+      'group': 'dimension'
+    },
+    'control.selection_focus_width': {
+      'group': 'dimension'
+    },
+    'control.selection_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.selection_focus_radius': {
+      'group': 'dimension'
+    },
+    'control.selection_layer_size': {
+      'group': 'dimension'
+    },
+    'type.field_value': {
+      'group': 'typeSet'
+    },
+    'type.field_label': {
+      'group': 'typeSet'
+    },
+    'type.field_helper': {
+      'group': 'typeSet'
+    },
+    'shadow.level_00': {
+      'group': 'shadow'
+    },
+    'shadow.button_primary': {
+      'group': 'shadow'
+    },
+    'shadow.button_primary_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_primary_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_primary_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_secondary': {
+      'group': 'shadow'
+    },
+    'shadow.button_secondary_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_secondary_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_secondary_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_tertiary': {
+      'group': 'shadow'
+    },
+    'shadow.button_tertiary_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_tertiary_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_tertiary_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_ghost': {
+      'group': 'shadow'
+    },
+    'shadow.button_ghost_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_ghost_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_ghost_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_tertiary': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_tertiary_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_tertiary_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_tertiary_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_ghost': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_ghost_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_ghost_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_danger_ghost_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_tonal': {
+      'group': 'shadow'
+    },
+    'shadow.button_tonal_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_tonal_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_tonal_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.button_elevated': {
+      'group': 'shadow'
+    },
+    'shadow.button_elevated_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_elevated_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_elevated_disabled': {
+      'group': 'shadow'
     }
   },
   'provenance': {
@@ -6672,7 +7799,7 @@ export default Object.freeze({
       'package': '@carbon/icons',
       'version': '11.89.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '2e69f96d0d0302de27159057e4a695fa070df1c630c88bc91bb7ca64568e550d'
+      'map_sha256': '4aec287c9d9276fd8581d279caf0d8c458e2b3390dbdf3e0c63ef3b54a53b529'
     }
   }
 });

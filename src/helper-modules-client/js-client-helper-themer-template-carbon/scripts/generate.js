@@ -22,6 +22,7 @@ import debugLoader from 'helper-debug';
 import themerLoader from 'helper-themer';
 import defaultProfile from 'helper-themer-template-default';
 import buildCarbonIcons from './icons-carbon.js';
+import buildGridRecipe from './grid-recipe.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
@@ -57,9 +58,11 @@ const ANATOMY = {
   'anatomy.switch_handle': 'fixed',
   'anatomy.status_marker': 'bar_icon',
   'anatomy.dialog_actions': 'stretched',
-  'anatomy.caret': 'shown',
   'anatomy.slider_handle': 'round'
 };
+
+// --- Role grid (v5 amendment) -------------------------------------------
+const GRID_RECIPE = buildGridRecipe(contract.grid);
 
 // --- Name conversion: Carbon camelCase -> Superloom snake_case -----------
 function toSnake (carbonName) {
@@ -214,11 +217,11 @@ const TYPE_ROLE_MAP = {
 const COLOR_ROLE_MAP = {
   'color.button_tonal': 'layerAccent01',
   'color.button_tonal_hover': 'layerAccentHover01',
-  'color.button_tonal_active': 'layerAccentActive01',
+  'color.button_tonal_active': 'layerSelected01',
   'color.text_on_button_tonal': 'textPrimary',
   'color.button_elevated': 'layer01',
   'color.button_elevated_hover': 'layerHover01',
-  'color.button_elevated_active': 'layerActive01',
+  'color.button_elevated_active': 'layerHover01',
   'color.control_checked': 'iconPrimary'
 };
 
@@ -260,6 +263,7 @@ const D9_STRUCTURE = {
   'feedback.press': 'highlight',
   'feedback.focus': 'outline',
   'feedback.field': 'underline',
+  'feedback.focus_trigger': 'any',
   'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow}' }] },
   'shadow.level_02': { shadow: true, layers: [{ x: 0, y: 4, blur: 8, spread: 0, color: '{color.shadow}' }] },
   'shadow.level_03': { shadow: true, layers: [{ x: 0, y: 8, blur: 16, spread: 0, color: '{color.shadow}' }] },
@@ -468,6 +472,11 @@ function buildTokens (schemeName) {
 
   // Icon literals (v4)
   for (const [sKey, value] of Object.entries(ICONS)) {
+    tokens[sKey] = value;
+  }
+
+  // Role grid (v5 amendment): Carbon's answer to every cell, never the default's
+  for (const [sKey, value] of Object.entries(GRID_RECIPE)) {
     tokens[sKey] = value;
   }
 

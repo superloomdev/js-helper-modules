@@ -17,6 +17,7 @@ import debugLoader from 'helper-debug';
 import themerLoader from 'helper-themer';
 import buildCarbonIcons from './icons-carbon.js';
 
+import buildGridRecipe from './grid-recipe.js';
 const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
 const outDir = process.argv[2] || resolve(moduleRoot, 'data');
@@ -29,6 +30,8 @@ const Themer = themerLoader(Lib, {});
 const contract = Themer.getContract();
 const tokenNames = Object.keys(contract.tokens);
 const meta = contract.meta;
+// The role grid (v5 amendment): every cell answered by this template's recipe
+const GRID_RECIPE = buildGridRecipe(contract.grid);
 
 // --- Icons (v4) -----------------------------------------------------------
 // The default template carries Carbon's glyphs until the Superloom set exists.
@@ -50,7 +53,6 @@ const ANATOMY = {
   'anatomy.switch_handle': 'fixed',
   'anatomy.status_marker': 'bar_icon',
   'anatomy.dialog_actions': 'stretched',
-  'anatomy.caret': 'shown',
   'anatomy.slider_handle': 'round'
 };
 
@@ -249,7 +251,7 @@ const COLOR_MIXES = {
 const HUE_ROLES = {
   light: {
     'color.link_primary': '{color.interactive}',
-    'color.link_primary_hover': '{color.interactive}',
+    'color.link_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 60] },
     'color.button_tertiary': '{color.interactive}',
     'color.support_info': '{color.interactive}',
     'color.support_error': '{color.button_danger_primary}',
@@ -262,7 +264,13 @@ const HUE_ROLES = {
   },
   dark: {
     'color.link_primary': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
-    'color.link_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
+    'color.link_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 30] },
+    // Hover and press darken a filled kind in both polarities, so white text keeps reading on it; the
+    // outlined kind's fill lightens in the dark scheme, where its label turns to the inverse text
+    'color.button_primary_hover': { op: 'mix', args: ['color.interactive', 'color.background', 85] },
+    'color.button_primary_active': { op: 'mix', args: ['color.interactive', 'color.background', 70] },
+    'color.button_danger_hover': { op: 'mix', args: ['color.button_danger_primary', 'color.background', 85] },
+    'color.button_danger_active': { op: 'mix', args: ['color.button_danger_primary', 'color.background', 70] },
     'color.button_tertiary': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
     'color.support_info': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
     'color.support_error': { op: 'mix', args: ['color.button_danger_primary', 'color.text_primary', 50] },
@@ -466,6 +474,12 @@ function buildTokens (polarity) {
     const def = contract.tokens[name];
     const group = def.group;
 
+    // --- Role grid cells (v5 amendment) ---
+    if (GRID_RECIPE[name] !== undefined) {
+      tokens[name] = GRID_RECIPE[name];
+      continue;
+    }
+
     // --- Color tokens ---
     if (group === 'color') {
       if (name in COLOR_LITERALS) {
@@ -633,6 +647,9 @@ function buildTokens (polarity) {
       }
       if (name === 'feedback.field') {
         tokens[name] = 'underline';
+      }
+      if (name === 'feedback.focus_trigger') {
+        tokens[name] = 'any';
       }
       continue;
     }

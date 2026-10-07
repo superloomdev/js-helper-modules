@@ -31,9 +31,92 @@
 // role colors (the tonal and elevated button fills, the text on a tonal
 // fill, the checked-control fill), so a component reads a role, and each
 // template answers the role with its own number.
+//
+// Version 5 was amended inside its milestone with the role grid: for each
+// component family (field, button per kind, selection), one role per part
+// it draws, per state it draws it in, per property (colour, width, space,
+// type set, elevation), so a per-template difference is data, never a
+// branch in a component. It also adds `shadow.level_00` (no elevation),
+// the `feedback.focus_trigger` behaviour (a focus ring on any focus, or on
+// keyboard focus only) and two icon roles (`invalid`, `dropdown_indicator`:
+// the glyph a part shows is an icon role, never an enum), and removes
+// `anatomy.caret`, whose choice the `dropdown_indicator` role now carries.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
+
+// The role grid (v5 amendment). Kinds of the button family, in the order
+// the component documents them
+const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']);
+const BUTTON_FILL_STATES = Object.freeze(['', '_hover', '_active', '_focus', '_disabled', '_selected']);
+const BUTTON_BORDER_STATES = Object.freeze(['', '_hover', '_active', '_disabled']);
+const BUTTON_ELEVATION_STATES = Object.freeze(['', '_hover', '_active', '_disabled']);
+
+// Group -> cell names. A member cell (`text_input_`, `select_`) exists only
+// where a reference gives one member a different value than its family
+const GRID = Object.freeze({
+  color: Object.freeze([].concat(
+    [
+      'field_container', 'field_container_hover', 'field_container_disabled', 'text_input_container_hover',
+      'field_outline', 'field_outline_hover', 'field_outline_focus', 'field_outline_disabled',
+      'field_outline_invalid', 'field_outline_invalid_hover', 'field_outline_invalid_focus', 'select_outline_disabled',
+      'field_ring_invalid', 'field_focus_ring',
+      'field_label', 'field_label_hover', 'field_label_focus', 'field_label_disabled',
+      'field_label_invalid', 'field_label_invalid_hover', 'field_label_invalid_focus',
+      'field_value', 'field_value_disabled', 'field_placeholder', 'field_placeholder_disabled',
+      'field_helper', 'field_helper_disabled', 'field_message_invalid',
+      'field_indicator', 'field_indicator_disabled', 'field_indicator_invalid', 'field_invalid_icon'
+    ],
+    BUTTON_KINDS.flatMap(function (kind) {
+      return BUTTON_FILL_STATES.map(function (state) {
+        return 'button_' + kind + '_container' + state;
+      }).concat(BUTTON_FILL_STATES.map(function (state) {
+        return 'button_' + kind + '_label' + state;
+      }), BUTTON_BORDER_STATES.map(function (state) {
+        return 'button_' + kind + '_border' + state;
+      }));
+    }),
+    ['button_focus_ring', 'button_focus_gap'],
+    [
+      'selection_outline', 'selection_outline_hover', 'selection_outline_active', 'selection_outline_disabled', 'selection_outline_invalid',
+      'selection_container', 'selection_container_hover', 'selection_container_active', 'selection_container_disabled', 'selection_container_invalid',
+      'selection_mark', 'selection_mark_disabled',
+      'selection_layer_hover', 'selection_layer_active', 'selection_layer_selected_hover', 'selection_layer_selected_active',
+      'selection_label', 'selection_label_disabled', 'selection_helper', 'selection_message_invalid', 'selection_invalid_icon', 'selection_focus_ring'
+    ]
+  )),
+  control: Object.freeze([
+    'field_outline_width', 'field_outline_width_focus', 'field_invalid_ring_width', 'field_focus_width', 'field_focus_offset',
+    'field_padding_inline', 'field_icon_inset', 'field_icon_gap', 'field_message_inset', 'field_message_gap',
+    'button_focus_width', 'button_focus_offset', 'button_focus_gap_width', 'button_ghost_padding_start', 'button_ghost_padding_end', 'button_min_width',
+    'selection_focus_width', 'selection_focus_offset', 'selection_focus_radius', 'selection_layer_size'
+  ]),
+  type: Object.freeze(['field_value', 'field_label', 'field_helper']),
+  shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
+    return BUTTON_ELEVATION_STATES.map(function (state) {
+      return 'button_' + kind + state;
+    });
+  })))
+});
+
+
+/********************************************************************
+The role grid's token definitions, one per cell, in group order.
+
+@return {Object} - Token name -> definition
+*********************************************************************/
+function buildGridTokens () {
+
+  const out = {};
+  for (const group of Object.keys(GRID)) {
+    for (const cell of GRID[group]) {
+      out[group + '.' + cell] = Object.freeze({ group: group, grid: true });
+    }
+  }
+
+  return out;
+
+}
 
 /********************************************************************
 Build the contract registry.
@@ -498,6 +581,7 @@ function buildContract () {
     'feedback.press': Object.freeze({ group: 'feedback', values: ['highlight', 'opacity', 'ripple'] }),
     'feedback.focus': Object.freeze({ group: 'feedback', values: ['outline', 'inset', 'underline'] }),
     'feedback.field': Object.freeze({ group: 'feedback', values: ['underline', 'outline'] }),
+    'feedback.focus_trigger': Object.freeze({ group: 'feedback', values: ['any', 'keyboard'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (6 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -506,7 +590,6 @@ function buildContract () {
     'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
     'anatomy.status_marker': Object.freeze({ group: 'anatomy', values: ['bar_icon', 'plain'] }),
     'anatomy.dialog_actions': Object.freeze({ group: 'anatomy', values: ['stretched', 'trailing'] }),
-    'anatomy.caret': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
     'anatomy.slider_handle': Object.freeze({ group: 'anatomy', values: ['round', 'bar'] }),
 
 
@@ -626,6 +709,7 @@ function buildContract () {
     'icon.diamond_filled': Object.freeze({ group: 'icon' }),
     'icon.document': Object.freeze({ group: 'icon' }),
     'icon.download': Object.freeze({ group: 'icon' }),
+    'icon.dropdown_indicator': Object.freeze({ group: 'icon' }),
     'icon.edit': Object.freeze({ group: 'icon' }),
     'icon.error': Object.freeze({ group: 'icon' }),
     'icon.error_filled': Object.freeze({ group: 'icon' }),
@@ -641,6 +725,7 @@ function buildContract () {
     'icon.info': Object.freeze({ group: 'icon' }),
     'icon.information_filled': Object.freeze({ group: 'icon' }),
     'icon.information_square_filled': Object.freeze({ group: 'icon' }),
+    'icon.invalid': Object.freeze({ group: 'icon' }),
     'icon.layers': Object.freeze({ group: 'icon' }),
     'icon.loading': Object.freeze({ group: 'icon' }),
     'icon.low_severity': Object.freeze({ group: 'icon' }),
@@ -670,7 +755,12 @@ function buildContract () {
     'icon.warning_alt_filled': Object.freeze({ group: 'icon' }),
     'icon.warning_alt_inverted_filled': Object.freeze({ group: 'icon' }),
     'icon.warning_filled': Object.freeze({ group: 'icon' }),
-    'icon.warning_square_filled': Object.freeze({ group: 'icon' })
+    'icon.warning_square_filled': Object.freeze({ group: 'icon' }),
+
+
+    // ~~~~~~~~~~~~~~~~~~~~ role grid (v5 amendment) ~~~~~~~~~~~~~~~~~~~
+    // One role per part a component family draws, per state, per property.
+    ...buildGridTokens()
 
   });
 
@@ -688,6 +778,7 @@ function buildContract () {
 
   return Object.freeze({
     version: 5,
+    grid: GRID,
     groups: groups,
     tokens: tokens,
     meta: Object.freeze(meta)

@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "2e69f96d0d0302de27159057e4a695fa070df1c630c88bc91bb7ca64568e550d",
+  "source_sha256": "4aec287c9d9276fd8581d279caf0d8c458e2b3390dbdf3e0c63ef3b54a53b529",
   "set": "material",
   "upstream": {
     "package": "@material-symbols/svg-400",
@@ -41,6 +41,7 @@
     "diamond_filled": "diamond",
     "document": "description",
     "download": "download",
+    "dropdown_indicator": "arrow_drop_down",
     "edit": "edit",
     "error": "error",
     "error_filled": "error",
@@ -56,6 +57,7 @@
     "info": "info",
     "information_filled": "info",
     "information_square_filled": "info",
+    "invalid": "error",
     "layers": "layers",
     "loading": "sync",
     "low_severity": "info",

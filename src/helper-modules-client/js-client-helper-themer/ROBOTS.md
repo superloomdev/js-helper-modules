@@ -61,7 +61,7 @@ vocabulary, the token contract, ships in this package as data and is read throug
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
   ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
-  Same reference on every call. Never throws. Version 5 has 490 tokens in 19 groups: version 4's
+  Same reference on every call. Never throws. Version 5 has 752 tokens in 19 groups (amended with the 260-cell role grid, `contract.grid`): version 4's
   469 (version 3's 385 plus the `anatomy` enum group (6) and the `icon` value group (78)) plus the
   `control` dimension group (11 per-component geometry roles), two role type sets and eight role
   colors.

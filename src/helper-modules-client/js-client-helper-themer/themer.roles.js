@@ -20,8 +20,16 @@
 // hold that as a declared exception per template.
 
 
+// The role grid's button kinds and the states a label is read in over its fill
+const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']);
+const LABEL_STATES = Object.freeze(['', '_hover', '_active', '_focus', '_selected']);
+// Kinds whose rest container is a fill (not transparent): their fill must differ from the disabled fill
+const FILLED_KINDS = Object.freeze(['primary', 'secondary', 'danger', 'tonal', 'elevated']);
+
+
 // ~~~~~~~~~~~~~~~~~~~~ Contrast ~~~~~~~~~~~~~~~~~~~~
-// [content, surface, minimum ratio]
+// [content, surface, minimum ratio]; a translucent or transparent surface is
+// read over the page background
 
 const CONTRAST = Object.freeze([
   // Text on the page and its layers
@@ -54,7 +62,22 @@ const CONTRAST = Object.freeze([
   ['color.support_error', 'color.field_01', 3.0],
   ['color.border_strong_01', 'color.background', 3.0],
   ['color.border_interactive', 'color.background', 3.0],
-  ['color.focus', 'color.background', 3.0]
+  ['color.focus', 'color.background', 3.0],
+  // Role grid: every button label over its own fill, in every state it is read in
+  ...BUTTON_KINDS.flatMap(function (kind) {
+    return LABEL_STATES.map(function (state) {
+      return ['color.button_' + kind + '_label' + state, 'color.button_' + kind + '_container' + state, 4.5];
+    });
+  }),
+  // Role grid: field text, messages and boundaries
+  ['color.field_value', 'color.field_container', 4.5],
+  ['color.field_helper', 'color.background', 4.5],
+  ['color.field_message_invalid', 'color.background', 4.5],
+  ['color.field_outline', 'color.background', 3.0],
+  ['color.field_indicator', 'color.field_container', 3.0],
+  ['color.selection_outline', 'color.background', 3.0],
+  ['color.selection_mark', 'color.selection_container', 3.0],
+  ['color.selection_label', 'color.background', 4.5]
 ]);
 
 
@@ -86,7 +109,19 @@ const DISTINCT = Object.freeze([
   ['color.background_inverse', 'color.background'],
   ['color.icon_inverse', 'color.icon_primary'],
   // A selected surface shows
-  ['color.background_selected', 'color.background']
+  ['color.background_selected', 'color.background'],
+  // Role grid: an enabled label (kinds drawn on the page) or fill (filled kinds) never equals its disabled one
+  ...BUTTON_KINDS.filter(function (kind) {
+    return !FILLED_KINDS.includes(kind);
+  }).map(function (kind) {
+    return ['color.button_' + kind + '_label', 'color.button_' + kind + '_label_disabled'];
+  }),
+  ...FILLED_KINDS.map(function (kind) {
+    return ['color.button_' + kind + '_container', 'color.button_' + kind + '_container_disabled'];
+  }),
+  ['color.field_value', 'color.field_value_disabled'],
+  ['color.selection_container', 'color.selection_container_disabled'],
+  ['color.selection_outline', 'color.selection_outline_disabled']
 ]);
 
 

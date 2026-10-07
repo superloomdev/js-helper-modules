@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "2e69f96d0d0302de27159057e4a695fa070df1c630c88bc91bb7ca64568e550d",
+  "source_sha256": "4aec287c9d9276fd8581d279caf0d8c458e2b3390dbdf3e0c63ef3b54a53b529",
   "set": "carbon",
   "upstream": {
     "package": "@carbon/icons",
@@ -40,6 +40,7 @@
     "diamond_filled": "diamond-fill",
     "document": "document",
     "download": "download",
+    "dropdown_indicator": "chevron--down",
     "edit": "edit",
     "error": "error",
     "error_filled": "error--filled",
@@ -55,6 +56,7 @@
     "info": "information",
     "information_filled": "information--filled",
     "information_square_filled": "information--square--filled",
+    "invalid": "warning--filled",
     "layers": "layers",
     "loading": "restart",
     "low_severity": "low-severity",

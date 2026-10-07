@@ -18,6 +18,17 @@ import oracle from './fixtures/parity-oracle.json' with { type: 'json' };
 
 const { Lib } = loader();
 const Themer = themerLoader(Lib, {});
+
+// The reference's own values that the engine's role audit reports, each with
+// its source; every entry must keep reproducing, so the list can only shrink
+const AUDIT_EXCEPTIONS = Object.freeze([
+  {
+    scheme: 'g10',
+    rule: 'contrast',
+    tokens: ['color.button_ghost_label_active', 'color.button_ghost_container_active'],
+    reason: 'Carbon inks a pressed ghost button in $link-primary-hover over $background-active (button/_button.scss); in g10 that pair reads 4.33:1'
+  }
+]);
 const contract = Themer.getContract();
 const contractKeys = Object.keys(contract.tokens);
 
@@ -231,7 +242,6 @@ describe('carbon template - anatomy enums (v4)', () => {
     'anatomy.switch_handle': 'fixed',
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
-    'anatomy.caret': 'shown',
     'anatomy.slider_handle': 'round'
   };
 
@@ -259,8 +269,8 @@ describe('carbon template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 78 valid icon literals, identical across the four schemes', () => {
-    assert.equal(iconKeys.length, 78);
+  it('should carry 80 valid icon literals, identical across the four schemes', () => {
+    assert.equal(iconKeys.length, 80);
     const subset = {};
     for (const name of iconKeys) {
       const literal = profile.schemes.white.tokens[name];
@@ -317,11 +327,26 @@ describe('carbon template - role audit', () => {
   // Caught here, at the template, before any component draws the value.
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
 
-    it('should pass the engine role audit for ' + schemeName + ' on native', () => {
+    it('should pass the engine role audit for ' + schemeName + ' on native, apart from its listed reference exceptions', () => {
       const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native');
       const result = Themer.auditRoles(built);
-      assert.deepEqual(result.findings, [], 'role audit findings for ' + schemeName);
-      assert.equal(result.success, true);
+      const listed = AUDIT_EXCEPTIONS.filter(function (entry) {
+        return entry.scheme === schemeName;
+      });
+      const isListed = function (finding) {
+        return listed.some(function (entry) {
+          return entry.rule === finding.rule && entry.tokens.join() === finding.tokens.join();
+        });
+      };
+      assert.deepEqual(result.findings.filter(function (finding) {
+        return !isListed(finding);
+      }), [], 'role audit findings for ' + schemeName);
+      // A listed exception that no longer reproduces is stale
+      for (const entry of listed) {
+        assert.ok(result.findings.some(function (finding) {
+          return entry.rule === finding.rule && entry.tokens.join() === finding.tokens.join();
+        }), 'stale audit exception ' + entry.tokens.join(' on ') + ' in ' + schemeName + '; remove it');
+      }
     });
 
   }
@@ -396,10 +421,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 490 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 752 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 490);
+        assert.equal(names.length, 752);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -441,14 +466,56 @@ describe('carbon template - v5 control roles and role colors', () => {
   });
 
   it('should fill tonal buttons from the accent layer, elevated from the first layer, and check controls in the primary icon color', () => {
+    // Pressed tonal and elevated fills stop at the selected and hover layers, where the label still reads (role audit, g90)
     assert.equal(white['color.button_tonal'], white['color.layer_accent_01']);
     assert.equal(white['color.button_tonal_hover'], white['color.layer_accent_hover_01']);
-    assert.equal(white['color.button_tonal_active'], white['color.layer_accent_active_01']);
+    assert.equal(white['color.button_tonal_active'], white['color.layer_selected_01']);
     assert.equal(white['color.text_on_button_tonal'], white['color.text_primary']);
     assert.equal(white['color.button_elevated'], white['color.layer_01']);
     assert.equal(white['color.button_elevated_hover'], white['color.layer_hover_01']);
-    assert.equal(white['color.button_elevated_active'], white['color.layer_active_01']);
+    assert.equal(white['color.button_elevated_active'], white['color.layer_hover_01']);
     assert.equal(white['color.control_checked'], white['color.icon_primary']);
   });
 
 });
+
+
+describe('carbon template - role grid (v5 amendment)', () => {
+
+  const contract = Themer.getContract();
+  const cells = Object.keys(contract.grid).flatMap(function (group) {
+    return contract.grid[group].map(function (cell) {
+      return group + '.' + cell;
+    });
+  });
+
+  for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+
+    it('should answer every grid cell itself in ' + schemeName + ', none completed from the default', () => {
+      const scheme = profile.schemes[schemeName];
+      for (const name of cells) {
+        assert.notEqual(scheme.tokens[name], undefined, name);
+        assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
+      }
+    });
+
+    it('should draw Carbon\'s focus ring, field hover and disabled select in ' + schemeName, () => {
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens;
+      assert.equal(built['control.button_focus_offset'], -2);
+      assert.equal(built['control.button_focus_gap_width'], 1);
+      assert.equal(built['color.button_focus_gap'], built['color.background']);
+      assert.equal(built['control.field_focus_offset'], -2);
+      assert.equal(built['control.selection_focus_offset'], 1);
+      assert.equal(built['color.field_container_hover'], built['color.field_hover_01']);
+      assert.equal(built['color.text_input_container_hover'], built['color.field_01']);
+      assert.equal(built['color.select_outline_disabled'], 'rgba(0, 0, 0, 0)');
+      assert.equal(built['color.button_tertiary_container_focus'], built['color.button_tertiary']);
+      assert.equal(built['color.button_ghost_label_hover'], built['color.link_primary_hover']);
+      assert.equal(built['color.button_tertiary_border_disabled'], built['color.button_disabled']);
+      assert.equal(built['feedback.focus_trigger'], 'any');
+    });
+
+  }
+
+});
+

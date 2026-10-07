@@ -24,6 +24,7 @@ import themerLoader from 'helper-themer';
 import defaultProfile from 'helper-themer-template-default';
 import mapping from '../data/mapping.js';
 import buildMaterialIcons from './icons-material.js';
+import buildMaterialGrid from './grid-material.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const moduleRoot = resolve(here, '..');
@@ -69,7 +70,11 @@ if (installedShasum !== registryShasum) {
 // scripts/icon-map.json (see scripts/sync-icon-map.js).
 const iconMap = JSON.parse(readFileSync(resolve(here, 'icon-map.json'), 'utf8'));
 const materialIcons = buildMaterialIcons(iconMap.icons);
-const ICONS = materialIcons.tokens;
+// The select's indicator is the select's own drawing, not a Symbols glyph:
+// @material/web 2.5.0 `select/internal/select.js` renderTrailingIcon draws a
+// 10 x 5 polygon (7,10 12,15 17,10) centred in its 24px icon slot
+const DROPDOWN_INDICATOR = Object.freeze({ icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] });
+const ICONS = Object.assign({}, materialIcons.tokens, { 'icon.dropdown_indicator': DROPDOWN_INDICATOR });
 
 const provenance = Object.freeze({
   default_version: defaultVersion,
@@ -80,7 +85,8 @@ const provenance = Object.freeze({
     version: materialIcons.version,
     style: materialIcons.style,
     map_source: iconMap.source,
-    map_sha256: iconMap.source_sha256
+    map_sha256: iconMap.source_sha256,
+    drawings: Object.freeze({ dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon' })
   })
 });
 
@@ -90,7 +96,6 @@ const ANATOMY = {
   'anatomy.switch_handle': 'grows',
   'anatomy.status_marker': 'plain',
   'anatomy.dialog_actions': 'trailing',
-  'anatomy.caret': 'hidden',
   'anatomy.slider_handle': 'bar'
 };
 
@@ -348,7 +353,8 @@ const STRUCTURE_KNOBS = {
   'focus.offset': 0,
   'feedback.press': 'ripple',
   'feedback.focus': 'outline',
-  'feedback.field': 'outline'
+  'feedback.field': 'outline',
+  'feedback.focus_trigger': 'keyboard'
 };
 
 // Breakpoints (Material has its own, but we use Carbon's for consistency)
@@ -514,6 +520,20 @@ function buildTokens (schemeName) {
 
   // Icon literals (v4)
   for (const [sKey, value] of Object.entries(ICONS)) {
+    tokens[sKey] = value;
+  }
+
+  // Role grid (v5 amendment): every cell from Material's component token files
+  const grid = buildMaterialGrid({
+    grid: contract.grid,
+    scheme: scheme,
+    dirs: compDirs,
+    hexFromArgb: hexFromArgb,
+    typeSet: function (role) {
+      return convertTypeSet(role, typeRoles[role]);
+    }
+  });
+  for (const [sKey, value] of Object.entries(grid)) {
     tokens[sKey] = value;
   }
 
