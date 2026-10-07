@@ -262,11 +262,6 @@ describe('default template - durations (D19)', () => {
 
 describe('default template - feedback focus', () => {
 
-  it('should have feedback.focus = outline', () => {
-    const built = Themer.buildTheme(profile.schemes.light, [], 'native');
-    assert.equal(built.tokens['feedback.focus'], 'outline');
-  });
-
   it('should have feedback.field = underline', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native');
     assert.equal(built.tokens['feedback.field'], 'underline');
@@ -440,10 +435,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 752 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 751 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 752);
+        assert.equal(names.length, 751);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

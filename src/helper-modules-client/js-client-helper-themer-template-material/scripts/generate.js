@@ -352,7 +352,6 @@ const STRUCTURE_KNOBS = {
   'focus.width': 2,
   'focus.offset': 0,
   'feedback.press': 'ripple',
-  'feedback.focus': 'outline',
   'feedback.field': 'outline',
   'feedback.focus_trigger': 'keyboard'
 };

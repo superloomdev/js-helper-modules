@@ -261,7 +261,6 @@ const D9_STRUCTURE = {
   'focus.width': 2,
   'focus.offset': 0,
   'feedback.press': 'highlight',
-  'feedback.focus': 'outline',
   'feedback.field': 'underline',
   'feedback.focus_trigger': 'any',
   'shadow.level_01': { shadow: true, layers: [{ x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow}' }] },

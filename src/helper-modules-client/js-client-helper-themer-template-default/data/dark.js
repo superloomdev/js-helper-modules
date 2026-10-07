@@ -1822,7 +1822,6 @@ export default Object.freeze({
     'focus.width': 2,
     'focus.offset': 0,
     'feedback.press': 'highlight',
-    'feedback.focus': 'outline',
     'feedback.field': 'underline',
     'feedback.focus_trigger': 'any',
     'anatomy.label': 'above',
@@ -6597,9 +6596,6 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'feedback.press': {
-      'group': 'raw'
-    },
-    'feedback.focus': {
       'group': 'raw'
     },
     'feedback.field': {

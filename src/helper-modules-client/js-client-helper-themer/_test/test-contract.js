@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 752 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 752);
+  it('should expose exactly 751 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 751);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 752 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 752);
+  it('should expose exactly 751 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 751);
   });
 
   it('should report contract version 5', () => {
@@ -91,7 +91,7 @@ describe('contract registry - group counts', () => {
     shape: 9,
     border: 4,
     focus: 2,
-    feedback: 4,
+    feedback: 3,
     shadow: 42,
     breakpoint: 5,
     grid: 13,
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 752 tokens and theme has all 752', () => {
+  it('should return success true when required is all 751 tokens and theme has all 751', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1421,20 +1421,11 @@ describe('contract v2 - M8 full weight scale', () => {
 
 });
 
-describe('contract v2 - F1 feedback.focus enum', () => {
+describe('contract v5 amendment - feedback.focus removed', () => {
 
-  it('should declare values for feedback.focus', () => {
-    assert.deepEqual(contract.tokens['feedback.focus'].values, ['outline', 'inset', 'underline']);
-  });
-
-  it('should reject a value not in the declared values list', () => {
-    const result = Themer.validateContract({ tokens: { 'feedback.focus': 'ring' } }, {});
-    assert.equal(result.success, false);
-  });
-
-  it('should accept outline', () => {
-    const result = Themer.validateContract({ tokens: { 'feedback.focus': 'outline' } }, {});
-    assert.equal(result.success, true);
+  it('should not declare feedback.focus: the grid draws each family\'s focus ring', () => {
+    assert.equal(contract.tokens['feedback.focus'], undefined);
+    assert.ok(contract.tokens['control.button_focus_offset']);
   });
 
 });

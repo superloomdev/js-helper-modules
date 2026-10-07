@@ -642,9 +642,6 @@ function buildTokens (polarity) {
       if (name === 'feedback.press') {
         tokens[name] = 'highlight';
       }
-      if (name === 'feedback.focus') {
-        tokens[name] = 'outline';
-      }
       if (name === 'feedback.field') {
         tokens[name] = 'underline';
       }
@@ -788,11 +785,6 @@ for (let i = 1; i < DURATION_SLOTS.length; i++) {
   if (tokens[DURATION_SLOTS[i]] <= tokens[DURATION_SLOTS[i - 1]]) {
     throw new Error('Durations not strictly increasing at index ' + i);
   }
-}
-
-// Assert feedback.focus
-if (tokens['feedback.focus'] !== 'outline') {
-  throw new Error('feedback.focus must be outline');
 }
 
 // Assert feedback.field

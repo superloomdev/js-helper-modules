@@ -128,7 +128,7 @@ Version 5 adds per-component roles, so a component reads one role and each templ
 - **Role type sets** (`type` group, 2 tokens): `type.button_label`, the set a button label is drawn in; `type.field_label_raised`, the set a floating field label is drawn in once raised.
 - **Role colors** (`color` group, 8 tokens): `color.button_tonal`, `color.button_tonal_hover`, `color.button_tonal_active`, `color.text_on_button_tonal`, `color.button_elevated`, `color.button_elevated_hover`, `color.button_elevated_active`, `color.control_checked` (the fill of a checked checkbox or radio).
 
-The contract registry now carries 752 tokens in 19 groups. Contract version 5 was amended inside its milestone with the role grid (`contract.grid`, 260 cells marked `grid: true`): for the `field` family (TextInput, Select and later field-like components), each `button` kind and the `selection` family, one role per part a component draws, per state, per property (colour, width, space, type set, elevation). A member cell (`text_input_container_hover`, `select_outline_disabled`) exists only where a reference gives one member a different value. It also adds `shadow.level_00` (no elevation), `feedback.focus_trigger` (`any` | `keyboard`) and the icon roles `invalid` and `dropdown_indicator`, and removes `anatomy.caret`: the glyph a part shows is an icon role, never an enum.
+The contract registry now carries 751 tokens in 19 groups. Contract version 5 was amended inside its milestone with the role grid (`contract.grid`, 260 cells marked `grid: true`): for the `field` family (TextInput, Select and later field-like components), each `button` kind and the `selection` family, one role per part a component draws, per state, per property (colour, width, space, type set, elevation). A member cell (`text_input_container_hover`, `select_outline_disabled`) exists only where a reference gives one member a different value. It also adds `shadow.level_00` (no elevation), `feedback.focus_trigger` (`any` | `keyboard`) and the icon roles `invalid` and `dropdown_indicator`, and removes `anatomy.caret` (the glyph a part shows is an icon role, never an enum) and `feedback.focus` (each family's ring is its grid cells; a negative offset draws it inside the edge).
 
 ### Contract version 4
 
@@ -167,7 +167,7 @@ Version 2 added the approved Section 14.5 items:
 
 **Font weights (M8):** `font.weight.thin`, `font.weight.extralight`, `font.weight.medium`, `font.weight.extrabold`, `font.weight.black`.
 
-**Focus enum (F1):** `feedback.focus` with values `['outline', 'inset', 'underline']`.
+**Focus enum (F1):** `feedback.focus` (`outline` | `inset` | `underline`), removed in the version 5 amendment: each family's focus ring is its role-grid cells, and `feedback.focus_trigger` (`any` | `keyboard`) decides when it shows.
 
 **Duration slots (M9):** `motion.duration_fast_03`, `motion.duration_fast_04`, `motion.duration_moderate_03`, `motion.duration_moderate_04`, `motion.duration_slow_03`, `motion.duration_slow_04`, `motion.duration_extra_slow_01`, `motion.duration_extra_slow_02`, `motion.duration_extra_slow_03`, `motion.duration_extra_slow_04`.
 
