@@ -40,7 +40,8 @@
 // focus width, offset and colour cells now draw per family (an offset below
 // zero draws the ring inside the edge). It also adds `shadow.level_00` (no elevation),
 // the `feedback.focus_trigger` behaviour (a focus ring on any focus, or on
-// keyboard focus only) and two icon roles (`invalid`, `dropdown_indicator`:
+// keyboard focus only) and four icon roles (`invalid`, `dropdown_indicator`,
+// `checked_indicator`, `mixed_indicator`:
 // the glyph a part shows is an icon role, never an enum), and removes
 // `anatomy.caret`, whose choice the `dropdown_indicator` role now carries.
 
@@ -61,13 +62,15 @@ const GRID = Object.freeze({
     [
       'field_container', 'field_container_hover', 'field_container_disabled', 'text_input_container_hover',
       'field_outline', 'field_outline_hover', 'field_outline_focus', 'field_outline_disabled',
-      'field_outline_invalid', 'field_outline_invalid_hover', 'field_outline_invalid_focus', 'select_outline_disabled',
+      'field_outline_invalid', 'field_outline_invalid_hover', 'field_outline_invalid_focus', 'select_outline_disabled', 'select_indicator_focus',
       'field_ring_invalid', 'field_focus_ring',
       'field_label', 'field_label_hover', 'field_label_focus', 'field_label_disabled',
       'field_label_invalid', 'field_label_invalid_hover', 'field_label_invalid_focus',
       'field_value', 'field_value_disabled', 'field_placeholder', 'field_placeholder_disabled',
       'field_helper', 'field_helper_disabled', 'field_message_invalid',
-      'field_indicator', 'field_indicator_disabled', 'field_indicator_invalid', 'field_invalid_icon'
+      'field_indicator', 'field_indicator_hover', 'field_indicator_focus', 'field_indicator_disabled',
+      'field_indicator_invalid', 'field_indicator_invalid_hover', 'field_indicator_invalid_focus',
+      'field_invalid_icon', 'field_invalid_icon_hover', 'field_invalid_icon_focus'
     ],
     BUTTON_KINDS.flatMap(function (kind) {
       return BUTTON_FILL_STATES.map(function (state) {
@@ -80,8 +83,8 @@ const GRID = Object.freeze({
     }),
     ['button_focus_ring', 'button_focus_gap'],
     [
-      'selection_outline', 'selection_outline_hover', 'selection_outline_active', 'selection_outline_disabled', 'selection_outline_invalid',
-      'selection_container', 'selection_container_hover', 'selection_container_active', 'selection_container_disabled', 'selection_container_invalid',
+      'selection_outline', 'selection_outline_hover', 'selection_outline_active', 'selection_outline_focus', 'selection_outline_disabled', 'selection_outline_invalid',
+      'selection_container', 'selection_container_hover', 'selection_container_active', 'selection_container_focus', 'selection_container_disabled', 'selection_container_invalid',
       'selection_mark', 'selection_mark_disabled',
       'selection_layer_hover', 'selection_layer_active', 'selection_layer_selected_hover', 'selection_layer_selected_active',
       'selection_label', 'selection_label_disabled', 'selection_helper', 'selection_message_invalid', 'selection_invalid_icon', 'selection_focus_ring'
@@ -691,6 +694,7 @@ function buildContract () {
     'icon.caution': Object.freeze({ group: 'icon' }),
     'icon.checkbox': Object.freeze({ group: 'icon' }),
     'icon.checkbox_unchecked': Object.freeze({ group: 'icon' }),
+    'icon.checked_indicator': Object.freeze({ group: 'icon' }),
     'icon.checkmark': Object.freeze({ group: 'icon' }),
     'icon.checkmark_filled': Object.freeze({ group: 'icon' }),
     'icon.checkmark_outline': Object.freeze({ group: 'icon' }),
@@ -731,6 +735,7 @@ function buildContract () {
     'icon.loading': Object.freeze({ group: 'icon' }),
     'icon.low_severity': Object.freeze({ group: 'icon' }),
     'icon.menu': Object.freeze({ group: 'icon' }),
+    'icon.mixed_indicator': Object.freeze({ group: 'icon' }),
     'icon.notification': Object.freeze({ group: 'icon' }),
     'icon.overflow': Object.freeze({ group: 'icon' }),
     'icon.overflow_vertical': Object.freeze({ group: 'icon' }),

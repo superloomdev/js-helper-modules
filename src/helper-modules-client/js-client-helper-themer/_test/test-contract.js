@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 751 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 751);
+  it('should expose exactly 762 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 762);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 751 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 751);
+  it('should expose exactly 762 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 762);
   });
 
   it('should report contract version 5', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 398,
+    color: 407,
     spacing: 17,
     size: 22,
     type: 63,
@@ -99,7 +99,7 @@ describe('contract registry - group counts', () => {
     tint: 5,
     stacking: 5,
     anatomy: 5,
-    icon: 80,
+    icon: 82,
     control: 31
   };
 
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 751 tokens and theme has all 751', () => {
+  it('should return success true when required is all 762 tokens and theme has all 762', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1303,12 +1303,12 @@ describe('contract v4 - icon group', () => {
     return Themer.validateContract({ tokens: { 'icon.close': value } }, {});
   };
 
-  it('should expose 80 value-tier icon tokens in alphabetical order with raw emission', () => {
-    assert.equal(iconTokens.length, 80);
+  it('should expose 82 value-tier icon tokens in alphabetical order with raw emission', () => {
+    assert.equal(iconTokens.length, 82);
     assert.deepEqual(iconTokens, iconTokens.slice().sort());
     assert.deepEqual(contract.groups.icon, { tier: 'value', type: 'icon', emit: 'raw' });
     assert.equal(contract.meta['icon.close'].group, 'raw');
-    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add', 'icon.invalid', 'icon.dropdown_indicator']) {
+    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add', 'icon.invalid', 'icon.dropdown_indicator', 'icon.checked_indicator', 'icon.mixed_indicator']) {
       assert.ok(contract.tokens[name], 'missing ' + name);
     }
   });
@@ -1726,7 +1726,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow']);
-    assert.equal(gridNames.length, 260);
+    assert.equal(gridNames.length, 269);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);

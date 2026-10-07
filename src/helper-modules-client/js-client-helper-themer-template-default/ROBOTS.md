@@ -2,7 +2,7 @@
 
 ## Type
 
-Class G data pack, default export frozen profile `{ id: 'superloom-default', contract_version: 5, schemes: { light, dark } }`. Each scheme carries every contract token (751), including `anatomy.*` enums at their plainest value, `control.*` roles at the primary reference geometry, every role-grid cell as an alias to the semantic token the part draws in, and 80 `icon.*` literals, plus `provenance.icons` `{ package, version, map_source, map_sha256 }`.
+Class G data pack, default export frozen profile `{ id: 'superloom-default', contract_version: 5, schemes: { light, dark } }`. Each scheme carries every contract token (762), including `anatomy.*` enums at their plainest value, `control.*` roles at the primary reference geometry, every role-grid cell as an alias to the semantic token the part draws in, and 82 `icon.*` literals, plus `provenance.icons` `{ package, version, map_source, map_sha256 }`.
 
 ## Peer dependencies
 

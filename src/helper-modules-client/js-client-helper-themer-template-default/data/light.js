@@ -2435,6 +2435,44 @@ export default Object.freeze({
         }
       }
     },
+    'icon.checked_indicator': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 20 20',
+          'paths': [
+            {
+              'd': 'M8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
+            },
+            {
+              'd': 'M15.6 5.6 8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 24 24',
+          'paths': [
+            {
+              'd': 'M10 15.9 4.7 10.6 3.6 11.6 8.9 16.9 10 18 20.6 7.4 19.5 6.3z'
+            }
+          ]
+        }
+      }
+    },
     'icon.checkmark': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -4111,6 +4149,41 @@ export default Object.freeze({
         }
       }
     },
+    'icon.mixed_indicator': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M8 15H24V17H8z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M8 15H24V17H8z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M8 15H24V17H8z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M8 15H24V17H8z'
+            }
+          ]
+        }
+      }
+    },
     'icon.notification': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -5256,11 +5329,12 @@ export default Object.freeze({
     'color.field_outline': '{color.border_strong_01}',
     'color.field_outline_hover': '{color.border_strong_01}',
     'color.field_outline_focus': '{color.border_strong_01}',
-    'color.field_outline_disabled': '{color.border_disabled}',
+    'color.field_outline_disabled': '{color.border_strong_01}',
     'color.field_outline_invalid': '{color.border_strong_01}',
     'color.field_outline_invalid_hover': '{color.border_strong_01}',
     'color.field_outline_invalid_focus': '{color.border_strong_01}',
     'color.select_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.select_indicator_focus': '{color.icon_primary}',
     'color.field_ring_invalid': '{color.support_error}',
     'color.field_focus_ring': '{color.focus}',
     'color.field_label': '{color.text_secondary}',
@@ -5278,9 +5352,15 @@ export default Object.freeze({
     'color.field_helper_disabled': '{color.text_disabled}',
     'color.field_message_invalid': '{color.text_error}',
     'color.field_indicator': '{color.icon_primary}',
+    'color.field_indicator_hover': '{color.icon_primary}',
+    'color.field_indicator_focus': '{color.icon_primary}',
     'color.field_indicator_disabled': '{color.icon_disabled}',
     'color.field_indicator_invalid': '{color.icon_primary}',
+    'color.field_indicator_invalid_hover': '{color.icon_primary}',
+    'color.field_indicator_invalid_focus': '{color.icon_primary}',
     'color.field_invalid_icon': '{color.support_error}',
+    'color.field_invalid_icon_hover': '{color.support_error}',
+    'color.field_invalid_icon_focus': '{color.support_error}',
     'color.button_primary_container': '{color.button_primary}',
     'color.button_primary_container_hover': '{color.button_primary_hover}',
     'color.button_primary_container_active': '{color.button_primary_active}',
@@ -5364,18 +5444,18 @@ export default Object.freeze({
     'color.button_danger_tertiary_container': 'rgba(0, 0, 0, 0)',
     'color.button_danger_tertiary_container_hover': '{color.button_danger_hover}',
     'color.button_danger_tertiary_container_active': '{color.button_danger_active}',
-    'color.button_danger_tertiary_container_focus': 'rgba(0, 0, 0, 0)',
+    'color.button_danger_tertiary_container_focus': '{color.button_danger_primary}',
     'color.button_danger_tertiary_container_disabled': 'rgba(0, 0, 0, 0)',
     'color.button_danger_tertiary_container_selected': '{color.background_selected}',
     'color.button_danger_tertiary_label': '{color.button_danger_secondary}',
     'color.button_danger_tertiary_label_hover': '{color.text_on_color}',
     'color.button_danger_tertiary_label_active': '{color.text_on_color}',
-    'color.button_danger_tertiary_label_focus': '{color.button_danger_secondary}',
+    'color.button_danger_tertiary_label_focus': '{color.text_on_color}',
     'color.button_danger_tertiary_label_disabled': '{color.text_disabled}',
     'color.button_danger_tertiary_label_selected': '{color.text_primary}',
     'color.button_danger_tertiary_border': '{color.button_danger_secondary}',
     'color.button_danger_tertiary_border_hover': '{color.button_danger_hover}',
-    'color.button_danger_tertiary_border_active': '{color.button_danger_secondary}',
+    'color.button_danger_tertiary_border_active': '{color.button_danger_active}',
     'color.button_danger_tertiary_border_disabled': '{color.button_disabled}',
     'color.button_danger_ghost_container': 'rgba(0, 0, 0, 0)',
     'color.button_danger_ghost_container_hover': '{color.button_danger_hover}',
@@ -5430,11 +5510,13 @@ export default Object.freeze({
     'color.selection_outline': '{color.icon_primary}',
     'color.selection_outline_hover': '{color.icon_primary}',
     'color.selection_outline_active': '{color.icon_primary}',
+    'color.selection_outline_focus': '{color.icon_primary}',
     'color.selection_outline_disabled': '{color.icon_disabled}',
     'color.selection_outline_invalid': '{color.support_error}',
     'color.selection_container': '{color.control_checked}',
     'color.selection_container_hover': '{color.control_checked}',
     'color.selection_container_active': '{color.control_checked}',
+    'color.selection_container_focus': '{color.control_checked}',
     'color.selection_container_disabled': '{color.icon_disabled}',
     'color.selection_container_invalid': '{color.control_checked}',
     'color.selection_mark': '{color.icon_inverse}',
@@ -6797,6 +6879,9 @@ export default Object.freeze({
     'icon.checkbox_unchecked': {
       'group': 'raw'
     },
+    'icon.checked_indicator': {
+      'group': 'raw'
+    },
     'icon.checkmark': {
       'group': 'raw'
     },
@@ -6917,6 +7002,9 @@ export default Object.freeze({
     'icon.menu': {
       'group': 'raw'
     },
+    'icon.mixed_indicator': {
+      'group': 'raw'
+    },
     'icon.notification': {
       'group': 'raw'
     },
@@ -7031,6 +7119,9 @@ export default Object.freeze({
     'color.select_outline_disabled': {
       'group': 'color'
     },
+    'color.select_indicator_focus': {
+      'group': 'color'
+    },
     'color.field_ring_invalid': {
       'group': 'color'
     },
@@ -7082,13 +7173,31 @@ export default Object.freeze({
     'color.field_indicator': {
       'group': 'color'
     },
+    'color.field_indicator_hover': {
+      'group': 'color'
+    },
+    'color.field_indicator_focus': {
+      'group': 'color'
+    },
     'color.field_indicator_disabled': {
       'group': 'color'
     },
     'color.field_indicator_invalid': {
       'group': 'color'
     },
+    'color.field_indicator_invalid_hover': {
+      'group': 'color'
+    },
+    'color.field_indicator_invalid_focus': {
+      'group': 'color'
+    },
     'color.field_invalid_icon': {
+      'group': 'color'
+    },
+    'color.field_invalid_icon_hover': {
+      'group': 'color'
+    },
+    'color.field_invalid_icon_focus': {
       'group': 'color'
     },
     'color.button_primary_container': {
@@ -7538,6 +7647,9 @@ export default Object.freeze({
     'color.selection_outline_active': {
       'group': 'color'
     },
+    'color.selection_outline_focus': {
+      'group': 'color'
+    },
     'color.selection_outline_disabled': {
       'group': 'color'
     },
@@ -7551,6 +7663,9 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.selection_container_active': {
+      'group': 'color'
+    },
+    'color.selection_container_focus': {
       'group': 'color'
     },
     'color.selection_container_disabled': {
@@ -7781,7 +7896,7 @@ export default Object.freeze({
       'package': '@carbon/icons',
       'version': '11.89.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '4aec287c9d9276fd8581d279caf0d8c458e2b3390dbdf3e0c63ef3b54a53b529'
+      'map_sha256': 'eba661af8eb464ea187359d17922f8413a628e5ea482a8af6dfca12539b0c04c'
     }
   }
 });

@@ -74,7 +74,19 @@ const materialIcons = buildMaterialIcons(iconMap.icons);
 // @material/web 2.5.0 `select/internal/select.js` renderTrailingIcon draws a
 // 10 x 5 polygon (7,10 12,15 17,10) centred in its 24px icon slot
 const DROPDOWN_INDICATOR = Object.freeze({ icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] });
-const ICONS = Object.assign({}, materialIcons.tokens, { 'icon.dropdown_indicator': DROPDOWN_INDICATOR });
+// The checkbox's own marks: @material/web 2.5.0 `checkbox/internal/_checkbox.scss`
+// draws two 2px rects in an 18px box (the container), transformed by
+// scaleY(-1) translate(7px, -14px) rotate(45deg) for the check (short end
+// sqrt(32) tall, long end sqrt(128) wide) and scaleY(-1) translate(4px, -10px)
+// for the mixed dash (10 wide). The polygons below are those transforms
+// applied; the viewBox is the box inside its 2px border, where the mark is drawn
+const CHECKED_INDICATOR = Object.freeze({ icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M7 14 8.414 12.586 4.414 8.586 3 10Z M7 14 15 6 13.586 4.586 5.586 12.586Z' }] });
+const MIXED_INDICATOR = Object.freeze({ icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M4 8h10v2H4Z' }] });
+const ICONS = Object.assign({}, materialIcons.tokens, {
+  'icon.dropdown_indicator': DROPDOWN_INDICATOR,
+  'icon.checked_indicator': CHECKED_INDICATOR,
+  'icon.mixed_indicator': MIXED_INDICATOR
+});
 
 const provenance = Object.freeze({
   default_version: defaultVersion,
@@ -86,7 +98,11 @@ const provenance = Object.freeze({
     style: materialIcons.style,
     map_source: iconMap.source,
     map_sha256: iconMap.source_sha256,
-    drawings: Object.freeze({ dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon' })
+    drawings: Object.freeze({
+      dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon',
+      checked_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .checked .mark',
+      mixed_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark'
+    })
   })
 });
 
@@ -555,6 +571,25 @@ function completeFromDefault (tokens, polarity) {
   return fromDefault;
 }
 
+// --- The scheme's Material system colours --------------------------------
+// Every role `_md-sys-color.scss` names, as this scheme resolves it, so a
+// page that draws Material's own components can be themed with exactly the
+// scheme the grid cells were read from
+function systemColors (scheme) {
+  const content = readFileSync(resolve(scssDir, '_md-sys-color.scss'), 'utf8');
+  const roles = Array.from(new Set(Array.from(content.matchAll(/^ {4}'([a-z-]+)':/gm), function (match) {
+    return match[1];
+  }))).sort();
+  const out = {};
+  for (const role of roles) {
+    const value = scheme[materialToCamel(role.replace(/-/g, '_'))];
+    if (value !== undefined) {
+      out[role] = hexFromArgb(value);
+    }
+  }
+  return out;
+}
+
 // --- Serialize with single quotes ----------------------------------------
 function serialize (obj, indent) {
   return JSON.stringify(obj, null, indent).replace(/"/g, '\'');
@@ -578,7 +613,8 @@ function buildScheme (schemeName) {
     tokens: tokens,
     meta: meta,
     from_default: fromDefault,
-    provenance: provenance
+    provenance: provenance,
+    system_colors: systemColors(SCHEMES[schemeName].scheme)
   };
 }
 

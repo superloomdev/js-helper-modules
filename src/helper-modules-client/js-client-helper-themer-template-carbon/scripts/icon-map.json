@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "4aec287c9d9276fd8581d279caf0d8c458e2b3390dbdf3e0c63ef3b54a53b529",
+  "source_sha256": "eba661af8eb464ea187359d17922f8413a628e5ea482a8af6dfca12539b0c04c",
   "set": "carbon",
   "upstream": {
     "package": "@carbon/icons",
@@ -21,6 +21,7 @@
     "caution": "caution",
     "checkbox": "checkbox--checked--filled",
     "checkbox_unchecked": "checkbox",
+    "checked_indicator": "checkmark",
     "checkmark": "checkmark",
     "checkmark_filled": "checkmark--filled",
     "checkmark_outline": "checkmark--outline",
@@ -61,6 +62,7 @@
     "loading": "restart",
     "low_severity": "low-severity",
     "menu": "menu",
+    "mixed_indicator": "subtract",
     "notification": "notification",
     "overflow": "overflow-menu--horizontal",
     "overflow_vertical": "overflow-menu--vertical",

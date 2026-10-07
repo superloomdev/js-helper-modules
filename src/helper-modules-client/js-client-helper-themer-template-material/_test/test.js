@@ -34,7 +34,37 @@ const AUDIT_EXCEPTIONS = Object.freeze([
     scheme: 'light_medium_contrast',
     rule: 'contrast',
     tokens: ['color.button_tonal_label_active', 'color.button_tonal_container_active'],
-    reason: 'Material lays on-secondary-container at 12% over secondary-container for a pressed tonal button; in the medium-contrast light scheme the label reads 4.02:1'
+    reason: 'Material keeps the hover layer (8%) under the pressed layer (12%) of a pressed button, as md-ripple draws them; in the medium-contrast light scheme the tonal label reads 3.51:1'
+  },
+  {
+    scheme: 'light',
+    rule: 'contrast',
+    tokens: ['color.button_primary_label_active', 'color.button_primary_container_active'],
+    reason: 'Material keeps the hover layer (8%) under the pressed layer (12%) of a pressed button, as md-ripple draws them; on-primary over primary reads 4.14:1'
+  },
+  {
+    scheme: 'light',
+    rule: 'contrast',
+    tokens: ['color.button_secondary_label_active', 'color.button_secondary_container_active'],
+    reason: 'Material keeps the hover layer (8%) under the pressed layer (12%) of a pressed button, as md-ripple draws them; on-secondary over secondary, the filled recipe with Material roles substituted reads 4.13:1'
+  },
+  {
+    scheme: 'light',
+    rule: 'contrast',
+    tokens: ['color.button_danger_tertiary_label_active', 'color.button_danger_tertiary_container_active'],
+    reason: 'Material keeps the hover layer (8%) under the pressed layer (12%) of a pressed button, as md-ripple draws them; error over the page, the outlined recipe with error substituted reads 4.42:1'
+  },
+  {
+    scheme: 'light',
+    rule: 'contrast',
+    tokens: ['color.button_danger_ghost_label_active', 'color.button_danger_ghost_container_active'],
+    reason: 'Material keeps the hover layer (8%) under the pressed layer (12%) of a pressed button, as md-ripple draws them; error over the page, the text recipe with error substituted reads 4.42:1'
+  },
+  {
+    scheme: 'light',
+    rule: 'contrast',
+    tokens: ['color.button_elevated_label_active', 'color.button_elevated_container_active'],
+    reason: 'Material keeps the hover layer (8%) under the pressed layer (12%) of a pressed button, as md-ripple draws them; primary over surface-container-low reads 4.49:1'
   }
 ]);
 const contract = Themer.getContract();
@@ -521,16 +551,20 @@ describe('material template - icon literals (v4)', () => {
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@material-symbols', 'svg-400', 'package.json'), 'utf8'));
 
   // The select's indicator is the select's own drawing (a 24px box), not a Symbols glyph
-  const DRAWINGS = ['icon.dropdown_indicator'];
+  const DRAWINGS = {
+    'icon.dropdown_indicator': { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] },
+    'icon.checked_indicator': { icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M7 14 8.414 12.586 4.414 8.586 3 10Z M7 14 15 6 13.586 4.586 5.586 12.586Z' }] },
+    'icon.mixed_indicator': { icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M4 8h10v2H4Z' }] }
+  };
 
-  it('should carry 80 icon literals, every one valid, none completed from the default template', () => {
-    assert.equal(iconKeys.length, 80);
+  it('should carry 82 icon literals, every one valid, none completed from the default template', () => {
+    assert.equal(iconKeys.length, 82);
     for (const schemeName of SCHEME_NAMES) {
       const scheme = profile.schemes[schemeName];
       const subset = {};
       for (const name of iconKeys) {
-        if (DRAWINGS.includes(name)) {
-          assert.deepEqual(scheme.tokens[name], { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] }, schemeName + ' ' + name);
+        if (DRAWINGS[name] !== undefined) {
+          assert.deepEqual(scheme.tokens[name], DRAWINGS[name], schemeName + ' ' + name);
           subset[name] = scheme.tokens[name];
           continue;
         }
@@ -560,7 +594,11 @@ describe('material template - icon literals (v4)', () => {
         style: 'outlined',
         map_source: iconMap.source,
         map_sha256: iconMap.source_sha256,
-        drawings: { dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon' }
+        drawings: {
+          dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon',
+          checked_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .checked .mark',
+          mixed_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark'
+        }
       });
     }
     assert.deepEqual(Object.keys(iconMap.icons).map(function (name) { return 'icon.' + name; }), iconKeys);
@@ -637,10 +675,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 751 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 762 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 751);
+        assert.equal(names.length, 762);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -733,7 +771,7 @@ describe('material template - role grid (v5 amendment)', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native').tokens;
     // Field: outline turns on-surface on hover, primary and 2px on focus; disabled at 12% and 38%
     assert.equal(built['color.field_outline_hover'], built['color.text_primary']);
-    assert.equal(built['control.field_outline_width_focus'], 2);
+    assert.equal(built['control.field_outline_width_focus'], 3);
     assert.match(built['color.field_outline_disabled'], /^rgba\(.*, 0\.12\)$/);
     assert.match(built['color.field_label_disabled'], /^rgba\(.*, 0\.38\)$/);
     assert.equal(built['control.field_icon_inset'], 12);
@@ -748,7 +786,8 @@ describe('material template - role grid (v5 amendment)', () => {
     assert.equal(built['control.button_min_width'], 64);
     // Checkbox: a 44px ring around an 18px box, state layers per selection
     assert.equal(built['control.selection_focus_offset'], 13);
-    assert.match(built['color.selection_layer_active'], /^rgba\(.*, 0\.12\)$/);
+    // A pressed layer keeps the hover layer under it: 8% then 12%, 19% together
+    assert.match(built['color.selection_layer_active'], /^rgba\(.*, 0\.19\)$/);
   });
 
 });

@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "4aec287c9d9276fd8581d279caf0d8c458e2b3390dbdf3e0c63ef3b54a53b529",
+  "source_sha256": "eba661af8eb464ea187359d17922f8413a628e5ea482a8af6dfca12539b0c04c",
   "set": "material",
   "upstream": {
     "package": "@material-symbols/svg-400",
@@ -22,6 +22,7 @@
     "caution": "warning",
     "checkbox": "check_box",
     "checkbox_unchecked": "check_box_outline_blank",
+    "checked_indicator": "check",
     "checkmark": "check",
     "checkmark_filled": "check_circle",
     "checkmark_outline": "task_alt",
@@ -62,6 +63,7 @@
     "loading": "sync",
     "low_severity": "info",
     "menu": "menu",
+    "mixed_indicator": "remove",
     "notification": "notifications",
     "overflow": "more_horiz",
     "overflow_vertical": "more_vert",

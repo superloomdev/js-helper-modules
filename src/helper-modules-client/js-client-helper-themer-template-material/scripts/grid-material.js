@@ -4,8 +4,9 @@
 // as a role at an opacity stays translucent (`rgba`, exact over any
 // backdrop); a hover or pressed fill of a filled container is the state
 // layer flattened over that container (one opaque paint), of a transparent
-// container the state layer itself; a focused container draws no state
-// layer. Button kinds Material has no component for are built from the
+// container the state layer itself; a pressed control keeps its hover
+// layer under the pressed one, as md-ripple draws them; a focused container
+// draws no state layer. Button kinds Material has no component for are built from the
 // nearest Material component with Material's own roles substituted (a
 // destructive kind from `error`), as the destructive kinds already are.
 // Parts Material does not draw (a checkbox label, a field ring) take the
@@ -142,6 +143,20 @@ export default function buildMaterialGrid (options) {
     }).join('');
   };
   // A token's colour, its role substituted where the kind asks for it
+  // Translucent layers stacked into one translucent colour: [[hex, alpha], ...] bottom first
+  const stack = function (layers) {
+    let alpha = 0;
+    let rgb = [0, 0, 0];
+    for (const entry of layers) {
+      const c = channels(entry[0]);
+      const next = entry[1] + alpha * (1 - entry[1]);
+      rgb = rgb.map(function (value, i) {
+        return (c[i] * entry[1] + value * alpha * (1 - entry[1])) / next;
+      });
+      alpha = next;
+    }
+    return 'rgba(' + rgb.map(Math.round).join(', ') + ', ' + Math.round(alpha * 1000) / 1000 + ')';
+  };
   const colorToken = function (file, name, roles) {
     const value = read(file, name);
     if (value === null || value.role === undefined) {
@@ -183,10 +198,14 @@ export default function buildMaterialGrid (options) {
       out['color.button_' + kind + '_' + part + state] = value;
     };
     const container = colorToken(file, 'container-color', roles);
+    // A pressed control keeps its hover layer under the pressed one (md-ripple draws both)
     const layer = function (state) {
-      const color = required(colorToken(file, state + '-state-layer-color', roles), file + ' ' + state + ' state layer');
-      const alpha = numberToken(file, state + '-state-layer-opacity');
-      return container === null ? rgba(color, alpha) : flatten(container, color, alpha);
+      const layers = (state === 'pressed' ? ['hover', 'pressed'] : [state]).map(function (name) {
+        return [required(colorToken(file, name + '-state-layer-color', roles), file + ' ' + name + ' state layer'), numberToken(file, name + '-state-layer-opacity')];
+      });
+      return container === null ? stack(layers) : layers.reduce(function (base, entry) {
+        return flatten(base, entry[0], entry[1]);
+      }, container);
     };
     put('container', '', container === null ? NONE : container);
     put('container', '_hover', layer('hover'));
@@ -240,6 +259,7 @@ export default function buildMaterialGrid (options) {
     'color.field_outline_invalid_hover': fieldColor('error-hover-outline-color'),
     'color.field_outline_invalid_focus': fieldColor('error-focus-outline-color'),
     'color.select_outline_disabled': translucent('outlined-select', 'text-field-disabled-outline-color', 'text-field-disabled-outline-opacity'),
+    'color.select_indicator_focus': required(colorToken('outlined-select', 'text-field-focus-trailing-icon-color'), 'select focus trailing icon'),
     'color.field_ring_invalid': NONE,
     'color.field_focus_ring': NONE,
     'color.field_label': fieldColor('label-text-color'),
@@ -257,11 +277,18 @@ export default function buildMaterialGrid (options) {
     'color.field_helper_disabled': translucent(field, 'disabled-supporting-text-color', 'disabled-supporting-text-opacity'),
     'color.field_message_invalid': fieldColor('error-supporting-text-color'),
     'color.field_indicator': fieldColor('trailing-icon-color'),
+    'color.field_indicator_hover': fieldColor('hover-trailing-icon-color'),
+    'color.field_indicator_focus': fieldColor('focus-trailing-icon-color'),
     'color.field_indicator_disabled': translucent(field, 'disabled-trailing-icon-color', 'disabled-trailing-icon-opacity'),
     'color.field_indicator_invalid': fieldColor('error-trailing-icon-color'),
+    'color.field_indicator_invalid_hover': fieldColor('error-hover-trailing-icon-color'),
+    'color.field_indicator_invalid_focus': fieldColor('error-focus-trailing-icon-color'),
     'color.field_invalid_icon': fieldColor('error-trailing-icon-color'),
+    'color.field_invalid_icon_hover': fieldColor('error-hover-trailing-icon-color'),
+    'color.field_invalid_icon_focus': fieldColor('error-focus-trailing-icon-color'),
     'control.field_outline_width': numberToken(field, 'outline-width'),
-    'control.field_outline_width_focus': numberToken(field, 'focus-outline-width'),
+    // `field/internal/_outlined-field.scss` draws the focused outline inside the resting one, so both widths show
+    'control.field_outline_width_focus': numberToken(field, 'outline-width') + numberToken(field, 'focus-outline-width'),
     'control.field_invalid_ring_width': 0,
     'control.field_focus_width': 0,
     'control.field_focus_offset': 0,
@@ -280,26 +307,33 @@ export default function buildMaterialGrid (options) {
   const boxColor = function (name) {
     return required(colorToken(box, name), box + ' ' + name);
   };
-  const boxLayer = function (prefix) {
-    return translucent(box, prefix + '-state-layer-color', prefix + '-state-layer-opacity');
+  // A pressed box keeps its hover layer under the pressed one
+  const boxLayer = function (selection, state) {
+    const names = state === 'pressed' ? ['hover', 'pressed'] : [state];
+    return stack(names.map(function (name) {
+      const prefix = selection + '-' + name;
+      return [boxColor(prefix + '-state-layer-color'), numberToken(box, prefix + '-state-layer-opacity')];
+    }));
   };
   Object.assign(out, {
     'color.selection_outline': boxColor('unselected-outline-color'),
     'color.selection_outline_hover': boxColor('unselected-hover-outline-color'),
     'color.selection_outline_active': boxColor('unselected-pressed-outline-color'),
+    'color.selection_outline_focus': boxColor('unselected-focus-outline-color'),
     'color.selection_outline_disabled': translucent(box, 'unselected-disabled-outline-color', 'unselected-disabled-container-opacity'),
     'color.selection_outline_invalid': boxColor('unselected-error-outline-color'),
     'color.selection_container': boxColor('selected-container-color'),
     'color.selection_container_hover': boxColor('selected-hover-container-color'),
     'color.selection_container_active': boxColor('selected-pressed-container-color'),
+    'color.selection_container_focus': boxColor('selected-focus-container-color'),
     'color.selection_container_disabled': translucent(box, 'selected-disabled-container-color', 'selected-disabled-container-opacity'),
     'color.selection_container_invalid': boxColor('selected-error-container-color'),
     'color.selection_mark': boxColor('selected-icon-color'),
     'color.selection_mark_disabled': boxColor('selected-disabled-icon-color'),
-    'color.selection_layer_hover': boxLayer('unselected-hover'),
-    'color.selection_layer_active': boxLayer('unselected-pressed'),
-    'color.selection_layer_selected_hover': boxLayer('selected-hover'),
-    'color.selection_layer_selected_active': boxLayer('selected-pressed'),
+    'color.selection_layer_hover': boxLayer('unselected', 'hover'),
+    'color.selection_layer_active': boxLayer('unselected', 'pressed'),
+    'color.selection_layer_selected_hover': boxLayer('selected', 'hover'),
+    'color.selection_layer_selected_active': boxLayer('selected', 'pressed'),
     // Material's checkbox is the box alone: its label and messages are drawn in the template's own text roles
     'color.selection_label': '{color.text_primary}',
     'color.selection_label_disabled': translucent(field, 'disabled-label-text-color', 'disabled-label-text-opacity'),

@@ -304,8 +304,8 @@ describe('default template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 80 icon tokens, every one a valid icon literal, in both schemes', () => {
-    assert.equal(iconKeys.length, 80);
+  it('should carry 82 icon tokens, every one a valid icon literal, in both schemes', () => {
+    assert.equal(iconKeys.length, 82);
     for (const schemeName of ['light', 'dark']) {
       const tokens = profile.schemes[schemeName].tokens;
       const subset = {};
@@ -435,10 +435,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 751 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 762 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 751);
+        assert.equal(names.length, 762);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

@@ -6,13 +6,17 @@
 // 0 0 1px $focus, inset 0 0 0 2px $background` (2px of focus colour inside
 // the edge, then a 1px page-colour line; `button/_mixins.scss`), a tertiary
 // button fills with `$button-tertiary` and inks `$text-inverse` on focus and
-// clears its border while pressed (`button/_button.scss`), a ghost inks
+// clears its border while pressed, a danger tertiary fills with
+// `$button-danger-primary` and inks `$text-on-color` on focus and draws its
+// border in `$button-danger-active` while pressed
+// (`button/_button.scss`), a ghost inks
 // `$link-primary-hover` while hovered or pressed, a danger tertiary draws its
 // border in `$button-danger-hover` while hovered, a disabled outlined kind
 // draws its border in `$button-disabled`; a field and a select draw their
 // focus outline 2px inside the frame, a checkbox 1px outside its box; a
 // select fills with `$field-hover` on hover, a text input does not change;
-// a disabled select draws no border. A cell the contract adds and this table
+// a disabled text input keeps its `$border-strong` underline, a disabled
+// select draws no border. A cell the contract adds and this table
 // does not answer stops the generator.
 
 // Kinds whose rest container is a fill; the others draw on the page
@@ -29,7 +33,7 @@ const FILLED = Object.freeze({
 const ON_PAGE = Object.freeze({
   tertiary: { hover: 'button_tertiary_hover', active: 'button_tertiary_active', label: 'button_tertiary', engaged: 'text_inverse', border: 'button_tertiary', focus: 'button_tertiary' },
   ghost: { hover: 'background_hover', active: 'background_active', label: 'link_primary', engaged: 'link_primary_hover', border: null, focus: null },
-  danger_tertiary: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: 'button_danger_secondary', borderHover: 'button_danger_hover', focus: null },
+  danger_tertiary: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: 'button_danger_secondary', borderHover: 'button_danger_hover', borderActive: 'button_danger_active', focus: 'button_danger_primary' },
   danger_ghost: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: null, focus: null }
 });
 
@@ -93,7 +97,7 @@ function buttonCells (kind) {
     put('label', '_disabled', colorOf('text_disabled'));
     put('border', '', colorOf(k.border));
     put('border', '_hover', colorOf(k.borderHover || k.border));
-    put('border', '_active', kind === 'tertiary' ? NONE : colorOf(k.border));
+    put('border', '_active', kind === 'tertiary' ? NONE : colorOf(k.borderActive || k.border));
     put('border', '_disabled', k.border === null ? NONE : colorOf('button_disabled'));
   }
   put('container', '_selected', colorOf('background_selected'));
@@ -127,11 +131,13 @@ export default function buildGridRecipe (grid) {
     'color.field_outline': colorOf('border_strong_01'),
     'color.field_outline_hover': colorOf('border_strong_01'),
     'color.field_outline_focus': colorOf('border_strong_01'),
-    'color.field_outline_disabled': colorOf('border_disabled'),
+    // A disabled text input keeps its strong border; a disabled select draws none (its member cell)
+    'color.field_outline_disabled': colorOf('border_strong_01'),
     'color.field_outline_invalid': colorOf('border_strong_01'),
     'color.field_outline_invalid_hover': colorOf('border_strong_01'),
     'color.field_outline_invalid_focus': colorOf('border_strong_01'),
     'color.select_outline_disabled': NONE,
+    'color.select_indicator_focus': colorOf('icon_primary'),
     'color.field_ring_invalid': colorOf('support_error'),
     'color.field_focus_ring': colorOf('focus'),
     'color.field_label': colorOf('text_secondary'),
@@ -149,9 +155,15 @@ export default function buildGridRecipe (grid) {
     'color.field_helper_disabled': colorOf('text_disabled'),
     'color.field_message_invalid': colorOf('text_error'),
     'color.field_indicator': colorOf('icon_primary'),
+    'color.field_indicator_hover': colorOf('icon_primary'),
+    'color.field_indicator_focus': colorOf('icon_primary'),
     'color.field_indicator_disabled': colorOf('icon_disabled'),
     'color.field_indicator_invalid': colorOf('icon_primary'),
+    'color.field_indicator_invalid_hover': colorOf('icon_primary'),
+    'color.field_indicator_invalid_focus': colorOf('icon_primary'),
     'color.field_invalid_icon': colorOf('support_error'),
+    'color.field_invalid_icon_hover': colorOf('support_error'),
+    'color.field_invalid_icon_focus': colorOf('support_error'),
     'control.field_outline_width': '{border.width_01}',
     'control.field_outline_width_focus': '{border.width_01}',
     'control.field_invalid_ring_width': '{border.width_02}',
@@ -178,11 +190,13 @@ export default function buildGridRecipe (grid) {
     'color.selection_outline': colorOf('icon_primary'),
     'color.selection_outline_hover': colorOf('icon_primary'),
     'color.selection_outline_active': colorOf('icon_primary'),
+    'color.selection_outline_focus': colorOf('icon_primary'),
     'color.selection_outline_disabled': colorOf('icon_disabled'),
     'color.selection_outline_invalid': colorOf('support_error'),
     'color.selection_container': colorOf('control_checked'),
     'color.selection_container_hover': colorOf('control_checked'),
     'color.selection_container_active': colorOf('control_checked'),
+    'color.selection_container_focus': colorOf('control_checked'),
     'color.selection_container_disabled': colorOf('icon_disabled'),
     'color.selection_container_invalid': colorOf('control_checked'),
     'color.selection_mark': colorOf('icon_inverse'),
