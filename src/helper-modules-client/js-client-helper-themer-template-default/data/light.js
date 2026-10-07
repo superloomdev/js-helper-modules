@@ -7896,7 +7896,7 @@ export default Object.freeze({
       'package': '@carbon/icons',
       'version': '11.89.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': 'eba661af8eb464ea187359d17922f8413a628e5ea482a8af6dfca12539b0c04c'
+      'map_sha256': '585c7897b573e01b56b3f7a9b5d2484fd380f99ebf9815972eb9c1ede8b53540'
     }
   }
 });

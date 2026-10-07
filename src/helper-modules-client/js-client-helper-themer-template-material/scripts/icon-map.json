@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "eba661af8eb464ea187359d17922f8413a628e5ea482a8af6dfca12539b0c04c",
+  "source_sha256": "585c7897b573e01b56b3f7a9b5d2484fd380f99ebf9815972eb9c1ede8b53540",
   "set": "material",
   "upstream": {
     "package": "@material-symbols/svg-400",
@@ -58,7 +58,7 @@
     "info": "info",
     "information_filled": "info",
     "information_square_filled": "info",
-    "invalid": "error",
+    "invalid": "error-fill",
     "layers": "layers",
     "loading": "sync",
     "low_severity": "info",
