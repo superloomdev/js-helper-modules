@@ -112,7 +112,10 @@ const ANATOMY = {
   'anatomy.switch_handle': 'grows',
   'anatomy.status_marker': 'plain',
   'anatomy.dialog_actions': 'trailing',
-  'anatomy.slider_handle': 'bar'
+  'anatomy.slider_handle': 'bar',
+  // @material/web 2.5.0 button/internal/_shared.scss: the button is an
+  // inline flex box with align-items: center, so a taller one centers its label
+  'anatomy.button_label': 'center'
 };
 
 // --- Engine setup ---------------------------------------------------------

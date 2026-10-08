@@ -1815,6 +1815,7 @@ export default Object.freeze({
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
     'anatomy.slider_handle': 'round',
+    'anatomy.button_label': 'top',
     'shadow.level_01': {
       'shadow': true,
       'layers': [
@@ -6685,6 +6686,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'anatomy.slider_handle': {
+      'group': 'raw'
+    },
+    'anatomy.button_label': {
       'group': 'raw'
     },
     'shadow.level_01': {

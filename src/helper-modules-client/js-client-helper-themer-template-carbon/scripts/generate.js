@@ -58,7 +58,10 @@ const ANATOMY = {
   'anatomy.switch_handle': 'fixed',
   'anatomy.status_marker': 'bar_icon',
   'anatomy.dialog_actions': 'stretched',
-  'anatomy.slider_handle': 'round'
+  'anatomy.slider_handle': 'round',
+  // @carbon/styles 1.115.0 button/_mixins.scss caps padding-block at the lg
+  // height's (--temp-padding-block-max), so xl and 2xl keep the label at the top
+  'anatomy.button_label': 'top'
 };
 
 // --- Role grid (v5 amendment) -------------------------------------------

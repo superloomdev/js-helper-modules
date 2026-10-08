@@ -242,7 +242,8 @@ describe('carbon template - anatomy enums (v4)', () => {
     'anatomy.switch_handle': 'fixed',
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
-    'anatomy.slider_handle': 'round'
+    'anatomy.slider_handle': 'round',
+    'anatomy.button_label': 'top'
   };
 
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
@@ -421,10 +422,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 762 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 763 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 762);
+        assert.equal(names.length, 763);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

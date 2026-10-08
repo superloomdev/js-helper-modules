@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 762 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 762);
+  it('should expose exactly 763 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 763);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 762 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 762);
+  it('should expose exactly 763 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 763);
   });
 
   it('should report contract version 5', () => {
@@ -98,7 +98,7 @@ describe('contract registry - group counts', () => {
     state: 6,
     tint: 5,
     stacking: 5,
-    anatomy: 5,
+    anatomy: 6,
     icon: 82,
     control: 31
   };
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 762 tokens and theme has all 762', () => {
+  it('should return success true when required is all 763 tokens and theme has all 763', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1251,7 +1251,7 @@ describe('contract v5 - control group and role tokens', () => {
 
 describe('contract v4 - anatomy group', () => {
 
-  it('should expose five enum structure tokens with their literal value lists', () => {
+  it('should expose six enum structure tokens with their literal value lists', () => {
     const anatomyTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'anatomy';
     });
@@ -1261,7 +1261,8 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.switch_handle',
       'anatomy.status_marker',
       'anatomy.dialog_actions',
-      'anatomy.slider_handle'
+      'anatomy.slider_handle',
+      'anatomy.button_label'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1270,10 +1271,11 @@ describe('contract v4 - anatomy group', () => {
     assert.deepEqual(contract.tokens['anatomy.dialog_actions'].values, ['stretched', 'trailing']);
     assert.equal(contract.tokens['anatomy.caret'], undefined);
     assert.deepEqual(contract.tokens['anatomy.slider_handle'].values, ['round', 'bar']);
+    assert.deepEqual(contract.tokens['anatomy.button_label'].values, ['top', 'center']);
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }

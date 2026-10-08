@@ -53,7 +53,9 @@ const ANATOMY = {
   'anatomy.switch_handle': 'fixed',
   'anatomy.status_marker': 'bar_icon',
   'anatomy.dialog_actions': 'stretched',
-  'anatomy.slider_handle': 'round'
+  'anatomy.slider_handle': 'round',
+  // A tall button keeps its label where the default height puts it
+  'anatomy.button_label': 'top'
 };
 
 // --- Neutral ramp ---------------------------------------------------------

@@ -299,6 +299,9 @@ Where two design systems draw the same component with a different shape, the cho
 | `anatomy.status_marker` | `bar_icon`, `plain` |
 | `anatomy.dialog_actions` | `stretched`, `trailing` |
 | `anatomy.slider_handle` | `round`, `bar` |
+| `anatomy.button_label` | `top`, `center` |
+
+`anatomy.button_label` (the second version 5 amendment) says where a button taller than the default height draws its label: `top` keeps it where the default height puts it, `center` centers it in the taller button.
 
 Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.
 

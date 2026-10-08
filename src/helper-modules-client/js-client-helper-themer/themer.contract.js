@@ -44,6 +44,10 @@
 // `checked_indicator`, `mixed_indicator`:
 // the glyph a part shows is an icon role, never an enum), and removes
 // `anatomy.caret`, whose choice the `dropdown_indicator` role now carries.
+// A second amendment adds `anatomy.button_label`: where a button taller
+// than the default height draws its label (`top`, where the default
+// height puts it, or `center`), a choice one reference makes for its
+// tall sizes that a component must not make in code.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -595,6 +599,7 @@ function buildContract () {
     'anatomy.status_marker': Object.freeze({ group: 'anatomy', values: ['bar_icon', 'plain'] }),
     'anatomy.dialog_actions': Object.freeze({ group: 'anatomy', values: ['stretched', 'trailing'] }),
     'anatomy.slider_handle': Object.freeze({ group: 'anatomy', values: ['round', 'bar'] }),
+    'anatomy.button_label': Object.freeze({ group: 'anatomy', values: ['top', 'center'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
