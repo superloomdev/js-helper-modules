@@ -481,6 +481,7 @@ export default Object.freeze({
     'anatomy.status_marker': 'plain',
     'anatomy.dialog_actions': 'trailing',
     'anatomy.slider_handle': 'bar',
+    'anatomy.button_label': 'center',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -4111,6 +4112,9 @@ export default Object.freeze({
     'anatomy.slider_handle': {
       'group': 'raw'
     },
+    'anatomy.button_label': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -5549,7 +5553,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '9879762e69507afbd457a96c2a69636aa9df9740',
+    'default_shasum': '4fbaf6942abe5f7f9e186d2ce155f8c3a418b431',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
