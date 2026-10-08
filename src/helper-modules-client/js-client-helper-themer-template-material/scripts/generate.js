@@ -115,7 +115,19 @@ const ANATOMY = {
   'anatomy.slider_handle': 'bar',
   // @material/web 2.5.0 button/internal/_shared.scss: the button is an
   // inline flex box with align-items: center, so a taller one centers its label
-  'anatomy.button_label': 'center'
+  'anatomy.button_label': 'center',
+  // v6: Material's shape choices. The field counter sits in the
+  // supporting-text row (`field/internal/_supporting-text.scss` .counter),
+  // the switch draws no state text, an indeterminate linear progress is two
+  // bars travelling (`progress/internal/_linear-progress.scss`), the
+  // primary tab's indicator spans the label
+  // (_md-comp-primary-navigation-tab.scss), and a dialog draws no close button
+  // (_md-comp-dialog.scss / dialog internal styles)
+  'anatomy.field_counter': 'message',
+  'anatomy.switch_state_text': 'hidden',
+  'anatomy.progress_indeterminate': 'travel',
+  'anatomy.tab_indicator': 'content',
+  'anatomy.dialog_close': 'hidden'
 };
 
 // --- Engine setup ---------------------------------------------------------
@@ -548,6 +560,7 @@ function buildTokens (schemeName) {
     dirs: compDirs,
     hexFromArgb: hexFromArgb,
     mapping: mapping.color,
+    shapeMap: mapping.shape,
     typeSet: function (role) {
       return convertTypeSet(role, typeRoles[role]);
     }

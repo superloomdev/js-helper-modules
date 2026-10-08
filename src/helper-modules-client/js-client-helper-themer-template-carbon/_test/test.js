@@ -42,8 +42,8 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.id, 'carbon-v11');
   });
 
-  it('should export contract_version 5', () => {
-    assert.equal(profile.contract_version, 5);
+  it('should export contract_version 6', () => {
+    assert.equal(profile.contract_version, 6);
   });
 
   it('should export reference with Carbon package versions', () => {
@@ -271,7 +271,7 @@ describe('carbon template - icon literals (v4)', () => {
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
   it('should carry 82 valid icon literals, identical across the four schemes', () => {
-    assert.equal(iconKeys.length, 82);
+    assert.equal(iconKeys.length, 84);
     const subset = {};
     for (const name of iconKeys) {
       const literal = profile.schemes.white.tokens[name];
@@ -422,10 +422,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 763 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 961 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 763);
+        assert.equal(names.length, 961);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

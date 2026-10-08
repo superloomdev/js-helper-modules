@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "585c7897b573e01b56b3f7a9b5d2484fd380f99ebf9815972eb9c1ede8b53540",
+  "source_sha256": "3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274",
   "set": "material",
   "upstream": {
     "package": "@material-symbols/svg-400",
@@ -71,10 +71,12 @@
     "radio_button": "radio_button_unchecked",
     "radio_button_checked": "radio_button_checked",
     "search": "search",
+    "selected_indicator": "check",
     "settings": "settings",
     "share": "share",
     "subtract": "remove",
     "success": "check_circle",
+    "switch_checked_indicator": "check",
     "task_complete": "task_alt",
     "time": "schedule",
     "tools": "build",

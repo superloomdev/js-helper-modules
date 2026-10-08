@@ -96,8 +96,8 @@ describe('material template - profile identity', () => {
     assert.equal(profile.id, 'material-v0_192');
   });
 
-  it('should export contract_version 5', () => {
-    assert.equal(profile.contract_version, 5);
+  it('should export contract_version 6', () => {
+    assert.equal(profile.contract_version, 6);
   });
 
   it('should export reference with Material package versions', () => {
@@ -559,7 +559,7 @@ describe('material template - icon literals (v4)', () => {
   };
 
   it('should carry 82 icon literals, every one valid, none completed from the default template', () => {
-    assert.equal(iconKeys.length, 82);
+    assert.equal(iconKeys.length, 84);
     for (const schemeName of SCHEME_NAMES) {
       const scheme = profile.schemes[schemeName];
       const subset = {};
@@ -676,10 +676,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 763 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 961 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 763);
+        assert.equal(names.length, 961);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

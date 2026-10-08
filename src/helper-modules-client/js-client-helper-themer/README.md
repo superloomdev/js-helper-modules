@@ -120,6 +120,17 @@ auditRoles(theme) -> { success, findings } | async:no
   differ, every shadow level is translucent. A template's tests run it over every scheme so a value
   that would draw an unreadable label is caught before any component draws it.
 
+### Contract version 6
+
+Version 6 extends the role grid to the next component batch, so the same families hold for a Select's option list, a menu, a switch, a tag, a progress bar, a tooltip, tabs, a dialog and a toast notification:
+
+- **New grid families** (`color`, `control`, `type`, `shadow` cells, 191 cells added for 460 total): `list` (the option list, shared by Select, Dropdown, Menu and ComboBox, with `menu_*` member cells), `switch`, `tag` (the neutral chrome; the ten `color.tag_*_<hue>` semantic colors stay), `progress`, `tooltip` (with `tooltip_compact_*` members), `tab` (with `tab_contained_*` members), `dialog`, `notification`.
+- **New member cells:** `text_area_container_hover`, `text_area_outline_disabled`, `type.text_area_value`; `radio_size`, `radio_border`, `radio_dot_size`, `radio_focus_offset`, `radio_outline_selected[_hover|_active|_focus]`; `icon_button_size`, `icon_button_icon_size`, `icon_button_<kind>_icon[_state]`; `dialog_close_icon_size`.
+- **New anatomy values** (5): `anatomy.field_counter` (`label` | `message`), `anatomy.switch_state_text` (`shown` | `hidden`), `anatomy.progress_indeterminate` (`sweep` | `travel`), `anatomy.tab_indicator` (`full` | `content`), `anatomy.dialog_close` (`shown` | `hidden`).
+- **New icon roles** (2): `icon.selected_indicator` (the mark on a selected list item), `icon.switch_checked_indicator` (the mark on a checked switch handle).
+
+The contract registry now carries 961 tokens in 19 groups.
+
 ### Contract version 5
 
 Version 5 adds per-component roles, so a component reads one role and each template answers it with its own number where the shared scales hold one value for every design system:

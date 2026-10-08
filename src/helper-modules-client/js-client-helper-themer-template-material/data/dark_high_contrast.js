@@ -482,6 +482,11 @@ export default Object.freeze({
     'anatomy.dialog_actions': 'trailing',
     'anatomy.slider_handle': 'bar',
     'anatomy.button_label': 'center',
+    'anatomy.field_counter': 'message',
+    'anatomy.switch_state_text': 'hidden',
+    'anatomy.progress_indeterminate': 'travel',
+    'anatomy.tab_indicator': 'content',
+    'anatomy.dialog_close': 'hidden',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -1049,6 +1054,15 @@ export default Object.freeze({
         }
       ]
     },
+    'icon.selected_indicator': {
+      'icon': true,
+      'viewBox': '0 -960 960 960',
+      'paths': [
+        {
+          'd': 'M378-246 154-470l43-43 181 181 384-384 43 43-427 427Z'
+        }
+      ]
+    },
     'icon.settings': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -1082,6 +1096,15 @@ export default Object.freeze({
       'paths': [
         {
           'd': 'm421-298 283-283-46-45-237 237-120-120-45 45 165 166Zm59 218q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z'
+        }
+      ]
+    },
+    'icon.switch_checked_indicator': {
+      'icon': true,
+      'viewBox': '0 -960 960 960',
+      'paths': [
+        {
+          'd': 'M378-246 154-470l43-43 181 181 384-384 43 43-427 427Z'
         }
       ]
     },
@@ -1767,6 +1790,422 @@ export default Object.freeze({
     'control.selection_focus_offset': 13,
     'control.selection_focus_radius': '{shape.radius_max}',
     'control.selection_layer_size': 40,
+    'color.list_container': '{color.layer_02}',
+    'color.list_item_label': '{color.text_primary}',
+    'color.list_item_label_hover': '{color.text_primary}',
+    'color.list_item_label_selected': '{color.text_on_button_tonal}',
+    'color.list_item_label_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.3
+      ]
+    },
+    'color.list_item_container_hover': {
+      'op': 'mix',
+      'args': [
+        'color.text_primary',
+        'color.layer_02',
+        8
+      ]
+    },
+    'color.list_item_container_active': {
+      'op': 'mix',
+      'args': [
+        'color.text_primary',
+        'color.layer_02',
+        19.04
+      ]
+    },
+    'color.list_item_container_selected': '{color.button_secondary_hover}',
+    'color.list_item_container_selected_hover': {
+      'op': 'mix',
+      'args': [
+        'color.text_primary',
+        'color.button_secondary_hover',
+        8
+      ]
+    },
+    'color.list_item_divider': '{color.border_subtle_02}',
+    'control.list_item_height': 56,
+    'control.list_item_padding_inline': 16,
+    'control.list_item_divider_width': 1,
+    'control.list_padding_block': 8,
+    'control.list_radius': '{shape.radius_04}',
+    'type.list_item': {
+      'type_set': true,
+      'font_size': 16,
+      'line_height_px': 24,
+      'letter_spacing': 0.5,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'shadow.list': '{shadow.level_02}',
+    'control.menu_padding_block': 8,
+    'control.menu_item_height': 56,
+    'control.menu_divider_width': 1,
+    'control.menu_icon_size': 24,
+    'color.menu_item_danger_label': '{color.support_error}',
+    'color.menu_item_danger_label_hover': '{color.support_error}',
+    'color.menu_item_danger_container_hover': {
+      'op': 'mix',
+      'args': [
+        'color.support_error',
+        'color.layer_02',
+        8
+      ]
+    },
+    'color.text_area_container_hover': '{color.field_container_hover}',
+    'color.text_area_outline_disabled': '{color.field_outline_disabled}',
+    'type.text_area_value': '{type.field_value}',
+    'control.radio_size': 20,
+    'control.radio_border': 2,
+    'control.radio_dot_size': 10,
+    'control.radio_focus_offset': 10,
+    'color.radio_outline_selected': '{color.interactive}',
+    'color.radio_outline_selected_hover': '{color.interactive}',
+    'color.radio_outline_selected_active': '{color.interactive}',
+    'color.radio_outline_selected_focus': '{color.interactive}',
+    'control.switch_track_width': 52,
+    'control.switch_track_height': 32,
+    'control.switch_outline_width': 2,
+    'control.switch_handle_size': 16,
+    'control.switch_handle_size_selected': 24,
+    'control.switch_handle_size_pressed': 28,
+    'control.switch_focus_width': 3,
+    'control.switch_focus_offset': 2,
+    'color.switch_outline': '{color.border_subtle_01}',
+    'color.switch_outline_hover': '{color.border_subtle_01}',
+    'color.switch_outline_focus': '{color.border_subtle_01}',
+    'color.switch_outline_active': '{color.border_subtle_01}',
+    'color.switch_outline_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.12
+      ]
+    },
+    'color.switch_track': '{color.layer_active_01}',
+    'color.switch_track_hover': '{color.layer_active_01}',
+    'color.switch_track_focus': '{color.layer_active_01}',
+    'color.switch_track_active': '{color.layer_active_01}',
+    'color.switch_track_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.layer_active_01',
+        0.12
+      ]
+    },
+    'color.switch_track_selected': '{color.interactive}',
+    'color.switch_track_selected_hover': '{color.interactive}',
+    'color.switch_track_selected_focus': '{color.interactive}',
+    'color.switch_track_selected_active': '{color.interactive}',
+    'color.switch_track_selected_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.12
+      ]
+    },
+    'color.switch_handle': '{color.border_subtle_01}',
+    'color.switch_handle_hover': '{color.text_secondary}',
+    'color.switch_handle_focus': '{color.text_secondary}',
+    'color.switch_handle_active': '{color.text_secondary}',
+    'color.switch_handle_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'color.switch_handle_selected': '{color.text_on_color}',
+    'color.switch_handle_selected_hover': '{color.highlight}',
+    'color.switch_handle_selected_focus': '{color.highlight}',
+    'color.switch_handle_selected_active': '{color.highlight}',
+    'color.switch_handle_selected_disabled': '{color.background}',
+    'color.switch_mark': '{color.text_on_color_disabled}',
+    'color.switch_mark_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'color.switch_layer_hover': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.08
+      ]
+    },
+    'color.switch_layer_active': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.19
+      ]
+    },
+    'color.switch_layer_selected_hover': {
+      'op': 'alpha',
+      'args': [
+        'color.interactive',
+        0.08
+      ]
+    },
+    'color.switch_layer_selected_active': {
+      'op': 'alpha',
+      'args': [
+        'color.interactive',
+        0.19
+      ]
+    },
+    'color.switch_focus_ring': '{color.focus}',
+    'color.tag_container': 'rgba(0, 0, 0, 0)',
+    'color.tag_container_disabled': 'rgba(0, 0, 0, 0)',
+    'color.tag_label': '{color.text_primary}',
+    'color.tag_label_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'color.tag_outline': '{color.border_subtle_01}',
+    'color.tag_outline_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.12
+      ]
+    },
+    'color.tag_icon': '{color.interactive}',
+    'color.tag_icon_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'control.tag_height': 32,
+    'control.tag_radius': '{shape.radius_08}',
+    'control.tag_padding_inline': 16,
+    'control.tag_padding_icon': 8,
+    'control.tag_outline_width': 1,
+    'control.tag_icon_size': 18,
+    'type.tag_label': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 500,
+      'font_family': 'sans'
+    },
+    'color.progress_track': '{color.layer_active_01}',
+    'color.progress_indicator': '{color.interactive}',
+    'color.progress_indicator_success': '{color.support_success}',
+    'color.progress_indicator_error': '{color.support_error}',
+    'control.progress_height': 4,
+    'control.progress_radius': '{shape.radius_00}',
+    'color.tooltip_container': '{color.background_inverse}',
+    'color.tooltip_label': '{color.text_inverse}',
+    'type.tooltip_label': {
+      'type_set': true,
+      'font_size': 12,
+      'line_height_px': 16,
+      'letter_spacing': 0.4,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'control.tooltip_padding_block': 4,
+    'control.tooltip_padding_inline': 8,
+    'control.tooltip_radius': '{shape.radius_04}',
+    'control.tooltip_caret_width': 0,
+    'control.tooltip_caret_height': 0,
+    'control.tooltip_offset': 4,
+    'control.tooltip_max_width': 0,
+    'control.tooltip_compact_padding_block': 4,
+    'control.tooltip_compact_caret_width': 0,
+    'control.tooltip_compact_caret_height': 0,
+    'control.tooltip_compact_offset': 4,
+    'type.tooltip_compact_label': {
+      'type_set': true,
+      'font_size': 12,
+      'line_height_px': 16,
+      'letter_spacing': 0.4,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'color.tab_container': '{color.background}',
+    'color.tab_divider': '{color.border_subtle_02}',
+    'color.tab_track': 'rgba(0, 0, 0, 0)',
+    'color.tab_track_hover': 'rgba(0, 0, 0, 0)',
+    'color.tab_track_disabled': 'rgba(0, 0, 0, 0)',
+    'color.tab_indicator': '{color.interactive}',
+    'color.tab_label': '{color.text_secondary}',
+    'color.tab_label_hover': '{color.text_primary}',
+    'color.tab_label_selected': '{color.interactive}',
+    'color.tab_label_selected_hover': '{color.interactive}',
+    'color.tab_label_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'color.tab_layer_hover': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.08
+      ]
+    },
+    'color.tab_layer_active': 'rgba(249, 244, 255, 0.19)',
+    'color.tab_layer_selected_hover': {
+      'op': 'alpha',
+      'args': [
+        'color.interactive',
+        0.08
+      ]
+    },
+    'color.tab_layer_selected_active': {
+      'op': 'alpha',
+      'args': [
+        'color.interactive',
+        0.19
+      ]
+    },
+    'color.tab_focus_ring': '{color.focus}',
+    'color.tab_contained_container': '{color.layer_02}',
+    'color.tab_contained_container_hover': {
+      'op': 'mix',
+      'args': [
+        'color.text_primary',
+        'color.layer_02',
+        8
+      ]
+    },
+    'color.tab_contained_container_selected': '{color.background}',
+    'color.tab_contained_separator': '{color.border_subtle_02}',
+    'control.tab_height': 48,
+    'control.tab_padding_inline': 16,
+    'control.tab_divider_width': 1,
+    'control.tab_track_width': 0,
+    'control.tab_indicator_width': 3,
+    'control.tab_indicator_radius': 3,
+    'control.tab_focus_width': 3,
+    'control.tab_focus_offset': 2,
+    'type.tab_label': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 500,
+      'font_family': 'sans'
+    },
+    'type.tab_label_selected': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 500,
+      'font_family': 'sans'
+    },
+    'color.dialog_scrim': {
+      'op': 'alpha',
+      'args': [
+        'color.overlay',
+        0.32
+      ]
+    },
+    'color.dialog_container': '{color.layer_03}',
+    'color.dialog_border': 'rgba(0, 0, 0, 0)',
+    'color.dialog_heading': '{color.text_primary}',
+    'color.dialog_body': '{color.text_secondary}',
+    'control.dialog_border_width': 0,
+    'control.dialog_radius': '{shape.radius_28}',
+    'control.dialog_min_width': 280,
+    'control.dialog_max_width': 560,
+    'control.dialog_padding_inline': 24,
+    'control.dialog_padding_top': 24,
+    'control.dialog_header_gap': 8,
+    'control.dialog_body_padding_top': 8,
+    'control.dialog_body_padding_bottom': 24,
+    'control.dialog_actions_height': 0,
+    'control.dialog_actions_gap': 8,
+    'control.dialog_actions_padding': 24,
+    'control.dialog_close_icon_size': 24,
+    'type.dialog_heading': {
+      'type_set': true,
+      'font_size': 24,
+      'line_height_px': 32,
+      'letter_spacing': 0,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.dialog_body': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.25,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'shadow.dialog': '{shadow.level_03}',
+    'color.notification_container': '{color.background_inverse}',
+    'color.notification_text': '{color.text_inverse}',
+    'color.notification_close_icon': '{color.text_inverse}',
+    'color.notification_action': '{color.focus_inverse}',
+    'color.notification_marker_error': '{color.support_error_inverse}',
+    'color.notification_marker_success': '{color.support_success_inverse}',
+    'color.notification_marker_info': '{color.support_info_inverse}',
+    'color.notification_marker_warning': '{color.support_warning_inverse}',
+    'control.notification_width': 288,
+    'control.notification_radius': '{shape.radius_04}',
+    'control.notification_marker_width': 0,
+    'control.notification_icon_size': 24,
+    'type.notification_title': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.25,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.notification_body': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.25,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'shadow.notification': '{shadow.level_03}',
+    'color.icon_button_ghost_icon': '{color.text_secondary}',
+    'color.icon_button_ghost_icon_hover': '{color.text_secondary}',
+    'color.icon_button_ghost_icon_active': '{color.text_secondary}',
+    'color.icon_button_ghost_icon_focus': '{color.text_secondary}',
+    'color.icon_button_ghost_icon_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'color.icon_button_ghost_icon_selected': '{color.interactive}',
+    'color.icon_button_tertiary_icon': '{color.text_secondary}',
+    'color.icon_button_tertiary_icon_hover': '{color.text_secondary}',
+    'color.icon_button_tertiary_icon_active': '{color.text_primary}',
+    'color.icon_button_tertiary_icon_focus': '{color.text_secondary}',
+    'color.icon_button_tertiary_icon_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
+    'color.icon_button_tertiary_icon_selected': '{color.text_inverse}',
+    'control.icon_button_size': 40,
+    'control.icon_button_icon_size': 24,
     'shadow.level_00': {
       'shadow': true,
       'layers': [
@@ -4115,6 +4554,21 @@ export default Object.freeze({
     'anatomy.button_label': {
       'group': 'raw'
     },
+    'anatomy.field_counter': {
+      'group': 'raw'
+    },
+    'anatomy.switch_state_text': {
+      'group': 'raw'
+    },
+    'anatomy.progress_indeterminate': {
+      'group': 'raw'
+    },
+    'anatomy.tab_indicator': {
+      'group': 'raw'
+    },
+    'anatomy.dialog_close': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -4454,6 +4908,9 @@ export default Object.freeze({
     'icon.search': {
       'group': 'raw'
     },
+    'icon.selected_indicator': {
+      'group': 'raw'
+    },
     'icon.settings': {
       'group': 'raw'
     },
@@ -4464,6 +4921,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'icon.success': {
+      'group': 'raw'
+    },
+    'icon.switch_checked_indicator': {
       'group': 'raw'
     },
     'icon.task_complete': {
@@ -5138,6 +5598,336 @@ export default Object.freeze({
     'color.selection_focus_ring': {
       'group': 'color'
     },
+    'color.list_container': {
+      'group': 'color'
+    },
+    'color.list_item_label': {
+      'group': 'color'
+    },
+    'color.list_item_label_hover': {
+      'group': 'color'
+    },
+    'color.list_item_label_selected': {
+      'group': 'color'
+    },
+    'color.list_item_label_disabled': {
+      'group': 'color'
+    },
+    'color.list_item_container_hover': {
+      'group': 'color'
+    },
+    'color.list_item_container_active': {
+      'group': 'color'
+    },
+    'color.list_item_container_selected': {
+      'group': 'color'
+    },
+    'color.list_item_container_selected_hover': {
+      'group': 'color'
+    },
+    'color.list_item_divider': {
+      'group': 'color'
+    },
+    'color.menu_item_danger_container_hover': {
+      'group': 'color'
+    },
+    'color.menu_item_danger_label': {
+      'group': 'color'
+    },
+    'color.menu_item_danger_label_hover': {
+      'group': 'color'
+    },
+    'color.text_area_container_hover': {
+      'group': 'color'
+    },
+    'color.text_area_outline_disabled': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected_hover': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected_active': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected_focus': {
+      'group': 'color'
+    },
+    'color.switch_outline': {
+      'group': 'color'
+    },
+    'color.switch_outline_hover': {
+      'group': 'color'
+    },
+    'color.switch_outline_focus': {
+      'group': 'color'
+    },
+    'color.switch_outline_active': {
+      'group': 'color'
+    },
+    'color.switch_outline_disabled': {
+      'group': 'color'
+    },
+    'color.switch_track': {
+      'group': 'color'
+    },
+    'color.switch_track_hover': {
+      'group': 'color'
+    },
+    'color.switch_track_focus': {
+      'group': 'color'
+    },
+    'color.switch_track_active': {
+      'group': 'color'
+    },
+    'color.switch_track_disabled': {
+      'group': 'color'
+    },
+    'color.switch_track_selected': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_hover': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_focus': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_active': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_disabled': {
+      'group': 'color'
+    },
+    'color.switch_handle': {
+      'group': 'color'
+    },
+    'color.switch_handle_hover': {
+      'group': 'color'
+    },
+    'color.switch_handle_focus': {
+      'group': 'color'
+    },
+    'color.switch_handle_active': {
+      'group': 'color'
+    },
+    'color.switch_handle_disabled': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_hover': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_focus': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_active': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_disabled': {
+      'group': 'color'
+    },
+    'color.switch_mark': {
+      'group': 'color'
+    },
+    'color.switch_mark_disabled': {
+      'group': 'color'
+    },
+    'color.switch_layer_hover': {
+      'group': 'color'
+    },
+    'color.switch_layer_active': {
+      'group': 'color'
+    },
+    'color.switch_layer_selected_hover': {
+      'group': 'color'
+    },
+    'color.switch_layer_selected_active': {
+      'group': 'color'
+    },
+    'color.switch_focus_ring': {
+      'group': 'color'
+    },
+    'color.tag_container': {
+      'group': 'color'
+    },
+    'color.tag_container_disabled': {
+      'group': 'color'
+    },
+    'color.tag_label': {
+      'group': 'color'
+    },
+    'color.tag_label_disabled': {
+      'group': 'color'
+    },
+    'color.tag_outline': {
+      'group': 'color'
+    },
+    'color.tag_outline_disabled': {
+      'group': 'color'
+    },
+    'color.tag_icon': {
+      'group': 'color'
+    },
+    'color.tag_icon_disabled': {
+      'group': 'color'
+    },
+    'color.progress_track': {
+      'group': 'color'
+    },
+    'color.progress_indicator': {
+      'group': 'color'
+    },
+    'color.progress_indicator_success': {
+      'group': 'color'
+    },
+    'color.progress_indicator_error': {
+      'group': 'color'
+    },
+    'color.tooltip_container': {
+      'group': 'color'
+    },
+    'color.tooltip_label': {
+      'group': 'color'
+    },
+    'color.tab_container': {
+      'group': 'color'
+    },
+    'color.tab_divider': {
+      'group': 'color'
+    },
+    'color.tab_track': {
+      'group': 'color'
+    },
+    'color.tab_track_hover': {
+      'group': 'color'
+    },
+    'color.tab_track_disabled': {
+      'group': 'color'
+    },
+    'color.tab_indicator': {
+      'group': 'color'
+    },
+    'color.tab_label': {
+      'group': 'color'
+    },
+    'color.tab_label_hover': {
+      'group': 'color'
+    },
+    'color.tab_label_selected': {
+      'group': 'color'
+    },
+    'color.tab_label_selected_hover': {
+      'group': 'color'
+    },
+    'color.tab_label_disabled': {
+      'group': 'color'
+    },
+    'color.tab_layer_hover': {
+      'group': 'color'
+    },
+    'color.tab_layer_active': {
+      'group': 'color'
+    },
+    'color.tab_layer_selected_hover': {
+      'group': 'color'
+    },
+    'color.tab_layer_selected_active': {
+      'group': 'color'
+    },
+    'color.tab_focus_ring': {
+      'group': 'color'
+    },
+    'color.tab_contained_container': {
+      'group': 'color'
+    },
+    'color.tab_contained_container_hover': {
+      'group': 'color'
+    },
+    'color.tab_contained_container_selected': {
+      'group': 'color'
+    },
+    'color.tab_contained_separator': {
+      'group': 'color'
+    },
+    'color.dialog_scrim': {
+      'group': 'color'
+    },
+    'color.dialog_container': {
+      'group': 'color'
+    },
+    'color.dialog_border': {
+      'group': 'color'
+    },
+    'color.dialog_heading': {
+      'group': 'color'
+    },
+    'color.dialog_body': {
+      'group': 'color'
+    },
+    'color.notification_container': {
+      'group': 'color'
+    },
+    'color.notification_text': {
+      'group': 'color'
+    },
+    'color.notification_close_icon': {
+      'group': 'color'
+    },
+    'color.notification_action': {
+      'group': 'color'
+    },
+    'color.notification_marker_error': {
+      'group': 'color'
+    },
+    'color.notification_marker_success': {
+      'group': 'color'
+    },
+    'color.notification_marker_info': {
+      'group': 'color'
+    },
+    'color.notification_marker_warning': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_hover': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_active': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_focus': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_disabled': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_hover': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_active': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_focus': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_disabled': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_selected': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -5198,6 +5988,207 @@ export default Object.freeze({
     'control.selection_layer_size': {
       'group': 'dimension'
     },
+    'control.list_item_height': {
+      'group': 'dimension'
+    },
+    'control.list_item_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.list_item_divider_width': {
+      'group': 'dimension'
+    },
+    'control.list_padding_block': {
+      'group': 'dimension'
+    },
+    'control.list_radius': {
+      'group': 'dimension'
+    },
+    'control.menu_padding_block': {
+      'group': 'dimension'
+    },
+    'control.menu_item_height': {
+      'group': 'dimension'
+    },
+    'control.menu_divider_width': {
+      'group': 'dimension'
+    },
+    'control.menu_icon_size': {
+      'group': 'dimension'
+    },
+    'control.radio_size': {
+      'group': 'dimension'
+    },
+    'control.radio_border': {
+      'group': 'dimension'
+    },
+    'control.radio_dot_size': {
+      'group': 'dimension'
+    },
+    'control.radio_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.switch_track_width': {
+      'group': 'dimension'
+    },
+    'control.switch_track_height': {
+      'group': 'dimension'
+    },
+    'control.switch_outline_width': {
+      'group': 'dimension'
+    },
+    'control.switch_handle_size': {
+      'group': 'dimension'
+    },
+    'control.switch_handle_size_selected': {
+      'group': 'dimension'
+    },
+    'control.switch_handle_size_pressed': {
+      'group': 'dimension'
+    },
+    'control.switch_focus_width': {
+      'group': 'dimension'
+    },
+    'control.switch_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.tag_height': {
+      'group': 'dimension'
+    },
+    'control.tag_radius': {
+      'group': 'dimension'
+    },
+    'control.tag_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.tag_padding_icon': {
+      'group': 'dimension'
+    },
+    'control.tag_outline_width': {
+      'group': 'dimension'
+    },
+    'control.tag_icon_size': {
+      'group': 'dimension'
+    },
+    'control.progress_height': {
+      'group': 'dimension'
+    },
+    'control.progress_radius': {
+      'group': 'dimension'
+    },
+    'control.tooltip_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tooltip_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.tooltip_radius': {
+      'group': 'dimension'
+    },
+    'control.tooltip_caret_width': {
+      'group': 'dimension'
+    },
+    'control.tooltip_caret_height': {
+      'group': 'dimension'
+    },
+    'control.tooltip_offset': {
+      'group': 'dimension'
+    },
+    'control.tooltip_max_width': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_caret_width': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_caret_height': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_offset': {
+      'group': 'dimension'
+    },
+    'control.tab_height': {
+      'group': 'dimension'
+    },
+    'control.tab_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.tab_divider_width': {
+      'group': 'dimension'
+    },
+    'control.tab_track_width': {
+      'group': 'dimension'
+    },
+    'control.tab_indicator_width': {
+      'group': 'dimension'
+    },
+    'control.tab_indicator_radius': {
+      'group': 'dimension'
+    },
+    'control.tab_focus_width': {
+      'group': 'dimension'
+    },
+    'control.tab_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.dialog_border_width': {
+      'group': 'dimension'
+    },
+    'control.dialog_radius': {
+      'group': 'dimension'
+    },
+    'control.dialog_min_width': {
+      'group': 'dimension'
+    },
+    'control.dialog_max_width': {
+      'group': 'dimension'
+    },
+    'control.dialog_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.dialog_padding_top': {
+      'group': 'dimension'
+    },
+    'control.dialog_header_gap': {
+      'group': 'dimension'
+    },
+    'control.dialog_body_padding_top': {
+      'group': 'dimension'
+    },
+    'control.dialog_body_padding_bottom': {
+      'group': 'dimension'
+    },
+    'control.dialog_actions_height': {
+      'group': 'dimension'
+    },
+    'control.dialog_actions_gap': {
+      'group': 'dimension'
+    },
+    'control.dialog_actions_padding': {
+      'group': 'dimension'
+    },
+    'control.dialog_close_icon_size': {
+      'group': 'dimension'
+    },
+    'control.notification_width': {
+      'group': 'dimension'
+    },
+    'control.notification_radius': {
+      'group': 'dimension'
+    },
+    'control.notification_marker_width': {
+      'group': 'dimension'
+    },
+    'control.notification_icon_size': {
+      'group': 'dimension'
+    },
+    'control.icon_button_size': {
+      'group': 'dimension'
+    },
+    'control.icon_button_icon_size': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -5205,6 +6196,39 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.field_helper': {
+      'group': 'typeSet'
+    },
+    'type.list_item': {
+      'group': 'typeSet'
+    },
+    'type.text_area_value': {
+      'group': 'typeSet'
+    },
+    'type.tag_label': {
+      'group': 'typeSet'
+    },
+    'type.tooltip_label': {
+      'group': 'typeSet'
+    },
+    'type.tooltip_compact_label': {
+      'group': 'typeSet'
+    },
+    'type.tab_label': {
+      'group': 'typeSet'
+    },
+    'type.tab_label_selected': {
+      'group': 'typeSet'
+    },
+    'type.dialog_heading': {
+      'group': 'typeSet'
+    },
+    'type.dialog_body': {
+      'group': 'typeSet'
+    },
+    'type.notification_title': {
+      'group': 'typeSet'
+    },
+    'type.notification_body': {
       'group': 'typeSet'
     },
     'shadow.level_00': {
@@ -5316,6 +6340,15 @@ export default Object.freeze({
       'group': 'shadow'
     },
     'shadow.button_elevated_disabled': {
+      'group': 'shadow'
+    },
+    'shadow.list': {
+      'group': 'shadow'
+    },
+    'shadow.dialog': {
+      'group': 'shadow'
+    },
+    'shadow.notification': {
       'group': 'shadow'
     }
   },
@@ -5553,14 +6586,14 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '4fbaf6942abe5f7f9e186d2ce155f8c3a418b431',
+    'default_shasum': '6a406833d5bf06858f324bbaa445a72c439dd3da',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
       'version': '0.47.4',
       'style': 'outlined',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '585c7897b573e01b56b3f7a9b5d2484fd380f99ebf9815972eb9c1ede8b53540',
+      'map_sha256': '3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274',
       'drawings': {
         'dropdown_indicator': '@material/web 2.5.0 select/internal/select.js renderTrailingIcon',
         'checked_indicator': '@material/web 2.5.0 checkbox/internal/_checkbox.scss .checked .mark',

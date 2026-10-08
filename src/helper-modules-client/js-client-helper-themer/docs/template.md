@@ -300,18 +300,38 @@ Where two design systems draw the same component with a different shape, the cho
 | `anatomy.dialog_actions` | `stretched`, `trailing` |
 | `anatomy.slider_handle` | `round`, `bar` |
 | `anatomy.button_label` | `top`, `center` |
+| `anatomy.field_counter` | `label`, `message` |
+| `anatomy.switch_state_text` | `shown`, `hidden` |
+| `anatomy.progress_indeterminate` | `sweep`, `travel` |
+| `anatomy.tab_indicator` | `full`, `content` |
+| `anatomy.dialog_close` | `shown`, `hidden` |
 
 `anatomy.button_label` (the second version 5 amendment) says where a button taller than the default height draws its label: `top` keeps it where the default height puts it, `center` centers it in the taller button.
+
+The version 6 anatomy values: `anatomy.field_counter` places a field's character counter in the `label` row or the `message` row; `anatomy.switch_state_text` shows or `hidden` an on/off label beside the switch; `anatomy.progress_indeterminate` animates an indeterminate bar as a `sweep` (the bar travels the track) or `travel` (Material's indeterminate motion); `anatomy.tab_indicator` draws the active-tab indicator the `full` tab width or the `content` (label) width; `anatomy.dialog_close` shows or `hidden` a dialog's close button.
 
 Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.
 
 ## Role grid
 
-Contract version 5, amended inside its milestone, carries the role grid (`getContract().grid`, group -> cell names; each token marked `grid: true`). For each component family, one role per part the component draws, per state, per property:
+Contract version 6 carries the role grid (`getContract().grid`, group -> cell names; each token marked `grid: true`). For each component family, one role per part the component draws, per state, per property:
 
-- `field` (text input, select and later field-like components): container, outline, label, value, placeholder, helper, invalid message, indicator and invalid icon colors per rest, hover, focus, disabled and invalid state; outline, invalid ring and focus ring widths, focus offset, inline padding, icon inset and gap, message inset and gap; value, label and helper type sets. A member cell (`text_input_container_hover`, `select_outline_disabled`) exists only where a reference gives one member a different value than its family.
+- `field` (text input, select and later field-like components): container, outline, label, value, placeholder, helper, invalid message, indicator and invalid icon colors per rest, hover, focus, disabled and invalid state; outline, invalid ring and focus ring widths, focus offset, inline padding, icon inset and gap, message inset and gap; value, label and helper type sets. A member cell (`text_input_container_hover`, `select_outline_disabled`, `select_indicator_focus`) exists only where a reference gives one member a different value than its family.
 - `button`, per kind (`primary`, `secondary`, `tertiary`, `ghost`, `danger`, `danger_tertiary`, `danger_ghost`, `tonal`, `elevated`): container and label colors per rest, hover, active, focus, disabled and selected state, border colors per rest, hover, active and disabled, elevation (`shadow.button_<kind>[_state]`); the focus ring and its inner gap, ghost padding and minimum width.
 - `selection` (checkbox, later radio and switch): outline, container, mark, state layer, label and message colors per state; focus ring width, offset and corner; state layer size.
+
+Contract version 6 adds eight families for the next component batch:
+
+- `list`: the option list a Select, Dropdown, Menu or ComboBox opens — container, item label and container colors per rest, hover, active, selected, selected-hover and disabled state; item height, inline padding, divider width, block padding and corner radius; the item type set; the list's elevation. `menu_*` member cells carry the menu's own padding, item height, icon size and the danger item's label and hover fill.
+- `switch`: track, outline, handle, mark and state-layer colors per rest, hover, focus, active and disabled state in both unchecked and selected; track width and height, outline width, the three handle sizes, focus ring width and offset.
+- `tag`: container, label, outline and icon colors at rest and disabled; height, radius, inline and icon paddings, outline width, icon size, label type set. (The ten `color.tag_*_<hue>` semantic colors stay semantic; this family is the neutral tag chrome.)
+- `progress`: track, indicator and status indicator colors; track height and radius.
+- `tooltip`: container and label colors, label type set, both paddings, radius, caret size, anchor offset and max width; `tooltip_compact_*` member cells carry the compact variant.
+- `tab`: bar container and divider, tab track, indicator and label colors per state, state layers, focus ring; bar height, tab padding, divider and track widths, indicator width and radius, focus width and offset; `tab_contained_*` member cells carry the contained variant.
+- `dialog`: scrim, container, border, heading and body colors; border width, radius, min and max width clamps, paddings, header gap, body spacing, actions row geometry and the close icon size; heading and body type sets; the dialog's elevation.
+- `notification`: container, text, close icon, action and per-status marker colors; width, radius, marker width, icon size; title and body type sets; the notification's elevation.
+
+Member cells added in version 6: `text_area_container_hover`, `text_area_outline_disabled`, `type.text_area_value` (the multiline field), `radio_size`, `radio_border`, `radio_dot_size`, `radio_focus_offset` and the `radio_outline_selected_*` colors (the radio's own geometry and checked ring), `icon_button_size` and `icon_button_icon_size` plus the `icon_button_<kind>_icon_*` colors, and `dialog_close_icon_size`.
 
 A template answers every cell. A neutral or Carbon-shaped template points each cell at the semantic token the part draws in (`{color.field_01}`); a template generated from a design system's component tokens fills each cell from them. A color the design system states as a role at an opacity stays `rgba` (exact over any backdrop). `shadow.level_00` is no elevation. `feedback.focus_trigger` (`any` | `keyboard`) decides whether a focus ring shows on every focus or on keyboard focus only.
 

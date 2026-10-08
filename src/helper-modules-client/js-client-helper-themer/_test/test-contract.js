@@ -45,20 +45,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 763 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 763);
+  it('should expose exactly 961 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 961);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 763 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 763);
+  it('should expose exactly 961 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 961);
   });
 
-  it('should report contract version 5', () => {
-    assert.equal(contract.version, 5);
+  it('should report contract version 6', () => {
+    assert.equal(contract.version, 6);
   });
 
   it('should be a frozen object', () => {
@@ -82,25 +82,25 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 407,
+    color: 517,
     spacing: 17,
     size: 22,
-    type: 63,
+    type: 74,
     font: 12,
     motion: 29,
     shape: 9,
     border: 4,
     focus: 2,
     feedback: 3,
-    shadow: 42,
+    shadow: 45,
     breakpoint: 5,
     grid: 13,
     state: 6,
     tint: 5,
     stacking: 5,
-    anatomy: 6,
-    icon: 82,
-    control: 31
+    anatomy: 11,
+    icon: 84,
+    control: 98
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 763 tokens and theme has all 763', () => {
+  it('should return success true when required is all 961 tokens and theme has all 961', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1121,8 +1121,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 5', () => {
-    assert.equal(contract.version, 5);
+  it('should report contract version 6', () => {
+    assert.equal(contract.version, 6);
   });
 
 });
@@ -1251,7 +1251,7 @@ describe('contract v5 - control group and role tokens', () => {
 
 describe('contract v4 - anatomy group', () => {
 
-  it('should expose six enum structure tokens with their literal value lists', () => {
+  it('should expose eleven enum structure tokens with their literal value lists', () => {
     const anatomyTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'anatomy';
     });
@@ -1262,7 +1262,12 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.status_marker',
       'anatomy.dialog_actions',
       'anatomy.slider_handle',
-      'anatomy.button_label'
+      'anatomy.button_label',
+      'anatomy.field_counter',
+      'anatomy.switch_state_text',
+      'anatomy.progress_indeterminate',
+      'anatomy.tab_indicator',
+      'anatomy.dialog_close'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1272,10 +1277,15 @@ describe('contract v4 - anatomy group', () => {
     assert.equal(contract.tokens['anatomy.caret'], undefined);
     assert.deepEqual(contract.tokens['anatomy.slider_handle'].values, ['round', 'bar']);
     assert.deepEqual(contract.tokens['anatomy.button_label'].values, ['top', 'center']);
+    assert.deepEqual(contract.tokens['anatomy.field_counter'].values, ['label', 'message']);
+    assert.deepEqual(contract.tokens['anatomy.switch_state_text'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.progress_indeterminate'].values, ['sweep', 'travel']);
+    assert.deepEqual(contract.tokens['anatomy.tab_indicator'].values, ['full', 'content']);
+    assert.deepEqual(contract.tokens['anatomy.dialog_close'].values, ['shown', 'hidden']);
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }
@@ -1305,12 +1315,12 @@ describe('contract v4 - icon group', () => {
     return Themer.validateContract({ tokens: { 'icon.close': value } }, {});
   };
 
-  it('should expose 82 value-tier icon tokens in alphabetical order with raw emission', () => {
-    assert.equal(iconTokens.length, 82);
+  it('should expose 84 value-tier icon tokens in alphabetical order with raw emission', () => {
+    assert.equal(iconTokens.length, 84);
     assert.deepEqual(iconTokens, iconTokens.slice().sort());
     assert.deepEqual(contract.groups.icon, { tier: 'value', type: 'icon', emit: 'raw' });
     assert.equal(contract.meta['icon.close'].group, 'raw');
-    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add', 'icon.invalid', 'icon.dropdown_indicator', 'icon.checked_indicator', 'icon.mixed_indicator']) {
+    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add', 'icon.invalid', 'icon.dropdown_indicator', 'icon.checked_indicator', 'icon.mixed_indicator', 'icon.selected_indicator', 'icon.switch_checked_indicator']) {
       assert.ok(contract.tokens[name], 'missing ' + name);
     }
   });
@@ -1728,7 +1738,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow']);
-    assert.equal(gridNames.length, 269);
+    assert.equal(gridNames.length, 460);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1754,6 +1764,79 @@ describe('contract v5 amendment - the role grid', () => {
     assert.equal(Themer.validateContract({ tokens: { 'color.field_outline_disabled': 'rgba(29, 27, 32, 0.12)' } }, {}).success, true);
     assert.equal(Themer.validateContract({ tokens: { 'control.field_focus_offset': -2 } }, {}).success, true);
     assert.equal(Themer.validateContract({ tokens: { 'color.field_outline': 'outline' } }, {}).success, false);
+  });
+
+});
+
+
+describe('contract v6 - the anchor families\' cells', () => {
+
+  // Each family -> its cell names per group (the census's classified list)
+  const FAMILIES = {
+    color: {
+      list: ['container', 'item_label', 'item_label_hover', 'item_label_selected', 'item_label_disabled', 'item_container_hover', 'item_container_active', 'item_container_selected', 'item_container_selected_hover', 'item_divider'],
+      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover'],
+      text_area: ['container_hover', 'outline_disabled'],
+      radio: ['outline_selected', 'outline_selected_hover', 'outline_selected_active', 'outline_selected_focus'],
+      switch: ['outline', 'outline_hover', 'outline_focus', 'outline_active', 'outline_disabled', 'track', 'track_hover', 'track_focus', 'track_active', 'track_disabled', 'track_selected', 'track_selected_hover', 'track_selected_focus', 'track_selected_active', 'track_selected_disabled', 'handle', 'handle_hover', 'handle_focus', 'handle_active', 'handle_disabled', 'handle_selected', 'handle_selected_hover', 'handle_selected_focus', 'handle_selected_active', 'handle_selected_disabled', 'mark', 'mark_disabled', 'layer_hover', 'layer_active', 'layer_selected_hover', 'layer_selected_active', 'focus_ring'],
+      tag: ['container', 'container_disabled', 'label', 'label_disabled', 'outline', 'outline_disabled', 'icon', 'icon_disabled'],
+      progress: ['track', 'indicator', 'indicator_success', 'indicator_error'],
+      tooltip: ['container', 'label'],
+      tab: ['container', 'divider', 'track', 'track_hover', 'track_disabled', 'indicator', 'label', 'label_hover', 'label_selected', 'label_selected_hover', 'label_disabled', 'layer_hover', 'layer_active', 'layer_selected_hover', 'layer_selected_active', 'focus_ring', 'contained_container', 'contained_container_hover', 'contained_container_selected', 'contained_separator'],
+      dialog: ['scrim', 'container', 'border', 'heading', 'body'],
+      notification: ['container', 'text', 'close_icon', 'action', 'marker_error', 'marker_success', 'marker_info', 'marker_warning'],
+      icon_button: ['ghost_icon', 'ghost_icon_hover', 'ghost_icon_active', 'ghost_icon_focus', 'ghost_icon_disabled', 'ghost_icon_selected', 'tertiary_icon', 'tertiary_icon_hover', 'tertiary_icon_active', 'tertiary_icon_focus', 'tertiary_icon_disabled', 'tertiary_icon_selected']
+    },
+    control: {
+      list: ['item_height', 'item_padding_inline', 'item_divider_width', 'padding_block', 'radius'],
+      menu: ['padding_block', 'item_height', 'divider_width', 'icon_size'],
+      radio: ['size', 'border', 'dot_size', 'focus_offset'],
+      switch: ['track_width', 'track_height', 'outline_width', 'handle_size', 'handle_size_selected', 'handle_size_pressed', 'focus_width', 'focus_offset'],
+      tag: ['height', 'radius', 'padding_inline', 'padding_icon', 'outline_width', 'icon_size'],
+      progress: ['height', 'radius'],
+      tooltip: ['padding_block', 'padding_inline', 'radius', 'caret_width', 'caret_height', 'offset', 'max_width', 'compact_padding_block', 'compact_caret_width', 'compact_caret_height', 'compact_offset'],
+      tab: ['height', 'padding_inline', 'divider_width', 'track_width', 'indicator_width', 'indicator_radius', 'focus_width', 'focus_offset'],
+      dialog: ['border_width', 'radius', 'min_width', 'max_width', 'padding_inline', 'padding_top', 'header_gap', 'body_padding_top', 'body_padding_bottom', 'actions_height', 'actions_gap', 'actions_padding', 'close_icon_size'],
+      notification: ['width', 'radius', 'marker_width', 'icon_size'],
+      icon_button: ['size', 'icon_size']
+    },
+    type: {
+      list: ['item'],
+      text_area: ['value'],
+      tag: ['label'],
+      tooltip: ['label', 'compact_label'],
+      tab: ['label', 'label_selected'],
+      dialog: ['heading', 'body'],
+      notification: ['title', 'body']
+    },
+    shadow: {
+      list: [''],
+      dialog: [''],
+      notification: ['']
+    }
+  };
+
+  it('should expose every cell of the eight new families and the member cells', () => {
+    for (const group of Object.keys(FAMILIES)) {
+      for (const family of Object.keys(FAMILIES[group])) {
+        for (const leaf of FAMILIES[group][family]) {
+          const cell = leaf === '' ? family : family + '_' + leaf;
+          const name = group + '.' + cell;
+          assert.ok(contract.tokens[name], 'missing ' + name);
+          assert.equal(contract.tokens[name].grid, true, name + ' not a grid cell');
+        }
+      }
+    }
+  });
+
+  it('should keep the v5 families\' cells and add the v6 cells to the grid', () => {
+    for (const name of ['color.field_container', 'color.button_primary_label_hover', 'color.selection_container', 'control.field_outline_width', 'type.field_value', 'shadow.button_primary_hover']) {
+      assert.equal(contract.tokens[name].grid, true, name);
+    }
+    assert.equal(contract.grid.color.includes('list_item_container_selected'), true);
+    assert.equal(contract.grid.control.includes('dialog_close_icon_size'), true);
+    assert.equal(contract.grid.type.includes('notification_title'), true);
+    assert.equal(contract.grid.shadow.includes('dialog'), true);
   });
 
 });

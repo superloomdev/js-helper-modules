@@ -55,7 +55,13 @@ const ANATOMY = {
   'anatomy.dialog_actions': 'stretched',
   'anatomy.slider_handle': 'round',
   // A tall button keeps its label where the default height puts it
-  'anatomy.button_label': 'top'
+  'anatomy.button_label': 'top',
+  // v6: the primary reference's anatomy, as the default draws it
+  'anatomy.field_counter': 'label',
+  'anatomy.switch_state_text': 'shown',
+  'anatomy.progress_indeterminate': 'sweep',
+  'anatomy.tab_indicator': 'full',
+  'anatomy.dialog_close': 'shown'
 };
 
 // --- Neutral ramp ---------------------------------------------------------

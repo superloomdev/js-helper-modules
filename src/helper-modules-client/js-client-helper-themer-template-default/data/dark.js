@@ -1830,6 +1830,11 @@ export default Object.freeze({
     'anatomy.dialog_actions': 'stretched',
     'anatomy.slider_handle': 'round',
     'anatomy.button_label': 'top',
+    'anatomy.field_counter': 'label',
+    'anatomy.switch_state_text': 'shown',
+    'anatomy.progress_indeterminate': 'sweep',
+    'anatomy.tab_indicator': 'full',
+    'anatomy.dialog_close': 'shown',
     'shadow.level_01': {
       'shadow': true,
       'layers': [
@@ -4504,6 +4509,44 @@ export default Object.freeze({
         }
       }
     },
+    'icon.selected_indicator': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 20 20',
+          'paths': [
+            {
+              'd': 'M8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
+            },
+            {
+              'd': 'M15.6 5.6 8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 24 24',
+          'paths': [
+            {
+              'd': 'M10 15.9 4.7 10.6 3.6 11.6 8.9 16.9 10 18 20.6 7.4 19.5 6.3z'
+            }
+          ]
+        }
+      }
+    },
     'icon.settings': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -4651,6 +4694,44 @@ export default Object.freeze({
           'paths': [
             {
               'd': 'M12,1C6,1,1,6,1,12s5,11,11,11s11-4.9,11-11S18.1,1,12,1z M10.4,16.3l-3.9-3.9l1.3-1.2l2.7,2.7l5.8-5.8l1.3,1.3L10.4,16.3z'
+            }
+          ]
+        }
+      }
+    },
+    'icon.switch_checked_indicator': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 20 20',
+          'paths': [
+            {
+              'd': 'M8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
+            },
+            {
+              'd': 'M15.6 5.6 8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 24 24',
+          'paths': [
+            {
+              'd': 'M10 15.9 4.7 10.6 3.6 11.6 8.9 16.9 10 18 20.6 7.4 19.5 6.3z'
             }
           ]
         }
@@ -5546,6 +5627,116 @@ export default Object.freeze({
     'color.selection_message_invalid': '{color.text_error}',
     'color.selection_invalid_icon': '{color.support_error}',
     'color.selection_focus_ring': '{color.focus}',
+    'color.list_container': '{color.layer_01}',
+    'color.list_item_label': '{color.text_secondary}',
+    'color.list_item_label_hover': '{color.text_primary}',
+    'color.list_item_label_selected': '{color.text_primary}',
+    'color.list_item_label_disabled': '{color.text_disabled}',
+    'color.list_item_container_hover': '{color.layer_hover_01}',
+    'color.list_item_container_active': '{color.layer_selected_01}',
+    'color.list_item_container_selected': '{color.layer_selected_01}',
+    'color.list_item_container_selected_hover': '{color.layer_selected_hover_01}',
+    'color.list_item_divider': '{color.border_subtle_01}',
+    'color.menu_item_danger_container_hover': '{color.button_danger_primary}',
+    'color.menu_item_danger_label': '{color.text_secondary}',
+    'color.menu_item_danger_label_hover': '{color.text_on_color}',
+    'color.text_area_container_hover': '{color.field_container_hover}',
+    'color.text_area_outline_disabled': '{color.field_outline_disabled}',
+    'color.radio_outline_selected': '{color.selection_outline}',
+    'color.radio_outline_selected_hover': '{color.selection_outline_hover}',
+    'color.radio_outline_selected_active': '{color.selection_outline_active}',
+    'color.radio_outline_selected_focus': '{color.selection_outline_focus}',
+    'color.switch_outline': 'rgba(0, 0, 0, 0)',
+    'color.switch_outline_hover': 'rgba(0, 0, 0, 0)',
+    'color.switch_outline_focus': 'rgba(0, 0, 0, 0)',
+    'color.switch_outline_active': 'rgba(0, 0, 0, 0)',
+    'color.switch_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.switch_track': '{color.toggle_off}',
+    'color.switch_track_hover': '{color.toggle_off}',
+    'color.switch_track_focus': '{color.toggle_off}',
+    'color.switch_track_active': '{color.toggle_off}',
+    'color.switch_track_disabled': '{color.button_disabled}',
+    'color.switch_track_selected': '{color.support_success}',
+    'color.switch_track_selected_hover': '{color.support_success}',
+    'color.switch_track_selected_focus': '{color.support_success}',
+    'color.switch_track_selected_active': '{color.support_success}',
+    'color.switch_track_selected_disabled': '{color.button_disabled}',
+    'color.switch_handle': '{color.icon_on_color}',
+    'color.switch_handle_hover': '{color.icon_on_color}',
+    'color.switch_handle_focus': '{color.icon_on_color}',
+    'color.switch_handle_active': '{color.icon_on_color}',
+    'color.switch_handle_disabled': '{color.icon_on_color_disabled}',
+    'color.switch_handle_selected': '{color.icon_on_color}',
+    'color.switch_handle_selected_hover': '{color.icon_on_color}',
+    'color.switch_handle_selected_focus': '{color.icon_on_color}',
+    'color.switch_handle_selected_active': '{color.icon_on_color}',
+    'color.switch_handle_selected_disabled': '{color.icon_on_color_disabled}',
+    'color.switch_mark': '{color.support_success}',
+    'color.switch_mark_disabled': '{color.button_disabled}',
+    'color.switch_layer_hover': 'rgba(0, 0, 0, 0)',
+    'color.switch_layer_active': 'rgba(0, 0, 0, 0)',
+    'color.switch_layer_selected_hover': 'rgba(0, 0, 0, 0)',
+    'color.switch_layer_selected_active': 'rgba(0, 0, 0, 0)',
+    'color.switch_focus_ring': '{color.focus}',
+    'color.tag_container': '{color.tag_background_gray}',
+    'color.tag_container_disabled': '{color.layer_01}',
+    'color.tag_label': '{color.tag_color_gray}',
+    'color.tag_label_disabled': '{color.text_disabled}',
+    'color.tag_outline': 'rgba(0, 0, 0, 0)',
+    'color.tag_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.tag_icon': '{color.tag_color_gray}',
+    'color.tag_icon_disabled': '{color.text_disabled}',
+    'color.progress_track': '{color.border_subtle_01}',
+    'color.progress_indicator': '{color.interactive}',
+    'color.progress_indicator_success': '{color.support_success}',
+    'color.progress_indicator_error': '{color.support_error}',
+    'color.tooltip_container': '{color.background_inverse}',
+    'color.tooltip_label': '{color.text_inverse}',
+    'color.tab_container': 'rgba(0, 0, 0, 0)',
+    'color.tab_divider': 'rgba(0, 0, 0, 0)',
+    'color.tab_track': '{color.border_subtle_01}',
+    'color.tab_track_hover': '{color.border_strong_01}',
+    'color.tab_track_disabled': '{color.border_subtle_01}',
+    'color.tab_indicator': '{color.border_interactive}',
+    'color.tab_label': '{color.text_secondary}',
+    'color.tab_label_hover': '{color.text_primary}',
+    'color.tab_label_selected': '{color.text_primary}',
+    'color.tab_label_selected_hover': '{color.text_primary}',
+    'color.tab_label_disabled': '{color.text_disabled}',
+    'color.tab_layer_hover': 'rgba(0, 0, 0, 0)',
+    'color.tab_layer_active': 'rgba(0, 0, 0, 0)',
+    'color.tab_layer_selected_hover': 'rgba(0, 0, 0, 0)',
+    'color.tab_layer_selected_active': 'rgba(0, 0, 0, 0)',
+    'color.tab_focus_ring': '{color.focus}',
+    'color.tab_contained_container': '{color.layer_accent_01}',
+    'color.tab_contained_container_hover': '{color.layer_accent_hover_01}',
+    'color.tab_contained_container_selected': '{color.layer_01}',
+    'color.tab_contained_separator': '{color.border_strong_01}',
+    'color.dialog_scrim': '{color.overlay}',
+    'color.dialog_container': '{color.layer_01}',
+    'color.dialog_border': '{color.border_subtle_01}',
+    'color.dialog_heading': '{color.text_primary}',
+    'color.dialog_body': '{color.text_primary}',
+    'color.notification_container': '{color.background_inverse}',
+    'color.notification_text': '{color.text_inverse}',
+    'color.notification_close_icon': '{color.icon_inverse}',
+    'color.notification_action': '{color.link_inverse}',
+    'color.notification_marker_error': '{color.support_error_inverse}',
+    'color.notification_marker_success': '{color.support_success_inverse}',
+    'color.notification_marker_info': '{color.support_info_inverse}',
+    'color.notification_marker_warning': '{color.support_warning_inverse}',
+    'color.icon_button_ghost_icon': '{color.button_ghost_label}',
+    'color.icon_button_ghost_icon_hover': '{color.button_ghost_label_hover}',
+    'color.icon_button_ghost_icon_active': '{color.button_ghost_label_active}',
+    'color.icon_button_ghost_icon_focus': '{color.button_ghost_label_focus}',
+    'color.icon_button_ghost_icon_disabled': '{color.button_ghost_label_disabled}',
+    'color.icon_button_ghost_icon_selected': '{color.button_ghost_label_selected}',
+    'color.icon_button_tertiary_icon': '{color.button_tertiary_label}',
+    'color.icon_button_tertiary_icon_hover': '{color.button_tertiary_label_hover}',
+    'color.icon_button_tertiary_icon_active': '{color.button_tertiary_label_active}',
+    'color.icon_button_tertiary_icon_focus': '{color.button_tertiary_label_focus}',
+    'color.icon_button_tertiary_icon_disabled': '{color.button_tertiary_label_disabled}',
+    'color.icon_button_tertiary_icon_selected': '{color.button_tertiary_label_selected}',
     'control.field_outline_width': '{border.width_01}',
     'control.field_outline_width_focus': '{border.width_01}',
     'control.field_invalid_ring_width': '{border.width_02}',
@@ -5566,9 +5757,87 @@ export default Object.freeze({
     'control.selection_focus_offset': 1,
     'control.selection_focus_radius': '{shape.radius_02}',
     'control.selection_layer_size': '{size.size_medium}',
+    'control.list_item_height': '{control.option_height}',
+    'control.list_item_padding_inline': '{spacing.spacing_05}',
+    'control.list_item_divider_width': '{border.width_01}',
+    'control.list_padding_block': 0,
+    'control.list_radius': '{shape.radius_00}',
+    'control.menu_padding_block': '{control.list_padding_block}',
+    'control.menu_item_height': '{control.list_item_height}',
+    'control.menu_divider_width': '{control.list_item_divider_width}',
+    'control.menu_icon_size': '{size.icon_01}',
+    'control.radio_size': '{control.checkbox_size}',
+    'control.radio_border': '{border.width_01}',
+    'control.radio_dot_size': 8,
+    'control.radio_focus_offset': '{control.selection_focus_offset}',
+    'control.switch_track_width': 48,
+    'control.switch_track_height': 24,
+    'control.switch_outline_width': 0,
+    'control.switch_handle_size': 18,
+    'control.switch_handle_size_selected': 18,
+    'control.switch_handle_size_pressed': 18,
+    'control.switch_focus_width': '{focus.width}',
+    'control.switch_focus_offset': 1,
+    'control.tag_height': '{size.size_xsmall}',
+    'control.tag_radius': '{shape.radius_16}',
+    'control.tag_padding_inline': '{spacing.spacing_03}',
+    'control.tag_padding_icon': '{spacing.spacing_02}',
+    'control.tag_outline_width': 0,
+    'control.tag_icon_size': '{size.icon_01}',
+    'control.progress_height': '{spacing.spacing_03}',
+    'control.progress_radius': '{shape.radius_00}',
+    'control.tooltip_padding_block': '{spacing.spacing_05}',
+    'control.tooltip_padding_inline': '{spacing.spacing_05}',
+    'control.tooltip_radius': '{shape.radius_02}',
+    'control.tooltip_caret_width': 12,
+    'control.tooltip_caret_height': 6,
+    'control.tooltip_offset': '{spacing.spacing_04}',
+    'control.tooltip_max_width': 288,
+    'control.tooltip_compact_padding_block': '{control.tooltip_padding_block}',
+    'control.tooltip_compact_caret_width': '{control.tooltip_caret_width}',
+    'control.tooltip_compact_caret_height': '{control.tooltip_caret_height}',
+    'control.tooltip_compact_offset': '{control.tooltip_offset}',
+    'control.tab_height': '{size.size_medium}',
+    'control.tab_padding_inline': '{spacing.spacing_05}',
+    'control.tab_divider_width': 0,
+    'control.tab_track_width': '{border.width_02}',
+    'control.tab_indicator_width': '{border.width_02}',
+    'control.tab_indicator_radius': '{shape.radius_00}',
+    'control.tab_focus_width': '{focus.width}',
+    'control.tab_focus_offset': -2,
+    'control.dialog_border_width': '{border.width_01}',
+    'control.dialog_radius': '{shape.radius_00}',
+    'control.dialog_min_width': 0,
+    'control.dialog_max_width': 0,
+    'control.dialog_padding_inline': '{spacing.spacing_05}',
+    'control.dialog_padding_top': '{spacing.spacing_05}',
+    'control.dialog_header_gap': '{spacing.spacing_02}',
+    'control.dialog_body_padding_top': '{spacing.spacing_03}',
+    'control.dialog_body_padding_bottom': '{spacing.spacing_09}',
+    'control.dialog_actions_height': '{size.size_xlarge}',
+    'control.dialog_actions_gap': 0,
+    'control.dialog_actions_padding': 0,
+    'control.dialog_close_icon_size': '{size.icon_02}',
+    'control.notification_width': 288,
+    'control.notification_radius': '{shape.radius_00}',
+    'control.notification_marker_width': 3,
+    'control.notification_icon_size': '{size.icon_02}',
+    'control.icon_button_size': '{control.button_height}',
+    'control.icon_button_icon_size': '{size.icon_01}',
     'type.field_value': '{type.body_compact_01}',
     'type.field_label': '{type.label01}',
     'type.field_helper': '{type.helper_text_01}',
+    'type.list_item': '{type.body_compact_01}',
+    'type.text_area_value': '{type.field_value}',
+    'type.tag_label': '{type.label01}',
+    'type.tooltip_label': '{type.body01}',
+    'type.tooltip_compact_label': '{type.tooltip_label}',
+    'type.tab_label': '{type.body_compact_01}',
+    'type.tab_label_selected': '{type.heading_compact_01}',
+    'type.dialog_heading': '{type.heading03}',
+    'type.dialog_body': '{type.body01}',
+    'type.notification_title': '{type.heading_compact_01}',
+    'type.notification_body': '{type.body_compact_01}',
     'shadow.level_00': {
       'shadow': true,
       'layers': [
@@ -5616,7 +5885,21 @@ export default Object.freeze({
     'shadow.button_elevated': '{shadow.level_01}',
     'shadow.button_elevated_hover': '{shadow.level_01}',
     'shadow.button_elevated_active': '{shadow.level_01}',
-    'shadow.button_elevated_disabled': '{shadow.level_00}'
+    'shadow.button_elevated_disabled': '{shadow.level_00}',
+    'shadow.list': '{shadow.level_01}',
+    'shadow.dialog': '{shadow.level_00}',
+    'shadow.notification': {
+      'shadow': true,
+      'layers': [
+        {
+          'x': 0,
+          'y': 2,
+          'blur': 6,
+          'spread': 0,
+          'color': 'rgba(0, 0, 0, 0.2)'
+        }
+      ]
+    }
   },
   'meta': {
     'color.background': {
@@ -6705,6 +6988,21 @@ export default Object.freeze({
     'anatomy.button_label': {
       'group': 'raw'
     },
+    'anatomy.field_counter': {
+      'group': 'raw'
+    },
+    'anatomy.switch_state_text': {
+      'group': 'raw'
+    },
+    'anatomy.progress_indeterminate': {
+      'group': 'raw'
+    },
+    'anatomy.tab_indicator': {
+      'group': 'raw'
+    },
+    'anatomy.dialog_close': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -7044,6 +7342,9 @@ export default Object.freeze({
     'icon.search': {
       'group': 'raw'
     },
+    'icon.selected_indicator': {
+      'group': 'raw'
+    },
     'icon.settings': {
       'group': 'raw'
     },
@@ -7054,6 +7355,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'icon.success': {
+      'group': 'raw'
+    },
+    'icon.switch_checked_indicator': {
       'group': 'raw'
     },
     'icon.task_complete': {
@@ -7728,6 +8032,336 @@ export default Object.freeze({
     'color.selection_focus_ring': {
       'group': 'color'
     },
+    'color.list_container': {
+      'group': 'color'
+    },
+    'color.list_item_label': {
+      'group': 'color'
+    },
+    'color.list_item_label_hover': {
+      'group': 'color'
+    },
+    'color.list_item_label_selected': {
+      'group': 'color'
+    },
+    'color.list_item_label_disabled': {
+      'group': 'color'
+    },
+    'color.list_item_container_hover': {
+      'group': 'color'
+    },
+    'color.list_item_container_active': {
+      'group': 'color'
+    },
+    'color.list_item_container_selected': {
+      'group': 'color'
+    },
+    'color.list_item_container_selected_hover': {
+      'group': 'color'
+    },
+    'color.list_item_divider': {
+      'group': 'color'
+    },
+    'color.menu_item_danger_container_hover': {
+      'group': 'color'
+    },
+    'color.menu_item_danger_label': {
+      'group': 'color'
+    },
+    'color.menu_item_danger_label_hover': {
+      'group': 'color'
+    },
+    'color.text_area_container_hover': {
+      'group': 'color'
+    },
+    'color.text_area_outline_disabled': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected_hover': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected_active': {
+      'group': 'color'
+    },
+    'color.radio_outline_selected_focus': {
+      'group': 'color'
+    },
+    'color.switch_outline': {
+      'group': 'color'
+    },
+    'color.switch_outline_hover': {
+      'group': 'color'
+    },
+    'color.switch_outline_focus': {
+      'group': 'color'
+    },
+    'color.switch_outline_active': {
+      'group': 'color'
+    },
+    'color.switch_outline_disabled': {
+      'group': 'color'
+    },
+    'color.switch_track': {
+      'group': 'color'
+    },
+    'color.switch_track_hover': {
+      'group': 'color'
+    },
+    'color.switch_track_focus': {
+      'group': 'color'
+    },
+    'color.switch_track_active': {
+      'group': 'color'
+    },
+    'color.switch_track_disabled': {
+      'group': 'color'
+    },
+    'color.switch_track_selected': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_hover': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_focus': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_active': {
+      'group': 'color'
+    },
+    'color.switch_track_selected_disabled': {
+      'group': 'color'
+    },
+    'color.switch_handle': {
+      'group': 'color'
+    },
+    'color.switch_handle_hover': {
+      'group': 'color'
+    },
+    'color.switch_handle_focus': {
+      'group': 'color'
+    },
+    'color.switch_handle_active': {
+      'group': 'color'
+    },
+    'color.switch_handle_disabled': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_hover': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_focus': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_active': {
+      'group': 'color'
+    },
+    'color.switch_handle_selected_disabled': {
+      'group': 'color'
+    },
+    'color.switch_mark': {
+      'group': 'color'
+    },
+    'color.switch_mark_disabled': {
+      'group': 'color'
+    },
+    'color.switch_layer_hover': {
+      'group': 'color'
+    },
+    'color.switch_layer_active': {
+      'group': 'color'
+    },
+    'color.switch_layer_selected_hover': {
+      'group': 'color'
+    },
+    'color.switch_layer_selected_active': {
+      'group': 'color'
+    },
+    'color.switch_focus_ring': {
+      'group': 'color'
+    },
+    'color.tag_container': {
+      'group': 'color'
+    },
+    'color.tag_container_disabled': {
+      'group': 'color'
+    },
+    'color.tag_label': {
+      'group': 'color'
+    },
+    'color.tag_label_disabled': {
+      'group': 'color'
+    },
+    'color.tag_outline': {
+      'group': 'color'
+    },
+    'color.tag_outline_disabled': {
+      'group': 'color'
+    },
+    'color.tag_icon': {
+      'group': 'color'
+    },
+    'color.tag_icon_disabled': {
+      'group': 'color'
+    },
+    'color.progress_track': {
+      'group': 'color'
+    },
+    'color.progress_indicator': {
+      'group': 'color'
+    },
+    'color.progress_indicator_success': {
+      'group': 'color'
+    },
+    'color.progress_indicator_error': {
+      'group': 'color'
+    },
+    'color.tooltip_container': {
+      'group': 'color'
+    },
+    'color.tooltip_label': {
+      'group': 'color'
+    },
+    'color.tab_container': {
+      'group': 'color'
+    },
+    'color.tab_divider': {
+      'group': 'color'
+    },
+    'color.tab_track': {
+      'group': 'color'
+    },
+    'color.tab_track_hover': {
+      'group': 'color'
+    },
+    'color.tab_track_disabled': {
+      'group': 'color'
+    },
+    'color.tab_indicator': {
+      'group': 'color'
+    },
+    'color.tab_label': {
+      'group': 'color'
+    },
+    'color.tab_label_hover': {
+      'group': 'color'
+    },
+    'color.tab_label_selected': {
+      'group': 'color'
+    },
+    'color.tab_label_selected_hover': {
+      'group': 'color'
+    },
+    'color.tab_label_disabled': {
+      'group': 'color'
+    },
+    'color.tab_layer_hover': {
+      'group': 'color'
+    },
+    'color.tab_layer_active': {
+      'group': 'color'
+    },
+    'color.tab_layer_selected_hover': {
+      'group': 'color'
+    },
+    'color.tab_layer_selected_active': {
+      'group': 'color'
+    },
+    'color.tab_focus_ring': {
+      'group': 'color'
+    },
+    'color.tab_contained_container': {
+      'group': 'color'
+    },
+    'color.tab_contained_container_hover': {
+      'group': 'color'
+    },
+    'color.tab_contained_container_selected': {
+      'group': 'color'
+    },
+    'color.tab_contained_separator': {
+      'group': 'color'
+    },
+    'color.dialog_scrim': {
+      'group': 'color'
+    },
+    'color.dialog_container': {
+      'group': 'color'
+    },
+    'color.dialog_border': {
+      'group': 'color'
+    },
+    'color.dialog_heading': {
+      'group': 'color'
+    },
+    'color.dialog_body': {
+      'group': 'color'
+    },
+    'color.notification_container': {
+      'group': 'color'
+    },
+    'color.notification_text': {
+      'group': 'color'
+    },
+    'color.notification_close_icon': {
+      'group': 'color'
+    },
+    'color.notification_action': {
+      'group': 'color'
+    },
+    'color.notification_marker_error': {
+      'group': 'color'
+    },
+    'color.notification_marker_success': {
+      'group': 'color'
+    },
+    'color.notification_marker_info': {
+      'group': 'color'
+    },
+    'color.notification_marker_warning': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_hover': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_active': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_focus': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_disabled': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_hover': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_active': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_focus': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_disabled': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_selected': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -7788,6 +8422,207 @@ export default Object.freeze({
     'control.selection_layer_size': {
       'group': 'dimension'
     },
+    'control.list_item_height': {
+      'group': 'dimension'
+    },
+    'control.list_item_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.list_item_divider_width': {
+      'group': 'dimension'
+    },
+    'control.list_padding_block': {
+      'group': 'dimension'
+    },
+    'control.list_radius': {
+      'group': 'dimension'
+    },
+    'control.menu_padding_block': {
+      'group': 'dimension'
+    },
+    'control.menu_item_height': {
+      'group': 'dimension'
+    },
+    'control.menu_divider_width': {
+      'group': 'dimension'
+    },
+    'control.menu_icon_size': {
+      'group': 'dimension'
+    },
+    'control.radio_size': {
+      'group': 'dimension'
+    },
+    'control.radio_border': {
+      'group': 'dimension'
+    },
+    'control.radio_dot_size': {
+      'group': 'dimension'
+    },
+    'control.radio_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.switch_track_width': {
+      'group': 'dimension'
+    },
+    'control.switch_track_height': {
+      'group': 'dimension'
+    },
+    'control.switch_outline_width': {
+      'group': 'dimension'
+    },
+    'control.switch_handle_size': {
+      'group': 'dimension'
+    },
+    'control.switch_handle_size_selected': {
+      'group': 'dimension'
+    },
+    'control.switch_handle_size_pressed': {
+      'group': 'dimension'
+    },
+    'control.switch_focus_width': {
+      'group': 'dimension'
+    },
+    'control.switch_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.tag_height': {
+      'group': 'dimension'
+    },
+    'control.tag_radius': {
+      'group': 'dimension'
+    },
+    'control.tag_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.tag_padding_icon': {
+      'group': 'dimension'
+    },
+    'control.tag_outline_width': {
+      'group': 'dimension'
+    },
+    'control.tag_icon_size': {
+      'group': 'dimension'
+    },
+    'control.progress_height': {
+      'group': 'dimension'
+    },
+    'control.progress_radius': {
+      'group': 'dimension'
+    },
+    'control.tooltip_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tooltip_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.tooltip_radius': {
+      'group': 'dimension'
+    },
+    'control.tooltip_caret_width': {
+      'group': 'dimension'
+    },
+    'control.tooltip_caret_height': {
+      'group': 'dimension'
+    },
+    'control.tooltip_offset': {
+      'group': 'dimension'
+    },
+    'control.tooltip_max_width': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_caret_width': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_caret_height': {
+      'group': 'dimension'
+    },
+    'control.tooltip_compact_offset': {
+      'group': 'dimension'
+    },
+    'control.tab_height': {
+      'group': 'dimension'
+    },
+    'control.tab_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.tab_divider_width': {
+      'group': 'dimension'
+    },
+    'control.tab_track_width': {
+      'group': 'dimension'
+    },
+    'control.tab_indicator_width': {
+      'group': 'dimension'
+    },
+    'control.tab_indicator_radius': {
+      'group': 'dimension'
+    },
+    'control.tab_focus_width': {
+      'group': 'dimension'
+    },
+    'control.tab_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.dialog_border_width': {
+      'group': 'dimension'
+    },
+    'control.dialog_radius': {
+      'group': 'dimension'
+    },
+    'control.dialog_min_width': {
+      'group': 'dimension'
+    },
+    'control.dialog_max_width': {
+      'group': 'dimension'
+    },
+    'control.dialog_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.dialog_padding_top': {
+      'group': 'dimension'
+    },
+    'control.dialog_header_gap': {
+      'group': 'dimension'
+    },
+    'control.dialog_body_padding_top': {
+      'group': 'dimension'
+    },
+    'control.dialog_body_padding_bottom': {
+      'group': 'dimension'
+    },
+    'control.dialog_actions_height': {
+      'group': 'dimension'
+    },
+    'control.dialog_actions_gap': {
+      'group': 'dimension'
+    },
+    'control.dialog_actions_padding': {
+      'group': 'dimension'
+    },
+    'control.dialog_close_icon_size': {
+      'group': 'dimension'
+    },
+    'control.notification_width': {
+      'group': 'dimension'
+    },
+    'control.notification_radius': {
+      'group': 'dimension'
+    },
+    'control.notification_marker_width': {
+      'group': 'dimension'
+    },
+    'control.notification_icon_size': {
+      'group': 'dimension'
+    },
+    'control.icon_button_size': {
+      'group': 'dimension'
+    },
+    'control.icon_button_icon_size': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -7795,6 +8630,39 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.field_helper': {
+      'group': 'typeSet'
+    },
+    'type.list_item': {
+      'group': 'typeSet'
+    },
+    'type.text_area_value': {
+      'group': 'typeSet'
+    },
+    'type.tag_label': {
+      'group': 'typeSet'
+    },
+    'type.tooltip_label': {
+      'group': 'typeSet'
+    },
+    'type.tooltip_compact_label': {
+      'group': 'typeSet'
+    },
+    'type.tab_label': {
+      'group': 'typeSet'
+    },
+    'type.tab_label_selected': {
+      'group': 'typeSet'
+    },
+    'type.dialog_heading': {
+      'group': 'typeSet'
+    },
+    'type.dialog_body': {
+      'group': 'typeSet'
+    },
+    'type.notification_title': {
+      'group': 'typeSet'
+    },
+    'type.notification_body': {
       'group': 'typeSet'
     },
     'shadow.level_00': {
@@ -7907,6 +8775,15 @@ export default Object.freeze({
     },
     'shadow.button_elevated_disabled': {
       'group': 'shadow'
+    },
+    'shadow.list': {
+      'group': 'shadow'
+    },
+    'shadow.dialog': {
+      'group': 'shadow'
+    },
+    'shadow.notification': {
+      'group': 'shadow'
     }
   },
   'provenance': {
@@ -7914,7 +8791,7 @@ export default Object.freeze({
       'package': '@carbon/icons',
       'version': '11.89.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '585c7897b573e01b56b3f7a9b5d2484fd380f99ebf9815972eb9c1ede8b53540'
+      'map_sha256': '3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274'
     }
   }
 });

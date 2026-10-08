@@ -61,7 +61,17 @@ const ANATOMY = {
   'anatomy.slider_handle': 'round',
   // @carbon/styles 1.115.0 button/_mixins.scss caps padding-block at the lg
   // height's (--temp-padding-block-max), so xl and 2xl keep the label at the top
-  'anatomy.button_label': 'top'
+  'anatomy.button_label': 'top',
+  // v6: Carbon's shape choices. A text area's counter sits in the label row
+  // (@carbon/react TextArea), the toggle shows its On/Off text, an
+  // indeterminate progress is a gradient sweep (`progress-bar/_progress-bar.scss`),
+  // the tab indicator spans the full tab (`tabs/_tabs.scss`), and a modal shows
+  // its close button
+  'anatomy.field_counter': 'label',
+  'anatomy.switch_state_text': 'shown',
+  'anatomy.progress_indeterminate': 'sweep',
+  'anatomy.tab_indicator': 'full',
+  'anatomy.dialog_close': 'shown'
 };
 
 // --- Role grid (v5 amendment) -------------------------------------------
@@ -552,7 +562,7 @@ for (const schemeName of SCHEME_NAMES) {
 
   // Verify tag count
   const tagKeys = Object.keys(scheme.tokens).filter(function (k) {
-    return k.startsWith('color.tag_');
+    return /^color\.tag_(background|color|border|hover)_/.test(k);
   });
   if (tagKeys.length !== 40) {
     throw new Error(schemeName + ' has ' + tagKeys.length + ' tag tokens, expected 40');

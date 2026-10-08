@@ -48,6 +48,15 @@
 // than the default height draws its label (`top`, where the default
 // height puts it, or `center`), a choice one reference makes for its
 // tall sizes that a component must not make in code.
+//
+// Version 6 extends the role grid with the families the remaining anchor
+// components draw (`list`, `switch`, `tag`, `progress`, `tooltip`, `tab`,
+// `dialog`, `notification`) and member cells where one member of an
+// existing family draws differently (`text_area`, `radio`, `icon_button`,
+// `menu`, `tooltip_compact`, `dialog_close`). It adds five anatomy enums
+// (`field_counter`, `switch_state_text`, `progress_indeterminate`,
+// `tab_indicator`, `dialog_close`) and two icon roles
+// (`selected_indicator`, `switch_checked_indicator`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -92,20 +101,98 @@ const GRID = Object.freeze({
       'selection_mark', 'selection_mark_disabled',
       'selection_layer_hover', 'selection_layer_active', 'selection_layer_selected_hover', 'selection_layer_selected_active',
       'selection_label', 'selection_label_disabled', 'selection_helper', 'selection_message_invalid', 'selection_invalid_icon', 'selection_focus_ring'
+    ],
+    [
+      // v6: the option list a select, dropdown or menu draws
+      'list_container',
+      'list_item_label', 'list_item_label_hover', 'list_item_label_selected', 'list_item_label_disabled',
+      'list_item_container_hover', 'list_item_container_active', 'list_item_container_selected', 'list_item_container_selected_hover',
+      'list_item_divider',
+      // v6: a menu's danger item
+      'menu_item_danger_container_hover', 'menu_item_danger_label', 'menu_item_danger_label_hover',
+      // v6: field members that differ from their family
+      'text_area_container_hover', 'text_area_outline_disabled',
+      // v6: selection members that differ from their family
+      'radio_outline_selected', 'radio_outline_selected_hover', 'radio_outline_selected_active', 'radio_outline_selected_focus',
+      // v6: the switch family
+      'switch_outline', 'switch_outline_hover', 'switch_outline_focus', 'switch_outline_active', 'switch_outline_disabled',
+      'switch_track', 'switch_track_hover', 'switch_track_focus', 'switch_track_active', 'switch_track_disabled',
+      'switch_track_selected', 'switch_track_selected_hover', 'switch_track_selected_focus', 'switch_track_selected_active', 'switch_track_selected_disabled',
+      'switch_handle', 'switch_handle_hover', 'switch_handle_focus', 'switch_handle_active', 'switch_handle_disabled',
+      'switch_handle_selected', 'switch_handle_selected_hover', 'switch_handle_selected_focus', 'switch_handle_selected_active', 'switch_handle_selected_disabled',
+      'switch_mark', 'switch_mark_disabled',
+      'switch_layer_hover', 'switch_layer_active', 'switch_layer_selected_hover', 'switch_layer_selected_active',
+      'switch_focus_ring',
+      // v6: the tag family (the hues stay semantic tag_* tokens)
+      'tag_container', 'tag_container_disabled', 'tag_label', 'tag_label_disabled', 'tag_outline', 'tag_outline_disabled', 'tag_icon', 'tag_icon_disabled',
+      // v6: the progress family
+      'progress_track', 'progress_indicator', 'progress_indicator_success', 'progress_indicator_error',
+      // v6: the tooltip family
+      'tooltip_container', 'tooltip_label',
+      // v6: the tab family
+      'tab_container', 'tab_divider',
+      'tab_track', 'tab_track_hover', 'tab_track_disabled',
+      'tab_indicator',
+      'tab_label', 'tab_label_hover', 'tab_label_selected', 'tab_label_selected_hover', 'tab_label_disabled',
+      'tab_layer_hover', 'tab_layer_active', 'tab_layer_selected_hover', 'tab_layer_selected_active',
+      'tab_focus_ring',
+      'tab_contained_container', 'tab_contained_container_hover', 'tab_contained_container_selected', 'tab_contained_separator',
+      // v6: the dialog family
+      'dialog_scrim', 'dialog_container', 'dialog_border', 'dialog_heading', 'dialog_body',
+      // v6: the notification family
+      'notification_container', 'notification_text', 'notification_close_icon', 'notification_action',
+      'notification_marker_error', 'notification_marker_success', 'notification_marker_info', 'notification_marker_warning',
+      // v6: button members that differ from their family
+      'icon_button_ghost_icon', 'icon_button_ghost_icon_hover', 'icon_button_ghost_icon_active', 'icon_button_ghost_icon_focus', 'icon_button_ghost_icon_disabled', 'icon_button_ghost_icon_selected',
+      'icon_button_tertiary_icon', 'icon_button_tertiary_icon_hover', 'icon_button_tertiary_icon_active', 'icon_button_tertiary_icon_focus', 'icon_button_tertiary_icon_disabled', 'icon_button_tertiary_icon_selected'
     ]
   )),
   control: Object.freeze([
     'field_outline_width', 'field_outline_width_focus', 'field_invalid_ring_width', 'field_focus_width', 'field_focus_offset',
     'field_padding_inline', 'field_icon_inset', 'field_icon_gap', 'field_message_inset', 'field_message_gap',
     'button_focus_width', 'button_focus_offset', 'button_focus_gap_width', 'button_ghost_padding_start', 'button_ghost_padding_end', 'button_min_width',
-    'selection_focus_width', 'selection_focus_offset', 'selection_focus_radius', 'selection_layer_size'
+    'selection_focus_width', 'selection_focus_offset', 'selection_focus_radius', 'selection_layer_size',
+    // v6: the option list
+    'list_item_height', 'list_item_padding_inline', 'list_item_divider_width', 'list_padding_block', 'list_radius',
+    // v6: a menu's own geometry where it differs from the list it shares
+    'menu_padding_block', 'menu_item_height', 'menu_divider_width', 'menu_icon_size',
+    // v6: field and selection members that differ from their family
+    'radio_size', 'radio_border', 'radio_dot_size', 'radio_focus_offset',
+    // v6: the switch family
+    'switch_track_width', 'switch_track_height', 'switch_outline_width',
+    'switch_handle_size', 'switch_handle_size_selected', 'switch_handle_size_pressed',
+    'switch_focus_width', 'switch_focus_offset',
+    // v6: the tag family
+    'tag_height', 'tag_radius', 'tag_padding_inline', 'tag_padding_icon', 'tag_outline_width', 'tag_icon_size',
+    // v6: the progress family
+    'progress_height', 'progress_radius',
+    // v6: the tooltip family and its compact member
+    'tooltip_padding_block', 'tooltip_padding_inline', 'tooltip_radius', 'tooltip_caret_width', 'tooltip_caret_height', 'tooltip_offset', 'tooltip_max_width',
+    'tooltip_compact_padding_block', 'tooltip_compact_caret_width', 'tooltip_compact_caret_height', 'tooltip_compact_offset',
+    // v6: the tab family
+    'tab_height', 'tab_padding_inline', 'tab_divider_width', 'tab_track_width', 'tab_indicator_width', 'tab_indicator_radius', 'tab_focus_width', 'tab_focus_offset',
+    // v6: the dialog family
+    'dialog_border_width', 'dialog_radius', 'dialog_min_width', 'dialog_max_width', 'dialog_padding_inline', 'dialog_padding_top', 'dialog_header_gap',
+    'dialog_body_padding_top', 'dialog_body_padding_bottom', 'dialog_actions_height', 'dialog_actions_gap', 'dialog_actions_padding', 'dialog_close_icon_size',
+    // v6: the notification family
+    'notification_width', 'notification_radius', 'notification_marker_width', 'notification_icon_size',
+    // v6: the icon button member
+    'icon_button_size', 'icon_button_icon_size'
   ]),
-  type: Object.freeze(['field_value', 'field_label', 'field_helper']),
+  type: Object.freeze([
+    'field_value', 'field_label', 'field_helper',
+    // v6
+    'list_item', 'text_area_value', 'tag_label', 'tooltip_label', 'tooltip_compact_label', 'tab_label', 'tab_label_selected',
+    'dialog_heading', 'dialog_body', 'notification_title', 'notification_body'
+  ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
       return 'button_' + kind + state;
     });
-  })))
+  }), [
+    // v6
+    'list', 'dialog', 'notification'
+  ]))
 });
 
 
@@ -592,7 +679,7 @@ function buildContract () {
     'feedback.focus_trigger': Object.freeze({ group: 'feedback', values: ['any', 'keyboard'] }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (6 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (11 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'anatomy.label': Object.freeze({ group: 'anatomy', values: ['above', 'floating'] }),
     'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
@@ -600,6 +687,12 @@ function buildContract () {
     'anatomy.dialog_actions': Object.freeze({ group: 'anatomy', values: ['stretched', 'trailing'] }),
     'anatomy.slider_handle': Object.freeze({ group: 'anatomy', values: ['round', 'bar'] }),
     'anatomy.button_label': Object.freeze({ group: 'anatomy', values: ['top', 'center'] }),
+    // v6
+    'anatomy.field_counter': Object.freeze({ group: 'anatomy', values: ['label', 'message'] }),
+    'anatomy.switch_state_text': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.progress_indeterminate': Object.freeze({ group: 'anatomy', values: ['sweep', 'travel'] }),
+    'anatomy.tab_indicator': Object.freeze({ group: 'anatomy', values: ['full', 'content'] }),
+    'anatomy.dialog_close': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -681,7 +774,7 @@ function buildContract () {
     'control.option_height': Object.freeze({ group: 'control' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ icon.* (78 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ icon.* (84 tokens) ~~~~~~~~~~~~~~~~~~~
     // One token per semantic glyph name, alphabetical. Values are icon
     // literals: { icon: true, viewBox, paths, sizes? }.
 
@@ -748,10 +841,12 @@ function buildContract () {
     'icon.radio_button': Object.freeze({ group: 'icon' }),
     'icon.radio_button_checked': Object.freeze({ group: 'icon' }),
     'icon.search': Object.freeze({ group: 'icon' }),
+    'icon.selected_indicator': Object.freeze({ group: 'icon' }),
     'icon.settings': Object.freeze({ group: 'icon' }),
     'icon.share': Object.freeze({ group: 'icon' }),
     'icon.subtract': Object.freeze({ group: 'icon' }),
     'icon.success': Object.freeze({ group: 'icon' }),
+    'icon.switch_checked_indicator': Object.freeze({ group: 'icon' }),
     'icon.task_complete': Object.freeze({ group: 'icon' }),
     'icon.time': Object.freeze({ group: 'icon' }),
     'icon.tools': Object.freeze({ group: 'icon' }),
@@ -788,7 +883,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 5,
+    version: 6,
     grid: GRID,
     groups: groups,
     tokens: tokens,

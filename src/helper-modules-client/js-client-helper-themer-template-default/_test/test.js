@@ -65,8 +65,8 @@ describe('default template - profile identity', () => {
     assert.equal(profile.id, 'superloom-default');
   });
 
-  it('should export contract_version 5', () => {
-    assert.equal(profile.contract_version, 5);
+  it('should export contract_version 6', () => {
+    assert.equal(profile.contract_version, 6);
   });
 
   it('should have light and dark schemes', () => {
@@ -305,8 +305,8 @@ describe('default template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 82 icon tokens, every one a valid icon literal, in both schemes', () => {
-    assert.equal(iconKeys.length, 82);
+  it('should carry 84 icon tokens, every one a valid icon literal, in both schemes', () => {
+    assert.equal(iconKeys.length, 84);
     for (const schemeName of ['light', 'dark']) {
       const tokens = profile.schemes[schemeName].tokens;
       const subset = {};
@@ -436,10 +436,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 763 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 961 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 763);
+        assert.equal(names.length, 961);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
