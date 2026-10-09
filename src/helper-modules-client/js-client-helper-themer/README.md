@@ -126,10 +126,10 @@ Version 6 extends the role grid to the next component batch, so the same familie
 
 - **New grid families** (`color`, `control`, `type`, `shadow` cells, 191 cells added for 460 total): `list` (the option list, shared by Select, Dropdown, Menu and ComboBox, with `menu_*` member cells), `switch`, `tag` (the neutral chrome; the ten `color.tag_*_<hue>` semantic colors stay), `progress`, `tooltip` (with `tooltip_compact_*` members), `tab` (with `tab_contained_*` members), `dialog`, `notification`.
 - **New member cells:** `text_area_container_hover`, `text_area_outline_disabled`, `type.text_area_value`; `radio_size`, `radio_border`, `radio_dot_size`, `radio_focus_offset`, `radio_outline_selected[_hover|_active|_focus]`; `icon_button_size`, `icon_button_icon_size`, `icon_button_<kind>_icon[_state]`; `dialog_close_icon_size`.
-- **New anatomy values** (5): `anatomy.field_counter` (`label` | `message`), `anatomy.switch_state_text` (`shown` | `hidden`), `anatomy.progress_indeterminate` (`sweep` | `travel`), `anatomy.tab_indicator` (`full` | `content`), `anatomy.dialog_close` (`shown` | `hidden`).
+- **New anatomy values** (6): `anatomy.field_counter` (`label` | `message`), `anatomy.switch_state_text` (`shown` | `hidden`), `anatomy.progress_indeterminate` (`sweep` | `travel`), `anatomy.tab_indicator` (`full` | `content`), `anatomy.dialog_close` (`shown` | `hidden`), and, amended inside the version, `anatomy.list_selected_mark` (`shown` | `hidden`): whether a selected list item draws its mark at all.
 - **New icon roles** (2): `icon.selected_indicator` (the mark on a selected list item), `icon.switch_checked_indicator` (the mark on a checked switch handle).
 
-The contract registry now carries 961 tokens in 19 groups.
+The contract registry now carries 962 tokens in 19 groups.
 
 ### Contract version 5
 

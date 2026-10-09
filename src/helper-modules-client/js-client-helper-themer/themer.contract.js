@@ -56,7 +56,9 @@
 // `menu`, `tooltip_compact`, `dialog_close`). It adds five anatomy enums
 // (`field_counter`, `switch_state_text`, `progress_indeterminate`,
 // `tab_indicator`, `dialog_close`) and two icon roles
-// (`selected_indicator`, `switch_checked_indicator`).
+// (`selected_indicator`, `switch_checked_indicator`). An amendment inside its
+// milestone adds `anatomy.list_selected_mark`: whether a selected list item
+// draws its mark at all (the glyph it draws stays the icon role).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -693,6 +695,7 @@ function buildContract () {
     'anatomy.progress_indeterminate': Object.freeze({ group: 'anatomy', values: ['sweep', 'travel'] }),
     'anatomy.tab_indicator': Object.freeze({ group: 'anatomy', values: ['full', 'content'] }),
     'anatomy.dialog_close': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.list_selected_mark': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~

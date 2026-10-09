@@ -278,7 +278,13 @@ describe('default template - anatomy enums (v4)', () => {
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
     'anatomy.slider_handle': 'round',
-    'anatomy.button_label': 'top'
+    'anatomy.button_label': 'top',
+    'anatomy.field_counter': 'label',
+    'anatomy.switch_state_text': 'shown',
+    'anatomy.progress_indeterminate': 'sweep',
+    'anatomy.tab_indicator': 'full',
+    'anatomy.dialog_close': 'shown',
+    'anatomy.list_selected_mark': 'shown'
   };
 
   for (const schemeName of ['light', 'dark']) {
@@ -316,6 +322,12 @@ describe('default template - icon literals (v4)', () => {
       }
       const result = Themer.validateContract({ tokens: subset }, { required: iconKeys });
       assert.deepEqual(result.errors, []);
+    }
+  });
+
+  it('should draw the primary reference\'s own switch check, not an icon-set glyph', () => {
+    for (const schemeName of ['light', 'dark']) {
+      assert.deepEqual(profile.schemes[schemeName].tokens['icon.switch_checked_indicator'], { icon: true, viewBox: '0 0 6 5', paths: [{ d: 'M2.2 2.7L5 0 6 1 2.2 5 0 2.7 1 1.5z' }] });
     }
   });
 
@@ -360,7 +372,10 @@ describe('default template - icon literals (v4)', () => {
           package: '@carbon/icons',
           version: iconPkg.version,
           map_source: iconMap.source,
-          map_sha256: iconMap.source_sha256
+          map_sha256: iconMap.source_sha256,
+          drawings: {
+            switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
+          }
         }
       });
     }
@@ -436,10 +451,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 961 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 962 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 961);
+        assert.equal(names.length, 962);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

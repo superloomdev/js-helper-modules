@@ -305,10 +305,11 @@ Where two design systems draw the same component with a different shape, the cho
 | `anatomy.progress_indeterminate` | `sweep`, `travel` |
 | `anatomy.tab_indicator` | `full`, `content` |
 | `anatomy.dialog_close` | `shown`, `hidden` |
+| `anatomy.list_selected_mark` | `shown`, `hidden` |
 
 `anatomy.button_label` (the second version 5 amendment) says where a button taller than the default height draws its label: `top` keeps it where the default height puts it, `center` centers it in the taller button.
 
-The version 6 anatomy values: `anatomy.field_counter` places a field's character counter in the `label` row or the `message` row; `anatomy.switch_state_text` shows or `hidden` an on/off label beside the switch; `anatomy.progress_indeterminate` animates an indeterminate bar as a `sweep` (the bar travels the track) or `travel` (Material's indeterminate motion); `anatomy.tab_indicator` draws the active-tab indicator the `full` tab width or the `content` (label) width; `anatomy.dialog_close` shows or `hidden` a dialog's close button.
+The version 6 anatomy values: `anatomy.field_counter` places a field's character counter in the `label` row or the `message` row; `anatomy.switch_state_text` shows or `hidden` an on/off label beside the switch; `anatomy.progress_indeterminate` animates an indeterminate bar as a `sweep` (the bar travels the track) or `travel` (Material's indeterminate motion); `anatomy.tab_indicator` draws the active-tab indicator the `full` tab width or the `content` (label) width; `anatomy.dialog_close` shows or `hidden` a dialog's close button; `anatomy.list_selected_mark` (an amendment inside version 6) shows or `hidden` the mark on a selected list item (which glyph it draws is `icon.selected_indicator`).
 
 Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.
 

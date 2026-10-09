@@ -243,7 +243,13 @@ describe('carbon template - anatomy enums (v4)', () => {
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
     'anatomy.slider_handle': 'round',
-    'anatomy.button_label': 'top'
+    'anatomy.button_label': 'top',
+    'anatomy.field_counter': 'label',
+    'anatomy.switch_state_text': 'shown',
+    'anatomy.progress_indeterminate': 'sweep',
+    'anatomy.tab_indicator': 'full',
+    'anatomy.dialog_close': 'shown',
+    'anatomy.list_selected_mark': 'shown'
   };
 
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
@@ -284,6 +290,12 @@ describe('carbon template - icon literals (v4)', () => {
     assert.deepEqual(Themer.validateContract({ tokens: subset }, { required: iconKeys }).errors, []);
   });
 
+  it('should draw Carbon\'s own toggle check (@carbon/react Toggle), not an icon-set glyph', () => {
+    for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+      assert.deepEqual(profile.schemes[schemeName].tokens['icon.switch_checked_indicator'], { icon: true, viewBox: '0 0 6 5', paths: [{ d: 'M2.2 2.7L5 0 6 1 2.2 5 0 2.7 1 1.5z' }] });
+    }
+  });
+
   it('should keep the set\'s own 16, 20 and 24 pixel glyphs under sizes with their own viewBox', () => {
     const close = profile.schemes.white.tokens['icon.close'];
     assert.deepEqual(Object.keys(close.sizes), ['16', '20', '24']);
@@ -311,7 +323,10 @@ describe('carbon template - icon literals (v4)', () => {
           package: '@carbon/icons',
           version: iconPkg.version,
           map_source: iconMap.source,
-          map_sha256: iconMap.source_sha256
+          map_sha256: iconMap.source_sha256,
+          drawings: {
+            switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
+          }
         }
       });
     }
@@ -422,10 +437,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 961 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 962 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 961);
+        assert.equal(names.length, 962);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

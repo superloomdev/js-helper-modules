@@ -556,9 +556,8 @@ export default function buildMaterialGrid (options) {
     'color.tag_icon_disabled': translucent(chipFile, 'with-icon-disabled-icon-color', 'with-icon-disabled-icon-opacity'),
     'control.tag_height': numberToken(chipFile, 'container-height'),
     'control.tag_radius': radiusOf(chipFile, 'container-shape'),
-    // `chips/internal/_assist-chip.scss`: 16px inline padding, 8px with a leading icon
-    'control.tag_padding_inline': 16,
-    'control.tag_padding_icon': 8,
+    'control.tag_padding_inline': numberToken(chipFile, 'leading-space'),
+    'control.tag_padding_icon': numberToken(chipFile, 'with-leading-icon-leading-space'),
     'control.tag_outline_width': numberToken(chipFile, 'flat-outline-width'),
     'control.tag_icon_size': numberToken(chipFile, 'with-icon-icon-size'),
     'type.tag_label': options.typeSet(required(read(chipFile, 'label-text-font'), 'chip label type').typescale)
@@ -583,16 +582,18 @@ export default function buildMaterialGrid (options) {
     'color.tooltip_container': required(colorToken(tooltipFile, 'container-color'), 'tooltip container'),
     'color.tooltip_label': required(colorToken(tooltipFile, 'supporting-text-color'), 'tooltip label'),
     'type.tooltip_label': tooltipLabel,
-    // The token file ships colour, shape and type only; padding, offset and
-    // width are the M3 spec's (4 / 8 padding, 4 from the anchor, no caret, no
-    // width bound - 0 is unclamped)
+    // The token file ships colour, shape and type only, and @material/web has
+    // no tooltip element; the geometry is Google's own M3 implementation,
+    // Compose Material 3 (androidx 00709418ece1) `Tooltip.kt`:
+    // PlainTooltipVerticalPadding 4, PlainTooltipHorizontalPadding 8,
+    // SpacingBetweenTooltipAndAnchor 4, plainTooltipMaxWidth 200, caretShape null
     'control.tooltip_padding_block': 4,
     'control.tooltip_padding_inline': 8,
     'control.tooltip_radius': radiusOf(tooltipFile, 'container-shape'),
     'control.tooltip_caret_width': 0,
     'control.tooltip_caret_height': 0,
     'control.tooltip_offset': 4,
-    'control.tooltip_max_width': 0,
+    'control.tooltip_max_width': 200,
     // The plain tooltip is already the compact member
     'control.tooltip_compact_padding_block': 4,
     'control.tooltip_compact_caret_width': 0,
@@ -668,10 +669,13 @@ export default function buildMaterialGrid (options) {
     'control.dialog_padding_inline': 24,
     'control.dialog_padding_top': 24,
     'control.dialog_header_gap': 8,
-    'control.dialog_body_padding_top': 8,
+    // `_dialog.scss:190-193`: the content pads 24 on every side. With actions
+    // the content's bottom drops to 8 and the actions row pads 16 on top
+    // (`:216-222`), the same 24 between text and buttons, so the body keeps 24
+    // and the actions row pads its sides and bottom only
+    'control.dialog_body_padding_top': 24,
     'control.dialog_body_padding_bottom': 24,
-    // The actions row is content height; text buttons trail with an 8px gap in
-    // a 16 / 24 / 24 padding (the sides and bottom share the cell's 24)
+    // The actions row is content height; text buttons trail with an 8px gap
     'control.dialog_actions_height': 0,
     'control.dialog_actions_gap': 8,
     'control.dialog_actions_padding': 24,
@@ -694,8 +698,9 @@ export default function buildMaterialGrid (options) {
     'color.notification_marker_success': '{color.support_success_inverse}',
     'color.notification_marker_info': '{color.support_info_inverse}',
     'color.notification_marker_warning': '{color.support_warning_inverse}',
-    // The M3 snackbar spec: 288 wide at least, no marker
-    'control.notification_width': 288,
+    // No snackbar element ships; Compose Material 3 (androidx 00709418ece1)
+    // `Snackbar.kt` fills the width up to ContainerMaxWidth 600. No marker
+    'control.notification_width': 600,
     'control.notification_radius': radiusOf(snackbarFile, 'container-shape'),
     'control.notification_marker_width': 0,
     'control.notification_icon_size': numberToken(snackbarFile, 'icon-size'),

@@ -82,10 +82,14 @@ const DROPDOWN_INDICATOR = Object.freeze({ icon: true, viewBox: '0 0 24 24', pat
 // applied; the viewBox is the box inside its 2px border, where the mark is drawn
 const CHECKED_INDICATOR = Object.freeze({ icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M7 14 8.414 12.586 4.414 8.586 3 10Z M7 14 15 6 13.586 4.586 5.586 12.586Z' }] });
 const MIXED_INDICATOR = Object.freeze({ icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M4 8h10v2H4Z' }] });
+// The switch's own check: @material/web 2.5.0 `switch/internal/switch.js`
+// renderOnIcon draws the weight-500 check in a 24px box, not the Symbols 400 glyph
+const SWITCH_CHECKED_INDICATOR = Object.freeze({ icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M9.55 18.2 3.65 12.3 5.275 10.675 9.55 14.95 18.725 5.775 20.35 7.4Z' }] });
 const ICONS = Object.assign({}, materialIcons.tokens, {
   'icon.dropdown_indicator': DROPDOWN_INDICATOR,
   'icon.checked_indicator': CHECKED_INDICATOR,
-  'icon.mixed_indicator': MIXED_INDICATOR
+  'icon.mixed_indicator': MIXED_INDICATOR,
+  'icon.switch_checked_indicator': SWITCH_CHECKED_INDICATOR
 });
 
 const provenance = Object.freeze({
@@ -101,7 +105,8 @@ const provenance = Object.freeze({
     drawings: Object.freeze({
       dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon',
       checked_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .checked .mark',
-      mixed_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark'
+      mixed_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark',
+      switch_checked_indicator: '@material/web 2.5.0 switch/internal/switch.js renderOnIcon'
     })
   })
 });
@@ -127,7 +132,10 @@ const ANATOMY = {
   'anatomy.switch_state_text': 'hidden',
   'anatomy.progress_indeterminate': 'travel',
   'anatomy.tab_indicator': 'content',
-  'anatomy.dialog_close': 'hidden'
+  'anatomy.dialog_close': 'hidden',
+  // A selected option draws no mark; it fills its container
+  // (`select/internal/selectoption/select-option.js` renders no selected icon)
+  'anatomy.list_selected_mark': 'hidden'
 };
 
 // --- Engine setup ---------------------------------------------------------

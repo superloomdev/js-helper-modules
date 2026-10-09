@@ -37,13 +37,21 @@ const GRID_RECIPE = buildGridRecipe(contract.grid);
 // The default template carries Carbon's glyphs until the Superloom set exists.
 const iconMap = JSON.parse(readFileSync(resolve(here, 'icon-map.json'), 'utf8'));
 const carbonIcons = buildCarbonIcons(iconMap.icons);
-const ICONS = carbonIcons.tokens;
+// The primary reference's own switch check: @carbon/react 1.115.0
+// Toggle/Toggle.js draws a 6 x 5 path in the checked handle, not a glyph
+const SWITCH_CHECKED_INDICATOR = Object.freeze({ icon: true, viewBox: '0 0 6 5', paths: [{ d: 'M2.2 2.7L5 0 6 1 2.2 5 0 2.7 1 1.5z' }] });
+const ICONS = Object.assign({}, carbonIcons.tokens, {
+  'icon.switch_checked_indicator': SWITCH_CHECKED_INDICATOR
+});
 const PROVENANCE = {
   icons: {
     package: '@carbon/icons',
     version: carbonIcons.version,
     map_source: iconMap.source,
-    map_sha256: iconMap.source_sha256
+    map_sha256: iconMap.source_sha256,
+    drawings: {
+      switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
+    }
   }
 };
 
@@ -61,7 +69,8 @@ const ANATOMY = {
   'anatomy.switch_state_text': 'shown',
   'anatomy.progress_indeterminate': 'sweep',
   'anatomy.tab_indicator': 'full',
-  'anatomy.dialog_close': 'shown'
+  'anatomy.dialog_close': 'shown',
+  'anatomy.list_selected_mark': 'shown'
 };
 
 // --- Neutral ramp ---------------------------------------------------------

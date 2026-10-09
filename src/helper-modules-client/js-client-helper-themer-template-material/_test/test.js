@@ -521,7 +521,13 @@ describe('material template - anatomy enums (v4)', () => {
     'anatomy.status_marker': 'plain',
     'anatomy.dialog_actions': 'trailing',
     'anatomy.slider_handle': 'bar',
-    'anatomy.button_label': 'center'
+    'anatomy.button_label': 'center',
+    'anatomy.field_counter': 'message',
+    'anatomy.switch_state_text': 'hidden',
+    'anatomy.progress_indeterminate': 'travel',
+    'anatomy.tab_indicator': 'content',
+    'anatomy.dialog_close': 'hidden',
+    'anatomy.list_selected_mark': 'hidden'
   };
 
   for (const schemeName of SCHEME_NAMES) {
@@ -555,7 +561,8 @@ describe('material template - icon literals (v4)', () => {
   const DRAWINGS = {
     'icon.dropdown_indicator': { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M7 9.5 12 14.5 17 9.5Z' }] },
     'icon.checked_indicator': { icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M7 14 8.414 12.586 4.414 8.586 3 10Z M7 14 15 6 13.586 4.586 5.586 12.586Z' }] },
-    'icon.mixed_indicator': { icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M4 8h10v2H4Z' }] }
+    'icon.mixed_indicator': { icon: true, viewBox: '2 2 14 14', paths: [{ d: 'M4 8h10v2H4Z' }] },
+    'icon.switch_checked_indicator': { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M9.55 18.2 3.65 12.3 5.275 10.675 9.55 14.95 18.725 5.775 20.35 7.4Z' }] }
   };
 
   it('should carry 82 icon literals, every one valid, none completed from the default template', () => {
@@ -598,7 +605,8 @@ describe('material template - icon literals (v4)', () => {
         drawings: {
           dropdown_indicator: '@material/web 2.5.0 select/internal/select.js renderTrailingIcon',
           checked_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .checked .mark',
-          mixed_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark'
+          mixed_indicator: '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark',
+          switch_checked_indicator: '@material/web 2.5.0 switch/internal/switch.js renderOnIcon'
         }
       });
     }
@@ -676,10 +684,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 961 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 962 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 961);
+        assert.equal(names.length, 962);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -810,3 +818,32 @@ describe('material template - brand reach into the role grid', () => {
 
 });
 
+
+describe('material template - contract v6 values without a rendered reference element', () => {
+
+  // @material/web 2.5.0 dialog/internal/_dialog.scss:190-193 pads the content 24
+  // on every side; with actions, content-bottom 8 plus the actions row's top 16
+  // keep the same 24, so the actions row pads its sides and bottom only
+  it('should space the dialog body 24 above and below and pad the actions row 24', () => {
+    for (const schemeName of SCHEME_NAMES) {
+      const tokens = profile.schemes[schemeName].tokens;
+      assert.equal(tokens['control.dialog_body_padding_top'], 24, schemeName);
+      assert.equal(tokens['control.dialog_body_padding_bottom'], 24, schemeName);
+      assert.equal(tokens['control.dialog_actions_padding'], 24, schemeName);
+    }
+  });
+
+  // The token files state no geometry for the plain tooltip or the snackbar;
+  // Compose Material 3 (androidx 00709418ece1) Tooltip.kt and Snackbar.kt do
+  it('should take the plain tooltip and snackbar geometry from Compose Material 3', () => {
+    for (const schemeName of SCHEME_NAMES) {
+      const tokens = profile.schemes[schemeName].tokens;
+      assert.equal(tokens['control.tooltip_padding_block'], 4, schemeName);
+      assert.equal(tokens['control.tooltip_padding_inline'], 8, schemeName);
+      assert.equal(tokens['control.tooltip_offset'], 4, schemeName);
+      assert.equal(tokens['control.tooltip_max_width'], 200, schemeName);
+      assert.equal(tokens['control.notification_width'], 600, schemeName);
+    }
+  });
+
+});

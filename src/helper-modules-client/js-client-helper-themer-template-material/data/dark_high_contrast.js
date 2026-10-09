@@ -487,6 +487,7 @@ export default Object.freeze({
     'anatomy.progress_indeterminate': 'travel',
     'anatomy.tab_indicator': 'content',
     'anatomy.dialog_close': 'hidden',
+    'anatomy.list_selected_mark': 'hidden',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -1101,10 +1102,10 @@ export default Object.freeze({
     },
     'icon.switch_checked_indicator': {
       'icon': true,
-      'viewBox': '0 -960 960 960',
+      'viewBox': '0 0 24 24',
       'paths': [
         {
-          'd': 'M378-246 154-470l43-43 181 181 384-384 43 43-427 427Z'
+          'd': 'M9.55 18.2 3.65 12.3 5.275 10.675 9.55 14.95 18.725 5.775 20.35 7.4Z'
         }
       ]
     },
@@ -2022,7 +2023,7 @@ export default Object.freeze({
     'control.tooltip_caret_width': 0,
     'control.tooltip_caret_height': 0,
     'control.tooltip_offset': 4,
-    'control.tooltip_max_width': 0,
+    'control.tooltip_max_width': 200,
     'control.tooltip_compact_padding_block': 4,
     'control.tooltip_compact_caret_width': 0,
     'control.tooltip_compact_caret_height': 0,
@@ -2128,7 +2129,7 @@ export default Object.freeze({
     'control.dialog_padding_inline': 24,
     'control.dialog_padding_top': 24,
     'control.dialog_header_gap': 8,
-    'control.dialog_body_padding_top': 8,
+    'control.dialog_body_padding_top': 24,
     'control.dialog_body_padding_bottom': 24,
     'control.dialog_actions_height': 0,
     'control.dialog_actions_gap': 8,
@@ -2159,7 +2160,7 @@ export default Object.freeze({
     'color.notification_marker_success': '{color.support_success_inverse}',
     'color.notification_marker_info': '{color.support_info_inverse}',
     'color.notification_marker_warning': '{color.support_warning_inverse}',
-    'control.notification_width': 288,
+    'control.notification_width': 600,
     'control.notification_radius': '{shape.radius_04}',
     'control.notification_marker_width': 0,
     'control.notification_icon_size': 24,
@@ -4569,6 +4570,9 @@ export default Object.freeze({
     'anatomy.dialog_close': {
       'group': 'raw'
     },
+    'anatomy.list_selected_mark': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -6586,7 +6590,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': 'ccebf45ac727ade62971d8c4bc97af22df55467e',
+    'default_shasum': 'bc4c1964ffd0d5ee8cde70d91833a3f16679a57e',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
@@ -6597,7 +6601,8 @@ export default Object.freeze({
       'drawings': {
         'dropdown_indicator': '@material/web 2.5.0 select/internal/select.js renderTrailingIcon',
         'checked_indicator': '@material/web 2.5.0 checkbox/internal/_checkbox.scss .checked .mark',
-        'mixed_indicator': '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark'
+        'mixed_indicator': '@material/web 2.5.0 checkbox/internal/_checkbox.scss .indeterminate .mark',
+        'switch_checked_indicator': '@material/web 2.5.0 switch/internal/switch.js renderOnIcon'
       }
     }
   },

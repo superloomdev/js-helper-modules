@@ -866,6 +866,7 @@ export default Object.freeze({
     'anatomy.progress_indeterminate': 'sweep',
     'anatomy.tab_indicator': 'full',
     'anatomy.dialog_close': 'shown',
+    'anatomy.list_selected_mark': 'shown',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -3627,41 +3628,12 @@ export default Object.freeze({
     },
     'icon.switch_checked_indicator': {
       'icon': true,
-      'viewBox': '0 0 32 32',
+      'viewBox': '0 0 6 5',
       'paths': [
         {
-          'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
+          'd': 'M2.2 2.7L5 0 6 1 2.2 5 0 2.7 1 1.5z'
         }
-      ],
-      'sizes': {
-        '16': {
-          'viewBox': '0 0 32 32',
-          'paths': [
-            {
-              'd': 'M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z'
-            }
-          ]
-        },
-        '20': {
-          'viewBox': '0 0 20 20',
-          'paths': [
-            {
-              'd': 'M8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
-            },
-            {
-              'd': 'M15.6 5.6 8 13.2 3.6 8.8 2.7 9.7 7.1 14.1 8 15 16.5 6.5 15.6 5.6z'
-            }
-          ]
-        },
-        '24': {
-          'viewBox': '0 0 24 24',
-          'paths': [
-            {
-              'd': 'M10 15.9 4.7 10.6 3.6 11.6 8.9 16.9 10 18 20.6 7.4 19.5 6.3z'
-            }
-          ]
-        }
-      }
+      ]
     },
     'icon.task_complete': {
       'icon': true,
@@ -6038,6 +6010,9 @@ export default Object.freeze({
     'anatomy.dialog_close': {
       'group': 'raw'
     },
+    'anatomy.list_selected_mark': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -7880,7 +7855,10 @@ export default Object.freeze({
       'package': '@carbon/icons',
       'version': '11.89.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274'
+      'map_sha256': '3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274',
+      'drawings': {
+        'switch_checked_indicator': '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
+      }
     }
   }
 });
