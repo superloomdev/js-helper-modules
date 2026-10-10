@@ -474,7 +474,17 @@ function colorStep (name) {
   if (/^color\.notification_action/.test(name)) {
     return 4;
   }
-  // Tag: step 2
+  // Tag: the fills sit at step 2; the ink drawn on them is the text step,
+  // the hover one deeper than the fill, the border a visible mid step
+  if (/^color\.tag_color_/.test(name)) {
+    return 10;
+  }
+  if (/^color\.tag_border_/.test(name)) {
+    return 4;
+  }
+  if (/^color\.tag_hover_/.test(name)) {
+    return 3;
+  }
   if (/^color\.tag_/.test(name)) {
     return 2;
   }

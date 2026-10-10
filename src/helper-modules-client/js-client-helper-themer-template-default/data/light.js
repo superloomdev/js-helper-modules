@@ -939,181 +939,181 @@ export default Object.freeze({
     'color.tag_border_blue': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_cool_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_cyan': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_green': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_magenta': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_purple': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_red': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_teal': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_border_warm_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        4
       ]
     },
     'color.tag_color_blue': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_cool_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_cyan': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_green': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_magenta': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_purple': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_red': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_teal': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_color_warm_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        10
       ]
     },
     'color.tag_hover_blue': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_cool_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_cyan': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_green': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_magenta': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_purple': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_red': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_teal': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'color.tag_hover_warm_gray': {
       'op': 'rampStep',
       'args': [
-        2
+        3
       ]
     },
     'spacing.spacing_01': {
