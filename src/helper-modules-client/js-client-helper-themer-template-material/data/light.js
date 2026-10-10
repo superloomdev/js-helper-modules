@@ -6633,7 +6633,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': 'bc4c1964ffd0d5ee8cde70d91833a3f16679a57e',
+    'default_shasum': '7fde5cb695cf5714adbb789107bef23a63fff60d',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
