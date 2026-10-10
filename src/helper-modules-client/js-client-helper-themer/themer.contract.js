@@ -58,7 +58,20 @@
 // `tab_indicator`, `dialog_close`) and two icon roles
 // (`selected_indicator`, `switch_checked_indicator`). An amendment inside its
 // milestone adds `anatomy.list_selected_mark`: whether a selected list item
-// draws its mark at all (the glyph it draws stays the icon role).
+// draws its mark at all (the glyph it draws stays the icon role). A second
+// amendment adds `anatomy.menu_icon_seat`: whether a menu with any icon
+// reserves the icon seat for every item (`shared`) or each item carries
+// its own (`item`). A third amendment adds `anatomy.dialog_label`: whether
+// a dialog draws an eyebrow label above its heading (`shown`) or not
+// (`hidden`), `control.dialog_header_space`: the space between the
+// header block and the body, and `control.dialog_min_height`: the
+// dialog's minimum height. A fourth amendment adds `color.menu_divider`:
+// a menu's separator color, `control.tab_contained_height` and
+// `control.tab_contained_padding_block`: the contained tab variant's
+// height and label block inset, `control.tab_item_gap`: the space a
+// system's tab anatomy reserves after each item, and
+// `anatomy.switch_edge`: whether a switch's edge is a drawn `border`
+// that costs room or a `skin` it paints free.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -110,8 +123,9 @@ const GRID = Object.freeze({
       'list_item_label', 'list_item_label_hover', 'list_item_label_selected', 'list_item_label_disabled',
       'list_item_container_hover', 'list_item_container_active', 'list_item_container_selected', 'list_item_container_selected_hover',
       'list_item_divider',
-      // v6: a menu's danger item
+      // v6: a menu's danger item and its separator
       'menu_item_danger_container_hover', 'menu_item_danger_label', 'menu_item_danger_label_hover',
+      'menu_divider',
       // v6: field members that differ from their family
       'text_area_container_hover', 'text_area_outline_disabled',
       // v6: selection members that differ from their family
@@ -176,6 +190,14 @@ const GRID = Object.freeze({
     // v6: the dialog family
     'dialog_border_width', 'dialog_radius', 'dialog_min_width', 'dialog_max_width', 'dialog_padding_inline', 'dialog_padding_top', 'dialog_header_gap',
     'dialog_body_padding_top', 'dialog_body_padding_bottom', 'dialog_actions_height', 'dialog_actions_gap', 'dialog_actions_padding', 'dialog_close_icon_size',
+    // v6 third amendment: the space between the header block and the body
+    // and the dialog's minimum height where a system floors it
+    'dialog_header_space', 'dialog_min_height',
+    // v6 fourth amendment: the contained tab's height and its label's block
+    // inset, where a system seats a variant at a taller measure
+    'tab_contained_height', 'tab_contained_padding_block',
+    // the space a system's tab anatomy reserves after each item
+    'tab_item_gap',
     // v6: the notification family
     'notification_width', 'notification_radius', 'notification_marker_width', 'notification_icon_size',
     // v6: the icon button member
@@ -692,10 +714,13 @@ function buildContract () {
     // v6
     'anatomy.field_counter': Object.freeze({ group: 'anatomy', values: ['label', 'message'] }),
     'anatomy.switch_state_text': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.switch_edge': Object.freeze({ group: 'anatomy', values: ['border', 'skin'] }),
     'anatomy.progress_indeterminate': Object.freeze({ group: 'anatomy', values: ['sweep', 'travel'] }),
     'anatomy.tab_indicator': Object.freeze({ group: 'anatomy', values: ['full', 'content'] }),
     'anatomy.dialog_close': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.dialog_label': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
     'anatomy.list_selected_mark': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.menu_icon_seat': Object.freeze({ group: 'anatomy', values: ['shared', 'item'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~

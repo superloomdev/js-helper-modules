@@ -292,9 +292,24 @@ export default function buildMaterialGrid (options) {
     put('label', '_active', required(colorToken(file, 'pressed-label-text-color', roles), file + ' pressed label'));
     put('label', '_focus', required(colorToken(file, 'focus-label-text-color', roles), file + ' focus label'));
     put('label', '_disabled', translucent(file, 'disabled-label-text-color', 'disabled-label-text-opacity', roles));
-    // Selection is the segmented button's selected recipe, Material's own answer for a selected action
-    put('container', '_selected', required(colorToken('outlined-segmented-button', 'selected-container-color'), 'segmented selected container'));
-    put('label', '_selected', required(colorToken('outlined-segmented-button', 'selected-label-text-color'), 'segmented selected label'));
+    // Selection: the icon button family's selected recipe (the `button_*` selected
+    // cells feed only the icon button's toggle). The standard button keeps its
+    // transparent container - its icon alone turns primary; the outlined fills
+    // inverse-surface and drops its icon to inverse-on-surface; filled and tonal
+    // keep their containers. Kinds outside the roster keep the segmented recipe.
+    const ICON_BUTTON_SELECTED = {
+      primary: { file: 'filled-icon-button', icon: 'toggle-selected-icon-color' },
+      secondary: { file: 'filled-tonal-icon-button', icon: 'toggle-selected-icon-color' },
+      tertiary: { file: 'outlined-icon-button', icon: 'selected-icon-color' },
+      ghost: { file: 'icon-button', icon: 'selected-icon-color', transparent: true }
+    };
+    const selected = ICON_BUTTON_SELECTED[kind];
+    put('container', '_selected', selected === undefined || selected.transparent !== true
+      ? required(colorToken(selected === undefined ? 'outlined-segmented-button' : selected.file, 'selected-container-color'), 'selected container')
+      : NONE);
+    put('label', '_selected', selected === undefined
+      ? required(colorToken('outlined-segmented-button', 'selected-label-text-color'), 'segmented selected label')
+      : required(colorToken(selected.file, selected.icon), selected.file + ' selected icon'));
     const outline = colorToken(file, 'outline-color', roles);
     put('border', '', outline === null ? NONE : outline);
     put('border', '_hover', outline === null ? NONE : colorToken(file, 'hover-outline-color', roles) || outline);
@@ -461,6 +476,7 @@ export default function buildMaterialGrid (options) {
     'control.menu_item_height': 56,
     'control.menu_divider_width': numberToken('divider', 'thickness'),
     'control.menu_icon_size': numberToken(listItem, 'list-item-leading-icon-size'),
+    'color.menu_divider': required(colorToken('divider', 'color'), 'divider color'),
     'color.menu_item_danger_label': roleEntry('error'),
     'color.menu_item_danger_label_hover': roleEntry('error'),
     'color.menu_item_danger_container_hover': layered(menuSurface, [[rolePaint('error'), numberToken(listItem, 'list-item-hover-state-layer-opacity')]])
@@ -612,7 +628,9 @@ export default function buildMaterialGrid (options) {
     }));
   };
   Object.assign(out, {
-    'color.tab_container': required(colorToken(tabFile, 'container-color'), 'tab container'),
+    // `tabs/internal`: the bar paints nothing of its own; each tab's container
+    // carries the fill and the bar's divider is not drawn in the primary kind
+    'color.tab_container': NONE,
     // `tabs/internal`: a divider under the bar
     'color.tab_divider': required(colorToken('divider', 'color'), 'divider color'),
     'color.tab_track': NONE,
@@ -639,9 +657,15 @@ export default function buildMaterialGrid (options) {
     'color.tab_contained_container_selected': required(colorToken(tabFile, 'container-color'), 'tab container'),
     'color.tab_contained_separator': required(colorToken('divider', 'color'), 'divider color'),
     'control.tab_height': numberToken(tabFile, 'container-height'),
-    // `tabs/internal/_primary-tab.scss`: 16px inline padding
+    // Material has no contained kind; the nearest answer is the bar's own
+    // measure and a plain block inset
+    'control.tab_contained_height': numberToken(tabFile, 'container-height'),
+    'control.tab_contained_padding_block': 8,
+    // `tabs/internal/_primary-tab.scss`: 16px inline padding, no reserved
+    // space between items
     'control.tab_padding_inline': 16,
-    'control.tab_divider_width': numberToken('divider', 'thickness'),
+    'control.tab_item_gap': 0,
+    'control.tab_divider_width': 0,
     'control.tab_track_width': 0,
     'control.tab_indicator_width': numberToken(tabFile, 'active-indicator-height'),
     // `active-indicator-shape` is the tuple (3px 3px 0 0): the top radius
@@ -669,14 +693,20 @@ export default function buildMaterialGrid (options) {
     'control.dialog_padding_inline': 24,
     'control.dialog_padding_top': 24,
     'control.dialog_header_gap': 8,
+    // The upstream dialog floors its height at `min-height: 140px`
+    'control.dialog_min_height': 140,
+    // The headline block sits flush against the content (the upstream's
+    // spacing is inside the slotted children)
+    'control.dialog_header_space': 0,
     // `_dialog.scss:190-193`: the content pads 24 on every side. With actions
     // the content's bottom drops to 8 and the actions row pads 16 on top
     // (`:216-222`), the same 24 between text and buttons, so the body keeps 24
     // and the actions row pads its sides and bottom only
     'control.dialog_body_padding_top': 24,
     'control.dialog_body_padding_bottom': 24,
-    // The actions row is content height; text buttons trail with an 8px gap
-    'control.dialog_actions_height': 0,
+    // The actions zone is 100: 16 top pad, the 60px button seat (a 40px
+    // button inside its 10px-padded host) and 24 bottom pad
+    'control.dialog_actions_height': 100,
     'control.dialog_actions_gap': 8,
     'control.dialog_actions_padding': 24,
     'control.dialog_close_icon_size': numberToken(dialogFile, 'with-icon-icon-size'),

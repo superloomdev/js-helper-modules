@@ -302,14 +302,17 @@ Where two design systems draw the same component with a different shape, the cho
 | `anatomy.button_label` | `top`, `center` |
 | `anatomy.field_counter` | `label`, `message` |
 | `anatomy.switch_state_text` | `shown`, `hidden` |
+| `anatomy.switch_edge` | `border`, `skin` |
 | `anatomy.progress_indeterminate` | `sweep`, `travel` |
 | `anatomy.tab_indicator` | `full`, `content` |
 | `anatomy.dialog_close` | `shown`, `hidden` |
+| `anatomy.dialog_label` | `shown`, `hidden` |
 | `anatomy.list_selected_mark` | `shown`, `hidden` |
+| `anatomy.menu_icon_seat` | `shared`, `item` |
 
 `anatomy.button_label` (the second version 5 amendment) says where a button taller than the default height draws its label: `top` keeps it where the default height puts it, `center` centers it in the taller button.
 
-The version 6 anatomy values: `anatomy.field_counter` places a field's character counter in the `label` row or the `message` row; `anatomy.switch_state_text` shows or `hidden` an on/off label beside the switch; `anatomy.progress_indeterminate` animates an indeterminate bar as a `sweep` (the bar travels the track) or `travel` (Material's indeterminate motion); `anatomy.tab_indicator` draws the active-tab indicator the `full` tab width or the `content` (label) width; `anatomy.dialog_close` shows or `hidden` a dialog's close button; `anatomy.list_selected_mark` (an amendment inside version 6) shows or `hidden` the mark on a selected list item (which glyph it draws is `icon.selected_indicator`).
+The version 6 anatomy values: `anatomy.field_counter` places a field's character counter in the `label` row or the `message` row; `anatomy.switch_state_text` shows or `hidden` an on/off label beside the switch; `anatomy.progress_indeterminate` animates an indeterminate bar as a `sweep` (the bar travels the track) or `travel` (Material's indeterminate motion); `anatomy.tab_indicator` draws the active-tab indicator the `full` tab width or the `content` (label) width; `anatomy.dialog_close` shows or `hidden` a dialog's close button; `anatomy.list_selected_mark` (an amendment inside version 6) shows or `hidden` the mark on a selected list item (which glyph it draws is `icon.selected_indicator`); `anatomy.switch_edge` (an amendment inside version 6) draws the switch's edge as a `border` that costs room or paints it on a `skin` free of room; `anatomy.dialog_label` (an amendment inside version 6) shows or `hidden` an eyebrow label above a dialog's heading; `anatomy.menu_icon_seat` (an amendment inside version 6) reserves the icon seat for every item (`shared`) or lets each item carry its own (`item`).
 
 Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.
 

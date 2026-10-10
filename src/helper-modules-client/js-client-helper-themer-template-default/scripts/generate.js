@@ -67,10 +67,13 @@ const ANATOMY = {
   // v6: the primary reference's anatomy, as the default draws it
   'anatomy.field_counter': 'label',
   'anatomy.switch_state_text': 'shown',
+  'anatomy.switch_edge': 'border',
   'anatomy.progress_indeterminate': 'sweep',
   'anatomy.tab_indicator': 'full',
   'anatomy.dialog_close': 'shown',
-  'anatomy.list_selected_mark': 'shown'
+  'anatomy.dialog_label': 'shown',
+  'anatomy.list_selected_mark': 'shown',
+  'anatomy.menu_icon_seat': 'shared'
 };
 
 // --- Neutral ramp ---------------------------------------------------------

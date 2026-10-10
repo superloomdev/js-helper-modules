@@ -389,7 +389,7 @@ describe('default template - icon literals (v4)', () => {
 describe('default template - unit gate', () => {
 
   it('should have no string matching (rem|em|px|vw|vh|%|ms)$ in any scheme', () => {
-    const unitRegex = /(rem|em|px|vw|vh|%|ms)$/;
+    const unitRegex = /[0-9.](rem|em|px|vw|vh|%|ms)$/;
 
     function walkTokens (tokens, label) {
       const keys = Object.keys(tokens);
@@ -451,10 +451,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 962 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 971 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 962);
+        assert.equal(names.length, 971);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

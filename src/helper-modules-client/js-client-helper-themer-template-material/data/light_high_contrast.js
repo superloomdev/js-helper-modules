@@ -484,10 +484,13 @@ export default Object.freeze({
     'anatomy.button_label': 'center',
     'anatomy.field_counter': 'message',
     'anatomy.switch_state_text': 'hidden',
+    'anatomy.switch_edge': 'skin',
     'anatomy.progress_indeterminate': 'travel',
     'anatomy.tab_indicator': 'content',
     'anatomy.dialog_close': 'hidden',
+    'anatomy.dialog_label': 'hidden',
     'anatomy.list_selected_mark': 'hidden',
+    'anatomy.menu_icon_seat': 'item',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -1280,8 +1283,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_primary_container_selected': '{color.button_secondary_hover}',
-    'color.button_primary_label_selected': '{color.text_on_button_tonal}',
+    'color.button_primary_container_selected': '{color.interactive}',
+    'color.button_primary_label_selected': '{color.text_on_color}',
     'color.button_primary_border': 'rgba(0, 0, 0, 0)',
     'color.button_primary_border_hover': 'rgba(0, 0, 0, 0)',
     'color.button_primary_border_active': 'rgba(0, 0, 0, 0)',
@@ -1350,8 +1353,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_tertiary_container_selected': '{color.button_secondary_hover}',
-    'color.button_tertiary_label_selected': '{color.text_on_button_tonal}',
+    'color.button_tertiary_container_selected': '{color.background_inverse}',
+    'color.button_tertiary_label_selected': '{color.text_inverse}',
     'color.button_tertiary_border': '{color.border_subtle_01}',
     'color.button_tertiary_border_hover': '{color.border_subtle_01}',
     'color.button_tertiary_border_active': '{color.border_subtle_01}',
@@ -1394,8 +1397,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_ghost_container_selected': '{color.button_secondary_hover}',
-    'color.button_ghost_label_selected': '{color.text_on_button_tonal}',
+    'color.button_ghost_container_selected': 'rgba(0, 0, 0, 0)',
+    'color.button_ghost_label_selected': '{color.interactive}',
     'color.button_ghost_border': 'rgba(0, 0, 0, 0)',
     'color.button_ghost_border_hover': 'rgba(0, 0, 0, 0)',
     'color.button_ghost_border_active': 'rgba(0, 0, 0, 0)',
@@ -1846,6 +1849,7 @@ export default Object.freeze({
     'control.menu_item_height': 56,
     'control.menu_divider_width': 1,
     'control.menu_icon_size': 24,
+    'color.menu_divider': '{color.border_subtle_02}',
     'color.menu_item_danger_label': '{color.support_error}',
     'color.menu_item_danger_label_hover': '{color.support_error}',
     'color.menu_item_danger_container_hover': {
@@ -2036,7 +2040,7 @@ export default Object.freeze({
       'weight': 400,
       'font_family': 'sans'
     },
-    'color.tab_container': '{color.background}',
+    'color.tab_container': 'rgba(0, 0, 0, 0)',
     'color.tab_divider': '{color.border_subtle_02}',
     'color.tab_track': 'rgba(0, 0, 0, 0)',
     'color.tab_track_hover': 'rgba(0, 0, 0, 0)',
@@ -2088,8 +2092,11 @@ export default Object.freeze({
     'color.tab_contained_container_selected': '{color.background}',
     'color.tab_contained_separator': '{color.border_subtle_02}',
     'control.tab_height': 48,
+    'control.tab_contained_height': 48,
+    'control.tab_contained_padding_block': 8,
     'control.tab_padding_inline': 16,
-    'control.tab_divider_width': 1,
+    'control.tab_item_gap': 0,
+    'control.tab_divider_width': 0,
     'control.tab_track_width': 0,
     'control.tab_indicator_width': 3,
     'control.tab_indicator_radius': 3,
@@ -2129,9 +2136,11 @@ export default Object.freeze({
     'control.dialog_padding_inline': 24,
     'control.dialog_padding_top': 24,
     'control.dialog_header_gap': 8,
+    'control.dialog_min_height': 140,
+    'control.dialog_header_space': 0,
     'control.dialog_body_padding_top': 24,
     'control.dialog_body_padding_bottom': 24,
-    'control.dialog_actions_height': 0,
+    'control.dialog_actions_height': 100,
     'control.dialog_actions_gap': 8,
     'control.dialog_actions_padding': 24,
     'control.dialog_close_icon_size': 24,
@@ -4568,6 +4577,9 @@ export default Object.freeze({
     'anatomy.switch_state_text': {
       'group': 'raw'
     },
+    'anatomy.switch_edge': {
+      'group': 'raw'
+    },
     'anatomy.progress_indeterminate': {
       'group': 'raw'
     },
@@ -4577,7 +4589,13 @@ export default Object.freeze({
     'anatomy.dialog_close': {
       'group': 'raw'
     },
+    'anatomy.dialog_label': {
+      'group': 'raw'
+    },
     'anatomy.list_selected_mark': {
+      'group': 'raw'
+    },
+    'anatomy.menu_icon_seat': {
       'group': 'raw'
     },
     'shadow.level_01': {
@@ -5648,6 +5666,9 @@ export default Object.freeze({
     'color.menu_item_danger_label_hover': {
       'group': 'color'
     },
+    'color.menu_divider': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -6180,6 +6201,21 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.dialog_close_icon_size': {
+      'group': 'dimension'
+    },
+    'control.dialog_header_space': {
+      'group': 'dimension'
+    },
+    'control.dialog_min_height': {
+      'group': 'dimension'
+    },
+    'control.tab_contained_height': {
+      'group': 'dimension'
+    },
+    'control.tab_contained_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tab_item_gap': {
       'group': 'dimension'
     },
     'control.notification_width': {

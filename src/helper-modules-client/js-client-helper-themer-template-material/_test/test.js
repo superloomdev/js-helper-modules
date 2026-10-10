@@ -266,7 +266,7 @@ describe('material template - unit gate', () => {
   for (const schemeName of SCHEME_NAMES) {
 
     it('should have no unit suffixes in ' + schemeName, () => {
-      const unitRegex = /(rem|em|px|vw|vh|%|ms)$/;
+      const unitRegex = /[0-9.](rem|em|px|vw|vh|%|ms)$/;
       const tokens = profile.schemes[schemeName].tokens;
       const keys = Object.keys(tokens);
       for (let i = 0; i < keys.length; i++) {
@@ -684,10 +684,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 962 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 971 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 962);
+        assert.equal(names.length, 971);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

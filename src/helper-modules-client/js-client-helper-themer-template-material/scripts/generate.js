@@ -130,12 +130,17 @@ const ANATOMY = {
   // (_md-comp-dialog.scss / dialog internal styles)
   'anatomy.field_counter': 'message',
   'anatomy.switch_state_text': 'hidden',
+  'anatomy.switch_edge': 'skin',
   'anatomy.progress_indeterminate': 'travel',
   'anatomy.tab_indicator': 'content',
   'anatomy.dialog_close': 'hidden',
+  // The upstream dialog has no eyebrow label (`_dialog.scss` mounts
+  // `headline`, `content` and `actions` slots only)
+  'anatomy.dialog_label': 'hidden',
   // A selected option draws no mark; it fills its container
   // (`select/internal/selectoption/select-option.js` renders no selected icon)
-  'anatomy.list_selected_mark': 'hidden'
+  'anatomy.list_selected_mark': 'hidden',
+  'anatomy.menu_icon_seat': 'item'
 };
 
 // --- Engine setup ---------------------------------------------------------

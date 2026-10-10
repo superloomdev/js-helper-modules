@@ -1818,10 +1818,13 @@ export default Object.freeze({
     'anatomy.button_label': 'top',
     'anatomy.field_counter': 'label',
     'anatomy.switch_state_text': 'shown',
+    'anatomy.switch_edge': 'border',
     'anatomy.progress_indeterminate': 'sweep',
     'anatomy.tab_indicator': 'full',
     'anatomy.dialog_close': 'shown',
+    'anatomy.dialog_label': 'shown',
     'anatomy.list_selected_mark': 'shown',
+    'anatomy.menu_icon_seat': 'shared',
     'shadow.level_01': {
       'shadow': true,
       'layers': [
@@ -5598,6 +5601,7 @@ export default Object.freeze({
     'color.menu_item_danger_container_hover': '{color.button_danger_primary}',
     'color.menu_item_danger_label': '{color.text_secondary}',
     'color.menu_item_danger_label_hover': '{color.text_on_color}',
+    'color.menu_divider': '{color.border_subtle_00}',
     'color.text_area_container_hover': '{color.field_container_hover}',
     'color.text_area_outline_disabled': '{color.field_outline_disabled}',
     'color.radio_outline_selected': '{color.selection_outline}',
@@ -5644,7 +5648,7 @@ export default Object.freeze({
     'color.tag_outline_disabled': 'rgba(0, 0, 0, 0)',
     'color.tag_icon': '{color.tag_color_gray}',
     'color.tag_icon_disabled': '{color.text_disabled}',
-    'color.progress_track': '{color.border_subtle_01}',
+    'color.progress_track': '{color.border_subtle_00}',
     'color.progress_indicator': '{color.interactive}',
     'color.progress_indicator_success': '{color.support_success}',
     'color.progress_indicator_error': '{color.support_error}',
@@ -5652,9 +5656,9 @@ export default Object.freeze({
     'color.tooltip_label': '{color.text_inverse}',
     'color.tab_container': 'rgba(0, 0, 0, 0)',
     'color.tab_divider': 'rgba(0, 0, 0, 0)',
-    'color.tab_track': '{color.border_subtle_01}',
+    'color.tab_track': '{color.border_subtle_00}',
     'color.tab_track_hover': '{color.border_strong_01}',
-    'color.tab_track_disabled': '{color.border_subtle_01}',
+    'color.tab_track_disabled': '{color.border_subtle_00}',
     'color.tab_indicator': '{color.border_interactive}',
     'color.tab_label': '{color.text_secondary}',
     'color.tab_label_hover': '{color.text_primary}',
@@ -5683,12 +5687,12 @@ export default Object.freeze({
     'color.notification_marker_success': '{color.support_success_inverse}',
     'color.notification_marker_info': '{color.support_info_inverse}',
     'color.notification_marker_warning': '{color.support_warning_inverse}',
-    'color.icon_button_ghost_icon': '{color.button_ghost_label}',
-    'color.icon_button_ghost_icon_hover': '{color.button_ghost_label_hover}',
-    'color.icon_button_ghost_icon_active': '{color.button_ghost_label_active}',
-    'color.icon_button_ghost_icon_focus': '{color.button_ghost_label_focus}',
-    'color.icon_button_ghost_icon_disabled': '{color.button_ghost_label_disabled}',
-    'color.icon_button_ghost_icon_selected': '{color.button_ghost_label_selected}',
+    'color.icon_button_ghost_icon': '{color.icon_primary}',
+    'color.icon_button_ghost_icon_hover': '{color.icon_primary}',
+    'color.icon_button_ghost_icon_active': '{color.icon_primary}',
+    'color.icon_button_ghost_icon_focus': '{color.icon_primary}',
+    'color.icon_button_ghost_icon_disabled': '{color.icon_disabled}',
+    'color.icon_button_ghost_icon_selected': '{color.icon_primary}',
     'color.icon_button_tertiary_icon': '{color.button_tertiary_label}',
     'color.icon_button_tertiary_icon_hover': '{color.button_tertiary_label_hover}',
     'color.icon_button_tertiary_icon_active': '{color.button_tertiary_label_active}',
@@ -5776,6 +5780,11 @@ export default Object.freeze({
     'control.dialog_actions_gap': 0,
     'control.dialog_actions_padding': 0,
     'control.dialog_close_icon_size': '{size.icon_02}',
+    'control.dialog_header_space': '{spacing.spacing_03}',
+    'control.dialog_min_height': 0,
+    'control.tab_contained_height': '{size.size_large}',
+    'control.tab_contained_padding_block': '{spacing.spacing_03}',
+    'control.tab_item_gap': '{border.width_01}',
     'control.notification_width': 288,
     'control.notification_radius': '{shape.radius_00}',
     'control.notification_marker_width': 3,
@@ -6952,6 +6961,9 @@ export default Object.freeze({
     'anatomy.switch_state_text': {
       'group': 'raw'
     },
+    'anatomy.switch_edge': {
+      'group': 'raw'
+    },
     'anatomy.progress_indeterminate': {
       'group': 'raw'
     },
@@ -6961,7 +6973,13 @@ export default Object.freeze({
     'anatomy.dialog_close': {
       'group': 'raw'
     },
+    'anatomy.dialog_label': {
+      'group': 'raw'
+    },
     'anatomy.list_selected_mark': {
+      'group': 'raw'
+    },
+    'anatomy.menu_icon_seat': {
       'group': 'raw'
     },
     'shadow.level_01': {
@@ -8032,6 +8050,9 @@ export default Object.freeze({
     'color.menu_item_danger_label_hover': {
       'group': 'color'
     },
+    'color.menu_divider': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -8564,6 +8585,21 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.dialog_close_icon_size': {
+      'group': 'dimension'
+    },
+    'control.dialog_header_space': {
+      'group': 'dimension'
+    },
+    'control.dialog_min_height': {
+      'group': 'dimension'
+    },
+    'control.tab_contained_height': {
+      'group': 'dimension'
+    },
+    'control.tab_contained_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tab_item_gap': {
       'group': 'dimension'
     },
     'control.notification_width': {

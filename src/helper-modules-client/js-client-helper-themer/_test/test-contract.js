@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 962 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 962);
+  it('should expose exactly 971 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 971);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 962 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 962);
+  it('should expose exactly 971 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 971);
   });
 
   it('should report contract version 6', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 517,
+    color: 518,
     spacing: 17,
     size: 22,
     type: 74,
@@ -98,9 +98,9 @@ describe('contract registry - group counts', () => {
     state: 6,
     tint: 5,
     stacking: 5,
-    anatomy: 12,
+    anatomy: 15,
     icon: 84,
-    control: 98
+    control: 103
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 962 tokens and theme has all 962', () => {
+  it('should return success true when required is all 971 tokens and theme has all 971', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1251,7 +1251,7 @@ describe('contract v5 - control group and role tokens', () => {
 
 describe('contract v4 - anatomy group', () => {
 
-  it('should expose twelve enum structure tokens with their literal value lists', () => {
+  it('should expose fifteen enum structure tokens with their literal value lists', () => {
     const anatomyTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'anatomy';
     });
@@ -1265,10 +1265,13 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.button_label',
       'anatomy.field_counter',
       'anatomy.switch_state_text',
+      'anatomy.switch_edge',
       'anatomy.progress_indeterminate',
       'anatomy.tab_indicator',
       'anatomy.dialog_close',
-      'anatomy.list_selected_mark'
+      'anatomy.dialog_label',
+      'anatomy.list_selected_mark',
+      'anatomy.menu_icon_seat'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1280,14 +1283,17 @@ describe('contract v4 - anatomy group', () => {
     assert.deepEqual(contract.tokens['anatomy.button_label'].values, ['top', 'center']);
     assert.deepEqual(contract.tokens['anatomy.field_counter'].values, ['label', 'message']);
     assert.deepEqual(contract.tokens['anatomy.switch_state_text'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.switch_edge'].values, ['border', 'skin']);
     assert.deepEqual(contract.tokens['anatomy.progress_indeterminate'].values, ['sweep', 'travel']);
     assert.deepEqual(contract.tokens['anatomy.tab_indicator'].values, ['full', 'content']);
     assert.deepEqual(contract.tokens['anatomy.dialog_close'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.dialog_label'].values, ['shown', 'hidden']);
     assert.deepEqual(contract.tokens['anatomy.list_selected_mark'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.menu_icon_seat'].values, ['shared', 'item']);
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.list_selected_mark']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }
@@ -1740,7 +1746,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow']);
-    assert.equal(gridNames.length, 460);
+    assert.equal(gridNames.length, 466);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1777,7 +1783,7 @@ describe('contract v6 - the anchor families\' cells', () => {
   const FAMILIES = {
     color: {
       list: ['container', 'item_label', 'item_label_hover', 'item_label_selected', 'item_label_disabled', 'item_container_hover', 'item_container_active', 'item_container_selected', 'item_container_selected_hover', 'item_divider'],
-      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover'],
+      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover', 'divider'],
       text_area: ['container_hover', 'outline_disabled'],
       radio: ['outline_selected', 'outline_selected_hover', 'outline_selected_active', 'outline_selected_focus'],
       switch: ['outline', 'outline_hover', 'outline_focus', 'outline_active', 'outline_disabled', 'track', 'track_hover', 'track_focus', 'track_active', 'track_disabled', 'track_selected', 'track_selected_hover', 'track_selected_focus', 'track_selected_active', 'track_selected_disabled', 'handle', 'handle_hover', 'handle_focus', 'handle_active', 'handle_disabled', 'handle_selected', 'handle_selected_hover', 'handle_selected_focus', 'handle_selected_active', 'handle_selected_disabled', 'mark', 'mark_disabled', 'layer_hover', 'layer_active', 'layer_selected_hover', 'layer_selected_active', 'focus_ring'],
@@ -1797,8 +1803,8 @@ describe('contract v6 - the anchor families\' cells', () => {
       tag: ['height', 'radius', 'padding_inline', 'padding_icon', 'outline_width', 'icon_size'],
       progress: ['height', 'radius'],
       tooltip: ['padding_block', 'padding_inline', 'radius', 'caret_width', 'caret_height', 'offset', 'max_width', 'compact_padding_block', 'compact_caret_width', 'compact_caret_height', 'compact_offset'],
-      tab: ['height', 'padding_inline', 'divider_width', 'track_width', 'indicator_width', 'indicator_radius', 'focus_width', 'focus_offset'],
-      dialog: ['border_width', 'radius', 'min_width', 'max_width', 'padding_inline', 'padding_top', 'header_gap', 'body_padding_top', 'body_padding_bottom', 'actions_height', 'actions_gap', 'actions_padding', 'close_icon_size'],
+      tab: ['height', 'padding_inline', 'divider_width', 'track_width', 'indicator_width', 'indicator_radius', 'focus_width', 'focus_offset', 'contained_height', 'contained_padding_block', 'item_gap'],
+      dialog: ['border_width', 'radius', 'min_width', 'max_width', 'padding_inline', 'padding_top', 'header_gap', 'body_padding_top', 'body_padding_bottom', 'actions_height', 'actions_gap', 'actions_padding', 'close_icon_size', 'header_space', 'min_height'],
       notification: ['width', 'radius', 'marker_width', 'icon_size'],
       icon_button: ['size', 'icon_size']
     },

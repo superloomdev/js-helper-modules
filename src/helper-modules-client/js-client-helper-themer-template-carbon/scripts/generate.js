@@ -77,12 +77,15 @@ const ANATOMY = {
   // its close button
   'anatomy.field_counter': 'label',
   'anatomy.switch_state_text': 'shown',
+  'anatomy.switch_edge': 'border',
   'anatomy.progress_indeterminate': 'sweep',
   'anatomy.tab_indicator': 'full',
   'anatomy.dialog_close': 'shown',
+  'anatomy.dialog_label': 'shown',
   // A selected list item draws its checkmark (`list-box/_list-box.scss:877`,
   // `.cds--list-box__menu-item__selected-icon`)
-  'anatomy.list_selected_mark': 'shown'
+  'anatomy.list_selected_mark': 'shown',
+  'anatomy.menu_icon_seat': 'shared'
 };
 
 // --- Role grid (v5 amendment) -------------------------------------------
