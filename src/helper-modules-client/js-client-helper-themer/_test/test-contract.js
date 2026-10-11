@@ -45,8 +45,8 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 992 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 992);
+  it('should expose exactly 995 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 995);
   });
 
   it('should expose exactly 19 groups', () => {
@@ -54,7 +54,7 @@ describe('contract registry - structure', () => {
   });
 
   it('should expose exactly 992 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 992);
+    assert.equal(Object.keys(contract.meta).length, 995);
   });
 
   it('should report contract version 6', () => {
@@ -82,10 +82,10 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 535,
+    color: 537,
     spacing: 17,
     size: 22,
-    type: 74,
+    type: 75,
     font: 12,
     motion: 29,
     shape: 9,
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 992 tokens and theme has all 992', () => {
+  it('should return success true when required is all 995 tokens and theme has all 995', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1796,7 +1796,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow']);
-    assert.equal(gridNames.length, 486);
+    assert.equal(gridNames.length, 489);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1833,7 +1833,7 @@ describe('contract v6 - the anchor families\' cells', () => {
   const FAMILIES = {
     color: {
       list: ['container', 'item_label', 'item_label_hover', 'item_label_selected', 'item_label_disabled', 'item_container_hover', 'item_container_active', 'item_container_selected', 'item_container_selected_hover', 'item_divider'],
-      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover', 'divider', 'item_icon', 'item_icon_hover', 'item_icon_disabled'],
+      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover', 'divider', 'item_icon', 'item_icon_hover', 'item_icon_disabled', 'item_shortcut', 'item_shortcut_hover'],
       text_area: ['container_hover', 'outline_disabled'],
       radio: ['outline_selected', 'outline_selected_hover', 'outline_selected_active', 'outline_selected_focus'],
       switch: ['outline', 'outline_hover', 'outline_focus', 'outline_active', 'outline_disabled', 'track', 'track_hover', 'track_focus', 'track_active', 'track_disabled', 'track_selected', 'track_selected_hover', 'track_selected_focus', 'track_selected_active', 'track_selected_disabled', 'handle', 'handle_hover', 'handle_focus', 'handle_active', 'handle_disabled', 'handle_selected', 'handle_selected_hover', 'handle_selected_focus', 'handle_selected_active', 'handle_selected_disabled', 'mark', 'mark_disabled', 'layer_hover', 'layer_active', 'layer_selected_hover', 'layer_selected_active', 'focus_ring'],
@@ -1860,6 +1860,7 @@ describe('contract v6 - the anchor families\' cells', () => {
     },
     type: {
       list: ['item'],
+      menu: ['item_shortcut'],
       text_area: ['value'],
       tag: ['label'],
       tooltip: ['label', 'compact_label'],

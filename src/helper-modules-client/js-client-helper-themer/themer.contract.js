@@ -87,7 +87,10 @@
 // against the toggle's unselected pair - and
 // `anatomy.field_counter_format`: whether a field's counter prints the
 // count against the limit (`tight`, "4/100") or spaced from it
-// (`spaced`, "4 / 100").
+// (`spaced`, "4 / 100"). A sixth amendment adds the menu item shortcut's
+// own type and ink (`type.menu_item_shortcut`, `color.menu_item_shortcut`
+// and its hover): the primary draws it in the item's type and colour, the
+// second in a smaller supporting type and a quieter ink.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -145,6 +148,8 @@ const GRID = Object.freeze({
       // v6 fifth amendment: the item icon's own ink where a menu colors
       // it apart from the label
       'menu_item_icon', 'menu_item_icon_hover', 'menu_item_icon_disabled',
+      // v6 sixth amendment: the menu item shortcut's own ink
+      'menu_item_shortcut', 'menu_item_shortcut_hover',
       // v6: field members that differ from their family
       'text_area_container_hover', 'text_area_outline_disabled',
       // v6: selection members that differ from their family
@@ -237,7 +242,7 @@ const GRID = Object.freeze({
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
     // v6
-    'list_item', 'text_area_value', 'tag_label', 'tooltip_label', 'tooltip_compact_label', 'tab_label', 'tab_label_selected',
+    'list_item', 'menu_item_shortcut', 'text_area_value', 'tag_label', 'tooltip_label', 'tooltip_compact_label', 'tab_label', 'tab_label_selected',
     'dialog_heading', 'dialog_body', 'notification_title', 'notification_body'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {

@@ -61,8 +61,8 @@ vocabulary, the token contract, ships in this package as data and is read throug
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
   ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
-  Same reference on every call. Never throws. Version 6 has 992 tokens in 19 groups (the role grid,
-  `contract.grid`, now 486 cells): version 5's 763 plus eight grid families (list, switch, tag,
+  Same reference on every call. Never throws. Version 6 has 995 tokens in 19 groups (the role grid,
+  `contract.grid`, now 489 cells): version 5's 763 plus eight grid families (list, switch, tag,
   progress, tooltip, tab, dialog, notification), member cells for the text area, radio, icon
   button, menu, compact tooltip and dialog close icon, ten anatomy values (`field_counter`,
   `switch_state_text`, `progress_indeterminate`, `tab_indicator`, `dialog_close`,
