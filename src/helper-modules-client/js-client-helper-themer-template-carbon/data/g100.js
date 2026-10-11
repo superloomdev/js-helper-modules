@@ -4435,6 +4435,9 @@ export default Object.freeze({
     'color.menu_item_icon': '{color.list_item_label}',
     'color.menu_item_icon_hover': '{color.list_item_label_hover}',
     'color.menu_item_icon_disabled': '{color.list_item_label_disabled}',
+    'type.menu_item_shortcut': '{type.list_item}',
+    'color.menu_item_shortcut': '{color.list_item_label}',
+    'color.menu_item_shortcut_hover': '{color.list_item_label_hover}',
     'color.menu_divider': '{color.border_subtle_00}',
     'color.menu_item_danger_container_hover': '{color.button_danger_primary}',
     'color.menu_item_danger_label': '{color.text_secondary}',
@@ -7135,6 +7138,12 @@ export default Object.freeze({
     'color.menu_item_icon_disabled': {
       'group': 'color'
     },
+    'color.menu_item_shortcut': {
+      'group': 'color'
+    },
+    'color.menu_item_shortcut_hover': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -7763,6 +7772,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.list_item': {
+      'group': 'typeSet'
+    },
+    'type.menu_item_shortcut': {
       'group': 'typeSet'
     },
     'type.text_area_value': {
