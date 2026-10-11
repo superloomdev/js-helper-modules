@@ -326,6 +326,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     @return {Object[]} .findings - One entry per failed rule:
       { rule: 'contrast', tokens: [content, surface], ratio, minimum } |
       { rule: 'distinct', tokens: [a, b], value } |
+      { rule: 'distinct', tokens: [selContainer, selInk, restContainer, restInk], value: [v1, v2] } |
       { rule: 'shadow', tokens: [level], value } |
       { rule: 'missing', tokens: [name] }
     *********************************************************************/
@@ -384,6 +385,18 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
         }
         if (Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[0]])) === Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[1]]))) {
           findings.push({ rule: 'distinct', tokens: [pair[0], pair[1]], value: tokens[pair[0]] });
+        }
+      }
+
+      // Selected pairs: the container and ink a control paints when selected
+      // must not both equal their rest paints, or selection shows nothing
+      for (const pair of ROLES.selected_pairs) {
+        if (!present(pair[0]) || !present(pair[1]) || !present(pair[2]) || !present(pair[3])) {
+          continue;
+        }
+        if (Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[0]])) === Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[2]])) &&
+            Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[1]])) === Parts.Color.toHex(Parts.Color.parseHex(tokens[pair[3]]))) {
+          findings.push({ rule: 'distinct', tokens: [pair[0], pair[1], pair[2], pair[3]], value: [tokens[pair[0]], tokens[pair[1]]] });
         }
       }
 

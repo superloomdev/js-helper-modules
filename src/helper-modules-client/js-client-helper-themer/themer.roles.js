@@ -11,7 +11,9 @@
 //   distinct - two roles that mean different things must not share a value
 //              (a disabled fill equal to a danger fill is a danger button
 //              that reads as disabled); under highlight press feedback a
-//              hover or active fill must also differ from its rest fill
+//              hover or active fill must also differ from its rest fill,
+//              and a control's selected container-and-ink pair must not
+//              paint exactly as its rest pair
 //   shadow   - every shadow level is drawn translucent; an opaque shadow is
 //              a hard ring, not a lift
 //
@@ -125,6 +127,24 @@ const DISTINCT = Object.freeze([
 ]);
 
 
+// ~~~~~~~~~~~~~~~~~~~~ Selected pairs ~~~~~~~~~~~~~~~~~~~~
+// [selectedContainer, selectedInk, restContainer, restInk]: the two cells
+// a control paints when selected must not both equal their rest paints,
+// or a selected control shows nothing. A button's rest pair is its
+// container and label cells; an icon button is a toggle whose selected
+// face can legitimately paint the button's face (a selected filled or
+// tonal icon button is the filled or tonal face), so its selected pair
+// is audited against the toggle's own unselected cells instead
+
+const SELECTED_PAIRS = Object.freeze(
+  BUTTON_KINDS.map(function (kind) {
+    return ['color.button_' + kind + '_container_selected', 'color.button_' + kind + '_label_selected', 'color.button_' + kind + '_container', 'color.button_' + kind + '_label'];
+  }).concat(['primary', 'secondary', 'ghost', 'tertiary'].map(function (kind) {
+    return ['color.icon_button_' + kind + '_container_selected', 'color.icon_button_' + kind + '_icon_selected', 'color.icon_button_' + kind + '_container_unselected', 'color.icon_button_' + kind + '_icon_unselected'];
+  }))
+);
+
+
 // ~~~~~~~~~~~~~~~~~~~~ Distinct under highlight ~~~~~~~~~~~~~~~~~~~~
 // [role, role] that must differ when the theme shows hover and press by
 // swapping fills (`feedback.press: highlight`); under a state layer or an
@@ -153,6 +173,7 @@ const SHADOW_LEVELS = Object.freeze([
 export default Object.freeze({
   contrast: CONTRAST,
   distinct: DISTINCT,
+  selected_pairs: SELECTED_PAIRS,
   distinct_highlight: DISTINCT_HIGHLIGHT,
   shadow_levels: SHADOW_LEVELS
 });

@@ -71,7 +71,23 @@
 // height and label block inset, `control.tab_item_gap`: the space a
 // system's tab anatomy reserves after each item, and
 // `anatomy.switch_edge`: whether a switch's edge is a drawn `border`
-// that costs room or a `skin` it paints free.
+// that costs room or a `skin` it paints free. A fifth amendment adds a
+// menu's width floor (`control.menu_min_width`, and
+// `control.menu_icon_min_width` where any item carries an icon), the
+// space a menu reserves between an item's icon and its label
+// (`control.menu_item_gap`), a menu item icon's ink where a system
+// colors it apart from the label (`color.menu_item_icon` and its hover
+// and disabled), the icon button's selected paints as member cells
+// (`color.icon_button_<kind>_container_selected` for every kind,
+// `color.icon_button_<kind>_icon_selected` for primary and secondary;
+// ghost and tertiary already carry the selected icon cell), the toggle
+// icon button's unselected face (`color.icon_button_<kind>_container_unselected`
+// and `_icon_unselected` for every kind) - a selected filled or tonal
+// icon button paints the button's face, so its selected pair is audited
+// against the toggle's unselected pair - and
+// `anatomy.field_counter_format`: whether a field's counter prints the
+// count against the limit (`tight`, "4/100") or spaced from it
+// (`spaced`, "4 / 100").
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -126,6 +142,9 @@ const GRID = Object.freeze({
       // v6: a menu's danger item and its separator
       'menu_item_danger_container_hover', 'menu_item_danger_label', 'menu_item_danger_label_hover',
       'menu_divider',
+      // v6 fifth amendment: the item icon's own ink where a menu colors
+      // it apart from the label
+      'menu_item_icon', 'menu_item_icon_hover', 'menu_item_icon_disabled',
       // v6: field members that differ from their family
       'text_area_container_hover', 'text_area_outline_disabled',
       // v6: selection members that differ from their family
@@ -160,7 +179,17 @@ const GRID = Object.freeze({
       'notification_marker_error', 'notification_marker_success', 'notification_marker_info', 'notification_marker_warning',
       // v6: button members that differ from their family
       'icon_button_ghost_icon', 'icon_button_ghost_icon_hover', 'icon_button_ghost_icon_active', 'icon_button_ghost_icon_focus', 'icon_button_ghost_icon_disabled', 'icon_button_ghost_icon_selected',
-      'icon_button_tertiary_icon', 'icon_button_tertiary_icon_hover', 'icon_button_tertiary_icon_active', 'icon_button_tertiary_icon_focus', 'icon_button_tertiary_icon_disabled', 'icon_button_tertiary_icon_selected'
+      'icon_button_tertiary_icon', 'icon_button_tertiary_icon_hover', 'icon_button_tertiary_icon_active', 'icon_button_tertiary_icon_focus', 'icon_button_tertiary_icon_disabled', 'icon_button_tertiary_icon_selected',
+      // v6 fifth amendment: the icon button's selected face and ink as
+      // member cells, so the button family's selected recipe stays the
+      // labelled button's
+      'icon_button_primary_container_selected', 'icon_button_secondary_container_selected', 'icon_button_ghost_container_selected', 'icon_button_tertiary_container_selected',
+      'icon_button_primary_icon_selected', 'icon_button_secondary_icon_selected',
+      // and the toggle's unselected face: a selected filled or tonal icon
+      // button paints the button's face, so the pair it must differ from is
+      // the toggle's own unselected face, not the button's
+      'icon_button_primary_container_unselected', 'icon_button_secondary_container_unselected', 'icon_button_ghost_container_unselected', 'icon_button_tertiary_container_unselected',
+      'icon_button_primary_icon_unselected', 'icon_button_secondary_icon_unselected', 'icon_button_ghost_icon_unselected', 'icon_button_tertiary_icon_unselected'
     ]
   )),
   control: Object.freeze([
@@ -172,6 +201,8 @@ const GRID = Object.freeze({
     'list_item_height', 'list_item_padding_inline', 'list_item_divider_width', 'list_padding_block', 'list_radius',
     // v6: a menu's own geometry where it differs from the list it shares
     'menu_padding_block', 'menu_item_height', 'menu_divider_width', 'menu_icon_size',
+    // v6 fifth amendment: a menu's width floor and icon-to-label space
+    'menu_min_width', 'menu_icon_min_width', 'menu_item_gap',
     // v6: field and selection members that differ from their family
     'radio_size', 'radio_border', 'radio_dot_size', 'radio_focus_offset',
     // v6: the switch family
@@ -721,6 +752,8 @@ function buildContract () {
     'anatomy.dialog_label': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
     'anatomy.list_selected_mark': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
     'anatomy.menu_icon_seat': Object.freeze({ group: 'anatomy', values: ['shared', 'item'] }),
+    // v6 fifth amendment
+    'anatomy.field_counter_format': Object.freeze({ group: 'anatomy', values: ['tight', 'spaced'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~

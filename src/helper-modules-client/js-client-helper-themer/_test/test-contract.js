@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 971 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 971);
+  it('should expose exactly 992 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 992);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 971 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 971);
+  it('should expose exactly 992 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 992);
   });
 
   it('should report contract version 6', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 518,
+    color: 535,
     spacing: 17,
     size: 22,
     type: 74,
@@ -98,9 +98,9 @@ describe('contract registry - group counts', () => {
     state: 6,
     tint: 5,
     stacking: 5,
-    anatomy: 15,
+    anatomy: 16,
     icon: 84,
-    control: 103
+    control: 106
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 971 tokens and theme has all 971', () => {
+  it('should return success true when required is all 992 tokens and theme has all 992', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -1271,7 +1271,8 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.dialog_close',
       'anatomy.dialog_label',
       'anatomy.list_selected_mark',
-      'anatomy.menu_icon_seat'
+      'anatomy.menu_icon_seat',
+      'anatomy.field_counter_format'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1290,10 +1291,11 @@ describe('contract v4 - anatomy group', () => {
     assert.deepEqual(contract.tokens['anatomy.dialog_label'].values, ['shown', 'hidden']);
     assert.deepEqual(contract.tokens['anatomy.list_selected_mark'].values, ['shown', 'hidden']);
     assert.deepEqual(contract.tokens['anatomy.menu_icon_seat'].values, ['shared', 'item']);
+    assert.deepEqual(contract.tokens['anatomy.field_counter_format'].values, ['tight', 'spaced']);
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }
@@ -1629,6 +1631,17 @@ function readableTheme () {
     'color.selection_mark': '#ffffff', 'color.selection_container': '#161616', 'color.selection_container_disabled': '#8d8d8d',
     'color.selection_label': '#161616'
   });
+  // The icon button members: a selected pair that differs from the
+  // toggle's unselected face
+  for (const kind of ['primary', 'secondary', 'ghost', 'tertiary']) {
+    tokens['color.icon_button_' + kind + '_container_selected'] = 'rgba(141, 141, 141, 0.2)';
+    tokens['color.icon_button_' + kind + '_icon_selected'] = '#161616';
+    tokens['color.icon_button_' + kind + '_container_unselected'] = '#e0e0e0';
+    tokens['color.icon_button_' + kind + '_icon_unselected'] = '#393939';
+    if (kind === 'ghost' || kind === 'tertiary') {
+      tokens['color.icon_button_' + kind + '_icon'] = '#0f62fe';
+    }
+  }
   return { tokens: tokens };
 }
 
@@ -1691,6 +1704,43 @@ describe('auditRoles', () => {
     ]);
   });
 
+  it('should report a button kind whose selected cells paint exactly as its rest cells', () => {
+    const theme = readableTheme();
+    theme.tokens['color.button_primary_container_selected'] = '#0f62fe';
+    theme.tokens['color.button_primary_label_selected'] = '#ffffff';
+    const result = Themer.auditRoles(theme);
+    assert.deepEqual(result.findings.filter((f) => f.rule === 'distinct'), [
+      { rule: 'distinct', tokens: ['color.button_primary_container_selected', 'color.button_primary_label_selected', 'color.button_primary_container', 'color.button_primary_label'], value: ['#0f62fe', '#ffffff'] }
+    ]);
+  });
+
+  it('should pass a button kind whose selected pair differs in one cell only', () => {
+    const theme = readableTheme();
+    theme.tokens['color.button_primary_container_selected'] = '#0f62fe';
+    const result = Themer.auditRoles(theme);
+    assert.deepEqual(result.findings.filter((f) => f.rule === 'distinct'), []);
+  });
+
+  it('should report an icon button whose selected cells paint exactly as its unselected cells', () => {
+    const theme = readableTheme();
+    theme.tokens['color.icon_button_primary_container_selected'] = '#e0e0e0';
+    theme.tokens['color.icon_button_primary_icon_selected'] = '#393939';
+    theme.tokens['color.icon_button_ghost_container_selected'] = '#e0e0e0';
+    theme.tokens['color.icon_button_ghost_icon_selected'] = '#393939';
+    const result = Themer.auditRoles(theme);
+    assert.deepEqual(result.findings.filter((f) => f.rule === 'distinct'), [
+      { rule: 'distinct', tokens: ['color.icon_button_primary_container_selected', 'color.icon_button_primary_icon_selected', 'color.icon_button_primary_container_unselected', 'color.icon_button_primary_icon_unselected'], value: ['#e0e0e0', '#393939'] },
+      { rule: 'distinct', tokens: ['color.icon_button_ghost_container_selected', 'color.icon_button_ghost_icon_selected', 'color.icon_button_ghost_container_unselected', 'color.icon_button_ghost_icon_unselected'], value: ['#e0e0e0', '#393939'] }
+    ]);
+  });
+
+  it('should pass an icon button whose selected pair equals the button\'s rest pair', () => {
+    const theme = readableTheme();
+    theme.tokens['color.icon_button_primary_container_selected'] = '#0f62fe';
+    theme.tokens['color.icon_button_primary_icon_selected'] = '#ffffff';
+    assert.deepEqual(Themer.auditRoles(theme).findings.filter((f) => f.rule === 'distinct'), []);
+  });
+
 });
 
 
@@ -1746,7 +1796,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow']);
-    assert.equal(gridNames.length, 466);
+    assert.equal(gridNames.length, 486);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1783,7 +1833,7 @@ describe('contract v6 - the anchor families\' cells', () => {
   const FAMILIES = {
     color: {
       list: ['container', 'item_label', 'item_label_hover', 'item_label_selected', 'item_label_disabled', 'item_container_hover', 'item_container_active', 'item_container_selected', 'item_container_selected_hover', 'item_divider'],
-      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover', 'divider'],
+      menu: ['item_danger_container_hover', 'item_danger_label', 'item_danger_label_hover', 'divider', 'item_icon', 'item_icon_hover', 'item_icon_disabled'],
       text_area: ['container_hover', 'outline_disabled'],
       radio: ['outline_selected', 'outline_selected_hover', 'outline_selected_active', 'outline_selected_focus'],
       switch: ['outline', 'outline_hover', 'outline_focus', 'outline_active', 'outline_disabled', 'track', 'track_hover', 'track_focus', 'track_active', 'track_disabled', 'track_selected', 'track_selected_hover', 'track_selected_focus', 'track_selected_active', 'track_selected_disabled', 'handle', 'handle_hover', 'handle_focus', 'handle_active', 'handle_disabled', 'handle_selected', 'handle_selected_hover', 'handle_selected_focus', 'handle_selected_active', 'handle_selected_disabled', 'mark', 'mark_disabled', 'layer_hover', 'layer_active', 'layer_selected_hover', 'layer_selected_active', 'focus_ring'],
@@ -1793,11 +1843,11 @@ describe('contract v6 - the anchor families\' cells', () => {
       tab: ['container', 'divider', 'track', 'track_hover', 'track_disabled', 'indicator', 'label', 'label_hover', 'label_selected', 'label_selected_hover', 'label_disabled', 'layer_hover', 'layer_active', 'layer_selected_hover', 'layer_selected_active', 'focus_ring', 'contained_container', 'contained_container_hover', 'contained_container_selected', 'contained_separator'],
       dialog: ['scrim', 'container', 'border', 'heading', 'body'],
       notification: ['container', 'text', 'close_icon', 'action', 'marker_error', 'marker_success', 'marker_info', 'marker_warning'],
-      icon_button: ['ghost_icon', 'ghost_icon_hover', 'ghost_icon_active', 'ghost_icon_focus', 'ghost_icon_disabled', 'ghost_icon_selected', 'tertiary_icon', 'tertiary_icon_hover', 'tertiary_icon_active', 'tertiary_icon_focus', 'tertiary_icon_disabled', 'tertiary_icon_selected']
+      icon_button: ['ghost_icon', 'ghost_icon_hover', 'ghost_icon_active', 'ghost_icon_focus', 'ghost_icon_disabled', 'ghost_icon_selected', 'tertiary_icon', 'tertiary_icon_hover', 'tertiary_icon_active', 'tertiary_icon_focus', 'tertiary_icon_disabled', 'tertiary_icon_selected', 'primary_container_selected', 'secondary_container_selected', 'ghost_container_selected', 'tertiary_container_selected', 'primary_icon_selected', 'secondary_icon_selected']
     },
     control: {
       list: ['item_height', 'item_padding_inline', 'item_divider_width', 'padding_block', 'radius'],
-      menu: ['padding_block', 'item_height', 'divider_width', 'icon_size'],
+      menu: ['padding_block', 'item_height', 'divider_width', 'icon_size', 'min_width', 'icon_min_width', 'item_gap'],
       radio: ['size', 'border', 'dot_size', 'focus_offset'],
       switch: ['track_width', 'track_height', 'outline_width', 'handle_size', 'handle_size_selected', 'handle_size_pressed', 'focus_width', 'focus_offset'],
       tag: ['height', 'radius', 'padding_inline', 'padding_icon', 'outline_width', 'icon_size'],
