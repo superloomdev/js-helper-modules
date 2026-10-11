@@ -481,6 +481,12 @@ export default function buildMaterialGrid (options) {
     'color.menu_item_icon': required(colorToken(listItem, 'list-item-leading-icon-color'), 'menu item icon'),
     'color.menu_item_icon_hover': required(colorToken(listItem, 'list-item-hover-leading-icon-icon-color'), 'menu item hover icon'),
     'color.menu_item_icon_disabled': translucent(listItem, 'list-item-disabled-leading-icon-color', 'list-item-disabled-leading-icon-opacity'),
+    // `_md-comp-list.scss`: the trailing supporting text takes its own
+    // type and color slots; the upstream list item states no hover colour
+    // for it (the state layer carries hover)
+    'type.menu_item_shortcut': options.typeSet(required(read(listItem, 'list-item-trailing-supporting-text-font'), 'menu shortcut type').typescale),
+    'color.menu_item_shortcut': required(colorToken(listItem, 'list-item-trailing-supporting-text-color'), 'menu shortcut'),
+    'color.menu_item_shortcut_hover': required(colorToken(listItem, 'list-item-trailing-supporting-text-color'), 'menu shortcut'),
     'color.menu_divider': required(colorToken('divider', 'color'), 'divider color'),
     'color.menu_item_danger_label': roleEntry('error'),
     'color.menu_item_danger_label_hover': roleEntry('error'),

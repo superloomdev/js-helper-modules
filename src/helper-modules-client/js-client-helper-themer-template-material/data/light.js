@@ -1862,6 +1862,16 @@ export default Object.freeze({
         0.38
       ]
     },
+    'type.menu_item_shortcut': {
+      'type_set': true,
+      'font_size': 11,
+      'line_height_px': 16,
+      'letter_spacing': 0.5,
+      'weight': 500,
+      'font_family': 'sans'
+    },
+    'color.menu_item_shortcut': '{color.text_secondary}',
+    'color.menu_item_shortcut_hover': '{color.text_secondary}',
     'color.menu_divider': '{color.border_subtle_02}',
     'color.menu_item_danger_label': '{color.support_error}',
     'color.menu_item_danger_label_hover': '{color.support_error}',
@@ -5708,6 +5718,12 @@ export default Object.freeze({
     'color.menu_item_icon_disabled': {
       'group': 'color'
     },
+    'color.menu_item_shortcut': {
+      'group': 'color'
+    },
+    'color.menu_item_shortcut_hover': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -6338,6 +6354,9 @@ export default Object.freeze({
     'type.list_item': {
       'group': 'typeSet'
     },
+    'type.menu_item_shortcut': {
+      'group': 'typeSet'
+    },
     'type.text_area_value': {
       'group': 'typeSet'
     },
@@ -6723,7 +6742,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '525956d108fe806161008321b2d18f74abd35e97',
+    'default_shasum': '0cca261a227176985cfb9b807211fc395959ab5e',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
