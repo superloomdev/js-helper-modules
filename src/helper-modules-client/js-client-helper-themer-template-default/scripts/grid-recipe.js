@@ -87,8 +87,11 @@ function buttonCells (kind) {
     put('border', '_active', kind === 'tertiary' ? NONE : colorOf(k.borderActive || k.border));
     put('border', '_disabled', k.border === null ? NONE : colorOf('button_disabled'));
   }
-  put('container', '_selected', colorOf('background_selected'));
-  put('label', '_selected', colorOf('text_primary'));
+  // The dark scheme's background_selected is the secondary fill itself, so
+  // the secondary's selected face takes the kind's active container instead
+  // (the label stays the kind's own)
+  put('container', '_selected', kind === 'secondary' ? '{color.button_secondary_container_active}' : colorOf('background_selected'));
+  put('label', '_selected', kind === 'secondary' ? '{color.button_secondary_label}' : colorOf('text_primary'));
   const lifted = kind === 'elevated' ? '{shadow.level_01}' : '{shadow.level_00}';
   out['shadow.button_' + kind] = lifted;
   out['shadow.button_' + kind + '_hover'] = lifted;
@@ -225,6 +228,16 @@ export default function buildGridRecipe (grid) {
     'control.menu_item_height': '{control.list_item_height}',
     'control.menu_divider_width': '{control.list_item_divider_width}',
     'control.menu_icon_size': '{size.icon_01}',
+    // The primary reference floors the menu at 10rem, 12rem when any item
+    // carries an icon (@carbon/styles `menu/_menu.scss` `min-inline-size`),
+    // and spaces the icon from the label by $spacing-03
+    'control.menu_min_width': 160,
+    'control.menu_icon_min_width': 192,
+    'control.menu_item_gap': '{spacing.spacing_03}',
+    // The item icon follows its label's ink (upstream `currentColor`)
+    'color.menu_item_icon': '{color.list_item_label}',
+    'color.menu_item_icon_hover': '{color.list_item_label_hover}',
+    'color.menu_item_icon_disabled': '{color.list_item_label_disabled}',
     'color.menu_divider': colorOf('border_subtle_00'),
     'color.menu_item_danger_container_hover': colorOf('button_danger_primary'),
     'color.menu_item_danger_label': colorOf('text_secondary'),
@@ -412,6 +425,23 @@ export default function buildGridRecipe (grid) {
     'color.icon_button_tertiary_icon_focus': '{color.button_tertiary_label_focus}',
     'color.icon_button_tertiary_icon_disabled': '{color.button_tertiary_label_disabled}',
     'color.icon_button_tertiary_icon_selected': '{color.button_tertiary_label_selected}',
+    // The icon button's selected face and ink alias the kind's selected cells
+    'color.icon_button_primary_container_selected': '{color.button_primary_container_selected}',
+    'color.icon_button_secondary_container_selected': '{color.button_secondary_container_selected}',
+    'color.icon_button_ghost_container_selected': '{color.button_ghost_container_selected}',
+    'color.icon_button_tertiary_container_selected': '{color.button_tertiary_container_selected}',
+    'color.icon_button_primary_icon_selected': '{color.button_primary_label_selected}',
+    'color.icon_button_secondary_icon_selected': '{color.button_secondary_label_selected}',
+    // The toggle's unselected face is the kind's rest: container and ink
+    // alias the rest cells the kind paints with
+    'color.icon_button_primary_container_unselected': '{color.button_primary_container}',
+    'color.icon_button_secondary_container_unselected': '{color.button_secondary_container}',
+    'color.icon_button_ghost_container_unselected': '{color.button_ghost_container}',
+    'color.icon_button_tertiary_container_unselected': '{color.button_tertiary_container}',
+    'color.icon_button_primary_icon_unselected': '{color.button_primary_label}',
+    'color.icon_button_secondary_icon_unselected': '{color.button_secondary_label}',
+    'color.icon_button_ghost_icon_unselected': '{color.icon_button_ghost_icon}',
+    'color.icon_button_tertiary_icon_unselected': '{color.icon_button_tertiary_icon}',
     'control.icon_button_size': '{control.button_height}',
     'control.icon_button_icon_size': '{size.icon_01}',
     // No elevation

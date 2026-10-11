@@ -284,7 +284,8 @@ describe('default template - anatomy enums (v4)', () => {
     'anatomy.progress_indeterminate': 'sweep',
     'anatomy.tab_indicator': 'full',
     'anatomy.dialog_close': 'shown',
-    'anatomy.list_selected_mark': 'shown'
+    'anatomy.list_selected_mark': 'shown',
+    'anatomy.field_counter_format': 'tight'
   };
 
   for (const schemeName of ['light', 'dark']) {
@@ -451,10 +452,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 971 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 992 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 971);
+        assert.equal(names.length, 992);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

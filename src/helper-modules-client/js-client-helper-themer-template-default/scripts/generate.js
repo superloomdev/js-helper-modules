@@ -73,7 +73,9 @@ const ANATOMY = {
   'anatomy.dialog_close': 'shown',
   'anatomy.dialog_label': 'shown',
   'anatomy.list_selected_mark': 'shown',
-  'anatomy.menu_icon_seat': 'shared'
+  'anatomy.menu_icon_seat': 'shared',
+  // The primary reference's counter prints "4/100"
+  'anatomy.field_counter_format': 'tight'
 };
 
 // --- Neutral ramp ---------------------------------------------------------
