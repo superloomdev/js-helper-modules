@@ -50,7 +50,6 @@ export default Object.freeze({
     'color.text_on_button_tonal': '#ffffff',
     'color.link_secondary': '#585267',
     'color.notification_background_info': '#8e606f',
-    'color.notification_background_success': '#8e606f',
     'color.link_visited': '#734856',
     'color.support_error': '#740006',
     'color.text_error': '#740006',
@@ -2830,6 +2829,12 @@ export default Object.freeze({
       'op': 'rampStep',
       'args': [
         4
+      ]
+    },
+    'color.notification_background_success': {
+      'op': 'rampStep',
+      'args': [
+        2
       ]
     },
     'color.notification_background_warning': {
@@ -6592,6 +6597,7 @@ export default Object.freeze({
     'color.notification_action_tertiary_inverse_hover',
     'color.notification_action_tertiary_inverse_text',
     'color.notification_action_tertiary_inverse_text_on_color_disabled',
+    'color.notification_background_success',
     'color.notification_background_warning',
     'color.skeleton_background',
     'color.skeleton_element',

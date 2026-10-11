@@ -36,11 +36,14 @@ export default Object.freeze({
     on_secondary_fixed_variant: [],
 
     // Tertiary
+    // Material states no success role: the low-contrast success background
+    // falls back to the default recipe instead of borrowing a tertiary
+    // tone, which reads like the error container
     tertiary: [],
     on_tertiary: [],
     tertiary_container: 'color.notification_background_info',
     on_tertiary_container: [],
-    tertiary_fixed: 'color.notification_background_success',
+    tertiary_fixed: [],
     tertiary_fixed_dim: 'color.link_visited',
     on_tertiary_fixed: [],
     on_tertiary_fixed_variant: [],
