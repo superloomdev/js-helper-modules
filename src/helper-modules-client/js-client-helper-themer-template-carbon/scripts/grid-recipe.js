@@ -245,6 +245,16 @@ export default function buildGridRecipe (grid) {
     'control.menu_item_height': '{size.size_small}',
     'control.menu_divider_width': '{border.width_01}',
     'control.menu_icon_size': '{size.icon_01}',
+    // `menu/_menu.scss:38,58`: the menu floors at `min-inline-size: 10rem`,
+    // `12rem` when any item carries an icon
+    'control.menu_min_width': 160,
+    'control.menu_icon_min_width': 192,
+    // The icon's gap to the label is $spacing-03 (`menu/_menu.scss` item padding)
+    'control.menu_item_gap': '{spacing.spacing_03}',
+    // The item icon inks `currentColor` upstream, so it follows the label cells
+    'color.menu_item_icon': '{color.list_item_label}',
+    'color.menu_item_icon_hover': '{color.list_item_label_hover}',
+    'color.menu_item_icon_disabled': '{color.list_item_label_disabled}',
     'color.menu_divider': colorOf('border_subtle_00'),
     'color.menu_item_danger_container_hover': colorOf('button_danger_primary'),
     'color.menu_item_danger_label': colorOf('text_secondary'),
@@ -457,6 +467,23 @@ export default function buildGridRecipe (grid) {
     'color.icon_button_tertiary_icon_focus': '{color.button_tertiary_label_focus}',
     'color.icon_button_tertiary_icon_disabled': '{color.button_tertiary_label_disabled}',
     'color.icon_button_tertiary_icon_selected': '{color.button_tertiary_label_selected}',
+    // The icon button's selected face and ink alias the kind's selected cells
+    'color.icon_button_primary_container_selected': '{color.button_primary_container_selected}',
+    'color.icon_button_secondary_container_selected': '{color.button_secondary_container_selected}',
+    'color.icon_button_ghost_container_selected': '{color.button_ghost_container_selected}',
+    'color.icon_button_tertiary_container_selected': '{color.button_tertiary_container_selected}',
+    'color.icon_button_primary_icon_selected': '{color.button_primary_label_selected}',
+    'color.icon_button_secondary_icon_selected': '{color.button_secondary_label_selected}',
+    // The toggle's unselected face is the kind's rest: container and ink
+    // alias the rest cells the kind paints with
+    'color.icon_button_primary_container_unselected': '{color.button_primary_container}',
+    'color.icon_button_secondary_container_unselected': '{color.button_secondary_container}',
+    'color.icon_button_ghost_container_unselected': '{color.button_ghost_container}',
+    'color.icon_button_tertiary_container_unselected': '{color.button_tertiary_container}',
+    'color.icon_button_primary_icon_unselected': '{color.button_primary_label}',
+    'color.icon_button_secondary_icon_unselected': '{color.button_secondary_label}',
+    'color.icon_button_ghost_icon_unselected': '{color.icon_button_ghost_icon}',
+    'color.icon_button_tertiary_icon_unselected': '{color.icon_button_tertiary_icon}',
     'control.icon_button_size': '{control.button_height}',
     'control.icon_button_icon_size': '{size.icon_01}',
     // No elevation

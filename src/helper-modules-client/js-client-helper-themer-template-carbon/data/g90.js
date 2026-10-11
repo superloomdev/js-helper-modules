@@ -870,6 +870,7 @@ export default Object.freeze({
     'anatomy.dialog_label': 'shown',
     'anatomy.list_selected_mark': 'shown',
     'anatomy.menu_icon_seat': 'shared',
+    'anatomy.field_counter_format': 'tight',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -4428,6 +4429,12 @@ export default Object.freeze({
     'control.menu_item_height': '{size.size_small}',
     'control.menu_divider_width': '{border.width_01}',
     'control.menu_icon_size': '{size.icon_01}',
+    'control.menu_min_width': 160,
+    'control.menu_icon_min_width': 192,
+    'control.menu_item_gap': '{spacing.spacing_03}',
+    'color.menu_item_icon': '{color.list_item_label}',
+    'color.menu_item_icon_hover': '{color.list_item_label_hover}',
+    'color.menu_item_icon_disabled': '{color.list_item_label_disabled}',
     'color.menu_divider': '{color.border_subtle_00}',
     'color.menu_item_danger_container_hover': '{color.button_danger_primary}',
     'color.menu_item_danger_label': '{color.text_secondary}',
@@ -4613,6 +4620,20 @@ export default Object.freeze({
     'color.icon_button_tertiary_icon_focus': '{color.button_tertiary_label_focus}',
     'color.icon_button_tertiary_icon_disabled': '{color.button_tertiary_label_disabled}',
     'color.icon_button_tertiary_icon_selected': '{color.button_tertiary_label_selected}',
+    'color.icon_button_primary_container_selected': '{color.button_primary_container_selected}',
+    'color.icon_button_secondary_container_selected': '{color.button_secondary_container_selected}',
+    'color.icon_button_ghost_container_selected': '{color.button_ghost_container_selected}',
+    'color.icon_button_tertiary_container_selected': '{color.button_tertiary_container_selected}',
+    'color.icon_button_primary_icon_selected': '{color.button_primary_label_selected}',
+    'color.icon_button_secondary_icon_selected': '{color.button_secondary_label_selected}',
+    'color.icon_button_primary_container_unselected': '{color.button_primary_container}',
+    'color.icon_button_secondary_container_unselected': '{color.button_secondary_container}',
+    'color.icon_button_ghost_container_unselected': '{color.button_ghost_container}',
+    'color.icon_button_tertiary_container_unselected': '{color.button_tertiary_container}',
+    'color.icon_button_primary_icon_unselected': '{color.button_primary_label}',
+    'color.icon_button_secondary_icon_unselected': '{color.button_secondary_label}',
+    'color.icon_button_ghost_icon_unselected': '{color.icon_button_ghost_icon}',
+    'color.icon_button_tertiary_icon_unselected': '{color.icon_button_tertiary_icon}',
     'control.icon_button_size': '{control.button_height}',
     'control.icon_button_icon_size': '{size.icon_01}',
     'shadow.level_00': {
@@ -6031,6 +6052,9 @@ export default Object.freeze({
     'anatomy.menu_icon_seat': {
       'group': 'raw'
     },
+    'anatomy.field_counter_format': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -7102,6 +7126,15 @@ export default Object.freeze({
     'color.menu_divider': {
       'group': 'color'
     },
+    'color.menu_item_icon': {
+      'group': 'color'
+    },
+    'color.menu_item_icon_hover': {
+      'group': 'color'
+    },
+    'color.menu_item_icon_disabled': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -7393,6 +7426,48 @@ export default Object.freeze({
     'color.icon_button_tertiary_icon_selected': {
       'group': 'color'
     },
+    'color.icon_button_primary_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_primary_icon_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_icon_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_primary_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_primary_icon_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_icon_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_unselected': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -7478,6 +7553,15 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.menu_icon_size': {
+      'group': 'dimension'
+    },
+    'control.menu_min_width': {
+      'group': 'dimension'
+    },
+    'control.menu_icon_min_width': {
+      'group': 'dimension'
+    },
+    'control.menu_item_gap': {
       'group': 'dimension'
     },
     'control.radio_size': {

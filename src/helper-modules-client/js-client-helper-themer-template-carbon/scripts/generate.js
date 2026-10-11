@@ -85,7 +85,9 @@ const ANATOMY = {
   // A selected list item draws its checkmark (`list-box/_list-box.scss:877`,
   // `.cds--list-box__menu-item__selected-icon`)
   'anatomy.list_selected_mark': 'shown',
-  'anatomy.menu_icon_seat': 'shared'
+  'anatomy.menu_icon_seat': 'shared',
+  // The counter prints "4/100" (`text-area` renders the count against the limit)
+  'anatomy.field_counter_format': 'tight'
 };
 
 // --- Role grid (v5 amendment) -------------------------------------------
