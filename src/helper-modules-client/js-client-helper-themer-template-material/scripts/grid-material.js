@@ -292,24 +292,18 @@ export default function buildMaterialGrid (options) {
     put('label', '_active', required(colorToken(file, 'pressed-label-text-color', roles), file + ' pressed label'));
     put('label', '_focus', required(colorToken(file, 'focus-label-text-color', roles), file + ' focus label'));
     put('label', '_disabled', translucent(file, 'disabled-label-text-color', 'disabled-label-text-opacity', roles));
-    // Selection: the icon button family's selected recipe (the `button_*` selected
-    // cells feed only the icon button's toggle). The standard button keeps its
-    // transparent container - its icon alone turns primary; the outlined fills
-    // inverse-surface and drops its icon to inverse-on-surface; filled and tonal
-    // keep their containers. Kinds outside the roster keep the segmented recipe.
-    const ICON_BUTTON_SELECTED = {
-      primary: { file: 'filled-icon-button', icon: 'toggle-selected-icon-color' },
-      secondary: { file: 'filled-tonal-icon-button', icon: 'toggle-selected-icon-color' },
-      tertiary: { file: 'outlined-icon-button', icon: 'selected-icon-color' },
-      ghost: { file: 'icon-button', icon: 'selected-icon-color', transparent: true }
-    };
-    const selected = ICON_BUTTON_SELECTED[kind];
-    put('container', '_selected', selected === undefined || selected.transparent !== true
-      ? required(colorToken(selected === undefined ? 'outlined-segmented-button' : selected.file, 'selected-container-color'), 'selected container')
-      : NONE);
-    put('label', '_selected', selected === undefined
-      ? required(colorToken('outlined-segmented-button', 'selected-label-text-color'), 'segmented selected label')
-      : required(colorToken(selected.file, selected.icon), selected.file + ' selected icon'));
+    // Selection: the standard button's selected cells come from the outlined
+    // segmented recipe (`_md-comp-outlined-segmented-button.scss`) - except
+    // tonal, whose rest face IS the segmented selected face (both draw
+    // secondary-container); the tonal's selected face takes the secondary
+    // roles instead. The icon button's own toggle recipe lives on the
+    // icon_button members below
+    put('container', '_selected', kind === 'tonal'
+      ? roleEntry('secondary')
+      : required(colorToken('outlined-segmented-button', 'selected-container-color'), 'selected container'));
+    put('label', '_selected', kind === 'tonal'
+      ? roleEntry('on-secondary')
+      : required(colorToken('outlined-segmented-button', 'selected-label-text-color'), 'segmented selected label'));
     const outline = colorToken(file, 'outline-color', roles);
     put('border', '', outline === null ? NONE : outline);
     put('border', '_hover', outline === null ? NONE : colorToken(file, 'hover-outline-color', roles) || outline);
@@ -476,6 +470,17 @@ export default function buildMaterialGrid (options) {
     'control.menu_item_height': 56,
     'control.menu_divider_width': numberToken('divider', 'thickness'),
     'control.menu_icon_size': numberToken(listItem, 'list-item-leading-icon-size'),
+    // `menu/internal/_menu.scss:44`: the menu floors at `min-width: 112px`,
+    // icons or not
+    'control.menu_min_width': 112,
+    'control.menu_icon_min_width': 112,
+    // `labs/item/internal/_item.scss:39`: a 16px gap between item children
+    'control.menu_item_gap': 16,
+    // `_md-comp-list.scss`: the leading icon takes its own color slots, the
+    // disabled one at the disabled opacity
+    'color.menu_item_icon': required(colorToken(listItem, 'list-item-leading-icon-color'), 'menu item icon'),
+    'color.menu_item_icon_hover': required(colorToken(listItem, 'list-item-hover-leading-icon-icon-color'), 'menu item hover icon'),
+    'color.menu_item_icon_disabled': translucent(listItem, 'list-item-disabled-leading-icon-color', 'list-item-disabled-leading-icon-opacity'),
     'color.menu_divider': required(colorToken('divider', 'color'), 'divider color'),
     'color.menu_item_danger_label': roleEntry('error'),
     'color.menu_item_danger_label_hover': roleEntry('error'),
@@ -665,7 +670,9 @@ export default function buildMaterialGrid (options) {
     // space between items
     'control.tab_padding_inline': 16,
     'control.tab_item_gap': 0,
-    'control.tab_divider_width': 0,
+    // `tabs/internal/_tabs.scss`: md-tabs draws a full-width md-divider under
+    // the bar (1px, probe evidence/0160/m2/probes/p1-tabs.json)
+    'control.tab_divider_width': numberToken('divider', 'thickness'),
     'control.tab_track_width': 0,
     'control.tab_indicator_width': numberToken(tabFile, 'active-indicator-height'),
     // `active-indicator-shape` is the tuple (3px 3px 0 0): the top radius
@@ -704,9 +711,11 @@ export default function buildMaterialGrid (options) {
     // and the actions row pads its sides and bottom only
     'control.dialog_body_padding_top': 24,
     'control.dialog_body_padding_bottom': 24,
-    // The actions zone is 100: 16 top pad, the 60px button seat (a 40px
-    // button inside its 10px-padded host) and 24 bottom pad
-    'control.dialog_actions_height': 100,
+    // The actions content height is 0: the row's room comes from its padding
+    // and the buttons' own seats (upstream zone 16 + 40 + 24 = 80; the 100px
+    // measured on the reference page was a page artifact,
+    // evidence/0160/m2/probes/p2-p3-modal.json)
+    'control.dialog_actions_height': 0,
     'control.dialog_actions_gap': 8,
     'control.dialog_actions_padding': 24,
     'control.dialog_close_icon_size': numberToken(dialogFile, 'with-icon-icon-size'),
@@ -758,6 +767,32 @@ export default function buildMaterialGrid (options) {
       out['color.' + member + '_icon' + state] = ink[state];
     }
   }
+  // Selected toggle states come from each kind's icon-button file:
+  // filled/tonal draw `selected-container-color` with `toggle-selected-icon-color`,
+  // outlined `selected-container-color` / `selected-icon-color`, and the plain
+  // icon button has no container - its `selected-icon-color` already sits in
+  // the ink map above
+  out['color.icon_button_primary_container_selected'] = required(colorToken('filled-icon-button', 'selected-container-color'), 'filled icon button selected container');
+  out['color.icon_button_secondary_container_selected'] = required(colorToken('filled-tonal-icon-button', 'selected-container-color'), 'tonal icon button selected container');
+  out['color.icon_button_tertiary_container_selected'] = required(colorToken('outlined-icon-button', 'selected-container-color'), 'outlined icon button selected container');
+  out['color.icon_button_ghost_container_selected'] = NONE;
+  out['color.icon_button_primary_icon_selected'] = required(colorToken('filled-icon-button', 'toggle-selected-icon-color'), 'filled icon button selected icon');
+  out['color.icon_button_secondary_icon_selected'] = required(colorToken('filled-tonal-icon-button', 'toggle-selected-icon-color'), 'tonal icon button selected icon');
+  // The toggle's unselected face: filled and tonal draw their
+  // `unselected-container-color` and `toggle-unselected-icon-color`; the
+  // outlined and plain kinds keep a transparent container and their
+  // unselected icon color
+  out['color.icon_button_primary_container_unselected'] = required(colorToken('filled-icon-button', 'unselected-container-color'), 'filled icon button unselected container');
+  out['color.icon_button_secondary_container_unselected'] = required(colorToken('filled-tonal-icon-button', 'unselected-container-color'), 'tonal icon button unselected container');
+  out['color.icon_button_tertiary_container_unselected'] = NONE;
+  out['color.icon_button_ghost_container_unselected'] = NONE;
+  out['color.icon_button_primary_icon_unselected'] = required(colorToken('filled-icon-button', 'toggle-unselected-icon-color'), 'filled icon button unselected icon');
+  out['color.icon_button_secondary_icon_unselected'] = required(colorToken('filled-tonal-icon-button', 'toggle-unselected-icon-color'), 'tonal icon button unselected icon');
+  // The pinned outlined-icon-button and icon-button files carry no
+  // `icon-color` key - every icon token is toggle-qualified, so the
+  // unselected face reads `unselected-icon-color`
+  out['color.icon_button_tertiary_icon_unselected'] = required(colorToken(outlinedIconButtonFile, 'unselected-icon-color'), 'outlined icon button unselected icon');
+  out['color.icon_button_ghost_icon_unselected'] = required(colorToken(iconButtonFile, 'unselected-icon-color'), 'icon button unselected icon');
   out['control.icon_button_size'] = numberToken(iconButtonFile, 'state-layer-width');
   out['control.icon_button_icon_size'] = numberToken(iconButtonFile, 'icon-size');
 

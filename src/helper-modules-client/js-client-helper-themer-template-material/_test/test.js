@@ -527,7 +527,9 @@ describe('material template - anatomy enums (v4)', () => {
     'anatomy.progress_indeterminate': 'travel',
     'anatomy.tab_indicator': 'content',
     'anatomy.dialog_close': 'hidden',
-    'anatomy.list_selected_mark': 'hidden'
+    'anatomy.list_selected_mark': 'hidden',
+    'anatomy.menu_icon_seat': 'item',
+    'anatomy.field_counter_format': 'spaced'
   };
 
   for (const schemeName of SCHEME_NAMES) {
@@ -684,10 +686,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 971 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 992 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 971);
+        assert.equal(names.length, 992);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

@@ -140,7 +140,10 @@ const ANATOMY = {
   // A selected option draws no mark; it fills its container
   // (`select/internal/selectoption/select-option.js` renders no selected icon)
   'anatomy.list_selected_mark': 'hidden',
-  'anatomy.menu_icon_seat': 'item'
+  'anatomy.menu_icon_seat': 'item',
+  // The supporting-text counter prints "4 / 100" (`field/internal/`
+  // `_supporting-text.scss` pads the count against the max)
+  'anatomy.field_counter_format': 'spaced'
 };
 
 // --- Engine setup ---------------------------------------------------------

@@ -491,6 +491,7 @@ export default Object.freeze({
     'anatomy.dialog_label': 'hidden',
     'anatomy.list_selected_mark': 'hidden',
     'anatomy.menu_icon_seat': 'item',
+    'anatomy.field_counter_format': 'spaced',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -1283,8 +1284,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_primary_container_selected': '{color.interactive}',
-    'color.button_primary_label_selected': '{color.text_on_color}',
+    'color.button_primary_container_selected': '{color.button_secondary_hover}',
+    'color.button_primary_label_selected': '{color.text_on_button_tonal}',
     'color.button_primary_border': 'rgba(0, 0, 0, 0)',
     'color.button_primary_border_hover': 'rgba(0, 0, 0, 0)',
     'color.button_primary_border_active': 'rgba(0, 0, 0, 0)',
@@ -1353,8 +1354,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_tertiary_container_selected': '{color.background_inverse}',
-    'color.button_tertiary_label_selected': '{color.text_inverse}',
+    'color.button_tertiary_container_selected': '{color.button_secondary_hover}',
+    'color.button_tertiary_label_selected': '{color.text_on_button_tonal}',
     'color.button_tertiary_border': '{color.border_subtle_01}',
     'color.button_tertiary_border_hover': '{color.border_subtle_01}',
     'color.button_tertiary_border_active': '{color.border_subtle_01}',
@@ -1397,8 +1398,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_ghost_container_selected': 'rgba(0, 0, 0, 0)',
-    'color.button_ghost_label_selected': '{color.interactive}',
+    'color.button_ghost_container_selected': '{color.button_secondary_hover}',
+    'color.button_ghost_label_selected': '{color.text_on_button_tonal}',
     'color.button_ghost_border': 'rgba(0, 0, 0, 0)',
     'color.button_ghost_border_hover': 'rgba(0, 0, 0, 0)',
     'color.button_ghost_border_active': 'rgba(0, 0, 0, 0)',
@@ -1557,8 +1558,8 @@ export default Object.freeze({
         0.38
       ]
     },
-    'color.button_tonal_container_selected': '{color.button_secondary_hover}',
-    'color.button_tonal_label_selected': '{color.text_on_button_tonal}',
+    'color.button_tonal_container_selected': '{color.button_secondary}',
+    'color.button_tonal_label_selected': '#ffffff',
     'color.button_tonal_border': 'rgba(0, 0, 0, 0)',
     'color.button_tonal_border_hover': 'rgba(0, 0, 0, 0)',
     'color.button_tonal_border_active': 'rgba(0, 0, 0, 0)',
@@ -1849,6 +1850,18 @@ export default Object.freeze({
     'control.menu_item_height': 56,
     'control.menu_divider_width': 1,
     'control.menu_icon_size': 24,
+    'control.menu_min_width': 112,
+    'control.menu_icon_min_width': 112,
+    'control.menu_item_gap': 16,
+    'color.menu_item_icon': '{color.text_secondary}',
+    'color.menu_item_icon_hover': '{color.text_secondary}',
+    'color.menu_item_icon_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.38
+      ]
+    },
     'color.menu_divider': '{color.border_subtle_02}',
     'color.menu_item_danger_label': '{color.support_error}',
     'color.menu_item_danger_label_hover': '{color.support_error}',
@@ -2096,7 +2109,7 @@ export default Object.freeze({
     'control.tab_contained_padding_block': 8,
     'control.tab_padding_inline': 16,
     'control.tab_item_gap': 0,
-    'control.tab_divider_width': 0,
+    'control.tab_divider_width': 1,
     'control.tab_track_width': 0,
     'control.tab_indicator_width': 3,
     'control.tab_indicator_radius': 3,
@@ -2140,7 +2153,7 @@ export default Object.freeze({
     'control.dialog_header_space': 0,
     'control.dialog_body_padding_top': 24,
     'control.dialog_body_padding_bottom': 24,
-    'control.dialog_actions_height': 100,
+    'control.dialog_actions_height': 0,
     'control.dialog_actions_gap': 8,
     'control.dialog_actions_padding': 24,
     'control.dialog_close_icon_size': 24,
@@ -2214,6 +2227,20 @@ export default Object.freeze({
       ]
     },
     'color.icon_button_tertiary_icon_selected': '{color.text_inverse}',
+    'color.icon_button_primary_container_selected': '{color.interactive}',
+    'color.icon_button_secondary_container_selected': '{color.button_secondary_hover}',
+    'color.icon_button_tertiary_container_selected': '{color.background_inverse}',
+    'color.icon_button_ghost_container_selected': 'rgba(0, 0, 0, 0)',
+    'color.icon_button_primary_icon_selected': '{color.text_on_color}',
+    'color.icon_button_secondary_icon_selected': '{color.text_on_button_tonal}',
+    'color.icon_button_primary_container_unselected': '{color.layer_active_01}',
+    'color.icon_button_secondary_container_unselected': '{color.layer_active_01}',
+    'color.icon_button_tertiary_container_unselected': 'rgba(0, 0, 0, 0)',
+    'color.icon_button_ghost_container_unselected': 'rgba(0, 0, 0, 0)',
+    'color.icon_button_primary_icon_unselected': '{color.interactive}',
+    'color.icon_button_secondary_icon_unselected': '{color.text_secondary}',
+    'color.icon_button_tertiary_icon_unselected': '{color.text_secondary}',
+    'color.icon_button_ghost_icon_unselected': '{color.text_secondary}',
     'control.icon_button_size': 40,
     'control.icon_button_icon_size': 24,
     'shadow.level_00': {
@@ -4598,6 +4625,9 @@ export default Object.freeze({
     'anatomy.menu_icon_seat': {
       'group': 'raw'
     },
+    'anatomy.field_counter_format': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -5669,6 +5699,15 @@ export default Object.freeze({
     'color.menu_divider': {
       'group': 'color'
     },
+    'color.menu_item_icon': {
+      'group': 'color'
+    },
+    'color.menu_item_icon_hover': {
+      'group': 'color'
+    },
+    'color.menu_item_icon_disabled': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -5960,6 +5999,48 @@ export default Object.freeze({
     'color.icon_button_tertiary_icon_selected': {
       'group': 'color'
     },
+    'color.icon_button_primary_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_container_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_primary_icon_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_icon_selected': {
+      'group': 'color'
+    },
+    'color.icon_button_primary_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_container_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_primary_icon_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_secondary_icon_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_ghost_icon_unselected': {
+      'group': 'color'
+    },
+    'color.icon_button_tertiary_icon_unselected': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -6045,6 +6126,15 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.menu_icon_size': {
+      'group': 'dimension'
+    },
+    'control.menu_min_width': {
+      'group': 'dimension'
+    },
+    'control.menu_icon_min_width': {
+      'group': 'dimension'
+    },
+    'control.menu_item_gap': {
       'group': 'dimension'
     },
     'control.radio_size': {
@@ -6633,7 +6723,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '0741d6d36888e0a13dbfa96449ba1ee1ffcafe7d',
+    'default_shasum': '525956d108fe806161008321b2d18f74abd35e97',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
