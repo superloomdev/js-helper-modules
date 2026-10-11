@@ -238,6 +238,10 @@ export default function buildGridRecipe (grid) {
     'color.menu_item_icon': '{color.list_item_label}',
     'color.menu_item_icon_hover': '{color.list_item_label_hover}',
     'color.menu_item_icon_disabled': '{color.list_item_label_disabled}',
+    // The item shortcut draws in the item's own type and colour
+    'type.menu_item_shortcut': '{type.list_item}',
+    'color.menu_item_shortcut': '{color.list_item_label}',
+    'color.menu_item_shortcut_hover': '{color.list_item_label_hover}',
     'color.menu_divider': colorOf('border_subtle_00'),
     'color.menu_item_danger_container_hover': colorOf('button_danger_primary'),
     'color.menu_item_danger_label': colorOf('text_secondary'),

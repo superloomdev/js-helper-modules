@@ -5606,6 +5606,8 @@ export default Object.freeze({
     'color.menu_item_icon': '{color.list_item_label}',
     'color.menu_item_icon_hover': '{color.list_item_label_hover}',
     'color.menu_item_icon_disabled': '{color.list_item_label_disabled}',
+    'color.menu_item_shortcut': '{color.list_item_label}',
+    'color.menu_item_shortcut_hover': '{color.list_item_label_hover}',
     'color.text_area_container_hover': '{color.field_container_hover}',
     'color.text_area_outline_disabled': '{color.field_outline_disabled}',
     'color.radio_outline_selected': '{color.selection_outline}',
@@ -5816,6 +5818,7 @@ export default Object.freeze({
     'type.field_label': '{type.label01}',
     'type.field_helper': '{type.helper_text_01}',
     'type.list_item': '{type.body_compact_01}',
+    'type.menu_item_shortcut': '{type.list_item}',
     'type.text_area_value': '{type.field_value}',
     'type.tag_label': '{type.label01}',
     'type.tooltip_label': '{type.body01}',
@@ -8086,6 +8089,12 @@ export default Object.freeze({
     'color.menu_item_icon_disabled': {
       'group': 'color'
     },
+    'color.menu_item_shortcut': {
+      'group': 'color'
+    },
+    'color.menu_item_shortcut_hover': {
+      'group': 'color'
+    },
     'color.text_area_container_hover': {
       'group': 'color'
     },
@@ -8714,6 +8723,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.list_item': {
+      'group': 'typeSet'
+    },
+    'type.menu_item_shortcut': {
       'group': 'typeSet'
     },
     'type.text_area_value': {
