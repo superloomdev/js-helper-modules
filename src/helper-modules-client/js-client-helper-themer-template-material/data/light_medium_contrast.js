@@ -7425,7 +7425,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '8ae2f81f8b8fc5d5c8e283cefb05026413d9fa2d',
+    'default_shasum': '3e6d30076c0227d566f79ffca3293f19f87f8172',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
