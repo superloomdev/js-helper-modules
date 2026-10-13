@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274",
+  "source_sha256": "f911c7f8aaa883cd4c58359f7649fbe302cf1258a54d04c78209fe07c9f557f5",
   "set": "material",
   "upstream": {
     "package": "@material-symbols/svg-400",
@@ -70,6 +70,7 @@
     "pending_filled": "pending",
     "radio_button": "radio_button_unchecked",
     "radio_button_checked": "radio_button_checked",
+    "save": "save",
     "search": "search",
     "selected_indicator": "check",
     "settings": "settings",

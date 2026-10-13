@@ -61,13 +61,13 @@ vocabulary, the token contract, ships in this package as data and is read throug
 getContract() -> Object | async:no
   Frozen registry { version, groups, tokens, meta }. tokens has one entry per contract token
   ({ group, emit?, values? }); meta is derived and can be attached to a template as template.meta.
-  Same reference on every call. Never throws. Version 6 has 995 tokens in 19 groups (the role grid,
-  `contract.grid`, now 489 cells): version 5's 763 plus eight grid families (list, switch, tag,
-  progress, tooltip, tab, dialog, notification), member cells for the text area, radio, icon
-  button, menu, compact tooltip and dialog close icon, ten anatomy values (`field_counter`,
-  `switch_state_text`, `progress_indeterminate`, `tab_indicator`, `dialog_close`,
-  `list_selected_mark`, `switch_edge`, `dialog_label`, `menu_icon_seat`, `field_counter_format`)
-  and the icon roles `selected_indicator` and `switch_checked_indicator`.
+  Same reference on every call. Never throws. Version 7 has 1127 tokens in 19 groups (the role grid,
+  `contract.grid`, now 617 cells): version 6's 995 plus the divider, link, loading, progress step,
+  skeleton and view families, member cells for the button set, button skeleton, combo button,
+  inline loading, saving, the tag variants and the landing view, one button kind (`quick_action`),
+  three anatomy values (`loading_motion`, `tag_close`, `tag_selected_mark`), the grid's first
+  motion cells (`loading_rotation`, `loading_arc_cycle`, `skeleton_cycle`) and the icon role
+  `save`.
 
 validateContract(theme, options) -> { success, errors, warnings } | async:no
   Checks theme.tokens against the contract. options.required (string[]) makes absence an error;

@@ -27,6 +27,12 @@ const AUDIT_EXCEPTIONS = Object.freeze([
     rule: 'contrast',
     tokens: ['color.button_ghost_label_active', 'color.button_ghost_container_active'],
     reason: 'Carbon inks a pressed ghost button in $link-primary-hover over $background-active (button/_button.scss); in g10 that pair reads 4.33:1'
+  },
+  {
+    scheme: 'g10',
+    rule: 'contrast',
+    tokens: ['color.button_quick_action_label_active', 'color.button_quick_action_container_active'],
+    reason: 'Carbon inks a pressed quick-action chat button in $chat-button-text-hover over $chat-button-active (chat-button/_chat-button.scss); in g10 that pair reads 4.33:1'
   }
 ]);
 const contract = Themer.getContract();
@@ -42,8 +48,8 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.id, 'carbon-v11');
   });
 
-  it('should export contract_version 6', () => {
-    assert.equal(profile.contract_version, 6);
+  it('should export contract_version 7', () => {
+    assert.equal(profile.contract_version, 7);
   });
 
   it('should export reference with Carbon package versions', () => {
@@ -250,7 +256,10 @@ describe('carbon template - anatomy enums (v4)', () => {
     'anatomy.tab_indicator': 'full',
     'anatomy.dialog_close': 'shown',
     'anatomy.list_selected_mark': 'shown',
-    'anatomy.field_counter_format': 'tight'
+    'anatomy.field_counter_format': 'tight',
+    'anatomy.loading_motion': 'spin',
+    'anatomy.tag_close': 'circle',
+    'anatomy.tag_selected_mark': 'hidden'
   };
 
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
@@ -278,7 +287,7 @@ describe('carbon template - icon literals (v4)', () => {
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
   it('should carry 82 valid icon literals, identical across the four schemes', () => {
-    assert.equal(iconKeys.length, 84);
+    assert.equal(iconKeys.length, 85);
     const subset = {};
     for (const name of iconKeys) {
       const literal = profile.schemes.white.tokens[name];
@@ -438,10 +447,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 995 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1127 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 995);
+        assert.equal(names.length, 1127);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });

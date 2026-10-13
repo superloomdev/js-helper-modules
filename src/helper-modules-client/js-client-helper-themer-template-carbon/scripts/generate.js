@@ -87,7 +87,13 @@ const ANATOMY = {
   'anatomy.list_selected_mark': 'shown',
   'anatomy.menu_icon_seat': 'shared',
   // The counter prints "4/100" (`text-area` renders the count against the limit)
-  'anatomy.field_counter_format': 'tight'
+  'anatomy.field_counter_format': 'tight',
+  // v7: a spinner that rotates whole, the filter tag's circular close
+  // affordance, and a selectable tag that marks selection by its inverse
+  // fill, not a checkmark
+  'anatomy.loading_motion': 'spin',
+  'anatomy.tag_close': 'circle',
+  'anatomy.tag_selected_mark': 'hidden'
 };
 
 // --- Role grid (v5 amendment) -------------------------------------------

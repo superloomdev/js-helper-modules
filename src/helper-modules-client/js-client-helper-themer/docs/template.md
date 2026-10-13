@@ -310,10 +310,15 @@ Where two design systems draw the same component with a different shape, the cho
 | `anatomy.list_selected_mark` | `shown`, `hidden` |
 | `anatomy.menu_icon_seat` | `shared`, `item` |
 | `anatomy.field_counter_format` | `tight`, `spaced` |
+| `anatomy.loading_motion` | `spin`, `arc` |
+| `anatomy.tag_close` | `circle`, `inset` |
+| `anatomy.tag_selected_mark` | `shown`, `hidden` |
 
 `anatomy.button_label` (the second version 5 amendment) says where a button taller than the default height draws its label: `top` keeps it where the default height puts it, `center` centers it in the taller button.
 
 The version 6 anatomy values: `anatomy.field_counter` places a field's character counter in the `label` row or the `message` row; `anatomy.switch_state_text` shows or `hidden` an on/off label beside the switch; `anatomy.progress_indeterminate` animates an indeterminate bar as a `sweep` (the bar travels the track) or `travel` (Material's indeterminate motion); `anatomy.tab_indicator` draws the active-tab indicator the `full` tab width or the `content` (label) width; `anatomy.dialog_close` shows or `hidden` a dialog's close button; `anatomy.list_selected_mark` (an amendment inside version 6) shows or `hidden` the mark on a selected list item (which glyph it draws is `icon.selected_indicator`); `anatomy.switch_edge` (an amendment inside version 6) draws the switch's edge as a `border` that costs room or paints it on a `skin` free of room; `anatomy.dialog_label` (an amendment inside version 6) shows or `hidden` an eyebrow label above a dialog's heading; `anatomy.menu_icon_seat` (an amendment inside version 6) reserves the icon seat for every item (`shared`) or lets each item carry its own (`item`); `anatomy.field_counter_format` (an amendment inside version 6) prints a field's counter tight against the limit (`tight`, "4/100") or spaced from it (`spaced`, "4 / 100").
+
+The version 7 anatomy values: `anatomy.loading_motion` draws a spinner as a full `spin` (the whole disc rotates) or as an `arc` (a partial arc travels the circle); `anatomy.tag_close` draws a dismissible tag's close affordance as a `circle` behind the icon or `inset` inside the tag's edge; `anatomy.tag_selected_mark` shows or `hidden` the checkmark a selectable tag draws when selected.
 
 Values are named by what they do, never by a design system. `validateContract` rejects a value outside the list with `CONTRACT_INVALID_VALUE`.
 
@@ -337,6 +342,17 @@ Contract version 6 adds eight families for the next component batch:
 - `notification`: container, text, close icon, action and per-status marker colors; width, radius, marker width, icon size; title and body type sets; the notification's elevation.
 
 Member cells added in version 6: `text_area_container_hover`, `text_area_outline_disabled`, `type.text_area_value` (the multiline field), `radio_size`, `radio_border`, `radio_dot_size`, `radio_focus_offset` and the `radio_outline_selected_*` colors (the radio's own geometry and checked ring), `icon_button_size` and `icon_button_icon_size` plus the `icon_button_<kind>_icon_*` colors, and `dialog_close_icon_size`. Amended inside the version: the menu cells `menu_min_width`, `menu_icon_min_width`, `menu_item_gap` and `menu_item_icon[_hover|_disabled]`, `type.menu_item_shortcut` and `color.menu_item_shortcut[_hover]` (the shortcut's own type and ink), and the icon button's selected paints `icon_button_<kind>_container_selected` (every kind) and `icon_button_<kind>_icon_selected` (primary and secondary), plus the toggle's unselected face `icon_button_<kind>_container_unselected` and `icon_button_<kind>_icon_unselected` (every kind).
+
+Contract version 7 adds the families the remaining atom-tier components draw, and the grid's first `motion` cells:
+
+- `divider`: the line's color, width and inset.
+- `link`: label colors per rest, hover, active, visited and disabled state; the focus ring's color and width; the icon gap and the icon size (plus the large size); the label's type set at three sizes (`link_label`, `link_label_small`, `link_label_large`).
+- `loading`: the spinner's indicator, track and scrim colors; size, stroke width and arc per size; `motion.loading_rotation` (the disc's cycle) and `motion.loading_arc_cycle` (the traveling arc's cycle).
+- `progress_step`: the step icon, connector line and label colors per state; the step's width, vertical height, icon and label gaps, line width, label width floors and the skeleton label geometry; the label and secondary label type sets.
+- `skeleton`: the container and shimmer colors, corner radius, placeholder size, text line height and gap, heading height, and `motion.skeleton_cycle`.
+- `view`: the page background and the navigation region's background.
+
+Member cells added in version 7: the button set's `button_set_separator[_disabled|_stacked_disabled]`, `button_set_item_max_width`, `button_set_gap` and the `button_set_fluid_*` widths and ghost padding; `button_skeleton_width`; `combo_button_min_width` and `_max_width`; the inline loading's `inline_loading_label`, `inline_loading_success`, `inline_loading_error`, `control.inline_loading_gap` and `type.inline_loading_label`; the saving status's `saving_error_icon`, `control.saving_icon_gap` and `type.saving_label`; the closable tag's `tag_close_*` cells; the interactive tags' `tag_interactive_*` cells and `tag_focus_width`, `tag_focus_offset`, `color.tag_focus_ring`; the selectable tag's `tag_selectable_*` cells; `tag_skeleton_width`; and the landing view's `landing_*` cells and `type.landing_title`. Version 7 also adds one button kind, `quick_action` (the chat button's outlined quick action), which gets every cell a kind gets plus `control.button_quick_action_focus_gap_width`, and the icon role `icon.save`.
 
 A template answers every cell. A neutral or Carbon-shaped template points each cell at the semantic token the part draws in (`{color.field_01}`); a template generated from a design system's component tokens fills each cell from them. A color the design system states as a role at an opacity stays `rgba` (exact over any backdrop). `shadow.level_00` is no elevation. `feedback.focus_trigger` (`any` | `keyboard`) decides whether a focus ring shows on every focus or on keyboard focus only.
 

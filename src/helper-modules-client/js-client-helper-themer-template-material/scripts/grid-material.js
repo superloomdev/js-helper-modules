@@ -325,6 +325,32 @@ export default function buildMaterialGrid (options) {
   // `button/internal/_shared.scss`: "Buttons have a default min-width of 64px"
   out['control.button_min_width'] = 64;
 
+  // v7: the quick action - Material has no chat button; the request draws it
+  // as a transparent button under primary state layers with a primary label
+  // and an outline border, its selected face the secondary container
+  const quickPrimary = rolePaint('primary');
+  out['color.button_quick_action_container'] = NONE;
+  out['color.button_quick_action_container_hover'] = atOpacity(quickPrimary, 0.08);
+  out['color.button_quick_action_container_active'] = atOpacity(quickPrimary, 0.12);
+  out['color.button_quick_action_container_focus'] = atOpacity(quickPrimary, 0.12);
+  out['color.button_quick_action_container_disabled'] = NONE;
+  out['color.button_quick_action_container_selected'] = roleEntry('secondary-container', 'color.button_tonal');
+  out['color.button_quick_action_label'] = roleEntry('primary');
+  out['color.button_quick_action_label_hover'] = roleEntry('primary');
+  out['color.button_quick_action_label_active'] = roleEntry('primary');
+  out['color.button_quick_action_label_focus'] = roleEntry('primary');
+  out['color.button_quick_action_label_disabled'] = atOpacity(rolePaint('on-surface'), 0.38);
+  out['color.button_quick_action_label_selected'] = roleEntry('on-secondary-container');
+  out['color.button_quick_action_border'] = roleEntry('outline');
+  out['color.button_quick_action_border_hover'] = roleEntry('outline');
+  out['color.button_quick_action_border_active'] = roleEntry('primary');
+  out['color.button_quick_action_border_disabled'] = atOpacity(rolePaint('on-surface'), 0.12);
+  out['shadow.button_quick_action'] = '{shadow.level_00}';
+  out['shadow.button_quick_action_hover'] = '{shadow.level_00}';
+  out['shadow.button_quick_action_active'] = '{shadow.level_00}';
+  out['shadow.button_quick_action_disabled'] = '{shadow.level_00}';
+  out['control.button_quick_action_focus_gap_width'] = '{control.button_focus_gap_width}';
+
   // ~~~~~~~~~~~~~~~~~~~~ Field family ~~~~~~~~~~~~~~~~~~~~
   const field = 'outlined-text-field';
   const fieldColor = function (name) {
@@ -801,6 +827,172 @@ export default function buildMaterialGrid (options) {
   out['color.icon_button_ghost_icon_unselected'] = required(colorToken(iconButtonFile, 'unselected-icon-color'), 'icon button unselected icon');
   out['control.icon_button_size'] = numberToken(iconButtonFile, 'state-layer-width');
   out['control.icon_button_icon_size'] = numberToken(iconButtonFile, 'icon-size');
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the button set, skeleton and combo members ~~~~
+  // Material draws no button set, split button or button skeleton; the
+  // request's decisions answer, the set gap and fluid ghost inset reading the
+  // template's own cells
+  Object.assign(out, {
+    'control.button_set_item_max_width': 196,
+    'control.button_set_gap': '{control.dialog_actions_gap}',
+    'color.button_set_separator': NONE,
+    'color.button_set_separator_disabled': NONE,
+    'color.button_set_separator_stacked_disabled': NONE,
+    'control.button_set_fluid_min_width': 176,
+    'control.button_set_fluid_max_width': 232,
+    'control.button_set_fluid_ghost_padding_start': '{control.button_padding_start}',
+    'control.button_skeleton_width': 150,
+    'control.combo_button_min_width': 160,
+    'control.combo_button_max_width': 240
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the divider family (md-divider) ~~~~~~~~~~~~~~~
+  Object.assign(out, {
+    'color.divider': required(colorToken('divider', 'color'), 'divider color'),
+    'control.divider_width': numberToken('divider', 'thickness'),
+    // `divider/internal/_divider.scss`: 16px inset at each end inside a list
+    'control.divider_inset': 16
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the link family ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Material has no link element; a link is text in primary under the same
+  // focus ring every control draws
+  Object.assign(out, {
+    'color.link_label': roleEntry('primary'),
+    'color.link_label_hover': roleEntry('primary'),
+    'color.link_label_active': roleEntry('primary'),
+    'color.link_label_visited': roleEntry('primary'),
+    'color.link_label_disabled': atOpacity(rolePaint('on-surface'), 0.38),
+    'color.link_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
+    'control.link_focus_width': numberToken('focus-ring', 'width'),
+    'control.link_icon_gap': 8,
+    'control.link_icon_size': 18,
+    'control.link_icon_size_large': 20,
+    'type.link_label': options.typeSet('label-large'),
+    'type.link_label_small': options.typeSet('label-medium'),
+    'type.link_label_large': options.typeSet('body-large')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the loading family (md-circular-progress) ~~~~~
+  // The circular indicator is a 48px ring with a 4px stroke (24px and 3px
+  // small); it spins every 1568ms while its arc cycles every 1333ms
+  // (`progress/internal/_circular-progress.scss`), the request's decision
+  Object.assign(out, {
+    'color.loading_indicator': roleEntry('primary'),
+    'color.loading_track': NONE,
+    'color.loading_scrim': '{color.dialog_scrim}',
+    'control.loading_size': 48,
+    'control.loading_size_small': 24,
+    'control.loading_stroke_width': 4,
+    'control.loading_stroke_width_small': 3,
+    'control.loading_arc': 0.81,
+    'control.loading_arc_small': 0.48,
+    'motion.loading_rotation': 1568,
+    'motion.loading_arc_cycle': 1333
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the inline loading and saving members ~~~~~~~~~
+  Object.assign(out, {
+    'type.inline_loading_label': options.typeSet('body-medium'),
+    'color.inline_loading_label': roleEntry('on-surface-variant'),
+    'control.inline_loading_gap': 8,
+    'color.inline_loading_success': roleEntry('primary'),
+    'color.inline_loading_error': roleEntry('error'),
+    'type.saving_label': options.typeSet('body-medium'),
+    'color.saving_error_icon': roleEntry('error'),
+    'control.saving_icon_gap': 16
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the progress step family ~~~~~~~~~~~~~~~~~~~~~~
+  // Material has no stepped progress; the request's decisions answer, the
+  // connector drawn at the linear track's height
+  Object.assign(out, {
+    'color.progress_step_icon': roleEntry('primary'),
+    'color.progress_step_icon_incomplete': roleEntry('on-surface-variant'),
+    'color.progress_step_icon_disabled': atOpacity(rolePaint('on-surface'), 0.38),
+    'color.progress_step_icon_invalid': roleEntry('error'),
+    'color.progress_step_line': roleEntry('surface-container-highest'),
+    'color.progress_step_line_complete': roleEntry('primary'),
+    'color.progress_step_label': roleEntry('on-surface'),
+    'color.progress_step_label_hover': roleEntry('primary'),
+    'color.progress_step_label_focus': roleEntry('primary'),
+    'color.progress_step_label_disabled': atOpacity(rolePaint('on-surface'), 0.38),
+    'color.progress_step_secondary_label': roleEntry('on-surface-variant'),
+    'control.progress_step_width': 128,
+    'control.progress_step_min_width': 112,
+    'control.progress_step_vertical_min_height': 58,
+    'control.progress_step_icon_gap': 8,
+    'control.progress_step_icon_top': 10,
+    'control.progress_step_line_width': '{control.progress_height}',
+    'control.progress_step_label_max_width': 88,
+    'control.progress_step_label_max_width_vertical': 160,
+    'control.progress_step_label_gap': 8,
+    'control.progress_step_skeleton_label_width': 40,
+    'control.progress_step_skeleton_label_height': 14,
+    'type.progress_step_label': options.typeSet('label-large'),
+    'type.progress_step_secondary_label': options.typeSet('body-small')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the skeleton family ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Material has no skeleton element; the request's decisions answer, the
+  // shimmer an on-surface sweep at the hover opacity
+  Object.assign(out, {
+    'color.skeleton_container': roleEntry('surface-container-highest'),
+    'color.skeleton_shimmer': atOpacity(rolePaint('on-surface'), 0.08),
+    'control.skeleton_radius': 4,
+    'control.skeleton_placeholder_size': 100,
+    'control.skeleton_text_height': 16,
+    'control.skeleton_text_gap': 8,
+    'control.skeleton_heading_height': 24,
+    'motion.skeleton_cycle': 3000
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the tag members ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // The dismissible tag's close is the input chip's trailing icon, inset from
+  // the edge; the operational and selectable tags are the assist and filter
+  // chips, the selected filter chip filling secondary-container
+  const inputChip = 'input-chip';
+  const filterChip = 'filter-chip';
+  Object.assign(out, {
+    'control.tag_skeleton_width': 60,
+    'control.tag_close_gap': numberToken(inputChip, 'icon-label-space'),
+    'control.tag_close_icon_size': numberToken(inputChip, 'with-trailing-icon-trailing-icon-size'),
+    'control.tag_close_inset': numberToken(inputChip, 'with-trailing-icon-trailing-space'),
+    'color.tag_close_container_hover': translucent(inputChip, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
+    'color.tag_close_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
+    'control.tag_interactive_outline_width': numberToken('assist-chip', 'flat-outline-width'),
+    'color.tag_interactive_layer_active': translucent('assist-chip', 'pressed-state-layer-color', 'pressed-state-layer-opacity'),
+    'color.tag_interactive_outline_disabled': translucent(filterChip, 'flat-disabled-unselected-outline-color', 'flat-disabled-unselected-outline-opacity'),
+    'color.tag_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
+    'control.tag_focus_width': numberToken('focus-ring', 'width'),
+    'control.tag_focus_offset': numberToken('focus-ring', 'outward-offset'),
+    // The flat filter chip draws no unselected fill; the selected face fills
+    // secondary-container and its hover layers on-secondary-container over it
+    'color.tag_selectable_container': NONE,
+    'color.tag_selectable_container_hover': translucent(filterChip, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
+    'color.tag_selectable_container_selected': required(colorToken(filterChip, 'flat-selected-container-color'), 'filter chip selected container'),
+    'color.tag_selectable_container_selected_hover': layered(
+      required(paintOf(filterChip, 'flat-selected-container-color'), 'filter chip selected container'),
+      [[required(paintOf(filterChip, 'selected-hover-state-layer-color'), 'filter chip selected hover layer'), numberToken(filterChip, 'selected-hover-state-layer-opacity')]]
+    ),
+    'color.tag_selectable_label': required(colorToken(filterChip, 'unselected-label-text-color'), 'filter chip label'),
+    'color.tag_selectable_label_selected': required(colorToken(filterChip, 'selected-label-text-color'), 'filter chip selected label'),
+    'color.tag_selectable_outline': required(colorToken(filterChip, 'flat-unselected-outline-color'), 'filter chip outline'),
+    'control.tag_selectable_outline_width_selected': numberToken(filterChip, 'flat-selected-outline-width')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v7: the view family and landing member ~~~~~~~~~~~~
+  Object.assign(out, {
+    'color.view_background': roleEntry('surface'),
+    'color.view_navigation_background': roleEntry('surface-container'),
+    'color.landing_banner': roleEntry('inverse-surface'),
+    'control.landing_banner_height': 192,
+    'control.landing_banner_min_window_height': 500,
+    'control.landing_company_image_width': 61,
+    'control.landing_company_image_height': 24,
+    'control.landing_product_image_size': 96,
+    'type.landing_title': options.typeSet('headline-medium')
+  });
 
   // No elevation
   out['shadow.level_00'] = { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] };

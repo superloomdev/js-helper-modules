@@ -23,7 +23,7 @@
 
 
 // The role grid's button kinds and the states a label is read in over its fill
-const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']);
+const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated', 'quick_action']);
 const LABEL_STATES = Object.freeze(['', '_hover', '_active', '_focus', '_selected']);
 // Kinds whose rest container is a fill (not transparent): their fill must differ from the disabled fill
 const FILLED_KINDS = Object.freeze(['primary', 'secondary', 'danger', 'tonal', 'elevated']);
@@ -79,7 +79,16 @@ const CONTRAST = Object.freeze([
   ['color.field_indicator', 'color.field_container', 3.0],
   ['color.selection_outline', 'color.background', 3.0],
   ['color.selection_mark', 'color.selection_container', 3.0],
-  ['color.selection_label', 'color.background', 4.5]
+  ['color.selection_label', 'color.background', 4.5],
+  // Role grid (v7): the link's labels on the page, the loading and step
+  // labels, and the selectable tag's label on its rest and selected fills
+  ['color.link_label', 'color.background', 4.5],
+  ['color.link_label_hover', 'color.background', 4.5],
+  ['color.link_label_visited', 'color.background', 4.5],
+  ['color.progress_step_label', 'color.background', 4.5],
+  ['color.inline_loading_label', 'color.background', 4.5],
+  ['color.tag_selectable_label', 'color.tag_selectable_container', 4.5],
+  ['color.tag_selectable_label_selected', 'color.tag_selectable_container_selected', 4.5]
 ]);
 
 
@@ -123,7 +132,9 @@ const DISTINCT = Object.freeze([
   }),
   ['color.field_value', 'color.field_value_disabled'],
   ['color.selection_container', 'color.selection_container_disabled'],
-  ['color.selection_outline', 'color.selection_outline_disabled']
+  ['color.selection_outline', 'color.selection_outline_disabled'],
+  // Role grid (v7): a shimmer that equals its container does not show
+  ['color.skeleton_shimmer', 'color.skeleton_container']
 ]);
 
 
@@ -141,7 +152,10 @@ const SELECTED_PAIRS = Object.freeze(
     return ['color.button_' + kind + '_container_selected', 'color.button_' + kind + '_label_selected', 'color.button_' + kind + '_container', 'color.button_' + kind + '_label'];
   }).concat(['primary', 'secondary', 'ghost', 'tertiary'].map(function (kind) {
     return ['color.icon_button_' + kind + '_container_selected', 'color.icon_button_' + kind + '_icon_selected', 'color.icon_button_' + kind + '_container_unselected', 'color.icon_button_' + kind + '_icon_unselected'];
-  }))
+  })).concat([
+    // Role grid (v7): the selectable tag's selected face against its rest
+    ['color.tag_selectable_container_selected', 'color.tag_selectable_label_selected', 'color.tag_selectable_container', 'color.tag_selectable_label']
+  ])
 );
 
 

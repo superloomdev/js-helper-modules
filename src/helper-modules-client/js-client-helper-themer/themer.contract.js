@@ -91,13 +91,25 @@
 // own type and ink (`type.menu_item_shortcut`, `color.menu_item_shortcut`
 // and its hover): the primary draws it in the item's type and colour, the
 // second in a smaller supporting type and a quieter ink.
+//
+// Version 7 extends the role grid with the families the remaining
+// atom-tier rows draw (`divider`, `link`, `loading`, `progress_step`,
+// `skeleton`, `view`), member cells where a member of an existing family
+// draws differently (the button set, the button skeleton, the combo
+// button, the inline loading line, the saving status, the closable,
+// interactive, selectable and skeleton tags, the landing view), one button
+// kind (`quick_action`, the chat button's outlined quick action, which
+// gets every cell a kind gets), three anatomy enums (`loading_motion`,
+// `tag_close`, `tag_selected_mark`) and the motion of the two animated
+// families (`motion.loading_rotation`, `motion.loading_arc_cycle`,
+// `motion.skeleton_cycle`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 // The role grid (v5 amendment). Kinds of the button family, in the order
 // the component documents them
-const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']);
+const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated', 'quick_action']);
 const BUTTON_FILL_STATES = Object.freeze(['', '_hover', '_active', '_focus', '_disabled', '_selected']);
 const BUTTON_BORDER_STATES = Object.freeze(['', '_hover', '_active', '_disabled']);
 const BUTTON_ELEVATION_STATES = Object.freeze(['', '_hover', '_active', '_disabled']);
@@ -194,7 +206,36 @@ const GRID = Object.freeze({
       // button paints the button's face, so the pair it must differ from is
       // the toggle's own unselected face, not the button's
       'icon_button_primary_container_unselected', 'icon_button_secondary_container_unselected', 'icon_button_ghost_container_unselected', 'icon_button_tertiary_container_unselected',
-      'icon_button_primary_icon_unselected', 'icon_button_secondary_icon_unselected', 'icon_button_ghost_icon_unselected', 'icon_button_tertiary_icon_unselected'
+      'icon_button_primary_icon_unselected', 'icon_button_secondary_icon_unselected', 'icon_button_ghost_icon_unselected', 'icon_button_tertiary_icon_unselected',
+      // v7: the button set's separators between adjacent items
+      'button_set_separator', 'button_set_separator_disabled', 'button_set_separator_stacked_disabled',
+      // v7: the divider family
+      'divider',
+      // v7: the link family
+      'link_label', 'link_label_hover', 'link_label_active', 'link_label_visited', 'link_label_disabled', 'link_focus_ring',
+      // v7: the loading family
+      'loading_indicator', 'loading_track', 'loading_scrim',
+      // v7: the inline loading member
+      'inline_loading_label', 'inline_loading_success', 'inline_loading_error',
+      // v7: the saving member
+      'saving_error_icon',
+      // v7: the progress step member
+      'progress_step_icon', 'progress_step_icon_incomplete', 'progress_step_icon_disabled', 'progress_step_icon_invalid',
+      'progress_step_line', 'progress_step_line_complete',
+      'progress_step_label', 'progress_step_label_hover', 'progress_step_label_focus', 'progress_step_label_disabled', 'progress_step_secondary_label',
+      // v7: the skeleton family
+      'skeleton_container', 'skeleton_shimmer',
+      // v7: the closable tag member
+      'tag_close_container_hover', 'tag_close_focus_ring',
+      // v7: the interactive tag members
+      'tag_interactive_layer_active', 'tag_interactive_outline_disabled', 'tag_focus_ring',
+      // v7: the selectable tag member
+      'tag_selectable_container', 'tag_selectable_container_hover', 'tag_selectable_container_selected', 'tag_selectable_container_selected_hover',
+      'tag_selectable_label', 'tag_selectable_label_selected', 'tag_selectable_outline',
+      // v7: the view family
+      'view_background', 'view_navigation_background',
+      // v7: the landing view member
+      'landing_banner'
     ]
   )),
   control: Object.freeze([
@@ -237,13 +278,52 @@ const GRID = Object.freeze({
     // v6: the notification family
     'notification_width', 'notification_radius', 'notification_marker_width', 'notification_icon_size',
     // v6: the icon button member
-    'icon_button_size', 'icon_button_icon_size'
+    'icon_button_size', 'icon_button_icon_size',
+    // v7: the quick action's focus gap
+    'button_quick_action_focus_gap_width',
+    // v7: the button set member
+    'button_set_item_max_width', 'button_set_gap', 'button_set_fluid_min_width', 'button_set_fluid_max_width', 'button_set_fluid_ghost_padding_start',
+    // v7: the button skeleton member
+    'button_skeleton_width',
+    // v7: the combo button member
+    'combo_button_min_width', 'combo_button_max_width',
+    // v7: the divider family
+    'divider_width', 'divider_inset',
+    // v7: the link family
+    'link_focus_width', 'link_icon_gap', 'link_icon_size', 'link_icon_size_large',
+    // v7: the loading family
+    'loading_size', 'loading_size_small', 'loading_stroke_width', 'loading_stroke_width_small', 'loading_arc', 'loading_arc_small',
+    // v7: the inline loading member
+    'inline_loading_gap',
+    // v7: the saving member
+    'saving_icon_gap',
+    // v7: the progress step member
+    'progress_step_width', 'progress_step_min_width', 'progress_step_vertical_min_height', 'progress_step_icon_gap', 'progress_step_icon_top',
+    'progress_step_line_width', 'progress_step_label_max_width', 'progress_step_label_max_width_vertical', 'progress_step_label_gap',
+    'progress_step_skeleton_label_width', 'progress_step_skeleton_label_height',
+    // v7: the skeleton family
+    'skeleton_radius', 'skeleton_placeholder_size', 'skeleton_text_height', 'skeleton_text_gap', 'skeleton_heading_height',
+    // v7: the skeleton tag member
+    'tag_skeleton_width',
+    // v7: the closable tag member
+    'tag_close_gap', 'tag_close_icon_size', 'tag_close_inset',
+    // v7: the interactive tag members
+    'tag_interactive_outline_width', 'tag_focus_width', 'tag_focus_offset',
+    // v7: the selectable tag member
+    'tag_selectable_outline_width_selected',
+    // v7: the landing view member
+    'landing_banner_height', 'landing_banner_min_window_height', 'landing_company_image_width', 'landing_company_image_height', 'landing_product_image_size'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
     // v6
     'list_item', 'menu_item_shortcut', 'text_area_value', 'tag_label', 'tooltip_label', 'tooltip_compact_label', 'tab_label', 'tab_label_selected',
-    'dialog_heading', 'dialog_body', 'notification_title', 'notification_body'
+    'dialog_heading', 'dialog_body', 'notification_title', 'notification_body',
+    // v7: the link, loading, saving and progress step labels, the landing title
+    'link_label', 'link_label_small', 'link_label_large',
+    'inline_loading_label', 'saving_label',
+    'progress_step_label', 'progress_step_secondary_label',
+    'landing_title'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
@@ -252,7 +332,11 @@ const GRID = Object.freeze({
   }), [
     // v6
     'list', 'dialog', 'notification'
-  ]))
+  ])),
+  motion: Object.freeze([
+    // v7: the two animated families' cycles
+    'loading_rotation', 'loading_arc_cycle', 'skeleton_cycle'
+  ])
 });
 
 
@@ -739,7 +823,7 @@ function buildContract () {
     'feedback.focus_trigger': Object.freeze({ group: 'feedback', values: ['any', 'keyboard'] }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (11 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (19 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'anatomy.label': Object.freeze({ group: 'anatomy', values: ['above', 'floating'] }),
     'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
@@ -759,6 +843,10 @@ function buildContract () {
     'anatomy.menu_icon_seat': Object.freeze({ group: 'anatomy', values: ['shared', 'item'] }),
     // v6 fifth amendment
     'anatomy.field_counter_format': Object.freeze({ group: 'anatomy', values: ['tight', 'spaced'] }),
+    // v7
+    'anatomy.loading_motion': Object.freeze({ group: 'anatomy', values: ['spin', 'arc'] }),
+    'anatomy.tag_close': Object.freeze({ group: 'anatomy', values: ['circle', 'inset'] }),
+    'anatomy.tag_selected_mark': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -840,7 +928,7 @@ function buildContract () {
     'control.option_height': Object.freeze({ group: 'control' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ icon.* (84 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ icon.* (85 tokens) ~~~~~~~~~~~~~~~~~~~
     // One token per semantic glyph name, alphabetical. Values are icon
     // literals: { icon: true, viewBox, paths, sizes? }.
 
@@ -906,6 +994,7 @@ function buildContract () {
     'icon.pending_filled': Object.freeze({ group: 'icon' }),
     'icon.radio_button': Object.freeze({ group: 'icon' }),
     'icon.radio_button_checked': Object.freeze({ group: 'icon' }),
+    'icon.save': Object.freeze({ group: 'icon' }),
     'icon.search': Object.freeze({ group: 'icon' }),
     'icon.selected_indicator': Object.freeze({ group: 'icon' }),
     'icon.settings': Object.freeze({ group: 'icon' }),
@@ -949,7 +1038,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 6,
+    version: 7,
     grid: GRID,
     groups: groups,
     tokens: tokens,

@@ -871,6 +871,9 @@ export default Object.freeze({
     'anatomy.list_selected_mark': 'shown',
     'anatomy.menu_icon_seat': 'shared',
     'anatomy.field_counter_format': 'tight',
+    'anatomy.loading_motion': 'spin',
+    'anatomy.tag_close': 'circle',
+    'anatomy.tag_selected_mark': 'hidden',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -3405,6 +3408,41 @@ export default Object.freeze({
         }
       }
     },
+    'icon.save': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M27.71,9.29l-5-5A1,1,0,0,0,22,4H6A2,2,0,0,0,4,6V26a2,2,0,0,0,2,2H26a2,2,0,0,0,2-2V10A1,1,0,0,0,27.71,9.29ZM12,6h8v4H12Zm8,20H12V18h8Zm2,0V18a2,2,0,0,0-2-2H12a2,2,0,0,0-2,2v8H6V6h4v4a2,2,0,0,0,2,2h8a2,2,0,0,0,2-2V6.41l4,4V26Z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 16 16',
+          'paths': [
+            {
+              'd': 'M13.9,4.6l-2.5-2.5C11.3,2.1,11.1,2,11,2H3C2.4,2,2,2.4,2,3v10c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1V5\tC14,4.9,13.9,4.7,13.9,4.6z M6,3h4v2H6V3z M10,13H6V9h4V13z M11,13V9c0-0.6-0.4-1-1-1H6C5.4,8,5,8.4,5,9v4H3V3h2v2c0,0.6,0.4,1,1,1\th4c0.6,0,1-0.4,1-1V3.2l2,2V13H11z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 20 20',
+          'paths': [
+            {
+              'd': 'M17.8,5.5l-3.3-3.3C14.3,2.1,14.2,2,14,2H3.3C2.6,2,2,2.6,2,3.3v13.3C2,17.4,2.6,18,3.3,18h13.3c0.7,0,1.4-0.5,1.4-1.2V6.1\tC18,5.7,17.9,5.7,17.8,5.5z M7.3,3.3h5.3v3.3H7.3V3.3z M12.7,16.7H7.3v-5.3h5.3L12.7,16.7L12.7,16.7z M14,16.7v-5.3\tc0-0.7-0.6-1.3-1.3-1.3H7.3C6.6,10,6,10.6,6,11.3v5.3H3.3V3.3H6v3.3C6,7.4,6.6,8,7.3,8h5.3C13.4,8,14,7.4,14,6.7v-3l2.7,2.7v10.4\tL14,16.7L14,16.7z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 24 24',
+          'paths': [
+            {
+              'd': 'M20.8,7L17,3.2C16.9,3.1,16.7,3,16.5,3h-12C3.7,3,3,3.7,3,4.5v15C3,20.3,3.7,21,4.5,21h15c0.8,0,1.5-0.7,1.5-1.5v-12\tC21,7.3,20.9,7.1,20.8,7z M9,4.5h6v3H9V4.5z M15,19.5H9v-6h6V19.5z M16.5,19.5v-6c0-0.8-0.7-1.5-1.5-1.5H9c-0.8,0-1.5,0.7-1.5,1.5v6\th-3v-15h3v3C7.5,8.3,8.2,9,9,9h6c0.8,0,1.5-0.7,1.5-1.5V4.8l3,3v11.7H16.5z'
+            }
+          ]
+        }
+      }
+    },
     'icon.search': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -4380,6 +4418,7 @@ export default Object.freeze({
     'control.button_ghost_padding_start': '{control.button_padding_start}',
     'control.button_ghost_padding_end': '{control.button_padding_start}',
     'control.button_min_width': 0,
+    'control.button_quick_action_focus_gap_width': 0,
     'color.selection_outline': '{color.icon_primary}',
     'color.selection_outline_hover': '{color.icon_primary}',
     'color.selection_outline_active': '{color.icon_primary}',
@@ -4639,6 +4678,120 @@ export default Object.freeze({
     'color.icon_button_tertiary_icon_unselected': '{color.icon_button_tertiary_icon}',
     'control.icon_button_size': '{control.button_height}',
     'control.icon_button_icon_size': '{size.icon_01}',
+    'color.button_set_separator': '{color.button_separator}',
+    'color.button_set_separator_disabled': '{color.icon_on_color_disabled}',
+    'color.button_set_separator_stacked_disabled': '{color.layer_selected_disabled}',
+    'control.button_set_item_max_width': 196,
+    'control.button_set_gap': 0,
+    'control.button_set_fluid_min_width': 176,
+    'control.button_set_fluid_max_width': 232,
+    'control.button_set_fluid_ghost_padding_start': '{spacing.spacing_07}',
+    'control.button_skeleton_width': 150,
+    'control.combo_button_min_width': 160,
+    'control.combo_button_max_width': 240,
+    'color.divider': '{color.border_subtle_01}',
+    'control.divider_width': '{border.width_01}',
+    'control.divider_inset': '{spacing.spacing_05}',
+    'color.link_label': '{color.link_primary}',
+    'color.link_label_hover': '{color.link_primary_hover}',
+    'color.link_label_active': '{color.link_primary}',
+    'color.link_label_visited': '{color.link_visited}',
+    'color.link_label_disabled': '{color.text_disabled}',
+    'color.link_focus_ring': '{color.focus}',
+    'control.link_focus_width': 1,
+    'control.link_icon_gap': '{spacing.spacing_03}',
+    'control.link_icon_size': 16,
+    'control.link_icon_size_large': 20,
+    'type.link_label': '{type.body_compact_01}',
+    'type.link_label_small': '{type.helper_text_01}',
+    'type.link_label_large': '{type.body_compact_02}',
+    'color.loading_indicator': '{color.interactive}',
+    'color.loading_track': '{color.layer_accent_01}',
+    'color.loading_scrim': '{color.overlay}',
+    'control.loading_size': 88,
+    'control.loading_size_small': 16,
+    'control.loading_stroke_width': 8.8,
+    'control.loading_stroke_width_small': 2.56,
+    'control.loading_arc': 0.81,
+    'control.loading_arc_small': 0.48,
+    'motion.loading_rotation': 690,
+    'motion.loading_arc_cycle': 690,
+    'type.inline_loading_label': '{type.label02}',
+    'color.inline_loading_label': '{color.text_secondary}',
+    'control.inline_loading_gap': '{spacing.spacing_03}',
+    'color.inline_loading_success': '{color.support_success}',
+    'color.inline_loading_error': '{color.support_error}',
+    'type.saving_label': '{type.body_compact_01}',
+    'color.saving_error_icon': '{color.button_danger_primary}',
+    'control.saving_icon_gap': '{spacing.spacing_05}',
+    'color.progress_step_icon': '{color.interactive}',
+    'color.progress_step_icon_incomplete': '{color.icon_primary}',
+    'color.progress_step_icon_disabled': '{color.icon_disabled}',
+    'color.progress_step_icon_invalid': '{color.support_error}',
+    'color.progress_step_line': '{color.border_subtle_01}',
+    'color.progress_step_line_complete': '{color.interactive}',
+    'color.progress_step_label': '{color.text_primary}',
+    'color.progress_step_label_hover': '{color.link_primary_hover}',
+    'color.progress_step_label_focus': '{color.focus}',
+    'color.progress_step_label_disabled': '{color.text_disabled}',
+    'color.progress_step_secondary_label': '{color.text_secondary}',
+    'control.progress_step_width': 128,
+    'control.progress_step_min_width': 112,
+    'control.progress_step_vertical_min_height': 58,
+    'control.progress_step_icon_gap': '{spacing.spacing_03}',
+    'control.progress_step_icon_top': 10,
+    'control.progress_step_line_width': 2,
+    'control.progress_step_label_max_width': 88,
+    'control.progress_step_label_max_width_vertical': 160,
+    'control.progress_step_label_gap': '{spacing.spacing_03}',
+    'control.progress_step_skeleton_label_width': 40,
+    'control.progress_step_skeleton_label_height': 14,
+    'type.progress_step_label': '{type.body_compact_01}',
+    'type.progress_step_secondary_label': '{type.label01}',
+    'color.skeleton_container': '{color.skeleton_background}',
+    'color.skeleton_shimmer': '{color.skeleton_element}',
+    'control.skeleton_radius': 0,
+    'control.skeleton_placeholder_size': 100,
+    'control.skeleton_text_height': 16,
+    'control.skeleton_text_gap': '{spacing.spacing_03}',
+    'control.skeleton_heading_height': 24,
+    'motion.skeleton_cycle': 3000,
+    'control.tag_skeleton_width': 60,
+    'control.tag_close_gap': '{spacing.spacing_01}',
+    'control.tag_close_icon_size': 16,
+    'control.tag_close_inset': 0,
+    'color.tag_close_container_hover': '{color.tag_hover_gray}',
+    'color.tag_close_focus_ring': '{color.focus}',
+    'control.tag_interactive_outline_width': 1,
+    'color.tag_interactive_layer_active': 'rgba(0, 0, 0, 0)',
+    'color.tag_interactive_outline_disabled': '{color.border_disabled}',
+    'color.tag_focus_ring': '{color.focus}',
+    'control.tag_focus_width': 2,
+    'control.tag_focus_offset': 1,
+    'color.tag_selectable_container': '{color.layer_01}',
+    'color.tag_selectable_container_hover': '{color.layer_hover_01}',
+    'color.tag_selectable_container_selected': '{color.layer_selected_inverse}',
+    'color.tag_selectable_container_selected_hover': '{color.layer_selected_inverse}',
+    'color.tag_selectable_label': '{color.text_primary}',
+    'color.tag_selectable_label_selected': '{color.text_inverse}',
+    'color.tag_selectable_outline': '{color.border_inverse}',
+    'control.tag_selectable_outline_width_selected': 1,
+    'color.view_background': '{color.background}',
+    'color.view_navigation_background': '{color.layer_01}',
+    'color.landing_banner': '#000000',
+    'control.landing_banner_height': 192,
+    'control.landing_banner_min_window_height': 500,
+    'control.landing_company_image_width': 61,
+    'control.landing_company_image_height': 24,
+    'control.landing_product_image_size': 96,
+    'type.landing_title': {
+      'type_set': true,
+      'font_size': 28,
+      'line_height_px': 36,
+      'letter_spacing': 0,
+      'weight': 600,
+      'font_family': 'sans'
+    },
     'shadow.level_00': {
       'shadow': true,
       'layers': [
@@ -4831,6 +4984,26 @@ export default Object.freeze({
     'shadow.button_danger_ghost_hover': '{shadow.level_00}',
     'shadow.button_danger_ghost_active': '{shadow.level_00}',
     'shadow.button_danger_ghost_disabled': '{shadow.level_00}',
+    'color.button_quick_action_container': 'rgba(0, 0, 0, 0)',
+    'color.button_quick_action_container_hover': '{color.background_hover}',
+    'color.button_quick_action_container_active': '{color.background_active}',
+    'color.button_quick_action_container_focus': 'rgba(0, 0, 0, 0)',
+    'color.button_quick_action_container_disabled': 'rgba(0, 0, 0, 0)',
+    'color.button_quick_action_label': '{color.link_primary}',
+    'color.button_quick_action_label_hover': '{color.link_primary_hover}',
+    'color.button_quick_action_label_active': '{color.link_primary_hover}',
+    'color.button_quick_action_label_focus': '{color.link_primary}',
+    'color.button_quick_action_label_disabled': '{color.button_disabled}',
+    'color.button_quick_action_border': '{color.link_primary}',
+    'color.button_quick_action_border_hover': 'rgba(0, 0, 0, 0)',
+    'color.button_quick_action_border_active': 'rgba(0, 0, 0, 0)',
+    'color.button_quick_action_border_disabled': '{color.button_disabled}',
+    'color.button_quick_action_container_selected': '{color.background_selected}',
+    'color.button_quick_action_label_selected': '{color.text_secondary}',
+    'shadow.button_quick_action': '{shadow.level_00}',
+    'shadow.button_quick_action_hover': '{shadow.level_00}',
+    'shadow.button_quick_action_active': '{shadow.level_00}',
+    'shadow.button_quick_action_disabled': '{shadow.level_00}',
     'size.icon_03': 24,
     'size.icon_04': 32,
     'font.weight.thin': 100,
@@ -6058,6 +6231,15 @@ export default Object.freeze({
     'anatomy.field_counter_format': {
       'group': 'raw'
     },
+    'anatomy.loading_motion': {
+      'group': 'raw'
+    },
+    'anatomy.tag_close': {
+      'group': 'raw'
+    },
+    'anatomy.tag_selected_mark': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -6392,6 +6574,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'icon.radio_button_checked': {
+      'group': 'raw'
+    },
+    'icon.save': {
       'group': 'raw'
     },
     'icon.search': {
@@ -7009,6 +7194,54 @@ export default Object.freeze({
     'color.button_elevated_border_disabled': {
       'group': 'color'
     },
+    'color.button_quick_action_container': {
+      'group': 'color'
+    },
+    'color.button_quick_action_container_hover': {
+      'group': 'color'
+    },
+    'color.button_quick_action_container_active': {
+      'group': 'color'
+    },
+    'color.button_quick_action_container_focus': {
+      'group': 'color'
+    },
+    'color.button_quick_action_container_disabled': {
+      'group': 'color'
+    },
+    'color.button_quick_action_container_selected': {
+      'group': 'color'
+    },
+    'color.button_quick_action_label': {
+      'group': 'color'
+    },
+    'color.button_quick_action_label_hover': {
+      'group': 'color'
+    },
+    'color.button_quick_action_label_active': {
+      'group': 'color'
+    },
+    'color.button_quick_action_label_focus': {
+      'group': 'color'
+    },
+    'color.button_quick_action_label_disabled': {
+      'group': 'color'
+    },
+    'color.button_quick_action_label_selected': {
+      'group': 'color'
+    },
+    'color.button_quick_action_border': {
+      'group': 'color'
+    },
+    'color.button_quick_action_border_hover': {
+      'group': 'color'
+    },
+    'color.button_quick_action_border_active': {
+      'group': 'color'
+    },
+    'color.button_quick_action_border_disabled': {
+      'group': 'color'
+    },
     'color.button_focus_ring': {
       'group': 'color'
     },
@@ -7477,6 +7710,141 @@ export default Object.freeze({
     'color.icon_button_tertiary_icon_unselected': {
       'group': 'color'
     },
+    'color.button_set_separator': {
+      'group': 'color'
+    },
+    'color.button_set_separator_disabled': {
+      'group': 'color'
+    },
+    'color.button_set_separator_stacked_disabled': {
+      'group': 'color'
+    },
+    'color.divider': {
+      'group': 'color'
+    },
+    'color.link_label': {
+      'group': 'color'
+    },
+    'color.link_label_hover': {
+      'group': 'color'
+    },
+    'color.link_label_active': {
+      'group': 'color'
+    },
+    'color.link_label_visited': {
+      'group': 'color'
+    },
+    'color.link_label_disabled': {
+      'group': 'color'
+    },
+    'color.link_focus_ring': {
+      'group': 'color'
+    },
+    'color.loading_indicator': {
+      'group': 'color'
+    },
+    'color.loading_track': {
+      'group': 'color'
+    },
+    'color.loading_scrim': {
+      'group': 'color'
+    },
+    'color.inline_loading_label': {
+      'group': 'color'
+    },
+    'color.inline_loading_success': {
+      'group': 'color'
+    },
+    'color.inline_loading_error': {
+      'group': 'color'
+    },
+    'color.saving_error_icon': {
+      'group': 'color'
+    },
+    'color.progress_step_icon': {
+      'group': 'color'
+    },
+    'color.progress_step_icon_incomplete': {
+      'group': 'color'
+    },
+    'color.progress_step_icon_disabled': {
+      'group': 'color'
+    },
+    'color.progress_step_icon_invalid': {
+      'group': 'color'
+    },
+    'color.progress_step_line': {
+      'group': 'color'
+    },
+    'color.progress_step_line_complete': {
+      'group': 'color'
+    },
+    'color.progress_step_label': {
+      'group': 'color'
+    },
+    'color.progress_step_label_hover': {
+      'group': 'color'
+    },
+    'color.progress_step_label_focus': {
+      'group': 'color'
+    },
+    'color.progress_step_label_disabled': {
+      'group': 'color'
+    },
+    'color.progress_step_secondary_label': {
+      'group': 'color'
+    },
+    'color.skeleton_container': {
+      'group': 'color'
+    },
+    'color.skeleton_shimmer': {
+      'group': 'color'
+    },
+    'color.tag_close_container_hover': {
+      'group': 'color'
+    },
+    'color.tag_close_focus_ring': {
+      'group': 'color'
+    },
+    'color.tag_interactive_layer_active': {
+      'group': 'color'
+    },
+    'color.tag_interactive_outline_disabled': {
+      'group': 'color'
+    },
+    'color.tag_focus_ring': {
+      'group': 'color'
+    },
+    'color.tag_selectable_container': {
+      'group': 'color'
+    },
+    'color.tag_selectable_container_hover': {
+      'group': 'color'
+    },
+    'color.tag_selectable_container_selected': {
+      'group': 'color'
+    },
+    'color.tag_selectable_container_selected_hover': {
+      'group': 'color'
+    },
+    'color.tag_selectable_label': {
+      'group': 'color'
+    },
+    'color.tag_selectable_label_selected': {
+      'group': 'color'
+    },
+    'color.tag_selectable_outline': {
+      'group': 'color'
+    },
+    'color.view_background': {
+      'group': 'color'
+    },
+    'color.view_navigation_background': {
+      'group': 'color'
+    },
+    'color.landing_banner': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -7762,6 +8130,162 @@ export default Object.freeze({
     'control.icon_button_icon_size': {
       'group': 'dimension'
     },
+    'control.button_quick_action_focus_gap_width': {
+      'group': 'dimension'
+    },
+    'control.button_set_item_max_width': {
+      'group': 'dimension'
+    },
+    'control.button_set_gap': {
+      'group': 'dimension'
+    },
+    'control.button_set_fluid_min_width': {
+      'group': 'dimension'
+    },
+    'control.button_set_fluid_max_width': {
+      'group': 'dimension'
+    },
+    'control.button_set_fluid_ghost_padding_start': {
+      'group': 'dimension'
+    },
+    'control.button_skeleton_width': {
+      'group': 'dimension'
+    },
+    'control.combo_button_min_width': {
+      'group': 'dimension'
+    },
+    'control.combo_button_max_width': {
+      'group': 'dimension'
+    },
+    'control.divider_width': {
+      'group': 'dimension'
+    },
+    'control.divider_inset': {
+      'group': 'dimension'
+    },
+    'control.link_focus_width': {
+      'group': 'dimension'
+    },
+    'control.link_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.link_icon_size': {
+      'group': 'dimension'
+    },
+    'control.link_icon_size_large': {
+      'group': 'dimension'
+    },
+    'control.loading_size': {
+      'group': 'dimension'
+    },
+    'control.loading_size_small': {
+      'group': 'dimension'
+    },
+    'control.loading_stroke_width': {
+      'group': 'dimension'
+    },
+    'control.loading_stroke_width_small': {
+      'group': 'dimension'
+    },
+    'control.loading_arc': {
+      'group': 'dimension'
+    },
+    'control.loading_arc_small': {
+      'group': 'dimension'
+    },
+    'control.inline_loading_gap': {
+      'group': 'dimension'
+    },
+    'control.saving_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.progress_step_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_min_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_vertical_min_height': {
+      'group': 'dimension'
+    },
+    'control.progress_step_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.progress_step_icon_top': {
+      'group': 'dimension'
+    },
+    'control.progress_step_line_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_label_max_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_label_max_width_vertical': {
+      'group': 'dimension'
+    },
+    'control.progress_step_label_gap': {
+      'group': 'dimension'
+    },
+    'control.progress_step_skeleton_label_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_skeleton_label_height': {
+      'group': 'dimension'
+    },
+    'control.skeleton_radius': {
+      'group': 'dimension'
+    },
+    'control.skeleton_placeholder_size': {
+      'group': 'dimension'
+    },
+    'control.skeleton_text_height': {
+      'group': 'dimension'
+    },
+    'control.skeleton_text_gap': {
+      'group': 'dimension'
+    },
+    'control.skeleton_heading_height': {
+      'group': 'dimension'
+    },
+    'control.tag_skeleton_width': {
+      'group': 'dimension'
+    },
+    'control.tag_close_gap': {
+      'group': 'dimension'
+    },
+    'control.tag_close_icon_size': {
+      'group': 'dimension'
+    },
+    'control.tag_close_inset': {
+      'group': 'dimension'
+    },
+    'control.tag_interactive_outline_width': {
+      'group': 'dimension'
+    },
+    'control.tag_focus_width': {
+      'group': 'dimension'
+    },
+    'control.tag_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.tag_selectable_outline_width_selected': {
+      'group': 'dimension'
+    },
+    'control.landing_banner_height': {
+      'group': 'dimension'
+    },
+    'control.landing_banner_min_window_height': {
+      'group': 'dimension'
+    },
+    'control.landing_company_image_width': {
+      'group': 'dimension'
+    },
+    'control.landing_company_image_height': {
+      'group': 'dimension'
+    },
+    'control.landing_product_image_size': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -7805,6 +8329,30 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.notification_body': {
+      'group': 'typeSet'
+    },
+    'type.link_label': {
+      'group': 'typeSet'
+    },
+    'type.link_label_small': {
+      'group': 'typeSet'
+    },
+    'type.link_label_large': {
+      'group': 'typeSet'
+    },
+    'type.inline_loading_label': {
+      'group': 'typeSet'
+    },
+    'type.saving_label': {
+      'group': 'typeSet'
+    },
+    'type.progress_step_label': {
+      'group': 'typeSet'
+    },
+    'type.progress_step_secondary_label': {
+      'group': 'typeSet'
+    },
+    'type.landing_title': {
       'group': 'typeSet'
     },
     'shadow.level_00': {
@@ -7918,6 +8466,18 @@ export default Object.freeze({
     'shadow.button_elevated_disabled': {
       'group': 'shadow'
     },
+    'shadow.button_quick_action': {
+      'group': 'shadow'
+    },
+    'shadow.button_quick_action_hover': {
+      'group': 'shadow'
+    },
+    'shadow.button_quick_action_active': {
+      'group': 'shadow'
+    },
+    'shadow.button_quick_action_disabled': {
+      'group': 'shadow'
+    },
     'shadow.list': {
       'group': 'shadow'
     },
@@ -7926,6 +8486,15 @@ export default Object.freeze({
     },
     'shadow.notification': {
       'group': 'shadow'
+    },
+    'motion.loading_rotation': {
+      'group': 'duration'
+    },
+    'motion.loading_arc_cycle': {
+      'group': 'duration'
+    },
+    'motion.skeleton_cycle': {
+      'group': 'duration'
     }
   },
   'from_default': [
@@ -7987,7 +8556,7 @@ export default Object.freeze({
       'package': '@carbon/icons',
       'version': '11.89.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '3007738c52c7a8c4677ea609391b0bca8b8ffed77688bc5fb2d62dc1a4889274',
+      'map_sha256': 'f911c7f8aaa883cd4c58359f7649fbe302cf1258a54d04c78209fe07c9f557f5',
       'drawings': {
         'switch_checked_indicator': '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
       }

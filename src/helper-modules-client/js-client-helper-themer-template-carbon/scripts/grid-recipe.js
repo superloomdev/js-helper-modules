@@ -34,7 +34,11 @@ const ON_PAGE = Object.freeze({
   tertiary: { hover: 'button_tertiary_hover', active: 'button_tertiary_active', label: 'button_tertiary', engaged: 'text_inverse', border: 'button_tertiary', focus: 'button_tertiary' },
   ghost: { hover: 'background_hover', active: 'background_active', label: 'link_primary', engaged: 'link_primary_hover', border: null, focus: null },
   danger_tertiary: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: 'button_danger_secondary', borderHover: 'button_danger_hover', borderActive: 'button_danger_active', focus: 'button_danger_primary' },
-  danger_ghost: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: null, focus: null }
+  danger_ghost: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: null, focus: null },
+  // v7: the chat button's quick action - a link-colored border at rest,
+  // the page's state fills behind a deepening link label while engaged
+  // (@carbon/themes chatButton* == linkPrimary*, background* in all schemes)
+  quick_action: { hover: 'background_hover', active: 'background_active', label: 'link_primary', engaged: 'link_primary_hover', border: 'link_primary', borderHover: null, borderActive: null, focus: null, disabledLabel: 'button_disabled', selectedLabel: 'text_secondary' }
 });
 
 const NONE = 'rgba(0, 0, 0, 0)';
@@ -64,6 +68,7 @@ The cells of one button kind.
 function buttonCells (kind) {
 
   const out = {};
+  const entry = FILLED[kind] || ON_PAGE[kind];
   const put = function (part, state, value) {
     out['color.button_' + kind + '_' + part + state] = value;
   };
@@ -94,14 +99,14 @@ function buttonCells (kind) {
     put('label', '_hover', colorOf(k.engaged));
     put('label', '_active', colorOf(k.engaged));
     put('label', '_focus', k.focus === null ? colorOf(k.label) : colorOf(k.engaged));
-    put('label', '_disabled', colorOf('text_disabled'));
+    put('label', '_disabled', colorOf(k.disabledLabel || 'text_disabled'));
     put('border', '', colorOf(k.border));
-    put('border', '_hover', colorOf(k.borderHover || k.border));
-    put('border', '_active', kind === 'tertiary' ? NONE : colorOf(k.borderActive || k.border));
+    put('border', '_hover', colorOf(k.borderHover !== undefined ? k.borderHover : k.border));
+    put('border', '_active', colorOf(k.borderActive !== undefined ? k.borderActive : (kind === 'tertiary' ? null : k.border)));
     put('border', '_disabled', k.border === null ? NONE : colorOf('button_disabled'));
   }
   put('container', '_selected', colorOf('background_selected'));
-  put('label', '_selected', colorOf('text_primary'));
+  put('label', '_selected', colorOf(entry.selectedLabel || 'text_primary'));
   const lifted = kind === 'elevated' ? '{shadow.level_01}' : '{shadow.level_00}';
   out['shadow.button_' + kind] = lifted;
   out['shadow.button_' + kind + '_hover'] = lifted;
@@ -186,6 +191,8 @@ export default function buildGridRecipe (grid) {
     'control.button_ghost_padding_start': '{control.button_padding_start}',
     'control.button_ghost_padding_end': '{control.button_padding_start}',
     'control.button_min_width': 0,
+    // v7: the quick action's ring hugs its edge, no inner gap
+    'control.button_quick_action_focus_gap_width': 0,
     // Selection family: an icon-colored box, filled when checked, no state layer
     'color.selection_outline': colorOf('icon_primary'),
     'color.selection_outline_hover': colorOf('icon_primary'),
@@ -490,6 +497,131 @@ export default function buildGridRecipe (grid) {
     'color.icon_button_tertiary_icon_unselected': '{color.icon_button_tertiary_icon}',
     'control.icon_button_size': '{control.button_height}',
     'control.icon_button_icon_size': '{size.icon_01}',
+    // v7 Button set members: $button-separator hairlines between adjacent
+    // items, drawn in the icon-disabled and layer-disabled roles on disabled
+    'color.button_set_separator': colorOf('button_separator'),
+    'color.button_set_separator_disabled': colorOf('icon_on_color_disabled'),
+    'color.button_set_separator_stacked_disabled': colorOf('layer_selected_disabled'),
+    'control.button_set_item_max_width': 196,
+    'control.button_set_gap': 0,
+    'control.button_set_fluid_min_width': 176,
+    'control.button_set_fluid_max_width': 232,
+    'control.button_set_fluid_ghost_padding_start': '{spacing.spacing_07}',
+    // v7 Button skeleton member
+    'control.button_skeleton_width': 150,
+    // v7 Combo button members
+    'control.combo_button_min_width': 160,
+    'control.combo_button_max_width': 240,
+    // v7 Divider family: a subtle line, indented from the edge
+    'color.divider': colorOf('border_subtle_01'),
+    'control.divider_width': '{border.width_01}',
+    'control.divider_inset': '{spacing.spacing_05}',
+    // v7 Link family: Carbon's link colours, focus ring and type sets
+    'color.link_label': colorOf('link_primary'),
+    'color.link_label_hover': colorOf('link_primary_hover'),
+    'color.link_label_active': colorOf('link_primary'),
+    'color.link_label_visited': colorOf('link_visited'),
+    'color.link_label_disabled': colorOf('text_disabled'),
+    'color.link_focus_ring': colorOf('focus'),
+    'control.link_focus_width': 1,
+    'control.link_icon_gap': '{spacing.spacing_03}',
+    'control.link_icon_size': 16,
+    'control.link_icon_size_large': 20,
+    'type.link_label': '{type.body_compact_01}',
+    'type.link_label_small': '{type.helper_text_01}',
+    'type.link_label_large': '{type.body_compact_02}',
+    // v7 Loading family: an interactive arc on an accent track over a scrim;
+    // the stroke widths are the rendered sizes of the 10- and 16-unit svg
+    // strokes in the 100-unit viewBox (88px and 16px renderings)
+    'color.loading_indicator': colorOf('interactive'),
+    'color.loading_track': colorOf('layer_accent_01'),
+    'color.loading_scrim': colorOf('overlay'),
+    'control.loading_size': 88,
+    'control.loading_size_small': 16,
+    'control.loading_stroke_width': 8.8,
+    'control.loading_stroke_width_small': 2.56,
+    'control.loading_arc': 0.81,
+    'control.loading_arc_small': 0.48,
+    'motion.loading_rotation': 690,
+    'motion.loading_arc_cycle': 690,
+    // v7 Inline loading member: the label beside the spinner
+    'type.inline_loading_label': '{type.label02}',
+    'color.inline_loading_label': colorOf('text_secondary'),
+    'control.inline_loading_gap': '{spacing.spacing_03}',
+    'color.inline_loading_success': colorOf('support_success'),
+    'color.inline_loading_error': colorOf('support_error'),
+    // v7 Saving member: the fail icon in $button-danger-primary
+    'type.saving_label': '{type.body_compact_01}',
+    'color.saving_error_icon': colorOf('button_danger_primary'),
+    'control.saving_icon_gap': '{spacing.spacing_05}',
+    // v7 Progress step family: interactive steps on a subtle line
+    'color.progress_step_icon': colorOf('interactive'),
+    'color.progress_step_icon_incomplete': colorOf('icon_primary'),
+    'color.progress_step_icon_disabled': colorOf('icon_disabled'),
+    'color.progress_step_icon_invalid': colorOf('support_error'),
+    'color.progress_step_line': colorOf('border_subtle_01'),
+    'color.progress_step_line_complete': colorOf('interactive'),
+    'color.progress_step_label': colorOf('text_primary'),
+    'color.progress_step_label_hover': colorOf('link_primary_hover'),
+    'color.progress_step_label_focus': colorOf('focus'),
+    'color.progress_step_label_disabled': colorOf('text_disabled'),
+    'color.progress_step_secondary_label': colorOf('text_secondary'),
+    'control.progress_step_width': 128,
+    'control.progress_step_min_width': 112,
+    'control.progress_step_vertical_min_height': 58,
+    'control.progress_step_icon_gap': '{spacing.spacing_03}',
+    'control.progress_step_icon_top': 10,
+    'control.progress_step_line_width': 2,
+    'control.progress_step_label_max_width': 88,
+    'control.progress_step_label_max_width_vertical': 160,
+    'control.progress_step_label_gap': '{spacing.spacing_03}',
+    'control.progress_step_skeleton_label_width': 40,
+    'control.progress_step_skeleton_label_height': 14,
+    'type.progress_step_label': '{type.body_compact_01}',
+    'type.progress_step_secondary_label': '{type.label01}',
+    // v7 Skeleton family: $skeleton-element over $skeleton-background
+    'color.skeleton_container': colorOf('skeleton_background'),
+    'color.skeleton_shimmer': colorOf('skeleton_element'),
+    'control.skeleton_radius': 0,
+    'control.skeleton_placeholder_size': 100,
+    'control.skeleton_text_height': 16,
+    'control.skeleton_text_gap': '{spacing.spacing_03}',
+    'control.skeleton_heading_height': 24,
+    'motion.skeleton_cycle': 3000,
+    // v7 Tag members: the skeleton's width, the filter tag's circular close,
+    // the interactive tags' outline and ring, the selectable tag's inverse face
+    'control.tag_skeleton_width': 60,
+    'control.tag_close_gap': '{spacing.spacing_01}',
+    'control.tag_close_icon_size': 16,
+    'control.tag_close_inset': 0,
+    'color.tag_close_container_hover': colorOf('tag_hover_gray'),
+    'color.tag_close_focus_ring': colorOf('focus'),
+    'control.tag_interactive_outline_width': 1,
+    'color.tag_interactive_layer_active': NONE,
+    'color.tag_interactive_outline_disabled': colorOf('border_disabled'),
+    'color.tag_focus_ring': colorOf('focus'),
+    'control.tag_focus_width': 2,
+    'control.tag_focus_offset': 1,
+    'color.tag_selectable_container': colorOf('layer_01'),
+    'color.tag_selectable_container_hover': colorOf('layer_hover_01'),
+    'color.tag_selectable_container_selected': colorOf('layer_selected_inverse'),
+    'color.tag_selectable_container_selected_hover': colorOf('layer_selected_inverse'),
+    'color.tag_selectable_label': colorOf('text_primary'),
+    'color.tag_selectable_label_selected': colorOf('text_inverse'),
+    'color.tag_selectable_outline': colorOf('border_inverse'),
+    'control.tag_selectable_outline_width_selected': 1,
+    // v7 View family: the page and its navigation region
+    'color.view_background': colorOf('background'),
+    'color.view_navigation_background': colorOf('layer_01'),
+    // v7 Landing view member: the upstream banner is #000000 in every scheme
+    'color.landing_banner': '#000000',
+    'control.landing_banner_height': 192,
+    'control.landing_banner_min_window_height': 500,
+    'control.landing_company_image_width': 61,
+    'control.landing_company_image_height': 24,
+    'control.landing_product_image_size': 96,
+    // heading-04 drawn in SemiBold, like Carbon's other 600-weight sets
+    'type.landing_title': { type_set: true, font_size: 28, line_height_px: 36, letter_spacing: 0, weight: 600, font_family: 'sans' },
     // No elevation
     'shadow.level_00': { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] }
   };

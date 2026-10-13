@@ -143,7 +143,14 @@ const ANATOMY = {
   'anatomy.menu_icon_seat': 'item',
   // The supporting-text counter prints "4 / 100" (`field/internal/`
   // `_supporting-text.scss` pads the count against the max)
-  'anatomy.field_counter_format': 'spaced'
+  'anatomy.field_counter_format': 'spaced',
+  // v7: Material's shape choices. The circular progress draws a travelling
+  // arc (`progress/internal/_circular-progress.scss`), the input chip's
+  // trailing icon is an inset mark, and the selected filter chip draws its
+  // check (`_md-comp-filter-chip.scss` with-icon)
+  'anatomy.loading_motion': 'arc',
+  'anatomy.tag_close': 'inset',
+  'anatomy.tag_selected_mark': 'shown'
 };
 
 // --- Engine setup ---------------------------------------------------------

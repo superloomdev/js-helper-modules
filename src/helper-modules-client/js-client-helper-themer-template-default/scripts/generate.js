@@ -75,7 +75,11 @@ const ANATOMY = {
   'anatomy.list_selected_mark': 'shown',
   'anatomy.menu_icon_seat': 'shared',
   // The primary reference's counter prints "4/100"
-  'anatomy.field_counter_format': 'tight'
+  'anatomy.field_counter_format': 'tight',
+  // v7: the primary reference's anatomy, as the default draws it
+  'anatomy.loading_motion': 'spin',
+  'anatomy.tag_close': 'circle',
+  'anatomy.tag_selected_mark': 'hidden'
 };
 
 // --- Neutral ramp ---------------------------------------------------------
@@ -421,7 +425,7 @@ function colorStep (name) {
     return parseInt(m[1], 10) + 2;
   }
   if (name === 'color.layer_selected_inverse') {
-    return 0;
+    return 10;
   }
   // Field: same as layer
   if (/^color\.field_\d+$/.test(name)) {
@@ -446,7 +450,7 @@ function colorStep (name) {
     return 10;
   }
   if (name === 'color.border_inverse') {
-    return 0;
+    return 10;
   }
   if (/^color\.border_tile/.test(name)) {
     return 2;

@@ -65,8 +65,8 @@ describe('default template - profile identity', () => {
     assert.equal(profile.id, 'superloom-default');
   });
 
-  it('should export contract_version 6', () => {
-    assert.equal(profile.contract_version, 6);
+  it('should export contract_version 7', () => {
+    assert.equal(profile.contract_version, 7);
   });
 
   it('should have light and dark schemes', () => {
@@ -285,7 +285,10 @@ describe('default template - anatomy enums (v4)', () => {
     'anatomy.tab_indicator': 'full',
     'anatomy.dialog_close': 'shown',
     'anatomy.list_selected_mark': 'shown',
-    'anatomy.field_counter_format': 'tight'
+    'anatomy.field_counter_format': 'tight',
+    'anatomy.loading_motion': 'spin',
+    'anatomy.tag_close': 'circle',
+    'anatomy.tag_selected_mark': 'hidden'
   };
 
   for (const schemeName of ['light', 'dark']) {
@@ -312,8 +315,8 @@ describe('default template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 84 icon tokens, every one a valid icon literal, in both schemes', () => {
-    assert.equal(iconKeys.length, 84);
+  it('should carry 85 icon tokens, every one a valid icon literal, in both schemes', () => {
+    assert.equal(iconKeys.length, 85);
     for (const schemeName of ['light', 'dark']) {
       const tokens = profile.schemes[schemeName].tokens;
       const subset = {};
@@ -452,10 +455,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 995 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1127 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 995);
+        assert.equal(names.length, 1127);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
