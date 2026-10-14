@@ -2094,7 +2094,7 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 14,
       'line_height_px': 20,
-      'letter_spacing': 0.1,
+      'letter_spacing': 0,
       'weight': 500,
       'font_family': 'sans'
     },
@@ -2388,6 +2388,12 @@ export default Object.freeze({
     'control.loading_arc_small': 0.48,
     'motion.loading_rotation': 1568,
     'motion.loading_arc_cycle': 1333,
+    'motion.loading_arc_easing': [
+      0.4,
+      0,
+      0.2,
+      1
+    ],
     'type.inline_loading_label': {
       'type_set': true,
       'font_size': 14,
@@ -2493,7 +2499,7 @@ export default Object.freeze({
     'color.tag_close_focus_ring': '{color.focus}',
     'color.tag_dismissible_label': '{color.text_secondary}',
     'control.tag_interactive_outline_width': 1,
-    'control.tag_interactive_height_small': '{control.tag_height}',
+    'control.tag_interactive_height_small': 18,
     'color.tag_interactive_layer_active': {
       'op': 'alpha',
       'args': [
@@ -7255,6 +7261,9 @@ export default Object.freeze({
     'motion.loading_arc_cycle': {
       'group': 'duration'
     },
+    'motion.loading_arc_easing': {
+      'group': 'easing'
+    },
     'motion.skeleton_cycle': {
       'group': 'duration'
     }
@@ -7494,7 +7503,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '19055c51cd0252e2ad1375ceaf2db2ca07d6ecc9',
+    'default_shasum': '6ec4bff8929b13875d2cc715fbdddbadc6335546',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

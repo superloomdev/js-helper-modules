@@ -616,7 +616,12 @@ export default function buildMaterialGrid (options) {
     'control.tag_padding_icon': numberToken(chipFile, 'with-leading-icon-leading-space'),
     'control.tag_outline_width': numberToken(chipFile, 'flat-outline-width'),
     'control.tag_icon_size': numberToken(chipFile, 'with-icon-icon-size'),
-    'type.tag_label': options.typeSet(required(read(chipFile, 'label-text-font'), 'chip label type').typescale)
+    // v7 batch 6 B3 round 3 amendment: the chips' token file names
+    // label-text-tracking, but @material/web 2.5.0 chips/internal/*.scss
+    // never applies a letter spacing - the rendered label computes
+    // letter-spacing: normal. Font, size, line height and weight stay
+    // what the chip file gives; the tracking is overridden to 0
+    'type.tag_label': Object.assign({}, options.typeSet(required(read(chipFile, 'label-text-font'), 'chip label type').typescale), { letter_spacing: 0 })
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ Progress family (linear progress) ~~~~~~~~~~~~~~~~~~
@@ -891,7 +896,10 @@ export default function buildMaterialGrid (options) {
     'control.loading_arc': 0.81,
     'control.loading_arc_small': 0.48,
     'motion.loading_rotation': 1568,
-    'motion.loading_arc_cycle': 1333
+    'motion.loading_arc_cycle': 1333,
+    // v7 batch 6 B3 round 3 amendment: $indeterminate-easing
+    // (@material/web progress/internal/_circular-progress.scss:49)
+    'motion.loading_arc_easing': [0.4, 0, 0.2, 1]
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ v7: the inline loading and saving members ~~~~~~~~~
@@ -975,9 +983,11 @@ export default function buildMaterialGrid (options) {
     // (the input chip's label role differs from the flat chip's)
     'color.tag_dismissible_label': required(colorToken(inputChip, 'unselected-label-text-color'), 'input chip label'),
     'control.tag_interactive_outline_width': numberToken('assist-chip', 'flat-outline-width'),
-    // v7 batch 6 B3 amendment: the chips have one height, so the small
-    // interactive tag is the tag's own
-    'control.tag_interactive_height_small': '{control.tag_height}',
+    // v7 batch 6 B3 round 3 amendment: the second system has no small
+    // chip; with the `inset` outline nothing grows the box, so a small
+    // interactive tag is the plain small tag's 18 (Tag's heightSmall:
+    // size.icon_01 + spacing.spacing_01)
+    'control.tag_interactive_height_small': 18,
     'color.tag_interactive_layer_active': translucent('assist-chip', 'pressed-state-layer-color', 'pressed-state-layer-opacity'),
     'color.tag_interactive_outline_disabled': translucent(filterChip, 'flat-disabled-unselected-outline-color', 'flat-disabled-unselected-outline-opacity'),
     // v7 batch 6 B3 round 2 amendment: the untyped interactive tag's outline

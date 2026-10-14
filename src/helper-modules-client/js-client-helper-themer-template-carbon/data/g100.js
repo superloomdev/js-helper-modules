@@ -4718,6 +4718,7 @@ export default Object.freeze({
     'control.loading_arc_small': 0.48,
     'motion.loading_rotation': 690,
     'motion.loading_arc_cycle': 690,
+    'motion.loading_arc_easing': '{motion.easing_standard_productive}',
     'type.inline_loading_label': '{type.label02}',
     'color.inline_loading_label': '{color.text_secondary}',
     'control.inline_loading_gap': '{spacing.spacing_03}',
@@ -8544,6 +8545,9 @@ export default Object.freeze({
     },
     'motion.loading_arc_cycle': {
       'group': 'duration'
+    },
+    'motion.loading_arc_easing': {
+      'group': 'easing'
     },
     'motion.skeleton_cycle': {
       'group': 'duration'
