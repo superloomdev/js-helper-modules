@@ -2436,6 +2436,11 @@ export default Object.freeze({
     'control.progress_step_label_gap': 8,
     'control.progress_step_skeleton_label_width': 40,
     'control.progress_step_skeleton_label_height': 14,
+    'control.progress_step_focus_width': 3,
+    'control.progress_step_vertical_icon_top': 1,
+    'control.progress_step_vertical_line_width': '{control.progress_step_line_width}',
+    'control.progress_step_secondary_label_top': 28,
+    'control.progress_step_secondary_label_start': 24,
     'type.progress_step_label': {
       'type_set': true,
       'font_size': 14,
@@ -2517,6 +2522,13 @@ export default Object.freeze({
     'color.tag_selectable_label_selected': '{color.text_on_button_tonal}',
     'color.tag_selectable_outline': '{color.border_subtle_01}',
     'control.tag_selectable_outline_width_selected': 0,
+    'color.tag_selectable_layer_active': {
+      'op': 'alpha',
+      'args': [
+        'color.text_secondary',
+        0.12
+      ]
+    },
     'color.view_background': '{color.background}',
     'color.view_navigation_background': '{color.layer_02}',
     'color.landing_banner': '{color.background_inverse}',
@@ -6522,6 +6534,9 @@ export default Object.freeze({
     'color.tag_selectable_outline': {
       'group': 'color'
     },
+    'color.tag_selectable_layer_active': {
+      'group': 'color'
+    },
     'color.view_background': {
       'group': 'color'
     },
@@ -6916,6 +6931,21 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.progress_step_skeleton_label_height': {
+      'group': 'dimension'
+    },
+    'control.progress_step_focus_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_vertical_icon_top': {
+      'group': 'dimension'
+    },
+    'control.progress_step_vertical_line_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_secondary_label_top': {
+      'group': 'dimension'
+    },
+    'control.progress_step_secondary_label_start': {
       'group': 'dimension'
     },
     'control.skeleton_radius': {
@@ -7418,7 +7448,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '3e6d30076c0227d566f79ffca3293f19f87f8172',
+    'default_shasum': '7e51930f2556b6787f52c142572e645689f5194d',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

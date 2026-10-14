@@ -929,6 +929,14 @@ export default function buildMaterialGrid (options) {
     'control.progress_step_label_gap': 8,
     'control.progress_step_skeleton_label_width': 40,
     'control.progress_step_skeleton_label_height': 14,
+    // v7 batch 6 amendment: the pressable label takes the platform's own
+    // focus ring width; the vertical connector stays as thick as the
+    // horizontal line
+    'control.progress_step_focus_width': numberToken('focus-ring', 'width'),
+    'control.progress_step_vertical_icon_top': 1,
+    'control.progress_step_vertical_line_width': '{control.progress_step_line_width}',
+    'control.progress_step_secondary_label_top': 28,
+    'control.progress_step_secondary_label_start': 24,
     'type.progress_step_label': options.typeSet('label-large'),
     'type.progress_step_secondary_label': options.typeSet('body-small')
   });
@@ -978,7 +986,10 @@ export default function buildMaterialGrid (options) {
     'color.tag_selectable_label': required(colorToken(filterChip, 'unselected-label-text-color'), 'filter chip label'),
     'color.tag_selectable_label_selected': required(colorToken(filterChip, 'selected-label-text-color'), 'filter chip selected label'),
     'color.tag_selectable_outline': required(colorToken(filterChip, 'flat-unselected-outline-color'), 'filter chip outline'),
-    'control.tag_selectable_outline_width_selected': numberToken(filterChip, 'flat-selected-outline-width')
+    'control.tag_selectable_outline_width_selected': numberToken(filterChip, 'flat-selected-outline-width'),
+    // v7 batch 6 amendment: the filter chip's pressed layer (the
+    // selected chip's state layer answers on-surface-variant at 0.12)
+    'color.tag_selectable_layer_active': translucent(filterChip, 'selected-pressed-state-layer-color', 'selected-pressed-state-layer-opacity')
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ v7: the view family and landing member ~~~~~~~~~~~~

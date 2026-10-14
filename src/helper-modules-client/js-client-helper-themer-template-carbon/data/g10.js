@@ -4746,6 +4746,11 @@ export default Object.freeze({
     'control.progress_step_label_gap': '{spacing.spacing_03}',
     'control.progress_step_skeleton_label_width': 40,
     'control.progress_step_skeleton_label_height': 14,
+    'control.progress_step_focus_width': 1,
+    'control.progress_step_vertical_icon_top': 1,
+    'control.progress_step_vertical_line_width': 1,
+    'control.progress_step_secondary_label_top': 28,
+    'control.progress_step_secondary_label_start': 24,
     'type.progress_step_label': '{type.body_compact_01}',
     'type.progress_step_secondary_label': '{type.label01}',
     'color.skeleton_container': '{color.skeleton_background}',
@@ -4775,6 +4780,7 @@ export default Object.freeze({
     'color.tag_selectable_label': '{color.text_primary}',
     'color.tag_selectable_label_selected': '{color.text_inverse}',
     'color.tag_selectable_outline': '{color.border_inverse}',
+    'color.tag_selectable_layer_active': 'rgba(0, 0, 0, 0)',
     'control.tag_selectable_outline_width_selected': 1,
     'color.view_background': '{color.background}',
     'color.view_navigation_background': '{color.layer_01}',
@@ -7836,6 +7842,9 @@ export default Object.freeze({
     'color.tag_selectable_outline': {
       'group': 'color'
     },
+    'color.tag_selectable_layer_active': {
+      'group': 'color'
+    },
     'color.view_background': {
       'group': 'color'
     },
@@ -8230,6 +8239,21 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.progress_step_skeleton_label_height': {
+      'group': 'dimension'
+    },
+    'control.progress_step_focus_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_vertical_icon_top': {
+      'group': 'dimension'
+    },
+    'control.progress_step_vertical_line_width': {
+      'group': 'dimension'
+    },
+    'control.progress_step_secondary_label_top': {
+      'group': 'dimension'
+    },
+    'control.progress_step_secondary_label_start': {
       'group': 'dimension'
     },
     'control.skeleton_radius': {
