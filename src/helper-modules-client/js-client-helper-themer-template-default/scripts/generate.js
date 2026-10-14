@@ -79,7 +79,8 @@ const ANATOMY = {
   // v7: the primary reference's anatomy, as the default draws it
   'anatomy.loading_motion': 'spin',
   'anatomy.tag_close': 'circle',
-  'anatomy.tag_selected_mark': 'hidden'
+  'anatomy.tag_selected_mark': 'hidden',
+  'anatomy.tag_interactive_outline': 'border'
 };
 
 // --- Neutral ramp ---------------------------------------------------------

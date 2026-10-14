@@ -308,6 +308,9 @@ export default function buildGridRecipe (grid) {
     'control.switch_focus_offset': 1,
     // v6 Tag family: a neutral gray pill, read-only
     'color.tag_container': colorOf('tag_background_gray'),
+    // v7 batch 6 B3 amendment: the untyped interactive tag hovers on the
+    // neutral tag's own hover
+    'color.tag_container_hover': colorOf('tag_hover_gray'),
     'color.tag_container_disabled': colorOf('layer_01'),
     'color.tag_label': colorOf('tag_color_gray'),
     'color.tag_label_disabled': colorOf('text_disabled'),
@@ -562,6 +565,10 @@ export default function buildGridRecipe (grid) {
     'color.tag_close_container_hover': colorOf('tag_hover_gray'),
     'color.tag_close_focus_ring': colorOf('focus'),
     'control.tag_interactive_outline_width': 1,
+    // v7 batch 6 B3 amendment: the small interactive tag's measured 20px
+    // (18 min-height beaten by the 16 label line plus the border and the
+    // button's own block padding)
+    'control.tag_interactive_height_small': 20,
     'color.tag_interactive_layer_active': NONE,
     'color.tag_interactive_outline_disabled': colorOf('border_disabled'),
     'color.tag_focus_ring': colorOf('focus'),

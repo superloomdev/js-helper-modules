@@ -231,6 +231,9 @@ const GRID = Object.freeze({
       'tag_close_container_hover', 'tag_close_focus_ring',
       // v7: the interactive tag members
       'tag_interactive_layer_active', 'tag_interactive_outline_disabled', 'tag_focus_ring',
+      // v7 batch 6 B3 amendment: the untyped interactive tag's hover reads
+      // the neutral tag cells
+      'tag_container_hover',
       // v7: the selectable tag member
       'tag_selectable_container', 'tag_selectable_container_hover', 'tag_selectable_container_selected', 'tag_selectable_container_selected_hover',
       'tag_selectable_label', 'tag_selectable_label_selected', 'tag_selectable_outline',
@@ -319,7 +322,7 @@ const GRID = Object.freeze({
     // v7: the closable tag member
     'tag_close_gap', 'tag_close_icon_size', 'tag_close_inset',
     // v7: the interactive tag members
-    'tag_interactive_outline_width', 'tag_focus_width', 'tag_focus_offset',
+    'tag_interactive_outline_width', 'tag_interactive_height_small', 'tag_focus_width', 'tag_focus_offset',
     // v7: the selectable tag member
     'tag_selectable_outline_width_selected',
     // v7: the landing view member
@@ -834,7 +837,7 @@ function buildContract () {
     'feedback.focus_trigger': Object.freeze({ group: 'feedback', values: ['any', 'keyboard'] }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (19 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (20 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'anatomy.label': Object.freeze({ group: 'anatomy', values: ['above', 'floating'] }),
     'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
@@ -858,6 +861,9 @@ function buildContract () {
     'anatomy.loading_motion': Object.freeze({ group: 'anatomy', values: ['spin', 'arc'] }),
     'anatomy.tag_close': Object.freeze({ group: 'anatomy', values: ['circle', 'inset'] }),
     'anatomy.tag_selected_mark': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    // v7 batch 6 B3 amendment: the interactive tag's outline, drawn as a
+    // layout border or as an inset ring that moves nothing
+    'anatomy.tag_interactive_outline': Object.freeze({ group: 'anatomy', values: ['border', 'inset'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~

@@ -1843,6 +1843,7 @@ export default Object.freeze({
     'anatomy.loading_motion': 'spin',
     'anatomy.tag_close': 'circle',
     'anatomy.tag_selected_mark': 'hidden',
+    'anatomy.tag_interactive_outline': 'border',
     'shadow.level_01': {
       'shadow': true,
       'layers': [
@@ -5827,6 +5828,7 @@ export default Object.freeze({
     'color.tag_interactive_layer_active': 'rgba(0, 0, 0, 0)',
     'color.tag_interactive_outline_disabled': '{color.border_disabled}',
     'color.tag_focus_ring': '{color.focus}',
+    'color.tag_container_hover': '{color.tag_hover_gray}',
     'color.tag_selectable_container': '{color.layer_01}',
     'color.tag_selectable_container_hover': '{color.layer_hover_01}',
     'color.tag_selectable_container_selected': '{color.layer_selected_inverse}',
@@ -5982,6 +5984,7 @@ export default Object.freeze({
     'control.tag_close_icon_size': 16,
     'control.tag_close_inset': 0,
     'control.tag_interactive_outline_width': 1,
+    'control.tag_interactive_height_small': 20,
     'control.tag_focus_width': 2,
     'control.tag_focus_offset': 1,
     'control.tag_selectable_outline_width_selected': 1,
@@ -7207,6 +7210,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'anatomy.tag_selected_mark': {
+      'group': 'raw'
+    },
+    'anatomy.tag_interactive_outline': {
       'group': 'raw'
     },
     'shadow.level_01': {
@@ -8784,6 +8790,9 @@ export default Object.freeze({
     'color.tag_focus_ring': {
       'group': 'color'
     },
+    'color.tag_container_hover': {
+      'group': 'color'
+    },
     'color.tag_selectable_container': {
       'group': 'color'
     },
@@ -9247,6 +9256,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.tag_interactive_outline_width': {
+      'group': 'dimension'
+    },
+    'control.tag_interactive_height_small': {
       'group': 'dimension'
     },
     'control.tag_focus_width': {

@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1133 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1133);
+  it('should expose exactly 1136 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1136);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1133 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1133);
+  it('should expose exactly 1136 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1136);
   });
 
   it('should report contract version 7', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 599,
+    color: 600,
     spacing: 17,
     size: 22,
     type: 83,
@@ -98,9 +98,9 @@ describe('contract registry - group counts', () => {
     state: 6,
     tint: 5,
     stacking: 5,
-    anatomy: 19,
+    anatomy: 20,
     icon: 85,
-    control: 163
+    control: 164
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1251,7 +1251,7 @@ describe('contract v5 - control group and role tokens', () => {
 
 describe('contract v4 - anatomy group', () => {
 
-  it('should expose nineteen enum structure tokens with their literal value lists', () => {
+  it('should expose twenty enum structure tokens with their literal value lists', () => {
     const anatomyTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'anatomy';
     });
@@ -1275,7 +1275,8 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.field_counter_format',
       'anatomy.loading_motion',
       'anatomy.tag_close',
-      'anatomy.tag_selected_mark'
+      'anatomy.tag_selected_mark',
+      'anatomy.tag_interactive_outline'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1298,10 +1299,11 @@ describe('contract v4 - anatomy group', () => {
     assert.deepEqual(contract.tokens['anatomy.loading_motion'].values, ['spin', 'arc']);
     assert.deepEqual(contract.tokens['anatomy.tag_close'].values, ['circle', 'inset']);
     assert.deepEqual(contract.tokens['anatomy.tag_selected_mark'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.tag_interactive_outline'].values, ['border', 'inset']);
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format', 'anatomy.loading_motion', 'anatomy.tag_close', 'anatomy.tag_selected_mark']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format', 'anatomy.loading_motion', 'anatomy.tag_close', 'anatomy.tag_selected_mark', 'anatomy.tag_interactive_outline']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }
@@ -1811,7 +1813,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 623);
+    assert.equal(gridNames.length, 625);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1997,10 +1999,11 @@ describe('contract v7 - the remaining atom families\' cells', () => {
     assert.equal(engine.buildTheme(template, [], 'native').tokens['motion.loading_rotation'], 690);
   });
 
-  it('should answer the three new anatomy enums with their value lists', () => {
+  it('should answer the four new anatomy enums with their value lists', () => {
     assert.deepEqual(contract.tokens['anatomy.loading_motion'].values, ['spin', 'arc']);
     assert.deepEqual(contract.tokens['anatomy.tag_close'].values, ['circle', 'inset']);
     assert.deepEqual(contract.tokens['anatomy.tag_selected_mark'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.tag_interactive_outline'].values, ['border', 'inset']);
   });
 
   it('should carry the save icon token', () => {
