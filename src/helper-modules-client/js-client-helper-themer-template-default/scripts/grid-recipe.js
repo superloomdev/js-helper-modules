@@ -564,6 +564,9 @@ export default function buildGridRecipe (grid) {
     'control.tag_close_inset': 0,
     'color.tag_close_container_hover': colorOf('tag_hover_gray'),
     'color.tag_close_focus_ring': colorOf('focus'),
+    // v7 batch 6 B3 round 2 amendment: the untyped dismissible tag's label
+    // reads the neutral tag label
+    'color.tag_dismissible_label': colorOf('tag_label'),
     'control.tag_interactive_outline_width': 1,
     // v7 batch 6 B3 amendment: the small interactive tag's measured 20px
     // (18 min-height beaten by the 16 label line plus the border and the
@@ -571,6 +574,9 @@ export default function buildGridRecipe (grid) {
     'control.tag_interactive_height_small': 20,
     'color.tag_interactive_layer_active': NONE,
     'color.tag_interactive_outline_disabled': colorOf('border_disabled'),
+    // v7 batch 6 B3 round 2 amendment: the untyped interactive tag's outline
+    // (its gray border where the plain tag draws none)
+    'color.tag_interactive_outline': colorOf('tag_border_gray'),
     'color.tag_focus_ring': colorOf('focus'),
     'control.tag_focus_width': 2,
     'control.tag_focus_offset': 1,
@@ -580,6 +586,11 @@ export default function buildGridRecipe (grid) {
     'color.tag_selectable_container_selected_hover': colorOf('layer_selected_inverse'),
     'color.tag_selectable_label': colorOf('text_primary'),
     'color.tag_selectable_label_selected': colorOf('text_inverse'),
+    // v7 batch 6 B3 round 2 amendment: selected and disabled reads the cells
+    // the component answers today - color.tag_container_disabled and
+    // color.tag_label_disabled
+    'color.tag_selectable_container_selected_disabled': colorOf('tag_container_disabled'),
+    'color.tag_selectable_label_selected_disabled': colorOf('tag_label_disabled'),
     'color.tag_selectable_outline': colorOf('border_inverse'),
     // v7 batch 6 amendment: the primary draws no pressed layer on the
     // selectable tag - the selection fill already darkens on press

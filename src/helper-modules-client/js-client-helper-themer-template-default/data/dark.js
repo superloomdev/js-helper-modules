@@ -5825,10 +5825,12 @@ export default Object.freeze({
     },
     'color.tag_close_container_hover': '{color.tag_hover_gray}',
     'color.tag_close_focus_ring': '{color.focus}',
+    'color.tag_dismissible_label': '{color.tag_label}',
     'color.tag_interactive_layer_active': 'rgba(0, 0, 0, 0)',
     'color.tag_interactive_outline_disabled': '{color.border_disabled}',
     'color.tag_focus_ring': '{color.focus}',
     'color.tag_container_hover': '{color.tag_hover_gray}',
+    'color.tag_interactive_outline': '{color.tag_border_gray}',
     'color.tag_selectable_container': '{color.layer_01}',
     'color.tag_selectable_container_hover': '{color.layer_hover_01}',
     'color.tag_selectable_container_selected': '{color.layer_selected_inverse}',
@@ -5836,6 +5838,8 @@ export default Object.freeze({
     'color.tag_selectable_label': '{color.text_primary}',
     'color.tag_selectable_label_selected': '{color.text_inverse}',
     'color.tag_selectable_outline': '{color.border_inverse}',
+    'color.tag_selectable_container_selected_disabled': '{color.tag_container_disabled}',
+    'color.tag_selectable_label_selected_disabled': '{color.tag_label_disabled}',
     'color.tag_selectable_layer_active': 'rgba(0, 0, 0, 0)',
     'color.view_background': '{color.background}',
     'color.view_navigation_background': '{color.layer_01}',
@@ -8781,6 +8785,9 @@ export default Object.freeze({
     'color.tag_close_focus_ring': {
       'group': 'color'
     },
+    'color.tag_dismissible_label': {
+      'group': 'color'
+    },
     'color.tag_interactive_layer_active': {
       'group': 'color'
     },
@@ -8791,6 +8798,9 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.tag_container_hover': {
+      'group': 'color'
+    },
+    'color.tag_interactive_outline': {
       'group': 'color'
     },
     'color.tag_selectable_container': {
@@ -8812,6 +8822,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.tag_selectable_outline': {
+      'group': 'color'
+    },
+    'color.tag_selectable_container_selected_disabled': {
+      'group': 'color'
+    },
+    'color.tag_selectable_label_selected_disabled': {
       'group': 'color'
     },
     'color.tag_selectable_layer_active': {

@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1136 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1136);
+  it('should expose exactly 1140 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1140);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1136 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1136);
+  it('should expose exactly 1140 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1140);
   });
 
   it('should report contract version 7', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 600,
+    color: 604,
     spacing: 17,
     size: 22,
     type: 83,
@@ -1813,7 +1813,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 625);
+    assert.equal(gridNames.length, 629);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1932,9 +1932,10 @@ describe('contract v7 - the remaining atom families\' cells', () => {
       progress_step: ['icon', 'icon_incomplete', 'icon_disabled', 'icon_invalid', 'line', 'line_complete', 'label', 'label_hover', 'label_focus', 'label_disabled', 'secondary_label'],
       skeleton: ['container', 'shimmer'],
       tag_close: ['container_hover', 'focus_ring'],
-      tag_interactive: ['layer_active', 'outline_disabled'],
+      tag_dismissible: ['label'],
+      tag_interactive: ['layer_active', 'outline', 'outline_disabled'],
       tag: ['focus_ring'],
-      tag_selectable: ['container', 'container_hover', 'container_selected', 'container_selected_hover', 'label', 'label_selected', 'outline'],
+      tag_selectable: ['container', 'container_hover', 'container_selected', 'container_selected_disabled', 'container_selected_hover', 'label', 'label_selected', 'label_selected_disabled', 'outline'],
       view: ['background', 'navigation_background'],
       landing: ['banner'],
       button_quick_action: ['container', 'container_hover', 'container_active', 'container_focus', 'container_disabled', 'container_selected', 'label', 'label_hover', 'label_active', 'label_focus', 'label_disabled', 'label_selected', 'border', 'border_hover', 'border_active', 'border_disabled']

@@ -229,14 +229,23 @@ const GRID = Object.freeze({
       'skeleton_container', 'skeleton_shimmer',
       // v7: the closable tag member
       'tag_close_container_hover', 'tag_close_focus_ring',
+      // v7 batch 6 B3 round 2 amendment: the untyped dismissible tag's label
+      // (the input chip's label role differs from the flat chip's)
+      'tag_dismissible_label',
       // v7: the interactive tag members
       'tag_interactive_layer_active', 'tag_interactive_outline_disabled', 'tag_focus_ring',
       // v7 batch 6 B3 amendment: the untyped interactive tag's hover reads
       // the neutral tag cells
       'tag_container_hover',
+      // v7 batch 6 B3 round 2 amendment: the untyped interactive tag's
+      // outline (the chips outline where the plain tag draws none)
+      'tag_interactive_outline',
       // v7: the selectable tag member
       'tag_selectable_container', 'tag_selectable_container_hover', 'tag_selectable_container_selected', 'tag_selectable_container_selected_hover',
       'tag_selectable_label', 'tag_selectable_label_selected', 'tag_selectable_outline',
+      // v7 batch 6 B3 round 2 amendment: the selected and disabled
+      // selectable tag (the filter chip answers its own pair)
+      'tag_selectable_container_selected_disabled', 'tag_selectable_label_selected_disabled',
       // v7 batch 6 amendment: the selectable tag's pressed layer (the
       // second's filter chip presses on-surface-variant where the
       // interactive layer answers on-surface, so the member gets its own)
