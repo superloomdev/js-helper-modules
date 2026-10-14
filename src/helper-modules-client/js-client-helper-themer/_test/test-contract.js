@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1127 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1127);
+  it('should expose exactly 1133 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1133);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1127 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1127);
+  it('should expose exactly 1133 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1133);
   });
 
   it('should report contract version 7', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 598,
+    color: 599,
     spacing: 17,
     size: 22,
     type: 83,
@@ -100,7 +100,7 @@ describe('contract registry - group counts', () => {
     stacking: 5,
     anatomy: 19,
     icon: 85,
-    control: 158
+    control: 163
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1811,7 +1811,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 617);
+    assert.equal(gridNames.length, 623);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);

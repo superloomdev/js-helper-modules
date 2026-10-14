@@ -124,14 +124,15 @@ auditRoles(theme) -> { success, findings } | async:no
 
 Version 7 extends the role grid to the remaining atom-tier components: the divider, link, loading, progress step, skeleton and view families, plus member cells where one member of an existing family draws differently (the button set, the button skeleton, the combo button, the inline loading line, the saving status, the closable, interactive, selectable and skeleton tags, the landing view):
 
-- **New grid families** (128 cells added, 617 total): `divider` (line color, width, inset); `link` (label colors per rest, hover, active, visited and disabled state, the focus ring color and width, icon gap and sizes, three type sets); `loading` (indicator, track and scrim colors; size, stroke width and arc per size; the `motion` group's first cells: `loading_rotation` and `loading_arc_cycle`); `progress_step` (icon, line and label colors per state, eleven geometry controls, two type sets); `skeleton` (container and shimmer colors, radius, placeholder and text geometry, `motion.skeleton_cycle`); `view` (background and navigation background colors).
+- **New grid families** (134 cells added, 623 total): `divider` (line color, width, inset); `link` (label colors per rest, hover, active, visited and disabled state, the focus ring color and width, icon gap and sizes, three type sets); `loading` (indicator, track and scrim colors; size, stroke width and arc per size; the `motion` group's first cells: `loading_rotation` and `loading_arc_cycle`); `progress_step` (icon, line and label colors per state, eleven geometry controls, two type sets); `skeleton` (container and shimmer colors, radius, placeholder and text geometry, `motion.skeleton_cycle`); `view` (background and navigation background colors).
 - **New member cells:** `button_set_separator[_disabled|_stacked_disabled]`, `button_set_item_max_width`, `button_set_gap`, `button_set_fluid_*`; `button_skeleton_width`; `combo_button_min_width` and `_max_width`; `inline_loading_label`, `inline_loading_success`, `inline_loading_error`, `control.inline_loading_gap`, `type.inline_loading_label`; `saving_error_icon`, `control.saving_icon_gap`, `type.saving_label`; `tag_close_*` for the closable tag, `tag_interactive_*` and `tag_focus_*` for the interactive tags, `tag_selectable_*` for the selectable tag, `tag_skeleton_width`; `landing_banner`, the landing geometry controls and `type.landing_title`.
 - **New button kind** `quick_action`: the chat button's outlined quick action, which gets every cell a kind gets plus `control.button_quick_action_focus_gap_width`.
 - **New anatomy values** (3): `anatomy.loading_motion` (`spin` | `arc`), `anatomy.tag_close` (`circle` | `inset`), `anatomy.tag_selected_mark` (`shown` | `hidden`).
 - **New icon role:** `icon.save` (the saving status's glyph).
+- **Batch-6 amendment** (6 cells): the progress step's `focus_width`, `vertical_icon_top`, `vertical_line_width` and `secondary_label_top` / `_start`, and the selectable tag's own pressed layer `color.tag_selectable_layer_active`.
 - **New role audits:** `link_label[_hover|_visited]`, `progress_step_label` and `inline_loading_label` must read on the page at 4.5, the selectable tag's labels must read on their rest and selected fills, `skeleton_shimmer` must differ from `skeleton_container`, and the selectable tag's selected pair must not paint exactly as its rest pair.
 
-The contract registry now carries 1127 tokens in 19 groups.
+The contract registry now carries 1133 tokens in 19 groups.
 
 ### Contract version 6
 

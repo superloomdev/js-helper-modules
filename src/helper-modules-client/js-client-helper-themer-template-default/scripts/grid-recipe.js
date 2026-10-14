@@ -532,6 +532,16 @@ export default function buildGridRecipe (grid) {
     'control.progress_step_label_gap': '{spacing.spacing_03}',
     'control.progress_step_skeleton_label_width': 40,
     'control.progress_step_skeleton_label_height': 14,
+    // the pressable label's focus ring draws no offset, a 1px outline
+    'control.progress_step_focus_width': 1,
+    // vertical anatomy: the icon sits 1px from the seat's top, the line
+    // is a 1px connector
+    'control.progress_step_vertical_icon_top': 1,
+    'control.progress_step_vertical_line_width': 1,
+    // the secondary label is absolute under the icon at the label's
+    // x position and two spacing steps down
+    'control.progress_step_secondary_label_top': 28,
+    'control.progress_step_secondary_label_start': 24,
     'type.progress_step_label': '{type.body_compact_01}',
     'type.progress_step_secondary_label': '{type.label01}',
     // v7 Skeleton family: the shimmer one ramp step past the container
@@ -564,6 +574,9 @@ export default function buildGridRecipe (grid) {
     'color.tag_selectable_label': colorOf('text_primary'),
     'color.tag_selectable_label_selected': colorOf('text_inverse'),
     'color.tag_selectable_outline': colorOf('border_inverse'),
+    // v7 batch 6 amendment: the primary draws no pressed layer on the
+    // selectable tag - the selection fill already darkens on press
+    'color.tag_selectable_layer_active': NONE,
     'control.tag_selectable_outline_width_selected': 1,
     // v7 View family: the page and its navigation region
     'color.view_background': colorOf('background'),

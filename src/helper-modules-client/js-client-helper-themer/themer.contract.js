@@ -102,7 +102,9 @@
 // gets every cell a kind gets), three anatomy enums (`loading_motion`,
 // `tag_close`, `tag_selected_mark`) and the motion of the two animated
 // families (`motion.loading_rotation`, `motion.loading_arc_cycle`,
-// `motion.skeleton_cycle`).
+// `motion.skeleton_cycle`). A batch-6 amendment adds the progress step's
+// focus width, vertical icon inset and line thickness, and secondary-label
+// offsets, plus the selectable tag's own pressed layer.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -232,6 +234,10 @@ const GRID = Object.freeze({
       // v7: the selectable tag member
       'tag_selectable_container', 'tag_selectable_container_hover', 'tag_selectable_container_selected', 'tag_selectable_container_selected_hover',
       'tag_selectable_label', 'tag_selectable_label_selected', 'tag_selectable_outline',
+      // v7 batch 6 amendment: the selectable tag's pressed layer (the
+      // second's filter chip presses on-surface-variant where the
+      // interactive layer answers on-surface, so the member gets its own)
+      'tag_selectable_layer_active',
       // v7: the view family
       'view_background', 'view_navigation_background',
       // v7: the landing view member
@@ -301,6 +307,11 @@ const GRID = Object.freeze({
     'progress_step_width', 'progress_step_min_width', 'progress_step_vertical_min_height', 'progress_step_icon_gap', 'progress_step_icon_top',
     'progress_step_line_width', 'progress_step_label_max_width', 'progress_step_label_max_width_vertical', 'progress_step_label_gap',
     'progress_step_skeleton_label_width', 'progress_step_skeleton_label_height',
+    // v7 batch 6 amendment: the pressable label's focus outline, the
+    // vertical anatomy's icon inset and line thickness, and the secondary
+    // label's absolute offsets - all values the primary states literally
+    'progress_step_focus_width', 'progress_step_vertical_icon_top', 'progress_step_vertical_line_width',
+    'progress_step_secondary_label_top', 'progress_step_secondary_label_start',
     // v7: the skeleton family
     'skeleton_radius', 'skeleton_placeholder_size', 'skeleton_text_height', 'skeleton_text_gap', 'skeleton_heading_height',
     // v7: the skeleton tag member
