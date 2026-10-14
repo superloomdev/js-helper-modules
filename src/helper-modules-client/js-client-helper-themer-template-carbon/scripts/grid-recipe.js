@@ -334,6 +334,9 @@ export default function buildGridRecipe (grid) {
     // no outline; a 24 pill at the default size, padding 8 or 4 with an icon;
     // disabled is `$layer` with `$text-disabled`
     'color.tag_container': colorOf('tag_background_gray'),
+    // v7 batch 6 B3 amendment: the untyped interactive tag hovers on the
+    // neutral tag's own hover
+    'color.tag_container_hover': colorOf('tag_hover_gray'),
     'color.tag_container_disabled': colorOf('layer_01'),
     'color.tag_label': colorOf('tag_color_gray'),
     'color.tag_label_disabled': colorOf('text_disabled'),
@@ -559,7 +562,9 @@ export default function buildGridRecipe (grid) {
     'color.progress_step_icon_incomplete': colorOf('icon_primary'),
     'color.progress_step_icon_disabled': colorOf('icon_disabled'),
     'color.progress_step_icon_invalid': colorOf('support_error'),
-    'color.progress_step_line': colorOf('border_subtle_01'),
+    // v7 batch 6 B3 amendment: the measured line is the base layer's
+    // border-subtle, as menu_divider and progress_track already answer
+    'color.progress_step_line': colorOf('border_subtle_00'),
     'color.progress_step_line_complete': colorOf('interactive'),
     'color.progress_step_label': colorOf('text_primary'),
     'color.progress_step_label_hover': colorOf('link_primary_hover'),
@@ -605,6 +610,10 @@ export default function buildGridRecipe (grid) {
     'color.tag_close_container_hover': colorOf('tag_hover_gray'),
     'color.tag_close_focus_ring': colorOf('focus'),
     'control.tag_interactive_outline_width': 1,
+    // v7 batch 6 B3 amendment: the small interactive tag's measured 20px
+    // (18 min-height beaten by the 16 label line plus the border and the
+    // button's own block padding)
+    'control.tag_interactive_height_small': 20,
     'color.tag_interactive_layer_active': NONE,
     'color.tag_interactive_outline_disabled': colorOf('border_disabled'),
     'color.tag_focus_ring': colorOf('focus'),

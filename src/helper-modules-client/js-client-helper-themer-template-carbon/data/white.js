@@ -874,6 +874,7 @@ export default Object.freeze({
     'anatomy.loading_motion': 'spin',
     'anatomy.tag_close': 'circle',
     'anatomy.tag_selected_mark': 'hidden',
+    'anatomy.tag_interactive_outline': 'border',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -4533,6 +4534,7 @@ export default Object.freeze({
     'control.switch_focus_width': '{focus.width}',
     'control.switch_focus_offset': 1,
     'color.tag_container': '{color.tag_background_gray}',
+    'color.tag_container_hover': '{color.tag_hover_gray}',
     'color.tag_container_disabled': '{color.layer_01}',
     'color.tag_label': '{color.tag_color_gray}',
     'color.tag_label_disabled': '{color.text_disabled}',
@@ -4728,7 +4730,7 @@ export default Object.freeze({
     'color.progress_step_icon_incomplete': '{color.icon_primary}',
     'color.progress_step_icon_disabled': '{color.icon_disabled}',
     'color.progress_step_icon_invalid': '{color.support_error}',
-    'color.progress_step_line': '{color.border_subtle_01}',
+    'color.progress_step_line': '{color.border_subtle_00}',
     'color.progress_step_line_complete': '{color.interactive}',
     'color.progress_step_label': '{color.text_primary}',
     'color.progress_step_label_hover': '{color.link_primary_hover}',
@@ -4768,6 +4770,7 @@ export default Object.freeze({
     'color.tag_close_container_hover': '{color.tag_hover_gray}',
     'color.tag_close_focus_ring': '{color.focus}',
     'control.tag_interactive_outline_width': 1,
+    'control.tag_interactive_height_small': 20,
     'color.tag_interactive_layer_active': 'rgba(0, 0, 0, 0)',
     'color.tag_interactive_outline_disabled': '{color.border_disabled}',
     'color.tag_focus_ring': '{color.focus}',
@@ -6244,6 +6247,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'anatomy.tag_selected_mark': {
+      'group': 'raw'
+    },
+    'anatomy.tag_interactive_outline': {
       'group': 'raw'
     },
     'shadow.level_01': {
@@ -7821,6 +7827,9 @@ export default Object.freeze({
     'color.tag_focus_ring': {
       'group': 'color'
     },
+    'color.tag_container_hover': {
+      'group': 'color'
+    },
     'color.tag_selectable_container': {
       'group': 'color'
     },
@@ -8284,6 +8293,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.tag_interactive_outline_width': {
+      'group': 'dimension'
+    },
+    'control.tag_interactive_height_small': {
       'group': 'dimension'
     },
     'control.tag_focus_width': {

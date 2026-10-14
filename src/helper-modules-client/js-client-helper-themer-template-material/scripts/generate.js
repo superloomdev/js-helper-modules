@@ -150,7 +150,10 @@ const ANATOMY = {
   // check (`_md-comp-filter-chip.scss` with-icon)
   'anatomy.loading_motion': 'arc',
   'anatomy.tag_close': 'inset',
-  'anatomy.tag_selected_mark': 'shown'
+  'anatomy.tag_selected_mark': 'shown',
+  // v7 batch 6 B3 amendment: the chips draw their outline as an overlay
+  // that moves nothing
+  'anatomy.tag_interactive_outline': 'inset'
 };
 
 // --- Engine setup ---------------------------------------------------------

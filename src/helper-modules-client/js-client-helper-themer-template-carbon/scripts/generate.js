@@ -93,7 +93,10 @@ const ANATOMY = {
   // fill, not a checkmark
   'anatomy.loading_motion': 'spin',
   'anatomy.tag_close': 'circle',
-  'anatomy.tag_selected_mark': 'hidden'
+  'anatomy.tag_selected_mark': 'hidden',
+  // v7 batch 6 B3 amendment: the primary draws the interactive tag's
+  // outline as a layout border
+  'anatomy.tag_interactive_outline': 'border'
 };
 
 // --- Role grid (v5 amendment) -------------------------------------------

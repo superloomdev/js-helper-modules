@@ -494,6 +494,7 @@ export default Object.freeze({
     'anatomy.loading_motion': 'arc',
     'anatomy.tag_close': 'inset',
     'anatomy.tag_selected_mark': 'shown',
+    'anatomy.tag_interactive_outline': 'inset',
     'icon.accessibility': {
       'icon': true,
       'viewBox': '0 -960 960 960',
@@ -2051,6 +2052,13 @@ export default Object.freeze({
     },
     'color.switch_focus_ring': '{color.focus}',
     'color.tag_container': 'rgba(0, 0, 0, 0)',
+    'color.tag_container_hover': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.08
+      ]
+    },
     'color.tag_container_disabled': 'rgba(0, 0, 0, 0)',
     'color.tag_label': '{color.text_primary}',
     'color.tag_label_disabled': {
@@ -2484,6 +2492,7 @@ export default Object.freeze({
     },
     'color.tag_close_focus_ring': '{color.focus}',
     'control.tag_interactive_outline_width': 1,
+    'control.tag_interactive_height_small': '{control.tag_height}',
     'color.tag_interactive_layer_active': {
       'op': 'alpha',
       'args': [
@@ -4938,6 +4947,9 @@ export default Object.freeze({
     'anatomy.tag_selected_mark': {
       'group': 'raw'
     },
+    'anatomy.tag_interactive_outline': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -6513,6 +6525,9 @@ export default Object.freeze({
     'color.tag_focus_ring': {
       'group': 'color'
     },
+    'color.tag_container_hover': {
+      'group': 'color'
+    },
     'color.tag_selectable_container': {
       'group': 'color'
     },
@@ -6976,6 +6991,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.tag_interactive_outline_width': {
+      'group': 'dimension'
+    },
+    'control.tag_interactive_height_small': {
       'group': 'dimension'
     },
     'control.tag_focus_width': {
@@ -7448,7 +7466,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '7e51930f2556b6787f52c142572e645689f5194d',
+    'default_shasum': '24b3a66836b7216b2bc4a2da50580256ed3501f1',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

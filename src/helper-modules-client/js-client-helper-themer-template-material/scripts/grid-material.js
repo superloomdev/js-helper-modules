@@ -600,6 +600,9 @@ export default function buildMaterialGrid (options) {
   Object.assign(out, {
     // The flat chip draws no fill; its label, outline and icon carry it
     'color.tag_container': NONE,
+    // v7 batch 6 B3 amendment: the untyped interactive tag's hover state
+    // layer (the flat assist chip hovers on-surface at the state opacity)
+    'color.tag_container_hover': translucent(chipFile, 'hover-state-layer-color', 'hover-state-layer-opacity'),
     'color.tag_container_disabled': NONE,
     'color.tag_label': required(colorToken(chipFile, 'label-text-color'), 'chip label'),
     'color.tag_label_disabled': translucent(chipFile, 'disabled-label-text-color', 'disabled-label-text-opacity'),
@@ -969,6 +972,9 @@ export default function buildMaterialGrid (options) {
     'color.tag_close_container_hover': translucent(inputChip, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
     'color.tag_close_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
     'control.tag_interactive_outline_width': numberToken('assist-chip', 'flat-outline-width'),
+    // v7 batch 6 B3 amendment: the chips have one height, so the small
+    // interactive tag is the tag's own
+    'control.tag_interactive_height_small': '{control.tag_height}',
     'color.tag_interactive_layer_active': translucent('assist-chip', 'pressed-state-layer-color', 'pressed-state-layer-opacity'),
     'color.tag_interactive_outline_disabled': translucent(filterChip, 'flat-disabled-unselected-outline-color', 'flat-disabled-unselected-outline-opacity'),
     'color.tag_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
