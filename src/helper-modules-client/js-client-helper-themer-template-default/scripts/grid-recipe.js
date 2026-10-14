@@ -319,6 +319,10 @@ export default function buildGridRecipe (grid) {
     'color.tag_icon': colorOf('tag_color_gray'),
     'color.tag_icon_disabled': colorOf('text_disabled'),
     'control.tag_height': '{size.size_xsmall}',
+    // v7 milestone 3 amendment: the small tag's height is the template's
+    // answer (the label's line box must fit the pill), not the spec sum
+    // size.icon_01 + spacing.spacing_01 the specs used - which is this 18
+    'control.tag_height_small': 18,
     'control.tag_radius': '{shape.radius_16}',
     'control.tag_padding_inline': '{spacing.spacing_03}',
     'control.tag_padding_icon': '{spacing.spacing_02}',

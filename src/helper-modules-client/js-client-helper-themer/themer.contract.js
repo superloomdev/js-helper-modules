@@ -105,7 +105,8 @@
 // `motion.skeleton_cycle`). A batch-6 amendment adds the progress step's
 // focus width, vertical icon inset and line thickness, and secondary-label
 // offsets, plus the selectable tag's own pressed layer. A batch-6 B3
-// round-3 amendment adds the loading arc's motion easing.
+// round-3 amendment adds the loading arc's motion easing. A milestone-3
+// amendment adds the small tag's template-dependent height.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -276,6 +277,9 @@ const GRID = Object.freeze({
     'switch_focus_width', 'switch_focus_offset',
     // v6: the tag family
     'tag_height', 'tag_radius', 'tag_padding_inline', 'tag_padding_icon', 'tag_outline_width', 'tag_icon_size',
+    // v7 milestone 3 amendment: the small tag's height is the template's
+    // answer (the label's line box must fit the pill), not a spec sum
+    'tag_height_small',
     // v6: the progress family
     'progress_height', 'progress_radius',
     // v6: the tooltip family and its compact member

@@ -5894,6 +5894,7 @@ export default Object.freeze({
     'control.tag_padding_icon': '{spacing.spacing_02}',
     'control.tag_outline_width': 0,
     'control.tag_icon_size': '{size.icon_01}',
+    'control.tag_height_small': 18,
     'control.progress_height': '{spacing.spacing_03}',
     'control.progress_radius': '{shape.radius_00}',
     'control.tooltip_padding_block': '{spacing.spacing_05}',
@@ -8991,6 +8992,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.tag_icon_size': {
+      'group': 'dimension'
+    },
+    'control.tag_height_small': {
       'group': 'dimension'
     },
     'control.progress_height': {
