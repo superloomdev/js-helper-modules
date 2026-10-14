@@ -2491,6 +2491,7 @@ export default Object.freeze({
       ]
     },
     'color.tag_close_focus_ring': '{color.focus}',
+    'color.tag_dismissible_label': '{color.text_secondary}',
     'control.tag_interactive_outline_width': 1,
     'control.tag_interactive_height_small': '{control.tag_height}',
     'color.tag_interactive_layer_active': {
@@ -2507,6 +2508,7 @@ export default Object.freeze({
         0.12
       ]
     },
+    'color.tag_interactive_outline': '{color.border_subtle_01}',
     'color.tag_focus_ring': '{color.focus}',
     'control.tag_focus_width': 3,
     'control.tag_focus_offset': 2,
@@ -2529,6 +2531,20 @@ export default Object.freeze({
     },
     'color.tag_selectable_label': '{color.text_secondary}',
     'color.tag_selectable_label_selected': '{color.text_on_button_tonal}',
+    'color.tag_selectable_container_selected_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_primary',
+        0.12
+      ]
+    },
+    'color.tag_selectable_label_selected_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_on_button_tonal',
+        0.38
+      ]
+    },
     'color.tag_selectable_outline': '{color.border_subtle_01}',
     'control.tag_selectable_outline_width_selected': 0,
     'color.tag_selectable_layer_active': {
@@ -6516,6 +6532,9 @@ export default Object.freeze({
     'color.tag_close_focus_ring': {
       'group': 'color'
     },
+    'color.tag_dismissible_label': {
+      'group': 'color'
+    },
     'color.tag_interactive_layer_active': {
       'group': 'color'
     },
@@ -6526,6 +6545,9 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.tag_container_hover': {
+      'group': 'color'
+    },
+    'color.tag_interactive_outline': {
       'group': 'color'
     },
     'color.tag_selectable_container': {
@@ -6547,6 +6569,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.tag_selectable_outline': {
+      'group': 'color'
+    },
+    'color.tag_selectable_container_selected_disabled': {
+      'group': 'color'
+    },
+    'color.tag_selectable_label_selected_disabled': {
       'group': 'color'
     },
     'color.tag_selectable_layer_active': {
@@ -7466,7 +7494,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '24b3a66836b7216b2bc4a2da50580256ed3501f1',
+    'default_shasum': '19055c51cd0252e2ad1375ceaf2db2ca07d6ecc9',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

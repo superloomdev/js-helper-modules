@@ -971,12 +971,18 @@ export default function buildMaterialGrid (options) {
     'control.tag_close_inset': numberToken(inputChip, 'with-trailing-icon-trailing-space'),
     'color.tag_close_container_hover': translucent(inputChip, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
     'color.tag_close_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
+    // v7 batch 6 B3 round 2 amendment: the untyped dismissible tag's label
+    // (the input chip's label role differs from the flat chip's)
+    'color.tag_dismissible_label': required(colorToken(inputChip, 'unselected-label-text-color'), 'input chip label'),
     'control.tag_interactive_outline_width': numberToken('assist-chip', 'flat-outline-width'),
     // v7 batch 6 B3 amendment: the chips have one height, so the small
     // interactive tag is the tag's own
     'control.tag_interactive_height_small': '{control.tag_height}',
     'color.tag_interactive_layer_active': translucent('assist-chip', 'pressed-state-layer-color', 'pressed-state-layer-opacity'),
     'color.tag_interactive_outline_disabled': translucent(filterChip, 'flat-disabled-unselected-outline-color', 'flat-disabled-unselected-outline-opacity'),
+    // v7 batch 6 B3 round 2 amendment: the untyped interactive tag's outline
+    // (the flat assist chip's outline)
+    'color.tag_interactive_outline': required(colorToken('assist-chip', 'flat-outline-color'), 'assist chip flat outline'),
     'color.tag_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
     'control.tag_focus_width': numberToken('focus-ring', 'width'),
     'control.tag_focus_offset': numberToken('focus-ring', 'outward-offset'),
@@ -991,6 +997,14 @@ export default function buildMaterialGrid (options) {
     ),
     'color.tag_selectable_label': required(colorToken(filterChip, 'unselected-label-text-color'), 'filter chip label'),
     'color.tag_selectable_label_selected': required(colorToken(filterChip, 'selected-label-text-color'), 'filter chip selected label'),
+    // v7 batch 6 B3 round 2 amendment: the filter chip's disabled selected
+    // pair - its own container token, and the selected label color at the
+    // disabled label opacity
+    'color.tag_selectable_container_selected_disabled': translucent(filterChip, 'flat-disabled-selected-container-color', 'flat-disabled-selected-container-opacity'),
+    'color.tag_selectable_label_selected_disabled': atOpacity(
+      required(paintOf(filterChip, 'selected-label-text-color'), 'filter chip selected label'),
+      numberToken(filterChip, 'disabled-label-text-opacity')
+    ),
     'color.tag_selectable_outline': required(colorToken(filterChip, 'flat-unselected-outline-color'), 'filter chip outline'),
     'control.tag_selectable_outline_width_selected': numberToken(filterChip, 'flat-selected-outline-width'),
     // v7 batch 6 amendment: the filter chip's pressed layer (the
