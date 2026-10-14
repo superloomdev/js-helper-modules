@@ -2085,6 +2085,7 @@ export default Object.freeze({
       ]
     },
     'control.tag_height': 32,
+    'control.tag_height_small': 24,
     'control.tag_radius': '{shape.radius_08}',
     'control.tag_padding_inline': 16,
     'control.tag_padding_icon': 8,
@@ -2499,7 +2500,7 @@ export default Object.freeze({
     'color.tag_close_focus_ring': '{color.focus}',
     'color.tag_dismissible_label': '{color.text_secondary}',
     'control.tag_interactive_outline_width': 1,
-    'control.tag_interactive_height_small': 18,
+    'control.tag_interactive_height_small': '{control.tag_height_small}',
     'color.tag_interactive_layer_active': {
       'op': 'alpha',
       'args': [
@@ -6752,6 +6753,9 @@ export default Object.freeze({
     'control.tag_icon_size': {
       'group': 'dimension'
     },
+    'control.tag_height_small': {
+      'group': 'dimension'
+    },
     'control.progress_height': {
       'group': 'dimension'
     },
@@ -7510,7 +7514,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '6ec4bff8929b13875d2cc715fbdddbadc6335546',
+    'default_shasum': 'afbbdc2d0f68577862b9bab6d26833958aad12fa',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

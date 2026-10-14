@@ -345,6 +345,10 @@ export default function buildGridRecipe (grid) {
     'color.tag_icon': colorOf('tag_color_gray'),
     'color.tag_icon_disabled': colorOf('text_disabled'),
     'control.tag_height': '{size.size_xsmall}',
+    // v7 milestone 3 amendment: the small tag's height is a cell now -
+    // 18, what the spec sum size.icon_01 + spacing.spacing_01 gave
+    // (tag/_tag.scss:53 `min-block-size: layout.size('height')`, sm = 18)
+    'control.tag_height_small': 18,
     'control.tag_radius': '{shape.radius_16}',
     'control.tag_padding_inline': '{spacing.spacing_03}',
     'control.tag_padding_icon': '{spacing.spacing_02}',

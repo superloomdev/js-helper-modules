@@ -4543,6 +4543,7 @@ export default Object.freeze({
     'color.tag_icon': '{color.tag_color_gray}',
     'color.tag_icon_disabled': '{color.text_disabled}',
     'control.tag_height': '{size.size_xsmall}',
+    'control.tag_height_small': 18,
     'control.tag_radius': '{shape.radius_16}',
     'control.tag_padding_inline': '{spacing.spacing_03}',
     'control.tag_padding_icon': '{spacing.spacing_02}',
@@ -8028,6 +8029,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.tag_icon_size': {
+      'group': 'dimension'
+    },
+    'control.tag_height_small': {
       'group': 'dimension'
     },
     'control.progress_height': {

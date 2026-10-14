@@ -611,6 +611,10 @@ export default function buildMaterialGrid (options) {
     'color.tag_icon': required(colorToken(chipFile, 'with-icon-icon-color'), 'chip icon'),
     'color.tag_icon_disabled': translucent(chipFile, 'with-icon-disabled-icon-color', 'with-icon-disabled-icon-opacity'),
     'control.tag_height': numberToken(chipFile, 'container-height'),
+    // v7 milestone 3 amendment: the second system has no small chip, so
+    // 24 - the smallest box that holds the 20px label line with a block
+    // inset - not the spec sum 18 the label overflows
+    'control.tag_height_small': 24,
     'control.tag_radius': radiusOf(chipFile, 'container-shape'),
     'control.tag_padding_inline': numberToken(chipFile, 'leading-space'),
     'control.tag_padding_icon': numberToken(chipFile, 'with-leading-icon-leading-space'),
@@ -983,11 +987,10 @@ export default function buildMaterialGrid (options) {
     // (the input chip's label role differs from the flat chip's)
     'color.tag_dismissible_label': required(colorToken(inputChip, 'unselected-label-text-color'), 'input chip label'),
     'control.tag_interactive_outline_width': numberToken('assist-chip', 'flat-outline-width'),
-    // v7 batch 6 B3 round 3 amendment: the second system has no small
-    // chip; with the `inset` outline nothing grows the box, so a small
-    // interactive tag is the plain small tag's 18 (Tag's heightSmall:
-    // size.icon_01 + spacing.spacing_01)
-    'control.tag_interactive_height_small': 18,
+    // v7 milestone 3 amendment: the interactive small tag is the plain
+    // small tag - under the `inset` outline nothing grows the box, so it
+    // aliases control.tag_height_small
+    'control.tag_interactive_height_small': '{control.tag_height_small}',
     'color.tag_interactive_layer_active': translucent('assist-chip', 'pressed-state-layer-color', 'pressed-state-layer-opacity'),
     'color.tag_interactive_outline_disabled': translucent(filterChip, 'flat-disabled-unselected-outline-color', 'flat-disabled-unselected-outline-opacity'),
     // v7 batch 6 B3 round 2 amendment: the untyped interactive tag's outline
