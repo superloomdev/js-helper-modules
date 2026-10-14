@@ -104,7 +104,8 @@
 // families (`motion.loading_rotation`, `motion.loading_arc_cycle`,
 // `motion.skeleton_cycle`). A batch-6 amendment adds the progress step's
 // focus width, vertical icon inset and line thickness, and secondary-label
-// offsets, plus the selectable tag's own pressed layer.
+// offsets, plus the selectable tag's own pressed layer. A batch-6 B3
+// round-3 amendment adds the loading arc's motion easing.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -358,8 +359,18 @@ const GRID = Object.freeze({
   ])),
   motion: Object.freeze([
     // v7: the two animated families' cycles
-    'loading_rotation', 'loading_arc_cycle', 'skeleton_cycle'
+    'loading_rotation', 'loading_arc_cycle',
+    // v7 batch 6 B3 round 3 amendment: the arc anatomy's expand/rotate
+    // easing (an array4 curve, not a duration)
+    'loading_arc_easing',
+    'skeleton_cycle'
   ])
+});
+
+// A grid cell whose value type differs from its group's default emit
+// declares its token definition here
+const GRID_CELL_DEFS = Object.freeze({
+  'motion.loading_arc_easing': Object.freeze({ emit: 'easing', values: ['array4'] })
 });
 
 
@@ -373,7 +384,8 @@ function buildGridTokens () {
   const out = {};
   for (const group of Object.keys(GRID)) {
     for (const cell of GRID[group]) {
-      out[group + '.' + cell] = Object.freeze({ group: group, grid: true });
+      const name = group + '.' + cell;
+      out[name] = Object.freeze(Object.assign({ group: group, grid: true }, GRID_CELL_DEFS[name]));
     }
   }
 

@@ -502,6 +502,9 @@ export default function buildGridRecipe (grid) {
     'control.loading_arc_small': 0.48,
     'motion.loading_rotation': 690,
     'motion.loading_arc_cycle': 690,
+    // v7 batch 6 B3 round 3 amendment: the arc's expand and rotate steps
+    // run on the standard productive curve
+    'motion.loading_arc_easing': '{motion.easing_standard_productive}',
     // v7 Inline loading member: the label beside the spinner
     'type.inline_loading_label': '{type.label02}',
     'color.inline_loading_label': colorOf('text_secondary'),

@@ -6074,6 +6074,7 @@ export default Object.freeze({
     },
     'motion.loading_rotation': 690,
     'motion.loading_arc_cycle': 690,
+    'motion.loading_arc_easing': '{motion.easing_standard_productive}',
     'motion.skeleton_cycle': 3000
   },
   'meta': {
@@ -9493,6 +9494,9 @@ export default Object.freeze({
     },
     'motion.loading_arc_cycle': {
       'group': 'duration'
+    },
+    'motion.loading_arc_easing': {
+      'group': 'easing'
     },
     'motion.skeleton_cycle': {
       'group': 'duration'

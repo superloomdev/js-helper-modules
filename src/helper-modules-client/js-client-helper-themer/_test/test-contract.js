@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1140 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1140);
+  it('should expose exactly 1141 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1141);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1140 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1140);
+  it('should expose exactly 1141 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1141);
   });
 
   it('should report contract version 7', () => {
@@ -87,7 +87,7 @@ describe('contract registry - group counts', () => {
     size: 22,
     type: 83,
     font: 12,
-    motion: 32,
+    motion: 33,
     shape: 9,
     border: 4,
     focus: 2,
@@ -1813,7 +1813,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 629);
+    assert.equal(gridNames.length, 630);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1970,7 +1970,7 @@ describe('contract v7 - the remaining atom families\' cells', () => {
       button_quick_action: ['', 'hover', 'active', 'disabled']
     },
     motion: {
-      loading: ['rotation', 'arc_cycle'],
+      loading: ['rotation', 'arc_cycle', 'arc_easing'],
       skeleton: ['cycle']
     }
   };
@@ -1989,9 +1989,10 @@ describe('contract v7 - the remaining atom families\' cells', () => {
     }
   });
 
-  it('should add the motion group to the grid and emit its cells as durations', () => {
-    assert.deepEqual(contract.grid.motion, ['loading_rotation', 'loading_arc_cycle', 'skeleton_cycle']);
+  it('should add the motion group to the grid and emit its cells as durations, the arc easing as an easing', () => {
+    assert.deepEqual(contract.grid.motion, ['loading_rotation', 'loading_arc_cycle', 'loading_arc_easing', 'skeleton_cycle']);
     assert.deepEqual(contract.meta['motion.loading_rotation'], { group: 'duration' });
+    assert.deepEqual(contract.meta['motion.loading_arc_easing'], { group: 'easing' });
     const engine = themerLoader(Lib, {});
     const template = {
       tokens: { 'motion.loading_rotation': 690 },
