@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1217 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1217);
+  it('should expose exactly 1219 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1219);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1217 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1217);
+  it('should expose exactly 1219 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1219);
   });
 
   it('should report contract version 8', () => {
@@ -100,7 +100,7 @@ describe('contract registry - group counts', () => {
     stacking: 5,
     anatomy: 20,
     icon: 86,
-    control: 209
+    control: 211
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1814,7 +1814,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 705);
+    assert.equal(gridNames.length, 707);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -2058,11 +2058,11 @@ describe('contract v8 - the milestone 4 cells', () => {
       field_action: ['inset', 'size', 'gap'],
       field_skeleton: ['label_width', 'label_height'],
       time_picker: ['input_width', 'input_width_invalid', 'select_gap'],
-      number_input: ['divider_height'],
+      number_input: ['divider_height', 'min_width'],
       checkbox_group: ['gap'],
       radio_group: ['gap_horizontal', 'gap_vertical'],
       selection_skeleton: ['label_width'],
-      toggle_skeleton: ['bar_width', 'bar_height'],
+      toggle_skeleton: ['bar_width', 'bar_height', 'circle_size'],
       slider: ['gap', 'padding_block', 'min_width', 'max_width', 'track_height', 'track_radius', 'tick_height', 'handle_size', 'handle_size_active', 'state_layer_size', 'input_width', 'input_width_invalid', 'skeleton_range_width', 'skeleton_range_height'],
       multi_select: ['checkbox_inset'],
       popover: ['radius', 'caret_width', 'caret_height', 'offset'],

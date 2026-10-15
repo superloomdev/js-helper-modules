@@ -406,9 +406,15 @@ const GRID = Object.freeze({
     'field_skeleton_label_width', 'field_skeleton_label_height',
     'time_picker_input_width', 'time_picker_input_width_invalid', 'time_picker_select_gap',
     'number_input_divider_height',
+    // v8 rework amendment: the number input's width floor
+    // (number-input/_number-input.scss: min-inline-size 9.375rem)
+    'number_input_min_width',
     // v8: the selection group gaps and the skeleton seats
     'checkbox_group_gap', 'radio_group_gap_horizontal', 'radio_group_gap_vertical',
     'selection_skeleton_label_width', 'toggle_skeleton_bar_width', 'toggle_skeleton_bar_height',
+    // v8 rework amendment: the toggle skeleton's own circle - the census
+    // draws 18, unlike a live switch handle (toggle/_toggle.scss)
+    'toggle_skeleton_circle_size',
     // v8: the slider family
     'slider_gap', 'slider_padding_block', 'slider_min_width', 'slider_max_width',
     'slider_track_height', 'slider_track_radius', 'slider_tick_height',
