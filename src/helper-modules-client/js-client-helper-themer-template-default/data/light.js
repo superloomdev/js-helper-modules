@@ -6061,12 +6061,14 @@ export default Object.freeze({
     'control.time_picker_input_width_invalid': 98.8,
     'control.time_picker_select_gap': '{spacing.spacing_01}',
     'control.number_input_divider_height': 16,
+    'control.number_input_min_width': 150,
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
     'control.radio_group_gap_vertical': 6,
     'control.selection_skeleton_label_width': 100,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
+    'control.toggle_skeleton_circle_size': 18,
     'control.slider_gap': '{spacing.spacing_05}',
     'control.slider_padding_block': 16,
     'control.slider_min_width': 200,
@@ -9517,6 +9519,9 @@ export default Object.freeze({
     'control.number_input_divider_height': {
       'group': 'dimension'
     },
+    'control.number_input_min_width': {
+      'group': 'dimension'
+    },
     'control.checkbox_group_gap': {
       'group': 'dimension'
     },
@@ -9533,6 +9538,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.toggle_skeleton_bar_height': {
+      'group': 'dimension'
+    },
+    'control.toggle_skeleton_circle_size': {
       'group': 'dimension'
     },
     'control.slider_gap': {
