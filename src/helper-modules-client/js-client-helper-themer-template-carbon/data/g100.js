@@ -279,7 +279,7 @@ export default Object.freeze({
     'type.body01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 20,
+      'line_height_px': 19.999979999999997,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -295,7 +295,7 @@ export default Object.freeze({
     'type.body_compact_01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -311,7 +311,7 @@ export default Object.freeze({
     'type.body_long_01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 20,
+      'line_height_px': 19.999979999999997,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -327,7 +327,7 @@ export default Object.freeze({
     'type.body_short_01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -343,7 +343,7 @@ export default Object.freeze({
     'type.caption01': {
       'type_set': true,
       'font_size': 12,
-      'line_height_px': 16,
+      'line_height_px': 15.999959999999998,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'sans'
@@ -351,7 +351,7 @@ export default Object.freeze({
     'type.caption02': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'sans'
@@ -359,7 +359,7 @@ export default Object.freeze({
     'type.code01': {
       'type_set': true,
       'font_size': 12,
-      'line_height_px': 16,
+      'line_height_px': 15.999959999999998,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'mono'
@@ -367,7 +367,7 @@ export default Object.freeze({
     'type.code02': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 20,
+      'line_height_px': 19.999979999999997,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'mono'
@@ -375,7 +375,7 @@ export default Object.freeze({
     'type.display01': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -383,7 +383,7 @@ export default Object.freeze({
     'type.display02': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 600,
       'font_family': 'sans'
@@ -391,7 +391,7 @@ export default Object.freeze({
     'type.display03': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -399,7 +399,7 @@ export default Object.freeze({
     'type.display04': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -407,7 +407,7 @@ export default Object.freeze({
     'type.expressive_heading_01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 17.5,
       'letter_spacing': 0.16,
       'weight': 600,
       'font_family': 'sans'
@@ -431,7 +431,7 @@ export default Object.freeze({
     'type.expressive_heading_04': {
       'type_set': true,
       'font_size': 28,
-      'line_height_px': 36,
+      'line_height_px': 36.00016,
       'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
@@ -455,7 +455,7 @@ export default Object.freeze({
     'type.expressive_paragraph_01': {
       'type_set': true,
       'font_size': 24,
-      'line_height_px': 32,
+      'line_height_px': 32.016000000000005,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -463,7 +463,7 @@ export default Object.freeze({
     'type.fluid_display_01': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -471,7 +471,7 @@ export default Object.freeze({
     'type.fluid_display_02': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 600,
       'font_family': 'sans'
@@ -479,7 +479,7 @@ export default Object.freeze({
     'type.fluid_display_03': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -487,7 +487,7 @@ export default Object.freeze({
     'type.fluid_display_04': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 49.98,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -503,7 +503,7 @@ export default Object.freeze({
     'type.fluid_heading_04': {
       'type_set': true,
       'font_size': 28,
-      'line_height_px': 36,
+      'line_height_px': 36.00016,
       'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
@@ -527,7 +527,7 @@ export default Object.freeze({
     'type.fluid_paragraph_01': {
       'type_set': true,
       'font_size': 24,
-      'line_height_px': 32,
+      'line_height_px': 32.016000000000005,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -551,7 +551,7 @@ export default Object.freeze({
     'type.heading01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 20,
+      'line_height_px': 19.999979999999997,
       'letter_spacing': 0.16,
       'weight': 600,
       'font_family': 'sans'
@@ -575,7 +575,7 @@ export default Object.freeze({
     'type.heading04': {
       'type_set': true,
       'font_size': 28,
-      'line_height_px': 36,
+      'line_height_px': 36.00016,
       'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
@@ -591,7 +591,7 @@ export default Object.freeze({
     'type.heading06': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 50.358000000000004,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -599,7 +599,7 @@ export default Object.freeze({
     'type.heading07': {
       'type_set': true,
       'font_size': 54,
-      'line_height_px': 65,
+      'line_height_px': 64.74600000000001,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -607,7 +607,7 @@ export default Object.freeze({
     'type.heading_compact_01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 600,
       'font_family': 'sans'
@@ -623,7 +623,7 @@ export default Object.freeze({
     'type.helper_text_01': {
       'type_set': true,
       'font_size': 12,
-      'line_height_px': 16,
+      'line_height_px': 15.999959999999998,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'sans'
@@ -631,7 +631,7 @@ export default Object.freeze({
     'type.helper_text_02': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -639,7 +639,7 @@ export default Object.freeze({
     'type.label01': {
       'type_set': true,
       'font_size': 12,
-      'line_height_px': 16,
+      'line_height_px': 15.999959999999998,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'sans'
@@ -647,7 +647,7 @@ export default Object.freeze({
     'type.label02': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -655,7 +655,7 @@ export default Object.freeze({
     'type.legal01': {
       'type_set': true,
       'font_size': 12,
-      'line_height_px': 16,
+      'line_height_px': 15.999959999999998,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'sans'
@@ -663,7 +663,7 @@ export default Object.freeze({
     'type.legal02': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -671,7 +671,7 @@ export default Object.freeze({
     'type.productive_heading_01': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 600,
       'font_family': 'sans'
@@ -695,7 +695,7 @@ export default Object.freeze({
     'type.productive_heading_04': {
       'type_set': true,
       'font_size': 28,
-      'line_height_px': 36,
+      'line_height_px': 36.00016,
       'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
@@ -711,7 +711,7 @@ export default Object.freeze({
     'type.productive_heading_06': {
       'type_set': true,
       'font_size': 42,
-      'line_height_px': 50,
+      'line_height_px': 50.358000000000004,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -719,7 +719,7 @@ export default Object.freeze({
     'type.productive_heading_07': {
       'type_set': true,
       'font_size': 54,
-      'line_height_px': 65,
+      'line_height_px': 64.74600000000001,
       'letter_spacing': 0,
       'weight': 300,
       'font_family': 'sans'
@@ -743,7 +743,7 @@ export default Object.freeze({
     'type.button_label': {
       'type_set': true,
       'font_size': 14,
-      'line_height_px': 18,
+      'line_height_px': 18.00008,
       'letter_spacing': 0.16,
       'weight': 400,
       'font_family': 'sans'
@@ -751,7 +751,7 @@ export default Object.freeze({
     'type.field_label_raised': {
       'type_set': true,
       'font_size': 12,
-      'line_height_px': 16,
+      'line_height_px': 15.999959999999998,
       'letter_spacing': 0.32,
       'weight': 400,
       'font_family': 'sans'
@@ -4853,11 +4853,13 @@ export default Object.freeze({
     'control.time_picker_select_gap': '{spacing.spacing_01}',
     'color.number_input_divider': '{color.border_subtle_00}',
     'control.number_input_divider_height': 16,
+    'control.number_input_min_width': 150,
     'color.search_icon_disabled': '{color.icon_on_color_disabled}',
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
     'control.radio_group_gap_vertical': 6,
     'control.selection_skeleton_label_width': 100,
+    'control.toggle_skeleton_circle_size': 18,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
     'control.slider_gap': '{spacing.spacing_05}',
@@ -8561,6 +8563,9 @@ export default Object.freeze({
     'control.number_input_divider_height': {
       'group': 'dimension'
     },
+    'control.number_input_min_width': {
+      'group': 'dimension'
+    },
     'control.checkbox_group_gap': {
       'group': 'dimension'
     },
@@ -8577,6 +8582,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.toggle_skeleton_bar_height': {
+      'group': 'dimension'
+    },
+    'control.toggle_skeleton_circle_size': {
       'group': 'dimension'
     },
     'control.slider_gap': {

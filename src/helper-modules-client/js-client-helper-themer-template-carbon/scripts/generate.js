@@ -358,9 +358,13 @@ function parseVw (value) {
 }
 
 // --- Type set conversion -------------------------------------------------
+// The line box is the upstream product itself, never its integer round:
+// Chromium lays text out at the fractional box (heading01 14 x 1.42857 =
+// 19.99998 draws a 19.984375 box and seats the glyph one pixel higher than
+// a rounded 20), so the emitted value must preserve the product
 function convertTypeSet (carbonName, carbonDef) {
   const fontSize = remToPx(carbonDef.fontSize);
-  const lineHeightPx = Math.round(fontSize * carbonDef.lineHeight);
+  const lineHeightPx = fontSize * carbonDef.lineHeight;
   let letterSpacing = 0;
   if (carbonDef.letterSpacing !== undefined && carbonDef.letterSpacing !== 0) {
     letterSpacing = stripPx(carbonDef.letterSpacing);

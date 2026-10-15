@@ -671,6 +671,9 @@ export default function buildGridRecipe (grid) {
     // 16 tall between the steppers (number-input/_number-input.scss)
     'color.number_input_divider': colorOf('border_subtle_00'),
     'control.number_input_divider_height': 16,
+    // v8 rework amendment (census NumberInput): min-inline-size 9.375rem
+    // on the field (number-input/_number-input.scss:47-72)
+    'control.number_input_min_width': 150,
     // v8 Search (census Search): the disabled close and magnifier draw
     // $icon-on-color-disabled
     'color.search_icon_disabled': colorOf('icon_on_color_disabled'),
@@ -679,8 +682,11 @@ export default function buildGridRecipe (grid) {
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
     'control.radio_group_gap_vertical': 6,
-    // v8 Selection skeletons (census CheckboxSkeleton, ToggleSkeleton)
+    // v8 Selection skeletons (census CheckboxSkeleton, ToggleSkeleton):
+    // the skeleton's own 18 circle, unlike a live switch handle
+    // (toggle/_toggle.scss:226-231)
     'control.selection_skeleton_label_width': 100,
+    'control.toggle_skeleton_circle_size': 18,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
     // v8 Slider family (census Slider, slider/_slider.scss): a square 2px

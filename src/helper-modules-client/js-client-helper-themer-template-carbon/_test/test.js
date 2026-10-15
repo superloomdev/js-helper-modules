@@ -6,6 +6,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -381,7 +382,7 @@ describe('carbon template - engine build', () => {
     const body01 = built.tokens['type.body01'];
     assert.deepEqual(body01, {
       fontSize: 14,
-      lineHeight: 20,
+      lineHeight: 14 * 1.42857,
       letterSpacing: 0.16,
       fontWeight: '400',
       fontFamily: 'sans'
@@ -441,10 +442,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1217 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1219 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1217);
+        assert.equal(names.length, 1219);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -539,3 +540,55 @@ describe('carbon template - role grid (v5 amendment)', () => {
 
 });
 
+
+
+describe('carbon template - v8 rework amendment', () => {
+
+  // The pinned type package is read straight from the module's own
+  // node_modules, the same source the generator reads
+  const carbonType = createRequire(resolve(moduleRoot, 'package.json'))('@carbon/type');
+
+  const pxOf = function (rem) {
+    const px = parseFloat(rem) * 16;
+    const rounded = Math.round(px * 100) / 100;
+    return rounded % 1 === 0 ? Math.round(rounded) : rounded;
+  };
+
+  it('should preserve the exact fontSize x lineHeight product in every scheme', () => {
+    for (const carbonName of ['heading01', 'label01', 'bodyCompact01']) {
+      const def = carbonType[carbonName];
+      const expected = pxOf(def.fontSize) * def.lineHeight;
+      for (const schemeName of Object.keys(profile.schemes)) {
+        const sName = /[A-Z]/.test(carbonName)
+          ? carbonName.replace(/([A-Z])/g, '_$1').replace(/(\d+)/g, '_$1').toLowerCase().replace(/^_/, '')
+          : carbonName.toLowerCase();
+        const set = profile.schemes[schemeName].tokens['type.' + sName];
+        assert.ok(set, schemeName + ' missing type.' + sName);
+        assert.equal(set.line_height_px, expected,
+          schemeName + ' type.' + sName + '.line_height_px must be the exact product, not the round');
+      }
+    }
+  });
+
+  it('should keep heading01 under a 20px line box', () => {
+    const expected = pxOf(carbonType.heading01.fontSize) * carbonType.heading01.lineHeight;
+    assert.ok(expected < 20, 'fixture assumption: the product is below 20');
+    for (const schemeName of Object.keys(profile.schemes)) {
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens;
+      assert.equal(built['type.heading01'].lineHeight, expected,
+        schemeName + ' built native heading01 loses the product');
+    }
+  });
+
+  it('should answer the two new control cells itself in every scheme', () => {
+    for (const schemeName of Object.keys(profile.schemes)) {
+      const scheme = profile.schemes[schemeName];
+      assert.equal(scheme.tokens['control.number_input_min_width'], 150, schemeName);
+      assert.equal(scheme.tokens['control.toggle_skeleton_circle_size'], 18, schemeName);
+      for (const name of ['control.number_input_min_width', 'control.toggle_skeleton_circle_size']) {
+        assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
+      }
+    }
+  });
+
+});
