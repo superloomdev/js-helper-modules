@@ -689,10 +689,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1217 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1219 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1217);
+        assert.equal(names.length, 1219);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -777,6 +777,15 @@ describe('material template - role grid (v5 amendment)', () => {
         assert.notEqual(scheme.tokens[name], undefined, name);
         assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
       }
+    });
+
+    it('should answer the two v8 control cells with their exact values in ' + schemeName + ', raw and built', () => {
+      const scheme = profile.schemes[schemeName];
+      assert.equal(scheme.tokens['control.number_input_min_width'], 150, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.toggle_skeleton_circle_size'], 18, schemeName + ' raw');
+      const built = Themer.buildTheme(scheme, [], 'native').tokens;
+      assert.equal(built['control.number_input_min_width'], 150, schemeName + ' built');
+      assert.equal(built['control.toggle_skeleton_circle_size'], 18, schemeName + ' built');
     });
 
   }

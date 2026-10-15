@@ -1026,6 +1026,10 @@ export default function buildMaterialGrid (options) {
     // census NumberInput S: the stepper dividers in outline-variant
     'color.number_input_divider': roleEntry('outline-variant'),
     'control.number_input_divider_height': 16,
+    // rework amendment S: the primary's field width floor, already
+    // authored in the explicit default mapping (NumberInput,
+    // number-input/_number-input.scss:47-72)
+    'control.number_input_min_width': 150,
     // census Search S: the disabled close and magnifier on-surface at 0.38
     'color.search_icon_disabled': atOpacity(rolePaint('on-surface'), 0.38),
     // census CheckboxGroup / RadioButtonGroup / skeletons S (no group
@@ -1034,6 +1038,9 @@ export default function buildMaterialGrid (options) {
     'control.radio_group_gap_horizontal': 16,
     'control.radio_group_gap_vertical': 6,
     'control.selection_skeleton_label_width': 100,
+    // rework amendment S: the primary's 18 skeleton circle, unlike a
+    // live switch handle (toggle/_toggle.scss:226-231)
+    'control.toggle_skeleton_circle_size': 18,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8
   });
