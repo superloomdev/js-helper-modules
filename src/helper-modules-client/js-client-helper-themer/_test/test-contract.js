@@ -2218,4 +2218,74 @@ describe('contract v8 - leveled tokens', () => {
     assert.equal(theme.levels[3]['color.b'], '#130000');
   });
 
+  // Levels read the effective authored value: the template's tokens with
+  // every layer's pins applied in order, the last pin winning
+
+  it('should drop a leveled read when a layer pins the role to a literal', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.f': '{color.field_01}' }),
+      [{ name: 'brand', tokens: { 'color.f': '#ff0000' } }], 'web');
+    assert.equal(theme.tokens['color.f'], '#ff0000');
+    assert.equal('color.f' in theme.levels[2], false);
+    assert.equal('color.f' in theme.levels[3], false);
+  });
+
+  it('should shift from the member a layer redirects the role to', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.f': '{color.field_01}' }),
+      [{ name: 'brand', tokens: { 'color.f': '{color.field_02}' } }], 'web');
+    assert.equal(theme.tokens['color.f'], '#020202');
+    assert.equal(theme.levels[2]['color.f'], '#030303');
+    assert.equal(theme.levels[3]['color.f'], '#030303');
+  });
+
+  it('should add a leveled read when a layer pins a literal role to an alias', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.f': '#909090' }),
+      [{ name: 'brand', tokens: { 'color.f': '{color.field_01}' } }], 'web');
+    assert.equal(theme.tokens['color.f'], '#010101');
+    assert.equal(theme.levels[2]['color.f'], '#020202');
+    assert.equal(theme.levels[3]['color.f'], '#030303');
+  });
+
+  it('should stop a chain at an intermediate member a layer pins to a literal', () => {
+    const theme = Themer.buildTheme(leveledTemplate({
+      'color.a': '{color.b}',
+      'color.b': '{color.field_01}'
+    }), [{ name: 'brand', tokens: { 'color.b': '#ff0000' } }], 'web');
+    assert.equal(theme.tokens['color.a'], '#ff0000');
+    assert.equal('color.a' in theme.levels[2], false);
+    assert.equal('color.a' in theme.levels[3], false);
+    assert.equal('color.b' in theme.levels[2], false);
+    assert.equal('color.b' in theme.levels[3], false);
+  });
+
+  it('should let the last layer pin win, alias or literal', () => {
+    const literal_last = Themer.buildTheme(leveledTemplate({ 'color.f': '{color.field_01}' }),
+      [{ name: 'a', tokens: { 'color.f': '{color.field_02}' } }, { name: 'b', tokens: { 'color.f': '#ff0000' } }], 'web');
+    assert.equal(literal_last.tokens['color.f'], '#ff0000');
+    assert.equal('color.f' in literal_last.levels[2], false);
+    assert.equal('color.f' in literal_last.levels[3], false);
+    const alias_last = Themer.buildTheme(leveledTemplate({ 'color.f': '{color.field_01}' }),
+      [{ name: 'a', tokens: { 'color.f': '#ff0000' } }, { name: 'b', tokens: { 'color.f': '{color.field_02}' } }], 'web');
+    assert.equal(alias_last.tokens['color.f'], '#020202');
+    assert.equal(alias_last.levels[2]['color.f'], '#030303');
+    assert.equal(alias_last.levels[3]['color.f'], '#030303');
+  });
+
+  it('should emit a shifted member pinned to a literal as that literal', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.f': '{color.field_01}' }),
+      [{ name: 'brand', tokens: { 'color.field_02': '#00ff00' } }], 'web');
+    assert.equal(theme.tokens['color.f'], '#010101');
+    assert.equal(theme.levels[2]['color.f'], '#00ff00');
+    assert.equal(theme.levels[3]['color.f'], '#030303');
+  });
+
+  it('should not mutate the template or the layers it reads', () => {
+    const template = leveledTemplate({ 'color.f': '{color.field_01}' });
+    const layers = [{ name: 'brand', tokens: { 'color.f': '{color.field_02}' } }];
+    const template_json = JSON.stringify(template);
+    const layers_json = JSON.stringify(layers);
+    Themer.buildTheme(template, layers, 'web');
+    assert.equal(JSON.stringify(template), template_json);
+    assert.equal(JSON.stringify(layers), layers_json);
+  });
+
 });

@@ -148,7 +148,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       // The leveled readings derive from the same resolution, so their
       // losses append to a copy rather than the (possibly cached) list
       const level_lossy = [];
-      const levels = _Themer.buildLevels(Lib, Parts, CONFIG, template, resolved, platform, level_lossy);
+      const levels = _Themer.buildLevels(Lib, Parts, CONFIG, template, layers, resolved, platform, level_lossy);
 
       // Carry the contrast reports through, since they belong to the derivation
       return {
@@ -634,27 +634,40 @@ const _Themer = {
   /********************************************************************
   Derive the level-2 and level-3 readings of the leveled tokens.
 
-  A token enters a level map only when its authored value is an alias
-  whose chain reaches a member of a contract leveled set. Its value at
-  level N is the resolved value of the member shifted N - 1 places along
-  its set, capped at the last member, emitted for the same platform. A
-  literal, a composite, or a chain that never names a set member leaves
-  the token out of both maps.
+  A token enters a level map only when its effective authored value is an
+  alias whose chain reaches a member of a contract leveled set. Its value
+  at level N is the resolved value of the member shifted N - 1 places
+  along its set, capped at the last member, emitted for the same
+  platform. A literal, a composite, or a chain that never names a set
+  member leaves the token out of both maps.
 
   @param {Object} Lib - Dependency container
   @param {Object} Parts - Pure parts
   @param {Object} CONFIG - Merged config for this instance
   @param {Object} template - The authored template the chains read
+  @param {Object[]} layers - Ordered sparse overlays; their pins win in
+    order, so the chains read the cascade resolve saw
   @param {Object} resolved - Output of resolve, holding every member's value
   @param {String} platform - Target platform
   @param {Object[]} level_lossy - Accumulated loss reports for level reads
 
   @return {Object} - { 2: {...}, 3: {...} } maps of token name to value
   *********************************************************************/
-  buildLevels: function (Lib, Parts, CONFIG, template, resolved, platform, level_lossy) {
+  buildLevels: function (Lib, Parts, CONFIG, template, layers, resolved, platform, level_lossy) {
 
     const levels = { 2: {}, 3: {} };
-    const tokens = template.tokens;
+    // The effective authored map: the template's tokens with each layer's
+    // pins applied in order, the last pin winning - the same cascade
+    // resolve applied, so a pinned literal stops a chain and a pinned
+    // alias redirects it
+    const tokens = Object.assign({}, template.tokens);
+    for (let i = 0; i < layers.length; i++) {
+      const pins = layers[i].tokens || {};
+      const names = Object.keys(pins);
+      for (let j = 0; j < names.length; j++) {
+        tokens[names[j]] = pins[names[j]];
+      }
+    }
     const meta = template.meta || {};
     const supported = Parts.Emit.platforms();
     const scales = resolved.scales || {};
