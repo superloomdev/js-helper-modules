@@ -45,20 +45,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1142 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1142);
+  it('should expose exactly 1217 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1217);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1142 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1142);
+  it('should expose exactly 1217 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1217);
   });
 
-  it('should report contract version 7', () => {
-    assert.equal(contract.version, 7);
+  it('should report contract version 8', () => {
+    assert.equal(contract.version, 8);
   });
 
   it('should be a frozen object', () => {
@@ -82,10 +82,10 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 604,
+    color: 631,
     spacing: 17,
     size: 22,
-    type: 83,
+    type: 86,
     font: 12,
     motion: 33,
     shape: 9,
@@ -99,8 +99,8 @@ describe('contract registry - group counts', () => {
     tint: 5,
     stacking: 5,
     anatomy: 20,
-    icon: 85,
-    control: 165
+    icon: 86,
+    control: 209
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1121,8 +1121,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 7', () => {
-    assert.equal(contract.version, 7);
+  it('should report contract version 8', () => {
+    assert.equal(contract.version, 8);
   });
 
 });
@@ -1261,7 +1261,6 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.switch_handle',
       'anatomy.status_marker',
       'anatomy.dialog_actions',
-      'anatomy.slider_handle',
       'anatomy.button_label',
       'anatomy.field_counter',
       'anatomy.switch_state_text',
@@ -1276,7 +1275,8 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.loading_motion',
       'anatomy.tag_close',
       'anatomy.tag_selected_mark',
-      'anatomy.tag_interactive_outline'
+      'anatomy.tag_interactive_outline',
+      'anatomy.field_action'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1284,7 +1284,8 @@ describe('contract v4 - anatomy group', () => {
     assert.deepEqual(contract.tokens['anatomy.status_marker'].values, ['bar_icon', 'plain']);
     assert.deepEqual(contract.tokens['anatomy.dialog_actions'].values, ['stretched', 'trailing']);
     assert.equal(contract.tokens['anatomy.caret'], undefined);
-    assert.deepEqual(contract.tokens['anatomy.slider_handle'].values, ['round', 'bar']);
+    assert.equal(contract.tokens['anatomy.slider_handle'], undefined);
+    assert.deepEqual(contract.tokens['anatomy.field_action'].values, ['square', 'icon_button']);
     assert.deepEqual(contract.tokens['anatomy.button_label'].values, ['top', 'center']);
     assert.deepEqual(contract.tokens['anatomy.field_counter'].values, ['label', 'message']);
     assert.deepEqual(contract.tokens['anatomy.switch_state_text'].values, ['shown', 'hidden']);
@@ -1303,7 +1304,7 @@ describe('contract v4 - anatomy group', () => {
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.slider_handle', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format', 'anatomy.loading_motion', 'anatomy.tag_close', 'anatomy.tag_selected_mark', 'anatomy.tag_interactive_outline']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.field_action', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format', 'anatomy.loading_motion', 'anatomy.tag_close', 'anatomy.tag_selected_mark', 'anatomy.tag_interactive_outline']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }
@@ -1333,12 +1334,12 @@ describe('contract v4 - icon group', () => {
     return Themer.validateContract({ tokens: { 'icon.close': value } }, {});
   };
 
-  it('should expose 85 value-tier icon tokens in alphabetical order with raw emission', () => {
-    assert.equal(iconTokens.length, 85);
+  it('should expose 86 value-tier icon tokens in alphabetical order with raw emission', () => {
+    assert.equal(iconTokens.length, 86);
     assert.deepEqual(iconTokens, iconTokens.slice().sort());
     assert.deepEqual(contract.groups.icon, { tier: 'value', type: 'icon', emit: 'raw' });
     assert.equal(contract.meta['icon.close'].group, 'raw');
-    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add', 'icon.invalid', 'icon.dropdown_indicator', 'icon.checked_indicator', 'icon.mixed_indicator', 'icon.selected_indicator', 'icon.switch_checked_indicator', 'icon.save']) {
+    for (const name of ['icon.close', 'icon.chevron_down', 'icon.warning', 'icon.checkmark', 'icon.add', 'icon.invalid', 'icon.dropdown_indicator', 'icon.checked_indicator', 'icon.mixed_indicator', 'icon.selected_indicator', 'icon.switch_checked_indicator', 'icon.save', 'icon.visibility_on', 'icon.visibility_off', 'icon.subtract']) {
       assert.ok(contract.tokens[name], 'missing ' + name);
     }
   });
@@ -1622,7 +1623,7 @@ function readableTheme () {
     tokens['shadow.level_' + level] = { boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)' };
   }
   // The role grid: every kind's label reads on its fill; disabled differs from enabled
-  for (const kind of ['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated', 'quick_action']) {
+  for (const kind of ['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']) {
     for (const state of ['', '_hover', '_active', '_focus']) {
       tokens['color.button_' + kind + '_container' + state] = '#0f62fe';
       tokens['color.button_' + kind + '_label' + state] = '#ffffff';
@@ -1813,7 +1814,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 631);
+    assert.equal(gridNames.length, 705);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1822,7 +1823,7 @@ describe('contract v5 amendment - the role grid', () => {
   });
 
   it('should give every button kind the same fill, label, border and elevation cells', () => {
-    const kinds = ['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated', 'quick_action'];
+    const kinds = ['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated'];
     for (const kind of kinds) {
       for (const state of ['', '_hover', '_active', '_focus', '_disabled', '_selected']) {
         assert.ok(contract.tokens['color.button_' + kind + '_container' + state], kind + ' container' + state);
@@ -1935,13 +1936,9 @@ describe('contract v7 - the remaining atom families\' cells', () => {
       tag_dismissible: ['label'],
       tag_interactive: ['layer_active', 'outline', 'outline_disabled'],
       tag: ['focus_ring'],
-      tag_selectable: ['container', 'container_hover', 'container_selected', 'container_selected_disabled', 'container_selected_hover', 'label', 'label_selected', 'label_selected_disabled', 'outline'],
-      view: ['background', 'navigation_background'],
-      landing: ['banner'],
-      button_quick_action: ['container', 'container_hover', 'container_active', 'container_focus', 'container_disabled', 'container_selected', 'label', 'label_hover', 'label_active', 'label_focus', 'label_disabled', 'label_selected', 'border', 'border_hover', 'border_active', 'border_disabled']
+      tag_selectable: ['container', 'container_hover', 'container_selected', 'container_selected_disabled', 'container_selected_hover', 'label', 'label_selected', 'label_selected_disabled', 'outline']
     },
     control: {
-      button_quick_action: ['focus_gap_width'],
       button_set: ['item_max_width', 'gap', 'fluid_min_width', 'fluid_max_width', 'fluid_ghost_padding_start'],
       button_skeleton: ['width'],
       combo_button: ['min_width', 'max_width'],
@@ -1956,18 +1953,15 @@ describe('contract v7 - the remaining atom families\' cells', () => {
       tag_close: ['gap', 'icon_size', 'inset'],
       tag_interactive: ['outline_width'],
       tag: ['focus_width', 'focus_offset', 'height_small'],
-      tag_selectable: ['outline_width_selected'],
-      landing: ['banner_height', 'banner_min_window_height', 'company_image_width', 'company_image_height', 'product_image_size']
+      tag_selectable: ['outline_width_selected']
     },
     type: {
       link: ['label', 'label_small', 'label_large'],
       inline_loading: ['label'],
       saving: ['label'],
-      progress_step: ['label', 'secondary_label'],
-      landing: ['title']
+      progress_step: ['label', 'secondary_label']
     },
     shadow: {
-      button_quick_action: ['', 'hover', 'active', 'disabled']
     },
     motion: {
       loading: ['rotation', 'arc_cycle', 'arc_easing'],
@@ -2038,3 +2032,190 @@ describe('contract v7 - the remaining atom families\' cells', () => {
 
 });
 
+
+
+describe('contract v8 - the milestone 4 cells', () => {
+
+  // Each family -> its cell names per group, in the census's order
+  const FAMILIES = {
+    color: {
+      field_action: ['container_hover', 'container_active'],
+      password_toggle: ['container_hover', 'container_active'],
+      number_input: ['divider'],
+      slider: ['range_label', 'track', 'track_filled', 'track_filled_focus', 'handle', 'handle_focus', 'handle_gap_focus', 'state_layer_hover', 'state_layer_focus', 'state_layer_active', 'disabled', 'track_disabled'],
+      select: ['group_label'],
+      popover: ['container', 'label', 'border'],
+      definition_term: ['underline', 'underline_hover'],
+      toggletip: ['icon', 'icon_active'],
+      link_label_inverse: ['', '_hover'],
+      focus_ring_inverse: [''],
+      fab_surface: ['container', 'icon', 'layer_hover', 'layer_active'],
+      fab_primary: ['container', 'icon', 'layer_hover', 'layer_active'],
+      fab_secondary: ['container', 'icon', 'layer_hover', 'layer_active'],
+      fab_tertiary: ['container', 'icon', 'layer_hover', 'layer_active']
+    },
+    control: {
+      field_action: ['inset', 'size', 'gap'],
+      field_skeleton: ['label_width', 'label_height'],
+      time_picker: ['input_width', 'input_width_invalid', 'select_gap'],
+      number_input: ['divider_height'],
+      checkbox_group: ['gap'],
+      radio_group: ['gap_horizontal', 'gap_vertical'],
+      selection_skeleton: ['label_width'],
+      toggle_skeleton: ['bar_width', 'bar_height'],
+      slider: ['gap', 'padding_block', 'min_width', 'max_width', 'track_height', 'track_radius', 'tick_height', 'handle_size', 'handle_size_active', 'state_layer_size', 'input_width', 'input_width_invalid', 'skeleton_range_width', 'skeleton_range_height'],
+      multi_select: ['checkbox_inset'],
+      popover: ['radius', 'caret_width', 'caret_height', 'offset'],
+      definition_tooltip: ['max_width', 'padding_block', 'padding_inline'],
+      toggletip: ['offset', 'max_width'],
+      fab: ['size', 'size_small', 'size_large', 'icon_size', 'icon_size_large', 'radius', 'radius_small', 'radius_large', 'extended_padding', 'label_gap'],
+      tag_set: ['gap']
+    },
+    type: {
+      time_picker: ['value'],
+      slider: ['range_label'],
+      select: ['group_label'],
+      fab: ['label']
+    },
+    shadow: {
+      slider: ['handle'],
+      popover: [''],
+      fab: ['', '_hover']
+    }
+  };
+
+  const EXTRA = {
+    color: ['field_leading_icon', 'search_icon_disabled']
+  };
+
+  it('should expose every v8 cell in its group, marked a grid cell', () => {
+    for (const group of Object.keys(FAMILIES)) {
+      for (const family of Object.keys(FAMILIES[group])) {
+        for (const leaf of FAMILIES[group][family]) {
+          const cell = leaf === '' ? family : leaf.charAt(0) === '_' ? family + leaf : family + '_' + leaf;
+          const name = group + '.' + cell;
+          assert.ok(contract.tokens[name], 'missing ' + name);
+          assert.equal(contract.tokens[name].group, group, name + ' not in group ' + group);
+          assert.equal(contract.tokens[name].grid, true, name + ' not a grid cell');
+        }
+      }
+    }
+    for (const group of Object.keys(EXTRA)) {
+      for (const cell of EXTRA[group]) {
+        const name = group + '.' + cell;
+        assert.ok(contract.tokens[name], 'missing ' + name);
+        assert.equal(contract.tokens[name].grid, true, name + ' not a grid cell');
+      }
+    }
+  });
+
+  it('should have removed the quick action kind and the view and landing cells', () => {
+    for (const name of [
+      'color.button_quick_action_container', 'color.button_quick_action_label', 'color.button_quick_action_border',
+      'shadow.button_quick_action', 'control.button_quick_action_focus_gap_width',
+      'color.view_background', 'color.view_navigation_background',
+      'color.landing_banner', 'control.landing_banner_height', 'control.landing_banner_min_window_height',
+      'control.landing_company_image_width', 'control.landing_company_image_height', 'control.landing_product_image_size',
+      'type.landing_title', 'anatomy.slider_handle'
+    ]) {
+      assert.equal(contract.tokens[name], undefined, name + ' should be gone');
+    }
+  });
+
+  it('should carry the new icon token', () => {
+    assert.deepEqual(contract.tokens['icon.visibility_on'], { group: 'icon' });
+  });
+
+});
+
+
+describe('contract v8 - leveled tokens', () => {
+
+  // The contract marks the layered-surface sets, in set order
+  it('should declare the fifteen leveled sets in set order', () => {
+    assert.deepEqual(contract.leveled, {
+      layer: ['layer_01', 'layer_02', 'layer_03'],
+      layer_active: ['layer_active_01', 'layer_active_02', 'layer_active_03'],
+      layer_background: ['layer_background_01', 'layer_background_02', 'layer_background_03'],
+      layer_hover: ['layer_hover_01', 'layer_hover_02', 'layer_hover_03'],
+      layer_selected: ['layer_selected_01', 'layer_selected_02', 'layer_selected_03'],
+      layer_selected_hover: ['layer_selected_hover_01', 'layer_selected_hover_02', 'layer_selected_hover_03'],
+      layer_accent: ['layer_accent_01', 'layer_accent_02', 'layer_accent_03'],
+      layer_accent_hover: ['layer_accent_hover_01', 'layer_accent_hover_02', 'layer_accent_hover_03'],
+      layer_accent_active: ['layer_accent_active_01', 'layer_accent_active_02', 'layer_accent_active_03'],
+      field: ['field_01', 'field_02', 'field_03'],
+      field_hover: ['field_hover_01', 'field_hover_02', 'field_hover_03'],
+      border_subtle: ['border_subtle_00', 'border_subtle_01', 'border_subtle_02', 'border_subtle_03'],
+      border_subtle_selected: ['border_subtle_selected_01', 'border_subtle_selected_02', 'border_subtle_selected_03'],
+      border_strong: ['border_strong_01', 'border_strong_02', 'border_strong_03'],
+      border_tile: ['border_tile_01', 'border_tile_02', 'border_tile_03']
+    });
+    for (const members of Object.values(contract.leveled)) {
+      for (const member of members) {
+        assert.ok(contract.tokens['color.' + member], 'leveled member not a token: ' + member);
+      }
+    }
+  });
+
+  // A template whose leveled members carry distinct literals, so an
+  // alias's level value names the shifted member it re-resolved to
+  const leveledTemplate = function (extra) {
+    return {
+      tokens: Object.assign({
+        'color.field_01': '#010101',
+        'color.field_02': '#020202',
+        'color.field_03': '#030303',
+        'color.layer_01': '#0a0a0a',
+        'color.layer_02': '#0b0b0b',
+        'color.layer_03': '#0c0c0c',
+        'color.border_subtle_00': '#100000',
+        'color.border_subtle_01': '#110000',
+        'color.border_subtle_02': '#120000',
+        'color.border_subtle_03': '#130000'
+      }, extra)
+    };
+  };
+
+  it('should read an alias to field_01 at levels 2 and 3 as field_02 and field_03', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.f': '{color.field_01}' }), [], 'web');
+    assert.equal(theme.tokens['color.f'], '#010101');
+    assert.equal(theme.levels[2]['color.f'], '#020202');
+    assert.equal(theme.levels[3]['color.f'], '#030303');
+  });
+
+  it('should read an alias to border_subtle_00 at levels 2 and 3 as _01 and _02', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.b': '{color.border_subtle_00}' }), [], 'web');
+    assert.equal(theme.tokens['color.b'], '#100000');
+    assert.equal(theme.levels[2]['color.b'], '#110000');
+    assert.equal(theme.levels[3]['color.b'], '#120000');
+  });
+
+  it('should leave a literal out of levels', () => {
+    const theme = Themer.buildTheme(leveledTemplate({ 'color.f': '#010101' }), [], 'web');
+    assert.equal('color.f' in theme.levels[2], false);
+    assert.equal('color.f' in theme.levels[3], false);
+    assert.equal('color.field_01' in theme.levels[2], false);
+  });
+
+  it('should move a two-step alias chain by its leveled member', () => {
+    const theme = Themer.buildTheme(leveledTemplate({
+      'color.a': '{color.b}',
+      'color.b': '{color.field_01}'
+    }), [], 'web');
+    assert.equal(theme.tokens['color.a'], '#010101');
+    assert.equal(theme.levels[2]['color.a'], '#020202');
+    assert.equal(theme.levels[3]['color.a'], '#030303');
+  });
+
+  it('should cap the shift at the last member of each set', () => {
+    const theme = Themer.buildTheme(leveledTemplate({
+      'color.l': '{color.layer_03}',
+      'color.b': '{color.border_subtle_03}'
+    }), [], 'web');
+    assert.equal(theme.levels[2]['color.l'], '#0c0c0c');
+    assert.equal(theme.levels[3]['color.l'], '#0c0c0c');
+    assert.equal(theme.levels[2]['color.b'], '#130000');
+    assert.equal(theme.levels[3]['color.b'], '#130000');
+  });
+
+});

@@ -61,7 +61,8 @@ const ANATOMY = {
   'anatomy.switch_handle': 'fixed',
   'anatomy.status_marker': 'bar_icon',
   'anatomy.dialog_actions': 'stretched',
-  'anatomy.slider_handle': 'round',
+  // v8: the in-frame action is a square seat (census PasswordInput)
+  'anatomy.field_action': 'square',
   // A tall button keeps its label where the default height puts it
   'anatomy.button_label': 'top',
   // v6: the primary reference's anatomy, as the default draws it

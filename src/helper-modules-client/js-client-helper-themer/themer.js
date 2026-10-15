@@ -121,6 +121,9 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
 
     @return {Object} - Emitted theme
     @return {Object} .tokens - Platform-ready value per token name
+    @return {Object} .levels - { 2: {...}, 3: {...} }: the level-2 and
+      level-3 readings of every token whose authored value reaches a
+      member of a contract leveled set through its alias chain
     @return {Object[]} .substituted - Tokens replaced by a platform fallback
     @return {Object[]} .lossy - Facts a platform projection could not carry
     @return {Object[]} .corrections - Contrast rewrites that were applied
@@ -142,11 +145,17 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       // Project the resolved tokens onto the requested platform
       const emitted = Themer.emit(resolved, template, platform);
 
+      // The leveled readings derive from the same resolution, so their
+      // losses append to a copy rather than the (possibly cached) list
+      const level_lossy = [];
+      const levels = _Themer.buildLevels(Lib, Parts, CONFIG, template, resolved, platform, level_lossy);
+
       // Carry the contrast reports through, since they belong to the derivation
       return {
         tokens: emitted.tokens,
+        levels: levels,
         substituted: emitted.substituted,
-        lossy: emitted.lossy,
+        lossy: emitted.lossy.concat(level_lossy),
         corrections: resolved.corrections,
         violations: resolved.violations,
         stats: resolved.stats
@@ -618,6 +627,87 @@ const _Themer = {
     };
 
     out[name] = Parts.Emit.value(value, entry_meta.group, platform, context);
+
+  },
+
+
+  /********************************************************************
+  Derive the level-2 and level-3 readings of the leveled tokens.
+
+  A token enters a level map only when its authored value is an alias
+  whose chain reaches a member of a contract leveled set. Its value at
+  level N is the resolved value of the member shifted N - 1 places along
+  its set, capped at the last member, emitted for the same platform. A
+  literal, a composite, or a chain that never names a set member leaves
+  the token out of both maps.
+
+  @param {Object} Lib - Dependency container
+  @param {Object} Parts - Pure parts
+  @param {Object} CONFIG - Merged config for this instance
+  @param {Object} template - The authored template the chains read
+  @param {Object} resolved - Output of resolve, holding every member's value
+  @param {String} platform - Target platform
+  @param {Object[]} level_lossy - Accumulated loss reports for level reads
+
+  @return {Object} - { 2: {...}, 3: {...} } maps of token name to value
+  *********************************************************************/
+  buildLevels: function (Lib, Parts, CONFIG, template, resolved, platform, level_lossy) {
+
+    const levels = { 2: {}, 3: {} };
+    const tokens = template.tokens;
+    const meta = template.meta || {};
+    const supported = Parts.Emit.platforms();
+    const scales = resolved.scales || {};
+    const base_font_size = scales.base_font_size || CONFIG.BASE_FONT_SIZE;
+
+    const isAlias = function (entry) {
+      return Lib.Utils.isString(entry) && entry.charAt(0) === '{' && entry.charAt(entry.length - 1) === '}';
+    };
+
+    for (const name of Object.keys(tokens)) {
+
+      // Only an alias can reach a leveled member; walk its chain to the
+      // first one it names
+      if (!isAlias(tokens[name])) {
+        continue;
+      }
+      const seen = {};
+      let member = null;
+      let cursor = tokens[name].slice(1, -1);
+      while (cursor !== null && !seen[cursor]) {
+        seen[cursor] = true;
+        const bare = cursor.indexOf('color.') === 0 ? cursor.slice(6) : null;
+        if (bare !== null && contract.leveled_index[bare]) {
+          member = bare;
+          break;
+        }
+        cursor = isAlias(tokens[cursor]) ? tokens[cursor].slice(1, -1) : null;
+      }
+      if (member === null) {
+        continue;
+      }
+
+      // Emit the shifted member's resolved value under this token's meta
+      const hit = contract.leveled_index[member];
+      const members = contract.leveled[hit.set];
+      const entry_meta = meta[name] || { group: 'raw' };
+      const platforms = entry_meta.platforms || supported;
+      const context = { base_font_size: base_font_size, token: name, lossy: level_lossy };
+      for (const level of [2, 3]) {
+        const shifted = 'color.' + members[Math.min(hit.index + level - 1, members.length - 1)];
+        if (resolved.tokens[shifted] === undefined) {
+          continue;
+        }
+        if (!Lib.Utils.inArray(platforms, platform)) {
+          levels[level][name] = entry_meta.fallback ? entry_meta.fallback[platform] : null;
+          continue;
+        }
+        levels[level][name] = Parts.Emit.value(resolved.tokens[shifted], entry_meta.group, platform, context);
+      }
+
+    }
+
+    return levels;
 
   },
 

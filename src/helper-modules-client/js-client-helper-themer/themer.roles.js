@@ -23,7 +23,7 @@
 
 
 // The role grid's button kinds and the states a label is read in over its fill
-const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated', 'quick_action']);
+const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']);
 const LABEL_STATES = Object.freeze(['', '_hover', '_active', '_focus', '_selected']);
 // Kinds whose rest container is a fill (not transparent): their fill must differ from the disabled fill
 const FILLED_KINDS = Object.freeze(['primary', 'secondary', 'danger', 'tonal', 'elevated']);

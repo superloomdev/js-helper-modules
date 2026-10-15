@@ -107,16 +107,59 @@
 // offsets, plus the selectable tag's own pressed layer. A batch-6 B3
 // round-3 amendment adds the loading arc's motion easing. A milestone-3
 // amendment adds the small tag's template-dependent height.
+//
+// Version 8 marks Carbon's `$layer-sets` contextual sets as leveled, so a
+// token that reaches a set member through its alias chain also resolves at
+// levels 2 and 3 (the member shifted that many places along its set). It
+// extends the role grid with the milestone-4 census families (the field
+// action and skeleton seats, the time picker, the number input divider,
+// the selection groups, the slider, the select's group label, the popover,
+// the definition tooltip and toggletip, the inverse link, the floating
+// action button, the tag set), adds `anatomy.field_action` (the in-field
+// action's shape: `square` or `icon_button`) and `icon.visibility_on`, and
+// removes `anatomy.slider_handle`, the `quick_action` button kind with its
+// focus gap cell, and the `view_*` and `landing_*` cells (the roster cut
+// excluded every row that read them).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
 
 // The role grid (v5 amendment). Kinds of the button family, in the order
 // the component documents them
-const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated', 'quick_action']);
+const BUTTON_KINDS = Object.freeze(['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'danger_tertiary', 'danger_ghost', 'tonal', 'elevated']);
 const BUTTON_FILL_STATES = Object.freeze(['', '_hover', '_active', '_focus', '_disabled', '_selected']);
 const BUTTON_BORDER_STATES = Object.freeze(['', '_hover', '_active', '_disabled']);
 const BUTTON_ELEVATION_STATES = Object.freeze(['', '_hover', '_active', '_disabled']);
+
+// The leveled semantic sets (v8): the contextual ordering a layered
+// surface reads. A token whose authored value reaches a member of one set
+// through its alias chain also resolves at levels 2 and 3 - the member
+// shifted that many places along its set, capped at the last entry.
+const LEVELED_SETS = Object.freeze({
+  layer: Object.freeze(['layer_01', 'layer_02', 'layer_03']),
+  layer_active: Object.freeze(['layer_active_01', 'layer_active_02', 'layer_active_03']),
+  layer_background: Object.freeze(['layer_background_01', 'layer_background_02', 'layer_background_03']),
+  layer_hover: Object.freeze(['layer_hover_01', 'layer_hover_02', 'layer_hover_03']),
+  layer_selected: Object.freeze(['layer_selected_01', 'layer_selected_02', 'layer_selected_03']),
+  layer_selected_hover: Object.freeze(['layer_selected_hover_01', 'layer_selected_hover_02', 'layer_selected_hover_03']),
+  layer_accent: Object.freeze(['layer_accent_01', 'layer_accent_02', 'layer_accent_03']),
+  layer_accent_hover: Object.freeze(['layer_accent_hover_01', 'layer_accent_hover_02', 'layer_accent_hover_03']),
+  layer_accent_active: Object.freeze(['layer_accent_active_01', 'layer_accent_active_02', 'layer_accent_active_03']),
+  field: Object.freeze(['field_01', 'field_02', 'field_03']),
+  field_hover: Object.freeze(['field_hover_01', 'field_hover_02', 'field_hover_03']),
+  border_subtle: Object.freeze(['border_subtle_00', 'border_subtle_01', 'border_subtle_02', 'border_subtle_03']),
+  border_subtle_selected: Object.freeze(['border_subtle_selected_01', 'border_subtle_selected_02', 'border_subtle_selected_03']),
+  border_strong: Object.freeze(['border_strong_01', 'border_strong_02', 'border_strong_03']),
+  border_tile: Object.freeze(['border_tile_01', 'border_tile_02', 'border_tile_03'])
+});
+
+// Member name -> { set, index }, derived once so a chain lookup is O(1)
+const LEVELED_INDEX = Object.freeze(Object.keys(LEVELED_SETS).reduce(function (out, set) {
+  LEVELED_SETS[set].forEach(function (member, index) {
+    out[member] = Object.freeze({ set: set, index: index });
+  });
+  return out;
+}, {}));
 
 // Group -> cell names. A member cell (`text_input_`, `select_`) exists only
 // where a reference gives one member a different value than its family
@@ -252,10 +295,30 @@ const GRID = Object.freeze({
       // second's filter chip presses on-surface-variant where the
       // interactive layer answers on-surface, so the member gets its own)
       'tag_selectable_layer_active',
-      // v7: the view family
-      'view_background', 'view_navigation_background',
-      // v7: the landing view member
-      'landing_banner'
+      // v8: field members - the leading icon's ink, the in-field action's
+      // state fills, the password toggle's, the number input's divider,
+      // the search icon's disabled ink
+      'field_leading_icon', 'field_action_container_hover', 'field_action_container_active',
+      'password_toggle_container_hover', 'password_toggle_container_active',
+      'number_input_divider', 'search_icon_disabled',
+      // v8: the slider family
+      'slider_range_label', 'slider_track', 'slider_track_filled', 'slider_track_filled_focus',
+      'slider_handle', 'slider_handle_focus', 'slider_handle_gap_focus',
+      'slider_state_layer_hover', 'slider_state_layer_focus', 'slider_state_layer_active',
+      'slider_disabled', 'slider_track_disabled',
+      // v8: the select member
+      'select_group_label',
+      // v8: the popover, definition tooltip and toggletip members and the
+      // inverse link
+      'popover_container', 'popover_label', 'popover_border',
+      'definition_term_underline', 'definition_term_underline_hover',
+      'toggletip_icon', 'toggletip_icon_active',
+      'link_label_inverse', 'link_label_inverse_hover', 'focus_ring_inverse',
+      // v8: the floating action button family
+      'fab_surface_container', 'fab_surface_icon', 'fab_primary_container', 'fab_primary_icon',
+      'fab_secondary_container', 'fab_secondary_icon', 'fab_tertiary_container', 'fab_tertiary_icon',
+      'fab_surface_layer_hover', 'fab_surface_layer_active', 'fab_primary_layer_hover', 'fab_primary_layer_active',
+      'fab_secondary_layer_hover', 'fab_secondary_layer_active', 'fab_tertiary_layer_hover', 'fab_tertiary_layer_active'
     ]
   )),
   control: Object.freeze([
@@ -302,8 +365,6 @@ const GRID = Object.freeze({
     'notification_width', 'notification_radius', 'notification_marker_width', 'notification_icon_size',
     // v6: the icon button member
     'icon_button_size', 'icon_button_icon_size',
-    // v7: the quick action's focus gap
-    'button_quick_action_focus_gap_width',
     // v7: the button set member
     'button_set_item_max_width', 'button_set_gap', 'button_set_fluid_min_width', 'button_set_fluid_max_width', 'button_set_fluid_ghost_padding_start',
     // v7: the button skeleton member
@@ -339,19 +400,45 @@ const GRID = Object.freeze({
     'tag_interactive_outline_width', 'tag_interactive_height_small', 'tag_focus_width', 'tag_focus_offset',
     // v7: the selectable tag member
     'tag_selectable_outline_width_selected',
-    // v7: the landing view member
-    'landing_banner_height', 'landing_banner_min_window_height', 'landing_company_image_width', 'landing_company_image_height', 'landing_product_image_size'
+    // v8: field members - the in-field action's geometry, the field
+    // skeleton's label seat, the time picker's, the number input's divider
+    'field_action_inset', 'field_action_size', 'field_action_gap',
+    'field_skeleton_label_width', 'field_skeleton_label_height',
+    'time_picker_input_width', 'time_picker_input_width_invalid', 'time_picker_select_gap',
+    'number_input_divider_height',
+    // v8: the selection group gaps and the skeleton seats
+    'checkbox_group_gap', 'radio_group_gap_horizontal', 'radio_group_gap_vertical',
+    'selection_skeleton_label_width', 'toggle_skeleton_bar_width', 'toggle_skeleton_bar_height',
+    // v8: the slider family
+    'slider_gap', 'slider_padding_block', 'slider_min_width', 'slider_max_width',
+    'slider_track_height', 'slider_track_radius', 'slider_tick_height',
+    'slider_handle_size', 'slider_handle_size_active', 'slider_state_layer_size',
+    'slider_input_width', 'slider_input_width_invalid',
+    'slider_skeleton_range_width', 'slider_skeleton_range_height',
+    // v8: the select member
+    'multi_select_checkbox_inset',
+    // v8: the popover, definition tooltip and toggletip members
+    'popover_radius', 'popover_caret_width', 'popover_caret_height', 'popover_offset',
+    'definition_tooltip_max_width', 'definition_tooltip_padding_block', 'definition_tooltip_padding_inline',
+    'toggletip_offset', 'toggletip_max_width',
+    // v8: the floating action button family
+    'fab_size', 'fab_size_small', 'fab_size_large', 'fab_icon_size', 'fab_icon_size_large',
+    'fab_radius', 'fab_radius_small', 'fab_radius_large', 'fab_extended_padding', 'fab_label_gap',
+    // v8: the tag set member
+    'tag_set_gap'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
     // v6
     'list_item', 'menu_item_shortcut', 'text_area_value', 'tag_label', 'tooltip_label', 'tooltip_compact_label', 'tab_label', 'tab_label_selected',
     'dialog_heading', 'dialog_body', 'notification_title', 'notification_body',
-    // v7: the link, loading, saving and progress step labels, the landing title
+    // v7: the link, loading, saving and progress step labels
     'link_label', 'link_label_small', 'link_label_large',
     'inline_loading_label', 'saving_label',
     'progress_step_label', 'progress_step_secondary_label',
-    'landing_title'
+    // v8: the time picker value, the slider's range label, the select's
+    // group label, the extended action button's label
+    'time_picker_value', 'slider_range_label', 'select_group_label', 'fab_label'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
@@ -359,7 +446,9 @@ const GRID = Object.freeze({
     });
   }), [
     // v6
-    'list', 'dialog', 'notification'
+    'list', 'dialog', 'notification',
+    // v8: the slider's handle, the popover, the floating action button
+    'slider_handle', 'popover', 'fab', 'fab_hover'
   ])),
   motion: Object.freeze([
     // v7: the two animated families' cycles
@@ -868,7 +957,6 @@ function buildContract () {
     'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
     'anatomy.status_marker': Object.freeze({ group: 'anatomy', values: ['bar_icon', 'plain'] }),
     'anatomy.dialog_actions': Object.freeze({ group: 'anatomy', values: ['stretched', 'trailing'] }),
-    'anatomy.slider_handle': Object.freeze({ group: 'anatomy', values: ['round', 'bar'] }),
     'anatomy.button_label': Object.freeze({ group: 'anatomy', values: ['top', 'center'] }),
     // v6
     'anatomy.field_counter': Object.freeze({ group: 'anatomy', values: ['label', 'message'] }),
@@ -889,6 +977,9 @@ function buildContract () {
     // v7 batch 6 B3 amendment: the interactive tag's outline, drawn as a
     // layout border or as an inset ring that moves nothing
     'anatomy.tag_interactive_outline': Object.freeze({ group: 'anatomy', values: ['border', 'inset'] }),
+    // v8: the in-field action's shape - a square seat filling the field's
+    // height or the second system's circular icon button
+    'anatomy.field_action': Object.freeze({ group: 'anatomy', values: ['square', 'icon_button'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -970,7 +1061,7 @@ function buildContract () {
     'control.option_height': Object.freeze({ group: 'control' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ icon.* (85 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ icon.* (86 tokens) ~~~~~~~~~~~~~~~~~~~
     // One token per semantic glyph name, alphabetical. Values are icon
     // literals: { icon: true, viewBox, paths, sizes? }.
 
@@ -1054,6 +1145,7 @@ function buildContract () {
     'icon.user': Object.freeze({ group: 'icon' }),
     'icon.visibility': Object.freeze({ group: 'icon' }),
     'icon.visibility_off': Object.freeze({ group: 'icon' }),
+    'icon.visibility_on': Object.freeze({ group: 'icon' }),
     'icon.warning': Object.freeze({ group: 'icon' }),
     'icon.warning_alt_filled': Object.freeze({ group: 'icon' }),
     'icon.warning_alt_inverted_filled': Object.freeze({ group: 'icon' }),
@@ -1080,8 +1172,10 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 7,
+    version: 8,
     grid: GRID,
+    leveled: LEVELED_SETS,
+    leveled_index: LEVELED_INDEX,
     groups: groups,
     tokens: tokens,
     meta: Object.freeze(meta)
