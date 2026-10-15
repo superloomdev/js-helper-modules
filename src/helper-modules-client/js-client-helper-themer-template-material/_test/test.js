@@ -96,8 +96,8 @@ describe('material template - profile identity', () => {
     assert.equal(profile.id, 'material-v0_192');
   });
 
-  it('should export contract_version 7', () => {
-    assert.equal(profile.contract_version, 7);
+  it('should export contract_version 8', () => {
+    assert.equal(profile.contract_version, 8);
   });
 
   it('should export reference with Material package versions', () => {
@@ -520,7 +520,7 @@ describe('material template - anatomy enums (v4)', () => {
     'anatomy.switch_handle': 'grows',
     'anatomy.status_marker': 'plain',
     'anatomy.dialog_actions': 'trailing',
-    'anatomy.slider_handle': 'bar',
+    'anatomy.field_action': 'icon_button',
     'anatomy.button_label': 'center',
     'anatomy.field_counter': 'message',
     'anatomy.switch_state_text': 'hidden',
@@ -570,8 +570,8 @@ describe('material template - icon literals (v4)', () => {
     'icon.switch_checked_indicator': { icon: true, viewBox: '0 0 24 24', paths: [{ d: 'M9.55 18.2 3.65 12.3 5.275 10.675 9.55 14.95 18.725 5.775 20.35 7.4Z' }] }
   };
 
-  it('should carry 85 icon literals, every one valid, none completed from the default template', () => {
-    assert.equal(iconKeys.length, 85);
+  it('should carry 86 icon literals, every one valid, none completed from the default template', () => {
+    assert.equal(iconKeys.length, 86);
     for (const schemeName of SCHEME_NAMES) {
       const scheme = profile.schemes[schemeName];
       const subset = {};
@@ -689,10 +689,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1142 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1217 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1142);
+        assert.equal(names.length, 1217);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -855,14 +855,12 @@ describe('material template - contract v6 values without a rendered reference el
 
 describe('material template - contract v7 values', () => {
 
-  // The request's decisions where Material has no element: the quick action
-  // reads its focus gap from the focus ring, the button set its gap from the
-  // dialog actions row, the step connector is the linear track's height, the
-  // loading scrim the dialog scrim
+  // The request's decisions where Material has no element: the button set
+  // reads its gap from the dialog actions row, the step connector is the
+  // linear track's height, the loading scrim the dialog scrim
   it('should answer the v7 geometry from Material sources and the request', () => {
     for (const schemeName of SCHEME_NAMES) {
       const tokens = profile.schemes[schemeName].tokens;
-      assert.equal(tokens['control.button_quick_action_focus_gap_width'], '{control.button_focus_gap_width}', schemeName);
       assert.equal(tokens['control.button_set_gap'], '{control.dialog_actions_gap}', schemeName);
       assert.equal(tokens['control.button_set_item_max_width'], 196, schemeName);
       assert.equal(tokens['control.button_set_fluid_min_width'], 176, schemeName);
@@ -901,17 +899,8 @@ describe('material template - contract v7 values', () => {
     }
   });
 
-  it('should draw the quick action, selectable tag, divider and view from Material roles', () => {
+  it('should draw the selectable tag, divider and view from Material roles', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native').tokens;
-    // The quick action: a transparent container under primary state layers,
-    // a primary label and an outline border, the selected face the tonal fill
-    assert.equal(built['color.button_quick_action_container'], 'rgba(0, 0, 0, 0)');
-    assert.match(built['color.button_quick_action_container_hover'], /^rgba\(.*, 0\.08\)$/);
-    assert.match(built['color.button_quick_action_container_active'], /^rgba\(.*, 0\.12\)$/);
-    assert.equal(built['color.button_quick_action_container_selected'], built['color.button_tonal']);
-    assert.equal(built['color.button_quick_action_label'], built['color.interactive']);
-    assert.equal(built['color.button_quick_action_label_selected'], built['color.text_on_button_tonal']);
-    assert.equal(built['color.button_quick_action_border'], built['color.border_subtle_01']);
     // The flat filter chip: no rest fill, an on-surface-variant hover layer,
     // secondary-container selected with its own label and no outline
     assert.equal(built['color.tag_selectable_container'], 'rgba(0, 0, 0, 0)');
@@ -920,10 +909,8 @@ describe('material template - contract v7 values', () => {
     assert.equal(built['color.tag_selectable_label'], built['color.text_secondary']);
     assert.equal(built['color.tag_selectable_label_selected'], built['color.text_on_button_tonal']);
     assert.equal(built['color.tag_selectable_outline'], built['color.border_subtle_01']);
-    // The divider is the md-divider color, the banner the inverse surface
+    // The divider is the md-divider color
     assert.equal(built['color.divider'], built['color.border_subtle_02']);
-    assert.equal(built['color.view_background'], built['color.background']);
-    assert.equal(built['color.landing_banner'], built['color.background_inverse']);
     // The link is primary text under the shared focus ring
     assert.equal(built['color.link_label'], built['color.interactive']);
     assert.equal(built['color.link_focus_ring'], built['color.focus']);

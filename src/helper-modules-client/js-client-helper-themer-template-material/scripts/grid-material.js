@@ -325,32 +325,6 @@ export default function buildMaterialGrid (options) {
   // `button/internal/_shared.scss`: "Buttons have a default min-width of 64px"
   out['control.button_min_width'] = 64;
 
-  // v7: the quick action - Material has no chat button; the request draws it
-  // as a transparent button under primary state layers with a primary label
-  // and an outline border, its selected face the secondary container
-  const quickPrimary = rolePaint('primary');
-  out['color.button_quick_action_container'] = NONE;
-  out['color.button_quick_action_container_hover'] = atOpacity(quickPrimary, 0.08);
-  out['color.button_quick_action_container_active'] = atOpacity(quickPrimary, 0.12);
-  out['color.button_quick_action_container_focus'] = atOpacity(quickPrimary, 0.12);
-  out['color.button_quick_action_container_disabled'] = NONE;
-  out['color.button_quick_action_container_selected'] = roleEntry('secondary-container', 'color.button_tonal');
-  out['color.button_quick_action_label'] = roleEntry('primary');
-  out['color.button_quick_action_label_hover'] = roleEntry('primary');
-  out['color.button_quick_action_label_active'] = roleEntry('primary');
-  out['color.button_quick_action_label_focus'] = roleEntry('primary');
-  out['color.button_quick_action_label_disabled'] = atOpacity(rolePaint('on-surface'), 0.38);
-  out['color.button_quick_action_label_selected'] = roleEntry('on-secondary-container');
-  out['color.button_quick_action_border'] = roleEntry('outline');
-  out['color.button_quick_action_border_hover'] = roleEntry('outline');
-  out['color.button_quick_action_border_active'] = roleEntry('primary');
-  out['color.button_quick_action_border_disabled'] = atOpacity(rolePaint('on-surface'), 0.12);
-  out['shadow.button_quick_action'] = '{shadow.level_00}';
-  out['shadow.button_quick_action_hover'] = '{shadow.level_00}';
-  out['shadow.button_quick_action_active'] = '{shadow.level_00}';
-  out['shadow.button_quick_action_disabled'] = '{shadow.level_00}';
-  out['control.button_quick_action_focus_gap_width'] = '{control.button_focus_gap_width}';
-
   // ~~~~~~~~~~~~~~~~~~~~ Field family ~~~~~~~~~~~~~~~~~~~~
   const field = 'outlined-text-field';
   const fieldColor = function (name) {
@@ -1025,17 +999,162 @@ export default function buildMaterialGrid (options) {
     'color.tag_selectable_layer_active': translucent(filterChip, 'selected-pressed-state-layer-color', 'selected-pressed-state-layer-opacity')
   });
 
-  // ~~~~~~~~~~~~~~~~~~~~ v7: the view family and landing member ~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~ v8: the field action (census PasswordInput) ~~~~~~~
+  // Material draws the in-frame action as an icon button: a 24px glyph
+  // `with-trailing-icon-trailing-space` 12 from the end, a 40px state-layer
+  // circle centred on it, the text ending `icon-input-space` 16 before the
+  // glyph (`_md-comp-outlined-text-field.scss`, `_md-comp-icon-button.scss`)
   Object.assign(out, {
-    'color.view_background': roleEntry('surface'),
-    'color.view_navigation_background': roleEntry('surface-container'),
-    'color.landing_banner': roleEntry('inverse-surface'),
-    'control.landing_banner_height': 192,
-    'control.landing_banner_min_window_height': 500,
-    'control.landing_company_image_width': 61,
-    'control.landing_company_image_height': 24,
-    'control.landing_product_image_size': 96,
-    'type.landing_title': options.typeSet('headline-medium')
+    'control.field_action_inset': numberToken(field, 'with-trailing-icon-trailing-space'),
+    'control.field_action_size': numberToken(iconButtonFile, 'state-layer-width'),
+    'control.field_action_gap': numberToken(field, 'icon-input-space'),
+    'color.field_leading_icon': required(colorToken(field, 'leading-icon-color'), 'field leading icon'),
+    'color.field_action_container_hover': translucent(iconButtonFile, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
+    'color.field_action_container_active': translucent(iconButtonFile, 'unselected-pressed-state-layer-color', 'unselected-pressed-state-layer-opacity'),
+    // census PasswordInput: material and default alias the family cells
+    'color.password_toggle_container_hover': '{color.field_action_container_hover}',
+    'color.password_toggle_container_active': '{color.field_action_container_active}',
+    // census TextInputSkeleton S: the label block 75 x 14 (no skeleton element)
+    'control.field_skeleton_label_width': 75,
+    'control.field_skeleton_label_height': 14,
+    // census TimePicker S: body-large digits need a 112 field; 140 while
+    // invalid (the width plus the 24px error glyph and its 4px gap)
+    'type.time_picker_value': options.typeSet('body-large'),
+    'control.time_picker_input_width': 112,
+    'control.time_picker_input_width_invalid': 140,
+    'control.time_picker_select_gap': 8,
+    // census NumberInput S: the stepper dividers in outline-variant
+    'color.number_input_divider': roleEntry('outline-variant'),
+    'control.number_input_divider_height': 16,
+    // census Search S: the disabled close and magnifier on-surface at 0.38
+    'color.search_icon_disabled': atOpacity(rolePaint('on-surface'), 0.38),
+    // census CheckboxGroup / RadioButtonGroup / skeletons S (no group
+    // element, no skeleton element)
+    'control.checkbox_group_gap': 6,
+    'control.radio_group_gap_horizontal': 16,
+    'control.radio_group_gap_vertical': 6,
+    'control.selection_skeleton_label_width': 100,
+    'control.toggle_skeleton_bar_width': 24,
+    'control.toggle_skeleton_bar_height': 8
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v8: the slider family (md-slider) ~~~~~~~~~~~~~~~~~
+  const sliderFile = 'slider';
+  const sliderLayer = function (name) {
+    return translucent(sliderFile, name + '-state-layer-color', name + '-state-layer-opacity');
+  };
+  Object.assign(out, {
+    'control.slider_gap': 16,
+    // census Slider: the host is 48 tall around the 4px track
+    // (slider/internal/_slider.scss ripple area), 22 above and below
+    'control.slider_padding_block': 22,
+    'control.slider_min_width': 200,
+    'control.slider_max_width': 640,
+    'type.slider_range_label': options.typeSet('body-medium'),
+    'color.slider_range_label': roleEntry('on-surface-variant'),
+    'control.slider_track_height': numberToken(sliderFile, 'active-track-height'),
+    'control.slider_track_radius': radiusOf(sliderFile, 'active-track-shape'),
+    'color.slider_track': required(colorToken(sliderFile, 'inactive-track-color'), 'slider track'),
+    'color.slider_track_filled': required(colorToken(sliderFile, 'active-track-color'), 'slider active track'),
+    'color.slider_track_filled_focus': required(colorToken(sliderFile, 'active-track-color'), 'slider active track'),
+    // md-slider draws no tick
+    'control.slider_tick_height': 0,
+    'control.slider_handle_size': numberToken(sliderFile, 'handle-height'),
+    'control.slider_handle_size_active': numberToken(sliderFile, 'handle-height'),
+    'color.slider_handle': required(colorToken(sliderFile, 'handle-color'), 'slider handle'),
+    'color.slider_handle_focus': required(colorToken(sliderFile, 'focus-handle-color'), 'slider focus handle'),
+    'color.slider_handle_gap_focus': NONE,
+    'control.slider_state_layer_size': numberToken(sliderFile, 'state-layer-size'),
+    'color.slider_state_layer_hover': sliderLayer('hover'),
+    'color.slider_state_layer_focus': sliderLayer('focus'),
+    'color.slider_state_layer_active': sliderLayer('pressed'),
+    'shadow.slider_handle': elevation(sliderFile, 'handle-elevation'),
+    'color.slider_disabled': translucent(sliderFile, 'disabled-handle-color', 'disabled-handle-opacity'),
+    'color.slider_track_disabled': translucent(sliderFile, 'disabled-inactive-track-color', 'disabled-inactive-track-opacity'),
+    // census Slider S: the number field 64 wide, 96 invalid
+    'control.slider_input_width': 64,
+    'control.slider_input_width_invalid': 96,
+    // census SliderSkeleton S: the range label blocks 20 x 12
+    'control.slider_skeleton_range_width': 20,
+    'control.slider_skeleton_range_height': 12
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v8: select members (census group 4) ~~~~~~~~~~~~~~~~
+  Object.assign(out, {
+    // census MultiSelect S: the option checkbox seats 28 in
+    'control.multi_select_checkbox_inset': 28,
+    // census SelectItemGroup S: the group label is label-medium in
+    // on-surface-variant
+    'type.select_group_label': options.typeSet('label-medium'),
+    'color.select_group_label': roleEntry('on-surface-variant')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v8: the popover family (census Popover) ~~~~~~~~~~~
+  // Material has no popover element; the request's decisions answer: the
+  // menu's surface, on-surface text, an outline-variant border, radius 4,
+  // a 12 x 6 caret, offset 8, at level 2
+  Object.assign(out, {
+    'color.popover_container': roleEntry('surface-container'),
+    'color.popover_label': roleEntry('on-surface'),
+    'color.popover_border': roleEntry('outline-variant'),
+    'control.popover_radius': 4,
+    'control.popover_caret_width': 12,
+    'control.popover_caret_height': 6,
+    'control.popover_offset': 8,
+    'shadow.popover': '{shadow.level_02}',
+    // census DefinitionTooltip: the term's underline is `outline`, `primary`
+    // while engaged; the bubble reads the tooltip's own cells
+    'color.definition_term_underline': roleEntry('outline'),
+    'color.definition_term_underline_hover': roleEntry('primary'),
+    'control.definition_tooltip_max_width': '{control.tooltip_max_width}',
+    'control.definition_tooltip_padding_block': '{control.tooltip_padding_block}',
+    'control.definition_tooltip_padding_inline': '{control.tooltip_padding_inline}',
+    // census Toggletip: the trigger in on-surface-variant going on-surface
+    // while open, at the tooltip's offset; the content caps at 288
+    'color.toggletip_icon': roleEntry('on-surface-variant'),
+    'color.toggletip_icon_active': roleEntry('on-surface'),
+    'control.toggletip_offset': '{control.tooltip_offset}',
+    'control.toggletip_max_width': 288,
+    // census ToggletipContent S: inverse links and focus draw inverse-primary
+    'color.link_label_inverse': roleEntry('inverse-primary'),
+    'color.link_label_inverse_hover': roleEntry('inverse-primary'),
+    'color.focus_ring_inverse': roleEntry('inverse-primary')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v8: the fab family (md-fab) ~~~~~~~~~~~~~~~~~~~~~~~
+  // census FloatingActionButton: variants surface / primary / secondary /
+  // tertiary, a state layer in the icon colour at the hover and pressed
+  // opacities, elevation 3 rising to 4 while hovered
+  const fabFiles = Object.freeze({
+    surface: 'fab-surface',
+    primary: 'fab-primary',
+    secondary: 'fab-secondary',
+    tertiary: 'fab-tertiary'
+  });
+  for (const variant of Object.keys(fabFiles)) {
+    const fabFile = fabFiles[variant];
+    out['color.fab_' + variant + '_container'] = required(colorToken(fabFile, 'container-color'), fabFile + ' container');
+    out['color.fab_' + variant + '_icon'] = required(colorToken(fabFile, 'icon-color'), fabFile + ' icon');
+    out['color.fab_' + variant + '_layer_hover'] = translucent(fabFile, 'hover-state-layer-color', 'hover-state-layer-opacity');
+    out['color.fab_' + variant + '_layer_active'] = translucent(fabFile, 'pressed-state-layer-color', 'pressed-state-layer-opacity');
+  }
+  Object.assign(out, {
+    'control.fab_size': numberToken('fab-surface', 'container-height'),
+    'control.fab_size_small': numberToken('fab-surface-small', 'container-height'),
+    'control.fab_size_large': numberToken('fab-surface-large', 'container-height'),
+    'control.fab_icon_size': numberToken('fab-surface', 'icon-size'),
+    'control.fab_icon_size_large': numberToken('fab-surface-large', 'icon-size'),
+    'control.fab_radius': radiusOf('fab-surface', 'container-shape'),
+    'control.fab_radius_small': radiusOf('fab-surface-small', 'container-shape'),
+    'control.fab_radius_large': radiusOf('fab-surface-large', 'container-shape'),
+    'shadow.fab': elevation('fab-surface', 'container-elevation'),
+    'shadow.fab_hover': elevation('fab-surface', 'hover-container-elevation'),
+    'type.fab_label': options.typeSet(required(read('extended-fab-surface', 'label-text-font'), 'extended fab label').typescale),
+    // census: the extended fab pads 16 around its content, 12 before the label
+    'control.fab_extended_padding': 16,
+    'control.fab_label_gap': 12,
+    // census TagSet S: members 8 apart
+    'control.tag_set_gap': 8
   });
 
   // No elevation

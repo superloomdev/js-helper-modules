@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "f911c7f8aaa883cd4c58359f7649fbe302cf1258a54d04c78209fe07c9f557f5",
+  "source_sha256": "3a792b6d4955cba5fc6593cacd39d60486d703054d340434b5528c5e6ffaa04c",
   "set": "carbon",
   "upstream": {
     "package": "@carbon/icons",
@@ -87,6 +87,7 @@
     "user": "user",
     "visibility": "view",
     "visibility_off": "view--off",
+    "visibility_on": "view",
     "warning": "warning",
     "warning_alt_filled": "warning--alt--filled",
     "warning_alt_inverted_filled": "warning--alt-inverted--filled",

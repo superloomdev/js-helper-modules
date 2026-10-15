@@ -34,11 +34,7 @@ const ON_PAGE = Object.freeze({
   tertiary: { hover: 'button_tertiary_hover', active: 'button_tertiary_active', label: 'button_tertiary', engaged: 'text_inverse', border: 'button_tertiary', focus: 'button_tertiary' },
   ghost: { hover: 'background_hover', active: 'background_active', label: 'link_primary', engaged: 'link_primary_hover', border: null, focus: null },
   danger_tertiary: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: 'button_danger_secondary', borderHover: 'button_danger_hover', borderActive: 'button_danger_active', focus: 'button_danger_primary' },
-  danger_ghost: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: null, focus: null },
-  // v7: the chat button's quick action - a link-colored border at rest,
-  // the page's state fills behind a deepening link label while engaged
-  // (@carbon/themes chatButton* == linkPrimary*, background* in all schemes)
-  quick_action: { hover: 'background_hover', active: 'background_active', label: 'link_primary', engaged: 'link_primary_hover', border: 'link_primary', borderHover: null, borderActive: null, focus: null, disabledLabel: 'button_disabled', selectedLabel: 'text_secondary' }
+  danger_ghost: { hover: 'button_danger_hover', active: 'button_danger_active', label: 'button_danger_secondary', engaged: 'text_on_color', border: null, focus: null }
 });
 
 const NONE = 'rgba(0, 0, 0, 0)';
@@ -191,8 +187,6 @@ export default function buildGridRecipe (grid) {
     'control.button_ghost_padding_start': '{control.button_padding_start}',
     'control.button_ghost_padding_end': '{control.button_padding_start}',
     'control.button_min_width': 0,
-    // v7: the quick action's ring hugs its edge, no inner gap
-    'control.button_quick_action_focus_gap_width': 0,
     // Selection family: an icon-colored box, filled when checked, no state layer
     'color.selection_outline': colorOf('icon_primary'),
     'color.selection_outline_hover': colorOf('icon_primary'),
@@ -648,18 +642,150 @@ export default function buildGridRecipe (grid) {
     // the selection fill already darkens on press
     'color.tag_selectable_layer_active': NONE,
     'control.tag_selectable_outline_width_selected': 1,
-    // v7 View family: the page and its navigation region
-    'color.view_background': colorOf('background'),
-    'color.view_navigation_background': colorOf('layer_01'),
-    // v7 Landing view member: the upstream banner is #000000 in every scheme
-    'color.landing_banner': '#000000',
-    'control.landing_banner_height': 192,
-    'control.landing_banner_min_window_height': 500,
-    'control.landing_company_image_width': 61,
-    'control.landing_company_image_height': 24,
-    'control.landing_product_image_size': 96,
-    // heading-04 drawn in SemiBold, like Carbon's other 600-weight sets
-    'type.landing_title': { type_set: true, font_size: 28, line_height_px: 36, letter_spacing: 0, weight: 600, font_family: 'sans' },
+    // v8 Field actions (census PasswordInput): a square seat of the field's
+    // height flush with the frame's end, the text reserving the square
+    // (_text-input.scss `block-size:100%; aspect-ratio:1`); inset/size/gap
+    // go unread under the square anatomy, the state fills carry
+    'control.field_action_inset': 0,
+    'control.field_action_size': 40,
+    'control.field_action_gap': 16,
+    'color.field_leading_icon': colorOf('icon_secondary'),
+    // search close $field-hover / $background-selected (search/_search.scss:198-211)
+    'color.field_action_container_hover': colorOf('field_hover_01'),
+    'color.field_action_container_active': colorOf('background_selected'),
+    // census PasswordInput: the password toggle draws no hover fill
+    // (`background: none`, no hover rule) - transparent
+    'color.password_toggle_container_hover': NONE,
+    'color.password_toggle_container_active': NONE,
+    // v8 Field skeleton (census TextInputSkeleton): the label block 75 x 14
+    // (form/_form.scss:100-106)
+    'control.field_skeleton_label_width': 75,
+    'control.field_skeleton_label_height': 14,
+    // v8 Time picker (census TimePicker): code-02 digits, 78 wide,
+    // 98.8 (6.175rem) while invalid (time-picker/_time-picker.scss:62-81)
+    'type.time_picker_value': '{type.code02}',
+    'control.time_picker_input_width': 78,
+    'control.time_picker_input_width_invalid': 98.8,
+    'control.time_picker_select_gap': '{spacing.spacing_01}',
+    // v8 Number input (census NumberInput): 1px $border-subtle dividers
+    // 16 tall between the steppers (number-input/_number-input.scss)
+    'color.number_input_divider': colorOf('border_subtle_00'),
+    'control.number_input_divider_height': 16,
+    // v8 Search (census Search): the disabled close and magnifier draw
+    // $icon-on-color-disabled
+    'color.search_icon_disabled': colorOf('icon_on_color_disabled'),
+    // v8 Selection groups (census CheckboxGroup, RadioButtonGroup):
+    // members stacked 6 apart; the radio row spaces members $spacing-05
+    'control.checkbox_group_gap': 6,
+    'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
+    'control.radio_group_gap_vertical': 6,
+    // v8 Selection skeletons (census CheckboxSkeleton, ToggleSkeleton)
+    'control.selection_skeleton_label_width': 100,
+    'control.toggle_skeleton_bar_width': 24,
+    'control.toggle_skeleton_bar_height': 8,
+    // v8 Slider family (census Slider, slider/_slider.scss): a square 2px
+    // $border-subtle track filled $layer-selected-inverse (border-interactive
+    // while the handle has focus), a 14px handle growing to 20 while held,
+    // focus fill $interactive inside a 3px $layer ring, no state layer
+    'control.slider_gap': '{spacing.spacing_05}',
+    'control.slider_padding_block': 16,
+    'control.slider_min_width': 200,
+    'control.slider_max_width': 640,
+    'type.slider_range_label': '{type.body_compact_01}',
+    'color.slider_range_label': colorOf('text_primary'),
+    'control.slider_track_height': 2,
+    'control.slider_track_radius': '{shape.radius_00}',
+    'color.slider_track': colorOf('border_subtle_00'),
+    'color.slider_track_filled': colorOf('layer_selected_inverse'),
+    'color.slider_track_filled_focus': colorOf('border_interactive'),
+    'control.slider_tick_height': 4,
+    'control.slider_handle_size': 14,
+    'control.slider_handle_size_active': 20,
+    'color.slider_handle': colorOf('layer_selected_inverse'),
+    'color.slider_handle_focus': colorOf('interactive'),
+    'color.slider_handle_gap_focus': colorOf('layer_01'),
+    'control.slider_state_layer_size': 0,
+    'color.slider_state_layer_hover': NONE,
+    'color.slider_state_layer_focus': NONE,
+    'color.slider_state_layer_active': NONE,
+    'shadow.slider_handle': '{shadow.level_00}',
+    'color.slider_disabled': colorOf('border_disabled'),
+    'color.slider_track_disabled': colorOf('border_disabled'),
+    'control.slider_input_width': 64,
+    'control.slider_input_width_invalid': 96,
+    // v8 SliderSkeleton (census SliderSkeleton): the range label blocks 20 x 12
+    'control.slider_skeleton_range_width': 20,
+    'control.slider_skeleton_range_height': 12,
+    // v8 Select members (census MultiSelect, SelectItemGroup): the option
+    // checkbox seats 28 in; the optgroup label is label-01 in $text-secondary
+    'control.multi_select_checkbox_inset': 28,
+    'type.select_group_label': '{type.label01}',
+    'color.select_group_label': colorOf('text_secondary'),
+    // v8 Popover family (census Popover, popover/_popover.scss): $layer
+    // surface, $text-primary, 1px $border-subtle, radius 2, a 12 x 6 caret,
+    // offset 8, and the drop-shadow the open layer draws
+    'color.popover_container': colorOf('layer_01'),
+    'color.popover_label': colorOf('text_primary'),
+    'color.popover_border': colorOf('border_subtle_00'),
+    'control.popover_radius': '{shape.radius_02}',
+    'control.popover_caret_width': 12,
+    'control.popover_caret_height': 6,
+    'control.popover_offset': '{spacing.spacing_03}',
+    'shadow.popover': { shadow: true, layers: [{ x: 0, y: 2, blur: 2, spread: 0, color: 'rgba(0, 0, 0, 0.2)' }] },
+    // v8 DefinitionTooltip (census DefinitionTooltip, tooltip/_tooltip.scss):
+    // a dotted $border-strong term underline going $border-interactive while
+    // engaged; the inverse bubble caps at 176 with 8/16 padding
+    'color.definition_term_underline': colorOf('border_strong_01'),
+    'color.definition_term_underline_hover': colorOf('border_interactive'),
+    'control.definition_tooltip_max_width': 176,
+    'control.definition_tooltip_padding_block': '{spacing.spacing_03}',
+    'control.definition_tooltip_padding_inline': '{spacing.spacing_05}',
+    // v8 Toggletip (census Toggletip, toggletip/_toggletip.scss): a
+    // $icon-secondary trigger going $icon-primary hovered or open, offset
+    // 13; the inverse content caps at 18rem and links/focus draw inverse
+    'color.toggletip_icon': colorOf('icon_secondary'),
+    'color.toggletip_icon_active': colorOf('icon_primary'),
+    'control.toggletip_offset': 13,
+    'control.toggletip_max_width': 288,
+    'color.link_label_inverse': colorOf('link_inverse'),
+    'color.link_label_inverse_hover': colorOf('link_inverse_hover'),
+    'color.focus_ring_inverse': colorOf('focus_inverse'),
+    // v8 FAB family (census FloatingActionButton, carbon S): layer_01 /
+    // icon_primary for surface, the primary and secondary button faces, the
+    // accent layer for tertiary; each state's fill is its face's own
+    // hover/active
+    'color.fab_surface_container': colorOf('layer_01'),
+    'color.fab_surface_icon': colorOf('icon_primary'),
+    'color.fab_primary_container': colorOf('button_primary'),
+    'color.fab_primary_icon': colorOf('icon_on_color'),
+    'color.fab_secondary_container': colorOf('button_secondary'),
+    'color.fab_secondary_icon': colorOf('icon_on_color'),
+    'color.fab_tertiary_container': colorOf('layer_accent_01'),
+    'color.fab_tertiary_icon': colorOf('icon_primary'),
+    'color.fab_surface_layer_hover': colorOf('layer_hover_01'),
+    'color.fab_surface_layer_active': colorOf('layer_active_01'),
+    'color.fab_primary_layer_hover': colorOf('button_primary_hover'),
+    'color.fab_primary_layer_active': colorOf('button_primary_active'),
+    'color.fab_secondary_layer_hover': colorOf('button_secondary_hover'),
+    'color.fab_secondary_layer_active': colorOf('button_secondary_active'),
+    'color.fab_tertiary_layer_hover': colorOf('layer_accent_hover_01'),
+    'color.fab_tertiary_layer_active': colorOf('layer_accent_active_01'),
+    // 48 / 32 / 64 on the size scale, icons 20 / 32, square, the level-02 shadow
+    'control.fab_size': '{size.size_large}',
+    'control.fab_size_small': '{size.size_small}',
+    'control.fab_size_large': '{size.size_xlarge}',
+    'control.fab_icon_size': '{size.icon_02}',
+    'control.fab_icon_size_large': '{size.icon_04}',
+    'control.fab_radius': '{shape.radius_00}',
+    'control.fab_radius_small': '{shape.radius_00}',
+    'control.fab_radius_large': '{shape.radius_00}',
+    'shadow.fab': '{shadow.level_02}',
+    'shadow.fab_hover': '{shadow.level_02}',
+    'type.fab_label': '{type.body_compact_01}',
+    'control.fab_extended_padding': '{spacing.spacing_05}',
+    'control.fab_label_gap': '{spacing.spacing_03}',
+    // v8 TagSet (census TagSet): members $spacing-03 apart
+    'control.tag_set_gap': '{spacing.spacing_03}',
     // No elevation
     'shadow.level_00': { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] }
   };

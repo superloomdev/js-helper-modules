@@ -66,7 +66,9 @@ const ANATOMY = {
   'anatomy.switch_handle': 'fixed',
   'anatomy.status_marker': 'bar_icon',
   'anatomy.dialog_actions': 'stretched',
-  'anatomy.slider_handle': 'round',
+  // v8: a field action is a square of the field's height flush with the
+  // frame's end (census PasswordInput, _text-input.scss `aspect-ratio:1`)
+  'anatomy.field_action': 'square',
   // @carbon/styles 1.115.0 button/_mixins.scss caps padding-block at the lg
   // height's (--temp-padding-block-max), so xl and 2xl keep the label at the top
   'anatomy.button_label': 'top',
