@@ -5879,6 +5879,7 @@ export default Object.freeze({
     'color.password_toggle_container_active': '{color.field_action_container_active}',
     'color.number_input_divider': '{color.border_subtle_00}',
     'color.search_icon_disabled': '{color.icon_on_color_disabled}',
+    'color.search_placeholder_disabled': '{color.field_container_disabled}',
     'color.slider_range_label': '{color.text_primary}',
     'color.slider_track': '{color.border_subtle_00}',
     'color.slider_track_filled': '{color.layer_selected_inverse}',
@@ -6083,6 +6084,7 @@ export default Object.freeze({
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
     'control.toggle_skeleton_circle_size': 18,
+    'control.text_area_skeleton_height': 100,
     'control.slider_gap': '{spacing.spacing_05}',
     'control.slider_padding_block': 16,
     'control.slider_min_width': 200,
@@ -8945,6 +8947,9 @@ export default Object.freeze({
     'color.search_icon_disabled': {
       'group': 'color'
     },
+    'color.search_placeholder_disabled': {
+      'group': 'color'
+    },
     'color.slider_range_label': {
       'group': 'color'
     },
@@ -9555,6 +9560,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.toggle_skeleton_circle_size': {
+      'group': 'dimension'
+    },
+    'control.text_area_skeleton_height': {
       'group': 'dimension'
     },
     'control.slider_gap': {
