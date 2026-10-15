@@ -301,6 +301,9 @@ const GRID = Object.freeze({
       'field_leading_icon', 'field_action_container_hover', 'field_action_container_active',
       'password_toggle_container_hover', 'password_toggle_container_active',
       'number_input_divider', 'search_icon_disabled',
+      // v8 metrics amendment: the disabled search placeholder - upstream
+      // hides it in the field fill (search/_search.scss)
+      'search_placeholder_disabled',
       // v8: the slider family
       'slider_range_label', 'slider_track', 'slider_track_filled', 'slider_track_filled_focus',
       'slider_handle', 'slider_handle_focus', 'slider_handle_gap_focus',
@@ -415,6 +418,9 @@ const GRID = Object.freeze({
     // v8 rework amendment: the toggle skeleton's own circle - the census
     // draws 18, unlike a live switch handle (toggle/_toggle.scss)
     'toggle_skeleton_circle_size',
+    // v8 metrics amendment: the text area skeleton's fixed block size
+    // (text-area/_text-area.scss: block-size 100px)
+    'text_area_skeleton_height',
     // v8: the slider family
     'slider_gap', 'slider_padding_block', 'slider_min_width', 'slider_max_width',
     'slider_track_height', 'slider_track_radius', 'slider_tick_height',

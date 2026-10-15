@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1219 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1219);
+  it('should expose exactly 1221 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1221);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1219 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1219);
+  it('should expose exactly 1221 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1221);
   });
 
   it('should report contract version 8', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 631,
+    color: 632,
     spacing: 17,
     size: 22,
     type: 86,
@@ -100,7 +100,7 @@ describe('contract registry - group counts', () => {
     stacking: 5,
     anatomy: 20,
     icon: 86,
-    control: 211
+    control: 212
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1814,7 +1814,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 707);
+    assert.equal(gridNames.length, 709);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -2063,6 +2063,7 @@ describe('contract v8 - the milestone 4 cells', () => {
       radio_group: ['gap_horizontal', 'gap_vertical'],
       selection_skeleton: ['label_width'],
       toggle_skeleton: ['bar_width', 'bar_height', 'circle_size'],
+      text_area: ['skeleton_height'],
       slider: ['gap', 'padding_block', 'min_width', 'max_width', 'track_height', 'track_radius', 'tick_height', 'handle_size', 'handle_size_active', 'state_layer_size', 'input_width', 'input_width_invalid', 'skeleton_range_width', 'skeleton_range_height'],
       multi_select: ['checkbox_inset'],
       popover: ['radius', 'caret_width', 'caret_height', 'offset'],
@@ -2085,7 +2086,7 @@ describe('contract v8 - the milestone 4 cells', () => {
   };
 
   const EXTRA = {
-    color: ['field_leading_icon', 'search_icon_disabled']
+    color: ['field_leading_icon', 'search_icon_disabled', 'search_placeholder_disabled']
   };
 
   it('should expose every v8 cell in its group, marked a grid cell', () => {
@@ -2227,6 +2228,26 @@ describe('contract v8 - leveled tokens', () => {
     assert.equal(theme.tokens['color.f'], '#ff0000');
     assert.equal('color.f' in theme.levels[2], false);
     assert.equal('color.f' in theme.levels[3], false);
+  });
+
+  // v8 metrics amendment: the search placeholder reaches the field's
+  // leveled container through the disabled alias, and a literal brand
+  // override of that alias stays the placeholder at every level
+
+  it('should level the search placeholder through field_container_disabled and keep a literal pin at every level', () => {
+    const fixture = {
+      'color.field_container_disabled': '{color.field_01}',
+      'color.search_placeholder_disabled': '{color.field_container_disabled}'
+    };
+    const unleveled = Themer.buildTheme(leveledTemplate(fixture), [], 'web');
+    assert.equal(unleveled.tokens['color.search_placeholder_disabled'], '#010101');
+    assert.equal(unleveled.levels[2]['color.search_placeholder_disabled'], '#020202');
+    assert.equal(unleveled.levels[3]['color.search_placeholder_disabled'], '#030303');
+    const pinned = Themer.buildTheme(leveledTemplate(fixture),
+      [{ name: 'brand', tokens: { 'color.field_container_disabled': '#d4d4d4' } }], 'web');
+    assert.equal(pinned.tokens['color.search_placeholder_disabled'], '#d4d4d4');
+    assert.equal('color.search_placeholder_disabled' in pinned.levels[2], false);
+    assert.equal('color.search_placeholder_disabled' in pinned.levels[3], false);
   });
 
   it('should shift from the member a layer redirects the role to', () => {
