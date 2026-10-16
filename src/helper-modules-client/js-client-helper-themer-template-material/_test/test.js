@@ -79,6 +79,12 @@ const SCHEME_NAMES = [
   'dark_medium_contrast', 'dark_high_contrast'
 ];
 
+// '#49454e' at 0.12 -> 'rgba(73, 69, 78, 0.12)' - the engine's own format
+function rgbaOf (hex, alpha) {
+  const value = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (value >> 16) + ', ' + ((value >> 8) & 255) + ', ' + (value & 255) + ', ' + alpha + ')';
+}
+
 // D19 expressive spring literals
 const EXPRESSIVE_SPRINGS = {
   'motion.spring_spatial_default': { spring: true, stiffness: 380, damping: 31.19, mass: 1 },
@@ -689,10 +695,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1221 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1226 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1221);
+        assert.equal(names.length, 1226);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -733,7 +739,12 @@ describe('material template - v5 control roles and role colors', () => {
 
   it('should draw the button label in label-large and the raised field label in body-small', () => {
     assert.deepEqual(light['type.button_label'], light['type.label01']);
-    assert.deepEqual(light['type.field_label_raised'], light['type.caption01']);
+    // v8 review amendment: the raised label keeps body-small's shape but not
+    // its tracking - the pinned rendered fields use zero
+    const raised = Object.assign({}, light['type.field_label_raised']);
+    assert.equal(raised.letter_spacing, 0);
+    raised.letter_spacing = light['type.caption01'].letter_spacing;
+    assert.deepEqual(raised, light['type.caption01']);
     assert.equal(light['type.button_label'].font_size, 14);
     assert.equal(light['type.field_label_raised'].font_size, 12);
   });
@@ -797,7 +808,48 @@ describe('material template - role grid (v5 amendment)', () => {
       assert.equal(built['color.search_placeholder_disabled'], built['color.field_placeholder_disabled'], schemeName + ' built');
     });
 
+    it('should answer the v8 review cells with their pinned values in ' + schemeName + ', raw and built', () => {
+      const scheme = profile.schemes[schemeName];
+      assert.equal(scheme.tokens['control.radio_skeleton_label_height'], 18, schemeName + ' raw');
+      assert.equal(scheme.tokens['color.search_outline_disabled'], '{color.field_outline_disabled}', schemeName + ' raw alias');
+      assert.equal(scheme.tokens['color.number_input_action_container_active'], '{color.field_action_container_active}', schemeName + ' raw alias');
+      const built = Themer.buildTheme(scheme, [], 'native').tokens;
+      assert.equal(built['control.radio_skeleton_label_height'], 18, schemeName + ' built');
+      assert.equal(built['color.search_outline_disabled'], built['color.field_outline_disabled'], schemeName + ' built');
+      assert.equal(built['color.number_input_action_container_active'], built['color.field_action_container_active'], schemeName + ' built');
+      // The input chip's unselected pressed layer: on-surface-variant at the
+      // pressed opacity - the same paint the selected filter chip presses
+      assert.equal(built['color.tag_close_layer_active'], built['color.tag_selectable_layer_active'], schemeName + ' close layer');
+      // The filter chip's unselected pressed layer: on-secondary-container
+      // at the pressed opacity (different role from the selected one)
+      const expected = rgbaOf(scheme.system_colors['on-secondary-container'], 0.12);
+      assert.equal(built['color.tag_selectable_layer_unselected_active'], expected, schemeName + ' unselected pressed layer');
+      if (schemeName === 'light' || schemeName === 'dark') {
+        assert.notEqual(built['color.tag_selectable_layer_unselected_active'], built['color.tag_selectable_layer_active'],
+          schemeName + ' selected and unselected pressed layers must differ');
+      }
+    });
+
   }
+
+  it('should draw the four pinned field roles with zero tracking while the generic scales keep theirs', () => {
+    for (const schemeName of SCHEME_NAMES) {
+      const scheme = profile.schemes[schemeName];
+      for (const name of ['type.field_value', 'type.field_label', 'type.field_helper', 'type.field_label_raised']) {
+        assert.equal(scheme.tokens[name].letter_spacing, 0, schemeName + ' raw ' + name);
+      }
+      // The general typescale answers keep their tracking (body-large 0.5,
+      // body-small 0.4 at this pin)
+      assert.equal(scheme.tokens['type.body02'].letter_spacing, 0.5, schemeName + ' body02 keeps tracking');
+      assert.equal(scheme.tokens['type.caption01'].letter_spacing, 0.4, schemeName + ' caption01 keeps tracking');
+      const built = Themer.buildTheme(scheme, [], 'native').tokens;
+      for (const name of ['type.field_value', 'type.field_label', 'type.field_helper', 'type.field_label_raised', 'type.text_area_value']) {
+        assert.equal(built[name].letterSpacing, 0, schemeName + ' built ' + name);
+      }
+      // Not a measured field role: the time picker keeps body-large tracking
+      assert.equal(built['type.time_picker_value'].letterSpacing, 0.5, schemeName + ' built time_picker keeps tracking');
+    }
+  });
 
   it('should draw Material\'s field, button and checkbox states', () => {
     const built = Themer.buildTheme(profile.schemes.light, [], 'native').tokens;

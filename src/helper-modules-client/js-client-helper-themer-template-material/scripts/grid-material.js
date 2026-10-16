@@ -381,9 +381,12 @@ export default function buildMaterialGrid (options) {
     'control.field_icon_gap': numberToken(field, 'icon-input-space'),
     'control.field_message_inset': numberToken('outlined-field', 'supporting-text-leading-space'),
     'control.field_message_gap': numberToken('outlined-field', 'supporting-text-top-space'),
-    'type.field_value': options.typeSet(required(read(field, 'input-text-font'), 'input text type').typescale),
-    'type.field_label': options.typeSet(required(read(field, 'label-text-font'), 'label type').typescale),
-    'type.field_helper': options.typeSet(required(read(field, 'supporting-text-font'), 'supporting text type').typescale)
+    // v8 review amendment: the pinned rendered fields use normal (zero)
+    // tracking, not their generic typescale's - a fresh copy carries the
+    // override so the general roles keep theirs
+    'type.field_value': Object.assign({}, options.typeSet(required(read(field, 'input-text-font'), 'input text type').typescale), { letter_spacing: 0 }),
+    'type.field_label': Object.assign({}, options.typeSet(required(read(field, 'label-text-font'), 'label type').typescale), { letter_spacing: 0 }),
+    'type.field_helper': Object.assign({}, options.typeSet(required(read(field, 'supporting-text-font'), 'supporting text type').typescale), { letter_spacing: 0 })
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ Selection family ~~~~~~~~~~~~~~~~~~~~
@@ -960,6 +963,9 @@ export default function buildMaterialGrid (options) {
     'control.tag_close_inset': numberToken(inputChip, 'with-trailing-icon-trailing-space'),
     'color.tag_close_container_hover': translucent(inputChip, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
     'color.tag_close_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
+    // v8 review amendment: the dismissible tag's close is the input chip's
+    // trailing action - it presses the unselected role, not the assist chip's
+    'color.tag_close_layer_active': translucent(inputChip, 'unselected-pressed-state-layer-color', 'unselected-pressed-state-layer-opacity'),
     // v7 batch 6 B3 round 2 amendment: the untyped dismissible tag's label
     // (the input chip's label role differs from the flat chip's)
     'color.tag_dismissible_label': required(colorToken(inputChip, 'unselected-label-text-color'), 'input chip label'),
@@ -999,7 +1005,11 @@ export default function buildMaterialGrid (options) {
     'control.tag_selectable_outline_width_selected': numberToken(filterChip, 'flat-selected-outline-width'),
     // v7 batch 6 amendment: the filter chip's pressed layer (the
     // selected chip's state layer answers on-surface-variant at 0.12)
-    'color.tag_selectable_layer_active': translucent(filterChip, 'selected-pressed-state-layer-color', 'selected-pressed-state-layer-opacity')
+    'color.tag_selectable_layer_active': translucent(filterChip, 'selected-pressed-state-layer-color', 'selected-pressed-state-layer-opacity'),
+    // v8 review amendment: the unselected filter chip presses its own role
+    // (on-secondary-container), different from the selected one
+    // (_md-comp-filter-chip.scss:130-159)
+    'color.tag_selectable_layer_unselected_active': translucent(filterChip, 'unselected-pressed-state-layer-color', 'unselected-pressed-state-layer-opacity')
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ v8: the field action (census PasswordInput) ~~~~~~~
@@ -1029,6 +1039,9 @@ export default function buildMaterialGrid (options) {
     // census NumberInput S: the stepper dividers in outline-variant
     'color.number_input_divider': roleEntry('outline-variant'),
     'control.number_input_divider_height': 16,
+    // v8 review amendment: the second system's stepper presses its own
+    // state layer (icon-button unselected pressed)
+    'color.number_input_action_container_active': '{color.field_action_container_active}',
     // rework amendment S: the primary's field width floor, already
     // authored in the explicit default mapping (NumberInput,
     // number-input/_number-input.scss:47-72)
@@ -1038,12 +1051,18 @@ export default function buildMaterialGrid (options) {
     // metrics amendment S: the second field's disabled placeholder keeps
     // its existing role (search/_search.scss:116-125)
     'color.search_placeholder_disabled': '{color.field_placeholder_disabled}',
+    // review amendment: the disabled search's outline is the field's own
+    // disabled outline in the second system
+    'color.search_outline_disabled': '{color.field_outline_disabled}',
     // census CheckboxGroup / RadioButtonGroup / skeletons S (no group
     // element, no skeleton element)
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': 16,
     'control.radio_group_gap_vertical': 6,
     'control.selection_skeleton_label_width': 100,
+    // review amendment: the radio skeleton's fixed 18-high label bar -
+    // the explicit default mapping (census RadioButtonSkeleton)
+    'control.radio_skeleton_label_height': 18,
     // rework amendment S: the primary's 18 skeleton circle, unlike a
     // live switch handle (toggle/_toggle.scss:226-231)
     'control.toggle_skeleton_circle_size': 18,

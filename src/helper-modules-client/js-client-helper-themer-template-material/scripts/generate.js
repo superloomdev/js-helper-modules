@@ -506,6 +506,11 @@ function buildTokens (schemeName) {
     }
   }
 
+  // v8 review amendment: the pinned rendered raised field label uses normal
+  // (zero) tracking, not its generic typescale's - override a fresh copy so
+  // the general body-small role keeps its tracking
+  tokens['type.field_label_raised'] = Object.assign({}, tokens['type.field_label_raised'], { letter_spacing: 0 });
+
   // Control roles (v5)
   for (const [sKey, value] of Object.entries(buildControlValues(typeRoles))) {
     tokens[sKey] = value;

@@ -111,7 +111,7 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 12,
       'line_height_px': 16,
-      'letter_spacing': 0.4,
+      'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
     },
@@ -1738,7 +1738,7 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 16,
       'line_height_px': 24,
-      'letter_spacing': 0.5,
+      'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
     },
@@ -1746,7 +1746,7 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 16,
       'line_height_px': 24,
-      'letter_spacing': 0.5,
+      'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
     },
@@ -1754,7 +1754,7 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 12,
       'line_height_px': 16,
-      'letter_spacing': 0.4,
+      'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
     },
@@ -2457,6 +2457,13 @@ export default Object.freeze({
       ]
     },
     'color.tag_close_focus_ring': '{color.focus}',
+    'color.tag_close_layer_active': {
+      'op': 'alpha',
+      'args': [
+        'color.text_secondary',
+        0.12
+      ]
+    },
     'color.tag_dismissible_label': '{color.text_secondary}',
     'control.tag_interactive_outline_width': 1,
     'control.tag_interactive_height_small': '{control.tag_height_small}',
@@ -2520,6 +2527,13 @@ export default Object.freeze({
         0.12
       ]
     },
+    'color.tag_selectable_layer_unselected_active': {
+      'op': 'alpha',
+      'args': [
+        'color.text_on_button_tonal',
+        0.12
+      ]
+    },
     'control.field_action_inset': 12,
     'control.field_action_size': 40,
     'control.field_action_gap': 16,
@@ -2555,6 +2569,7 @@ export default Object.freeze({
     'control.time_picker_select_gap': 8,
     'color.number_input_divider': '{color.border_subtle_02}',
     'control.number_input_divider_height': 16,
+    'color.number_input_action_container_active': '{color.field_action_container_active}',
     'control.number_input_min_width': 150,
     'color.search_icon_disabled': {
       'op': 'alpha',
@@ -2564,10 +2579,12 @@ export default Object.freeze({
       ]
     },
     'color.search_placeholder_disabled': '{color.field_placeholder_disabled}',
+    'color.search_outline_disabled': '{color.field_outline_disabled}',
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': 16,
     'control.radio_group_gap_vertical': 6,
     'control.selection_skeleton_label_width': 100,
+    'control.radio_skeleton_label_height': 18,
     'control.toggle_skeleton_circle_size': 18,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
@@ -6656,6 +6673,9 @@ export default Object.freeze({
     'color.tag_close_focus_ring': {
       'group': 'color'
     },
+    'color.tag_close_layer_active': {
+      'group': 'color'
+    },
     'color.tag_dismissible_label': {
       'group': 'color'
     },
@@ -6704,6 +6724,9 @@ export default Object.freeze({
     'color.tag_selectable_layer_active': {
       'group': 'color'
     },
+    'color.tag_selectable_layer_unselected_active': {
+      'group': 'color'
+    },
     'color.field_leading_icon': {
       'group': 'color'
     },
@@ -6726,6 +6749,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.search_placeholder_disabled': {
+      'group': 'color'
+    },
+    'color.number_input_action_container_active': {
+      'group': 'color'
+    },
+    'color.search_outline_disabled': {
       'group': 'color'
     },
     'color.slider_range_label': {
@@ -7343,6 +7372,9 @@ export default Object.freeze({
     'control.text_area_skeleton_height': {
       'group': 'dimension'
     },
+    'control.radio_skeleton_label_height': {
+      'group': 'dimension'
+    },
     'control.slider_gap': {
       'group': 'dimension'
     },
@@ -7906,7 +7938,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': 'd42d4c72855e4e5f3632efc72e686029c26e1923',
+    'default_shasum': '7e9a2d7a1bb5cd5589f084cc5229a7be6f744212',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
