@@ -4817,6 +4817,7 @@ export default Object.freeze({
     'control.tag_close_inset': 0,
     'color.tag_close_container_hover': '{color.tag_hover_gray}',
     'color.tag_close_focus_ring': '{color.focus}',
+    'color.tag_close_layer_active': 'rgba(0, 0, 0, 0)',
     'color.tag_dismissible_label': '{color.tag_label}',
     'control.tag_interactive_outline_width': 1,
     'control.tag_interactive_height_small': 20,
@@ -4836,6 +4837,7 @@ export default Object.freeze({
     'color.tag_selectable_label_selected_disabled': '{color.tag_label_disabled}',
     'color.tag_selectable_outline': '{color.border_inverse}',
     'color.tag_selectable_layer_active': 'rgba(0, 0, 0, 0)',
+    'color.tag_selectable_layer_unselected_active': '{color.tag_selectable_layer_active}',
     'control.tag_selectable_outline_width_selected': 1,
     'control.field_action_inset': 0,
     'control.field_action_size': 40,
@@ -4855,12 +4857,15 @@ export default Object.freeze({
     'color.number_input_divider': '{color.border_subtle_00}',
     'control.number_input_divider_height': 16,
     'control.number_input_min_width': 150,
+    'color.number_input_action_container_active': '{color.field_action_container_hover}',
     'color.search_icon_disabled': '{color.icon_on_color_disabled}',
     'color.search_placeholder_disabled': '{color.field_container_disabled}',
+    'color.search_outline_disabled': 'rgba(0, 0, 0, 0)',
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
     'control.radio_group_gap_vertical': 6,
     'control.selection_skeleton_label_width': 100,
+    'control.radio_skeleton_label_height': 18,
     'control.toggle_skeleton_circle_size': 18,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
@@ -7908,6 +7913,9 @@ export default Object.freeze({
     'color.tag_close_focus_ring': {
       'group': 'color'
     },
+    'color.tag_close_layer_active': {
+      'group': 'color'
+    },
     'color.tag_dismissible_label': {
       'group': 'color'
     },
@@ -7956,6 +7964,9 @@ export default Object.freeze({
     'color.tag_selectable_layer_active': {
       'group': 'color'
     },
+    'color.tag_selectable_layer_unselected_active': {
+      'group': 'color'
+    },
     'color.field_leading_icon': {
       'group': 'color'
     },
@@ -7978,6 +7989,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.search_placeholder_disabled': {
+      'group': 'color'
+    },
+    'color.number_input_action_container_active': {
+      'group': 'color'
+    },
+    'color.search_outline_disabled': {
       'group': 'color'
     },
     'color.slider_range_label': {
@@ -8593,6 +8610,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.text_area_skeleton_height': {
+      'group': 'dimension'
+    },
+    'control.radio_skeleton_label_height': {
       'group': 'dimension'
     },
     'control.slider_gap': {

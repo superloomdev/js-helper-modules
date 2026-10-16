@@ -442,10 +442,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1221 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1226 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1221);
+        assert.equal(names.length, 1226);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -601,6 +601,30 @@ describe('carbon template - v8 rework amendment', () => {
       assert.equal(built['color.search_placeholder_disabled'], built['color.field_container_disabled'],
         schemeName + ' built placeholder is the disabled field fill');
       for (const name of ['control.text_area_skeleton_height', 'color.search_placeholder_disabled']) {
+        assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
+      }
+    }
+  });
+
+  it('should answer the five v8 review cells itself in every scheme, raw and built', () => {
+    for (const schemeName of Object.keys(profile.schemes)) {
+      const scheme = profile.schemes[schemeName];
+      assert.equal(scheme.tokens['control.radio_skeleton_label_height'], 18, schemeName + ' raw');
+      assert.equal(scheme.tokens['color.search_outline_disabled'], 'rgba(0, 0, 0, 0)', schemeName + ' raw');
+      assert.equal(scheme.tokens['color.number_input_action_container_active'], '{color.field_action_container_hover}', schemeName + ' raw alias');
+      assert.equal(scheme.tokens['color.tag_close_layer_active'], 'rgba(0, 0, 0, 0)', schemeName + ' raw');
+      assert.equal(scheme.tokens['color.tag_selectable_layer_unselected_active'], '{color.tag_selectable_layer_active}', schemeName + ' raw alias');
+      const built = Themer.buildTheme(scheme, [], 'native').tokens;
+      assert.equal(built['control.radio_skeleton_label_height'], 18, schemeName + ' built');
+      assert.equal(built['color.search_outline_disabled'], 'rgba(0, 0, 0, 0)', schemeName + ' built');
+      assert.equal(built['color.number_input_action_container_active'], built['color.field_action_container_hover'],
+        schemeName + ' built active stepper keeps the hover fill');
+      // The two new tag layers resolve transparent on the primary
+      assert.equal(built['color.tag_close_layer_active'], 'rgba(0, 0, 0, 0)', schemeName + ' built');
+      assert.equal(built['color.tag_selectable_layer_unselected_active'], 'rgba(0, 0, 0, 0)', schemeName + ' built');
+      for (const name of ['control.radio_skeleton_label_height', 'color.search_outline_disabled',
+          'color.number_input_action_container_active', 'color.tag_close_layer_active',
+          'color.tag_selectable_layer_unselected_active']) {
         assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
       }
     }
