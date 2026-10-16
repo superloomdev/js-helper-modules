@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1221 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1221);
+  it('should expose exactly 1226 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1226);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1221 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1221);
+  it('should expose exactly 1226 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1226);
   });
 
   it('should report contract version 8', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 632,
+    color: 636,
     spacing: 17,
     size: 22,
     type: 86,
@@ -100,7 +100,7 @@ describe('contract registry - group counts', () => {
     stacking: 5,
     anatomy: 20,
     icon: 86,
-    control: 212
+    control: 213
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1814,7 +1814,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 709);
+    assert.equal(gridNames.length, 714);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1932,11 +1932,11 @@ describe('contract v7 - the remaining atom families\' cells', () => {
       saving: ['error_icon'],
       progress_step: ['icon', 'icon_incomplete', 'icon_disabled', 'icon_invalid', 'line', 'line_complete', 'label', 'label_hover', 'label_focus', 'label_disabled', 'secondary_label'],
       skeleton: ['container', 'shimmer'],
-      tag_close: ['container_hover', 'focus_ring'],
+      tag_close: ['container_hover', 'focus_ring', 'layer_active'],
       tag_dismissible: ['label'],
       tag_interactive: ['layer_active', 'outline', 'outline_disabled'],
       tag: ['focus_ring'],
-      tag_selectable: ['container', 'container_hover', 'container_selected', 'container_selected_disabled', 'container_selected_hover', 'label', 'label_selected', 'label_selected_disabled', 'outline']
+      tag_selectable: ['container', 'container_hover', 'container_selected', 'container_selected_disabled', 'container_selected_hover', 'label', 'label_selected', 'label_selected_disabled', 'outline', 'layer_unselected_active']
     },
     control: {
       button_set: ['item_max_width', 'gap', 'fluid_min_width', 'fluid_max_width', 'fluid_ghost_padding_start'],
@@ -2041,7 +2041,7 @@ describe('contract v8 - the milestone 4 cells', () => {
     color: {
       field_action: ['container_hover', 'container_active'],
       password_toggle: ['container_hover', 'container_active'],
-      number_input: ['divider'],
+      number_input: ['divider', 'action_container_active'],
       slider: ['range_label', 'track', 'track_filled', 'track_filled_focus', 'handle', 'handle_focus', 'handle_gap_focus', 'state_layer_hover', 'state_layer_focus', 'state_layer_active', 'disabled', 'track_disabled'],
       select: ['group_label'],
       popover: ['container', 'label', 'border'],
@@ -2062,6 +2062,7 @@ describe('contract v8 - the milestone 4 cells', () => {
       checkbox_group: ['gap'],
       radio_group: ['gap_horizontal', 'gap_vertical'],
       selection_skeleton: ['label_width'],
+      radio_skeleton: ['label_height'],
       toggle_skeleton: ['bar_width', 'bar_height', 'circle_size'],
       text_area: ['skeleton_height'],
       slider: ['gap', 'padding_block', 'min_width', 'max_width', 'track_height', 'track_radius', 'tick_height', 'handle_size', 'handle_size_active', 'state_layer_size', 'input_width', 'input_width_invalid', 'skeleton_range_width', 'skeleton_range_height'],
@@ -2086,7 +2087,7 @@ describe('contract v8 - the milestone 4 cells', () => {
   };
 
   const EXTRA = {
-    color: ['field_leading_icon', 'search_icon_disabled', 'search_placeholder_disabled']
+    color: ['field_leading_icon', 'search_icon_disabled', 'search_placeholder_disabled', 'search_outline_disabled']
   };
 
   it('should expose every v8 cell in its group, marked a grid cell', () => {

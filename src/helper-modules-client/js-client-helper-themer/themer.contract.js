@@ -274,6 +274,9 @@ const GRID = Object.freeze({
       'skeleton_container', 'skeleton_shimmer',
       // v7: the closable tag member
       'tag_close_container_hover', 'tag_close_focus_ring',
+      // v8 review amendment: the closable tag's pressed layer (the second
+      // system's input chip presses its own unselected role)
+      'tag_close_layer_active',
       // v7 batch 6 B3 round 2 amendment: the untyped dismissible tag's label
       // (the input chip's label role differs from the flat chip's)
       'tag_dismissible_label',
@@ -295,6 +298,9 @@ const GRID = Object.freeze({
       // second's filter chip presses on-surface-variant where the
       // interactive layer answers on-surface, so the member gets its own)
       'tag_selectable_layer_active',
+      // v8 review amendment: the unselected pressed layer - the filter
+      // chip's selected and unselected pressed roles differ
+      'tag_selectable_layer_unselected_active',
       // v8: field members - the leading icon's ink, the in-field action's
       // state fills, the password toggle's, the number input's divider,
       // the search icon's disabled ink
@@ -304,6 +310,10 @@ const GRID = Object.freeze({
       // v8 metrics amendment: the disabled search placeholder - upstream
       // hides it in the field fill (search/_search.scss)
       'search_placeholder_disabled',
+      // v8 review amendment: the number input's held steppers keep the
+      // hover fill (no independent active) and the search disables its
+      // underline to transparent
+      'number_input_action_container_active', 'search_outline_disabled',
       // v8: the slider family
       'slider_range_label', 'slider_track', 'slider_track_filled', 'slider_track_filled_focus',
       'slider_handle', 'slider_handle_focus', 'slider_handle_gap_focus',
@@ -421,6 +431,9 @@ const GRID = Object.freeze({
     // v8 metrics amendment: the text area skeleton's fixed block size
     // (text-area/_text-area.scss: block-size 100px)
     'text_area_skeleton_height',
+    // v8 review amendment: the radio skeleton's own label bar - a fixed
+    // 18-high block, not the live radio's size
+    'radio_skeleton_label_height',
     // v8: the slider family
     'slider_gap', 'slider_padding_block', 'slider_min_width', 'slider_max_width',
     'slider_track_height', 'slider_track_radius', 'slider_tick_height',
