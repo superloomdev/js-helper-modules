@@ -1907,6 +1907,7 @@ export default Object.freeze({
     'color.text_area_container_hover': '{color.field_container_hover}',
     'color.text_area_outline_disabled': '{color.field_outline_disabled}',
     'type.text_area_value': '{type.field_value}',
+    'control.text_area_skeleton_height': 100,
     'control.radio_size': 20,
     'control.radio_border': 2,
     'control.radio_dot_size': 10,
@@ -2562,6 +2563,7 @@ export default Object.freeze({
         0.38
       ]
     },
+    'color.search_placeholder_disabled': '{color.field_placeholder_disabled}',
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': 16,
     'control.radio_group_gap_vertical': 6,
@@ -6730,6 +6732,9 @@ export default Object.freeze({
     'color.search_icon_disabled': {
       'group': 'color'
     },
+    'color.search_placeholder_disabled': {
+      'group': 'color'
+    },
     'color.slider_range_label': {
       'group': 'color'
     },
@@ -7342,6 +7347,9 @@ export default Object.freeze({
     'control.toggle_skeleton_circle_size': {
       'group': 'dimension'
     },
+    'control.text_area_skeleton_height': {
+      'group': 'dimension'
+    },
     'control.slider_gap': {
       'group': 'dimension'
     },
@@ -7905,7 +7913,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '6d4e6aa6eea3d37cfe178cd5593abec58576ec5c',
+    'default_shasum': 'd42d4c72855e4e5f3632efc72e686029c26e1923',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

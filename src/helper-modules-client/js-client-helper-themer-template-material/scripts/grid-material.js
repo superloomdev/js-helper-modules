@@ -497,7 +497,10 @@ export default function buildMaterialGrid (options) {
   Object.assign(out, {
     'color.text_area_container_hover': '{color.field_container_hover}',
     'color.text_area_outline_disabled': '{color.field_outline_disabled}',
-    'type.text_area_value': '{type.field_value}'
+    'type.text_area_value': '{type.field_value}',
+    // metrics amendment S: the primary's skeleton block, fixed at 100
+    // (text-area/_text-area.scss:229-238)
+    'control.text_area_skeleton_height': 100
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ Selection member: the radio's checked ring ~~~~~~~~~
@@ -1032,6 +1035,9 @@ export default function buildMaterialGrid (options) {
     'control.number_input_min_width': 150,
     // census Search S: the disabled close and magnifier on-surface at 0.38
     'color.search_icon_disabled': atOpacity(rolePaint('on-surface'), 0.38),
+    // metrics amendment S: the second field's disabled placeholder keeps
+    // its existing role (search/_search.scss:116-125)
+    'color.search_placeholder_disabled': '{color.field_placeholder_disabled}',
     // census CheckboxGroup / RadioButtonGroup / skeletons S (no group
     // element, no skeleton element)
     'control.checkbox_group_gap': 6,
