@@ -566,6 +566,8 @@ export default function buildGridRecipe (grid) {
     'control.tag_close_inset': 0,
     'color.tag_close_container_hover': colorOf('tag_hover_gray'),
     'color.tag_close_focus_ring': colorOf('focus'),
+    // v8 review amendment: the primary draws no pressed layer on the close
+    'color.tag_close_layer_active': NONE,
     // v7 batch 6 B3 round 2 amendment: the untyped dismissible tag's label
     // reads the neutral tag label
     'color.tag_dismissible_label': colorOf('tag_label'),
@@ -597,6 +599,9 @@ export default function buildGridRecipe (grid) {
     // v7 batch 6 amendment: the primary draws no pressed layer on the
     // selectable tag - the selection fill already darkens on press
     'color.tag_selectable_layer_active': NONE,
+    // v8 review amendment: the unselected press reads the same cell (still
+    // no pressed layer on the primary)
+    'color.tag_selectable_layer_unselected_active': '{color.tag_selectable_layer_active}',
     'control.tag_selectable_outline_width_selected': 1,
     // v8 Field actions (census PasswordInput): under the square anatomy the
     // seat is the field's height flush with the frame end, so only the state
@@ -627,11 +632,18 @@ export default function buildGridRecipe (grid) {
     // v8 rework amendment (census NumberInput): min-inline-size 9.375rem
     // on the field (number-input/_number-input.scss:47-72)
     'control.number_input_min_width': 150,
+    // v8 review amendment (census NumberInput): the held stepper keeps the
+    // hover fill; there is no independent active paint
+    // (number-input/_number-input.scss:180-234)
+    'color.number_input_action_container_active': '{color.field_action_container_hover}',
     // v8 Search (census Search): the disabled close and magnifier
     'color.search_icon_disabled': colorOf('icon_on_color_disabled'),
     // v8 metrics amendment (census Search): the disabled placeholder
     // hides in the field fill (search/_search.scss:116-125)
     'color.search_placeholder_disabled': '{color.field_container_disabled}',
+    // v8 review amendment (census Search): a disabled search draws no
+    // underline, unlike the ordinary field's border-strong disabled outline
+    'color.search_outline_disabled': NONE,
     // v8 Selection groups (census CheckboxGroup, RadioButtonGroup)
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
@@ -640,6 +652,9 @@ export default function buildGridRecipe (grid) {
     // the skeleton's own 18 circle, unlike a live switch handle
     // (toggle/_toggle.scss:226-231)
     'control.selection_skeleton_label_width': 100,
+    // v8 review amendment (census RadioButtonSkeleton): the skeleton's
+    // fixed 18-high label bar, not the live radio's size
+    'control.radio_skeleton_label_height': 18,
     'control.toggle_skeleton_circle_size': 18,
     'control.toggle_skeleton_bar_width': 24,
     'control.toggle_skeleton_bar_height': 8,
