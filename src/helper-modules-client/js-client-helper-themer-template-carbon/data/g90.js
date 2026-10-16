@@ -4847,6 +4847,7 @@ export default Object.freeze({
     'color.password_toggle_container_active': 'rgba(0, 0, 0, 0)',
     'control.field_skeleton_label_width': 75,
     'control.field_skeleton_label_height': 14,
+    'control.text_area_skeleton_height': 100,
     'type.time_picker_value': '{type.code02}',
     'control.time_picker_input_width': 78,
     'control.time_picker_input_width_invalid': 98.8,
@@ -4855,6 +4856,7 @@ export default Object.freeze({
     'control.number_input_divider_height': 16,
     'control.number_input_min_width': 150,
     'color.search_icon_disabled': '{color.icon_on_color_disabled}',
+    'color.search_placeholder_disabled': '{color.field_container_disabled}',
     'control.checkbox_group_gap': 6,
     'control.radio_group_gap_horizontal': '{spacing.spacing_05}',
     'control.radio_group_gap_vertical': 6,
@@ -7975,6 +7977,9 @@ export default Object.freeze({
     'color.search_icon_disabled': {
       'group': 'color'
     },
+    'color.search_placeholder_disabled': {
+      'group': 'color'
+    },
     'color.slider_range_label': {
       'group': 'color'
     },
@@ -8585,6 +8590,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.toggle_skeleton_circle_size': {
+      'group': 'dimension'
+    },
+    'control.text_area_skeleton_height': {
       'group': 'dimension'
     },
     'control.slider_gap': {

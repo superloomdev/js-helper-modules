@@ -661,6 +661,9 @@ export default function buildGridRecipe (grid) {
     // (form/_form.scss:100-106)
     'control.field_skeleton_label_width': 75,
     'control.field_skeleton_label_height': 14,
+    // v8 metrics amendment (census TextAreaSkeleton): the block is fixed
+    // at 100; there are no rows or size variants (text-area/_text-area.scss:229-238)
+    'control.text_area_skeleton_height': 100,
     // v8 Time picker (census TimePicker): code-02 digits, 78 wide,
     // 98.8 (6.175rem) while invalid (time-picker/_time-picker.scss:62-81)
     'type.time_picker_value': '{type.code02}',
@@ -677,6 +680,9 @@ export default function buildGridRecipe (grid) {
     // v8 Search (census Search): the disabled close and magnifier draw
     // $icon-on-color-disabled
     'color.search_icon_disabled': colorOf('icon_on_color_disabled'),
+    // v8 metrics amendment (census Search): the disabled placeholder
+    // hides in the field fill (search/_search.scss:116-125)
+    'color.search_placeholder_disabled': '{color.field_container_disabled}',
     // v8 Selection groups (census CheckboxGroup, RadioButtonGroup):
     // members stacked 6 apart; the radio row spaces members $spacing-05
     'control.checkbox_group_gap': 6,
