@@ -4815,6 +4815,7 @@ export default Object.freeze({
     'control.tag_close_gap': '{spacing.spacing_01}',
     'control.tag_close_icon_size': 16,
     'control.tag_close_inset': 0,
+    'control.tag_close_focus_offset': 0,
     'color.tag_close_container_hover': '{color.tag_hover_gray}',
     'color.tag_close_focus_ring': '{color.focus}',
     'color.tag_close_layer_active': 'rgba(0, 0, 0, 0)',
@@ -8541,6 +8542,9 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.tag_close_inset': {
+      'group': 'dimension'
+    },
+    'control.tag_close_focus_offset': {
       'group': 'dimension'
     },
     'control.tag_interactive_outline_width': {
