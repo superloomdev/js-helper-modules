@@ -564,6 +564,7 @@ export default function buildGridRecipe (grid) {
     'control.tag_close_gap': '{spacing.spacing_01}',
     'control.tag_close_icon_size': 16,
     'control.tag_close_inset': 0,
+    'control.tag_close_focus_offset': 0,
     'color.tag_close_container_hover': colorOf('tag_hover_gray'),
     'color.tag_close_focus_ring': colorOf('focus'),
     // v8 review amendment: the primary draws no pressed layer on the close
