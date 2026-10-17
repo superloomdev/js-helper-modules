@@ -2449,6 +2449,7 @@ export default Object.freeze({
     'control.tag_close_gap': 8,
     'control.tag_close_icon_size': 18,
     'control.tag_close_inset': 8,
+    'control.tag_close_focus_offset': 0,
     'color.tag_close_container_hover': {
       'op': 'alpha',
       'args': [
@@ -7303,6 +7304,9 @@ export default Object.freeze({
     'control.tag_close_inset': {
       'group': 'dimension'
     },
+    'control.tag_close_focus_offset': {
+      'group': 'dimension'
+    },
     'control.tag_interactive_outline_width': {
       'group': 'dimension'
     },
@@ -7938,7 +7942,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '7e9a2d7a1bb5cd5589f084cc5229a7be6f744212',
+    'default_shasum': '0495e92a9474fd0c0d29eaaf5077eccbe1611f0d',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',

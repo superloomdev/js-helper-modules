@@ -961,6 +961,10 @@ export default function buildMaterialGrid (options) {
     'control.tag_close_gap': numberToken(inputChip, 'icon-label-space'),
     'control.tag_close_icon_size': numberToken(inputChip, 'with-trailing-icon-trailing-icon-size'),
     'control.tag_close_inset': numberToken(inputChip, 'with-trailing-icon-trailing-space'),
+    // v8 review amendment: chips/internal/_trailing-icon.scss pins the close's
+    // md-focus-ring to the ripple circle with inset: unset - the measured offset
+    // is 0, not the generic tag ring's 2
+    'control.tag_close_focus_offset': 0,
     'color.tag_close_container_hover': translucent(inputChip, 'unselected-hover-state-layer-color', 'unselected-hover-state-layer-opacity'),
     'color.tag_close_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'focus ring color'),
     // v8 review amendment: the dismissible tag's close is the input chip's

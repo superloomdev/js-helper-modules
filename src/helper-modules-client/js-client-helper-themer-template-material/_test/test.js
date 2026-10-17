@@ -695,10 +695,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1226 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1227 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1226);
+        assert.equal(names.length, 1227);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -813,10 +813,12 @@ describe('material template - role grid (v5 amendment)', () => {
       assert.equal(scheme.tokens['control.radio_skeleton_label_height'], 18, schemeName + ' raw');
       assert.equal(scheme.tokens['color.search_outline_disabled'], '{color.field_outline_disabled}', schemeName + ' raw alias');
       assert.equal(scheme.tokens['color.number_input_action_container_active'], '{color.field_action_container_active}', schemeName + ' raw alias');
+      assert.equal(scheme.tokens['control.tag_close_focus_offset'], 0, schemeName + ' raw close focus offset');
       const built = Themer.buildTheme(scheme, [], 'native').tokens;
       assert.equal(built['control.radio_skeleton_label_height'], 18, schemeName + ' built');
       assert.equal(built['color.search_outline_disabled'], built['color.field_outline_disabled'], schemeName + ' built');
       assert.equal(built['color.number_input_action_container_active'], built['color.field_action_container_active'], schemeName + ' built');
+      assert.equal(built['control.tag_close_focus_offset'], 0, schemeName + ' built close focus offset');
       // The input chip's unselected pressed layer: on-surface-variant at the
       // pressed opacity - the same paint the selected filter chip presses
       assert.equal(built['color.tag_close_layer_active'], built['color.tag_selectable_layer_active'], schemeName + ' close layer');
