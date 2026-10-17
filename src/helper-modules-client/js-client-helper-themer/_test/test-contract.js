@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1226 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1226);
+  it('should expose exactly 1227 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1227);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1226 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1226);
+  it('should expose exactly 1227 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1227);
   });
 
   it('should report contract version 8', () => {
@@ -100,7 +100,7 @@ describe('contract registry - group counts', () => {
     stacking: 5,
     anatomy: 20,
     icon: 86,
-    control: 213
+    control: 214
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1814,7 +1814,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 714);
+    assert.equal(gridNames.length, 715);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1950,7 +1950,7 @@ describe('contract v7 - the remaining atom families\' cells', () => {
       progress_step: ['width', 'min_width', 'vertical_min_height', 'icon_gap', 'icon_top', 'line_width', 'label_max_width', 'label_max_width_vertical', 'label_gap', 'skeleton_label_width', 'skeleton_label_height'],
       skeleton: ['radius', 'placeholder_size', 'text_height', 'text_gap', 'heading_height'],
       tag_skeleton: ['width'],
-      tag_close: ['gap', 'icon_size', 'inset'],
+      tag_close: ['gap', 'icon_size', 'inset', 'focus_offset'],
       tag_interactive: ['outline_width'],
       tag: ['focus_width', 'focus_offset', 'height_small'],
       tag_selectable: ['outline_width_selected']

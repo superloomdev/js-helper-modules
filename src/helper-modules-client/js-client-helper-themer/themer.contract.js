@@ -408,7 +408,7 @@ const GRID = Object.freeze({
     // v7: the skeleton tag member
     'tag_skeleton_width',
     // v7: the closable tag member
-    'tag_close_gap', 'tag_close_icon_size', 'tag_close_inset',
+    'tag_close_gap', 'tag_close_icon_size', 'tag_close_inset', 'tag_close_focus_offset',
     // v7: the interactive tag members
     'tag_interactive_outline_width', 'tag_interactive_height_small', 'tag_focus_width', 'tag_focus_offset',
     // v7: the selectable tag member
