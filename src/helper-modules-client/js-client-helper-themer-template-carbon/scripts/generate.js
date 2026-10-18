@@ -69,6 +69,10 @@ const ANATOMY = {
   // v8: a field action is a square of the field's height flush with the
   // frame's end (census PasswordInput, _text-input.scss `aspect-ratio:1`)
   'anatomy.field_action': 'square',
+  // v8 metrics amendment (slider/_slider.scss): the focus indication is
+  // box shadows inside the thumb's edge, not an outline ring
+  'anatomy.slider_focus': 'inset',
+  'anatomy.slider_disabled_paint': 'independent',
   // @carbon/styles 1.115.0 button/_mixins.scss caps padding-block at the lg
   // height's (--temp-padding-block-max), so xl and 2xl keep the label at the top
   'anatomy.button_label': 'top',

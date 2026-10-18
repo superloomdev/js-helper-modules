@@ -728,7 +728,9 @@ export default function buildGridRecipe (grid) {
     'color.slider_track_filled_focus': colorOf('border_interactive'),
     'control.slider_tick_height': 4,
     'control.slider_handle_size': 14,
-    'control.slider_handle_size_active': 20,
+    // Pinned CSS: slider__thumb:hover/:focus/:active all scale(1.4286)
+    // from the 14px base, so the drawn active size is 14 * 1.4286 = 20.0004
+    'control.slider_handle_size_active': 20.0004,
     'color.slider_handle': colorOf('layer_selected_inverse'),
     'color.slider_handle_focus': colorOf('interactive'),
     'color.slider_handle_gap_focus': colorOf('layer_01'),
@@ -744,6 +746,20 @@ export default function buildGridRecipe (grid) {
     // v8 SliderSkeleton (census SliderSkeleton): the range label blocks 20 x 12
     'control.slider_skeleton_range_width': 20,
     'control.slider_skeleton_range_height': 12,
+    // v8 metrics amendment (slider/_slider.scss): the host is 32 high -
+    // the absolute track inside 16+16 padding - the track and handle run
+    // edge to edge, the focused thumb grows to 20 and draws its ring
+    // inside, and a disabled number field keeps no outline
+    'control.slider_height': 32,
+    'control.slider_track_inset': 0,
+    'control.slider_handle_inset': 0,
+    'control.slider_focus_size': 20,
+    'control.slider_focus_offset': 0,
+    'control.slider_focus_width': 2,
+    'control.slider_focus_gap_width': 1,
+    'control.slider_input_outline_width_disabled': '{control.field_outline_width}',
+    'color.slider_focus_ring': '{color.slider_handle_focus}',
+    'shadow.slider_handle_disabled': '{shadow.level_00}',
     // v8 Select members (census MultiSelect, SelectItemGroup): the option
     // checkbox seats 28 in; the optgroup label is label-01 in $text-secondary
     'control.multi_select_checkbox_inset': 28,

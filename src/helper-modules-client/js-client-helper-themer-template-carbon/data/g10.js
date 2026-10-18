@@ -860,6 +860,8 @@ export default Object.freeze({
     'anatomy.status_marker': 'bar_icon',
     'anatomy.dialog_actions': 'stretched',
     'anatomy.field_action': 'square',
+    'anatomy.slider_focus': 'inset',
+    'anatomy.slider_disabled_paint': 'independent',
     'anatomy.button_label': 'top',
     'anatomy.field_counter': 'label',
     'anatomy.switch_state_text': 'shown',
@@ -4883,7 +4885,7 @@ export default Object.freeze({
     'color.slider_track_filled_focus': '{color.border_interactive}',
     'control.slider_tick_height': 4,
     'control.slider_handle_size': 14,
-    'control.slider_handle_size_active': 20,
+    'control.slider_handle_size_active': 20.0004,
     'color.slider_handle': '{color.layer_selected_inverse}',
     'color.slider_handle_focus': '{color.interactive}',
     'color.slider_handle_gap_focus': '{color.layer_01}',
@@ -4898,6 +4900,16 @@ export default Object.freeze({
     'control.slider_input_width_invalid': 96,
     'control.slider_skeleton_range_width': 20,
     'control.slider_skeleton_range_height': 12,
+    'control.slider_height': 32,
+    'control.slider_track_inset': 0,
+    'control.slider_handle_inset': 0,
+    'control.slider_focus_size': 20,
+    'control.slider_focus_offset': 0,
+    'control.slider_focus_width': 2,
+    'control.slider_focus_gap_width': 1,
+    'control.slider_input_outline_width_disabled': '{control.field_outline_width}',
+    'color.slider_focus_ring': '{color.slider_handle_focus}',
+    'shadow.slider_handle_disabled': '{shadow.level_00}',
     'control.multi_select_checkbox_inset': 28,
     'type.select_group_label': '{type.label01}',
     'color.select_group_label': '{color.text_secondary}',
@@ -6391,6 +6403,12 @@ export default Object.freeze({
       'group': 'raw'
     },
     'anatomy.field_action': {
+      'group': 'raw'
+    },
+    'anatomy.slider_focus': {
+      'group': 'raw'
+    },
+    'anatomy.slider_disabled_paint': {
       'group': 'raw'
     },
     'shadow.level_01': {
@@ -8034,6 +8052,9 @@ export default Object.freeze({
     'color.slider_track_disabled': {
       'group': 'color'
     },
+    'color.slider_focus_ring': {
+      'group': 'color'
+    },
     'color.select_group_label': {
       'group': 'color'
     },
@@ -8661,6 +8682,30 @@ export default Object.freeze({
     'control.slider_skeleton_range_height': {
       'group': 'dimension'
     },
+    'control.slider_height': {
+      'group': 'dimension'
+    },
+    'control.slider_track_inset': {
+      'group': 'dimension'
+    },
+    'control.slider_handle_inset': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_size': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.slider_input_outline_width_disabled': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_width': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_gap_width': {
+      'group': 'dimension'
+    },
     'control.multi_select_checkbox_inset': {
       'group': 'dimension'
     },
@@ -8923,6 +8968,9 @@ export default Object.freeze({
       'group': 'shadow'
     },
     'shadow.slider_handle': {
+      'group': 'shadow'
+    },
+    'shadow.slider_handle_disabled': {
       'group': 'shadow'
     },
     'shadow.popover': {

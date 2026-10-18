@@ -254,7 +254,9 @@ describe('carbon template - anatomy enums (v4)', () => {
     'anatomy.field_counter_format': 'tight',
     'anatomy.loading_motion': 'spin',
     'anatomy.tag_close': 'circle',
-    'anatomy.tag_selected_mark': 'hidden'
+    'anatomy.tag_selected_mark': 'hidden',
+    'anatomy.slider_focus': 'inset',
+    'anatomy.slider_disabled_paint': 'independent'
   };
 
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
@@ -442,10 +444,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1227 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1239 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1227);
+        assert.equal(names.length, 1239);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -627,6 +629,47 @@ describe('carbon template - v8 rework amendment', () => {
       for (const name of ['control.radio_skeleton_label_height', 'color.search_outline_disabled',
           'color.number_input_action_container_active', 'color.tag_close_layer_active',
           'color.tag_selectable_layer_unselected_active', 'control.tag_close_focus_offset']) {
+        assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
+      }
+    }
+  });
+
+  it('should answer the twelve v8 slider metrics cells itself in every scheme, raw and built', () => {
+    const added = ['control.slider_height', 'control.slider_track_inset', 'control.slider_handle_inset',
+      'control.slider_focus_size', 'control.slider_focus_offset', 'control.slider_input_outline_width_disabled',
+      'control.slider_focus_width', 'control.slider_focus_gap_width',
+      'color.slider_focus_ring', 'shadow.slider_handle_disabled', 'anatomy.slider_focus',
+      'anatomy.slider_disabled_paint'];
+    for (const schemeName of Object.keys(profile.schemes)) {
+      const scheme = profile.schemes[schemeName];
+      assert.equal(scheme.tokens['control.slider_height'], 32, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_track_inset'], 0, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_handle_inset'], 0, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_handle_size_active'], 20.0004, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_size'], 20, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_offset'], 0, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_width'], 2, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_gap_width'], 1, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_input_outline_width_disabled'], '{control.field_outline_width}', schemeName + ' raw alias');
+      assert.equal(scheme.tokens['anatomy.slider_focus'], 'inset', schemeName + ' raw');
+      assert.equal(scheme.tokens['anatomy.slider_disabled_paint'], 'independent', schemeName + ' raw');
+      assert.equal(scheme.tokens['color.slider_focus_ring'], '{color.slider_handle_focus}', schemeName + ' raw alias');
+      assert.equal(scheme.tokens['shadow.slider_handle_disabled'], '{shadow.level_00}', schemeName + ' raw alias');
+      const built = Themer.buildTheme(scheme, [], 'native').tokens;
+      assert.equal(built['control.slider_height'], 32, schemeName + ' built');
+      assert.equal(built['control.slider_track_inset'], 0, schemeName + ' built');
+      assert.equal(built['control.slider_handle_inset'], 0, schemeName + ' built');
+      assert.equal(built['control.slider_handle_size_active'], 20.0004, schemeName + ' built');
+      assert.equal(built['control.slider_focus_size'], 20, schemeName + ' built');
+      assert.equal(built['control.slider_focus_offset'], 0, schemeName + ' built');
+      assert.equal(built['control.slider_focus_width'], 2, schemeName + ' built');
+      assert.equal(built['control.slider_focus_gap_width'], 1, schemeName + ' built');
+      assert.equal(built['control.slider_input_outline_width_disabled'], built['control.field_outline_width'], schemeName + ' built');
+      assert.equal(built['anatomy.slider_focus'], 'inset', schemeName + ' built');
+      assert.equal(built['anatomy.slider_disabled_paint'], 'independent', schemeName + ' built');
+      assert.equal(built['color.slider_focus_ring'], built['color.slider_handle_focus'], schemeName + ' built');
+      assert.deepEqual(built['shadow.slider_handle_disabled'], built['shadow.level_00'], schemeName + ' built');
+      for (const name of added) {
         assert.equal(scheme.from_default.includes(name), false, name + ' completed from the default');
       }
     }
