@@ -319,6 +319,10 @@ const GRID = Object.freeze({
       'slider_handle', 'slider_handle_focus', 'slider_handle_gap_focus',
       'slider_state_layer_hover', 'slider_state_layer_focus', 'slider_state_layer_active',
       'slider_disabled', 'slider_track_disabled',
+      // v8 metrics amendment: the focus ring's own color - a template that
+      // draws the ring outside the thumb needs a color other than the
+      // handle's focus primary
+      'slider_focus_ring',
       // v8: the select member
       'select_group_label',
       // v8: the popover, definition tooltip and toggletip members and the
@@ -440,6 +444,12 @@ const GRID = Object.freeze({
     'slider_handle_size', 'slider_handle_size_active', 'slider_state_layer_size',
     'slider_input_width', 'slider_input_width_invalid',
     'slider_skeleton_range_width', 'slider_skeleton_range_height',
+    // v8 metrics amendment: the host block size, the endpoint and handle
+    // travel insets, the focus ring's size and offset, and the disabled
+    // number field's outline width
+    'slider_height', 'slider_track_inset', 'slider_handle_inset',
+    'slider_focus_size', 'slider_focus_offset', 'slider_input_outline_width_disabled',
+    'slider_focus_width', 'slider_focus_gap_width',
     // v8: the select member
     'multi_select_checkbox_inset',
     // v8: the popover, definition tooltip and toggletip members
@@ -473,7 +483,7 @@ const GRID = Object.freeze({
     // v6
     'list', 'dialog', 'notification',
     // v8: the slider's handle, the popover, the floating action button
-    'slider_handle', 'popover', 'fab', 'fab_hover'
+    'slider_handle', 'slider_handle_disabled', 'popover', 'fab', 'fab_hover'
   ])),
   motion: Object.freeze([
     // v7: the two animated families' cycles
@@ -1005,6 +1015,10 @@ function buildContract () {
     // v8: the in-field action's shape - a square seat filling the field's
     // height or the second system's circular icon button
     'anatomy.field_action': Object.freeze({ group: 'anatomy', values: ['square', 'icon_button'] }),
+    // v8 metrics amendment: the slider's focus indication - shadows
+    // inside the thumb's edge or an outline ring outside it
+    'anatomy.slider_focus': Object.freeze({ group: 'anatomy', values: ['inset', 'outline'] }),
+    'anatomy.slider_disabled_paint': Object.freeze({ group: 'anatomy', values: ['independent', 'grouped'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~

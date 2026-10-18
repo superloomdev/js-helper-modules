@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1227 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1227);
+  it('should expose exactly 1239 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1239);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1227 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1227);
+  it('should expose exactly 1239 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1239);
   });
 
   it('should report contract version 8', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 636,
+    color: 637,
     spacing: 17,
     size: 22,
     type: 86,
@@ -92,15 +92,15 @@ describe('contract registry - group counts', () => {
     border: 4,
     focus: 2,
     feedback: 3,
-    shadow: 49,
+    shadow: 50,
     breakpoint: 5,
     grid: 13,
     state: 6,
     tint: 5,
     stacking: 5,
-    anatomy: 20,
+    anatomy: 22,
     icon: 86,
-    control: 214
+    control: 222
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1251,7 +1251,7 @@ describe('contract v5 - control group and role tokens', () => {
 
 describe('contract v4 - anatomy group', () => {
 
-  it('should expose twenty enum structure tokens with their literal value lists', () => {
+  it('should expose twenty-two enum structure tokens with their literal value lists', () => {
     const anatomyTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'anatomy';
     });
@@ -1276,7 +1276,9 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.tag_close',
       'anatomy.tag_selected_mark',
       'anatomy.tag_interactive_outline',
-      'anatomy.field_action'
+      'anatomy.field_action',
+      'anatomy.slider_focus',
+      'anatomy.slider_disabled_paint'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1286,6 +1288,8 @@ describe('contract v4 - anatomy group', () => {
     assert.equal(contract.tokens['anatomy.caret'], undefined);
     assert.equal(contract.tokens['anatomy.slider_handle'], undefined);
     assert.deepEqual(contract.tokens['anatomy.field_action'].values, ['square', 'icon_button']);
+    assert.deepEqual(contract.tokens['anatomy.slider_focus'].values, ['inset', 'outline']);
+    assert.deepEqual(contract.tokens['anatomy.slider_disabled_paint'].values, ['independent', 'grouped']);
     assert.deepEqual(contract.tokens['anatomy.button_label'].values, ['top', 'center']);
     assert.deepEqual(contract.tokens['anatomy.field_counter'].values, ['label', 'message']);
     assert.deepEqual(contract.tokens['anatomy.switch_state_text'].values, ['shown', 'hidden']);
@@ -1814,7 +1818,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 715);
+    assert.equal(gridNames.length, 725);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -2042,7 +2046,7 @@ describe('contract v8 - the milestone 4 cells', () => {
       field_action: ['container_hover', 'container_active'],
       password_toggle: ['container_hover', 'container_active'],
       number_input: ['divider', 'action_container_active'],
-      slider: ['range_label', 'track', 'track_filled', 'track_filled_focus', 'handle', 'handle_focus', 'handle_gap_focus', 'state_layer_hover', 'state_layer_focus', 'state_layer_active', 'disabled', 'track_disabled'],
+      slider: ['range_label', 'track', 'track_filled', 'track_filled_focus', 'handle', 'handle_focus', 'handle_gap_focus', 'state_layer_hover', 'state_layer_focus', 'state_layer_active', 'disabled', 'track_disabled', 'focus_ring'],
       select: ['group_label'],
       popover: ['container', 'label', 'border'],
       definition_term: ['underline', 'underline_hover'],
@@ -2065,7 +2069,7 @@ describe('contract v8 - the milestone 4 cells', () => {
       radio_skeleton: ['label_height'],
       toggle_skeleton: ['bar_width', 'bar_height', 'circle_size'],
       text_area: ['skeleton_height'],
-      slider: ['gap', 'padding_block', 'min_width', 'max_width', 'track_height', 'track_radius', 'tick_height', 'handle_size', 'handle_size_active', 'state_layer_size', 'input_width', 'input_width_invalid', 'skeleton_range_width', 'skeleton_range_height'],
+      slider: ['gap', 'padding_block', 'min_width', 'max_width', 'track_height', 'track_radius', 'tick_height', 'handle_size', 'handle_size_active', 'state_layer_size', 'input_width', 'input_width_invalid', 'skeleton_range_width', 'skeleton_range_height', 'height', 'track_inset', 'handle_inset', 'focus_size', 'focus_offset', 'input_outline_width_disabled', 'focus_width', 'focus_gap_width'],
       multi_select: ['checkbox_inset'],
       popover: ['radius', 'caret_width', 'caret_height', 'offset'],
       definition_tooltip: ['max_width', 'padding_block', 'padding_inline'],
@@ -2080,7 +2084,7 @@ describe('contract v8 - the milestone 4 cells', () => {
       fab: ['label']
     },
     shadow: {
-      slider: ['handle'],
+      slider: ['handle', 'handle_disabled'],
       popover: [''],
       fab: ['', '_hover']
     }
