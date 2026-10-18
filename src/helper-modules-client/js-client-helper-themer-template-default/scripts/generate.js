@@ -63,6 +63,9 @@ const ANATOMY = {
   'anatomy.dialog_actions': 'stretched',
   // v8: the in-frame action is a square seat (census PasswordInput)
   'anatomy.field_action': 'square',
+  // v8 metrics amendment: the focus indication is inside the thumb's edge
+  'anatomy.slider_focus': 'inset',
+  'anatomy.slider_disabled_paint': 'independent',
   // A tall button keeps its label where the default height puts it
   'anatomy.button_label': 'top',
   // v6: the primary reference's anatomy, as the default draws it

@@ -1830,6 +1830,8 @@ export default Object.freeze({
     'anatomy.tag_selected_mark': 'hidden',
     'anatomy.tag_interactive_outline': 'border',
     'anatomy.field_action': 'square',
+    'anatomy.slider_focus': 'inset',
+    'anatomy.slider_disabled_paint': 'independent',
     'shadow.level_01': {
       'shadow': true,
       'layers': [
@@ -5882,6 +5884,7 @@ export default Object.freeze({
     'color.slider_state_layer_active': 'rgba(0, 0, 0, 0)',
     'color.slider_disabled': '{color.border_disabled}',
     'color.slider_track_disabled': '{color.border_disabled}',
+    'color.slider_focus_ring': '{color.slider_handle_focus}',
     'color.select_group_label': '{color.text_secondary}',
     'color.popover_container': '{color.layer_01}',
     'color.popover_label': '{color.text_primary}',
@@ -6085,12 +6088,20 @@ export default Object.freeze({
     'control.slider_track_radius': '{shape.radius_00}',
     'control.slider_tick_height': 4,
     'control.slider_handle_size': 14,
-    'control.slider_handle_size_active': 20,
+    'control.slider_handle_size_active': 20.0004,
     'control.slider_state_layer_size': 0,
     'control.slider_input_width': 64,
     'control.slider_input_width_invalid': 96,
     'control.slider_skeleton_range_width': 20,
     'control.slider_skeleton_range_height': 12,
+    'control.slider_height': 32,
+    'control.slider_track_inset': 0,
+    'control.slider_handle_inset': 0,
+    'control.slider_focus_size': 20,
+    'control.slider_focus_offset': 0,
+    'control.slider_input_outline_width_disabled': '{control.field_outline_width}',
+    'control.slider_focus_width': 2,
+    'control.slider_focus_gap_width': 1,
     'control.multi_select_checkbox_inset': 28,
     'control.popover_radius': '{shape.radius_02}',
     'control.popover_caret_width': 12,
@@ -6201,6 +6212,7 @@ export default Object.freeze({
       ]
     },
     'shadow.slider_handle': '{shadow.level_00}',
+    'shadow.slider_handle_disabled': '{shadow.level_00}',
     'shadow.popover': {
       'shadow': true,
       'layers': [
@@ -7347,6 +7359,12 @@ export default Object.freeze({
       'group': 'raw'
     },
     'anatomy.field_action': {
+      'group': 'raw'
+    },
+    'anatomy.slider_focus': {
+      'group': 'raw'
+    },
+    'anatomy.slider_disabled_paint': {
       'group': 'raw'
     },
     'shadow.level_01': {
@@ -8990,6 +9008,9 @@ export default Object.freeze({
     'color.slider_track_disabled': {
       'group': 'color'
     },
+    'color.slider_focus_ring': {
+      'group': 'color'
+    },
     'color.select_group_label': {
       'group': 'color'
     },
@@ -9617,6 +9638,30 @@ export default Object.freeze({
     'control.slider_skeleton_range_height': {
       'group': 'dimension'
     },
+    'control.slider_height': {
+      'group': 'dimension'
+    },
+    'control.slider_track_inset': {
+      'group': 'dimension'
+    },
+    'control.slider_handle_inset': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_size': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.slider_input_outline_width_disabled': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_width': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_gap_width': {
+      'group': 'dimension'
+    },
     'control.multi_select_checkbox_inset': {
       'group': 'dimension'
     },
@@ -9879,6 +9924,9 @@ export default Object.freeze({
       'group': 'shadow'
     },
     'shadow.slider_handle': {
+      'group': 'shadow'
+    },
+    'shadow.slider_handle_disabled': {
       'group': 'shadow'
     },
     'shadow.popover': {
