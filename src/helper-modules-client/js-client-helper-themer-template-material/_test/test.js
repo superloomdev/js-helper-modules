@@ -538,7 +538,9 @@ describe('material template - anatomy enums (v4)', () => {
     'anatomy.field_counter_format': 'spaced',
     'anatomy.loading_motion': 'arc',
     'anatomy.tag_close': 'inset',
-    'anatomy.tag_selected_mark': 'shown'
+    'anatomy.tag_selected_mark': 'shown',
+    'anatomy.slider_focus': 'outline',
+    'anatomy.slider_disabled_paint': 'grouped'
   };
 
   for (const schemeName of SCHEME_NAMES) {
@@ -695,10 +697,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1227 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all 1239 tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1227);
+        assert.equal(names.length, 1239);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -830,6 +832,46 @@ describe('material template - role grid (v5 amendment)', () => {
         assert.notEqual(built['color.tag_selectable_layer_unselected_active'], built['color.tag_selectable_layer_active'],
           schemeName + ' selected and unselected pressed layers must differ');
       }
+    });
+
+    it('should answer the v8 slider metrics cells with its own values in ' + schemeName + ', raw and built', () => {
+      const scheme = profile.schemes[schemeName];
+      // The host is the state-layer-sized 40 box; the track sits 18 in
+      // and the handle travels inset 20; the focus indication is the
+      // 48 md-focus-ring outline at offset 0
+      assert.equal(scheme.tokens['control.slider_height'], 40, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_track_inset'], 18, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_handle_inset'], 20, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_size'], 48, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_offset'], 0, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_width'], 3, schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_focus_gap_width'], 0, schemeName + ' raw');
+      assert.equal(scheme.tokens['anatomy.slider_focus'], 'outline', schemeName + ' raw');
+      assert.equal(scheme.tokens['anatomy.slider_disabled_paint'], 'grouped', schemeName + ' raw');
+      assert.equal(scheme.tokens['control.slider_input_outline_width_disabled'], '{control.field_outline_width}', schemeName + ' raw alias');
+      // The rendered ripple has hovered and pressed classes only - the
+      // spec's focus wash is unused, so the cell is explicitly transparent
+      assert.equal(scheme.tokens['color.slider_state_layer_focus'], 'rgba(0, 0, 0, 0)', schemeName + ' raw focus wash');
+      const built = Themer.buildTheme(scheme, [], 'native').tokens;
+      assert.equal(built['control.slider_height'], 40, schemeName + ' built');
+      assert.equal(built['control.slider_track_inset'], 18, schemeName + ' built');
+      assert.equal(built['control.slider_handle_inset'], 20, schemeName + ' built');
+      assert.equal(built['control.slider_focus_size'], 48, schemeName + ' built');
+      assert.equal(built['control.slider_focus_offset'], 0, schemeName + ' built');
+      assert.equal(built['control.slider_focus_width'], 3, schemeName + ' built');
+      assert.equal(built['control.slider_focus_gap_width'], 0, schemeName + ' built');
+      assert.equal(built['anatomy.slider_focus'], 'outline', schemeName + ' built');
+      assert.equal(built['anatomy.slider_disabled_paint'], 'grouped', schemeName + ' built');
+      assert.equal(built['control.slider_input_outline_width_disabled'], built['control.field_outline_width'],
+        schemeName + ' built disabled input outline');
+      assert.equal(built['color.slider_state_layer_focus'], 'rgba(0, 0, 0, 0)', schemeName + ' built focus wash');
+      // The ring color is the shared focus-ring source, not the handle primary
+      assert.equal(built['color.slider_focus_ring'], built['color.tag_focus_ring'], schemeName + ' built focus ring');
+      if (schemeName === 'light' || schemeName === 'dark') {
+        assert.notEqual(built['color.slider_focus_ring'], built['color.slider_handle'],
+          schemeName + ' focus ring and handle primary must differ');
+      }
+      assert.deepEqual(built['shadow.slider_handle_disabled'], built['shadow.level_00'], schemeName + ' built disabled shadow');
     });
 
   }

@@ -120,6 +120,10 @@ const ANATOMY = {
   // v8: the in-frame action is an icon button (census PasswordInput,
   // `_md-comp-outlined-text-field.scss` trailing icon)
   'anatomy.field_action': 'icon_button',
+  // v8 metrics amendment: the focus indication is the md-focus-ring
+  // outline outside the thumb, not shadows inside it
+  'anatomy.slider_focus': 'outline',
+  'anatomy.slider_disabled_paint': 'grouped',
   // @material/web 2.5.0 button/internal/_shared.scss: the button is an
   // inline flex box with align-items: center, so a taller one centers its label
   'anatomy.button_label': 'center',

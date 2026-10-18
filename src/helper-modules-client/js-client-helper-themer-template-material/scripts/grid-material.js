@@ -1081,8 +1081,9 @@ export default function buildMaterialGrid (options) {
   };
   Object.assign(out, {
     'control.slider_gap': 16,
-    // census Slider: the host is 48 tall around the 4px track
-    // (slider/internal/_slider.scss ripple area), 22 above and below
+    // Legacy cell: an inferred pad, NOT a host-height metric - the
+    // rendered host is 40 (control.slider_height); kept unused until the
+    // next contract cleanup
     'control.slider_padding_block': 22,
     'control.slider_min_width': 200,
     'control.slider_max_width': 640,
@@ -1102,7 +1103,10 @@ export default function buildMaterialGrid (options) {
     'color.slider_handle_gap_focus': NONE,
     'control.slider_state_layer_size': numberToken(sliderFile, 'state-layer-size'),
     'color.slider_state_layer_hover': sliderLayer('hover'),
-    'color.slider_state_layer_focus': sliderLayer('focus'),
+    // The rendered ripple mounts hovered and pressed classes only
+    // (ripple/internal/ripple.js); keyboard focus shows the md-focus-ring,
+    // not the spec's unused focus wash - explicitly transparent
+    'color.slider_state_layer_focus': NONE,
     'color.slider_state_layer_active': sliderLayer('pressed'),
     'shadow.slider_handle': elevation(sliderFile, 'handle-elevation'),
     'color.slider_disabled': translucent(sliderFile, 'disabled-handle-color', 'disabled-handle-opacity'),
@@ -1112,7 +1116,22 @@ export default function buildMaterialGrid (options) {
     'control.slider_input_width_invalid': 96,
     // census SliderSkeleton S: the range label blocks 20 x 12
     'control.slider_skeleton_range_width': 20,
-    'control.slider_skeleton_range_height': 12
+    'control.slider_skeleton_range_height': 12,
+    // v8 metrics amendment (b9-material-probe): the host is the
+    // state-layer-sized 40 box, not 48; the track sits 18 in from each
+    // end (state-layer 40/2 minus the 2px tick container), the handle
+    // travels inset 20, keyboard focus shows the md-focus-ring's 48 ring
+    // at offset 0, and a disabled number field keeps the field outline
+    'control.slider_height': numberToken(sliderFile, 'state-layer-size'),
+    'control.slider_track_inset': numberToken(sliderFile, 'state-layer-size') / 2 - numberToken(sliderFile, 'with-tick-marks-container-size'),
+    'control.slider_handle_inset': numberToken(sliderFile, 'state-layer-size') / 2,
+    'control.slider_focus_size': 48,
+    'control.slider_focus_offset': 0,
+    'control.slider_focus_width': numberToken('focus-ring', 'width'),
+    'control.slider_focus_gap_width': 0,
+    'control.slider_input_outline_width_disabled': '{control.field_outline_width}',
+    'color.slider_focus_ring': required(colorToken('focus-ring', 'color', null, 'color.focus'), 'slider focus ring'),
+    'shadow.slider_handle_disabled': elevation(sliderFile, 'disabled-handle-elevation')
   });
 
   // ~~~~~~~~~~~~~~~~~~~~ v8: select members (census group 4) ~~~~~~~~~~~~~~~~

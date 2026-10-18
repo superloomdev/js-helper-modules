@@ -480,6 +480,8 @@ export default Object.freeze({
     'anatomy.status_marker': 'plain',
     'anatomy.dialog_actions': 'trailing',
     'anatomy.field_action': 'icon_button',
+    'anatomy.slider_focus': 'outline',
+    'anatomy.slider_disabled_paint': 'grouped',
     'anatomy.button_label': 'center',
     'anatomy.field_counter': 'message',
     'anatomy.switch_state_text': 'hidden',
@@ -2621,13 +2623,7 @@ export default Object.freeze({
         0.08
       ]
     },
-    'color.slider_state_layer_focus': {
-      'op': 'alpha',
-      'args': [
-        'color.interactive',
-        0.12
-      ]
-    },
+    'color.slider_state_layer_focus': 'rgba(0, 0, 0, 0)',
     'color.slider_state_layer_active': {
       'op': 'alpha',
       'args': [
@@ -2654,6 +2650,16 @@ export default Object.freeze({
     'control.slider_input_width_invalid': 96,
     'control.slider_skeleton_range_width': 20,
     'control.slider_skeleton_range_height': 12,
+    'control.slider_height': 40,
+    'control.slider_track_inset': 18,
+    'control.slider_handle_inset': 20,
+    'control.slider_focus_size': 48,
+    'control.slider_focus_offset': 0,
+    'control.slider_focus_width': 3,
+    'control.slider_focus_gap_width': 0,
+    'control.slider_input_outline_width_disabled': '{control.field_outline_width}',
+    'color.slider_focus_ring': '{color.focus}',
+    'shadow.slider_handle_disabled': '{shadow.level_00}',
     'control.multi_select_checkbox_inset': 28,
     'type.select_group_label': {
       'type_set': true,
@@ -5160,6 +5166,12 @@ export default Object.freeze({
     'anatomy.field_action': {
       'group': 'raw'
     },
+    'anatomy.slider_focus': {
+      'group': 'raw'
+    },
+    'anatomy.slider_disabled_paint': {
+      'group': 'raw'
+    },
     'shadow.level_01': {
       'group': 'shadow'
     },
@@ -6801,6 +6813,9 @@ export default Object.freeze({
     'color.slider_track_disabled': {
       'group': 'color'
     },
+    'color.slider_focus_ring': {
+      'group': 'color'
+    },
     'color.select_group_label': {
       'group': 'color'
     },
@@ -7428,6 +7443,30 @@ export default Object.freeze({
     'control.slider_skeleton_range_height': {
       'group': 'dimension'
     },
+    'control.slider_height': {
+      'group': 'dimension'
+    },
+    'control.slider_track_inset': {
+      'group': 'dimension'
+    },
+    'control.slider_handle_inset': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_size': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.slider_input_outline_width_disabled': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_width': {
+      'group': 'dimension'
+    },
+    'control.slider_focus_gap_width': {
+      'group': 'dimension'
+    },
     'control.multi_select_checkbox_inset': {
       'group': 'dimension'
     },
@@ -7692,6 +7731,9 @@ export default Object.freeze({
     'shadow.slider_handle': {
       'group': 'shadow'
     },
+    'shadow.slider_handle_disabled': {
+      'group': 'shadow'
+    },
     'shadow.popover': {
       'group': 'shadow'
     },
@@ -7949,7 +7991,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '0495e92a9474fd0c0d29eaaf5077eccbe1611f0d',
+    'default_shasum': '85a50b15491b6036a8436bf4267351698edc0fa7',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
