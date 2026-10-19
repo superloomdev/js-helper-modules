@@ -45,20 +45,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1239 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1239);
+  it('should expose exactly 1471 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1471);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1239 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1239);
+  it('should expose exactly 1470 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1471);
   });
 
-  it('should report contract version 8', () => {
-    assert.equal(contract.version, 8);
+  it('should report contract version 9', () => {
+    assert.equal(contract.version, 9);
   });
 
   it('should be a frozen object', () => {
@@ -82,10 +82,10 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 637,
+    color: 726,
     spacing: 17,
     size: 22,
-    type: 86,
+    type: 99,
     font: 12,
     motion: 33,
     shape: 9,
@@ -97,10 +97,10 @@ describe('contract registry - group counts', () => {
     grid: 13,
     state: 6,
     tint: 5,
-    stacking: 5,
-    anatomy: 22,
+    stacking: 6,
+    anatomy: 31,
     icon: 86,
-    control: 222
+    control: 342
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -227,7 +227,7 @@ describe('validateContract - happy path', () => {
     assert.equal(result.warnings.length, 0);
   });
 
-  it('should return success true when required is all 995 tokens and theme has all 995', () => {
+  it('should return success true when required is all 1471 tokens and theme has all 1471', () => {
     const theme = { tokens: {} };
     for (const name of tokenNames) {
       const def = contract.tokens[name];
@@ -995,7 +995,7 @@ describe('contract - CP1 repair', () => {
 
   it('should not accept a shadow_mode option', () => {
     assert.throws(() => Themer.buildTheme({ tokens: { a: 1 } }, [], 'native', { shadow_mode: 'anything' }),
-      /^TypeError: \[helper-themer\] options\.shadow_mode must be one of: contrast, min_contrast_ratio, motion_factor$/);
+      /^TypeError: \[helper-themer\] options\.shadow_mode must be one of: contrast, min_contrast_ratio, motion_factor, variant, adaptive$/);
   });
 
   it('should reject a non-boolean inset on a shadow layer', () => {
@@ -1121,8 +1121,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 8', () => {
-    assert.equal(contract.version, 8);
+  it('should report contract version 9', () => {
+    assert.equal(contract.version, 9);
   });
 
 });
@@ -1183,7 +1183,7 @@ describe('contract v2 - M5 tint group with range', () => {
 
 describe('contract v3 - stacking group', () => {
 
-  it('should expose five raw numeric structure tokens', () => {
+  it('should expose six raw numeric structure tokens', () => {
     const stackingTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'stacking';
     });
@@ -1193,7 +1193,8 @@ describe('contract v3 - stacking group', () => {
       'stacking.modal',
       'stacking.header',
       'stacking.overlay',
-      'stacking.floating'
+      'stacking.floating',
+      'stacking.skip_link'
     ]);
     assert.deepEqual(contract.groups.stacking, {
       tier: 'structure',
@@ -1251,7 +1252,7 @@ describe('contract v5 - control group and role tokens', () => {
 
 describe('contract v4 - anatomy group', () => {
 
-  it('should expose twenty-two enum structure tokens with their literal value lists', () => {
+  it('should expose thirty-one enum structure tokens with their literal value lists', () => {
     const anatomyTokens = tokenNames.filter(function (name) {
       return contract.tokens[name].group === 'anatomy';
     });
@@ -1278,7 +1279,16 @@ describe('contract v4 - anatomy group', () => {
       'anatomy.tag_interactive_outline',
       'anatomy.field_action',
       'anatomy.slider_focus',
-      'anatomy.slider_disabled_paint'
+      'anatomy.slider_disabled_paint',
+      'anatomy.toggle_widget',
+      'anatomy.date_picker_widget',
+      'anatomy.time_picker_widget',
+      'anatomy.surface_material',
+      'anatomy.tab_overflow',
+      'anatomy.content_switcher_separator',
+      'anatomy.content_switcher_selected_mark',
+      'anatomy.overflow_menu_connector',
+      'anatomy.dialog_scroll_fade'
     ]);
     assert.deepEqual(contract.groups.anatomy, { tier: 'structure', type: 'enum', emit: 'raw' });
     assert.deepEqual(contract.tokens['anatomy.label'].values, ['above', 'floating']);
@@ -1305,10 +1315,19 @@ describe('contract v4 - anatomy group', () => {
     assert.deepEqual(contract.tokens['anatomy.tag_close'].values, ['circle', 'inset']);
     assert.deepEqual(contract.tokens['anatomy.tag_selected_mark'].values, ['shown', 'hidden']);
     assert.deepEqual(contract.tokens['anatomy.tag_interactive_outline'].values, ['border', 'inset']);
+    assert.deepEqual(contract.tokens['anatomy.toggle_widget'].values, ['drawn', 'system']);
+    assert.deepEqual(contract.tokens['anatomy.date_picker_widget'].values, ['drawn', 'system']);
+    assert.deepEqual(contract.tokens['anatomy.time_picker_widget'].values, ['drawn', 'system']);
+    assert.deepEqual(contract.tokens['anatomy.surface_material'].values, ['solid', 'glass']);
+    assert.deepEqual(contract.tokens['anatomy.tab_overflow'].values, ['buttons', 'scroll']);
+    assert.deepEqual(contract.tokens['anatomy.content_switcher_separator'].values, ['short', 'full']);
+    assert.deepEqual(contract.tokens['anatomy.content_switcher_selected_mark'].values, ['hidden', 'shown']);
+    assert.deepEqual(contract.tokens['anatomy.overflow_menu_connector'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.dialog_scroll_fade'].values, ['shown', 'hidden']);
   });
 
   it('should accept every listed value and reject an unlisted one', () => {
-    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.field_action', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format', 'anatomy.loading_motion', 'anatomy.tag_close', 'anatomy.tag_selected_mark', 'anatomy.tag_interactive_outline']) {
+    for (const name of ['anatomy.label', 'anatomy.switch_handle', 'anatomy.status_marker', 'anatomy.dialog_actions', 'anatomy.field_action', 'anatomy.button_label', 'anatomy.field_counter', 'anatomy.switch_state_text', 'anatomy.switch_edge', 'anatomy.progress_indeterminate', 'anatomy.tab_indicator', 'anatomy.dialog_close', 'anatomy.dialog_label', 'anatomy.list_selected_mark', 'anatomy.menu_icon_seat', 'anatomy.field_counter_format', 'anatomy.loading_motion', 'anatomy.tag_close', 'anatomy.tag_selected_mark', 'anatomy.tag_interactive_outline', 'anatomy.toggle_widget', 'anatomy.date_picker_widget', 'anatomy.time_picker_widget', 'anatomy.surface_material', 'anatomy.tab_overflow', 'anatomy.content_switcher_separator', 'anatomy.content_switcher_selected_mark', 'anatomy.overflow_menu_connector', 'anatomy.dialog_scroll_fade']) {
       for (const value of contract.tokens[name].values) {
         assert.equal(Themer.validateContract({ tokens: { [name]: value } }, {}).success, true, name + ' ' + value);
       }
@@ -1818,7 +1837,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 725);
+    assert.equal(gridNames.length, 947);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
@@ -1999,11 +2018,20 @@ describe('contract v7 - the remaining atom families\' cells', () => {
     assert.equal(engine.buildTheme(template, [], 'native').tokens['motion.loading_rotation'], 690);
   });
 
-  it('should answer the four new anatomy enums with their value lists', () => {
+  it('should answer the new anatomy enums with their value lists', () => {
     assert.deepEqual(contract.tokens['anatomy.loading_motion'].values, ['spin', 'arc']);
     assert.deepEqual(contract.tokens['anatomy.tag_close'].values, ['circle', 'inset']);
     assert.deepEqual(contract.tokens['anatomy.tag_selected_mark'].values, ['shown', 'hidden']);
     assert.deepEqual(contract.tokens['anatomy.tag_interactive_outline'].values, ['border', 'inset']);
+    assert.deepEqual(contract.tokens['anatomy.toggle_widget'].values, ['drawn', 'system']);
+    assert.deepEqual(contract.tokens['anatomy.date_picker_widget'].values, ['drawn', 'system']);
+    assert.deepEqual(contract.tokens['anatomy.time_picker_widget'].values, ['drawn', 'system']);
+    assert.deepEqual(contract.tokens['anatomy.surface_material'].values, ['solid', 'glass']);
+    assert.deepEqual(contract.tokens['anatomy.tab_overflow'].values, ['buttons', 'scroll']);
+    assert.deepEqual(contract.tokens['anatomy.content_switcher_separator'].values, ['short', 'full']);
+    assert.deepEqual(contract.tokens['anatomy.content_switcher_selected_mark'].values, ['hidden', 'shown']);
+    assert.deepEqual(contract.tokens['anatomy.overflow_menu_connector'].values, ['shown', 'hidden']);
+    assert.deepEqual(contract.tokens['anatomy.dialog_scroll_fade'].values, ['shown', 'hidden']);
   });
 
   it('should carry the save icon token', () => {

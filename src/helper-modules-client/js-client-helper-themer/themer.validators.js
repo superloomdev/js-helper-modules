@@ -37,6 +37,22 @@ export default function loader (shared_libs, errors, color) {
 // Shared dependency injected by loader
 // Error catalog injected by loader (never self-required)
 // Color part injected by loader for ramp color parsing
+
+// The variant keys a template may carry (v9): a form class or a platform
+const VARIANT_FORMS = Object.freeze(['compact', 'medium', 'expanded']);
+const VARIANT_PLATFORMS = Object.freeze(['web', 'ios', 'android', 'macos', 'windows']);
+const VARIANT_NAMES = Object.freeze(
+  VARIANT_FORMS.map(function (f) {
+    return 'form.' + f;
+  }).concat(VARIANT_PLATFORMS.map(function (p) {
+    return 'platform.' + p;
+  }))
+);
+// The variant selection keys an options bundle may carry
+const VARIANT_SELECTION_KEYS = Object.freeze({ form: VARIANT_FORMS, platform: VARIANT_PLATFORMS });
+// The adaptive modes the options bundle accepts
+const ADAPTIVE_MODES = Object.freeze(['auto', 'fixed']);
+
 const createInterface = function (Lib, ERRORS, Color) {
 
   // Findings accumulator. Null means throwing mode, which is what resolution
@@ -232,6 +248,10 @@ const createInterface = function (Lib, ERRORS, Color) {
         Validators.assertPositiveNumber(template.scales.base_font_size, 'template.scales.base_font_size');
       }
 
+      // Variants (v9): named token-pin bundles the variant option selects.
+      // Entry values are checked where every token pin is, during resolution
+      _Validators.checkVariants(template.variants);
+
     },
 
 
@@ -363,9 +383,9 @@ const createInterface = function (Lib, ERRORS, Color) {
         _Validators.fail('options', ERRORS.MUST_BE_PLAIN_OBJECT);
       }
 
-      // Every option key is one of three; anything else is a caller bug and fails by name
+      // Every option key is one of five; anything else is a caller bug and fails by name
       for (const key of Object.keys(options)) {
-        if (key !== 'contrast' && key !== 'min_contrast_ratio' && key !== 'motion_factor') {
+        if (key !== 'contrast' && key !== 'min_contrast_ratio' && key !== 'motion_factor' && key !== 'variant' && key !== 'adaptive') {
           _Validators.fail('options.' + key, ERRORS.MUST_BE_KNOWN_OPTION);
         }
       }
@@ -383,6 +403,25 @@ const createInterface = function (Lib, ERRORS, Color) {
       // Contrast mode must be correct or report when present
       if (options.contrast !== undefined && options.contrast !== 'correct' && options.contrast !== 'report') {
         _Validators.fail('options.contrast', ERRORS.MUST_BE_KNOWN_CONTRAST_MODE);
+      }
+
+      // The variant selection (v9): a form and a platform, each naming a
+      // variant the contract allows
+      if (!Lib.Utils.isNullOrUndefined(options.variant)) {
+        if (!Lib.Utils.isObject(options.variant) || Array.isArray(options.variant)) {
+          _Validators.fail('options.variant', ERRORS.MUST_BE_PLAIN_OBJECT);
+        }
+        for (const key of Object.keys(options.variant)) {
+          const allowed = VARIANT_SELECTION_KEYS[key];
+          if (allowed === undefined || !Lib.Utils.inArray(allowed, options.variant[key])) {
+            _Validators.fail('options.variant.' + key, ERRORS.MUST_BE_KNOWN_VARIANT_SELECTION);
+          }
+        }
+      }
+
+      // The adaptive mode (v9): auto applies the selection, fixed ignores it
+      if (!Lib.Utils.isNullOrUndefined(options.adaptive) && !Lib.Utils.inArray(ADAPTIVE_MODES, options.adaptive)) {
+        _Validators.fail('options.adaptive', ERRORS.MUST_BE_KNOWN_ADAPTIVE_MODE);
       }
     },
 
@@ -640,6 +679,58 @@ const createInterface = function (Lib, ERRORS, Color) {
 
       // Throwing mode is the default, because a pure engine has no operational failures
       throw new TypeError(message);
+
+    },
+
+
+    /********************************************************************
+    Check a template's variants section (v9). Every key names a form or
+    platform variant the contract allows; every entry is a plain object
+    carrying only a tokens object of pins, resolved through the same
+    rules as a layer's.
+    Each shape fault fails by name; a token pin's content fault is the
+    one resolution already checks.
+    Absent or undefined variants are legitimate: a template may ship none.
+
+    @param {*} variants - Value to check as the variants map
+
+    @return {void}
+    *********************************************************************/
+    checkVariants: function (variants) {
+
+      if (Lib.Utils.isNullOrUndefined(variants)) {
+        return;
+      }
+
+      if (!Lib.Utils.isObject(variants) || Array.isArray(variants)) {
+        _Validators.fail('template.variants', ERRORS.MUST_BE_PLAIN_OBJECT);
+      }
+
+      const keys = Object.keys(variants);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const path = 'template.variants.' + key;
+
+        if (!Lib.Utils.inArray(VARIANT_NAMES, key)) {
+          _Validators.fail(path, ERRORS.MUST_BE_KNOWN_VARIANT);
+        }
+
+        const entry = variants[key];
+        if (!Lib.Utils.isObject(entry) || Array.isArray(entry)) {
+          _Validators.fail(path, ERRORS.MUST_BE_PLAIN_OBJECT);
+        }
+
+        const fields = Object.keys(entry);
+        for (let j = 0; j < fields.length; j++) {
+          if (fields[j] !== 'tokens') {
+            _Validators.fail(path + '.' + fields[j], ERRORS.MUST_BE_VARIANT_TOKENS_ONLY);
+          }
+        }
+
+        if (!Lib.Utils.isObject(entry.tokens) || Array.isArray(entry.tokens)) {
+          _Validators.fail(path + '.tokens', ERRORS.MUST_BE_PLAIN_OBJECT);
+        }
+      }
 
     },
 

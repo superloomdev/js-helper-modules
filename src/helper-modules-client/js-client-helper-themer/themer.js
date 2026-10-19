@@ -131,8 +131,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
     *********************************************************************/
     buildTheme: function (template, layers, platform, options) {
 
-      // Split options into resolve-side bundle
+      // The variant selection (v9) becomes real layers once, so resolution
+      // and the leveled readings see the identical cascade
       Validators.validateOptions(options);
+      const effective = _Themer.effectiveLayers(Lib, template, layers, options);
+
+      // Split options into resolve-side bundle; the adaptive keys were
+      // consumed by the cascade computation above
       const resolveOpts = options ? {
         contrast: options.contrast,
         min_contrast_ratio: options.min_contrast_ratio,
@@ -140,7 +145,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       } : undefined;
 
       // Resolve first, so the emitted result and the reports share one derivation
-      const resolved = Themer.resolve(template, layers, resolveOpts);
+      const resolved = Themer.resolve(template, effective, resolveOpts);
 
       // Project the resolved tokens onto the requested platform
       const emitted = Themer.emit(resolved, template, platform);
@@ -148,7 +153,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       // The leveled readings derive from the same resolution, so their
       // losses append to a copy rather than the (possibly cached) list
       const level_lossy = [];
-      const levels = _Themer.buildLevels(Lib, Parts, CONFIG, template, layers, resolved, platform, level_lossy);
+      const levels = _Themer.buildLevels(Lib, Parts, CONFIG, template, effective, resolved, platform, level_lossy);
 
       // Carry the contrast reports through, since they belong to the derivation
       return {
@@ -184,8 +189,13 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       // time rather than silently passing through unprojected
       Validators.validateGroups(template.meta, Parts.Emit.groups());
 
+      // The adaptive selection (v9) becomes real layers before anything
+      // reads the cascade; the resolve part never sees the option keys
+      const effective = _Themer.effectiveLayers(Lib, template, layers, options);
+      const runOpts = _Themer.resolveOptions(Lib, options);
+
       // Serve a cached derivation when this instance has produced it already
-      const key = _Themer.resolveKey(state, template, layers, options);
+      const key = _Themer.resolveKey(state, template, effective, runOpts);
       const cached = _Themer.getCache(state, key);
 
       // Cache hit: return the earlier derivation untouched
@@ -194,7 +204,7 @@ const createInterface = function (Lib, CONFIG, ERRORS, Validators, Parts, state)
       }
 
       // Derive, then store under the key so an equal call hits next time
-      const result = Parts.Resolve.run(template, layers, options);
+      const result = Parts.Resolve.run(template, effective, runOpts);
       _Themer.writeCache(state, CONFIG, key, result);
 
       return result;
@@ -532,6 +542,86 @@ const _Themer = {
       Emit: createEmit(emit_libs, CONFIG, ERRORS),
       Resolve: createResolve(resolve_libs, CONFIG, ERRORS)
     };
+
+  },
+
+
+  // ~~~~~~~~~~~~~~~~~~~~ The Adaptive Cascade ~~~~~~~~~~~~~~~~~~~~
+  // Turning the caller's variant selection into real layers (v9).
+
+  /********************************************************************
+  Prepend the selected template variants to the caller's layer stack.
+
+  A variant entry is a plain `{ tokens: {...} }` pin bundle the template
+  declares under `variants`; the `variant` option selects by form and
+  platform, and `adaptive: 'fixed'` (or no selection) leaves the stack
+  untouched. The form variant lands first, the platform variant second,
+  so a platform pin refines a form pin and a caller layer outranks both.
+
+  @param {Object} Lib - Shared dependency container
+  @param {Object} template - The template being resolved
+  @param {Object[]} layers - Ordered sparse overlays
+  @param {Object} [options] - Per-call overrides
+
+  @return {Object[]} - The layer stack resolution applies
+  *********************************************************************/
+  effectiveLayers: function (Lib, template, layers, options) {
+
+    // A fixed theme, or no selection, leaves the caller's cascade alone
+    if (Lib.Utils.isNullOrUndefined(options)
+        || options.adaptive === 'fixed'
+        || Lib.Utils.isNullOrUndefined(options.variant)
+        || Lib.Utils.isNullOrUndefined(template.variants)) {
+      return layers;
+    }
+
+    const variant = options.variant;
+    const variants = template.variants;
+    const out = [];
+
+    // Form first, platform second; a variant the template does not declare
+    // drops out rather than failing - the caller's own layers still win
+    if (!Lib.Utils.isNullOrUndefined(variant.form)) {
+      const form = variants['form.' + variant.form];
+      if (!Lib.Utils.isNullOrUndefined(form)) {
+        out.push(form);
+      }
+    }
+    if (!Lib.Utils.isNullOrUndefined(variant.platform)) {
+      const platform = variants['platform.' + variant.platform];
+      if (!Lib.Utils.isNullOrUndefined(platform)) {
+        out.push(platform);
+      }
+    }
+
+    return out.concat(layers);
+
+  },
+
+
+  /********************************************************************
+  The options the resolve part receives: the call's options minus the
+  adaptive keys, which the cascade above already consumed.
+
+  @param {Object} Lib - Shared dependency container
+  @param {Object} [options] - Per-call overrides
+
+  @return {Object|undefined} - Options without variant or adaptive
+  *********************************************************************/
+  resolveOptions: function (Lib, options) {
+
+    if (Lib.Utils.isNullOrUndefined(options)) {
+      return options;
+    }
+    if (Lib.Utils.isNullOrUndefined(options.variant) && Lib.Utils.isNullOrUndefined(options.adaptive)) {
+      return options;
+    }
+
+    const out = Object.assign({}, options);
+    delete out.variant;
+    delete out.adaptive;
+
+    return out;
 
   },
 

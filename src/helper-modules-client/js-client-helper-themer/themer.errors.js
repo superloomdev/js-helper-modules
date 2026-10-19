@@ -47,7 +47,15 @@ export default Object.freeze({
 
   MUST_BE_KNOWN_CONTRAST_MODE: 'must be one of: correct, report',
 
-  MUST_BE_KNOWN_OPTION: 'must be one of: contrast, min_contrast_ratio, motion_factor',
+  MUST_BE_KNOWN_OPTION: 'must be one of: contrast, min_contrast_ratio, motion_factor, variant, adaptive',
+
+  MUST_BE_KNOWN_VARIANT: 'must be one of: form.compact, form.medium, form.expanded, platform.web, platform.ios, platform.android, platform.macos, platform.windows',
+
+  MUST_BE_VARIANT_TOKENS_ONLY: 'must carry only a tokens object',
+
+  MUST_BE_KNOWN_VARIANT_SELECTION: 'must be a form of: compact, medium, expanded or a platform of: web, ios, android, macos, windows',
+
+  MUST_BE_KNOWN_ADAPTIVE_MODE: 'must be one of: auto, fixed',
 
 
   // ~~~~~~~~~~~~~~~~~~~~ Numeric Range ~~~~~~~~~~~~~~~~~~~~

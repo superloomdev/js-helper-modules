@@ -120,6 +120,31 @@
 // removes `anatomy.slider_handle`, the `quick_action` button kind with its
 // focus gap cell, and the `view_*` and `landing_*` cells (the roster cut
 // excluded every row that read them).
+//
+// Version 9 extends the role grid with the milestone-5 census families
+// (the tabs' dismissable, contained-tall, overflow and vertical members
+// and the tabs skeleton, the content switcher family with its
+// low-contrast members, the menu's width ceiling, viewport margin,
+// submenu offsets, danger focus inset, selected item and the overflow
+// menu's own cells, the dialog's size ratios, scroll fade and action
+// shares, the notification's inline width, layout insets, kind outlines
+// and warning glyph, the accordion and breadcrumb families, the
+// typographic text list, the contained list, the copy button and the
+// skip link), the folded follow-up cells (the selected list item's
+// pressed fill, the extended action button's end padding, the popover's
+// width ceiling and the combo box's clear, input and invalid-icon
+// geometry), the adaptive cells (`control.target_min`,
+// `control.text_scale_max` and `type.selection_label`) and nine anatomy
+// enums: the system-widget choices (`toggle_widget`,
+// `date_picker_widget`, `time_picker_widget`, each `drawn` or `system`;
+// `surface_material`, `solid` or `glass`) and the census's five
+// (`tab_overflow`, `content_switcher_separator`,
+// `content_switcher_selected_mark`, `overflow_menu_connector`,
+// `dialog_scroll_fade`). The ratio and line-count controls
+// (`*_ratio`, `control.text_scale_max`,
+// `control.tab_vertical_label_lines`) are unitless numbers: they emit
+// raw, with no px projection. `stacking.skip_link` joins the named
+// surface order.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -336,6 +361,52 @@ const GRID = Object.freeze({
       'fab_secondary_container', 'fab_secondary_icon', 'fab_tertiary_container', 'fab_tertiary_icon',
       'fab_surface_layer_hover', 'fab_surface_layer_active', 'fab_primary_layer_hover', 'fab_primary_layer_active',
       'fab_secondary_layer_hover', 'fab_secondary_layer_active', 'fab_tertiary_layer_hover', 'fab_tertiary_layer_active'
+    ],
+    [
+      // v9: the tabs' dismissable, overflow and vertical members (milestone-5 census)
+      'tab_close_icon', 'tab_close_icon_selected', 'tab_close_icon_disabled',
+      'tab_overflow_button', 'tab_overflow_button_hover', 'tab_overflow_button_active',
+      'tab_contained_overflow_button', 'tab_contained_overflow_button_hover', 'tab_contained_overflow_button_active',
+      'tab_overflow_icon',
+      'tab_panel_contained_container',
+      'tab_vertical_container', 'tab_vertical_item', 'tab_vertical_item_hover',
+      'tab_vertical_track', 'tab_vertical_track_hover', 'tab_vertical_divider',
+      // v9: the content switcher family
+      'content_switcher_outline', 'content_switcher_outline_disabled',
+      'content_switcher_label', 'content_switcher_label_hover', 'content_switcher_label_selected', 'content_switcher_label_disabled',
+      'content_switcher_container_hover', 'content_switcher_container_selected', 'content_switcher_container_selected_disabled',
+      'content_switcher_separator', 'content_switcher_separator_disabled',
+      'content_switcher_focus', 'content_switcher_focus_inset',
+      'content_switcher_icon', 'content_switcher_icon_hover', 'content_switcher_icon_only', 'content_switcher_icon_selected', 'content_switcher_icon_disabled',
+      'content_switcher_low_contrast_container', 'content_switcher_low_contrast_container_hover', 'content_switcher_low_contrast_container_selected',
+      'content_switcher_low_contrast_outline', 'content_switcher_low_contrast_label_selected',
+      'content_switcher_low_contrast_icon', 'content_switcher_low_contrast_icon_selected',
+      // v9: the menu family's remaining members
+      'menu_border', 'menu_container_background',
+      'menu_item_danger_focus_inset', 'menu_item_container_selected', 'menu_item_label_selected',
+      'overflow_menu_trigger_hover', 'overflow_menu_trigger_open', 'overflow_menu_icon',
+      // v9: the notification family's inline members and kind outlines
+      'notification_action_container_hover',
+      'notification_outline_error', 'notification_outline_success', 'notification_outline_info', 'notification_outline_warning',
+      'notification_warning_icon_inner',
+      // v9: the accordion family
+      'accordion_divider', 'accordion_divider_hover',
+      'accordion_heading_label', 'accordion_heading_label_disabled', 'accordion_heading_container_hover',
+      'accordion_focus', 'accordion_icon', 'accordion_icon_disabled',
+      // v9: the breadcrumb family
+      'breadcrumb_separator', 'breadcrumb_current',
+      'breadcrumb_overflow_icon', 'breadcrumb_overflow_icon_hover', 'breadcrumb_overflow_icon_active', 'breadcrumb_overflow_caret',
+      // v9: the text list, contained list, copy button and skip link members
+      'text_list_label',
+      'contained_list_header_container', 'contained_list_header_label', 'contained_list_divider',
+      'contained_list_header_container_disclosed', 'contained_list_header_label_disclosed',
+      'contained_list_search_container', 'contained_list_search_border',
+      'contained_list_item_label', 'contained_list_item_label_disabled',
+      'contained_list_item_container_hover', 'contained_list_item_container_active',
+      'copy_button_container', 'copy_button_container_hover', 'copy_button_container_active',
+      'skip_link_container', 'skip_link_label', 'skip_link_border',
+      // v9 folded follow-up: the selected list item's pressed fill
+      'list_item_container_selected_active'
     ]
   )),
   control: Object.freeze([
@@ -460,7 +531,64 @@ const GRID = Object.freeze({
     'fab_size', 'fab_size_small', 'fab_size_large', 'fab_icon_size', 'fab_icon_size_large',
     'fab_radius', 'fab_radius_small', 'fab_radius_large', 'fab_extended_padding', 'fab_label_gap',
     // v8: the tag set member
-    'tag_set_gap'
+    'tag_set_gap',
+    // v9: the adaptive cells - the touch target floor and the text scale
+    // ceiling the form and platform variants move
+    'target_min', 'text_scale_max',
+    // v9: the tabs' members (milestone-5 census)
+    'tab_icon_size', 'tab_icon_gap', 'tab_close_size', 'tab_close_icon_size',
+    'tab_dismiss_padding_end', 'tab_contained_dismiss_padding_end', 'tab_contained_tall_height',
+    'tab_overflow_button_width', 'tab_contained_overflow_button_width', 'tab_overflow_fade_width',
+    'tab_panel_padding',
+    'tab_vertical_height', 'tab_vertical_indicator_width', 'tab_vertical_fade_height',
+    'tab_vertical_label_lines', 'tab_vertical_list_ratio',
+    'tab_skeleton_width', 'tab_skeleton_bar_height',
+    // v9: the content switcher family
+    'content_switcher_radius', 'content_switcher_outline_width',
+    'content_switcher_padding_block', 'content_switcher_padding_inline', 'content_switcher_padding_inline_large',
+    'content_switcher_separator_height', 'content_switcher_focus_width',
+    'content_switcher_icon_size', 'content_switcher_icon_size_large', 'content_switcher_icon_gap',
+    // v9: the menu family's remaining members
+    'menu_max_width', 'menu_viewport_margin',
+    'menu_submenu_offset_end', 'menu_submenu_offset_start', 'menu_submenu_offset_block',
+    'menu_item_danger_focus_inset_width', 'menu_divider_margin_block', 'menu_button_min_width',
+    'overflow_menu_width', 'overflow_menu_connector_size', 'overflow_menu_connector_size_side', 'overflow_menu_option_max_width',
+    // v9: the dialog family's size ratios, enter offset, scroll fade and
+    // action shares (the ratios are unitless - GRID_CELL_DEFS)
+    'dialog_width_ratio', 'dialog_width_ratio_xs', 'dialog_width_ratio_sm', 'dialog_width_ratio_lg',
+    'dialog_height_ratio', 'dialog_height_ratio_xs', 'dialog_height_ratio_sm', 'dialog_height_ratio_lg',
+    'dialog_enter_offset',
+    'dialog_scroll_fade_height', 'dialog_scroll_fade_start', 'dialog_scroll_fade_min_height', 'dialog_scroll_end_space',
+    'dialog_text_gutter_ratio', 'dialog_action_ratio', 'dialog_action_ratio_three',
+    'dialog_action_padding_top', 'dialog_action_padding_bottom',
+    // v9: the notification family's inline members
+    'notification_inline_width', 'notification_min_height',
+    'notification_details_inset', 'notification_details_inset_end',
+    'notification_icon_top', 'notification_toast_icon_top', 'notification_icon_gap',
+    'notification_text_padding_block', 'notification_toast_text_padding_bottom', 'notification_title_gap',
+    'notification_action_height', 'notification_action_inset', 'notification_toast_action_inset', 'notification_action_end_space',
+    'notification_outline_width',
+    // v9: the accordion family
+    'accordion_divider_width', 'accordion_flush_inset', 'accordion_heading_padding_inline',
+    'accordion_focus_width', 'accordion_icon_size', 'accordion_icon_top', 'accordion_title_gap',
+    'accordion_content_padding_top', 'accordion_content_padding_bottom', 'accordion_content_padding_end', 'accordion_content_end_ratio',
+    // v9: the breadcrumb family
+    'breadcrumb_gap', 'breadcrumb_gap_small', 'breadcrumb_link_min_width_small',
+    'breadcrumb_overflow_width', 'breadcrumb_overflow_height', 'breadcrumb_overflow_height_small',
+    'breadcrumb_overflow_icon_offset', 'breadcrumb_overflow_underline_width', 'breadcrumb_overflow_caret_size',
+    'breadcrumb_skeleton_width', 'breadcrumb_skeleton_height',
+    // v9: the text list and contained list families
+    'text_list_indent', 'text_list_nested_indent', 'text_list_nested_item_padding',
+    'text_list_marker_offset', 'text_list_nested_marker_offset', 'text_list_ordinal_offset',
+    'contained_list_padding_inline', 'contained_list_gap', 'contained_list_header_height_disclosed',
+    'contained_list_action_space', 'contained_list_icon_size', 'contained_list_icon_gap', 'contained_list_icon_top',
+    // v9: the skip link member
+    'skip_link_height', 'skip_link_padding_inline', 'skip_link_border_width',
+    // v9 folded follow-ups: the extended action button's end padding, the
+    // popover's width ceiling, and the combo box member's geometry
+    'fab_extended_padding_end', 'popover_max_width',
+    'combo_box_clear_size', 'combo_box_clear_inset_end',
+    'combo_box_input_padding_end', 'combo_box_input_padding_end_invalid', 'combo_box_invalid_icon_inset_end'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
@@ -473,7 +601,17 @@ const GRID = Object.freeze({
     'progress_step_label', 'progress_step_secondary_label',
     // v8: the time picker value, the slider's range label, the select's
     // group label, the extended action button's label
-    'time_picker_value', 'slider_range_label', 'select_group_label', 'fab_label'
+    'time_picker_value', 'slider_range_label', 'select_group_label', 'fab_label',
+    // v9: the selection row's label (adaptive) and the milestone-5 census
+    // families' text
+    'selection_label',
+    'tab_secondary_label',
+    'content_switcher_label', 'content_switcher_label_selected_low_contrast',
+    'accordion_title',
+    'breadcrumb', 'breadcrumb_small',
+    'text_list', 'text_list_expressive',
+    'contained_list_header', 'contained_list_header_disclosed', 'contained_list_item',
+    'skip_link'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
@@ -498,7 +636,24 @@ const GRID = Object.freeze({
 // A grid cell whose value type differs from its group's default emit
 // declares its token definition here
 const GRID_CELL_DEFS = Object.freeze({
-  'motion.loading_arc_easing': Object.freeze({ emit: 'easing', values: ['array4'] })
+  'motion.loading_arc_easing': Object.freeze({ emit: 'easing', values: ['array4'] }),
+  // v9: the unitless controls - a scale ceiling, a line count, and the
+  // eleven ratios; numbers with no px projection
+  'control.text_scale_max': Object.freeze({ emit: 'raw' }),
+  'control.tab_vertical_label_lines': Object.freeze({ emit: 'raw' }),
+  'control.tab_vertical_list_ratio': Object.freeze({ emit: 'raw' }),
+  'control.dialog_width_ratio': Object.freeze({ emit: 'raw' }),
+  'control.dialog_width_ratio_xs': Object.freeze({ emit: 'raw' }),
+  'control.dialog_width_ratio_sm': Object.freeze({ emit: 'raw' }),
+  'control.dialog_width_ratio_lg': Object.freeze({ emit: 'raw' }),
+  'control.dialog_height_ratio': Object.freeze({ emit: 'raw' }),
+  'control.dialog_height_ratio_xs': Object.freeze({ emit: 'raw' }),
+  'control.dialog_height_ratio_sm': Object.freeze({ emit: 'raw' }),
+  'control.dialog_height_ratio_lg': Object.freeze({ emit: 'raw' }),
+  'control.dialog_text_gutter_ratio': Object.freeze({ emit: 'raw' }),
+  'control.dialog_action_ratio': Object.freeze({ emit: 'raw' }),
+  'control.dialog_action_ratio_three': Object.freeze({ emit: 'raw' }),
+  'control.accordion_content_end_ratio': Object.freeze({ emit: 'raw' })
 });
 
 
@@ -986,7 +1141,7 @@ function buildContract () {
     'feedback.focus_trigger': Object.freeze({ group: 'feedback', values: ['any', 'keyboard'] }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (20 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ anatomy.* (31 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'anatomy.label': Object.freeze({ group: 'anatomy', values: ['above', 'floating'] }),
     'anatomy.switch_handle': Object.freeze({ group: 'anatomy', values: ['fixed', 'grows'] }),
@@ -1019,6 +1174,18 @@ function buildContract () {
     // inside the thumb's edge or an outline ring outside it
     'anatomy.slider_focus': Object.freeze({ group: 'anatomy', values: ['inset', 'outline'] }),
     'anatomy.slider_disabled_paint': Object.freeze({ group: 'anatomy', values: ['independent', 'grouped'] }),
+    // v9: the system-widget choices (D32) - the theme draws the widget or
+    // the platform's own control takes the seat
+    'anatomy.toggle_widget': Object.freeze({ group: 'anatomy', values: ['drawn', 'system'] }),
+    'anatomy.date_picker_widget': Object.freeze({ group: 'anatomy', values: ['drawn', 'system'] }),
+    'anatomy.time_picker_widget': Object.freeze({ group: 'anatomy', values: ['drawn', 'system'] }),
+    'anatomy.surface_material': Object.freeze({ group: 'anatomy', values: ['solid', 'glass'] }),
+    // v9: the milestone-5 census's five
+    'anatomy.tab_overflow': Object.freeze({ group: 'anatomy', values: ['buttons', 'scroll'] }),
+    'anatomy.content_switcher_separator': Object.freeze({ group: 'anatomy', values: ['short', 'full'] }),
+    'anatomy.content_switcher_selected_mark': Object.freeze({ group: 'anatomy', values: ['hidden', 'shown'] }),
+    'anatomy.overflow_menu_connector': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
+    'anatomy.dialog_scroll_fade': Object.freeze({ group: 'anatomy', values: ['shown', 'hidden'] }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ shadow.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -1075,13 +1242,15 @@ function buildContract () {
     'tint.level_05': Object.freeze({ group: 'tint' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ stacking.* (5 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ stacking.* (6 tokens) ~~~~~~~~~~~~~~~~~~~
 
     'stacking.dropdown': Object.freeze({ group: 'stacking' }),
     'stacking.modal': Object.freeze({ group: 'stacking' }),
     'stacking.header': Object.freeze({ group: 'stacking' }),
     'stacking.overlay': Object.freeze({ group: 'stacking' }),
     'stacking.floating': Object.freeze({ group: 'stacking' }),
+    // v9: the skip link's focused layer
+    'stacking.skip_link': Object.freeze({ group: 'stacking' }),
 
 
     // ~~~~~~~~~~~~~~~~~~~~ control.* (11 tokens) ~~~~~~~~~~~~~~~~~~~
@@ -1211,7 +1380,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 8,
+    version: 9,
     grid: GRID,
     leveled: LEVELED_SETS,
     leveled_index: LEVELED_INDEX,
