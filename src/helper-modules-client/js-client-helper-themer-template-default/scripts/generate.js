@@ -84,8 +84,75 @@ const ANATOMY = {
   'anatomy.loading_motion': 'spin',
   'anatomy.tag_close': 'circle',
   'anatomy.tag_selected_mark': 'hidden',
-  'anatomy.tag_interactive_outline': 'border'
+  'anatomy.tag_interactive_outline': 'border',
+  // v9 (D32): the theme draws every widget and paints a solid surface
+  'anatomy.toggle_widget': 'drawn',
+  'anatomy.date_picker_widget': 'drawn',
+  'anatomy.time_picker_widget': 'drawn',
+  'anatomy.surface_material': 'solid',
+  // v9: the primary reference's anatomy, as the default draws it - button
+  // overflow, a short separator, no selected mark, the connector and the
+  // scroll fade drawn
+  'anatomy.tab_overflow': 'buttons',
+  'anatomy.content_switcher_separator': 'short',
+  'anatomy.content_switcher_selected_mark': 'hidden',
+  'anatomy.overflow_menu_connector': 'shown',
+  'anatomy.dialog_scroll_fade': 'shown'
 };
+
+// --- Variants (v9): the two form classes the compact and medium pins draw ---
+// The pins are the Carbon Mobile touch set and the census's per-form cells
+// (v9-adaptive-contract.md section 4), taken as Superloom decisions: the
+// same numbers as Carbon's, recorded `superloom_decision`. `menu_item_height`
+// is not pinned: the base already reads `list_item_height` ->
+// `option_height`, and the option_height pin carries it.
+const VARIANT_TOUCH_PINS = {
+  'control.target_min': 48,
+  'control.field_height': 48,
+  'control.checkbox_size': 20,
+  'control.radio_size': 20,
+  'control.tag_height': 32,
+  'control.option_height': 48,
+  'control.checkbox_group_gap': 28,
+  'control.radio_group_gap_vertical': 28,
+  'type.selection_label': '{type.body01}'
+};
+const VARIANTS = Object.freeze({
+  'form.compact': Object.freeze({
+    tokens: Object.assign({}, VARIANT_TOUCH_PINS, {
+      'control.dialog_width_ratio': 1,
+      'control.dialog_width_ratio_xs': 1,
+      'control.dialog_width_ratio_sm': 1,
+      'control.dialog_width_ratio_lg': 1,
+      'control.dialog_height_ratio': 1,
+      'control.dialog_height_ratio_xs': 1,
+      'control.dialog_height_ratio_sm': 1,
+      'control.dialog_height_ratio_lg': 1,
+      'control.notification_inline_width': 288,
+      'control.tab_vertical_list_ratio': 0.5,
+      'control.accordion_content_end_ratio': 0
+    })
+  }),
+  'form.medium': Object.freeze({
+    tokens: Object.assign({}, VARIANT_TOUCH_PINS, {
+      'control.dialog_width_ratio': 0.84,
+      'control.dialog_width_ratio_xs': 0.48,
+      'control.dialog_width_ratio_sm': 0.6,
+      'control.dialog_width_ratio_lg': 0.96,
+      'control.dialog_height_ratio': 0.9,
+      'control.dialog_height_ratio_xs': 0.48,
+      'control.dialog_height_ratio_sm': 0.72,
+      'control.dialog_height_ratio_lg': 0.96,
+      'control.notification_inline_width': 608
+    })
+  })
+});
+const PROVENANCE_VARIANTS = {
+  'form.compact': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, `tabs/_tabs.scss:83-93,737-746`, `accordion/_accordion.scss:202-217` (v9-adaptive-contract.md section 4)',
+  'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51` (v9-adaptive-contract.md section 4)',
+  not_applied: 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
+};
+PROVENANCE.variants = PROVENANCE_VARIANTS;
 
 // --- Neutral ramp ---------------------------------------------------------
 const RAMP = [
@@ -753,7 +820,9 @@ function buildTokens (polarity) {
       const stackingMap = {
         'stacking.dropdown': 9100, 'stacking.modal': 9000,
         'stacking.header': 8000, 'stacking.overlay': 6000,
-        'stacking.floating': 6000
+        'stacking.floating': 6000,
+        // v9: the skip link sits above everything while focused
+        'stacking.skip_link': 9999
       };
       tokens[name] = stackingMap[name];
       continue;
@@ -785,6 +854,7 @@ function buildScheme (polarity) {
     palette: {},
     tokens: buildTokens(polarity),
     meta: meta,
+    variants: VARIANTS,
     provenance: PROVENANCE
   };
 }

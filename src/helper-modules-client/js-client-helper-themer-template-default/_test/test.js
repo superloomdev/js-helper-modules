@@ -65,8 +65,8 @@ describe('default template - profile identity', () => {
     assert.equal(profile.id, 'superloom-default');
   });
 
-  it('should export contract_version 8', () => {
-    assert.equal(profile.contract_version, 8);
+  it('should export contract_version 9', () => {
+    assert.equal(profile.contract_version, 9);
   });
 
   it('should have light and dark schemes', () => {
@@ -290,7 +290,16 @@ describe('default template - anatomy enums (v4)', () => {
     'anatomy.tag_close': 'circle',
     'anatomy.tag_selected_mark': 'hidden',
     'anatomy.slider_focus': 'inset',
-    'anatomy.slider_disabled_paint': 'independent'
+    'anatomy.slider_disabled_paint': 'independent',
+    'anatomy.toggle_widget': 'drawn',
+    'anatomy.date_picker_widget': 'drawn',
+    'anatomy.time_picker_widget': 'drawn',
+    'anatomy.surface_material': 'solid',
+    'anatomy.tab_overflow': 'buttons',
+    'anatomy.content_switcher_separator': 'short',
+    'anatomy.content_switcher_selected_mark': 'hidden',
+    'anatomy.overflow_menu_connector': 'shown',
+    'anatomy.dialog_scroll_fade': 'shown'
   };
 
   for (const schemeName of ['light', 'dark']) {
@@ -373,15 +382,13 @@ describe('default template - icon literals (v4)', () => {
 
   it('should record icon provenance that matches the pinned package and the mapping snapshot', () => {
     for (const schemeName of ['light', 'dark']) {
-      assert.deepEqual(profile.schemes[schemeName].provenance, {
-        icons: {
-          package: '@carbon/icons',
-          version: iconPkg.version,
-          map_source: iconMap.source,
-          map_sha256: iconMap.source_sha256,
-          drawings: {
-            switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
-          }
+      assert.deepEqual(profile.schemes[schemeName].provenance.icons, {
+        package: '@carbon/icons',
+        version: iconPkg.version,
+        map_source: iconMap.source,
+        map_sha256: iconMap.source_sha256,
+        drawings: {
+          switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
         }
       });
     }
@@ -457,10 +464,10 @@ describe('default template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1239 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all ' + contractKeys.length + ' tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1239);
+        assert.equal(names.length, contractKeys.length);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -619,3 +626,187 @@ describe('default template - role grid (v5 amendment)', () => {
 
 });
 
+
+describe('default template - v9 adaptive cells', () => {
+
+  for (const schemeName of ['light', 'dark']) {
+
+    it('should answer the three adaptive cells in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      // WCAG 2.2 AA 2.5.8's smallest target on the web base (D26 `expanded`)
+      assert.equal(tokens['control.target_min'], 24);
+      assert.equal(tokens['control.text_scale_max'], 2);
+      assert.equal(tokens['type.selection_label'], '{type.body_compact_01}');
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens;
+      assert.equal(built['control.target_min'], 24);
+      assert.deepEqual(built['type.selection_label'], built['type.body_compact_01']);
+    });
+
+    it('should answer the stacked skip link and the v9 follow-up cells in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      assert.equal(tokens['stacking.skip_link'], 9999);
+      assert.equal(tokens['control.popover_max_width'], 368);
+      assert.equal(tokens['control.fab_extended_padding_end'], '{control.fab_extended_padding}');
+      assert.equal(tokens['color.list_item_container_selected_active'], '{color.list_item_container_active}');
+      assert.equal(tokens['control.combo_box_clear_size'], 24);
+      assert.equal(tokens['control.combo_box_input_padding_end_invalid'], 105);
+    });
+
+    it('should answer the v9 family cells in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      assert.equal(tokens['control.tab_overflow_button_width'], 40);
+      assert.equal(tokens['control.menu_max_width'], 288);
+      assert.equal(tokens['control.dialog_width_ratio'], 0.6);
+      assert.equal(tokens['control.notification_inline_width'], 736);
+      assert.equal(tokens['control.accordion_divider_width'], '{border.width_01}');
+      assert.equal(tokens['control.breadcrumb_skeleton_height'], '{spacing.spacing_05}');
+      assert.equal(tokens['type.breadcrumb'], '{type.body_compact_01}');
+      assert.equal(tokens['control.skip_link_height'], 48);
+      assert.equal(tokens['type.skip_link'], '{type.body_compact_01}');
+      // `_list.scss:58-73` parks the ordinal counter at -24px, not spacing_08
+      assert.equal(tokens['control.text_list_ordinal_offset'], 24);
+      assert.equal(Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens['control.text_list_ordinal_offset'], 24);
+    });
+
+  }
+
+});
+
+describe('default template - v9 variants', () => {
+
+  it('should declare the adaptive options and the two form variants', () => {
+    assert.deepEqual(profile.adaptive.options, ['auto', 'fixed', 'form.compact', 'form.medium']);
+    for (const schemeName of ['light', 'dark']) {
+      assert.deepEqual(Object.keys(profile.schemes[schemeName].variants), ['form.compact', 'form.medium']);
+    }
+  });
+
+  it('should carry the Carbon Mobile touch pins in each form variant', () => {
+    const PINS = {
+      'control.target_min': 48,
+      'control.field_height': 48,
+      'control.checkbox_size': 20,
+      'control.radio_size': 20,
+      'control.tag_height': 32,
+      'control.option_height': 48,
+      'control.checkbox_group_gap': 28,
+      'control.radio_group_gap_vertical': 28,
+      'type.selection_label': '{type.body01}'
+    };
+    for (const schemeName of ['light', 'dark']) {
+      for (const variantName of ['form.compact', 'form.medium']) {
+        const tokens = profile.schemes[schemeName].variants[variantName].tokens;
+        for (const [name, value] of Object.entries(PINS)) {
+          assert.deepEqual(tokens[name], value, schemeName + ' ' + variantName + ' ' + name);
+        }
+      }
+    }
+  });
+
+  it('should carry the census pins in each form variant', () => {
+    for (const schemeName of ['light', 'dark']) {
+      const compact = profile.schemes[schemeName].variants['form.compact'].tokens;
+      assert.equal(compact['control.dialog_width_ratio'], 1);
+      assert.equal(compact['control.dialog_height_ratio_lg'], 1);
+      assert.equal(compact['control.notification_inline_width'], 288);
+      assert.equal(compact['control.tab_vertical_list_ratio'], 0.5);
+      assert.equal(compact['control.accordion_content_end_ratio'], 0);
+      const medium = profile.schemes[schemeName].variants['form.medium'].tokens;
+      assert.equal(medium['control.dialog_width_ratio'], 0.84);
+      assert.equal(medium['control.dialog_height_ratio'], 0.9);
+      assert.equal(medium['control.notification_inline_width'], 608);
+      assert.equal(medium['control.tab_vertical_list_ratio'], undefined);
+      assert.equal(medium['control.accordion_content_end_ratio'], undefined);
+    }
+  });
+
+  it('should apply a variant after the base and before caller layers', () => {
+    const scheme = profile.schemes.light;
+    const base = Themer.buildTheme(scheme, [], 'native');
+    const compact = Themer.buildTheme(scheme, [], 'native', { variant: { form: 'compact' } });
+    assert.equal(compact.tokens['control.field_height'], 48);
+    assert.equal(compact.tokens['control.notification_inline_width'], 288);
+    const branded = Themer.buildTheme(scheme,
+      [{ name: 'brand', tokens: { 'control.field_height': 44 } }], 'native',
+      { variant: { form: 'compact' } });
+    assert.equal(branded.tokens['control.field_height'], 44);
+    assert.equal(base.tokens['control.field_height'], 40);
+  });
+
+  it('should apply nothing under adaptive fixed', () => {
+    const scheme = profile.schemes.light;
+    const fixed = Themer.buildTheme(scheme, [], 'native', { variant: { form: 'compact' }, adaptive: 'fixed' });
+    assert.equal(fixed.tokens['control.field_height'], 40);
+    assert.equal(fixed.tokens['control.notification_inline_width'], 736);
+  });
+
+  it('should record the variant provenance', () => {
+    const provenance = profile.schemes.light.provenance.variants;
+    assert.match(provenance['form.compact'], /carbon/i);
+    assert.match(provenance.not_applied, /radio_dot_size/);
+  });
+
+});
+
+describe('default template - v9 sample brands', () => {
+
+  it('should export the rounded and acme brands', () => {
+    assert.deepEqual(Object.keys(profile.brands), ['rounded', 'acme']);
+    assert.equal(profile.brands.rounded.name, 'rounded');
+    assert.equal(profile.brands.acme.name, 'acme');
+  });
+
+  it('should hold valid layers whose tokens are all in the contract', () => {
+    for (const brand of Object.values(profile.brands)) {
+      for (const polarity of ['light', 'dark']) {
+        for (const name of Object.keys(brand[polarity].tokens)) {
+          assert.ok(contract.tokens[name], 'brand token not in contract: ' + name);
+        }
+      }
+    }
+  });
+
+  it('should build every scheme under its brand with zero violations', () => {
+    for (const [schemeName, scheme] of Object.entries(profile.schemes)) {
+      for (const brand of Object.values(profile.brands)) {
+        const theme = Themer.buildTheme(scheme, [brand[scheme.polarity]], 'native', { contrast: 'report' });
+        assert.equal(theme.violations.length, 0, schemeName + ' ' + brand.name + ': ' + JSON.stringify(theme.violations.slice(0, 3)));
+      }
+    }
+  });
+
+  it('should let the rounded brand round the corners and switch the field', () => {
+    const theme = Themer.buildTheme(profile.schemes.light, [profile.brands.rounded.light], 'native');
+    assert.equal(theme.tokens['feedback.field'], 'outline');
+    assert.equal(theme.tokens['shape.radius_00'], 8);
+  });
+
+});
+
+describe('default template - the variant option round-trips', () => {
+
+  const FORMS = [undefined, 'compact', 'medium', 'expanded'];
+  const PLATFORMS = [undefined, 'web', 'ios', 'android', 'macos', 'windows'];
+
+  for (const [schemeName, scheme] of Object.entries(profile.schemes)) {
+    for (const form of FORMS) {
+      for (const platform of PLATFORMS) {
+        it('should build ' + schemeName + ' under ' + (form || '-') + '/' + (platform || '-') + ' with zero violations', () => {
+          const variant = {};
+          if (form !== undefined) {
+            variant.form = form;
+          }
+          if (platform !== undefined) {
+            variant.platform = platform;
+          }
+          const theme = Themer.buildTheme(scheme, [], 'native', {
+            variant: Object.keys(variant).length ? variant : undefined,
+            contrast: 'report'
+          });
+          assert.equal(theme.violations.length, 0, schemeName + ': ' + JSON.stringify(theme.violations.slice(0, 4)));
+        });
+      }
+    }
+  }
+
+});
