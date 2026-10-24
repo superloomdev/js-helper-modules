@@ -13,6 +13,7 @@ import * as carbonThemes from '@carbon/themes';
 import * as carbonTag from '@carbon/themes/js/generated/component-tokens/tag.js';
 import * as carbonButton from '@carbon/themes/js/generated/component-tokens/button.js';
 import * as carbonNotification from '@carbon/themes/js/generated/component-tokens/notification.js';
+import * as carbonContentSwitcher from '@carbon/themes/js/generated/component-tokens/content-switcher.js';
 import * as cType from '@carbon/type';
 import * as carbonMotion from '@carbon/motion';
 import * as carbonLayout from '@carbon/layout';
@@ -102,8 +103,94 @@ const ANATOMY = {
   'anatomy.tag_selected_mark': 'hidden',
   // v7 batch 6 B3 amendment: the primary draws the interactive tag's
   // outline as a layout border
-  'anatomy.tag_interactive_outline': 'border'
+  'anatomy.tag_interactive_outline': 'border',
+  // v9 (D32): the primary reference's anatomy - drawn widgets on a solid
+  // surface, button overflow, a short separator, no selected mark, the
+  // connector and the scroll fade drawn
+  'anatomy.toggle_widget': 'drawn',
+  'anatomy.date_picker_widget': 'drawn',
+  'anatomy.time_picker_widget': 'drawn',
+  'anatomy.surface_material': 'solid',
+  'anatomy.tab_overflow': 'buttons',
+  'anatomy.content_switcher_separator': 'short',
+  'anatomy.content_switcher_selected_mark': 'hidden',
+  'anatomy.overflow_menu_connector': 'shown',
+  'anatomy.dialog_scroll_fade': 'shown'
 };
+
+// --- Variants (v9): Carbon Mobile's own touch set ------------------------
+// `raw-carbon-mobile-variant.md` (codebase-superloom
+// __dev__/evidence/0160/census-m5/) measured the mobile components; the
+// mobile Menu inherits the 48px option row through `menu_item_height` ->
+// `list_item_height` -> `option_height`, so no menu pin is needed. Carbon's
+// mobile apps run `platform.ios` or `platform.android`; `form.compact` and
+// `form.medium` carry the same touch set plus the per-form cells measured
+// for them (`v9-adaptive-contract.md` section 4). The platform variants
+// carry only the widget pins (`v9-adaptive-contract.md` section 2): the
+// touch set belongs to the form axis, so an `expanded` iPad keeps web sizes.
+const VARIANT_TOUCH_PINS = {
+  'control.target_min': 48,
+  'control.field_height': 48,
+  'control.checkbox_size': 20,
+  'control.radio_size': 20,
+  'control.tag_height': 32,
+  'control.option_height': 48,
+  'control.menu_item_height': 48,
+  'control.checkbox_group_gap': 28,
+  'control.radio_group_gap_vertical': 28,
+  'type.selection_label': '{type.body01}'
+};
+const VARIANTS = Object.freeze({
+  // iOS hands every picker to the OS (D25); Android the toggle only
+  'platform.ios': Object.freeze({
+    tokens: {
+      'anatomy.toggle_widget': 'system',
+      'anatomy.date_picker_widget': 'system',
+      'anatomy.time_picker_widget': 'system'
+    }
+  }),
+  'platform.android': Object.freeze({
+    tokens: {
+      'anatomy.toggle_widget': 'system'
+    }
+  }),
+  'form.compact': Object.freeze({
+    tokens: Object.assign({}, VARIANT_TOUCH_PINS, {
+      'control.dialog_width_ratio': 1,
+      'control.dialog_width_ratio_xs': 1,
+      'control.dialog_width_ratio_sm': 1,
+      'control.dialog_width_ratio_lg': 1,
+      'control.dialog_height_ratio': 1,
+      'control.dialog_height_ratio_xs': 1,
+      'control.dialog_height_ratio_sm': 1,
+      'control.dialog_height_ratio_lg': 1,
+      'control.notification_inline_width': 288,
+      'control.tab_vertical_list_ratio': 0.5,
+      'control.accordion_content_end_ratio': 0
+    })
+  }),
+  'form.medium': Object.freeze({
+    tokens: Object.assign({}, VARIANT_TOUCH_PINS, {
+      'control.dialog_width_ratio': 0.84,
+      'control.dialog_width_ratio_xs': 0.48,
+      'control.dialog_width_ratio_sm': 0.6,
+      'control.dialog_width_ratio_lg': 0.96,
+      'control.dialog_height_ratio': 0.9,
+      'control.dialog_height_ratio_xs': 0.48,
+      'control.dialog_height_ratio_sm': 0.72,
+      'control.dialog_height_ratio_lg': 0.96,
+      'control.notification_inline_width': 608
+    })
+  })
+});
+const PROVENANCE_VARIANTS = {
+  'platform.ios': 'carbon_primary: @carbon/react-native 9.0.7 src/ (raw-carbon-mobile-variant.md)',
+  'platform.android': 'carbon_primary: @carbon/react-native 9.0.7 src/ (raw-carbon-mobile-variant.md)',
+  'form.compact': 'carbon_primary @carbon/react-native touch set + carbon_primary `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, `tabs/_tabs.scss:83-93,737-746`, `accordion/_accordion.scss:202-217`',
+  'form.medium': 'carbon_primary @carbon/react-native touch set + carbon_primary `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`',
+  not_applied: 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
+};
+PROVENANCE.variants = PROVENANCE_VARIANTS;
 
 // --- Role grid (v5 amendment) -------------------------------------------
 const GRID_RECIPE = buildGridRecipe(contract.grid);
@@ -314,7 +401,10 @@ const D9_STRUCTURE = {
   'stacking.modal': 9000,
   'stacking.header': 8000,
   'stacking.overlay': 6000,
-  'stacking.floating': 6000
+  'stacking.floating': 6000,
+  // v9: the skip link sits above everything while focused
+  // (`header/_header.scss:444` `z-index: 9999`)
+  'stacking.skip_link': 9999
 };
 
 // Section 5.5 font tokens
@@ -527,6 +617,17 @@ function buildTokens (schemeName) {
     tokens[sKey] = value;
   }
 
+  // v9: the low-contrast content switcher fills are per-scheme component
+  // tokens, not semantic roles - the recipe stands in `layer_02` colours and
+  // the scheme's own fills replace them here
+  // (`@carbon/themes/js/generated/component-tokens/content-switcher.js`)
+  tokens['color.content_switcher_low_contrast_container'] =
+    carbonContentSwitcher.contentSwitcherBackground[schemeName] || carbonContentSwitcher.contentSwitcherBackground.whiteTheme;
+  tokens['color.content_switcher_low_contrast_container_hover'] =
+    carbonContentSwitcher.contentSwitcherBackgroundHover[schemeName] || carbonContentSwitcher.contentSwitcherBackgroundHover.whiteTheme;
+  tokens['color.content_switcher_low_contrast_container_selected'] =
+    carbonContentSwitcher.contentSwitcherSelected[schemeName] || carbonContentSwitcher.contentSwitcherSelected.whiteTheme;
+
   return tokens;
 }
 
@@ -562,6 +663,7 @@ function buildScheme (schemeName) {
     scales: { base_font_size: 16 },
     tokens: tokens,
     meta: meta,
+    variants: VARIANTS,
     from_default: fromDefault,
     provenance: PROVENANCE
   };

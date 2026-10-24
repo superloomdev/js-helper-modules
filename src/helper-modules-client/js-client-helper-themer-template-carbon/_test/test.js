@@ -43,8 +43,8 @@ describe('carbon template - profile identity', () => {
     assert.equal(profile.id, 'carbon-v11');
   });
 
-  it('should export contract_version 8', () => {
-    assert.equal(profile.contract_version, 8);
+  it('should export contract_version 9', () => {
+    assert.equal(profile.contract_version, 9);
   });
 
   it('should export reference with Carbon package versions', () => {
@@ -256,7 +256,16 @@ describe('carbon template - anatomy enums (v4)', () => {
     'anatomy.tag_close': 'circle',
     'anatomy.tag_selected_mark': 'hidden',
     'anatomy.slider_focus': 'inset',
-    'anatomy.slider_disabled_paint': 'independent'
+    'anatomy.slider_disabled_paint': 'independent',
+    'anatomy.toggle_widget': 'drawn',
+    'anatomy.date_picker_widget': 'drawn',
+    'anatomy.time_picker_widget': 'drawn',
+    'anatomy.surface_material': 'solid',
+    'anatomy.tab_overflow': 'buttons',
+    'anatomy.content_switcher_separator': 'short',
+    'anatomy.content_switcher_selected_mark': 'hidden',
+    'anatomy.overflow_menu_connector': 'shown',
+    'anatomy.dialog_scroll_fade': 'shown'
   };
 
   for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
@@ -325,15 +334,13 @@ describe('carbon template - icon literals (v4)', () => {
   it('should record icon provenance that matches the pinned package and the mapping snapshot', () => {
     assert.equal(iconPkg.version, '11.89.0');
     for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
-      assert.deepEqual(profile.schemes[schemeName].provenance, {
-        icons: {
-          package: '@carbon/icons',
-          version: iconPkg.version,
-          map_source: iconMap.source,
-          map_sha256: iconMap.source_sha256,
-          drawings: {
-            switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
-          }
+      assert.deepEqual(profile.schemes[schemeName].provenance.icons, {
+        package: '@carbon/icons',
+        version: iconPkg.version,
+        map_source: iconMap.source,
+        map_sha256: iconMap.source_sha256,
+        drawings: {
+          switch_checked_indicator: '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
         }
       });
     }
@@ -444,10 +451,10 @@ describe('carbon template - every scheme resolves every token', () => {
 
   for (const schemeName of Object.keys(profile.schemes)) {
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1239 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all ' + contractKeys.length + ' tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1239);
+        assert.equal(names.length, contractKeys.length);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -674,5 +681,205 @@ describe('carbon template - v8 rework amendment', () => {
       }
     }
   });
+
+});
+
+describe('carbon template - v9 adaptive cells', () => {
+
+  for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+
+    it('should answer the three adaptive cells in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      // WCAG 2.2 AA 2.5.8's smallest target on the web base (D26 `expanded`)
+      assert.equal(tokens['control.target_min'], 24);
+      assert.equal(tokens['control.text_scale_max'], 2);
+      assert.equal(tokens['type.selection_label'], '{type.body_compact_01}');
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens;
+      assert.equal(built['control.target_min'], 24);
+      assert.deepEqual(built['type.selection_label'], built['type.body_compact_01']);
+    });
+
+    it('should answer the v9 cells Carbon owns in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      assert.equal(tokens['control.tab_overflow_button_width'], 40);
+      assert.equal(tokens['control.menu_max_width'], 288);
+      assert.equal(tokens['control.dialog_width_ratio'], 0.6);
+      assert.equal(tokens['control.notification_inline_width'], 736);
+      assert.equal(tokens['control.breadcrumb_gap'], '{spacing.spacing_03}');
+      assert.equal(tokens['stacking.skip_link'], 9999);
+      assert.equal(tokens['control.popover_max_width'], 368);
+      assert.equal(tokens['control.combo_box_clear_size'], 24);
+      assert.equal(tokens['control.combo_box_input_padding_end_invalid'], 105);
+      assert.equal(tokens['control.fab_extended_padding_end'], '{control.fab_extended_padding}');
+      assert.equal(tokens['color.list_item_container_selected_active'], '{color.list_item_container_active}');
+      // `_list.scss:58-73` parks the ordinal counter at -24px, not spacing_08
+      assert.equal(tokens['control.text_list_ordinal_offset'], 24);
+      assert.equal(Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens['control.text_list_ordinal_offset'], 24);
+    });
+
+    it('should paint the low-contrast content switcher from its own component fills in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      for (const name of ['color.content_switcher_low_contrast_container', 'color.content_switcher_low_contrast_container_hover', 'color.content_switcher_low_contrast_container_selected']) {
+        assert.ok(tokens[name] !== undefined, name + ' missing');
+        assert.equal(typeof tokens[name] === 'string' && tokens[name].charAt(0) !== '{', true, name + ' aliases instead of the component fill');
+      }
+    });
+
+  }
+
+});
+
+describe('carbon template - v9 variants', () => {
+
+  const SCHEMES = ['white', 'g10', 'g90', 'g100'];
+  const TOUCH_PINS = {
+    'control.target_min': 48,
+    'control.field_height': 48,
+    'control.checkbox_size': 20,
+    'control.radio_size': 20,
+    'control.tag_height': 32,
+    'control.option_height': 48,
+    'control.menu_item_height': 48,
+    'control.checkbox_group_gap': 28,
+    'control.radio_group_gap_vertical': 28,
+    'type.selection_label': '{type.body01}'
+  };
+
+  it('should declare the adaptive options and all four variants', () => {
+    assert.deepEqual(profile.adaptive.options, ['auto', 'fixed', 'platform.ios', 'platform.android', 'form.compact', 'form.medium']);
+    for (const schemeName of SCHEMES) {
+      assert.deepEqual(Object.keys(profile.schemes[schemeName].variants), ['platform.ios', 'platform.android', 'form.compact', 'form.medium']);
+    }
+  });
+
+  it('should carry the Carbon Mobile touch set in the form variants', () => {
+    for (const schemeName of SCHEMES) {
+      for (const variantName of ['form.compact', 'form.medium']) {
+        const tokens = profile.schemes[schemeName].variants[variantName].tokens;
+        for (const [name, value] of Object.entries(TOUCH_PINS)) {
+          assert.deepEqual(tokens[name], value, schemeName + ' ' + variantName + ' ' + name);
+        }
+      }
+    }
+  });
+
+  it('should pin only the system widgets on the platform variants', () => {
+    for (const schemeName of SCHEMES) {
+      assert.deepEqual(profile.schemes[schemeName].variants['platform.ios'].tokens, {
+        'anatomy.toggle_widget': 'system',
+        'anatomy.date_picker_widget': 'system',
+        'anatomy.time_picker_widget': 'system'
+      });
+      assert.deepEqual(profile.schemes[schemeName].variants['platform.android'].tokens, {
+        'anatomy.toggle_widget': 'system'
+      });
+    }
+  });
+
+  it('should carry the census form pins', () => {
+    for (const schemeName of SCHEMES) {
+      const compact = profile.schemes[schemeName].variants['form.compact'].tokens;
+      assert.equal(compact['control.dialog_width_ratio'], 1);
+      assert.equal(compact['control.notification_inline_width'], 288);
+      assert.equal(compact['control.tab_vertical_list_ratio'], 0.5);
+      assert.equal(compact['control.accordion_content_end_ratio'], 0);
+      const medium = profile.schemes[schemeName].variants['form.medium'].tokens;
+      assert.equal(medium['control.dialog_width_ratio'], 0.84);
+      assert.equal(medium['control.dialog_height_ratio'], 0.9);
+      assert.equal(medium['control.notification_inline_width'], 608);
+    }
+  });
+
+  it('should apply the platform variant after the form variant and layers after both', () => {
+    const scheme = profile.schemes.white;
+    const built = Themer.buildTheme(scheme, [], 'native', { variant: { form: 'compact', platform: 'ios' } });
+    assert.equal(built.tokens['control.field_height'], 48);
+    assert.equal(built.tokens['control.notification_inline_width'], 288);
+    assert.equal(built.tokens['anatomy.toggle_widget'], 'system');
+    const branded = Themer.buildTheme(scheme,
+      [{ name: 'brand', tokens: { 'anatomy.toggle_widget': 'drawn' } }], 'native',
+      { variant: { form: 'compact', platform: 'ios' } });
+    assert.equal(branded.tokens['anatomy.toggle_widget'], 'drawn');
+    const fixed = Themer.buildTheme(scheme, [], 'native',
+      { variant: { form: 'compact', platform: 'ios' }, adaptive: 'fixed' });
+    assert.equal(fixed.tokens['control.field_height'], 40);
+    assert.equal(fixed.tokens['anatomy.toggle_widget'], 'drawn');
+    // The touch set is a form axis, not a platform one: an expanded iPad
+    // keeps web sizes while its widgets still go to the OS
+    const expandedIos = Themer.buildTheme(scheme, [], 'native',
+      { variant: { form: 'expanded', platform: 'ios' } });
+    assert.equal(expandedIos.tokens['control.checkbox_size'], 16);
+    assert.equal(expandedIos.tokens['anatomy.toggle_widget'], 'system');
+    assert.equal(expandedIos.tokens['control.field_height'], 40);
+  });
+
+  it('should record the variant provenance', () => {
+    const provenance = profile.schemes.white.provenance.variants;
+    assert.match(provenance['platform.ios'], /react-native/i);
+    assert.match(provenance.not_applied, /radio_dot_size/);
+  });
+
+});
+
+describe('carbon template - v9 sample brands', () => {
+
+  it('should export the superloom and rounded brands', () => {
+    assert.deepEqual(Object.keys(profile.brands), ['superloom', 'rounded']);
+  });
+
+  it('should hold valid layers whose tokens are all in the contract', () => {
+    for (const brand of Object.values(profile.brands)) {
+      for (const polarity of ['light', 'dark']) {
+        for (const name of Object.keys(brand[polarity].tokens)) {
+          assert.ok(contract.tokens[name], 'brand token not in contract: ' + name);
+        }
+      }
+    }
+  });
+
+  it('should carry the D32 dark primary: the light steps, not purple-50', () => {
+    assert.equal(profile.brands.superloom.light.tokens['color.interactive'], '#8a3ffc');
+    assert.equal(profile.brands.superloom.dark.tokens['color.interactive'], '#a56eff');
+    assert.equal(profile.brands.superloom.dark.tokens['color.button_primary'], '#8a3ffc');
+    assert.equal(profile.brands.superloom.dark.tokens['color.button_primary_hover'], '#6929c4');
+    assert.equal(profile.brands.superloom.dark.tokens['color.button_primary_active'], '#491d8b');
+  });
+
+  it('should build every scheme under its brand with zero violations', () => {
+    for (const [schemeName, scheme] of Object.entries(profile.schemes)) {
+      for (const brand of Object.values(profile.brands)) {
+        const theme = Themer.buildTheme(scheme, [brand[scheme.polarity]], 'native', { contrast: 'report' });
+        assert.equal(theme.violations.length, 0, schemeName + ' ' + brand.name + ': ' + JSON.stringify(theme.violations.slice(0, 3)));
+      }
+    }
+  });
+
+});
+
+describe('carbon template - the variant option round-trips', () => {
+
+  const FORMS = [undefined, 'compact', 'medium', 'expanded'];
+  const PLATFORMS = [undefined, 'web', 'ios', 'android', 'macos', 'windows'];
+
+  for (const [schemeName, scheme] of Object.entries(profile.schemes)) {
+    for (const form of FORMS) {
+      for (const platform of PLATFORMS) {
+        it('should build ' + schemeName + ' under ' + (form || '-') + '/' + (platform || '-') + ' with zero violations', () => {
+          const variant = {};
+          if (form !== undefined) {
+            variant.form = form;
+          }
+          if (platform !== undefined) {
+            variant.platform = platform;
+          }
+          const theme = Themer.buildTheme(scheme, [], 'native', {
+            variant: Object.keys(variant).length ? variant : undefined,
+            contrast: 'report'
+          });
+          assert.equal(theme.violations.length, 0, schemeName + ': ' + JSON.stringify(theme.violations.slice(0, 4)));
+        });
+      }
+    }
+  }
 
 });

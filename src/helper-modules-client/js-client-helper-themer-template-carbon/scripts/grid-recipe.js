@@ -830,6 +830,290 @@ export default function buildGridRecipe (grid) {
     'control.fab_label_gap': '{spacing.spacing_03}',
     // v8 TagSet (census TagSet): members $spacing-03 apart
     'control.tag_set_gap': '{spacing.spacing_03}',
+    // v9 adaptive cells (`v9-adaptive-contract.md` section 2): WCAG 2.2 AA
+    // 2.5.8's 24px minimum target on the web base (D26 `expanded`), the
+    // text scale cap, and the selection row's compact-body label
+    'control.target_min': 24,
+    'control.text_scale_max': 2,
+    'type.selection_label': '{type.body_compact_01}',
+    // v9 Tabs members (`tabs/_tabs.scss`): the 16px icon with its 8 gap,
+    // the 24px close button's ink and the dismiss paddings, the tall
+    // contained list, the overflow buttons on $background ($layer-accent
+    // contained) with an 8px fade, the panel's padding and contained
+    // sibling, and the vertical variant's geometry
+    'control.tab_icon_size': 16,
+    'control.tab_icon_gap': '{spacing.spacing_03}',
+    'control.tab_close_size': 24,
+    'control.tab_close_icon_size': 16,
+    'control.tab_dismiss_padding_end': 40,
+    'control.tab_contained_dismiss_padding_end': 47,
+    'color.tab_close_icon': '{color.tab_label}',
+    'color.tab_close_icon_selected': colorOf('icon_primary'),
+    'color.tab_close_icon_disabled': colorOf('icon_disabled'),
+    'type.tab_secondary_label': '{type.label01}',
+    'control.tab_contained_tall_height': 64,
+    'control.tab_overflow_button_width': 40,
+    'control.tab_contained_overflow_button_width': 48,
+    'control.tab_overflow_fade_width': 8,
+    'color.tab_overflow_button': colorOf('background'),
+    'color.tab_overflow_button_hover': colorOf('background_hover'),
+    'color.tab_overflow_button_active': colorOf('background_active'),
+    'color.tab_contained_overflow_button': colorOf('layer_accent_01'),
+    'color.tab_contained_overflow_button_hover': colorOf('layer_accent_hover_01'),
+    'color.tab_contained_overflow_button_active': colorOf('layer_accent_active_01'),
+    'color.tab_overflow_icon': colorOf('icon_primary'),
+    'control.tab_panel_padding': '{spacing.spacing_05}',
+    'color.tab_panel_contained_container': colorOf('layer_01'),
+    'control.tab_vertical_height': 64,
+    'control.tab_vertical_indicator_width': 3,
+    'color.tab_vertical_container': colorOf('layer_01'),
+    'color.tab_vertical_item': colorOf('layer_01'),
+    'color.tab_vertical_item_hover': colorOf('layer_hover_01'),
+    'color.tab_vertical_track': colorOf('border_subtle_01'),
+    'color.tab_vertical_track_hover': colorOf('border_strong_01'),
+    'color.tab_vertical_divider': colorOf('border_subtle_01'),
+    'control.tab_vertical_fade_height': 64,
+    'control.tab_vertical_label_lines': 2,
+    'control.tab_vertical_list_ratio': 0.25,
+    'control.tab_skeleton_width': 160,
+    'control.tab_skeleton_bar_height': 14,
+    // v9 Content switcher family (`content-switcher/_content-switcher.scss`):
+    // the 4px rail under a 1px `$border-inverse` outline, compact-body
+    // segments 8/16 (14 inline at lg with the 20px icon), the 16px
+    // separators in $border-subtle, the inset 2px $focus + 3px $focus-inset,
+    // the secondary-then-inverse label, and the low-contrast kind on the
+    // content-switcher component fills (written per scheme in the
+    // generator) under $border-strong
+    'control.content_switcher_radius': '{shape.radius_04}',
+    'control.content_switcher_outline_width': '{border.width_01}',
+    'control.content_switcher_padding_block': '{spacing.spacing_03}',
+    'control.content_switcher_padding_inline': '{spacing.spacing_05}',
+    'control.content_switcher_padding_inline_large': 14,
+    'control.content_switcher_separator_height': 16,
+    'control.content_switcher_focus_width': '{focus.width}',
+    'control.content_switcher_icon_size': 16,
+    'control.content_switcher_icon_size_large': 20,
+    'control.content_switcher_icon_gap': '{spacing.spacing_03}',
+    'color.content_switcher_outline': colorOf('border_inverse'),
+    'color.content_switcher_outline_disabled': colorOf('border_disabled'),
+    'color.content_switcher_label': colorOf('text_secondary'),
+    'color.content_switcher_label_hover': colorOf('text_primary'),
+    'color.content_switcher_label_selected': colorOf('text_inverse'),
+    'color.content_switcher_label_disabled': colorOf('text_disabled'),
+    'color.content_switcher_container_hover': colorOf('layer_hover_01'),
+    'color.content_switcher_container_selected': colorOf('layer_selected_inverse'),
+    'color.content_switcher_container_selected_disabled': colorOf('button_disabled'),
+    'color.content_switcher_separator': colorOf('border_subtle_01'),
+    'color.content_switcher_separator_disabled': colorOf('border_disabled'),
+    'color.content_switcher_focus': colorOf('focus'),
+    'color.content_switcher_focus_inset': colorOf('focus_inset'),
+    'color.content_switcher_icon': colorOf('icon_secondary'),
+    'color.content_switcher_icon_hover': colorOf('icon_primary'),
+    'color.content_switcher_icon_only': colorOf('icon_primary'),
+    'color.content_switcher_icon_selected': colorOf('icon_inverse'),
+    'color.content_switcher_icon_disabled': colorOf('icon_disabled'),
+    // Recipe stand-ins; the generator writes the per-scheme component fills
+    'color.content_switcher_low_contrast_container': colorOf('layer_02'),
+    'color.content_switcher_low_contrast_container_hover': colorOf('layer_hover_02'),
+    'color.content_switcher_low_contrast_container_selected': colorOf('layer_selected_inverse'),
+    'color.content_switcher_low_contrast_outline': colorOf('border_strong_01'),
+    'color.content_switcher_low_contrast_label_selected': colorOf('text_primary'),
+    'color.content_switcher_low_contrast_icon': colorOf('icon_secondary'),
+    'color.content_switcher_low_contrast_icon_selected': colorOf('icon_primary'),
+    'type.content_switcher_label': '{type.body_compact_01}',
+    'type.content_switcher_label_selected_low_contrast': '{type.heading_compact_01}',
+    // v9 Menu members (`menu/_menu.scss`, `Menu.js`, `MenuItem.js`,
+    // `overflow-menu/_overflow-menu.scss`, `menu-button/_menu-button.scss`):
+    // the 18rem ceiling, the 8px viewport margin and submenu offsets, the
+    // border variant's $border-subtle outline and the explicit $background,
+    // the danger item's 3px inner page ring, the selected item reading the
+    // shared list cells, the divider's 4px block margin, the MenuButton's
+    // 12rem minimum, the OverflowMenu's trigger, 3px/6px connectors and
+    // 180px option clamp
+    'control.menu_max_width': 288,
+    'control.menu_viewport_margin': '{spacing.spacing_03}',
+    'control.menu_submenu_offset_end': -6,
+    'control.menu_submenu_offset_start': 10,
+    'control.menu_submenu_offset_block': -6,
+    'color.menu_border': colorOf('border_subtle_01'),
+    'color.menu_container_background': colorOf('background'),
+    'control.menu_item_danger_focus_inset_width': 3,
+    'color.menu_item_danger_focus_inset': colorOf('background'),
+    'color.menu_item_container_selected': '{color.list_container}',
+    'color.menu_item_label_selected': '{color.list_item_label}',
+    'control.menu_divider_margin_block': '{spacing.spacing_02}',
+    'control.menu_button_min_width': 192,
+    'color.overflow_menu_trigger_hover': colorOf('background_hover'),
+    'color.overflow_menu_trigger_open': colorOf('layer_01'),
+    'color.overflow_menu_icon': colorOf('icon_primary'),
+    'control.overflow_menu_width': 160,
+    'control.overflow_menu_connector_size': 3,
+    'control.overflow_menu_connector_size_side': 6,
+    'control.overflow_menu_option_max_width': 180,
+    // v9 Modal members (`modal/_modal.scss`): the lg column of the
+    // size-and-breakpoint ratio ladder, the 24px enter offset, the scroll
+    // fade's 80 -> 48 window suppressed under 300, the last child's 24, the
+    // prose's 20% end gutter, and the footer's halves/quarters with the
+    // 14/32 button padding
+    'control.dialog_width_ratio': 0.6,
+    'control.dialog_width_ratio_xs': 0.32,
+    'control.dialog_width_ratio_sm': 0.42,
+    'control.dialog_width_ratio_lg': 0.84,
+    'control.dialog_height_ratio': 0.84,
+    'control.dialog_height_ratio_xs': 0.48,
+    'control.dialog_height_ratio_sm': 0.72,
+    'control.dialog_height_ratio_lg': 0.96,
+    'control.dialog_enter_offset': 24,
+    'control.dialog_scroll_fade_height': 48,
+    'control.dialog_scroll_fade_start': 80,
+    'control.dialog_scroll_fade_min_height': 300,
+    'control.dialog_scroll_end_space': 24,
+    'control.dialog_text_gutter_ratio': 0.2,
+    'control.dialog_action_ratio': 0.5,
+    'control.dialog_action_ratio_three': 0.25,
+    'control.dialog_action_padding_top': 14,
+    'control.dialog_action_padding_bottom': 32,
+    // v9 Notification members (`notification/_inline-notification.scss`,
+    // `_actionable-notification.scss`): the lg inline width and the 48
+    // floor, the details/icon/text insets, the ghost action's geometry and
+    // its $background-inverse-hover, the toast action's inset and end
+    // space, the low-contrast kind outlines at 0.4 of their support role,
+    // and the warning glyph's $black-100 inner mark
+    'control.notification_inline_width': 736,
+    'control.notification_min_height': 48,
+    'control.notification_details_inset': 13,
+    'control.notification_details_inset_end': 48,
+    'control.notification_icon_top': 14,
+    'control.notification_toast_icon_top': 16,
+    'control.notification_icon_gap': '{spacing.spacing_05}',
+    'control.notification_text_padding_block': 15,
+    'control.notification_toast_text_padding_bottom': 23,
+    'control.notification_title_gap': '{spacing.spacing_02}',
+    'control.notification_action_height': 32,
+    'control.notification_action_inset': 40,
+    'color.notification_action_container_hover': colorOf('background_inverse_hover'),
+    'control.notification_toast_action_inset': 50,
+    'control.notification_action_end_space': '{spacing.spacing_03}',
+    'color.notification_outline_error': { op: 'alpha', args: ['color.support_error', 0.4] },
+    'color.notification_outline_success': { op: 'alpha', args: ['color.support_success', 0.4] },
+    'color.notification_outline_info': { op: 'alpha', args: ['color.support_info', 0.4] },
+    'color.notification_outline_warning': { op: 'alpha', args: ['color.support_warning', 0.4] },
+    'control.notification_outline_width': '{border.width_01}',
+    'color.notification_warning_icon_inner': '#000000',
+    // v9 Accordion family (`accordion/_accordion.scss`): the 1px
+    // $border-subtle rules that hover with the item, the 16 flush inset,
+    // the heading's 16 inline padding and $layer-hover, the 2px $focus on
+    // every edge, the 16px chevron 2px from the top, the body-01 title 16
+    // on, and the content's padding and quarter-end
+    'control.accordion_divider_width': '{border.width_01}',
+    'color.accordion_divider': colorOf('border_subtle_01'),
+    'color.accordion_divider_hover': colorOf('layer_hover_01'),
+    'control.accordion_flush_inset': '{spacing.spacing_05}',
+    'control.accordion_heading_padding_inline': '{spacing.spacing_05}',
+    'color.accordion_heading_label': colorOf('text_primary'),
+    'color.accordion_heading_label_disabled': colorOf('text_disabled'),
+    'color.accordion_heading_container_hover': colorOf('layer_hover_01'),
+    'color.accordion_focus': colorOf('focus'),
+    'control.accordion_focus_width': '{focus.width}',
+    'control.accordion_icon_size': 16,
+    'control.accordion_icon_top': 2,
+    'color.accordion_icon': colorOf('icon_primary'),
+    'color.accordion_icon_disabled': colorOf('icon_disabled'),
+    'type.accordion_title': '{type.body01}',
+    'control.accordion_title_gap': '{spacing.spacing_05}',
+    'control.accordion_content_padding_top': '{spacing.spacing_03}',
+    'control.accordion_content_padding_bottom': '{spacing.spacing_08}',
+    'control.accordion_content_padding_end': '{spacing.spacing_12}',
+    'control.accordion_content_end_ratio': 0.25,
+    // v9 Breadcrumb family (`breadcrumb/_breadcrumb.scss`): compact-body
+    // type (label-01 small), 8px items (4 small), the slash in primary
+    // text, the current page's label, the overflow's 16x18 link-coloured
+    // glyph moved 4 down with a 12x1 underline and the menu's 7px caret in
+    // $field, and the 100x16 skeleton
+    'type.breadcrumb': '{type.body_compact_01}',
+    'type.breadcrumb_small': '{type.label01}',
+    'control.breadcrumb_gap': '{spacing.spacing_03}',
+    'control.breadcrumb_gap_small': '{spacing.spacing_02}',
+    'color.breadcrumb_separator': colorOf('text_primary'),
+    'color.breadcrumb_current': colorOf('text_primary'),
+    'control.breadcrumb_link_min_width_small': 12,
+    'control.breadcrumb_overflow_width': 16,
+    'control.breadcrumb_overflow_height': 18,
+    'control.breadcrumb_overflow_height_small': 16,
+    'control.breadcrumb_overflow_icon_offset': 4,
+    'control.breadcrumb_overflow_underline_width': 12,
+    'control.breadcrumb_overflow_caret_size': 7,
+    'color.breadcrumb_overflow_icon': colorOf('link_primary'),
+    'color.breadcrumb_overflow_icon_hover': colorOf('link_primary_hover'),
+    'color.breadcrumb_overflow_icon_active': colorOf('icon_primary'),
+    'color.breadcrumb_overflow_caret': colorOf('field_01'),
+    'control.breadcrumb_skeleton_width': 100,
+    'control.breadcrumb_skeleton_height': '{spacing.spacing_05}',
+    // v9 Text list family (`list/_list.scss`): body-01 items (body-02
+    // expressive) in primary text, the 16 indent (32 nested with its 4px
+    // item padding), and the 16/8/24 marker offsets
+    'type.text_list': '{type.body01}',
+    'type.text_list_expressive': '{type.body02}',
+    'color.text_list_label': colorOf('text_primary'),
+    'control.text_list_indent': '{spacing.spacing_05}',
+    'control.text_list_nested_indent': '{spacing.spacing_10}',
+    'control.text_list_nested_item_padding': '{spacing.spacing_02}',
+    'control.text_list_marker_offset': '{spacing.spacing_05}',
+    'control.text_list_nested_marker_offset': '{spacing.spacing_03}',
+    'control.text_list_ordinal_offset': 24,
+    // v9 Contained list family (`contained-list/_contained-list.scss`): the
+    // sticky heading-compact header on $layer-background, the disclosed
+    // label-01 header on $layer 40 tall, the search's $background with its
+    // 1px rule, the body-01 item and its fills, and the action slot's 48
+    'type.contained_list_header': '{type.heading_compact_01}',
+    'color.contained_list_header_container': colorOf('layer_background_01'),
+    'color.contained_list_header_label': colorOf('text_primary'),
+    'color.contained_list_divider': colorOf('border_subtle_01'),
+    'control.contained_list_padding_inline': '{spacing.spacing_05}',
+    'control.contained_list_gap': '{spacing.spacing_05}',
+    'type.contained_list_header_disclosed': '{type.label01}',
+    'color.contained_list_header_container_disclosed': colorOf('layer_01'),
+    'color.contained_list_header_label_disclosed': colorOf('text_secondary'),
+    'control.contained_list_header_height_disclosed': 40,
+    'color.contained_list_search_container': colorOf('background'),
+    'color.contained_list_search_border': colorOf('border_subtle_01'),
+    'type.contained_list_item': '{type.body01}',
+    'color.contained_list_item_label': colorOf('text_primary'),
+    'color.contained_list_item_label_disabled': colorOf('text_disabled'),
+    'color.contained_list_item_container_hover': colorOf('layer_hover_01'),
+    'color.contained_list_item_container_active': colorOf('layer_active_01'),
+    'control.contained_list_action_space': 48,
+    'control.contained_list_icon_size': 16,
+    'control.contained_list_icon_gap': '{spacing.spacing_03}',
+    'control.contained_list_icon_top': 2,
+    // v9 CopyButton members (`copy-button/_copy-button.scss`): the icon
+    // button on $layer with the layer's hover and active fills
+    'color.copy_button_container': colorOf('layer_01'),
+    'color.copy_button_container_hover': colorOf('layer_hover_01'),
+    'color.copy_button_container_active': colorOf('layer_active_01'),
+    // v9 SkipToContent (`header/_header.scss:436-464`): focused 48 tall, 0
+    // 16 padding, a 4px $focus border on $background in $text-secondary;
+    // the type set is unspecified upstream - compact body, the header's own
+    'control.skip_link_height': 48,
+    'control.skip_link_padding_inline': '{spacing.spacing_05}',
+    'control.skip_link_border_width': '{border.width_04}',
+    'color.skip_link_container': colorOf('background'),
+    'color.skip_link_label': colorOf('text_secondary'),
+    'color.skip_link_border': colorOf('focus'),
+    'type.skip_link': '{type.body_compact_01}',
+    // v9 follow-ups (`## v9 Choice/Action Follow-Ups`): the selected item's
+    // pressed face is the unselected one's; the extended fab's end padding
+    // follows its block padding; the popover's 368 ceiling
+    // (`_popover.scss:195-218`); the ComboBox's measured clear, input and
+    // invalid glyph geometry (`evidence/0160/m4/b10-preflight/carbon-choice-source.json`)
+    'color.list_item_container_selected_active': '{color.list_item_container_active}',
+    'control.fab_extended_padding_end': '{control.fab_extended_padding}',
+    'control.popover_max_width': 368,
+    'control.combo_box_clear_size': 24,
+    'control.combo_box_clear_inset_end': 45,
+    'control.combo_box_input_padding_end': 70,
+    'control.combo_box_input_padding_end_invalid': 105,
+    'control.combo_box_invalid_icon_inset_end': 82,
     // No elevation
     'shadow.level_00': { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] }
   };

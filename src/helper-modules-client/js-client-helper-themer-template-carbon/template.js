@@ -4,14 +4,17 @@
 // generated from pinned @carbon packages, with Carbon's own glyphs from
 // @carbon/icons as icon literals. Each scheme is a complete Themer template
 // with every contract key.
+// `adaptive` declares the classes the Themer accepts for this profile (v9);
+// `brands` ships the sample brand layers.
 import white from './data/white.js';
 import g10 from './data/g10.js';
 import g90 from './data/g90.js';
 import g100 from './data/g100.js';
+import brands from './brands.js';
 
 export default Object.freeze({
   id: 'carbon-v11',
-  contract_version: 8,
+  contract_version: 9,
   reference: {
     themes: '@carbon/themes@11.80.0',
     type: '@carbon/type@11.66.0',
@@ -21,10 +24,14 @@ export default Object.freeze({
     commit: '7518c84ffd00f22434fe19d83119692c12fccb2f',
     icons: '@carbon/icons@11.89.0'
   },
+  adaptive: {
+    options: ['auto', 'fixed', 'platform.ios', 'platform.android', 'form.compact', 'form.medium']
+  },
   schemes: {
     white: white,
     g10: g10,
     g90: g90,
     g100: g100
-  }
+  },
+  brands: brands
 });
