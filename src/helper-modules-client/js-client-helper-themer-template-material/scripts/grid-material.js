@@ -1212,6 +1212,347 @@ export default function buildMaterialGrid (options) {
     'control.tag_set_gap': 8
   });
 
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the adaptive cells ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Material's own touch minimum is the 48px target (D32b); it ships no
+  // form variants (D24). The selection label is the type set its
+  // checkbox/radio label resolves today (`type.body_compact_01`) - the
+  // alias is zero visible change
+  Object.assign(out, {
+    'control.target_min': 48,
+    'control.text_scale_max': 2,
+    'type.selection_label': '{type.body_compact_01}'
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: tab members ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // The icon is the primary tab's 24px glyph; the close button and overflow
+  // buttons have no Material tab twin, so the values stand as Superloom
+  // decisions or read the surface roles (`scroll` anatomy never draws the
+  // buttons). The vertical variant and skeleton have no twin either
+  const surfacePaint = rolePaint('surface');
+  const listHoverOpacity = numberToken(listItem, 'list-item-hover-state-layer-opacity');
+  const listPressedOpacity = numberToken(listItem, 'list-item-pressed-state-layer-opacity');
+  const onSurfacePaint = rolePaint('on-surface');
+  const surfaceLayer = function (states) {
+    return layered(surfacePaint, states.map(function (name) {
+      return [onSurfacePaint, name === 'hover' ? listHoverOpacity : combined([listHoverOpacity, listPressedOpacity])];
+    }));
+  };
+  Object.assign(out, {
+    'control.tab_icon_size': numberToken(tabFile, 'with-icon-icon-size'),
+    'control.tab_icon_gap': 8,
+    'control.tab_close_size': 24,
+    'control.tab_close_icon_size': 18,
+    'control.tab_dismiss_padding_end': 40,
+    'control.tab_contained_dismiss_padding_end': 47,
+    'color.tab_close_icon': roleEntry('on-surface-variant'),
+    'color.tab_close_icon_selected': roleEntry('on-surface'),
+    'color.tab_close_icon_disabled': atOpacity(onSurfacePaint, 0.38),
+    // census: material's secondary label is its `body-small` typescale
+    'type.tab_secondary_label': options.typeSet('body-small'),
+    'control.tab_contained_tall_height': 64,
+    'control.tab_overflow_button_width': 40,
+    'control.tab_contained_overflow_button_width': 48,
+    'control.tab_overflow_fade_width': 8,
+    'color.tab_overflow_button': roleEntry('surface'),
+    'color.tab_overflow_button_hover': surfaceLayer(['hover']),
+    'color.tab_overflow_button_active': surfaceLayer(['pressed']),
+    'color.tab_contained_overflow_button': roleEntry('surface-container'),
+    'color.tab_contained_overflow_button_hover': layered(rolePaint('surface-container'), [[onSurfacePaint, listHoverOpacity]]),
+    'color.tab_contained_overflow_button_active': layered(rolePaint('surface-container'), [[onSurfacePaint, combined([listHoverOpacity, listPressedOpacity])]]),
+    'color.tab_overflow_icon': roleEntry('on-surface'),
+    'control.tab_panel_padding': 16,
+    'color.tab_panel_contained_container': roleEntry('surface'),
+    'control.tab_vertical_height': 64,
+    'control.tab_vertical_indicator_width': 3,
+    'color.tab_vertical_container': roleEntry('surface'),
+    'color.tab_vertical_item': roleEntry('surface'),
+    'color.tab_vertical_item_hover': surfaceLayer(['hover']),
+    'color.tab_vertical_track': roleEntry('outline-variant'),
+    'color.tab_vertical_track_hover': roleEntry('outline'),
+    'color.tab_vertical_divider': roleEntry('outline-variant'),
+    'control.tab_vertical_fade_height': 64,
+    'control.tab_vertical_label_lines': 2,
+    'control.tab_vertical_list_ratio': 0.25,
+    'control.tab_skeleton_width': 160,
+    'control.tab_skeleton_bar_height': 14
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the content switcher (md-outlined-segmented-button)
+  // The rail is the segment's 1px `outline` at half its 40px height; the
+  // selected face fills `secondary-container`; separators are the full-height
+  // outline (`full` anatomy); the label is `label-large`
+  const segmented = 'outlined-segmented-button';
+  const segmentedHeight = numberToken(segmented, 'container-height');
+  const segmentedLayer = function (states) {
+    return layered(surfacePaint, states.map(function (name) {
+      return [required(paintOf(segmented, 'unselected-' + name + '-state-layer-color'), segmented + ' unselected ' + name + ' layer'), numberToken(segmented, name + '-state-layer-opacity')];
+    }));
+  };
+  Object.assign(out, {
+    'control.content_switcher_radius': segmentedHeight / 2,
+    'control.content_switcher_outline_width': numberToken(segmented, 'outline-width'),
+    'control.content_switcher_padding_block': 0,
+    'control.content_switcher_padding_inline': 12,
+    'control.content_switcher_padding_inline_large': 12,
+    'control.content_switcher_separator_height': segmentedHeight,
+    'control.content_switcher_focus_width': numberToken('focus-ring', 'width'),
+    'control.content_switcher_icon_size': numberToken(segmented, 'with-icon-icon-size'),
+    'control.content_switcher_icon_size_large': numberToken(segmented, 'with-icon-icon-size'),
+    'control.content_switcher_icon_gap': 8,
+    'color.content_switcher_outline': required(colorToken(segmented, 'outline-color'), 'segmented outline'),
+    'color.content_switcher_outline_disabled': translucent(segmented, 'disabled-outline-color', 'disabled-outline-opacity'),
+    'color.content_switcher_label': required(colorToken(segmented, 'unselected-label-text-color'), 'segmented label'),
+    'color.content_switcher_label_hover': required(colorToken(segmented, 'unselected-hover-label-text-color'), 'segmented hover label'),
+    'color.content_switcher_label_selected': required(colorToken(segmented, 'selected-label-text-color'), 'segmented selected label'),
+    'color.content_switcher_label_disabled': translucent(segmented, 'disabled-label-text-color', 'disabled-label-text-opacity'),
+    'color.content_switcher_container_hover': segmentedLayer(['hover']),
+    'color.content_switcher_container_selected': required(colorToken(segmented, 'selected-container-color'), 'segmented selected container'),
+    'color.content_switcher_container_selected_disabled': atOpacity(onSurfacePaint, 0.12),
+    'color.content_switcher_separator': required(colorToken(segmented, 'outline-color'), 'segmented separator'),
+    'color.content_switcher_separator_disabled': translucent(segmented, 'disabled-outline-color', 'disabled-outline-opacity'),
+    'color.content_switcher_focus': roleEntry('secondary'),
+    'color.content_switcher_focus_inset': roleEntry('surface'),
+    'color.content_switcher_icon': required(colorToken(segmented, 'unselected-with-icon-icon-color'), 'segmented icon'),
+    'color.content_switcher_icon_hover': required(colorToken(segmented, 'unselected-hover-icon-color'), 'segmented hover icon'),
+    'color.content_switcher_icon_only': required(colorToken(segmented, 'unselected-with-icon-icon-color'), 'segmented icon-only'),
+    'color.content_switcher_icon_selected': required(colorToken(segmented, 'selected-with-icon-icon-color'), 'segmented selected icon'),
+    'color.content_switcher_icon_disabled': translucent(segmented, 'disabled-icon-color', 'disabled-icon-opacity'),
+    // No low-contrast segment in Material (S): the cells alias the regular ones
+    'color.content_switcher_low_contrast_container': NONE,
+    'color.content_switcher_low_contrast_container_hover': '{color.content_switcher_container_hover}',
+    'color.content_switcher_low_contrast_container_selected': '{color.content_switcher_container_selected}',
+    'color.content_switcher_low_contrast_outline': '{color.content_switcher_outline}',
+    'color.content_switcher_low_contrast_label_selected': '{color.content_switcher_label_selected}',
+    'color.content_switcher_low_contrast_icon': '{color.content_switcher_icon}',
+    'color.content_switcher_low_contrast_icon_selected': '{color.content_switcher_icon_selected}',
+    'type.content_switcher_label': options.typeSet(required(read(segmented, 'label-text-font'), 'segmented label type').typescale),
+    'type.content_switcher_label_selected_low_contrast': '{type.content_switcher_label}'
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: menu members ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // The 280px menu maximum is Material's own; the submenu offsets have no
+  // Material counterpart and stand at Carbon's. The border variant is
+  // `outline-variant`; the explicit background is `surface`. The selected
+  // item fills `secondary-container` (the menu file's own selected cells).
+  // The danger item has no Material twin: no inner ring, the surface as the
+  // stand-in paint
+  Object.assign(out, {
+    'control.menu_max_width': 280,
+    'control.menu_viewport_margin': 8,
+    'control.menu_submenu_offset_end': -6,
+    'control.menu_submenu_offset_start': 10,
+    'control.menu_submenu_offset_block': -6,
+    'color.menu_border': roleEntry('outline-variant'),
+    'color.menu_container_background': roleEntry('surface'),
+    'control.menu_item_danger_focus_inset_width': 0,
+    'color.menu_item_danger_focus_inset': roleEntry('surface'),
+    'color.menu_item_container_selected': required(colorToken(menuFile, 'list-item-selected-container-color'), 'menu selected container'),
+    'color.menu_item_label_selected': required(colorToken(menuFile, 'list-item-selected-label-text-color'), 'menu selected label'),
+    // Material insets its list divider 16px a side instead of breathing block
+    'control.menu_divider_margin_block': 8,
+    'control.menu_button_min_width': 192,
+    'color.overflow_menu_trigger_hover': atOpacity(onSurfacePaint, listHoverOpacity),
+    'color.overflow_menu_trigger_open': roleEntry('surface-container'),
+    'color.overflow_menu_icon': roleEntry('on-surface-variant'),
+    'control.overflow_menu_width': 160,
+    'control.overflow_menu_connector_size': 3,
+    'control.overflow_menu_connector_size_side': 6,
+    'control.overflow_menu_option_max_width': 180
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: modal members ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // md-dialog clamps its width (280-560) rather than sizing by ratio: every
+  // ratio stands at 1 and the clamps apply (S). The dialog enters without a
+  // translate, fades nothing when scrolling (`hidden` anatomy), keeps no end
+  // gutter, and its trailing actions carry Carbon's geometry unused
+  Object.assign(out, {
+    'control.dialog_width_ratio': 1,
+    'control.dialog_width_ratio_xs': 1,
+    'control.dialog_width_ratio_sm': 1,
+    'control.dialog_width_ratio_lg': 1,
+    'control.dialog_height_ratio': 1,
+    'control.dialog_height_ratio_xs': 1,
+    'control.dialog_height_ratio_sm': 1,
+    'control.dialog_height_ratio_lg': 1,
+    'control.dialog_enter_offset': 0,
+    'control.dialog_scroll_fade_height': 48,
+    'control.dialog_scroll_fade_start': 80,
+    'control.dialog_scroll_fade_min_height': 300,
+    'control.dialog_scroll_end_space': 24,
+    'control.dialog_text_gutter_ratio': 0,
+    'control.dialog_action_ratio': 0.5,
+    'control.dialog_action_ratio_three': 0.25,
+    'control.dialog_action_padding_top': 14,
+    'control.dialog_action_padding_bottom': 32
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: notification members ~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // No snackbar element and no low-contrast kind: the insets stand at
+  // Carbon's (S), the inline width at its 736 ceiling, the ghost action's
+  // hover is the inverse surface's state layer, the kind outlines map onto
+  // the error and primary role families at 0.4, and the warning glyph's
+  // inner mark reads on-surface
+  Object.assign(out, {
+    'control.notification_inline_width': 736,
+    'control.notification_min_height': 48,
+    'control.notification_details_inset': 13,
+    'control.notification_details_inset_end': 48,
+    'control.notification_icon_top': 14,
+    'control.notification_toast_icon_top': 16,
+    'control.notification_icon_gap': 16,
+    'control.notification_text_padding_block': 15,
+    'control.notification_toast_text_padding_bottom': 23,
+    'control.notification_title_gap': 4,
+    'control.notification_action_height': 32,
+    'control.notification_action_inset': 40,
+    'color.notification_action_container_hover': layered(rolePaint('inverse-surface'), [[rolePaint('inverse-on-surface'), listHoverOpacity]]),
+    'control.notification_toast_action_inset': 50,
+    'control.notification_action_end_space': 8,
+    'color.notification_outline_error': atOpacity(rolePaint('error'), 0.4),
+    'color.notification_outline_success': atOpacity(rolePaint('primary'), 0.4),
+    'color.notification_outline_info': atOpacity(rolePaint('primary'), 0.4),
+    'color.notification_outline_warning': atOpacity(rolePaint('error'), 0.4),
+    'control.notification_outline_width': 1,
+    'color.notification_warning_icon_inner': roleEntry('on-surface')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the accordion family ~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // No disclosure widget (no twin): the values map Material's list roles -
+  // `outline-variant` rules, `surface` rows with the on-surface hover layer,
+  // a `secondary` focus, the 24px chevron in on-surface-variant, and the
+  // body-large title (each S)
+  Object.assign(out, {
+    'control.accordion_divider_width': 1,
+    'color.accordion_divider': roleEntry('outline-variant'),
+    'color.accordion_divider_hover': roleEntry('outline-variant'),
+    'control.accordion_flush_inset': 16,
+    'control.accordion_heading_padding_inline': 16,
+    'color.accordion_heading_label': roleEntry('on-surface'),
+    'color.accordion_heading_label_disabled': atOpacity(onSurfacePaint, 0.38),
+    'color.accordion_heading_container_hover': surfaceLayer(['hover']),
+    'color.accordion_focus': roleEntry('secondary'),
+    'control.accordion_focus_width': 2,
+    'control.accordion_icon_size': 24,
+    'control.accordion_icon_top': 2,
+    'color.accordion_icon': roleEntry('on-surface-variant'),
+    'color.accordion_icon_disabled': atOpacity(onSurfacePaint, 0.38),
+    'type.accordion_title': options.typeSet('body-large'),
+    'control.accordion_title_gap': 16,
+    'control.accordion_content_padding_top': 8,
+    'control.accordion_content_padding_bottom': 24,
+    'control.accordion_content_padding_end': 48,
+    'control.accordion_content_end_ratio': 0.25
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the breadcrumb family ~~~~~~~~~~~~~~~~~~~~~~~~~
+  // No breadcrumb twin (S): body-medium / label-medium type, on-surface-variant
+  // slash, on-surface current page, a primary overflow glyph pressed to
+  // on-surface, and the surface-container caret
+  Object.assign(out, {
+    'type.breadcrumb': options.typeSet('body-medium'),
+    'type.breadcrumb_small': options.typeSet('label-medium'),
+    'control.breadcrumb_gap': 8,
+    'control.breadcrumb_gap_small': 4,
+    'color.breadcrumb_separator': roleEntry('on-surface-variant'),
+    'color.breadcrumb_current': roleEntry('on-surface'),
+    'control.breadcrumb_link_min_width_small': 12,
+    'control.breadcrumb_overflow_width': 16,
+    'control.breadcrumb_overflow_height': 18,
+    'control.breadcrumb_overflow_height_small': 16,
+    'control.breadcrumb_overflow_icon_offset': 4,
+    'control.breadcrumb_overflow_underline_width': 12,
+    'control.breadcrumb_overflow_caret_size': 7,
+    'color.breadcrumb_overflow_icon': roleEntry('primary'),
+    'color.breadcrumb_overflow_icon_hover': roleEntry('primary'),
+    'color.breadcrumb_overflow_icon_active': roleEntry('on-surface'),
+    'color.breadcrumb_overflow_caret': roleEntry('surface-container'),
+    'control.breadcrumb_skeleton_width': 100,
+    'control.breadcrumb_skeleton_height': 16
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the text list family ~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // No typographic-list twin (S): body-large items in on-surface at Carbon's
+  // measures; the markers are text in the same label color
+  Object.assign(out, {
+    'type.text_list': options.typeSet('body-large'),
+    'type.text_list_expressive': options.typeSet('body-large'),
+    'color.text_list_label': roleEntry('on-surface'),
+    'control.text_list_indent': 16,
+    'control.text_list_nested_indent': 32,
+    'control.text_list_nested_item_padding': 4,
+    'control.text_list_marker_offset': 16,
+    'control.text_list_nested_marker_offset': 8,
+    'control.text_list_ordinal_offset': 24
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the contained list family ~~~~~~~~~~~~~~~~~~~~~
+  // No contained-list twin (S): the title-small header on `surface`,
+  // label-medium disclosed header in on-surface-variant, `outline-variant`
+  // rules, the body-large item with the list's own hover and pressed layers,
+  // and the 24px icon column
+  Object.assign(out, {
+    'type.contained_list_header': options.typeSet('title-small'),
+    'color.contained_list_header_container': roleEntry('surface'),
+    'color.contained_list_header_label': roleEntry('on-surface'),
+    'color.contained_list_divider': roleEntry('outline-variant'),
+    'control.contained_list_padding_inline': 16,
+    'control.contained_list_gap': 16,
+    'type.contained_list_header_disclosed': options.typeSet('label-medium'),
+    'color.contained_list_header_container_disclosed': roleEntry('surface'),
+    'color.contained_list_header_label_disclosed': roleEntry('on-surface-variant'),
+    'control.contained_list_header_height_disclosed': 40,
+    'color.contained_list_search_container': roleEntry('surface'),
+    'color.contained_list_search_border': roleEntry('outline-variant'),
+    'type.contained_list_item': options.typeSet('body-large'),
+    'color.contained_list_item_label': roleEntry('on-surface'),
+    'color.contained_list_item_label_disabled': atOpacity(onSurfacePaint, 0.38),
+    'color.contained_list_item_container_hover': listLayer(null, ['hover']),
+    'color.contained_list_item_container_active': listLayer(null, ['hover', 'pressed']),
+    'control.contained_list_action_space': 48,
+    'control.contained_list_icon_size': 24,
+    'control.contained_list_icon_gap': 8,
+    'control.contained_list_icon_top': 2
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: CopyButton and SkipToContent ~~~~~~~~~~~~~~~~~~
+  // The copy button is an icon button on `surface` with the state layers;
+  // the skip link (web only) is `surface` with on-surface-variant text under
+  // a `secondary` border, label-large (S)
+  Object.assign(out, {
+    'color.copy_button_container': roleEntry('surface'),
+    'color.copy_button_container_hover': surfaceLayer(['hover']),
+    'color.copy_button_container_active': surfaceLayer(['pressed']),
+    'control.skip_link_height': 48,
+    'control.skip_link_padding_inline': 16,
+    'control.skip_link_border_width': 4,
+    'color.skip_link_container': roleEntry('surface'),
+    'color.skip_link_label': roleEntry('on-surface-variant'),
+    'color.skip_link_border': roleEntry('secondary'),
+    'type.skip_link': options.typeSet('label-large')
+  });
+
+  // ~~~~~~~~~~~~~~~~~~~~ v9: the folded follow-ups ~~~~~~~~~~~~~~~~~~~~~~~~~
+  // (`## v9 Choice/Action Follow-Ups`): the selected list item presses its
+  // hover layer over the selected container; the extended fab's end padding
+  // is the measured 20 (`_shared.scss:61-65`); the popover caps at 368; the
+  // ComboBox geometry stands at Carbon's (S: no combobox twin)
+  Object.assign(out, {
+    'color.list_item_container_selected_active': layered(
+      required(paintOf(menuFile, 'list-item-selected-container-color'), 'menu selected container'),
+      [
+        [required(paintOf(listItem, 'list-item-hover-state-layer-color'), 'list item hover state layer'), numberToken(listItem, 'list-item-hover-state-layer-opacity')],
+        [required(paintOf(listItem, 'list-item-pressed-state-layer-color'), 'list item pressed state layer'), numberToken(listItem, 'list-item-pressed-state-layer-opacity')]
+      ]
+    ),
+    'control.fab_extended_padding_end': 20,
+    'control.popover_max_width': 368,
+    'control.combo_box_clear_size': 24,
+    'control.combo_box_clear_inset_end': 45,
+    'control.combo_box_input_padding_end': 70,
+    'control.combo_box_input_padding_end_invalid': 105,
+    'control.combo_box_invalid_icon_inset_end': 82
+  });
+
   // No elevation
   out['shadow.level_00'] = { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] };
 

@@ -159,7 +159,21 @@ const ANATOMY = {
   'anatomy.tag_selected_mark': 'shown',
   // v7 batch 6 B3 amendment: the chips draw their outline as an overlay
   // that moves nothing
-  'anatomy.tag_interactive_outline': 'inset'
+  'anatomy.tag_interactive_outline': 'inset',
+  // v9 (D32): Material's own widgets are drawn and its surfaces solid; the
+  // platform variants that would set `system` ship only on carbon
+  'anatomy.toggle_widget': 'drawn',
+  'anatomy.date_picker_widget': 'drawn',
+  'anatomy.time_picker_widget': 'drawn',
+  'anatomy.surface_material': 'solid',
+  // v9: md-tabs scrolls with no buttons, the segment's separator is its
+  // full-height outline, a selected segment draws its checkmark, the menu
+  // has no connector bar and the dialog fades nothing
+  'anatomy.tab_overflow': 'scroll',
+  'anatomy.content_switcher_separator': 'full',
+  'anatomy.content_switcher_selected_mark': 'shown',
+  'anatomy.overflow_menu_connector': 'hidden',
+  'anatomy.dialog_scroll_fade': 'hidden'
 };
 
 // --- Engine setup ---------------------------------------------------------

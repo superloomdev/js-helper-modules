@@ -4,18 +4,20 @@
 // @material/web@2.5.0 and @material/material-color-utilities@0.4.0, mapped
 // onto Superloom keys through data/mapping.js; icon literals from Material
 // Symbols (outlined). Keys Material has no concept for are completed from the
-// Superloom default template and listed in from_default.
+// Superloom default template and listed in from_default. Material ships no
+// variants (D24) and no `adaptive` key; `brands` ships the `rounded` layer.
 import light from './data/light.js';
 import dark from './data/dark.js';
 import lightMediumContrast from './data/light_medium_contrast.js';
 import lightHighContrast from './data/light_high_contrast.js';
 import darkMediumContrast from './data/dark_medium_contrast.js';
 import darkHighContrast from './data/dark_high_contrast.js';
+import brands from './brands.js';
 
 export default Object.freeze({
 
   id: 'material-v0_192',
-  contract_version: 8,
+  contract_version: 9,
 
   reference: {
     material_web: '@material/web@2.5.0',
@@ -32,6 +34,8 @@ export default Object.freeze({
     light_high_contrast: lightHighContrast,
     dark_medium_contrast: darkMediumContrast,
     dark_high_contrast: darkHighContrast
-  }
+  },
+
+  brands: brands
 
 });

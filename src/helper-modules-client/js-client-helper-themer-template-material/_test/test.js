@@ -102,8 +102,8 @@ describe('material template - profile identity', () => {
     assert.equal(profile.id, 'material-v0_192');
   });
 
-  it('should export contract_version 8', () => {
-    assert.equal(profile.contract_version, 8);
+  it('should export contract_version 9', () => {
+    assert.equal(profile.contract_version, 9);
   });
 
   it('should export reference with Material package versions', () => {
@@ -540,7 +540,16 @@ describe('material template - anatomy enums (v4)', () => {
     'anatomy.tag_close': 'inset',
     'anatomy.tag_selected_mark': 'shown',
     'anatomy.slider_focus': 'outline',
-    'anatomy.slider_disabled_paint': 'grouped'
+    'anatomy.slider_disabled_paint': 'grouped',
+    'anatomy.toggle_widget': 'drawn',
+    'anatomy.date_picker_widget': 'drawn',
+    'anatomy.time_picker_widget': 'drawn',
+    'anatomy.surface_material': 'solid',
+    'anatomy.tab_overflow': 'scroll',
+    'anatomy.content_switcher_separator': 'full',
+    'anatomy.content_switcher_selected_mark': 'shown',
+    'anatomy.overflow_menu_connector': 'hidden',
+    'anatomy.dialog_scroll_fade': 'hidden'
   };
 
   for (const schemeName of SCHEME_NAMES) {
@@ -697,10 +706,10 @@ describe('material template - every scheme resolves every token', () => {
     });
 
     for (const platform of ['native', 'web']) {
-      it('should emit a value for all 1239 tokens of ' + schemeName + ' on ' + platform, () => {
+      it('should emit a value for all ' + contractKeys.length + ' tokens of ' + schemeName + ' on ' + platform, () => {
         const built = Themer.buildTheme(profile.schemes[schemeName], [], platform);
         const names = Object.keys(built.tokens);
-        assert.equal(names.length, 1239);
+        assert.equal(names.length, contractKeys.length);
         const empty = names.filter((name) => built.tokens[name] === undefined || built.tokens[name] === null);
         assert.deepEqual(empty, [], schemeName + ' on ' + platform + ' resolves these tokens to nothing');
       });
@@ -1030,5 +1039,120 @@ describe('material template - contract v7 values', () => {
     assert.equal(built['color.link_focus_ring'], built['color.focus']);
     assert.equal(built['control.link_focus_width'], 3);
   });
+
+});
+
+describe('material template - v9 adaptive cells', () => {
+
+  for (const schemeName of SCHEME_NAMES) {
+
+    it('should answer the three adaptive cells in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      // D26: Material's touch anatomy is already at the 48dp floor, so its
+      // base answers the compact pin directly and ships no form variants
+      assert.equal(tokens['control.target_min'], 48);
+      assert.equal(tokens['control.text_scale_max'], 2);
+      assert.equal(tokens['type.selection_label'], '{type.body_compact_01}');
+      const built = Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens;
+      assert.equal(built['control.target_min'], 48);
+      assert.deepEqual(built['type.selection_label'], built['type.body_compact_01']);
+    });
+
+    it('should answer the v9 cells Material owns in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      assert.equal(tokens['control.tab_overflow_button_width'], 40);
+      assert.equal(tokens['control.menu_max_width'], 280);
+      assert.equal(tokens['control.dialog_width_ratio'], 1);
+      assert.equal(tokens['control.notification_inline_width'], 736);
+      assert.equal(tokens['control.breadcrumb_gap'], 8);
+      assert.equal(tokens['control.popover_max_width'], 368);
+      assert.equal(tokens['control.combo_box_clear_size'], 24);
+      assert.equal(tokens['control.combo_box_input_padding_end_invalid'], 105);
+      assert.equal(tokens['control.fab_extended_padding_end'], 20);
+      assert.equal(tokens['control.skip_link_height'], 48);
+      assert.equal(tokens['control.tab_vertical_list_ratio'], 0.25);
+      assert.equal(tokens['control.accordion_content_end_ratio'], 0.25);
+      assert.ok(tokens['color.list_item_container_selected_active'] !== undefined);
+    });
+
+    it('should complete the cells Material has no concept for in ' + schemeName, () => {
+      const tokens = profile.schemes[schemeName].tokens;
+      const defaultScheme = defaultProfile.schemes[profile.schemes[schemeName].polarity];
+      for (const name of profile.schemes[schemeName].from_default) {
+        assert.ok(name in tokens, name + ' listed in from_default but missing from tokens');
+        assert.deepEqual(tokens[name], defaultScheme.tokens[name], name + ' was not completed from the default template');
+      }
+      // Spot-check the shared stacking cell the Material grid cannot answer
+      assert.equal(tokens['stacking.skip_link'], defaultScheme.tokens['stacking.skip_link']);
+    });
+
+  }
+
+  it('should ship no variants and no adaptive options (D24)', () => {
+    for (const name of SCHEME_NAMES) {
+      assert.equal(profile.schemes[name].variants, undefined);
+    }
+    assert.equal(profile.adaptive, undefined);
+    // With no variants declared the variant option is a no-op
+    const built = Themer.buildTheme(profile.schemes.light, [], 'native', { variant: { form: 'compact' } });
+    assert.equal(built.tokens['control.field_height'], profile.schemes.light.tokens['control.field_height']);
+  });
+
+});
+
+describe('material template - v9 sample brands', () => {
+
+  it('should export the rounded brand only', () => {
+    assert.deepEqual(Object.keys(profile.brands), ['rounded']);
+  });
+
+  it('should hold valid layers whose tokens are all in the contract', () => {
+    for (const polarity of ['light', 'dark']) {
+      for (const name of Object.keys(profile.brands.rounded[polarity].tokens)) {
+        assert.ok(contract.tokens[name], 'brand token not in contract: ' + name);
+      }
+    }
+  });
+
+  it('should build every scheme under its brand with zero violations', () => {
+    for (const [schemeName, scheme] of Object.entries(profile.schemes)) {
+      const theme = Themer.buildTheme(scheme, [profile.brands.rounded[scheme.polarity]], 'native', { contrast: 'report' });
+      assert.equal(theme.violations.length, 0, schemeName + ': ' + JSON.stringify(theme.violations.slice(0, 3)));
+    }
+  });
+
+  it('should round the corners and switch the field to outline', () => {
+    const theme = Themer.buildTheme(profile.schemes.light, [profile.brands.rounded.light], 'native');
+    assert.equal(theme.tokens['feedback.field'], 'outline');
+    assert.equal(theme.tokens['shape.radius_00'], 8);
+  });
+
+});
+
+describe('material template - the variant option round-trips', () => {
+
+  const FORMS = [undefined, 'compact', 'medium', 'expanded'];
+  const PLATFORMS = [undefined, 'web', 'ios', 'android', 'macos', 'windows'];
+
+  for (const [schemeName, scheme] of Object.entries(profile.schemes)) {
+    for (const form of FORMS) {
+      for (const platform of PLATFORMS) {
+        it('should build ' + schemeName + ' under ' + (form || '-') + '/' + (platform || '-') + ' with zero violations', () => {
+          const variant = {};
+          if (form !== undefined) {
+            variant.form = form;
+          }
+          if (platform !== undefined) {
+            variant.platform = platform;
+          }
+          const theme = Themer.buildTheme(scheme, [], 'native', {
+            variant: Object.keys(variant).length ? variant : undefined,
+            contrast: 'report'
+          });
+          assert.equal(theme.violations.length, 0, schemeName + ': ' + JSON.stringify(theme.violations.slice(0, 4)));
+        });
+      }
+    }
+  }
 
 });
