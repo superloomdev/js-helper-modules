@@ -1398,7 +1398,8 @@ export default function buildMaterialGrid (options) {
     'control.notification_inline_width': 736,
     'control.notification_min_height': 48,
     'control.notification_details_inset': 13,
-    'control.notification_details_inset_end': 48,
+    // At md and up the close and the action sit in flow (_inline-notification.scss:268-310); compact draws the below-md wrap
+    'control.notification_details_inset_end': 13,
     'control.notification_icon_top': 14,
     'control.notification_toast_icon_top': 16,
     'control.notification_icon_gap': 16,
@@ -1406,7 +1407,7 @@ export default function buildMaterialGrid (options) {
     'control.notification_toast_text_padding_bottom': 23,
     'control.notification_title_gap': 4,
     'control.notification_action_height': 32,
-    'control.notification_action_inset': 40,
+    'control.notification_action_inset': 0,
     'color.notification_action_container_hover': layered(rolePaint('inverse-surface'), [[rolePaint('inverse-on-surface'), listHoverOpacity]]),
     'control.notification_toast_action_inset': 50,
     'control.notification_action_end_space': 8,
