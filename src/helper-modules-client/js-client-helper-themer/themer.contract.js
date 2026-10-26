@@ -378,7 +378,7 @@ const GRID = Object.freeze({
       'content_switcher_separator', 'content_switcher_separator_disabled',
       'content_switcher_focus', 'content_switcher_focus_inset',
       'content_switcher_icon', 'content_switcher_icon_hover', 'content_switcher_icon_only', 'content_switcher_icon_selected', 'content_switcher_icon_disabled',
-      'content_switcher_low_contrast_container', 'content_switcher_low_contrast_container_hover', 'content_switcher_low_contrast_container_selected',
+      'content_switcher_low_contrast_container', 'content_switcher_low_contrast_container_active', 'content_switcher_low_contrast_container_hover', 'content_switcher_low_contrast_container_selected',
       'content_switcher_low_contrast_outline', 'content_switcher_low_contrast_label_selected',
       'content_switcher_low_contrast_icon', 'content_switcher_low_contrast_icon_selected',
       // v9: the menu family's remaining members
