@@ -129,6 +129,8 @@ const VARIANTS = Object.freeze({
       'control.dialog_height_ratio_sm': 1,
       'control.dialog_height_ratio_lg': 1,
       'control.notification_inline_width': 288,
+      'control.notification_details_inset_end': 0,
+      'control.notification_action_inset': 40,
       'control.tab_vertical_list_ratio': 0.5,
       'control.accordion_content_end_ratio': 0
     })
