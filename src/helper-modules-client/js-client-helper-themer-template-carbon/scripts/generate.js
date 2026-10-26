@@ -625,6 +625,8 @@ function buildTokens (schemeName) {
     carbonContentSwitcher.contentSwitcherBackground[schemeName] || carbonContentSwitcher.contentSwitcherBackground.whiteTheme;
   tokens['color.content_switcher_low_contrast_container_hover'] =
     carbonContentSwitcher.contentSwitcherBackgroundHover[schemeName] || carbonContentSwitcher.contentSwitcherBackgroundHover.whiteTheme;
+  tokens['color.content_switcher_low_contrast_container_active'] =
+    carbonContentSwitcher.contentSwitcherBackgroundHover[schemeName] || carbonContentSwitcher.contentSwitcherBackgroundHover.whiteTheme;
   tokens['color.content_switcher_low_contrast_container_selected'] =
     carbonContentSwitcher.contentSwitcherSelected[schemeName] || carbonContentSwitcher.contentSwitcherSelected.whiteTheme;
 

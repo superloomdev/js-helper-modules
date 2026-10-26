@@ -5052,6 +5052,7 @@ export default Object.freeze({
     'color.content_switcher_icon_selected': '{color.icon_inverse}',
     'color.content_switcher_icon_disabled': '{color.icon_disabled}',
     'color.content_switcher_low_contrast_container': 'rgba(0, 0, 0, 0)',
+    'color.content_switcher_low_contrast_container_active': 'rgba(141, 141, 141, 0.12)',
     'color.content_switcher_low_contrast_container_hover': 'rgba(141, 141, 141, 0.12)',
     'color.content_switcher_low_contrast_container_selected': 'rgba(141, 141, 141, 0.24)',
     'color.content_switcher_low_contrast_outline': '{color.border_strong_01}',
@@ -8528,6 +8529,9 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.content_switcher_low_contrast_container': {
+      'group': 'color'
+    },
+    'color.content_switcher_low_contrast_container_active': {
       'group': 'color'
     },
     'color.content_switcher_low_contrast_container_hover': {

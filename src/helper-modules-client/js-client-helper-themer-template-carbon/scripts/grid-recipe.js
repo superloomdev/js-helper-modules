@@ -914,6 +914,7 @@ export default function buildGridRecipe (grid) {
     'color.content_switcher_icon_disabled': colorOf('icon_disabled'),
     // Recipe stand-ins; the generator writes the per-scheme component fills
     'color.content_switcher_low_contrast_container': colorOf('layer_02'),
+    'color.content_switcher_low_contrast_container_active': colorOf('layer_hover_02'),
     'color.content_switcher_low_contrast_container_hover': colorOf('layer_hover_02'),
     'color.content_switcher_low_contrast_container_selected': colorOf('layer_selected_inverse'),
     'color.content_switcher_low_contrast_outline': colorOf('border_strong_01'),
