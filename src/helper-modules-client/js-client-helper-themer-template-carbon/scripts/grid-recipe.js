@@ -424,7 +424,8 @@ export default function buildGridRecipe (grid) {
     // 4, body 8/48, the 64 footer filled edge to edge
     'color.dialog_scrim': colorOf('overlay'),
     'color.dialog_container': colorOf('layer_01'),
-    'color.dialog_border': colorOf('border_subtle_00'),
+    // _modal.scss:83 names $border-subtle-01, not the contextual $border-subtle
+    'color.dialog_border': colorOf('border_subtle_01'),
     'color.dialog_heading': colorOf('text_primary'),
     'color.dialog_body': colorOf('text_primary'),
     'control.dialog_border_width': '{border.width_01}',
@@ -914,6 +915,7 @@ export default function buildGridRecipe (grid) {
     'color.content_switcher_icon_disabled': colorOf('icon_disabled'),
     // Recipe stand-ins; the generator writes the per-scheme component fills
     'color.content_switcher_low_contrast_container': colorOf('layer_02'),
+    // Pressed is :hover + :focus upstream: ::after paints the hover over the hover fill (_content-switcher.scss:497-560)
     'color.content_switcher_low_contrast_container_active': colorOf('layer_hover_02'),
     'color.content_switcher_low_contrast_container_hover': colorOf('layer_hover_02'),
     'color.content_switcher_low_contrast_container_selected': colorOf('layer_selected_inverse'),
@@ -984,7 +986,8 @@ export default function buildGridRecipe (grid) {
     'control.notification_inline_width': 736,
     'control.notification_min_height': 48,
     'control.notification_details_inset': 13,
-    'control.notification_details_inset_end': 48,
+    // At md and up the close and the action sit in flow (_inline-notification.scss:268-310); compact draws the below-md wrap
+    'control.notification_details_inset_end': 13,
     'control.notification_icon_top': 14,
     'control.notification_toast_icon_top': 16,
     'control.notification_icon_gap': '{spacing.spacing_05}',
@@ -992,7 +995,7 @@ export default function buildGridRecipe (grid) {
     'control.notification_toast_text_padding_bottom': 23,
     'control.notification_title_gap': '{spacing.spacing_02}',
     'control.notification_action_height': 32,
-    'control.notification_action_inset': 40,
+    'control.notification_action_inset': 0,
     'color.notification_action_container_hover': colorOf('background_inverse_hover'),
     'control.notification_toast_action_inset': 50,
     'control.notification_action_end_space': '{spacing.spacing_03}',
