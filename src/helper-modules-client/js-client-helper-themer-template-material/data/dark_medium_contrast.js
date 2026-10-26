@@ -9162,7 +9162,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': '7fb5823e6b22811076142f5617a35317796a5ae6',
+    'default_shasum': '53a7ed60de720cb8d490aecc4e82e2276410ad81',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
