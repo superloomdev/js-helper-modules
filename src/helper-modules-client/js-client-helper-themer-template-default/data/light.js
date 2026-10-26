@@ -466,24 +466,14 @@ export default Object.freeze({
     'color.focus_inset': '#0f62fe',
     'color.focus_inverse': '#0f62fe',
     'color.highlight': '#0f62fe',
-    'color.link_inverse': {
-      'op': 'rampStep',
-      'args': [
-        7
-      ]
-    },
+    'color.link_inverse': '#78a9ff',
     'color.link_inverse_active': {
       'op': 'rampStep',
       'args': [
         7
       ]
     },
-    'color.link_inverse_hover': {
-      'op': 'rampStep',
-      'args': [
-        7
-      ]
-    },
+    'color.link_inverse_hover': '#a6c8ff',
     'color.link_inverse_visited': {
       'op': 'rampStep',
       'args': [
@@ -5958,6 +5948,7 @@ export default Object.freeze({
     'color.content_switcher_icon_selected': '{color.icon_inverse}',
     'color.content_switcher_icon_disabled': '{color.icon_disabled}',
     'color.content_switcher_low_contrast_container': '{color.layer_01}',
+    'color.content_switcher_low_contrast_container_active': '{color.content_switcher_low_contrast_container_hover}',
     'color.content_switcher_low_contrast_container_hover': '{color.layer_hover_01}',
     'color.content_switcher_low_contrast_container_selected': '{color.layer_selected_inverse}',
     'color.content_switcher_low_contrast_outline': '{color.border_strong_01}',
@@ -9484,6 +9475,9 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.content_switcher_low_contrast_container': {
+      'group': 'color'
+    },
+    'color.content_switcher_low_contrast_container_active': {
       'group': 'color'
     },
     'color.content_switcher_low_contrast_container_hover': {

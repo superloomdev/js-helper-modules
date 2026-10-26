@@ -350,6 +350,8 @@ const HUE_ROLES = {
   light: {
     'color.link_primary': '{color.interactive}',
     'color.link_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 60] },
+    'color.link_inverse': '#78a9ff',
+    'color.link_inverse_hover': '#a6c8ff',
     'color.button_tertiary': '{color.interactive}',
     'color.support_info': '{color.interactive}',
     'color.support_error': '{color.button_danger_primary}',
@@ -363,6 +365,8 @@ const HUE_ROLES = {
   dark: {
     'color.link_primary': { op: 'mix', args: ['color.interactive', 'color.text_primary', 50] },
     'color.link_primary_hover': { op: 'mix', args: ['color.interactive', 'color.text_primary', 30] },
+    'color.link_inverse': '#0f62fe',
+    'color.link_inverse_hover': '#0043ce',
     // Hover and press darken a filled kind in both polarities, so white text keeps reading on it; the
     // outlined kind's fill lightens in the dark scheme, where its label turns to the inverse text
     'color.button_primary_hover': { op: 'mix', args: ['color.interactive', 'color.background', 85] },

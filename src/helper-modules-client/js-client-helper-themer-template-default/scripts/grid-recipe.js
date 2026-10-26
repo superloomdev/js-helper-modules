@@ -859,6 +859,7 @@ export default function buildGridRecipe (grid) {
     'color.content_switcher_icon_selected': colorOf('icon_inverse'),
     'color.content_switcher_icon_disabled': colorOf('icon_disabled'),
     'color.content_switcher_low_contrast_container': colorOf('layer_01'),
+    'color.content_switcher_low_contrast_container_active': '{color.content_switcher_low_contrast_container_hover}',
     'color.content_switcher_low_contrast_container_hover': colorOf('layer_hover_01'),
     'color.content_switcher_low_contrast_container_selected': colorOf('layer_selected_inverse'),
     'color.content_switcher_low_contrast_outline': colorOf('border_strong_01'),
