@@ -2765,7 +2765,7 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 14,
       'line_height_px': 20,
-      'letter_spacing': 0.1,
+      'letter_spacing': 0,
       'weight': 500,
       'font_family': 'sans'
     },
@@ -2925,6 +2925,7 @@ export default Object.freeze({
       ]
     },
     'color.content_switcher_low_contrast_container': 'rgba(0, 0, 0, 0)',
+    'color.content_switcher_low_contrast_container_active': '{color.content_switcher_low_contrast_container_hover}',
     'color.content_switcher_low_contrast_container_hover': '{color.content_switcher_container_hover}',
     'color.content_switcher_low_contrast_container_selected': '{color.content_switcher_container_selected}',
     'color.content_switcher_low_contrast_outline': '{color.content_switcher_outline}',
@@ -7508,6 +7509,9 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.content_switcher_low_contrast_container': {
+      'group': 'color'
+    },
+    'color.content_switcher_low_contrast_container_active': {
       'group': 'color'
     },
     'color.content_switcher_low_contrast_container_hover': {

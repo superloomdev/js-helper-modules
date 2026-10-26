@@ -1204,7 +1204,8 @@ export default function buildMaterialGrid (options) {
     'control.fab_radius_large': radiusOf('fab-surface-large', 'container-shape'),
     'shadow.fab': elevation('fab-surface', 'container-elevation'),
     'shadow.fab_hover': elevation('fab-surface', 'hover-container-elevation'),
-    'type.fab_label': options.typeSet(required(read('extended-fab-surface', 'label-text-font'), 'extended fab label').typescale),
+    // md-fab's label reads only label-text-{font,size,line-height,weight} (fab/internal/_shared.scss:138-146), so it carries no tracking
+    'type.fab_label': Object.assign({}, options.typeSet(required(read('extended-fab-surface', 'label-text-font'), 'extended fab label').typescale), { letter_spacing: 0 }),
     // census: the extended fab pads 16 around its content, 12 before the label
     'control.fab_extended_padding': 16,
     'control.fab_label_gap': 12,
@@ -1319,6 +1320,7 @@ export default function buildMaterialGrid (options) {
     'color.content_switcher_icon_disabled': translucent(segmented, 'disabled-icon-color', 'disabled-icon-opacity'),
     // No low-contrast segment in Material (S): the cells alias the regular ones
     'color.content_switcher_low_contrast_container': NONE,
+    'color.content_switcher_low_contrast_container_active': '{color.content_switcher_low_contrast_container_hover}',
     'color.content_switcher_low_contrast_container_hover': '{color.content_switcher_container_hover}',
     'color.content_switcher_low_contrast_container_selected': '{color.content_switcher_container_selected}',
     'color.content_switcher_low_contrast_outline': '{color.content_switcher_outline}',
