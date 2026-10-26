@@ -3581,12 +3581,7 @@ export default Object.freeze({
         7
       ]
     },
-    'color.link_inverse_hover': {
-      'op': 'rampStep',
-      'args': [
-        7
-      ]
-    },
+    'color.link_inverse_hover': '#a6c8ff',
     'color.link_inverse_visited': {
       'op': 'rampStep',
       'args': [
@@ -9174,7 +9169,7 @@ export default Object.freeze({
   ],
   'provenance': {
     'default_version': '1.0.0',
-    'default_shasum': 'b619cbede8ef3005eef3dea1814b3477d736e443',
+    'default_shasum': '7fb5823e6b22811076142f5617a35317796a5ae6',
     'generator_schema': 'v3',
     'icons': {
       'package': '@material-symbols/svg-400',
