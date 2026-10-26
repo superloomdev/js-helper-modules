@@ -5958,7 +5958,7 @@ export default Object.freeze({
     'color.menu_border': '{color.border_subtle_00}',
     'color.menu_container_background': '{color.background}',
     'color.menu_item_danger_focus_inset': '{color.background}',
-    'color.menu_item_container_selected': '{color.list_container}',
+    'color.menu_item_container_selected': 'rgba(0, 0, 0, 0)',
     'color.menu_item_label_selected': '{color.list_item_label}',
     'color.overflow_menu_trigger_hover': '{color.background_hover}',
     'color.overflow_menu_trigger_open': '{color.layer_01}',
@@ -6395,7 +6395,14 @@ export default Object.freeze({
     'type.contained_list_header': '{type.heading_compact_01}',
     'type.contained_list_header_disclosed': '{type.label01}',
     'type.contained_list_item': '{type.body01}',
-    'type.skip_link': '{type.body_compact_01}',
+    'type.skip_link': {
+      'type_set': true,
+      'font_size': 16,
+      'line_height_px': 16,
+      'letter_spacing': 0,
+      'weight': 400,
+      'font_family': 'sans'
+    },
     'shadow.level_00': {
       'shadow': true,
       'layers': [

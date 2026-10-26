@@ -662,7 +662,7 @@ describe('default template - v9 adaptive cells', () => {
       assert.equal(tokens['control.breadcrumb_skeleton_height'], '{spacing.spacing_05}');
       assert.equal(tokens['type.breadcrumb'], '{type.body_compact_01}');
       assert.equal(tokens['control.skip_link_height'], 48);
-      assert.equal(tokens['type.skip_link'], '{type.body_compact_01}');
+      assert.deepEqual(tokens['type.skip_link'], { type_set: true, font_size: 16, line_height_px: 16, letter_spacing: 0, weight: 400, font_family: 'sans' });
       // `_list.scss:58-73` parks the ordinal counter at -24px, not spacing_08
       assert.equal(tokens['control.text_list_ordinal_offset'], 24);
       assert.equal(Themer.buildTheme(profile.schemes[schemeName], [], 'native').tokens['control.text_list_ordinal_offset'], 24);

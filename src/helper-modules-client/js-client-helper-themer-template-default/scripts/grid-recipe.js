@@ -885,7 +885,8 @@ export default function buildGridRecipe (grid) {
     'color.menu_container_background': colorOf('background'),
     'control.menu_item_danger_focus_inset_width': 3,
     'color.menu_item_danger_focus_inset': colorOf('background'),
-    'color.menu_item_container_selected': '{color.list_container}',
+    // Upstream paints no fill on a checked menu item (radio or selectable); the mark is the selection
+    'color.menu_item_container_selected': NONE,
     'color.menu_item_label_selected': '{color.list_item_label}',
     'control.menu_divider_margin_block': '{spacing.spacing_02}',
     'control.menu_button_min_width': 192,
@@ -1047,7 +1048,8 @@ export default function buildGridRecipe (grid) {
     'color.skip_link_container': colorOf('background'),
     'color.skip_link_label': colorOf('text_secondary'),
     'color.skip_link_border': colorOf('focus'),
-    'type.skip_link': '{type.body_compact_01}',
+    // The link sets no type: it inherits Carbon's reset (html font-size 100%, body line-height 1; _header.scss:27-28,436-464)
+    'type.skip_link': { type_set: true, font_size: 16, line_height_px: 16, letter_spacing: 0, weight: 400, font_family: 'sans' },
     // v9 follow-ups (`## v9 Choice/Action Follow-Ups`): the selected item's
     // pressed face is the unselected one's; the extended fab's end padding
     // follows its block padding; the popover's 368 ceiling; the ComboBox's
