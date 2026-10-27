@@ -80,7 +80,6 @@
 #   43b. test-client-themer-ext-react → publish-client-themer-ext-react
 #   43c. test-client-themer-template-default → publish-client-themer-template-default
 #   43d. test-client-themer-template-carbon → publish-client-themer-template-carbon
-#   43e. test-client-themer-template-material → publish-client-themer-template-material
 #   44. test-react-idle → publish-react-idle
 #   45. test-react-timer → publish-react-timer
 #   46. test-client-kv-localstorage → publish-client-kv-localstorage
@@ -179,7 +178,10 @@ jobs:
             | sort -u)
 
           # Step 2: Find every module on disk (canonical list)
-          ALL_MODULES=$(ls -d src/helper-modules-*/js-* 2>/dev/null | sort -u)
+          # A module folder carrying ARCHIVED.md is frozen, not scanned
+          ALL_MODULES=$(for DIR in src/helper-modules-*/js-*; do
+            [ -f "$DIR/ARCHIVED.md" ] || echo "$DIR"
+          done | sort -u)
 
           # Step 3: Build PUBLISH_MODULES via shasum comparison.
           # A module needs publishing if its packed content differs from the registry
@@ -3397,61 +3399,6 @@ jobs:
       - uses: ./.github/actions/publish-guard
         with:
           working-directory: src/helper-modules-client/js-client-helper-themer-template-carbon
-  # ###########################################################################
-  #   MODULE 43e: js-client-helper-themer-template-material
-  #   (needs helper-themer, helper-themer-template-default, helper-utils, helper-debug)
-  #   Class G data pack - Material Design 3 reference template
-  # ###########################################################################
-
-  test-client-themer-template-material:
-    needs: [detect, publish-client-themer-template-default]
-    if: |
-      always() &&
-      !cancelled() &&
-      needs.detect.result == 'success' &&
-      contains(fromJSON(needs.detect.outputs.test_modules), 'src/helper-modules-client/js-client-helper-themer-template-material')
-    runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          registry-url: 'https://npm.pkg.github.com'
-      - name: Install and test
-        working-directory: src/helper-modules-client/js-client-helper-themer-template-material
-        run: |
-          npm install
-          npm run lint --if-present
-          cd _test && npm install && npm test
-
-  publish-client-themer-template-material:
-    needs: [detect, test-client-themer-template-material]
-    if: |
-      !cancelled() &&
-      needs.detect.result == 'success' &&
-      needs['test-client-themer-template-material'].result == 'success' &&
-      needs.detect.outputs.publish_modules != '[]' &&
-      needs.detect.outputs.publish_modules != '' &&
-      contains(fromJSON(needs.detect.outputs.publish_modules), 'src/helper-modules-client/js-client-helper-themer-template-material')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          registry-url: 'https://npm.pkg.github.com'
-      - name: Pin npm to v10
-        run: npm install -g npm@10
-      - uses: ./.github/actions/publish-guard
-        with:
-          working-directory: src/helper-modules-client/js-client-helper-themer-template-material
   # ╔═══════════════════════════════════════════════════════════════════════════╗
   # ║  GROUP 3 (continued): NEW CLIENT MODULES                                 ║
   # ║  Class I framework modules + Class E/F storage                            ║
