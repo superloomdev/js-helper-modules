@@ -881,9 +881,10 @@ export default function buildGridRecipe (grid) {
     // clamp
     'control.menu_max_width': 288,
     'control.menu_viewport_margin': '{spacing.spacing_03}',
-    'control.menu_submenu_offset_end': -6,
-    'control.menu_submenu_offset_start': 10,
-    'control.menu_submenu_offset_block': -6,
+    // Rendered: floating-ui offset(-6/+10 main, -6 cross) plus the submenu Menu's 8 px fitValue floor (MenuItem.js:46-51, Menu.js:113-148); measured panel at item right +2, top +2
+    'control.menu_submenu_offset_end': 2,
+    'control.menu_submenu_offset_start': 2,
+    'control.menu_submenu_offset_block': 2,
     'color.menu_border': colorOf('border_subtle_00'),
     'color.menu_container_background': colorOf('background'),
     'control.menu_item_danger_focus_inset_width': 3,
