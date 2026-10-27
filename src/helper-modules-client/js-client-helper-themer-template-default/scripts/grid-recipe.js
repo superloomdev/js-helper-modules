@@ -1054,6 +1054,8 @@ export default function buildGridRecipe (grid) {
     'color.skip_link_border': colorOf('focus'),
     // The link sets no type: it inherits Carbon's reset (html font-size 100%, body line-height 1; _header.scss:27-28,436-464)
     'type.skip_link': { type_set: true, font_size: 16, line_height_px: 16, letter_spacing: 0, weight: 400, font_family: 'sans' },
+    // The upstream term is a <button> that resets font-family and font-size but not line-height, so it lays out at the face's normal line height (_definition-tooltip.scss; measured 21 box with a 1 px border)
+    'type.definition_term': { type_set: true, font_size: 16, line_height_px: 20, letter_spacing: 0, weight: 400, font_family: 'sans' },
     // v9 follow-ups (`## v9 Choice/Action Follow-Ups`): the selected item's
     // pressed face is the unselected one's; the extended fab's end padding
     // follows its block padding; the popover's 368 ceiling; the ComboBox's

@@ -5950,7 +5950,7 @@ export default Object.freeze({
     'color.content_switcher_low_contrast_container': '{color.layer_01}',
     'color.content_switcher_low_contrast_container_active': '{color.content_switcher_low_contrast_container_hover}',
     'color.content_switcher_low_contrast_container_hover': '{color.layer_hover_01}',
-    'color.content_switcher_low_contrast_container_selected': '{color.layer_selected_inverse}',
+    'color.content_switcher_low_contrast_container_selected': '#ffffff',
     'color.content_switcher_low_contrast_outline': '{color.border_strong_01}',
     'color.content_switcher_low_contrast_label_selected': '{color.text_primary}',
     'color.content_switcher_low_contrast_icon': '{color.icon_secondary}',
@@ -6399,6 +6399,14 @@ export default Object.freeze({
       'type_set': true,
       'font_size': 16,
       'line_height_px': 16,
+      'letter_spacing': 0,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.definition_term': {
+      'type_set': true,
+      'font_size': 16,
+      'line_height_px': 20,
       'letter_spacing': 0,
       'weight': 400,
       'font_family': 'sans'
@@ -10754,6 +10762,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.skip_link': {
+      'group': 'typeSet'
+    },
+    'type.definition_term': {
       'group': 'typeSet'
     },
     'shadow.level_00': {

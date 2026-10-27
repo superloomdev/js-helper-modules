@@ -835,6 +835,10 @@ function buildTokens (polarity) {
     }
   }
 
+  // default follows carbon's contentSwitcherSelected: a dark fill under the
+  // dark text_primary label read 1:1 (plan 0160 m5-amend-5)
+  tokens['color.content_switcher_low_contrast_container_selected'] = polarity === 'dark' ? 'rgba(141, 141, 141, 0.24)' : '#ffffff';
+
   return tokens;
 }
 
