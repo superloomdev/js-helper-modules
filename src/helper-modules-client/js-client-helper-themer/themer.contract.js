@@ -611,7 +611,7 @@ const GRID = Object.freeze({
     'breadcrumb', 'breadcrumb_small',
     'text_list', 'text_list_expressive',
     'contained_list_header', 'contained_list_header_disclosed', 'contained_list_item',
-    'skip_link'
+    'skip_link', 'definition_term'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
