@@ -1006,10 +1006,10 @@ export default function buildGridRecipe (grid) {
     'type.text_list_expressive': '{type.body02}',
     'color.text_list_label': colorOf('text_primary'),
     'control.text_list_indent': '{spacing.spacing_05}',
-    'control.text_list_nested_indent': '{spacing.spacing_10}',
+    'control.text_list_nested_indent': '{spacing.spacing_07}', // _list.scss .cds--list--nested margin-inline-start 2rem
     'control.text_list_nested_item_padding': '{spacing.spacing_02}',
     'control.text_list_marker_offset': '{spacing.spacing_05}',
-    'control.text_list_nested_marker_offset': '{spacing.spacing_03}',
+    'control.text_list_nested_marker_offset': '{spacing.spacing_04}', // _list.scss nested square inset-inline-start -$spacing-04
     'control.text_list_ordinal_offset': 24,
     // v9 Contained list family (`contained-list/_contained-list.scss`,
     // superloom_decision): the sticky header on $layer-background (leveled),
@@ -1025,7 +1025,7 @@ export default function buildGridRecipe (grid) {
     'type.contained_list_header_disclosed': '{type.label01}',
     'color.contained_list_header_container_disclosed': colorOf('layer_01'),
     'color.contained_list_header_label_disclosed': colorOf('text_secondary'),
-    'control.contained_list_header_height_disclosed': 40,
+    'control.contained_list_header_height_disclosed': '{spacing.spacing_07}', // _contained-list.scss:144-150 block-size $spacing-07
     'color.contained_list_search_container': colorOf('background'),
     'color.contained_list_search_border': colorOf('border_subtle_00'),
     'type.contained_list_item': '{type.body01}',
@@ -1033,7 +1033,7 @@ export default function buildGridRecipe (grid) {
     'color.contained_list_item_label_disabled': colorOf('text_disabled'),
     'color.contained_list_item_container_hover': colorOf('layer_hover_01'),
     'color.contained_list_item_container_active': colorOf('layer_active_01'),
-    'control.contained_list_action_space': 48,
+    'control.contained_list_action_space': '{spacing.spacing_10}', // _contained-list.scss:241-244 padding-inline-end $spacing-10
     'control.contained_list_icon_size': 16,
     'control.contained_list_icon_gap': '{spacing.spacing_03}',
     'control.contained_list_icon_top': 2,
