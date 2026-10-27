@@ -5230,6 +5230,14 @@ export default Object.freeze({
       'weight': 400,
       'font_family': 'sans'
     },
+    'type.definition_term': {
+      'type_set': true,
+      'font_size': 16,
+      'line_height_px': 20,
+      'letter_spacing': 0,
+      'weight': 400,
+      'font_family': 'sans'
+    },
     'color.list_item_container_selected_active': '{color.list_item_container_active}',
     'control.fab_extended_padding_end': '{control.fab_extended_padding}',
     'control.popover_max_width': 368,
@@ -9808,6 +9816,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.skip_link': {
+      'group': 'typeSet'
+    },
+    'type.definition_term': {
       'group': 'typeSet'
     },
     'shadow.level_00': {
