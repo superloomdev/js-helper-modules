@@ -1,8 +1,0 @@
-scripts/
-_test/
-docs/
-eslint.config.js
-.gitignore
-
-# Local npm pack output
-*.tgz
