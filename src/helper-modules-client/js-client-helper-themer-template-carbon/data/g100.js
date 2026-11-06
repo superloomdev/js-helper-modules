@@ -5165,7 +5165,14 @@ export default Object.freeze({
     'control.accordion_content_padding_end': '{spacing.spacing_12}',
     'control.accordion_content_end_ratio': 0.25,
     'type.breadcrumb': '{type.body_compact_01}',
-    'type.breadcrumb_small': '{type.label01}',
+    'type.breadcrumb_small': {
+      'type_set': true,
+      'font_size': 12,
+      'line_height_px': 16,
+      'letter_spacing': 0.16,
+      'weight': 400,
+      'font_family': 'sans'
+    },
     'control.breadcrumb_gap': '{spacing.spacing_03}',
     'control.breadcrumb_gap_small': '{spacing.spacing_02}',
     'color.breadcrumb_separator': '{color.text_primary}',

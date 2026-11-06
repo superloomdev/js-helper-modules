@@ -1037,7 +1037,7 @@ export default function buildGridRecipe (grid) {
     // glyph moved 4 down with a 12x1 underline and the menu's 7px caret in
     // $field, and the 100x16 skeleton
     'type.breadcrumb': '{type.body_compact_01}',
-    'type.breadcrumb_small': '{type.label01}',
+    'type.breadcrumb_small': { type_set: true, font_size: 12, line_height_px: 16, letter_spacing: 0.16, weight: 400, font_family: 'sans' }, // _breadcrumb.scss:33-39 label-01 size under font: inherit; .cds--link keeps body-compact-01's 0.16
     'control.breadcrumb_gap': '{spacing.spacing_03}',
     'control.breadcrumb_gap_small': '{spacing.spacing_02}',
     'color.breadcrumb_separator': colorOf('text_primary'),
