@@ -614,7 +614,7 @@ export default function buildGridRecipe (grid) {
     'color.field_leading_icon': colorOf('icon_secondary'),
     'color.field_action_container_hover': colorOf('field_hover_01'),
     'color.field_action_container_active': colorOf('background_selected'),
-    // census PasswordInput: material and default alias the family cells
+    // census PasswordInput: the default aliases the family cells
     'color.password_toggle_container_hover': '{color.field_action_container_hover}',
     'color.password_toggle_container_active': '{color.field_action_container_active}',
     // v8 Field skeleton (census TextInputSkeleton): the label block is 75 x 14

@@ -859,25 +859,25 @@ export default Object.freeze({
     'color.notification_background_error': {
       'op': 'rampStep',
       'args': [
-        2
+        1
       ]
     },
     'color.notification_background_info': {
       'op': 'rampStep',
       'args': [
-        2
+        1
       ]
     },
     'color.notification_background_success': {
       'op': 'rampStep',
       'args': [
-        2
+        1
       ]
     },
     'color.notification_background_warning': {
       'op': 'rampStep',
       'args': [
-        2
+        1
       ]
     },
     'color.tag_background_blue': {

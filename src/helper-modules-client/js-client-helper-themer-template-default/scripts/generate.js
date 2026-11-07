@@ -551,9 +551,11 @@ function colorStep (name) {
   if (/^color\.button_(disabled|separator)/.test(name)) {
     return 3;
   }
-  // Notification backgrounds: step 2
+  // Notification low-contrast fills: the first layer step, where the
+  // template's hues (interactive, the semantic three) read at 4.5:1 - the
+  // only step they are promised to read on
   if (/^color\.notification_background/.test(name)) {
-    return 2;
+    return 1;
   }
   if (/^color\.notification_action/.test(name)) {
     return 4;
