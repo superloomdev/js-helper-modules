@@ -14,7 +14,7 @@ import brands from './brands.js';
 
 export default Object.freeze({
   id: 'carbon-v11',
-  contract_version: 9,
+  contract_version: 10,
   reference: {
     themes: '@carbon/themes@11.80.0',
     type: '@carbon/type@11.66.0',

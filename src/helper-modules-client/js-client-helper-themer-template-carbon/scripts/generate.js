@@ -168,6 +168,7 @@ const VARIANTS = Object.freeze({
       'control.notification_details_inset_end': 0,
       'control.notification_action_inset': 40,
       'control.tab_vertical_list_ratio': 0.5,
+      'control.file_uploader_name_max_width': 216,
       'control.accordion_content_end_ratio': 0
     })
   }),
@@ -627,13 +628,6 @@ function buildTokens (schemeName) {
     carbonContentSwitcher.contentSwitcherBackground[schemeName] || carbonContentSwitcher.contentSwitcherBackground.whiteTheme;
   tokens['color.content_switcher_low_contrast_container_hover'] =
     carbonContentSwitcher.contentSwitcherBackgroundHover[schemeName] || carbonContentSwitcher.contentSwitcherBackgroundHover.whiteTheme;
-  // Pressed is :hover + :focus upstream (_content-switcher.scss:497-560):
-  // the hover fill composited over itself - rgba(r,g,b,1-(1-a)^2), an
-  // opaque hover unchanged
-  const hover = carbonContentSwitcher.contentSwitcherBackgroundHover[schemeName] || carbonContentSwitcher.contentSwitcherBackgroundHover.whiteTheme;
-  const rgba = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/.exec(hover);
-  tokens['color.content_switcher_low_contrast_container_active'] =
-    rgba === null ? hover : 'rgba(' + rgba[1] + ', ' + rgba[2] + ', ' + rgba[3] + ', ' + parseFloat((1 - Math.pow(1 - parseFloat(rgba[4]), 2)).toFixed(6)) + ')';
   tokens['color.content_switcher_low_contrast_container_selected'] =
     carbonContentSwitcher.contentSwitcherSelected[schemeName] || carbonContentSwitcher.contentSwitcherSelected.whiteTheme;
 

@@ -916,7 +916,6 @@ export default function buildGridRecipe (grid) {
     // Recipe stand-ins; the generator writes the per-scheme component fills
     'color.content_switcher_low_contrast_container': colorOf('layer_02'),
     // Pressed is :hover + :focus upstream: ::after paints the hover over the hover fill (_content-switcher.scss:497-560)
-    'color.content_switcher_low_contrast_container_active': colorOf('layer_hover_02'),
     'color.content_switcher_low_contrast_container_hover': colorOf('layer_hover_02'),
     'color.content_switcher_low_contrast_container_selected': colorOf('layer_selected_inverse'),
     'color.content_switcher_low_contrast_outline': colorOf('border_strong_01'),
@@ -1123,6 +1122,252 @@ export default function buildGridRecipe (grid) {
     'control.combo_box_input_padding_end': 70,
     'control.combo_box_input_padding_end_invalid': 105,
     'control.combo_box_invalid_icon_inset_end': 82,
+    // v10 Tile family (`tile/_tile.scss:39-336, Tile.js:101-482`)
+    'color.tile_container': colorOf('layer_01'), // _tile.scss:39-55
+    'control.tile_padding': '{spacing.spacing_05}', // _tile.scss:39-55
+    'control.tile_min_height': 64, // _tile.scss:39-55
+    'control.tile_min_width': 128, // _tile.scss:39-55
+    'type.tile': '{type.body_compact_01}', // _tile.scss:39-55
+    'color.tile_label': colorOf('text_primary'), // _tile.scss:39-55
+    'color.tile_focus': colorOf('focus'), // _tile.scss:39-55
+    'control.tile_focus_width': '{focus.width}', // _tile.scss:39-55
+    'color.tile_container_hover': colorOf('layer_hover_01'), // _tile.scss:71-74
+    'color.tile_label_disabled': colorOf('text_disabled'), // _tile.scss:76-157
+    'control.tile_icon_size': 20, // _tile.scss:76-157
+    'control.tile_icon_inset': '{spacing.spacing_04}', // _tile.scss:76-157
+    'color.tile_icon': colorOf('icon_interactive'), // _tile.scss:76-157
+    'color.tile_icon_disabled': colorOf('icon_disabled'), // _tile.scss:76-157
+    'control.tile_border_width': '{border.width_01}', // _tile.scss:159-204
+    'control.tile_mark_space': '{spacing.spacing_09}', // _tile.scss:159-204
+    'control.tile_mark_size': 16, // _tile.scss:159-204
+    'control.tile_mark_inset': '{spacing.spacing_05}', // _tile.scss:159-204
+    'color.tile_mark': colorOf('icon_secondary'), // _tile.scss:159-204
+    'color.tile_mark_selected': colorOf('icon_primary'), // _tile.scss:338-389
+    'color.tile_mark_disabled': colorOf('icon_disabled'), // _tile.scss:338-389
+    'color.tile_border_selected': colorOf('layer_selected_inverse'), // _tile.scss:338-389
+    'color.tile_border_selected_disabled': colorOf('border_disabled'), // _tile.scss:338-389
+    'control.tile_chevron_seat': 48, // _tile.scss:206-336
+    'color.tile_chevron': colorOf('icon_primary'), // _tile.scss:206-336
+    // v10 Pagination family (`pagination/_pagination.scss:31-281, _pagination-nav.scss:74-120, _mixins.scss:14-33`)
+    'color.pagination_container': colorOf('layer_01'), // _pagination.scss:31-67
+    'color.pagination_divider': colorOf('border_subtle_00'), // _pagination.scss:31-67
+    'control.pagination_divider_width': '{border.width_01}', // _pagination.scss:31-67
+    'type.pagination': '{type.body_compact_01}', // _pagination.scss:31-67
+    'color.pagination_label': colorOf('text_primary'), // _pagination.scss:135-212
+    'color.pagination_count_label': colorOf('text_secondary'), // _pagination.scss:135-212
+    'control.pagination_padding_inline': '{spacing.spacing_05}', // _pagination.scss:135-212
+    'control.pagination_text_gap': '{spacing.spacing_05}', // _pagination.scss:135-212
+    'control.pagination_select_padding_start': '{spacing.spacing_05}', // _pagination.scss:71-133
+    'control.pagination_select_padding_end': 36, // _pagination.scss:71-133
+    'color.pagination_select_container_hover': colorOf('layer_hover_01'), // _pagination.scss:71-133
+    'color.pagination_button_icon': colorOf('icon_primary'), // _pagination.scss:214-274
+    'color.pagination_button_icon_disabled': colorOf('icon_disabled'), // _pagination.scss:214-274
+    'color.pagination_button_container_hover': colorOf('layer_hover_01'), // _pagination.scss:214-274
+    'control.pagination_collapse_width': 672, // _pagination.scss:53-67
+    'type.pagination_nav_page': { type_set: true, font_size: 14, line_height_px: 14, letter_spacing: 0.16, weight: 400, font_family: 'sans' }, // _pagination-nav.scss:74-120
+    'type.pagination_nav_page_active': { type_set: true, font_size: 14, line_height_px: 14, letter_spacing: 0.16, weight: 600, font_family: 'sans' }, // _pagination-nav.scss:74-120
+    'color.pagination_nav_page_label': colorOf('text_primary'), // _pagination-nav.scss:74-120
+    'color.pagination_nav_page_label_disabled': { op: 'alpha', args: ['color.text_secondary', 0.5] }, // _pagination-nav.scss:74-120
+    'color.pagination_nav_page_container_hover': colorOf('background_hover'), // _pagination-nav.scss:74-120
+    'control.pagination_nav_page_padding_inline': '{spacing.spacing_02}', // _pagination-nav.scss:74-120
+    'control.pagination_nav_indicator_width': 16, // _mixins.scss:14-33
+    'control.pagination_nav_indicator_height': 4, // _mixins.scss:14-33
+    'color.pagination_nav_indicator': colorOf('border_interactive'), // _mixins.scss:14-33
+    'color.pagination_nav_focus': colorOf('focus'), // _pagination-nav.scss:74-120
+    'control.pagination_nav_focus_width': '{focus.width}', // _pagination-nav.scss:74-120
+    'control.pagination_skeleton_width_short': 35, // _pagination.scss:278-281
+    'control.pagination_skeleton_width_medium': 70, // _pagination.scss:278-281
+    'control.pagination_skeleton_width_long': 105, // _pagination.scss:278-281
+    // v10 Tree family (`treeview/_treeview.scss:29-286, TreeNode.js:257-268`)
+    'color.tree_node_container': colorOf('layer_01'), // _treeview.scss:29-44
+    'color.tree_node_container_hover': colorOf('layer_hover_01'), // _treeview.scss:139-161
+    'color.tree_node_container_selected': colorOf('layer_selected_01'), // _treeview.scss:229-247
+    'color.tree_node_container_selected_hover': colorOf('layer_selected_hover_01'), // _treeview.scss:229-247
+    'color.tree_node_label': colorOf('text_secondary'), // _treeview.scss:29-44
+    'color.tree_node_label_hover': colorOf('text_primary'), // _treeview.scss:139-161
+    'color.tree_node_label_selected': colorOf('text_primary'), // _treeview.scss:229-247
+    'color.tree_node_icon': colorOf('icon_secondary'), // _treeview.scss:216-227
+    'color.tree_node_icon_hover': colorOf('icon_primary'), // _treeview.scss:216-227
+    'color.tree_node_indicator': colorOf('interactive'), // _treeview.scss:249-262
+    'control.tree_node_indicator_width': 4, // _treeview.scss:249-262
+    'color.tree_node_container_disabled': colorOf('field_01'), // _treeview.scss:70-103
+    'color.tree_node_label_disabled': colorOf('text_disabled'), // _treeview.scss:70-103
+    'color.tree_node_icon_disabled': colorOf('icon_disabled'), // _treeview.scss:70-103
+    'color.tree_focus': colorOf('focus'), // _treeview.scss:59-68
+    'control.tree_focus_width': '{focus.width}', // _treeview.scss:59-68
+    'control.tree_node_padding_start': '{spacing.spacing_05}', // _treeview.scss:124-148
+    'control.tree_label_padding_end': '{spacing.spacing_05}', // _treeview.scss:124-148
+    'control.tree_leaf_padding_block': 7, // _treeview.scss:162-174
+    'type.tree_node_label': { type_set: true, font_size: 14, line_height_px: 16.8, letter_spacing: 0.16, weight: 400, font_family: 'sans' }, // _treeview.scss:124-148
+    'control.tree_label_text_padding_start': '{spacing.spacing_02}', // _treeview.scss:277-286
+    'control.tree_leaf_padding_start': '{spacing.spacing_08}', // _treeview.scss:162-174
+    'control.tree_leaf_padding_start_icon': '{spacing.spacing_07}', // _treeview.scss:162-174
+    'control.tree_leaf_padding_start_nested_icon': '{spacing.spacing_06}', // _treeview.scss:162-174
+    'control.tree_indent': '{spacing.spacing_05}', // TreeNode.js:257-268
+    'control.tree_toggle_size': 24, // _treeview.scss:182-214
+    'control.tree_toggle_offset': '{spacing.spacing_02}', // _treeview.scss:182-214
+    'control.tree_icon_size': 16, // _treeview.scss:216-227
+    'control.tree_icon_gap': '{spacing.spacing_03}', // _treeview.scss:216-227
+    // v10 Date Picker family (`date-picker/_date-picker.scss:96-339, _flatpickr.scss:94-568, utilities/_box-shadow.scss:14-16`)
+    'type.date_picker_value': '{type.code02}', // _date-picker.scss:96-130
+    'control.date_picker_range_input_width': 143.5, // _date-picker.scss:236-238
+    'control.date_picker_calendar_width': 288, // _flatpickr.scss:94-140
+    'control.date_picker_calendar_padding_inline': '{spacing.spacing_02}', // _flatpickr.scss:121-133
+    'control.date_picker_calendar_padding_top': '{spacing.spacing_02}', // _flatpickr.scss:121-133
+    'control.date_picker_calendar_padding_bottom': '{spacing.spacing_03}', // _flatpickr.scss:121-133
+    'color.date_picker_calendar_container': colorOf('layer_01'), // _flatpickr.scss:121-133
+    'shadow.date_picker_calendar': '{shadow.level_01}', // utilities/_box-shadow.scss:14-16
+    'control.date_picker_header_height': 40, // _flatpickr.scss:202-219
+    'control.date_picker_nav_size': 40, // _flatpickr.scss:222-258
+    'control.date_picker_year_width': 60, // _flatpickr.scss:289-300
+    'control.date_picker_weekday_height': 40, // _flatpickr.scss:405-425
+    'control.date_picker_day_size': 40, // _flatpickr.scss:458-482
+    'type.date_picker_month': '{type.heading_compact_01}', // _flatpickr.scss:202-219
+    'type.date_picker_day': '{type.body_compact_01}', // _flatpickr.scss:458-482
+    'type.date_picker_day_today': { type_set: true, font_size: 14, line_height_px: 18.00008, letter_spacing: 0.16, weight: 600, font_family: 'sans' }, // _flatpickr.scss:488-508
+    'color.date_picker_label': colorOf('text_primary'), // _flatpickr.scss:202-219
+    'color.date_picker_nav_icon': colorOf('icon_primary'), // _flatpickr.scss:222-258
+    'color.date_picker_nav_icon_disabled': colorOf('icon_disabled'), // _flatpickr.scss:248-258
+    'color.date_picker_container_hover': colorOf('layer_hover_01'), // _flatpickr.scss:468-472
+    'color.date_picker_year_container_hover': colorOf('background_hover'), // _flatpickr.scss:289-296
+    'color.date_picker_day_label_outside': colorOf('text_helper'), // _flatpickr.scss:483-486
+    'color.date_picker_day_label_today': colorOf('link_primary'), // _flatpickr.scss:488-508
+    'control.date_picker_today_mark_size': 4, // _flatpickr.scss:488-508
+    'control.date_picker_today_mark_offset': 7, // _flatpickr.scss:488-508
+    'color.date_picker_day_container_selected': colorOf('button_primary'), // _flatpickr.scss:523-535
+    'color.date_picker_day_label_selected': colorOf('text_on_color'), // _flatpickr.scss:523-535
+    'color.date_picker_day_container_range': colorOf('highlight'), // _flatpickr.scss:518-521
+    'color.date_picker_day_label_disabled': colorOf('text_disabled'), // _flatpickr.scss:559-568
+    'color.date_picker_day_focus': colorOf('button_primary'), // _flatpickr.scss:474-480
+    'color.date_picker_day_focus_selected': colorOf('layer_02'), // _flatpickr.scss:523-535
+    'control.date_picker_day_focus_width_selected': '{border.width_01}', // _flatpickr.scss:523-535
+    'control.date_picker_day_focus_inset_selected': 3, // _flatpickr.scss:523-535
+    // v10 File Uploader family (`file-uploader/_file-uploader.scss:33-445, Filename.js:22-48, FileUploader.Skeleton.js:24-36`)
+    'type.file_uploader_title': '{type.heading_compact_01}', // _file-uploader.scss:39-49
+    'color.file_uploader_title': colorOf('text_primary'), // _file-uploader.scss:39-49
+    'control.file_uploader_title_gap': '{spacing.spacing_03}', // _file-uploader.scss:39-49
+    'type.file_uploader_description': '{type.label01}', // _file-uploader.scss:117-127
+    'color.file_uploader_description': colorOf('text_secondary'), // _file-uploader.scss:117-127
+    'color.file_uploader_label_disabled': colorOf('text_disabled'), // _file-uploader.scss:47-49,125-127
+    'control.file_uploader_list_gap': '{spacing.spacing_06}', // _file-uploader.scss:129-145
+    'color.file_uploader_item_container': colorOf('layer_01'), // _file-uploader.scss:147-162
+    'control.file_uploader_item_max_width': 320, // _file-uploader.scss:147-162
+    'control.file_uploader_item_gap': '{spacing.spacing_03}', // _file-uploader.scss:147-162
+    'control.file_uploader_item_row_gap': '{spacing.spacing_04}', // _file-uploader.scss:147-162
+    'type.file_uploader_item': '{type.body_compact_01}', // _file-uploader.scss:175-182
+    'color.file_uploader_item_label': colorOf('text_primary'), // _file-uploader.scss:175-182
+    'control.file_uploader_item_padding_start': '{spacing.spacing_05}', // _file-uploader.scss:175-182
+    'control.file_uploader_name_max_width': 280, // _file-uploader.scss:184-208
+    'control.file_uploader_name_max_width_invalid': 248, // _file-uploader.scss:193-208
+    'color.file_uploader_item_outline_invalid': colorOf('support_error'), // _file-uploader.scss:272-285
+    'control.file_uploader_item_outline_width': '{border.width_01}', // _file-uploader.scss:272-285
+    'type.file_uploader_error_title': '{type.heading_compact_01}', // _file-uploader.scss:286-324
+    'type.file_uploader_error_body': '{type.body_compact_01}', // _file-uploader.scss:286-324
+    'color.file_uploader_error_title': colorOf('text_primary'), // _file-uploader.scss:286-324
+    'color.file_uploader_error_body': colorOf('text_secondary'), // _file-uploader.scss:286-324
+    'control.file_uploader_close_size': 24, // _file-uploader.scss:382-411
+    'color.file_uploader_close_icon': colorOf('icon_primary'), // _file-uploader.scss:382-411
+    'color.file_uploader_close_icon_disabled': colorOf('icon_disabled'), // _file-uploader.scss:382-411
+    'color.file_uploader_invalid_icon': colorOf('support_error'), // _file-uploader.scss:376-380
+    'control.file_uploader_invalid_icon_gap': '{spacing.spacing_03}', // _file-uploader.scss:376-380
+    'color.file_uploader_complete_icon': colorOf('interactive'), // _file-uploader.scss:358-374
+    'control.file_uploader_drop_height': 96, // _file-uploader.scss:416-432
+    'color.file_uploader_drop_outline': colorOf('border_strong_01'), // _file-uploader.scss:416-432
+    'color.file_uploader_drop_outline_disabled': colorOf('button_disabled'), // _file-uploader.scss:429-432
+    'color.file_uploader_drop_outline_active': colorOf('focus'), // _file-uploader.scss:436-441
+    'control.file_uploader_drop_outline_width_active': '{focus.width}', // _file-uploader.scss:436-441
+    'color.file_uploader_drop_label': colorOf('link_primary'), // _file-uploader.scss:64-95
+    'color.file_uploader_drop_label_active': colorOf('text_primary'), // _file-uploader.scss:64-95
+    'control.file_uploader_skeleton_title_width': 100, // FileUploader.Skeleton.js:24-36
+    'control.file_uploader_skeleton_description_width': 225, // FileUploader.Skeleton.js:24-36
+    // v10 Card family (`Card/_card.scss:22-163, ProductiveCard/_productive-card.scss:18-113, Card.js:20-170`)
+    'color.card_container': colorOf('layer_01'), // _card.scss:22-26
+    'color.card_label': colorOf('text_primary'), // _card.scss:84-94
+    'control.card_border_width': '{border.width_01}', // _card.scss:22-26
+    'color.card_outline_clickable': colorOf('border_tile_01'), // _card.scss:28-33
+    'color.card_container_hover': colorOf('layer_hover_01'), // _card.scss:39-41
+    'color.card_focus': colorOf('focus'), // _card.scss:35-37
+    'control.card_focus_width': '{focus.width}', // _card.scss:35-37
+    'control.card_padding': '{spacing.spacing_05}', // _card.scss:64-67
+    'control.card_header_padding_bottom_label': '{spacing.spacing_03}', // _card.scss:69-75
+    'control.card_actions_space': '{spacing.spacing_03}', // _card.scss:135-137
+    'type.card_label': '{type.label01}', // _card.scss:84-88
+    'type.card_description': '{type.label01}', // _card.scss:90-94
+    'type.card_title': '{type.heading_compact_02}', // _productive-card.scss:22-28
+    'type.card_title_large': '{type.heading03}', // _productive-card.scss:26-28
+    'control.card_text_gap': '{spacing.spacing_01}', // _card.scss:87,93
+    'type.card_body': '{type.body_compact_01}', // _card.scss:96-101
+    'control.card_body_padding_top': '{spacing.spacing_03}', // _productive-card.scss:30-32
+    'color.card_divider': colorOf('border_subtle_01'), // _productive-card.scss:34-38
+    'control.card_divider_width': '{border.width_01}', // _productive-card.scss:34-38
+    'control.card_actions_height': 32, // _productive-card.scss:44-58
+    'control.card_action_padding_inline': '{spacing.spacing_04}', // _productive-card.scss:53-58
+    'control.card_actions_offset': '{spacing.spacing_02}', // _productive-card.scss:94-101
+    'control.card_action_divider_height': 24, // _productive-card.scss:60-66
+    'control.card_action_divider_width': 0.8, // _productive-card.scss:60-66
+    'color.card_action_divider': colorOf('layer_hover_01'), // _productive-card.scss:60-66
+    'control.card_icon_padding': '{spacing.spacing_03}', // _card.scss:113-125
+    'control.card_icon_gap': '{spacing.spacing_05}', // _card.scss:113-125
+    'color.card_icon_container_hover': colorOf('layer_hover_01'), // _card.scss:119-121
+    'color.card_icon_active': colorOf('link_primary_hover'), // _card.scss:123-125
+    // v10 Empty State family (`EmptyStates/_empty-state.scss:14-86, EmptyStateContent.js:25-40`)
+    'type.empty_state_title': '{type.heading03}', // _empty-state.scss:20-45
+    'type.empty_state_title_small': '{type.body_compact_02}', // _empty-state.scss:36-45
+    'type.empty_state_subtitle': '{type.body01}', // _empty-state.scss:28-45
+    'type.empty_state_subtitle_small': '{type.label01}', // _empty-state.scss:42-45
+    'color.empty_state_title': colorOf('text_primary'), // _empty-state.scss:16-19
+    'color.empty_state_subtitle': colorOf('text_secondary'), // _empty-state.scss:28-34
+    'control.empty_state_title_gap': '{spacing.spacing_03}', // _empty-state.scss:20-41
+    'control.empty_state_subtitle_gap': '{spacing.spacing_05}', // _empty-state.scss:28-45
+    'control.empty_state_illustration_size': '{spacing.spacing_11}', // _empty-state.scss:51-56
+    'control.empty_state_illustration_size_small': '{spacing.spacing_10}', // _empty-state.scss:58-61
+    'control.empty_state_illustration_gap': '{spacing.spacing_05}', // _empty-state.scss:48-50
+    'control.empty_state_action_gap': '{spacing.spacing_05}', // _empty-state.scss:79-86
+    // v10 Page Header family (`PageHeader/_page-header.scss:41-778, PageHeader.js:291-340`)
+    'color.page_header_container': colorOf('background'), // _page-header.scss:41-143
+    'color.page_header_container_scrolled': colorOf('layer_01'), // _page-header.scss:41-107
+    'color.page_header_shadow': colorOf('layer_accent_01'), // _page-header.scss:56-107
+    'control.page_header_padding_inline': '{spacing.spacing_07}', // _page-header.scss:141-143
+    'control.page_header_breadcrumb_height': 40, // _page-header.scss:144-156
+    'control.page_header_breadcrumb_gap': '{spacing.spacing_02}', // _page-header.scss:335-340
+    'color.page_header_bar_collapsed': colorOf('layer_01'), // _page-header.scss:735-778
+    'control.page_header_row_gap': '{spacing.spacing_05}', // _page-header.scss:369-377
+    'type.page_header_title': '{type.heading04}', // _page-header.scss:465-470
+    'color.page_header_title': colorOf('text_primary'), // _page-header.scss:465-470
+    'control.page_header_title_min_height': 40, // _page-header.scss:469-470
+    'control.page_header_title_icon_size': 32, // _page-header.scss:481-496
+    'control.page_header_title_icon_gap': '{spacing.spacing_04}', // _page-header.scss:488-489
+    'type.page_header_subtitle': '{type.body01}', // _page-header.scss:566-598
+    'color.page_header_subtitle': colorOf('text_primary'), // _page-header.scss:566-598
+    'control.page_header_subtitle_gap': '{spacing.spacing_03}', // _page-header.scss:554-565
+    'control.page_header_tags_padding_block': '{spacing.spacing_02}', // _page-header.scss:641-663
+    'control.page_header_tags_padding_end': '{spacing.spacing_07}', // _page-header.scss:647-656
+    // v10 Tearsheet family (`Tearsheet/_tearsheet.scss:34-595, ActionSet/_action-set.scss:22-124, TearsheetShell.js:208-330`)
+    'control.tearsheet_inset_inline': '{spacing.spacing_10}', // _tearsheet.scss:288-322
+    'control.tearsheet_inset_top': 90, // _tearsheet.scss:196-322
+    'control.tearsheet_inset_top_lower': 130, // _tearsheet.scss:196-322
+    'control.tearsheet_stack_offset': '{spacing.spacing_05}', // _tearsheet.scss:70-88
+    'control.tearsheet_enter_offset': 500, // _tearsheet.scss:34-63
+    'control.tearsheet_header_height': '{spacing.spacing_11}', // _tearsheet.scss:292-322
+    'control.tearsheet_header_padding_end': '{spacing.spacing_11}', // _tearsheet.scss:410-424
+    'type.tearsheet_heading': '{type.heading04}', // _tearsheet.scss:292-434
+    'control.tearsheet_description_gap': '{spacing.spacing_05}', // _tearsheet.scss:380-402
+    'control.tearsheet_description_max_ratio': 0.6, // _tearsheet.scss:380-402
+    'control.tearsheet_navigation_gap': '{spacing.spacing_04}', // _tearsheet.scss:432-434
+    'control.tearsheet_influencer_width': 256, // _tearsheet.scss:455-470
+    'control.tearsheet_influencer_width_wide': 320, // _tearsheet.scss:480-489
+    'color.tearsheet_divider': colorOf('border_subtle_01'), // _tearsheet.scss:455-457
+    'control.tearsheet_divider_width': '{border.width_01}', // _tearsheet.scss:455-457
+    'color.tearsheet_main_container': colorOf('background'), // _tearsheet.scss:471-489
+    'color.tearsheet_actions_container': colorOf('background'), // ActionSet/_action-set.scss:22-124
+    'control.tearsheet_action_height': 64, // ActionSet/_action-set.scss:22-124
+    'control.tearsheet_action_padding_top': '{spacing.spacing_05}', // ActionSet/_action-set.scss:22-124
+    'control.tearsheet_action_padding_bottom': '{spacing.spacing_07}', // ActionSet/_action-set.scss:22-124
+    'control.tearsheet_action_max_width': 232, // ActionSet/_action-set.scss:22-124
+    // v10 Folded family (`toggletip/_toggletip.scss:51-53`, `utilities/_focus-outline.scss:16-21`, `tag/_tag.scss:30-42`)
+    'control.toggletip_focus_width': '{border.width_01}', // utilities/_focus-outline.scss:16-21
+    'control.toggletip_focus_offset': 0, // utilities/_focus-outline.scss:16-21
+    'control.tag_height_large': 32, // tag/_tag.scss:30-42
     // No elevation
     'shadow.level_00': { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] }
   };

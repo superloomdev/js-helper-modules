@@ -5052,7 +5052,6 @@ export default Object.freeze({
     'color.content_switcher_icon_selected': '{color.icon_inverse}',
     'color.content_switcher_icon_disabled': '{color.icon_disabled}',
     'color.content_switcher_low_contrast_container': 'rgba(0, 0, 0, 0)',
-    'color.content_switcher_low_contrast_container_active': 'rgba(141, 141, 141, 0.2256)',
     'color.content_switcher_low_contrast_container_hover': 'rgba(141, 141, 141, 0.12)',
     'color.content_switcher_low_contrast_container_selected': 'rgba(141, 141, 141, 0.24)',
     'color.content_switcher_low_contrast_outline': '{color.border_strong_01}',
@@ -5253,6 +5252,276 @@ export default Object.freeze({
     'control.combo_box_input_padding_end': 70,
     'control.combo_box_input_padding_end_invalid': 105,
     'control.combo_box_invalid_icon_inset_end': 82,
+    'color.tile_container': '{color.layer_01}',
+    'control.tile_padding': '{spacing.spacing_05}',
+    'control.tile_min_height': 64,
+    'control.tile_min_width': 128,
+    'type.tile': '{type.body_compact_01}',
+    'color.tile_label': '{color.text_primary}',
+    'color.tile_focus': '{color.focus}',
+    'control.tile_focus_width': '{focus.width}',
+    'color.tile_container_hover': '{color.layer_hover_01}',
+    'color.tile_label_disabled': '{color.text_disabled}',
+    'control.tile_icon_size': 20,
+    'control.tile_icon_inset': '{spacing.spacing_04}',
+    'color.tile_icon': '{color.icon_interactive}',
+    'color.tile_icon_disabled': '{color.icon_disabled}',
+    'control.tile_border_width': '{border.width_01}',
+    'control.tile_mark_space': '{spacing.spacing_09}',
+    'control.tile_mark_size': 16,
+    'control.tile_mark_inset': '{spacing.spacing_05}',
+    'color.tile_mark': '{color.icon_secondary}',
+    'color.tile_mark_selected': '{color.icon_primary}',
+    'color.tile_mark_disabled': '{color.icon_disabled}',
+    'color.tile_border_selected': '{color.layer_selected_inverse}',
+    'color.tile_border_selected_disabled': '{color.border_disabled}',
+    'control.tile_chevron_seat': 48,
+    'color.tile_chevron': '{color.icon_primary}',
+    'color.pagination_container': '{color.layer_01}',
+    'color.pagination_divider': '{color.border_subtle_00}',
+    'control.pagination_divider_width': '{border.width_01}',
+    'type.pagination': '{type.body_compact_01}',
+    'color.pagination_label': '{color.text_primary}',
+    'color.pagination_count_label': '{color.text_secondary}',
+    'control.pagination_padding_inline': '{spacing.spacing_05}',
+    'control.pagination_text_gap': '{spacing.spacing_05}',
+    'control.pagination_select_padding_start': '{spacing.spacing_05}',
+    'control.pagination_select_padding_end': 36,
+    'color.pagination_select_container_hover': '{color.layer_hover_01}',
+    'color.pagination_button_icon': '{color.icon_primary}',
+    'color.pagination_button_icon_disabled': '{color.icon_disabled}',
+    'color.pagination_button_container_hover': '{color.layer_hover_01}',
+    'control.pagination_collapse_width': 672,
+    'type.pagination_nav_page': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 14,
+      'letter_spacing': 0.16,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.pagination_nav_page_active': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 14,
+      'letter_spacing': 0.16,
+      'weight': 600,
+      'font_family': 'sans'
+    },
+    'color.pagination_nav_page_label': '{color.text_primary}',
+    'color.pagination_nav_page_label_disabled': {
+      'op': 'alpha',
+      'args': [
+        'color.text_secondary',
+        0.5
+      ]
+    },
+    'color.pagination_nav_page_container_hover': '{color.background_hover}',
+    'control.pagination_nav_page_padding_inline': '{spacing.spacing_02}',
+    'control.pagination_nav_indicator_width': 16,
+    'control.pagination_nav_indicator_height': 4,
+    'color.pagination_nav_indicator': '{color.border_interactive}',
+    'color.pagination_nav_focus': '{color.focus}',
+    'control.pagination_nav_focus_width': '{focus.width}',
+    'control.pagination_skeleton_width_short': 35,
+    'control.pagination_skeleton_width_medium': 70,
+    'control.pagination_skeleton_width_long': 105,
+    'color.tree_node_container': '{color.layer_01}',
+    'color.tree_node_container_hover': '{color.layer_hover_01}',
+    'color.tree_node_container_selected': '{color.layer_selected_01}',
+    'color.tree_node_container_selected_hover': '{color.layer_selected_hover_01}',
+    'color.tree_node_label': '{color.text_secondary}',
+    'color.tree_node_label_hover': '{color.text_primary}',
+    'color.tree_node_label_selected': '{color.text_primary}',
+    'color.tree_node_icon': '{color.icon_secondary}',
+    'color.tree_node_icon_hover': '{color.icon_primary}',
+    'color.tree_node_indicator': '{color.interactive}',
+    'control.tree_node_indicator_width': 4,
+    'color.tree_node_container_disabled': '{color.field_01}',
+    'color.tree_node_label_disabled': '{color.text_disabled}',
+    'color.tree_node_icon_disabled': '{color.icon_disabled}',
+    'color.tree_focus': '{color.focus}',
+    'control.tree_focus_width': '{focus.width}',
+    'control.tree_node_padding_start': '{spacing.spacing_05}',
+    'control.tree_label_padding_end': '{spacing.spacing_05}',
+    'control.tree_leaf_padding_block': 7,
+    'type.tree_node_label': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 16.8,
+      'letter_spacing': 0.16,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'control.tree_label_text_padding_start': '{spacing.spacing_02}',
+    'control.tree_leaf_padding_start': '{spacing.spacing_08}',
+    'control.tree_leaf_padding_start_icon': '{spacing.spacing_07}',
+    'control.tree_leaf_padding_start_nested_icon': '{spacing.spacing_06}',
+    'control.tree_indent': '{spacing.spacing_05}',
+    'control.tree_toggle_size': 24,
+    'control.tree_toggle_offset': '{spacing.spacing_02}',
+    'control.tree_icon_size': 16,
+    'control.tree_icon_gap': '{spacing.spacing_03}',
+    'type.date_picker_value': '{type.code02}',
+    'control.date_picker_range_input_width': 143.5,
+    'control.date_picker_calendar_width': 288,
+    'control.date_picker_calendar_padding_inline': '{spacing.spacing_02}',
+    'control.date_picker_calendar_padding_top': '{spacing.spacing_02}',
+    'control.date_picker_calendar_padding_bottom': '{spacing.spacing_03}',
+    'color.date_picker_calendar_container': '{color.layer_01}',
+    'shadow.date_picker_calendar': '{shadow.level_01}',
+    'control.date_picker_header_height': 40,
+    'control.date_picker_nav_size': 40,
+    'control.date_picker_year_width': 60,
+    'control.date_picker_weekday_height': 40,
+    'control.date_picker_day_size': 40,
+    'type.date_picker_month': '{type.heading_compact_01}',
+    'type.date_picker_day': '{type.body_compact_01}',
+    'type.date_picker_day_today': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 18.00008,
+      'letter_spacing': 0.16,
+      'weight': 600,
+      'font_family': 'sans'
+    },
+    'color.date_picker_label': '{color.text_primary}',
+    'color.date_picker_nav_icon': '{color.icon_primary}',
+    'color.date_picker_nav_icon_disabled': '{color.icon_disabled}',
+    'color.date_picker_container_hover': '{color.layer_hover_01}',
+    'color.date_picker_year_container_hover': '{color.background_hover}',
+    'color.date_picker_day_label_outside': '{color.text_helper}',
+    'color.date_picker_day_label_today': '{color.link_primary}',
+    'control.date_picker_today_mark_size': 4,
+    'control.date_picker_today_mark_offset': 7,
+    'color.date_picker_day_container_selected': '{color.button_primary}',
+    'color.date_picker_day_label_selected': '{color.text_on_color}',
+    'color.date_picker_day_container_range': '{color.highlight}',
+    'color.date_picker_day_label_disabled': '{color.text_disabled}',
+    'color.date_picker_day_focus': '{color.button_primary}',
+    'color.date_picker_day_focus_selected': '{color.layer_02}',
+    'control.date_picker_day_focus_width_selected': '{border.width_01}',
+    'control.date_picker_day_focus_inset_selected': 3,
+    'type.file_uploader_title': '{type.heading_compact_01}',
+    'color.file_uploader_title': '{color.text_primary}',
+    'control.file_uploader_title_gap': '{spacing.spacing_03}',
+    'type.file_uploader_description': '{type.label01}',
+    'color.file_uploader_description': '{color.text_secondary}',
+    'color.file_uploader_label_disabled': '{color.text_disabled}',
+    'control.file_uploader_list_gap': '{spacing.spacing_06}',
+    'color.file_uploader_item_container': '{color.layer_01}',
+    'control.file_uploader_item_max_width': 320,
+    'control.file_uploader_item_gap': '{spacing.spacing_03}',
+    'control.file_uploader_item_row_gap': '{spacing.spacing_04}',
+    'type.file_uploader_item': '{type.body_compact_01}',
+    'color.file_uploader_item_label': '{color.text_primary}',
+    'control.file_uploader_item_padding_start': '{spacing.spacing_05}',
+    'control.file_uploader_name_max_width': 280,
+    'control.file_uploader_name_max_width_invalid': 248,
+    'color.file_uploader_item_outline_invalid': '{color.support_error}',
+    'control.file_uploader_item_outline_width': '{border.width_01}',
+    'type.file_uploader_error_title': '{type.heading_compact_01}',
+    'type.file_uploader_error_body': '{type.body_compact_01}',
+    'color.file_uploader_error_title': '{color.text_primary}',
+    'color.file_uploader_error_body': '{color.text_secondary}',
+    'control.file_uploader_close_size': 24,
+    'color.file_uploader_close_icon': '{color.icon_primary}',
+    'color.file_uploader_close_icon_disabled': '{color.icon_disabled}',
+    'color.file_uploader_invalid_icon': '{color.support_error}',
+    'control.file_uploader_invalid_icon_gap': '{spacing.spacing_03}',
+    'color.file_uploader_complete_icon': '{color.interactive}',
+    'control.file_uploader_drop_height': 96,
+    'color.file_uploader_drop_outline': '{color.border_strong_01}',
+    'color.file_uploader_drop_outline_disabled': '{color.button_disabled}',
+    'color.file_uploader_drop_outline_active': '{color.focus}',
+    'control.file_uploader_drop_outline_width_active': '{focus.width}',
+    'color.file_uploader_drop_label': '{color.link_primary}',
+    'color.file_uploader_drop_label_active': '{color.text_primary}',
+    'control.file_uploader_skeleton_title_width': 100,
+    'control.file_uploader_skeleton_description_width': 225,
+    'color.card_container': '{color.layer_01}',
+    'color.card_label': '{color.text_primary}',
+    'control.card_border_width': '{border.width_01}',
+    'color.card_outline_clickable': '{color.border_tile_01}',
+    'color.card_container_hover': '{color.layer_hover_01}',
+    'color.card_focus': '{color.focus}',
+    'control.card_focus_width': '{focus.width}',
+    'control.card_padding': '{spacing.spacing_05}',
+    'control.card_header_padding_bottom_label': '{spacing.spacing_03}',
+    'control.card_actions_space': '{spacing.spacing_03}',
+    'type.card_label': '{type.label01}',
+    'type.card_description': '{type.label01}',
+    'type.card_title': '{type.heading_compact_02}',
+    'type.card_title_large': '{type.heading03}',
+    'control.card_text_gap': '{spacing.spacing_01}',
+    'type.card_body': '{type.body_compact_01}',
+    'control.card_body_padding_top': '{spacing.spacing_03}',
+    'color.card_divider': '{color.border_subtle_01}',
+    'control.card_divider_width': '{border.width_01}',
+    'control.card_actions_height': 32,
+    'control.card_action_padding_inline': '{spacing.spacing_04}',
+    'control.card_actions_offset': '{spacing.spacing_02}',
+    'control.card_action_divider_height': 24,
+    'control.card_action_divider_width': 0.8,
+    'color.card_action_divider': '{color.layer_hover_01}',
+    'control.card_icon_padding': '{spacing.spacing_03}',
+    'control.card_icon_gap': '{spacing.spacing_05}',
+    'color.card_icon_container_hover': '{color.layer_hover_01}',
+    'color.card_icon_active': '{color.link_primary_hover}',
+    'type.empty_state_title': '{type.heading03}',
+    'type.empty_state_title_small': '{type.body_compact_02}',
+    'type.empty_state_subtitle': '{type.body01}',
+    'type.empty_state_subtitle_small': '{type.label01}',
+    'color.empty_state_title': '{color.text_primary}',
+    'color.empty_state_subtitle': '{color.text_secondary}',
+    'control.empty_state_title_gap': '{spacing.spacing_03}',
+    'control.empty_state_subtitle_gap': '{spacing.spacing_05}',
+    'control.empty_state_illustration_size': '{spacing.spacing_11}',
+    'control.empty_state_illustration_size_small': '{spacing.spacing_10}',
+    'control.empty_state_illustration_gap': '{spacing.spacing_05}',
+    'control.empty_state_action_gap': '{spacing.spacing_05}',
+    'color.page_header_container': '{color.background}',
+    'color.page_header_container_scrolled': '{color.layer_01}',
+    'color.page_header_shadow': '{color.layer_accent_01}',
+    'control.page_header_padding_inline': '{spacing.spacing_07}',
+    'control.page_header_breadcrumb_height': 40,
+    'control.page_header_breadcrumb_gap': '{spacing.spacing_02}',
+    'color.page_header_bar_collapsed': '{color.layer_01}',
+    'control.page_header_row_gap': '{spacing.spacing_05}',
+    'type.page_header_title': '{type.heading04}',
+    'color.page_header_title': '{color.text_primary}',
+    'control.page_header_title_min_height': 40,
+    'control.page_header_title_icon_size': 32,
+    'control.page_header_title_icon_gap': '{spacing.spacing_04}',
+    'type.page_header_subtitle': '{type.body01}',
+    'color.page_header_subtitle': '{color.text_primary}',
+    'control.page_header_subtitle_gap': '{spacing.spacing_03}',
+    'control.page_header_tags_padding_block': '{spacing.spacing_02}',
+    'control.page_header_tags_padding_end': '{spacing.spacing_07}',
+    'control.tearsheet_inset_inline': '{spacing.spacing_10}',
+    'control.tearsheet_inset_top': 90,
+    'control.tearsheet_inset_top_lower': 130,
+    'control.tearsheet_stack_offset': '{spacing.spacing_05}',
+    'control.tearsheet_enter_offset': 500,
+    'control.tearsheet_header_height': '{spacing.spacing_11}',
+    'control.tearsheet_header_padding_end': '{spacing.spacing_11}',
+    'type.tearsheet_heading': '{type.heading04}',
+    'control.tearsheet_description_gap': '{spacing.spacing_05}',
+    'control.tearsheet_description_max_ratio': 0.6,
+    'control.tearsheet_navigation_gap': '{spacing.spacing_04}',
+    'control.tearsheet_influencer_width': 256,
+    'control.tearsheet_influencer_width_wide': 320,
+    'color.tearsheet_divider': '{color.border_subtle_01}',
+    'control.tearsheet_divider_width': '{border.width_01}',
+    'color.tearsheet_main_container': '{color.background}',
+    'color.tearsheet_actions_container': '{color.background}',
+    'control.tearsheet_action_height': 64,
+    'control.tearsheet_action_padding_top': '{spacing.spacing_05}',
+    'control.tearsheet_action_padding_bottom': '{spacing.spacing_07}',
+    'control.tearsheet_action_max_width': 232,
+    'control.toggletip_focus_width': '{border.width_01}',
+    'control.toggletip_focus_offset': 0,
+    'control.tag_height_large': 32,
     'shadow.level_00': {
       'shadow': true,
       'layers': [
@@ -8553,9 +8822,6 @@ export default Object.freeze({
     'color.content_switcher_low_contrast_container': {
       'group': 'color'
     },
-    'color.content_switcher_low_contrast_container_active': {
-      'group': 'color'
-    },
     'color.content_switcher_low_contrast_container_hover': {
       'group': 'color'
     },
@@ -8713,6 +8979,279 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.list_item_container_selected_active': {
+      'group': 'color'
+    },
+    'color.tile_container': {
+      'group': 'color'
+    },
+    'color.tile_label': {
+      'group': 'color'
+    },
+    'color.tile_focus': {
+      'group': 'color'
+    },
+    'color.tile_container_hover': {
+      'group': 'color'
+    },
+    'color.tile_label_disabled': {
+      'group': 'color'
+    },
+    'color.tile_icon': {
+      'group': 'color'
+    },
+    'color.tile_icon_disabled': {
+      'group': 'color'
+    },
+    'color.tile_mark': {
+      'group': 'color'
+    },
+    'color.tile_mark_selected': {
+      'group': 'color'
+    },
+    'color.tile_mark_disabled': {
+      'group': 'color'
+    },
+    'color.tile_border_selected': {
+      'group': 'color'
+    },
+    'color.tile_border_selected_disabled': {
+      'group': 'color'
+    },
+    'color.tile_chevron': {
+      'group': 'color'
+    },
+    'color.pagination_container': {
+      'group': 'color'
+    },
+    'color.pagination_divider': {
+      'group': 'color'
+    },
+    'color.pagination_label': {
+      'group': 'color'
+    },
+    'color.pagination_count_label': {
+      'group': 'color'
+    },
+    'color.pagination_select_container_hover': {
+      'group': 'color'
+    },
+    'color.pagination_button_icon': {
+      'group': 'color'
+    },
+    'color.pagination_button_icon_disabled': {
+      'group': 'color'
+    },
+    'color.pagination_button_container_hover': {
+      'group': 'color'
+    },
+    'color.pagination_nav_page_label': {
+      'group': 'color'
+    },
+    'color.pagination_nav_page_label_disabled': {
+      'group': 'color'
+    },
+    'color.pagination_nav_page_container_hover': {
+      'group': 'color'
+    },
+    'color.pagination_nav_indicator': {
+      'group': 'color'
+    },
+    'color.pagination_nav_focus': {
+      'group': 'color'
+    },
+    'color.tree_node_container': {
+      'group': 'color'
+    },
+    'color.tree_node_container_hover': {
+      'group': 'color'
+    },
+    'color.tree_node_container_selected': {
+      'group': 'color'
+    },
+    'color.tree_node_container_selected_hover': {
+      'group': 'color'
+    },
+    'color.tree_node_label': {
+      'group': 'color'
+    },
+    'color.tree_node_label_hover': {
+      'group': 'color'
+    },
+    'color.tree_node_label_selected': {
+      'group': 'color'
+    },
+    'color.tree_node_icon': {
+      'group': 'color'
+    },
+    'color.tree_node_icon_hover': {
+      'group': 'color'
+    },
+    'color.tree_node_indicator': {
+      'group': 'color'
+    },
+    'color.tree_node_container_disabled': {
+      'group': 'color'
+    },
+    'color.tree_node_label_disabled': {
+      'group': 'color'
+    },
+    'color.tree_node_icon_disabled': {
+      'group': 'color'
+    },
+    'color.tree_focus': {
+      'group': 'color'
+    },
+    'color.date_picker_calendar_container': {
+      'group': 'color'
+    },
+    'color.date_picker_label': {
+      'group': 'color'
+    },
+    'color.date_picker_nav_icon': {
+      'group': 'color'
+    },
+    'color.date_picker_nav_icon_disabled': {
+      'group': 'color'
+    },
+    'color.date_picker_container_hover': {
+      'group': 'color'
+    },
+    'color.date_picker_year_container_hover': {
+      'group': 'color'
+    },
+    'color.date_picker_day_label_outside': {
+      'group': 'color'
+    },
+    'color.date_picker_day_label_today': {
+      'group': 'color'
+    },
+    'color.date_picker_day_container_selected': {
+      'group': 'color'
+    },
+    'color.date_picker_day_label_selected': {
+      'group': 'color'
+    },
+    'color.date_picker_day_container_range': {
+      'group': 'color'
+    },
+    'color.date_picker_day_label_disabled': {
+      'group': 'color'
+    },
+    'color.date_picker_day_focus': {
+      'group': 'color'
+    },
+    'color.date_picker_day_focus_selected': {
+      'group': 'color'
+    },
+    'color.file_uploader_title': {
+      'group': 'color'
+    },
+    'color.file_uploader_description': {
+      'group': 'color'
+    },
+    'color.file_uploader_label_disabled': {
+      'group': 'color'
+    },
+    'color.file_uploader_item_container': {
+      'group': 'color'
+    },
+    'color.file_uploader_item_label': {
+      'group': 'color'
+    },
+    'color.file_uploader_item_outline_invalid': {
+      'group': 'color'
+    },
+    'color.file_uploader_error_title': {
+      'group': 'color'
+    },
+    'color.file_uploader_error_body': {
+      'group': 'color'
+    },
+    'color.file_uploader_close_icon': {
+      'group': 'color'
+    },
+    'color.file_uploader_close_icon_disabled': {
+      'group': 'color'
+    },
+    'color.file_uploader_invalid_icon': {
+      'group': 'color'
+    },
+    'color.file_uploader_complete_icon': {
+      'group': 'color'
+    },
+    'color.file_uploader_drop_outline': {
+      'group': 'color'
+    },
+    'color.file_uploader_drop_outline_disabled': {
+      'group': 'color'
+    },
+    'color.file_uploader_drop_outline_active': {
+      'group': 'color'
+    },
+    'color.file_uploader_drop_label': {
+      'group': 'color'
+    },
+    'color.file_uploader_drop_label_active': {
+      'group': 'color'
+    },
+    'color.card_container': {
+      'group': 'color'
+    },
+    'color.card_label': {
+      'group': 'color'
+    },
+    'color.card_outline_clickable': {
+      'group': 'color'
+    },
+    'color.card_container_hover': {
+      'group': 'color'
+    },
+    'color.card_focus': {
+      'group': 'color'
+    },
+    'color.card_divider': {
+      'group': 'color'
+    },
+    'color.card_action_divider': {
+      'group': 'color'
+    },
+    'color.card_icon_container_hover': {
+      'group': 'color'
+    },
+    'color.card_icon_active': {
+      'group': 'color'
+    },
+    'color.empty_state_title': {
+      'group': 'color'
+    },
+    'color.empty_state_subtitle': {
+      'group': 'color'
+    },
+    'color.page_header_container': {
+      'group': 'color'
+    },
+    'color.page_header_container_scrolled': {
+      'group': 'color'
+    },
+    'color.page_header_shadow': {
+      'group': 'color'
+    },
+    'color.page_header_bar_collapsed': {
+      'group': 'color'
+    },
+    'color.page_header_title': {
+      'group': 'color'
+    },
+    'color.page_header_subtitle': {
+      'group': 'color'
+    },
+    'color.tearsheet_divider': {
+      'group': 'color'
+    },
+    'color.tearsheet_main_container': {
+      'group': 'color'
+    },
+    'color.tearsheet_actions_container': {
       'group': 'color'
     },
     'control.field_outline_width': {
@@ -9708,6 +10247,360 @@ export default Object.freeze({
     'control.combo_box_invalid_icon_inset_end': {
       'group': 'dimension'
     },
+    'control.tile_padding': {
+      'group': 'dimension'
+    },
+    'control.tile_min_height': {
+      'group': 'dimension'
+    },
+    'control.tile_min_width': {
+      'group': 'dimension'
+    },
+    'control.tile_focus_width': {
+      'group': 'dimension'
+    },
+    'control.tile_icon_size': {
+      'group': 'dimension'
+    },
+    'control.tile_icon_inset': {
+      'group': 'dimension'
+    },
+    'control.tile_border_width': {
+      'group': 'dimension'
+    },
+    'control.tile_mark_space': {
+      'group': 'dimension'
+    },
+    'control.tile_mark_size': {
+      'group': 'dimension'
+    },
+    'control.tile_mark_inset': {
+      'group': 'dimension'
+    },
+    'control.tile_chevron_seat': {
+      'group': 'dimension'
+    },
+    'control.pagination_divider_width': {
+      'group': 'dimension'
+    },
+    'control.pagination_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.pagination_text_gap': {
+      'group': 'dimension'
+    },
+    'control.pagination_select_padding_start': {
+      'group': 'dimension'
+    },
+    'control.pagination_select_padding_end': {
+      'group': 'dimension'
+    },
+    'control.pagination_collapse_width': {
+      'group': 'dimension'
+    },
+    'control.pagination_nav_page_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.pagination_nav_indicator_width': {
+      'group': 'dimension'
+    },
+    'control.pagination_nav_indicator_height': {
+      'group': 'dimension'
+    },
+    'control.pagination_nav_focus_width': {
+      'group': 'dimension'
+    },
+    'control.pagination_skeleton_width_short': {
+      'group': 'dimension'
+    },
+    'control.tree_node_indicator_width': {
+      'group': 'dimension'
+    },
+    'control.tree_focus_width': {
+      'group': 'dimension'
+    },
+    'control.tree_node_padding_start': {
+      'group': 'dimension'
+    },
+    'control.tree_label_padding_end': {
+      'group': 'dimension'
+    },
+    'control.tree_leaf_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tree_label_text_padding_start': {
+      'group': 'dimension'
+    },
+    'control.tree_leaf_padding_start': {
+      'group': 'dimension'
+    },
+    'control.tree_leaf_padding_start_icon': {
+      'group': 'dimension'
+    },
+    'control.tree_leaf_padding_start_nested_icon': {
+      'group': 'dimension'
+    },
+    'control.tree_indent': {
+      'group': 'dimension'
+    },
+    'control.tree_toggle_size': {
+      'group': 'dimension'
+    },
+    'control.tree_toggle_offset': {
+      'group': 'dimension'
+    },
+    'control.tree_icon_size': {
+      'group': 'dimension'
+    },
+    'control.tree_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.date_picker_range_input_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_calendar_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_calendar_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.date_picker_calendar_padding_top': {
+      'group': 'dimension'
+    },
+    'control.date_picker_calendar_padding_bottom': {
+      'group': 'dimension'
+    },
+    'control.date_picker_header_height': {
+      'group': 'dimension'
+    },
+    'control.date_picker_nav_size': {
+      'group': 'dimension'
+    },
+    'control.date_picker_year_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_weekday_height': {
+      'group': 'dimension'
+    },
+    'control.date_picker_day_size': {
+      'group': 'dimension'
+    },
+    'control.date_picker_today_mark_size': {
+      'group': 'dimension'
+    },
+    'control.date_picker_today_mark_offset': {
+      'group': 'dimension'
+    },
+    'control.date_picker_day_focus_width_selected': {
+      'group': 'dimension'
+    },
+    'control.date_picker_day_focus_inset_selected': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_title_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_list_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_max_width': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_row_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_start': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_name_max_width': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_name_max_width_invalid': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_outline_width': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_close_size': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_invalid_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_drop_height': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_drop_outline_width_active': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_skeleton_title_width': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_skeleton_description_width': {
+      'group': 'dimension'
+    },
+    'control.card_border_width': {
+      'group': 'dimension'
+    },
+    'control.card_focus_width': {
+      'group': 'dimension'
+    },
+    'control.card_padding': {
+      'group': 'dimension'
+    },
+    'control.card_header_padding_bottom_label': {
+      'group': 'dimension'
+    },
+    'control.card_actions_space': {
+      'group': 'dimension'
+    },
+    'control.card_text_gap': {
+      'group': 'dimension'
+    },
+    'control.card_body_padding_top': {
+      'group': 'dimension'
+    },
+    'control.card_divider_width': {
+      'group': 'dimension'
+    },
+    'control.card_actions_height': {
+      'group': 'dimension'
+    },
+    'control.card_action_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.card_actions_offset': {
+      'group': 'dimension'
+    },
+    'control.card_action_divider_height': {
+      'group': 'dimension'
+    },
+    'control.card_action_divider_width': {
+      'group': 'dimension'
+    },
+    'control.card_icon_padding': {
+      'group': 'dimension'
+    },
+    'control.card_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.empty_state_title_gap': {
+      'group': 'dimension'
+    },
+    'control.empty_state_subtitle_gap': {
+      'group': 'dimension'
+    },
+    'control.empty_state_illustration_size': {
+      'group': 'dimension'
+    },
+    'control.empty_state_illustration_size_small': {
+      'group': 'dimension'
+    },
+    'control.empty_state_illustration_gap': {
+      'group': 'dimension'
+    },
+    'control.empty_state_action_gap': {
+      'group': 'dimension'
+    },
+    'control.page_header_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_height': {
+      'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_gap': {
+      'group': 'dimension'
+    },
+    'control.page_header_row_gap': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_min_height': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_icon_size': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.page_header_subtitle_gap': {
+      'group': 'dimension'
+    },
+    'control.page_header_tags_padding_block': {
+      'group': 'dimension'
+    },
+    'control.page_header_tags_padding_end': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_inset_inline': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_inset_top': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_inset_top_lower': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_stack_offset': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_enter_offset': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_header_height': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_header_padding_end': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_description_gap': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_description_max_ratio': {
+      'group': 'raw'
+    },
+    'control.tearsheet_navigation_gap': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_influencer_width': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_influencer_width_wide': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_divider_width': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_action_height': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_action_padding_top': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_action_padding_bottom': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_action_max_width': {
+      'group': 'dimension'
+    },
+    'control.pagination_skeleton_width_medium': {
+      'group': 'dimension'
+    },
+    'control.pagination_skeleton_width_long': {
+      'group': 'dimension'
+    },
+    'control.toggletip_focus_width': {
+      'group': 'dimension'
+    },
+    'control.toggletip_focus_offset': {
+      'group': 'dimension'
+    },
+    'control.tag_height_large': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -9826,6 +10719,84 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.definition_term': {
+      'group': 'typeSet'
+    },
+    'type.tile': {
+      'group': 'typeSet'
+    },
+    'type.pagination': {
+      'group': 'typeSet'
+    },
+    'type.pagination_nav_page': {
+      'group': 'typeSet'
+    },
+    'type.pagination_nav_page_active': {
+      'group': 'typeSet'
+    },
+    'type.tree_node_label': {
+      'group': 'typeSet'
+    },
+    'type.date_picker_value': {
+      'group': 'typeSet'
+    },
+    'type.date_picker_month': {
+      'group': 'typeSet'
+    },
+    'type.date_picker_day': {
+      'group': 'typeSet'
+    },
+    'type.date_picker_day_today': {
+      'group': 'typeSet'
+    },
+    'type.file_uploader_title': {
+      'group': 'typeSet'
+    },
+    'type.file_uploader_description': {
+      'group': 'typeSet'
+    },
+    'type.file_uploader_item': {
+      'group': 'typeSet'
+    },
+    'type.file_uploader_error_title': {
+      'group': 'typeSet'
+    },
+    'type.file_uploader_error_body': {
+      'group': 'typeSet'
+    },
+    'type.card_label': {
+      'group': 'typeSet'
+    },
+    'type.card_description': {
+      'group': 'typeSet'
+    },
+    'type.card_title': {
+      'group': 'typeSet'
+    },
+    'type.card_title_large': {
+      'group': 'typeSet'
+    },
+    'type.card_body': {
+      'group': 'typeSet'
+    },
+    'type.empty_state_title': {
+      'group': 'typeSet'
+    },
+    'type.empty_state_title_small': {
+      'group': 'typeSet'
+    },
+    'type.empty_state_subtitle': {
+      'group': 'typeSet'
+    },
+    'type.empty_state_subtitle_small': {
+      'group': 'typeSet'
+    },
+    'type.page_header_title': {
+      'group': 'typeSet'
+    },
+    'type.page_header_subtitle': {
+      'group': 'typeSet'
+    },
+    'type.tearsheet_heading': {
       'group': 'typeSet'
     },
     'shadow.level_00': {
@@ -9963,6 +10934,9 @@ export default Object.freeze({
     'shadow.fab_hover': {
       'group': 'shadow'
     },
+    'shadow.date_picker_calendar': {
+      'group': 'shadow'
+    },
     'motion.loading_rotation': {
       'group': 'duration'
     },
@@ -10013,6 +10987,7 @@ export default Object.freeze({
         'control.notification_details_inset_end': 0,
         'control.notification_action_inset': 40,
         'control.tab_vertical_list_ratio': 0.5,
+        'control.file_uploader_name_max_width': 216,
         'control.accordion_content_end_ratio': 0
       }
     },
