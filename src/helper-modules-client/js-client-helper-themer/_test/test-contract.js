@@ -45,20 +45,20 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1471 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1473);
+  it('should expose exactly 1708 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1708);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1470 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1473);
+  it('should expose exactly 1708 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1708);
   });
 
-  it('should report contract version 9', () => {
-    assert.equal(contract.version, 9);
+  it('should report contract version 10', () => {
+    assert.equal(contract.version, 10);
   });
 
   it('should be a frozen object', () => {
@@ -82,17 +82,17 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 727,
+    color: 817,
     spacing: 17,
     size: 22,
-    type: 100,
+    type: 126,
     font: 12,
     motion: 33,
     shape: 9,
     border: 4,
     focus: 2,
     feedback: 3,
-    shadow: 50,
+    shadow: 51,
     breakpoint: 5,
     grid: 13,
     state: 6,
@@ -100,7 +100,7 @@ describe('contract registry - group counts', () => {
     stacking: 6,
     anatomy: 31,
     icon: 86,
-    control: 342
+    control: 460
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1121,8 +1121,8 @@ describe('contract v2 - C14 border width rename', () => {
     assert.ok(contract.tokens['border.width_04']);
   });
 
-  it('should report contract version 9', () => {
-    assert.equal(contract.version, 9);
+  it('should report contract version 10', () => {
+    assert.equal(contract.version, 10);
   });
 
 });
@@ -1837,7 +1837,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 949);
+    assert.equal(gridNames.length, 1184);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);

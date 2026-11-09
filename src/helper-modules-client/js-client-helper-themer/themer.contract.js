@@ -145,6 +145,23 @@
 // `control.tab_vertical_label_lines`) are unitless numbers: they emit
 // raw, with no px projection. `stacking.skip_link` joins the named
 // surface order.
+//
+// Version 10 extends the role grid with the milestone-6 census
+// families (the tile family's container, states, mark and chevron
+// cells, the pagination bar with its select, buttons, collapse and
+// skeleton plus the pagination nav's explicit type sets and opacity
+// disabled label, the tree family's node states, indentation, toggle
+// and icon cells, the date picker's calendar geometry, day states and
+// its own shadow, the file uploader's list, item, status and drop
+// cells, the card family's header, body, footer and action cells, the
+// empty state family, the page header's container, breadcrumb, title
+// and tags cells, and the tearsheet's insets, stacking, header,
+// influencer and action cells), the folded follow-ups (the tag's
+// large height, the toggletip's focus geometry and the remaining
+// pagination skeleton widths) and `shadow.date_picker_calendar`.
+// `control.tearsheet_description_max_ratio` is unitless and emits raw.
+// `color.content_switcher_low_contrast_container_active` is retired:
+// no component read it.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -378,7 +395,7 @@ const GRID = Object.freeze({
       'content_switcher_separator', 'content_switcher_separator_disabled',
       'content_switcher_focus', 'content_switcher_focus_inset',
       'content_switcher_icon', 'content_switcher_icon_hover', 'content_switcher_icon_only', 'content_switcher_icon_selected', 'content_switcher_icon_disabled',
-      'content_switcher_low_contrast_container', 'content_switcher_low_contrast_container_active', 'content_switcher_low_contrast_container_hover', 'content_switcher_low_contrast_container_selected',
+      'content_switcher_low_contrast_container', 'content_switcher_low_contrast_container_hover', 'content_switcher_low_contrast_container_selected',
       'content_switcher_low_contrast_outline', 'content_switcher_low_contrast_label_selected',
       'content_switcher_low_contrast_icon', 'content_switcher_low_contrast_icon_selected',
       // v9: the menu family's remaining members
@@ -406,7 +423,44 @@ const GRID = Object.freeze({
       'copy_button_container', 'copy_button_container_hover', 'copy_button_container_active',
       'skip_link_container', 'skip_link_label', 'skip_link_border',
       // v9 folded follow-up: the selected list item's pressed fill
-      'list_item_container_selected_active'
+      'list_item_container_selected_active',
+      // v10: the tile family
+      'tile_container', 'tile_label', 'tile_focus', 'tile_container_hover', 'tile_label_disabled',
+      'tile_icon', 'tile_icon_disabled', 'tile_mark', 'tile_mark_selected', 'tile_mark_disabled',
+      'tile_border_selected', 'tile_border_selected_disabled', 'tile_chevron',
+      // v10: the pagination family (bar, selects, buttons, nav)
+      'pagination_container', 'pagination_divider', 'pagination_label', 'pagination_count_label',
+      'pagination_select_container_hover', 'pagination_button_icon', 'pagination_button_icon_disabled', 'pagination_button_container_hover',
+      'pagination_nav_page_label', 'pagination_nav_page_label_disabled', 'pagination_nav_page_container_hover',
+      'pagination_nav_indicator', 'pagination_nav_focus',
+      // v10: the tree family
+      'tree_node_container', 'tree_node_container_hover', 'tree_node_container_selected', 'tree_node_container_selected_hover',
+      'tree_node_label', 'tree_node_label_hover', 'tree_node_label_selected',
+      'tree_node_icon', 'tree_node_icon_hover', 'tree_node_indicator',
+      'tree_node_container_disabled', 'tree_node_label_disabled', 'tree_node_icon_disabled', 'tree_focus',
+      // v10: the date_picker family
+      'date_picker_calendar_container', 'date_picker_label', 'date_picker_nav_icon', 'date_picker_nav_icon_disabled',
+      'date_picker_container_hover', 'date_picker_year_container_hover',
+      'date_picker_day_label_outside', 'date_picker_day_label_today',
+      'date_picker_day_container_selected', 'date_picker_day_label_selected', 'date_picker_day_container_range',
+      'date_picker_day_label_disabled', 'date_picker_day_focus', 'date_picker_day_focus_selected',
+      // v10: the file_uploader family
+      'file_uploader_title', 'file_uploader_description', 'file_uploader_label_disabled',
+      'file_uploader_item_container', 'file_uploader_item_label', 'file_uploader_item_outline_invalid',
+      'file_uploader_error_title', 'file_uploader_error_body',
+      'file_uploader_close_icon', 'file_uploader_close_icon_disabled', 'file_uploader_invalid_icon', 'file_uploader_complete_icon',
+      'file_uploader_drop_outline', 'file_uploader_drop_outline_disabled', 'file_uploader_drop_outline_active',
+      'file_uploader_drop_label', 'file_uploader_drop_label_active',
+      // v10: the card family
+      'card_container', 'card_label', 'card_outline_clickable', 'card_container_hover', 'card_focus',
+      'card_divider', 'card_action_divider', 'card_icon_container_hover', 'card_icon_active',
+      // v10: the empty_state family
+      'empty_state_title', 'empty_state_subtitle',
+      // v10: the page_header family
+      'page_header_container', 'page_header_container_scrolled', 'page_header_shadow',
+      'page_header_bar_collapsed', 'page_header_title', 'page_header_subtitle',
+      // v10: the tearsheet family
+      'tearsheet_divider', 'tearsheet_main_container', 'tearsheet_actions_container'
     ]
   )),
   control: Object.freeze([
@@ -588,7 +642,58 @@ const GRID = Object.freeze({
     // popover's width ceiling, and the combo box member's geometry
     'fab_extended_padding_end', 'popover_max_width',
     'combo_box_clear_size', 'combo_box_clear_inset_end',
-    'combo_box_input_padding_end', 'combo_box_input_padding_end_invalid', 'combo_box_invalid_icon_inset_end'
+    'combo_box_input_padding_end', 'combo_box_input_padding_end_invalid', 'combo_box_invalid_icon_inset_end',
+    // v10: the tile family
+    'tile_padding', 'tile_min_height', 'tile_min_width', 'tile_focus_width', 'tile_icon_size', 'tile_icon_inset',
+    'tile_border_width', 'tile_mark_space', 'tile_mark_size', 'tile_mark_inset', 'tile_chevron_seat',
+    // v10: the pagination family
+    'pagination_divider_width', 'pagination_padding_inline', 'pagination_text_gap',
+    'pagination_select_padding_start', 'pagination_select_padding_end', 'pagination_collapse_width',
+    'pagination_nav_page_padding_inline', 'pagination_nav_indicator_width', 'pagination_nav_indicator_height',
+    'pagination_nav_focus_width', 'pagination_skeleton_width_short',
+    // v10: the tree family
+    'tree_node_indicator_width', 'tree_focus_width', 'tree_node_padding_start', 'tree_label_padding_end',
+    'tree_leaf_padding_block', 'tree_label_text_padding_start',
+    'tree_leaf_padding_start', 'tree_leaf_padding_start_icon', 'tree_leaf_padding_start_nested_icon',
+    'tree_indent', 'tree_toggle_size', 'tree_toggle_offset', 'tree_icon_size', 'tree_icon_gap',
+    // v10: the date_picker family
+    'date_picker_range_input_width', 'date_picker_calendar_width',
+    'date_picker_calendar_padding_inline', 'date_picker_calendar_padding_top', 'date_picker_calendar_padding_bottom',
+    'date_picker_header_height', 'date_picker_nav_size', 'date_picker_year_width', 'date_picker_weekday_height',
+    'date_picker_day_size', 'date_picker_today_mark_size', 'date_picker_today_mark_offset',
+    'date_picker_day_focus_width_selected', 'date_picker_day_focus_inset_selected',
+    // v10: the file_uploader family
+    'file_uploader_title_gap', 'file_uploader_list_gap', 'file_uploader_item_max_width',
+    'file_uploader_item_gap', 'file_uploader_item_row_gap', 'file_uploader_item_padding_start',
+    'file_uploader_name_max_width', 'file_uploader_name_max_width_invalid', 'file_uploader_item_outline_width',
+    'file_uploader_close_size', 'file_uploader_invalid_icon_gap',
+    'file_uploader_drop_height', 'file_uploader_drop_outline_width_active',
+    'file_uploader_skeleton_title_width', 'file_uploader_skeleton_description_width',
+    // v10: the card family
+    'card_border_width', 'card_focus_width', 'card_padding', 'card_header_padding_bottom_label',
+    'card_actions_space', 'card_text_gap', 'card_body_padding_top', 'card_divider_width',
+    'card_actions_height', 'card_action_padding_inline', 'card_actions_offset',
+    'card_action_divider_height', 'card_action_divider_width', 'card_icon_padding', 'card_icon_gap',
+    // v10: the empty_state family
+    'empty_state_title_gap', 'empty_state_subtitle_gap',
+    'empty_state_illustration_size', 'empty_state_illustration_size_small',
+    'empty_state_illustration_gap', 'empty_state_action_gap',
+    // v10: the page_header family
+    'page_header_padding_inline', 'page_header_breadcrumb_height', 'page_header_breadcrumb_gap',
+    'page_header_row_gap', 'page_header_title_min_height', 'page_header_title_icon_size',
+    'page_header_title_icon_gap', 'page_header_subtitle_gap',
+    'page_header_tags_padding_block', 'page_header_tags_padding_end',
+    // v10: the tearsheet family
+    'tearsheet_inset_inline', 'tearsheet_inset_top', 'tearsheet_inset_top_lower',
+    'tearsheet_stack_offset', 'tearsheet_enter_offset', 'tearsheet_header_height', 'tearsheet_header_padding_end',
+    'tearsheet_description_gap', 'tearsheet_description_max_ratio', 'tearsheet_navigation_gap',
+    'tearsheet_influencer_width', 'tearsheet_influencer_width_wide',
+    'tearsheet_divider_width', 'tearsheet_action_height', 'tearsheet_action_padding_top',
+    'tearsheet_action_padding_bottom', 'tearsheet_action_max_width',
+    // v10 folded follow-ups: the remaining pagination skeleton widths,
+    // the toggletip's focus geometry and the tag's large height
+    'pagination_skeleton_width_medium', 'pagination_skeleton_width_long',
+    'toggletip_focus_width', 'toggletip_focus_offset', 'tag_height_large'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
@@ -611,7 +716,26 @@ const GRID = Object.freeze({
     'breadcrumb', 'breadcrumb_small',
     'text_list', 'text_list_expressive',
     'contained_list_header', 'contained_list_header_disclosed', 'contained_list_item',
-    'skip_link', 'definition_term'
+    'skip_link', 'definition_term',
+    // v10: the tile family
+    'tile',
+    // v10: the pagination family
+    'pagination', 'pagination_nav_page', 'pagination_nav_page_active',
+    // v10: the tree family
+    'tree_node_label',
+    // v10: the date_picker family
+    'date_picker_value', 'date_picker_month', 'date_picker_day', 'date_picker_day_today',
+    // v10: the file_uploader family
+    'file_uploader_title', 'file_uploader_description', 'file_uploader_item',
+    'file_uploader_error_title', 'file_uploader_error_body',
+    // v10: the card family
+    'card_label', 'card_description', 'card_title', 'card_title_large', 'card_body',
+    // v10: the empty_state family
+    'empty_state_title', 'empty_state_title_small', 'empty_state_subtitle', 'empty_state_subtitle_small',
+    // v10: the page_header family
+    'page_header_title', 'page_header_subtitle',
+    // v10: the tearsheet family
+    'tearsheet_heading'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
@@ -621,7 +745,9 @@ const GRID = Object.freeze({
     // v6
     'list', 'dialog', 'notification',
     // v8: the slider's handle, the popover, the floating action button
-    'slider_handle', 'slider_handle_disabled', 'popover', 'fab', 'fab_hover'
+    'slider_handle', 'slider_handle_disabled', 'popover', 'fab', 'fab_hover',
+    // v10: the date_picker family's calendar
+    'date_picker_calendar'
   ])),
   motion: Object.freeze([
     // v7: the two animated families' cycles
@@ -653,7 +779,9 @@ const GRID_CELL_DEFS = Object.freeze({
   'control.dialog_text_gutter_ratio': Object.freeze({ emit: 'raw' }),
   'control.dialog_action_ratio': Object.freeze({ emit: 'raw' }),
   'control.dialog_action_ratio_three': Object.freeze({ emit: 'raw' }),
-  'control.accordion_content_end_ratio': Object.freeze({ emit: 'raw' })
+  'control.accordion_content_end_ratio': Object.freeze({ emit: 'raw' }),
+  // v10: the tearsheet description's width share - unitless, emits raw
+  'control.tearsheet_description_max_ratio': Object.freeze({ emit: 'raw' })
 });
 
 
@@ -1380,7 +1508,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 9,
+    version: 10,
     grid: GRID,
     leveled: LEVELED_SETS,
     leveled_index: LEVELED_INDEX,
