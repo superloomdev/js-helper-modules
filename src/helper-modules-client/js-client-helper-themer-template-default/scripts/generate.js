@@ -132,6 +132,7 @@ const VARIANTS = Object.freeze({
       'control.notification_details_inset_end': 0,
       'control.notification_action_inset': 40,
       'control.tab_vertical_list_ratio': 0.5,
+      'control.file_uploader_name_max_width': 216,
       'control.accordion_content_end_ratio': 0
     })
   }),
