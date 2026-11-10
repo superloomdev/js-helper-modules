@@ -161,7 +161,9 @@
 // pagination skeleton widths) and `shadow.date_picker_calendar`.
 // `control.tearsheet_description_max_ratio` is unitless and emits raw.
 // `color.content_switcher_low_contrast_container_active` is retired:
-// no component read it.
+// no component read it. An amendment inside the milestone adds the
+// tearsheet's header padding and container, the influencer's container
+// and the description's type, and the page header's divider.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -459,8 +461,12 @@ const GRID = Object.freeze({
       // v10: the page_header family
       'page_header_container', 'page_header_container_scrolled', 'page_header_shadow',
       'page_header_bar_collapsed', 'page_header_title', 'page_header_subtitle',
+      // v10 amendment 2 (m6-amend-2)
+      'page_header_divider',
       // v10: the tearsheet family
-      'tearsheet_divider', 'tearsheet_main_container', 'tearsheet_actions_container'
+      'tearsheet_divider', 'tearsheet_main_container', 'tearsheet_actions_container',
+      // v10 amendment 2 (m6-amend-2)
+      'tearsheet_header_container', 'tearsheet_influencer_container'
     ]
   )),
   control: Object.freeze([
@@ -690,6 +696,8 @@ const GRID = Object.freeze({
     'tearsheet_influencer_width', 'tearsheet_influencer_width_wide',
     'tearsheet_divider_width', 'tearsheet_action_height', 'tearsheet_action_padding_top',
     'tearsheet_action_padding_bottom', 'tearsheet_action_max_width',
+    // v10 amendment 2 (m6-amend-2)
+    'tearsheet_header_padding_block', 'tearsheet_header_padding_inline',
     // v10 folded follow-ups: the remaining pagination skeleton widths,
     // the toggletip's focus geometry and the tag's large height
     'pagination_skeleton_width_medium', 'pagination_skeleton_width_long',
@@ -735,7 +743,9 @@ const GRID = Object.freeze({
     // v10: the page_header family
     'page_header_title', 'page_header_subtitle',
     // v10: the tearsheet family
-    'tearsheet_heading'
+    'tearsheet_heading',
+    // v10 amendment 2 (m6-amend-2)
+    'tearsheet_description'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
