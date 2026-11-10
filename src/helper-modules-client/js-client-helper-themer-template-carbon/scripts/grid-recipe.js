@@ -1342,6 +1342,7 @@ export default function buildGridRecipe (grid) {
     'control.page_header_subtitle_gap': '{spacing.spacing_03}', // _page-header.scss:554-565
     'control.page_header_tags_padding_block': '{spacing.spacing_02}', // _page-header.scss:641-663
     'control.page_header_tags_padding_end': '{spacing.spacing_07}', // _page-header.scss:647-656
+    'color.page_header_divider': colorOf('border_subtle_00'), // _page-header.scss:114 .c4p--page-header border-block-end 1px solid $border-subtle-00 (m6-amend-2)
     // v10 Tearsheet family (`Tearsheet/_tearsheet.scss:34-595, ActionSet/_action-set.scss:22-124, TearsheetShell.js:208-330`)
     'control.tearsheet_inset_inline': '{spacing.spacing_10}', // _tearsheet.scss:288-322
     'control.tearsheet_inset_top': 90, // _tearsheet.scss:196-322
@@ -1350,17 +1351,22 @@ export default function buildGridRecipe (grid) {
     'control.tearsheet_enter_offset': 500, // _tearsheet.scss:34-63
     'control.tearsheet_header_height': '{spacing.spacing_11}', // _tearsheet.scss:292-322
     'control.tearsheet_header_padding_end': '{spacing.spacing_11}', // _tearsheet.scss:410-424
+    'control.tearsheet_header_padding_block': '{spacing.spacing_06}', // _tearsheet.scss:317-318 wide header padding $spacing-06 $spacing-07 (m6-amend-2)
+    'control.tearsheet_header_padding_inline': '{spacing.spacing_07}', // _tearsheet.scss:317-318 wide header padding $spacing-06 $spacing-07 (m6-amend-2)
+    'color.tearsheet_header_container': colorOf('layer_01'), // _tearsheet.scss:320 wide header background-color $layer (m6-amend-2)
     'type.tearsheet_heading': '{type.heading04}', // _tearsheet.scss:292-434
     'control.tearsheet_description_gap': '{spacing.spacing_05}', // _tearsheet.scss:380-402
     'control.tearsheet_description_max_ratio': 0.6, // _tearsheet.scss:380-402
+    'type.tearsheet_description': '{type.body_compact_01}', // _tearsheet.scss:385-390 type-style body-compact-01 (m6-amend-2)
     'control.tearsheet_navigation_gap': '{spacing.spacing_04}', // _tearsheet.scss:432-434
     'control.tearsheet_influencer_width': 256, // _tearsheet.scss:455-470
     'control.tearsheet_influencer_width_wide': 320, // _tearsheet.scss:480-489
+    'color.tearsheet_influencer_container': colorOf('layer_01'), // _tearsheet.scss:485-489 influencer background $layer (m6-amend-2)
     'color.tearsheet_divider': colorOf('border_subtle_01'), // _tearsheet.scss:455-457
     'control.tearsheet_divider_width': '{border.width_01}', // _tearsheet.scss:455-457
     'color.tearsheet_main_container': colorOf('background'), // _tearsheet.scss:471-489
     'color.tearsheet_actions_container': colorOf('background'), // ActionSet/_action-set.scss:22-124
-    'control.tearsheet_action_height': 64, // ActionSet/_action-set.scss:22-124
+    'control.tearsheet_action_height': '{spacing.spacing_11}', // _tearsheet.scss:291-296 wide expressive action block-size $spacing-11 (m6-amend-2)
     'control.tearsheet_action_padding_top': '{spacing.spacing_05}', // ActionSet/_action-set.scss:22-124
     'control.tearsheet_action_padding_bottom': '{spacing.spacing_07}', // ActionSet/_action-set.scss:22-124
     'control.tearsheet_action_max_width': 232, // ActionSet/_action-set.scss:22-124

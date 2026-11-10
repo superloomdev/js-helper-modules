@@ -5498,6 +5498,7 @@ export default Object.freeze({
     'control.page_header_subtitle_gap': '{spacing.spacing_03}',
     'control.page_header_tags_padding_block': '{spacing.spacing_02}',
     'control.page_header_tags_padding_end': '{spacing.spacing_07}',
+    'color.page_header_divider': '{color.border_subtle_00}',
     'control.tearsheet_inset_inline': '{spacing.spacing_10}',
     'control.tearsheet_inset_top': 90,
     'control.tearsheet_inset_top_lower': 130,
@@ -5505,17 +5506,22 @@ export default Object.freeze({
     'control.tearsheet_enter_offset': 500,
     'control.tearsheet_header_height': '{spacing.spacing_11}',
     'control.tearsheet_header_padding_end': '{spacing.spacing_11}',
+    'control.tearsheet_header_padding_block': '{spacing.spacing_06}',
+    'control.tearsheet_header_padding_inline': '{spacing.spacing_07}',
+    'color.tearsheet_header_container': '{color.layer_01}',
     'type.tearsheet_heading': '{type.heading04}',
     'control.tearsheet_description_gap': '{spacing.spacing_05}',
     'control.tearsheet_description_max_ratio': 0.6,
+    'type.tearsheet_description': '{type.body_compact_01}',
     'control.tearsheet_navigation_gap': '{spacing.spacing_04}',
     'control.tearsheet_influencer_width': 256,
     'control.tearsheet_influencer_width_wide': 320,
+    'color.tearsheet_influencer_container': '{color.layer_01}',
     'color.tearsheet_divider': '{color.border_subtle_01}',
     'control.tearsheet_divider_width': '{border.width_01}',
     'color.tearsheet_main_container': '{color.background}',
     'color.tearsheet_actions_container': '{color.background}',
-    'control.tearsheet_action_height': 64,
+    'control.tearsheet_action_height': '{spacing.spacing_11}',
     'control.tearsheet_action_padding_top': '{spacing.spacing_05}',
     'control.tearsheet_action_padding_bottom': '{spacing.spacing_07}',
     'control.tearsheet_action_max_width': 232,
@@ -9245,6 +9251,9 @@ export default Object.freeze({
     'color.page_header_subtitle': {
       'group': 'color'
     },
+    'color.page_header_divider': {
+      'group': 'color'
+    },
     'color.tearsheet_divider': {
       'group': 'color'
     },
@@ -9252,6 +9261,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.tearsheet_actions_container': {
+      'group': 'color'
+    },
+    'color.tearsheet_header_container': {
+      'group': 'color'
+    },
+    'color.tearsheet_influencer_container': {
       'group': 'color'
     },
     'control.field_outline_width': {
@@ -10586,6 +10601,12 @@ export default Object.freeze({
     'control.tearsheet_action_max_width': {
       'group': 'dimension'
     },
+    'control.tearsheet_header_padding_block': {
+      'group': 'dimension'
+    },
+    'control.tearsheet_header_padding_inline': {
+      'group': 'dimension'
+    },
     'control.pagination_skeleton_width_medium': {
       'group': 'dimension'
     },
@@ -10797,6 +10818,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.tearsheet_heading': {
+      'group': 'typeSet'
+    },
+    'type.tearsheet_description': {
       'group': 'typeSet'
     },
     'shadow.level_00': {
