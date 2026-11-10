@@ -5491,7 +5491,7 @@ export default Object.freeze({
     'type.page_header_title': '{type.heading04}',
     'color.page_header_title': '{color.text_primary}',
     'control.page_header_title_min_height': 40,
-    'control.page_header_title_icon_size': 32,
+    'control.page_header_title_icon_size': '{size.icon_01}',
     'control.page_header_title_icon_gap': '{spacing.spacing_04}',
     'type.page_header_subtitle': '{type.body01}',
     'color.page_header_subtitle': '{color.text_primary}',
