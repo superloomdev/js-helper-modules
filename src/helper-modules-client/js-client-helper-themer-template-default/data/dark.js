@@ -6558,7 +6558,7 @@ export default Object.freeze({
     'control.page_header_breadcrumb_gap': '{spacing.spacing_02}',
     'control.page_header_row_gap': '{spacing.spacing_05}',
     'control.page_header_title_min_height': 40,
-    'control.page_header_title_icon_size': 32,
+    'control.page_header_title_icon_size': '{size.icon_01}',
     'control.page_header_title_icon_gap': '{spacing.spacing_04}',
     'control.page_header_subtitle_gap': '{spacing.spacing_03}',
     'control.page_header_tags_padding_block': '{spacing.spacing_02}',

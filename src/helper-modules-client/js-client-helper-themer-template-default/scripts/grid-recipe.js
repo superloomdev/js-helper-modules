@@ -1281,7 +1281,7 @@ export default function buildGridRecipe (grid) {
     'type.page_header_title': '{type.heading04}', // _page-header.scss:465-470
     'color.page_header_title': colorOf('text_primary'), // _page-header.scss:465-470
     'control.page_header_title_min_height': 40, // _page-header.scss:469-470
-    'control.page_header_title_icon_size': 32, // _page-header.scss:481-496
+    'control.page_header_title_icon_size': '{size.icon_01}', // probe PageHeader.json icon state: the renderIcon glyph renders 16 (m6-amend-1)
     'control.page_header_title_icon_gap': '{spacing.spacing_04}', // _page-header.scss:488-489
     'type.page_header_subtitle': '{type.body01}', // _page-header.scss:566-598
     'color.page_header_subtitle': colorOf('text_primary'), // _page-header.scss:566-598
