@@ -1157,6 +1157,11 @@ export default function buildGridRecipe (grid) {
     // v10 Date Picker family (`date-picker/_date-picker.scss:96-339, _flatpickr.scss:94-568, utilities/_box-shadow.scss:14-16`, superloom_decision)
     'type.date_picker_value': '{type.code02}', // _date-picker.scss:96-130
     'control.date_picker_range_input_width': 143.5, // _date-picker.scss:236-238
+    'control.date_picker_input_width': 288, // _date-picker.scss:86-89 single input inline-size 288px (m6-amend-3)
+    'control.date_picker_simple_input_width': 120, // _date-picker.scss:64-68 simple input and label 120px (m6-amend-3)
+    'control.date_picker_simple_input_width_message': 152, // _date-picker.scss:70-78 simple invalid/warn input and message 152px (m6-amend-3)
+    'control.date_picker_short_input_width': 91.2, // _date-picker.scss:80-84 simple+short input 5.7rem (m6-amend-3)
+    'control.date_picker_days_height': 246, // _flatpickr.scss:166-172 dayContainer wrapping flex block-size 246px (m6-amend-3)
     'control.date_picker_calendar_width': 288, // _flatpickr.scss:94-140
     'control.date_picker_calendar_padding_inline': '{spacing.spacing_02}', // _flatpickr.scss:121-133
     'control.date_picker_calendar_padding_top': '{spacing.spacing_02}', // _flatpickr.scss:121-133
