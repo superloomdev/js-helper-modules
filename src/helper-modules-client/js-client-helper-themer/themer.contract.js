@@ -163,7 +163,12 @@
 // `color.content_switcher_low_contrast_container_active` is retired:
 // no component read it. An amendment inside the milestone adds the
 // tearsheet's header padding and container, the influencer's container
-// and the description's type, and the page header's divider.
+// and the description's type, and the page header's divider. A third
+// milestone amendment adds the date picker's input widths and the day
+// grid's height (`control.date_picker_input_width`,
+// `control.date_picker_simple_input_width`,
+// `control.date_picker_simple_input_width_message`,
+// `control.date_picker_short_input_width`, `control.date_picker_days_height`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -668,6 +673,9 @@ const GRID = Object.freeze({
     'date_picker_header_height', 'date_picker_nav_size', 'date_picker_year_width', 'date_picker_weekday_height',
     'date_picker_day_size', 'date_picker_today_mark_size', 'date_picker_today_mark_offset',
     'date_picker_day_focus_width_selected', 'date_picker_day_focus_inset_selected',
+    // v10 amendment 3 (m6-amend-3)
+    'date_picker_input_width', 'date_picker_simple_input_width', 'date_picker_simple_input_width_message',
+    'date_picker_short_input_width', 'date_picker_days_height',
     // v10: the file_uploader family
     'file_uploader_title_gap', 'file_uploader_list_gap', 'file_uploader_item_max_width',
     'file_uploader_item_gap', 'file_uploader_item_row_gap', 'file_uploader_item_padding_start',
