@@ -1382,7 +1382,7 @@ describe('carbon template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1714, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1719, schemeName + ' token count');
     }
   });
 

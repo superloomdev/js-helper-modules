@@ -5364,6 +5364,11 @@ export default Object.freeze({
     'control.tree_icon_gap': '{spacing.spacing_03}',
     'type.date_picker_value': '{type.code02}',
     'control.date_picker_range_input_width': 143.5,
+    'control.date_picker_input_width': 288,
+    'control.date_picker_simple_input_width': 120,
+    'control.date_picker_simple_input_width_message': 152,
+    'control.date_picker_short_input_width': 91.2,
+    'control.date_picker_days_height': 246,
     'control.date_picker_calendar_width': 288,
     'control.date_picker_calendar_padding_inline': '{spacing.spacing_02}',
     'control.date_picker_calendar_padding_top': '{spacing.spacing_02}',
@@ -10410,6 +10415,21 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.date_picker_day_focus_inset_selected': {
+      'group': 'dimension'
+    },
+    'control.date_picker_input_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_simple_input_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_simple_input_width_message': {
+      'group': 'dimension'
+    },
+    'control.date_picker_short_input_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_days_height': {
       'group': 'dimension'
     },
     'control.file_uploader_title_gap': {
