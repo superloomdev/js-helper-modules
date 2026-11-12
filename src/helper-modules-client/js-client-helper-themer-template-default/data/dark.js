@@ -6105,8 +6105,8 @@ export default Object.freeze({
     'color.file_uploader_item_container': '{color.layer_01}',
     'color.file_uploader_item_label': '{color.text_primary}',
     'color.file_uploader_item_outline_invalid': '{color.support_error}',
-    'color.file_uploader_error_title': '{color.text_primary}',
-    'color.file_uploader_error_body': '{color.text_secondary}',
+    'color.file_uploader_error_title': '{color.text_error}',
+    'color.file_uploader_error_body': '{color.text_primary}',
     'color.file_uploader_close_icon': '{color.icon_primary}',
     'color.file_uploader_close_icon_disabled': '{color.icon_disabled}',
     'color.file_uploader_invalid_icon': '{color.support_error}',
@@ -6116,6 +6116,7 @@ export default Object.freeze({
     'color.file_uploader_drop_outline_active': '{color.focus}',
     'color.file_uploader_drop_label': '{color.link_primary}',
     'color.file_uploader_drop_label_active': '{color.text_primary}',
+    'color.file_uploader_error_rule': '{color.border_subtle_00}',
     'color.card_container': '{color.layer_01}',
     'color.card_label': '{color.text_primary}',
     'color.card_outline_clickable': '{color.border_tile_01}',
@@ -6526,20 +6527,40 @@ export default Object.freeze({
     'control.date_picker_short_input_width': 91.2,
     'control.date_picker_days_height': 246,
     'control.file_uploader_title_gap': '{spacing.spacing_03}',
-    'control.file_uploader_list_gap': '{spacing.spacing_06}',
+    'control.file_uploader_list_gap': '{spacing.spacing_05}',
     'control.file_uploader_item_max_width': 320,
     'control.file_uploader_item_gap': '{spacing.spacing_03}',
     'control.file_uploader_item_row_gap': '{spacing.spacing_04}',
     'control.file_uploader_item_padding_start': '{spacing.spacing_05}',
     'control.file_uploader_name_max_width': 280,
     'control.file_uploader_name_max_width_invalid': 248,
-    'control.file_uploader_item_outline_width': '{border.width_01}',
+    'control.file_uploader_item_outline_width': '{focus.width}',
     'control.file_uploader_close_size': 24,
-    'control.file_uploader_invalid_icon_gap': '{spacing.spacing_03}',
+    'control.file_uploader_invalid_icon_gap': 0,
     'control.file_uploader_drop_height': 96,
     'control.file_uploader_drop_outline_width_active': '{focus.width}',
     'control.file_uploader_skeleton_title_width': 100,
     'control.file_uploader_skeleton_description_width': 225,
+    'control.date_picker_calendar_height': 336,
+    'control.date_picker_month_gap': '{spacing.spacing_02}',
+    'control.date_picker_year_padding': '{spacing.spacing_02}',
+    'control.file_uploader_description_gap': '{spacing.spacing_05}',
+    'control.file_uploader_state_padding_end': 12,
+    'control.file_uploader_item_row_gap_medium': '{spacing.spacing_03}',
+    'control.file_uploader_item_row_gap_small': '{spacing.spacing_02}',
+    'control.file_uploader_item_padding_invalid': 12,
+    'control.file_uploader_item_padding_invalid_medium': '{spacing.spacing_03}',
+    'control.file_uploader_item_padding_invalid_small': '{spacing.spacing_02}',
+    'control.file_uploader_error_padding_top': '{spacing.spacing_05}',
+    'control.file_uploader_error_padding_top_medium': 11,
+    'control.file_uploader_error_padding_top_small': 7,
+    'control.file_uploader_error_padding_inline': '{spacing.spacing_05}',
+    'control.file_uploader_drop_padding': '{spacing.spacing_05}',
+    'control.file_uploader_drop_max_width': 320,
+    'control.page_header_title_offset_no_breadcrumb': '{spacing.spacing_07}',
+    'control.page_header_buffer_title': '{spacing.spacing_07}',
+    'control.page_header_tags_height': 44,
+    'control.pagination_select_indicator_end': 16,
     'control.card_border_width': '{border.width_01}',
     'control.card_focus_width': '{focus.width}',
     'control.card_padding': '{spacing.spacing_05}',
@@ -6687,10 +6708,10 @@ export default Object.freeze({
       'font_family': 'sans'
     },
     'type.file_uploader_title': '{type.heading_compact_01}',
-    'type.file_uploader_description': '{type.label01}',
+    'type.file_uploader_description': '{type.body_compact_01}',
     'type.file_uploader_item': '{type.body_compact_01}',
-    'type.file_uploader_error_title': '{type.heading_compact_01}',
-    'type.file_uploader_error_body': '{type.body_compact_01}',
+    'type.file_uploader_error_title': '{type.helper_text_01}',
+    'type.file_uploader_error_body': '{type.helper_text_01}',
     'type.card_label': '{type.label01}',
     'type.card_description': '{type.label01}',
     'type.card_title': '{type.heading_compact_02}',
@@ -10158,6 +10179,9 @@ export default Object.freeze({
     'color.file_uploader_drop_label_active': {
       'group': 'color'
     },
+    'color.file_uploader_error_rule': {
+      'group': 'color'
+    },
     'color.card_container': {
       'group': 'color'
     },
@@ -11428,6 +11452,66 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.file_uploader_skeleton_description_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_calendar_height': {
+      'group': 'dimension'
+    },
+    'control.date_picker_month_gap': {
+      'group': 'dimension'
+    },
+    'control.date_picker_year_padding': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_description_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_state_padding_end': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_row_gap_medium': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_row_gap_small': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_invalid': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_invalid_medium': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_invalid_small': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_top': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_top_medium': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_top_small': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_drop_padding': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_drop_max_width': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_offset_no_breadcrumb': {
+      'group': 'dimension'
+    },
+    'control.page_header_buffer_title': {
+      'group': 'dimension'
+    },
+    'control.page_header_tags_height': {
+      'group': 'dimension'
+    },
+    'control.pagination_select_indicator_end': {
       'group': 'dimension'
     },
     'control.card_border_width': {

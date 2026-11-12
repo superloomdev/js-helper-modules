@@ -1197,10 +1197,10 @@ export default function buildGridRecipe (grid) {
     'type.file_uploader_title': '{type.heading_compact_01}', // _file-uploader.scss:39-49
     'color.file_uploader_title': colorOf('text_primary'), // _file-uploader.scss:39-49
     'control.file_uploader_title_gap': '{spacing.spacing_03}', // _file-uploader.scss:39-49
-    'type.file_uploader_description': '{type.label01}', // _file-uploader.scss:117-127
+    'type.file_uploader_description': '{type.body_compact_01}', // _file-uploader.scss:117-119 type-style('body-compact-01'); probe FileUploader default description 14/18/400/0.16 (m6-amend-4)
     'color.file_uploader_description': colorOf('text_secondary'), // _file-uploader.scss:117-127
     'color.file_uploader_label_disabled': colorOf('text_disabled'), // _file-uploader.scss:47-49,125-127
-    'control.file_uploader_list_gap': '{spacing.spacing_06}', // _file-uploader.scss:129-145
+    'control.file_uploader_list_gap': '{spacing.spacing_05}', // _file-uploader.scss:138-139 .cds--btn ~ .cds--file-container margin-block-start $spacing-05 (the 24 of :134 is the dead .cds--file-btn); probe FileUploader default root 134 = 118 + 16 (m6-amend-4)
     'color.file_uploader_item_container': colorOf('layer_01'), // _file-uploader.scss:147-162
     'control.file_uploader_item_max_width': 320, // _file-uploader.scss:147-162
     'control.file_uploader_item_gap': '{spacing.spacing_03}', // _file-uploader.scss:147-162
@@ -1211,16 +1211,16 @@ export default function buildGridRecipe (grid) {
     'control.file_uploader_name_max_width': 280, // _file-uploader.scss:184-208
     'control.file_uploader_name_max_width_invalid': 248, // _file-uploader.scss:193-208
     'color.file_uploader_item_outline_invalid': colorOf('support_error'), // _file-uploader.scss:272-285
-    'control.file_uploader_item_outline_width': '{border.width_01}', // _file-uploader.scss:272-285
-    'type.file_uploader_error_title': '{type.heading_compact_01}', // _file-uploader.scss:286-324
-    'type.file_uploader_error_body': '{type.body_compact_01}', // _file-uploader.scss:286-324
-    'color.file_uploader_error_title': colorOf('text_primary'), // _file-uploader.scss:286-324
-    'color.file_uploader_error_body': colorOf('text_secondary'), // _file-uploader.scss:286-324
+    'control.file_uploader_item_outline_width': '{focus.width}', // _file-uploader.scss:272-273 focus-outline('invalid') 2px; probe FileUploaderItem invalid outline 2px solid (m6-amend-4)
+    'type.file_uploader_error_title': '{type.helper_text_01}', // _file-uploader.scss:300-305 type-style('helper-text-01'); probe invalid errorTitle 12/16/400/0.32 (m6-amend-4)
+    'type.file_uploader_error_body': '{type.helper_text_01}', // _file-uploader.scss:300-305; probe invalid errorBody 12/16/400/0.32 (m6-amend-4)
+    'color.file_uploader_error_title': colorOf('text_error'), // _file-uploader.scss:310-312 $text-error; probe #da1e28 (m6-amend-4)
+    'color.file_uploader_error_body': colorOf('text_primary'), // _file-uploader.scss:315-317 $text-primary; probe #161616 (m6-amend-4)
     'control.file_uploader_close_size': 24, // _file-uploader.scss:382-411
     'color.file_uploader_close_icon': colorOf('icon_primary'), // _file-uploader.scss:382-411
     'color.file_uploader_close_icon_disabled': colorOf('icon_disabled'), // _file-uploader.scss:382-411
     'color.file_uploader_invalid_icon': colorOf('support_error'), // _file-uploader.scss:376-380
-    'control.file_uploader_invalid_icon_gap': '{spacing.spacing_03}', // _file-uploader.scss:376-380
+    'control.file_uploader_invalid_icon_gap': 0, // Filename.js:30 renders .cds--file-invalid; the :33-36 margin targets .cds--file--invalid, which nothing carries; probe invalid icon x 268 + 16 = close x 284 (m6-amend-4)
     'color.file_uploader_complete_icon': colorOf('interactive'), // _file-uploader.scss:358-374
     'control.file_uploader_drop_height': 96, // _file-uploader.scss:416-432
     'color.file_uploader_drop_outline': colorOf('border_strong_01'), // _file-uploader.scss:416-432
@@ -1231,6 +1231,28 @@ export default function buildGridRecipe (grid) {
     'color.file_uploader_drop_label_active': colorOf('text_primary'), // _file-uploader.scss:64-95
     'control.file_uploader_skeleton_title_width': 100, // FileUploader.Skeleton.js:24-36
     'control.file_uploader_skeleton_description_width': 225, // FileUploader.Skeleton.js:24-36
+    // v10 amendment 4 (m6-amend-4, Plan 0162 U3 probes)
+    'control.date_picker_calendar_height': 336, // _flatpickr.scss:132 .flatpickr-calendar.open block-size 336px; probe DatePicker open calendar h 336
+    'control.date_picker_month_gap': '{spacing.spacing_02}', // _flatpickr.scss:271-272 .cur-month margin-inline $spacing-02; probe open monthLabel margin 0/4/0/4
+    'control.date_picker_year_padding': '{spacing.spacing_02}', // _flatpickr.scss:302 .numInput padding $spacing-02; probe open yearInput pad 4/4/4/4
+    'control.file_uploader_description_gap': '{spacing.spacing_05}', // _file-uploader.scss:117-122 label-description margin-block-end $spacing-05; probe FileUploader description marginBottom 16
+    'control.file_uploader_state_padding_end': 12, // _file-uploader.scss:338-343 state-container padding-inline-end 12px; probe FileUploaderItem state paddingRight 12
+    'control.file_uploader_item_row_gap_medium': '{spacing.spacing_03}', // _file-uploader.scss:247-248 --md gap $spacing-03
+    'control.file_uploader_item_row_gap_small': '{spacing.spacing_02}', // _file-uploader.scss:252-253 --sm gap $spacing-02
+    'control.file_uploader_item_padding_invalid': 12, // _file-uploader.scss:272-274 --invalid padding 12px 0; probe invalid root paddingTop 12
+    'control.file_uploader_item_padding_invalid_medium': '{spacing.spacing_03}', // _file-uploader.scss:282-284 --invalid--md padding $spacing-03 0
+    'control.file_uploader_item_padding_invalid_small': '{spacing.spacing_02}', // _file-uploader.scss:278-280 --invalid--sm padding $spacing-02 0
+    'control.file_uploader_error_padding_top': '{spacing.spacing_05}', // _file-uploader.scss:286-288 padding-block-start $spacing-05; probe invalid message paddingTop 16
+    'control.file_uploader_error_padding_top_medium': 11, // _file-uploader.scss:296-298 padding-block-start 11px
+    'control.file_uploader_error_padding_top_small': 7, // _file-uploader.scss:291-293 padding-block-start 7px
+    'control.file_uploader_error_padding_inline': '{spacing.spacing_05}', // _file-uploader.scss:300-307 title and supplement padding 0 $spacing-05; probe errorTitle paddingLeft 16
+    'color.file_uploader_error_rule': colorOf('border_subtle_00'), // _file-uploader.scss:286-287 border-block-start 1px $border-subtle; probe invalid message borderTopColor #e0e0e0
+    'control.file_uploader_drop_padding': '{spacing.spacing_05}', // _file-uploader.scss:415-423 drop-container padding $spacing-05
+    'control.file_uploader_drop_max_width': 320, // _file-uploader.scss:64-70 file-browse-btn max-inline-size 320px
+    'control.page_header_title_offset_no_breadcrumb': '{spacing.spacing_07}', // PageHeader/_page-header.scss:410-412 title-row--no-breadcrumb-row margin-block-start $spacing-07; probe title titleRow y 34 (queued at U2)
+    'control.page_header_buffer_title': '{spacing.spacing_07}', // _page-header.scss:391-394 last-row-buffer--active block-size $spacing-07; probe title root 105 = 32 + 40 + 32 + 1 (queued at U2)
+    'control.page_header_tags_height': 44, // probe PageHeader default / tags navigationRow height 44 (queued at U2)
+    'control.pagination_select_indicator_end': 16, // select/_select.scss:269-271 inline arrow inset-inline-end $spacing-03 plus the pagination arrow's translate(-0.5rem) (queued at U2)
     // v10 Card family (`Card/_card.scss:22-163, ProductiveCard/_productive-card.scss:18-113, Card.js:20-170`, superloom_decision)
     'color.card_container': colorOf('layer_01'), // _card.scss:22-26
     'color.card_label': colorOf('text_primary'), // _card.scss:84-94
