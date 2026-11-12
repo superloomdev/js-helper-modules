@@ -169,6 +169,13 @@
 // `control.date_picker_simple_input_width`,
 // `control.date_picker_simple_input_width_message`,
 // `control.date_picker_short_input_width`, `control.date_picker_days_height`).
+// A fourth adds the calendar's height, month gap and year padding, the
+// file uploader's description gap, state inset, size-scaled row gaps,
+// invalid padding, error message insets and rule, and drop padding and
+// width, and the page header and pagination cells queued by the M6
+// repairs (`control.page_header_title_offset_no_breadcrumb`,
+// `control.page_header_buffer_title`, `control.page_header_tags_height`,
+// `control.pagination_select_indicator_end`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -458,6 +465,8 @@ const GRID = Object.freeze({
       'file_uploader_close_icon', 'file_uploader_close_icon_disabled', 'file_uploader_invalid_icon', 'file_uploader_complete_icon',
       'file_uploader_drop_outline', 'file_uploader_drop_outline_disabled', 'file_uploader_drop_outline_active',
       'file_uploader_drop_label', 'file_uploader_drop_label_active',
+      // v10 amendment 4 (m6-amend-4)
+      'file_uploader_error_rule',
       // v10: the card family
       'card_container', 'card_label', 'card_outline_clickable', 'card_container_hover', 'card_focus',
       'card_divider', 'card_action_divider', 'card_icon_container_hover', 'card_icon_active',
@@ -683,6 +692,15 @@ const GRID = Object.freeze({
     'file_uploader_close_size', 'file_uploader_invalid_icon_gap',
     'file_uploader_drop_height', 'file_uploader_drop_outline_width_active',
     'file_uploader_skeleton_title_width', 'file_uploader_skeleton_description_width',
+    // v10 amendment 4 (m6-amend-4)
+    'date_picker_calendar_height', 'date_picker_month_gap', 'date_picker_year_padding',
+    'file_uploader_description_gap', 'file_uploader_state_padding_end',
+    'file_uploader_item_row_gap_medium', 'file_uploader_item_row_gap_small',
+    'file_uploader_item_padding_invalid', 'file_uploader_item_padding_invalid_medium', 'file_uploader_item_padding_invalid_small',
+    'file_uploader_error_padding_top', 'file_uploader_error_padding_top_medium', 'file_uploader_error_padding_top_small',
+    'file_uploader_error_padding_inline', 'file_uploader_drop_padding', 'file_uploader_drop_max_width',
+    'page_header_title_offset_no_breadcrumb', 'page_header_buffer_title', 'page_header_tags_height',
+    'pagination_select_indicator_end',
     // v10: the card family
     'card_border_width', 'card_focus_width', 'card_padding', 'card_header_padding_bottom_label',
     'card_actions_space', 'card_text_gap', 'card_body_padding_top', 'card_divider_width',
