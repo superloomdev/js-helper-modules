@@ -5410,10 +5410,10 @@ export default Object.freeze({
     'type.file_uploader_title': '{type.heading_compact_01}',
     'color.file_uploader_title': '{color.text_primary}',
     'control.file_uploader_title_gap': '{spacing.spacing_03}',
-    'type.file_uploader_description': '{type.label01}',
+    'type.file_uploader_description': '{type.body_compact_01}',
     'color.file_uploader_description': '{color.text_secondary}',
     'color.file_uploader_label_disabled': '{color.text_disabled}',
-    'control.file_uploader_list_gap': '{spacing.spacing_06}',
+    'control.file_uploader_list_gap': '{spacing.spacing_05}',
     'color.file_uploader_item_container': '{color.layer_01}',
     'control.file_uploader_item_max_width': 320,
     'control.file_uploader_item_gap': '{spacing.spacing_03}',
@@ -5424,16 +5424,16 @@ export default Object.freeze({
     'control.file_uploader_name_max_width': 280,
     'control.file_uploader_name_max_width_invalid': 248,
     'color.file_uploader_item_outline_invalid': '{color.support_error}',
-    'control.file_uploader_item_outline_width': '{border.width_01}',
-    'type.file_uploader_error_title': '{type.heading_compact_01}',
-    'type.file_uploader_error_body': '{type.body_compact_01}',
-    'color.file_uploader_error_title': '{color.text_primary}',
-    'color.file_uploader_error_body': '{color.text_secondary}',
+    'control.file_uploader_item_outline_width': '{focus.width}',
+    'type.file_uploader_error_title': '{type.helper_text_01}',
+    'type.file_uploader_error_body': '{type.helper_text_01}',
+    'color.file_uploader_error_title': '{color.text_error}',
+    'color.file_uploader_error_body': '{color.text_primary}',
     'control.file_uploader_close_size': 24,
     'color.file_uploader_close_icon': '{color.icon_primary}',
     'color.file_uploader_close_icon_disabled': '{color.icon_disabled}',
     'color.file_uploader_invalid_icon': '{color.support_error}',
-    'control.file_uploader_invalid_icon_gap': '{spacing.spacing_03}',
+    'control.file_uploader_invalid_icon_gap': 0,
     'color.file_uploader_complete_icon': '{color.interactive}',
     'control.file_uploader_drop_height': 96,
     'color.file_uploader_drop_outline': '{color.border_strong_01}',
@@ -5444,6 +5444,27 @@ export default Object.freeze({
     'color.file_uploader_drop_label_active': '{color.text_primary}',
     'control.file_uploader_skeleton_title_width': 100,
     'control.file_uploader_skeleton_description_width': 225,
+    'control.date_picker_calendar_height': 336,
+    'control.date_picker_month_gap': '{spacing.spacing_02}',
+    'control.date_picker_year_padding': '{spacing.spacing_02}',
+    'control.file_uploader_description_gap': '{spacing.spacing_05}',
+    'control.file_uploader_state_padding_end': 12,
+    'control.file_uploader_item_row_gap_medium': '{spacing.spacing_03}',
+    'control.file_uploader_item_row_gap_small': '{spacing.spacing_02}',
+    'control.file_uploader_item_padding_invalid': 12,
+    'control.file_uploader_item_padding_invalid_medium': '{spacing.spacing_03}',
+    'control.file_uploader_item_padding_invalid_small': '{spacing.spacing_02}',
+    'control.file_uploader_error_padding_top': '{spacing.spacing_05}',
+    'control.file_uploader_error_padding_top_medium': 11,
+    'control.file_uploader_error_padding_top_small': 7,
+    'control.file_uploader_error_padding_inline': '{spacing.spacing_05}',
+    'color.file_uploader_error_rule': '{color.border_subtle_00}',
+    'control.file_uploader_drop_padding': '{spacing.spacing_05}',
+    'control.file_uploader_drop_max_width': 320,
+    'control.page_header_title_offset_no_breadcrumb': '{spacing.spacing_07}',
+    'control.page_header_buffer_title': '{spacing.spacing_07}',
+    'control.page_header_tags_height': 44,
+    'control.pagination_select_indicator_end': 16,
     'color.card_container': '{color.layer_01}',
     'color.card_label': '{color.text_primary}',
     'control.card_border_width': '{border.width_01}',
@@ -9205,6 +9226,9 @@ export default Object.freeze({
     'color.file_uploader_drop_label_active': {
       'group': 'color'
     },
+    'color.file_uploader_error_rule': {
+      'group': 'color'
+    },
     'color.card_container': {
       'group': 'color'
     },
@@ -10475,6 +10499,66 @@ export default Object.freeze({
       'group': 'dimension'
     },
     'control.file_uploader_skeleton_description_width': {
+      'group': 'dimension'
+    },
+    'control.date_picker_calendar_height': {
+      'group': 'dimension'
+    },
+    'control.date_picker_month_gap': {
+      'group': 'dimension'
+    },
+    'control.date_picker_year_padding': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_description_gap': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_state_padding_end': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_row_gap_medium': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_row_gap_small': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_invalid': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_invalid_medium': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_item_padding_invalid_small': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_top': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_top_medium': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_top_small': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_error_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_drop_padding': {
+      'group': 'dimension'
+    },
+    'control.file_uploader_drop_max_width': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_offset_no_breadcrumb': {
+      'group': 'dimension'
+    },
+    'control.page_header_buffer_title': {
+      'group': 'dimension'
+    },
+    'control.page_header_tags_height': {
+      'group': 'dimension'
+    },
+    'control.pagination_select_indicator_end': {
       'group': 'dimension'
     },
     'control.card_border_width': {
