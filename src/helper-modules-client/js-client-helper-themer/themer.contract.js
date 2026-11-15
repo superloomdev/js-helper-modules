@@ -176,6 +176,10 @@
 // repairs (`control.page_header_title_offset_no_breadcrumb`,
 // `control.page_header_buffer_title`, `control.page_header_tags_height`,
 // `control.pagination_select_indicator_end`).
+// A fifth gives the date picker's field its own disabled outline and a
+// read-only state (`color.date_picker_input_outline_disabled`,
+// `color.date_picker_input_container_readonly`,
+// `color.date_picker_input_outline_readonly`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -467,6 +471,8 @@ const GRID = Object.freeze({
       'file_uploader_drop_label', 'file_uploader_drop_label_active',
       // v10 amendment 4 (m6-amend-4)
       'file_uploader_error_rule',
+      // v10 amendment 5 (m6-amend-5)
+      'date_picker_input_outline_disabled', 'date_picker_input_container_readonly', 'date_picker_input_outline_readonly',
       // v10: the card family
       'card_container', 'card_label', 'card_outline_clickable', 'card_container_hover', 'card_focus',
       'card_divider', 'card_action_divider', 'card_icon_container_hover', 'card_icon_active',
