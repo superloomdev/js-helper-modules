@@ -1307,6 +1307,10 @@ export default function buildGridRecipe (grid) {
     'control.page_header_buffer_title': '{spacing.spacing_07}', // _page-header.scss:391-394 last-row-buffer--active block-size $spacing-07; probe title root 105 = 32 + 40 + 32 + 1 (queued at U2)
     'control.page_header_tags_height': 44, // probe PageHeader default / tags navigationRow height 44 (queued at U2)
     'control.pagination_select_indicator_end': 16, // select/_select.scss:269-271 inline arrow inset-inline-end $spacing-03 plus the pagination arrow's translate(-0.5rem) (queued at U2)
+    // v10 amendment 5 (m6-amend-5, queued at U3)
+    'color.date_picker_input_outline_disabled': colorOf(null), // date-picker/_date-picker.scss:116-118 input:disabled border-block-end 1px solid transparent; focus run borderBottomColor rgba(0,0,0,0)
+    'color.date_picker_input_container_readonly': colorOf(null), // _date-picker.scss:307-308 input[readonly] background transparent; focus run backgroundColor rgba(0,0,0,0)
+    'color.date_picker_input_outline_readonly': colorOf('border_subtle_00'), // _date-picker.scss:307-309 input[readonly] border-block-end-color $border-subtle; focus run borderBottomColor rgb(224,224,224)
     // v10 Card family (`Card/_card.scss:22-163, ProductiveCard/_productive-card.scss:18-113, Card.js:20-170`)
     'color.card_container': colorOf('layer_01'), // _card.scss:22-26
     'color.card_label': colorOf('text_primary'), // _card.scss:84-94

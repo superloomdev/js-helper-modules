@@ -998,6 +998,9 @@ const V10_RAW = {
     'color.date_picker_day_label_selected': '{color.text_on_color}',
     'color.date_picker_day_container_range': '{color.highlight}',
     'color.date_picker_day_label_disabled': '{color.text_disabled}',
+    'color.date_picker_input_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.date_picker_input_container_readonly': 'rgba(0, 0, 0, 0)',
+    'color.date_picker_input_outline_readonly': '{color.border_subtle_00}',
     'color.date_picker_day_focus': '{color.button_primary}',
     'color.date_picker_day_focus_selected': '{color.layer_02}',
     'control.date_picker_day_focus_width_selected': '{border.width_01}',
@@ -1242,6 +1245,9 @@ const V10_BUILT = {
     'color.date_picker_day_label_selected': {a:'color.text_on_color'},
     'color.date_picker_day_container_range': {a:'color.highlight'},
     'color.date_picker_day_label_disabled': {a:'color.text_disabled'},
+    'color.date_picker_input_outline_disabled': {v:'rgba(0, 0, 0, 0)'},
+    'color.date_picker_input_container_readonly': {v:'rgba(0, 0, 0, 0)'},
+    'color.date_picker_input_outline_readonly': {a:'color.border_subtle_00'},
     'color.date_picker_day_focus': {a:'color.button_primary'},
     'color.date_picker_day_focus_selected': {a:'color.layer_02'},
     'control.date_picker_day_focus_width_selected': {a:'border.width_01'},
@@ -1382,7 +1388,7 @@ describe('carbon template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1740, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1743, schemeName + ' token count');
     }
   });
 

@@ -5465,6 +5465,9 @@ export default Object.freeze({
     'control.page_header_buffer_title': '{spacing.spacing_07}',
     'control.page_header_tags_height': 44,
     'control.pagination_select_indicator_end': 16,
+    'color.date_picker_input_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.date_picker_input_container_readonly': 'rgba(0, 0, 0, 0)',
+    'color.date_picker_input_outline_readonly': '{color.border_subtle_00}',
     'color.card_container': '{color.layer_01}',
     'color.card_label': '{color.text_primary}',
     'control.card_border_width': '{border.width_01}',
@@ -9227,6 +9230,15 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.file_uploader_error_rule': {
+      'group': 'color'
+    },
+    'color.date_picker_input_outline_disabled': {
+      'group': 'color'
+    },
+    'color.date_picker_input_container_readonly': {
+      'group': 'color'
+    },
+    'color.date_picker_input_outline_readonly': {
       'group': 'color'
     },
     'color.card_container': {
