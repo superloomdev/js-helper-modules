@@ -6095,7 +6095,14 @@ export default Object.freeze({
     'color.date_picker_day_label_today': '{color.link_primary}',
     'color.date_picker_day_container_selected': '{color.button_primary}',
     'color.date_picker_day_label_selected': '{color.text_on_color}',
-    'color.date_picker_day_container_range': '{color.highlight}',
+    'color.date_picker_day_container_range': {
+      'op': 'mix',
+      'args': [
+        'color.interactive',
+        'color.background',
+        20
+      ]
+    },
     'color.date_picker_day_label_disabled': '{color.text_disabled}',
     'color.date_picker_day_focus': '{color.button_primary}',
     'color.date_picker_day_focus_selected': '{color.layer_02}',
@@ -6117,6 +6124,9 @@ export default Object.freeze({
     'color.file_uploader_drop_label': '{color.link_primary}',
     'color.file_uploader_drop_label_active': '{color.text_primary}',
     'color.file_uploader_error_rule': '{color.border_subtle_00}',
+    'color.date_picker_input_outline_disabled': 'rgba(0, 0, 0, 0)',
+    'color.date_picker_input_container_readonly': 'rgba(0, 0, 0, 0)',
+    'color.date_picker_input_outline_readonly': '{color.border_subtle_00}',
     'color.card_container': '{color.layer_01}',
     'color.card_label': '{color.text_primary}',
     'color.card_outline_clickable': '{color.border_tile_01}',
@@ -10180,6 +10190,15 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.file_uploader_error_rule': {
+      'group': 'color'
+    },
+    'color.date_picker_input_outline_disabled': {
+      'group': 'color'
+    },
+    'color.date_picker_input_container_readonly': {
+      'group': 'color'
+    },
+    'color.date_picker_input_outline_readonly': {
       'group': 'color'
     },
     'color.card_container': {

@@ -1187,7 +1187,7 @@ export default function buildGridRecipe (grid) {
     'control.date_picker_today_mark_offset': 7, // _flatpickr.scss:488-508
     'color.date_picker_day_container_selected': colorOf('button_primary'), // _flatpickr.scss:523-535
     'color.date_picker_day_label_selected': colorOf('text_on_color'), // _flatpickr.scss:523-535
-    'color.date_picker_day_container_range': colorOf('highlight'), // _flatpickr.scss:518-521
+    'color.date_picker_day_container_range': { op: 'mix', args: ['color.interactive', 'color.background', 20] }, // _flatpickr.scss:518-521 inRange $highlight under $text-primary; Carbon's $highlight is blue-20, a fifth of blue-60 over white; this template's highlight is the full hue (3.62:1 under the day label, structural @375/768/1280), so the fill takes the same fifth (m6-amend-5)
     'color.date_picker_day_label_disabled': colorOf('text_disabled'), // _flatpickr.scss:559-568
     'color.date_picker_day_focus': colorOf('button_primary'), // _flatpickr.scss:474-480
     'color.date_picker_day_focus_selected': colorOf('layer_02'), // _flatpickr.scss:523-535
@@ -1253,6 +1253,10 @@ export default function buildGridRecipe (grid) {
     'control.page_header_buffer_title': '{spacing.spacing_07}', // _page-header.scss:391-394 last-row-buffer--active block-size $spacing-07; probe title root 105 = 32 + 40 + 32 + 1 (queued at U2)
     'control.page_header_tags_height': 44, // probe PageHeader default / tags navigationRow height 44 (queued at U2)
     'control.pagination_select_indicator_end': 16, // select/_select.scss:269-271 inline arrow inset-inline-end $spacing-03 plus the pagination arrow's translate(-0.5rem) (queued at U2)
+    // v10 amendment 5 (m6-amend-5, queued at U3)
+    'color.date_picker_input_outline_disabled': colorOf(null), // date-picker/_date-picker.scss:116-118 input:disabled border-block-end 1px solid transparent; focus run borderBottomColor rgba(0,0,0,0)
+    'color.date_picker_input_container_readonly': colorOf(null), // _date-picker.scss:307-308 input[readonly] background transparent; focus run backgroundColor rgba(0,0,0,0)
+    'color.date_picker_input_outline_readonly': colorOf('border_subtle_00'), // _date-picker.scss:307-309 input[readonly] border-block-end-color $border-subtle; focus run borderBottomColor rgb(224,224,224)
     // v10 Card family (`Card/_card.scss:22-163, ProductiveCard/_productive-card.scss:18-113, Card.js:20-170`, superloom_decision)
     'color.card_container': colorOf('layer_01'), // _card.scss:22-26
     'color.card_label': colorOf('text_primary'), // _card.scss:84-94
