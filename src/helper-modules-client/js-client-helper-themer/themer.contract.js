@@ -179,7 +179,11 @@
 // A fifth gives the date picker's field its own disabled outline and a
 // read-only state (`color.date_picker_input_outline_disabled`,
 // `color.date_picker_input_container_readonly`,
-// `color.date_picker_input_outline_readonly`).
+// `color.date_picker_input_outline_readonly`). A sixth gives the tree's
+// label its line-box offset and the page header its breadcrumb type and
+// top padding and its title icon's offset (`control.tree_label_offset`,
+// `type.page_header_breadcrumb`, `control.page_header_breadcrumb_padding_top`,
+// `control.page_header_title_icon_offset`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -707,6 +711,8 @@ const GRID = Object.freeze({
     'file_uploader_error_padding_inline', 'file_uploader_drop_padding', 'file_uploader_drop_max_width',
     'page_header_title_offset_no_breadcrumb', 'page_header_buffer_title', 'page_header_tags_height',
     'pagination_select_indicator_end',
+    // v10 amendment 6 (m6-amend-6)
+    'tree_label_offset', 'page_header_breadcrumb_padding_top', 'page_header_title_icon_offset',
     // v10: the card family
     'card_border_width', 'card_focus_width', 'card_padding', 'card_header_padding_bottom_label',
     'card_actions_space', 'card_text_gap', 'card_body_padding_top', 'card_divider_width',
@@ -774,6 +780,8 @@ const GRID = Object.freeze({
     'empty_state_title', 'empty_state_title_small', 'empty_state_subtitle', 'empty_state_subtitle_small',
     // v10: the page_header family
     'page_header_title', 'page_header_subtitle',
+    // v10 amendment 6 (m6-amend-6)
+    'page_header_breadcrumb',
     // v10: the tearsheet family
     'tearsheet_heading',
     // v10 amendment 2 (m6-amend-2)
