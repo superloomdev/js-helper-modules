@@ -183,7 +183,9 @@
 // label its line-box offset and the page header its breadcrumb type and
 // top padding and its title icon's offset (`control.tree_label_offset`,
 // `type.page_header_breadcrumb`, `control.page_header_breadcrumb_padding_top`,
-// `control.page_header_title_icon_offset`).
+// `control.page_header_title_icon_offset`). A seventh gives the page
+// header its breadcrumb section's share of the breadcrumb row
+// (`control.page_header_breadcrumb_ratio`, unitless, emits raw).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -713,6 +715,8 @@ const GRID = Object.freeze({
     'pagination_select_indicator_end',
     // v10 amendment 6 (m6-amend-6)
     'tree_label_offset', 'page_header_breadcrumb_padding_top', 'page_header_title_icon_offset',
+    // v10 amendment 7 (m6-amend-7)
+    'page_header_breadcrumb_ratio',
     // v10: the card family
     'card_border_width', 'card_focus_width', 'card_padding', 'card_header_padding_bottom_label',
     'card_actions_space', 'card_text_gap', 'card_body_padding_top', 'card_divider_width',
@@ -831,7 +835,9 @@ const GRID_CELL_DEFS = Object.freeze({
   'control.dialog_action_ratio_three': Object.freeze({ emit: 'raw' }),
   'control.accordion_content_end_ratio': Object.freeze({ emit: 'raw' }),
   // v10: the tearsheet description's width share - unitless, emits raw
-  'control.tearsheet_description_max_ratio': Object.freeze({ emit: 'raw' })
+  'control.tearsheet_description_max_ratio': Object.freeze({ emit: 'raw' }),
+  // v10 amendment 7: the page header's breadcrumb section share - unitless, emits raw
+  'control.page_header_breadcrumb_ratio': Object.freeze({ emit: 'raw' })
 });
 
 
