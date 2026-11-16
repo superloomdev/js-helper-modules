@@ -5465,6 +5465,7 @@ export default Object.freeze({
     'control.page_header_buffer_title': '{spacing.spacing_07}',
     'control.page_header_tags_height': 44,
     'control.pagination_select_indicator_end': 16,
+    'control.page_header_breadcrumb_ratio': 0.6,
     'control.tree_label_offset': 2,
     'type.page_header_breadcrumb': '{type.label01}',
     'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
@@ -10585,6 +10586,9 @@ export default Object.freeze({
     },
     'control.page_header_title_icon_offset': {
       'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_ratio': {
+      'group': 'raw'
     },
     'control.card_border_width': {
       'group': 'dimension'
