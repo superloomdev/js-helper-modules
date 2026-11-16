@@ -1253,6 +1253,8 @@ export default function buildGridRecipe (grid) {
     'control.page_header_buffer_title': '{spacing.spacing_07}', // _page-header.scss:391-394 last-row-buffer--active block-size $spacing-07; probe title root 105 = 32 + 40 + 32 + 1 (queued at U2)
     'control.page_header_tags_height': 44, // probe PageHeader default / tags navigationRow height 44 (queued at U2)
     'control.pagination_select_indicator_end': 16, // select/_select.scss:269-271 inline arrow inset-inline-end $spacing-03 plus the pagination arrow's translate(-0.5rem) (queued at U2)
+    // v10 amendment 7 (m6-amend-7, U4a)
+    'control.page_header_breadcrumb_ratio': 0.6, // PageHeader/_page-header.scss:36-39 $left-section-std-width 60%; :167-171 a breadcrumb row with page actions and no action bar is 0.6 * (100% + 2 * $spacing-05); :232-242,299-304 its action column 40%, the breadcrumb column the rest; probe PageHeader default breadcrumbRow 748.796875, breadcrumbColumn 449.28125, breadcrumbList 417.28125
     // v10 amendment 6 (m6-amend-6, queued at U4)
     'control.tree_label_offset': 2, // form/_form.scss .cds--label is inline-block, so the tree's label sits in a line box with the page strut; fidelity every TreeView state label y 2, tree y 26 (ours 0 / 24)
     'type.page_header_breadcrumb': '{type.label01}', // PageHeader/_page-header.scss:320-324 __breadcrumb type-style label-01, :342-347 its items and links label-01; fidelity breadcrumb height 15.98

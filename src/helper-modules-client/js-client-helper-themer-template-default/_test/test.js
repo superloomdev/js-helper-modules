@@ -932,6 +932,7 @@ const V10_RAW = {
     'type.page_header_breadcrumb': '{type.label01}',
     'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
     'control.page_header_title_icon_offset': 0.78125,
+    'control.page_header_breadcrumb_ratio': 0.6,
     'color.date_picker_day_focus': '{color.button_primary}',
     'color.date_picker_day_focus_selected': '{color.layer_02}',
     'control.date_picker_day_focus_width_selected': '{border.width_01}',
@@ -1182,6 +1183,7 @@ const V10_BUILT = {
     'type.page_header_breadcrumb': {a:'type.label01'},
     'control.page_header_breadcrumb_padding_top': {a:'spacing.spacing_04'},
     'control.page_header_title_icon_offset': {v:0.78125},
+    'control.page_header_breadcrumb_ratio': {v:0.6},
     'color.date_picker_day_focus': {a:'color.button_primary'},
     'color.date_picker_day_focus_selected': {a:'color.layer_02'},
     'control.date_picker_day_focus_width_selected': {a:'border.width_01'},
@@ -1322,7 +1324,7 @@ describe('default template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1747, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1748, schemeName + ' token count');
     }
   });
 

@@ -6574,6 +6574,7 @@ export default Object.freeze({
     'control.tree_label_offset': 2,
     'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
     'control.page_header_title_icon_offset': 0.78125,
+    'control.page_header_breadcrumb_ratio': 0.6,
     'control.card_border_width': '{border.width_01}',
     'control.card_focus_width': '{focus.width}',
     'control.card_padding': '{spacing.spacing_05}',
@@ -11545,6 +11546,9 @@ export default Object.freeze({
     },
     'control.page_header_title_icon_offset': {
       'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_ratio': {
+      'group': 'raw'
     },
     'control.card_border_width': {
       'group': 'dimension'
