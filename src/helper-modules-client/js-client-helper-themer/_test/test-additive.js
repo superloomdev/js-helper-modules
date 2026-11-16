@@ -558,7 +558,7 @@ describe('G02 - cache key includes template metadata', () => {
 
     // Add different metadata to template2 - this creates a new template identity
     template2.meta.cardShadow = Object.assign({}, template2.meta.cardShadow, {
-      _version: 'v2'
+      revision: 'v2'
     });
 
     const resolved1 = themer.resolve(template1, [{ name: 'base' }]);

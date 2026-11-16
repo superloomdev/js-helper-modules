@@ -53,46 +53,46 @@ function buttonCells (kind) {
   const out = {};
   const entry = FILLED[kind] || ON_PAGE[kind];
   const put = function (part, state, value) {
-    out['color.button_' + kind + '_' + part + state] = value;
+    out['color.button_' + kind + '_' + part + (state === 'enabled' ? '' : '_' + state)] = value;
   };
   if (FILLED[kind]) {
     const k = FILLED[kind];
-    put('container', '', colorOf(k.fill));
-    put('container', '_hover', colorOf(k.hover));
-    put('container', '_active', colorOf(k.active));
-    put('container', '_focus', colorOf(k.fill));
-    put('container', '_disabled', colorOf('button_disabled'));
-    put('label', '', colorOf(k.label));
-    put('label', '_hover', colorOf(k.engaged || k.label));
-    put('label', '_active', colorOf(k.engaged || k.label));
-    put('label', '_focus', colorOf(k.label));
-    put('label', '_disabled', colorOf('text_on_color_disabled'));
-    for (const state of ['', '_hover', '_active']) {
+    put('container', 'enabled', colorOf(k.fill));
+    put('container', 'hover', colorOf(k.hover));
+    put('container', 'active', colorOf(k.active));
+    put('container', 'focus', colorOf(k.fill));
+    put('container', 'disabled', colorOf('button_disabled'));
+    put('label', 'enabled', colorOf(k.label));
+    put('label', 'hover', colorOf(k.engaged || k.label));
+    put('label', 'active', colorOf(k.engaged || k.label));
+    put('label', 'focus', colorOf(k.label));
+    put('label', 'disabled', colorOf('text_on_color_disabled'));
+    for (const state of ['enabled', 'hover', 'active']) {
       put('border', state, NONE);
     }
-    put('border', '_disabled', colorOf('button_disabled'));
+    put('border', 'disabled', colorOf('button_disabled'));
   } else {
     const k = ON_PAGE[kind];
-    put('container', '', NONE);
-    put('container', '_hover', colorOf(k.hover));
-    put('container', '_active', colorOf(k.active));
-    put('container', '_focus', colorOf(k.focus));
-    put('container', '_disabled', NONE);
-    put('label', '', colorOf(k.label));
-    put('label', '_hover', colorOf(k.engaged));
-    put('label', '_active', colorOf(k.engaged));
-    put('label', '_focus', k.focus === null ? colorOf(k.label) : colorOf(k.engaged));
-    put('label', '_disabled', colorOf(k.disabledLabel || 'text_disabled'));
-    put('border', '', colorOf(k.border));
-    put('border', '_hover', colorOf(k.borderHover !== undefined ? k.borderHover : k.border));
-    put('border', '_active', colorOf(k.borderActive !== undefined ? k.borderActive : (kind === 'tertiary' ? null : k.border)));
-    put('border', '_disabled', k.border === null ? NONE : colorOf('button_disabled'));
+    put('container', 'enabled', NONE);
+    put('container', 'hover', colorOf(k.hover));
+    put('container', 'active', colorOf(k.active));
+    put('container', 'focus', colorOf(k.focus));
+    put('container', 'disabled', NONE);
+    put('label', 'enabled', colorOf(k.label));
+    put('label', 'hover', colorOf(k.engaged));
+    put('label', 'active', colorOf(k.engaged));
+    put('label', 'focus', k.focus === null ? colorOf(k.label) : colorOf(k.engaged));
+    put('label', 'disabled', colorOf(k.disabledLabel || 'text_disabled'));
+    put('border', 'enabled', colorOf(k.border));
+    put('border', 'hover', colorOf(k.borderHover !== undefined ? k.borderHover : k.border));
+    put('border', 'active', colorOf(k.borderActive !== undefined ? k.borderActive : (kind === 'tertiary' ? null : k.border)));
+    put('border', 'disabled', k.border === null ? NONE : colorOf('button_disabled'));
   }
   // The dark scheme's background_selected is the secondary fill itself, so
   // the secondary's selected face takes the kind's active container instead
   // (the label stays the kind's own)
-  put('container', '_selected', kind === 'secondary' ? '{color.button_secondary_container_active}' : colorOf('background_selected'));
-  put('label', '_selected', kind === 'secondary' ? '{color.button_secondary_label}' : colorOf(entry.selectedLabel || 'text_primary'));
+  put('container', 'selected', kind === 'secondary' ? '{color.button_secondary_container_active}' : colorOf('background_selected'));
+  put('label', 'selected', kind === 'secondary' ? '{color.button_secondary_label}' : colorOf(entry.selectedLabel || 'text_primary'));
   const lifted = kind === 'elevated' ? '{shadow.level_01}' : '{shadow.level_00}';
   out['shadow.button_' + kind] = lifted;
   out['shadow.button_' + kind + '_hover'] = lifted;

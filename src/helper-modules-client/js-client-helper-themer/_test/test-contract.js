@@ -2079,7 +2079,7 @@ describe('contract v8 - the milestone 4 cells', () => {
       popover: ['container', 'label', 'border'],
       definition_term: ['underline', 'underline_hover'],
       toggletip: ['icon', 'icon_active'],
-      link_label_inverse: ['', '_hover'],
+      link_label_inverse: ['', 'hover'],
       focus_ring_inverse: [''],
       fab_surface: ['container', 'icon', 'layer_hover', 'layer_active'],
       fab_primary: ['container', 'icon', 'layer_hover', 'layer_active'],
@@ -2114,7 +2114,7 @@ describe('contract v8 - the milestone 4 cells', () => {
     shadow: {
       slider: ['handle', 'handle_disabled'],
       popover: [''],
-      fab: ['', '_hover']
+      fab: ['', 'hover']
     }
   };
 
@@ -2126,7 +2126,7 @@ describe('contract v8 - the milestone 4 cells', () => {
     for (const group of Object.keys(FAMILIES)) {
       for (const family of Object.keys(FAMILIES[group])) {
         for (const leaf of FAMILIES[group][family]) {
-          const cell = leaf === '' ? family : leaf.charAt(0) === '_' ? family + leaf : family + '_' + leaf;
+          const cell = leaf === '' ? family : family + '_' + leaf;
           const name = group + '.' + cell;
           assert.ok(contract.tokens[name], 'missing ' + name);
           assert.equal(contract.tokens[name].group, group, name + ' not in group ' + group);
