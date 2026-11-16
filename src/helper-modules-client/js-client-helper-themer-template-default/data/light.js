@@ -6557,6 +6557,9 @@ export default Object.freeze({
     'control.page_header_buffer_title': '{spacing.spacing_07}',
     'control.page_header_tags_height': 44,
     'control.pagination_select_indicator_end': 16,
+    'control.tree_label_offset': 2,
+    'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
+    'control.page_header_title_icon_offset': 0.78125,
     'control.card_border_width': '{border.width_01}',
     'control.card_focus_width': '{focus.width}',
     'control.card_padding': '{spacing.spacing_05}',
@@ -6719,6 +6722,7 @@ export default Object.freeze({
     'type.empty_state_subtitle_small': '{type.label01}',
     'type.page_header_title': '{type.heading04}',
     'type.page_header_subtitle': '{type.body01}',
+    'type.page_header_breadcrumb': '{type.label01}',
     'type.tearsheet_heading': '{type.heading04}',
     'type.tearsheet_description': '{type.body_compact_01}',
     'shadow.level_00': {
@@ -11519,6 +11523,15 @@ export default Object.freeze({
     'control.pagination_select_indicator_end': {
       'group': 'dimension'
     },
+    'control.tree_label_offset': {
+      'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_padding_top': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_icon_offset': {
+      'group': 'dimension'
+    },
     'control.card_border_width': {
       'group': 'dimension'
     },
@@ -11877,6 +11890,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.page_header_subtitle': {
+      'group': 'typeSet'
+    },
+    'type.page_header_breadcrumb': {
       'group': 'typeSet'
     },
     'type.tearsheet_heading': {

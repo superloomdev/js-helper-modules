@@ -1253,6 +1253,11 @@ export default function buildGridRecipe (grid) {
     'control.page_header_buffer_title': '{spacing.spacing_07}', // _page-header.scss:391-394 last-row-buffer--active block-size $spacing-07; probe title root 105 = 32 + 40 + 32 + 1 (queued at U2)
     'control.page_header_tags_height': 44, // probe PageHeader default / tags navigationRow height 44 (queued at U2)
     'control.pagination_select_indicator_end': 16, // select/_select.scss:269-271 inline arrow inset-inline-end $spacing-03 plus the pagination arrow's translate(-0.5rem) (queued at U2)
+    // v10 amendment 6 (m6-amend-6, queued at U4)
+    'control.tree_label_offset': 2, // form/_form.scss .cds--label is inline-block, so the tree's label sits in a line box with the page strut; fidelity every TreeView state label y 2, tree y 26 (ours 0 / 24)
+    'type.page_header_breadcrumb': '{type.label01}', // PageHeader/_page-header.scss:320-324 __breadcrumb type-style label-01, :342-347 its items and links label-01; fidelity breadcrumb height 15.98
+    'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}', // _page-header.scss:320-324 __breadcrumb padding-block-start $spacing-04; fidelity breadcrumb y 12
+    'control.page_header_title_icon_offset': 0.78125, // _page-header.scss:487-495 the icon sits in an inline wrapper, vertical-align middle in the heading-04 line box, then translateY(-$spacing-01); fidelity icon titleIcon y 44.78125 = 32 + 12 + 0.78125
     // v10 amendment 5 (m6-amend-5, queued at U3)
     'color.date_picker_input_outline_disabled': colorOf(null), // date-picker/_date-picker.scss:116-118 input:disabled border-block-end 1px solid transparent; focus run borderBottomColor rgba(0,0,0,0)
     'color.date_picker_input_container_readonly': colorOf(null), // _date-picker.scss:307-308 input[readonly] background transparent; focus run backgroundColor rgba(0,0,0,0)
