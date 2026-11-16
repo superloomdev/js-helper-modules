@@ -5465,6 +5465,10 @@ export default Object.freeze({
     'control.page_header_buffer_title': '{spacing.spacing_07}',
     'control.page_header_tags_height': 44,
     'control.pagination_select_indicator_end': 16,
+    'control.tree_label_offset': 2,
+    'type.page_header_breadcrumb': '{type.label01}',
+    'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
+    'control.page_header_title_icon_offset': 0.78125,
     'color.date_picker_input_outline_disabled': 'rgba(0, 0, 0, 0)',
     'color.date_picker_input_container_readonly': 'rgba(0, 0, 0, 0)',
     'color.date_picker_input_outline_readonly': '{color.border_subtle_00}',
@@ -10573,6 +10577,15 @@ export default Object.freeze({
     'control.pagination_select_indicator_end': {
       'group': 'dimension'
     },
+    'control.tree_label_offset': {
+      'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_padding_top': {
+      'group': 'dimension'
+    },
+    'control.page_header_title_icon_offset': {
+      'group': 'dimension'
+    },
     'control.card_border_width': {
       'group': 'dimension'
     },
@@ -10931,6 +10944,9 @@ export default Object.freeze({
       'group': 'typeSet'
     },
     'type.page_header_subtitle': {
+      'group': 'typeSet'
+    },
+    'type.page_header_breadcrumb': {
       'group': 'typeSet'
     },
     'type.tearsheet_heading': {
