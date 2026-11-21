@@ -16,13 +16,13 @@ export default Object.freeze({
   id: 'carbon-v11',
   contract_version: 10,
   reference: {
-    themes: '@carbon/themes@11.80.0',
-    type: '@carbon/type@11.66.0',
-    motion: '@carbon/motion@11.51.0',
-    layout: '@carbon/layout@11.58.0',
-    via: '@carbon/react@1.115.0',
-    commit: '7518c84ffd00f22434fe19d83119692c12fccb2f',
-    icons: '@carbon/icons@11.89.0'
+    themes: '@carbon/themes@11.85.0',
+    type: '@carbon/type@11.71.0',
+    motion: '@carbon/motion@11.56.0',
+    layout: '@carbon/layout@11.63.0',
+    via: '@carbon/react@1.120.0',
+    commit: 'd9c9a18b8ffcc3c03881c88999a3675e4e1b6b1a',
+    icons: '@carbon/icons@11.92.0'
   },
   adaptive: {
     options: ['auto', 'fixed', 'platform.ios', 'platform.android', 'form.compact', 'form.medium']

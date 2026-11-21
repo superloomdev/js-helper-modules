@@ -48,11 +48,11 @@ describe('carbon template - profile identity', () => {
   });
 
   it('should export reference with Carbon package versions', () => {
-    assert.equal(profile.reference.themes, '@carbon/themes@11.80.0');
-    assert.equal(profile.reference.type, '@carbon/type@11.66.0');
-    assert.equal(profile.reference.motion, '@carbon/motion@11.51.0');
-    assert.equal(profile.reference.layout, '@carbon/layout@11.58.0');
-    assert.equal(profile.reference.icons, '@carbon/icons@11.89.0');
+    assert.equal(profile.reference.themes, '@carbon/themes@11.85.0');
+    assert.equal(profile.reference.type, '@carbon/type@11.71.0');
+    assert.equal(profile.reference.motion, '@carbon/motion@11.56.0');
+    assert.equal(profile.reference.layout, '@carbon/layout@11.63.0');
+    assert.equal(profile.reference.icons, '@carbon/icons@11.92.0');
   });
 
   it('should have four schemes', () => {
@@ -292,8 +292,8 @@ describe('carbon template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 86 valid icon literals, identical across the four schemes', () => {
-    assert.equal(iconKeys.length, 86);
+  it('should carry 87 valid icon literals, identical across the four schemes', () => {
+    assert.equal(iconKeys.length, 87);
     const subset = {};
     for (const name of iconKeys) {
       const literal = profile.schemes.white.tokens[name];
@@ -332,7 +332,7 @@ describe('carbon template - icon literals (v4)', () => {
   });
 
   it('should record icon provenance that matches the pinned package and the mapping snapshot', () => {
-    assert.equal(iconPkg.version, '11.89.0');
+    assert.equal(iconPkg.version, '11.92.0');
     for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
       assert.deepEqual(profile.schemes[schemeName].provenance.icons, {
         package: '@carbon/icons',
@@ -1006,6 +1006,10 @@ const V10_RAW = {
     'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
     'control.page_header_title_icon_offset': 0.78125,
     'control.page_header_breadcrumb_ratio': 0.6,
+    'control.page_header_breadcrumb_ratio_sm': 0.75,
+    'control.page_header_breadcrumb_back_offset': 1.90625,
+    'control.page_header_breadcrumb_back_height': 16.96875,
+    'color.tile_chevron_container_hover': '{color.layer_hover_01}',
     'color.date_picker_day_focus': '{color.button_primary}',
     'color.date_picker_day_focus_selected': '{color.layer_02}',
     'control.date_picker_day_focus_width_selected': '{border.width_01}',
@@ -1258,6 +1262,10 @@ const V10_BUILT = {
     'control.page_header_breadcrumb_padding_top': {a:'spacing.spacing_04'},
     'control.page_header_title_icon_offset': {v:0.78125},
     'control.page_header_breadcrumb_ratio': {v:0.6},
+    'control.page_header_breadcrumb_ratio_sm': {v:0.75},
+    'control.page_header_breadcrumb_back_offset': {v:1.90625},
+    'control.page_header_breadcrumb_back_height': {v:16.96875},
+    'color.tile_chevron_container_hover': {a:'color.layer_hover_01'},
     'color.date_picker_day_focus': {a:'color.button_primary'},
     'color.date_picker_day_focus_selected': {a:'color.layer_02'},
     'control.date_picker_day_focus_width_selected': {a:'border.width_01'},
@@ -1398,7 +1406,7 @@ describe('carbon template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1748, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1753, schemeName + ' token count');
     }
   });
 

@@ -28,15 +28,15 @@
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
     "@superloomdev/js-helper-eslint-config": "^1.0.0",
-    "@carbon/themes": "11.80.0",
-    "@carbon/type": "11.66.0",
-    "@carbon/motion": "11.51.0",
-    "@carbon/layout": "11.58.0",
+    "@carbon/themes": "11.85.0",
+    "@carbon/type": "11.71.0",
+    "@carbon/motion": "11.56.0",
+    "@carbon/layout": "11.63.0",
     "helper-utils": "npm:@superloomdev/js-helper-utils@^1.0.0",
     "helper-debug": "npm:@superloomdev/js-helper-debug@^1.0.0",
     "helper-themer": "npm:@superloomdev/js-client-helper-themer@^1.0.0",
     "helper-themer-template-default": "npm:@superloomdev/js-client-helper-themer-template-default@^1.0.0",
-    "@carbon/icons": "11.89.0"
+    "@carbon/icons": "11.92.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

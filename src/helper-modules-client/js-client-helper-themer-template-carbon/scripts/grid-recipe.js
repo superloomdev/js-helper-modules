@@ -1148,6 +1148,7 @@ export default function buildGridRecipe (grid) {
     'color.tile_border_selected_disabled': colorOf('border_disabled'), // _tile.scss:338-389
     'control.tile_chevron_seat': 48, // _tile.scss:206-336
     'color.tile_chevron': colorOf('icon_primary'), // _tile.scss:206-336
+    'color.tile_chevron_container_hover': colorOf('layer_hover_01'), // tile/_tile.scss:227,252-255 .cds--tile__chevron--interactive:hover background-color $layer-hover (m6-amend-8)
     // v10 Pagination family (`pagination/_pagination.scss:31-281, _pagination-nav.scss:74-120, _mixins.scss:14-33`)
     'color.pagination_container': colorOf('layer_01'), // _pagination.scss:31-67
     'color.pagination_divider': colorOf('border_subtle_00'), // _pagination.scss:31-67
@@ -1309,6 +1310,10 @@ export default function buildGridRecipe (grid) {
     'control.pagination_select_indicator_end': 16, // select/_select.scss:269-271 inline arrow inset-inline-end $spacing-03 plus the pagination arrow's translate(-0.5rem) (queued at U2)
     // v10 amendment 7 (m6-amend-7, U4a)
     'control.page_header_breadcrumb_ratio': 0.6, // PageHeader/_page-header.scss:36-39 $left-section-std-width 60%; :167-171 a breadcrumb row with page actions and no action bar is 0.6 * (100% + 2 * $spacing-05); :232-242,299-304 its action column 40%, the breadcrumb column the rest; probe PageHeader default breadcrumbRow 748.796875, breadcrumbColumn 449.28125, breadcrumbList 417.28125
+    // v10 amendment 8 (m6-amend-8, U4c)
+    'control.page_header_breadcrumb_ratio_sm': 0.75, // PageHeader/_page-header.scss:38 $left-section-alt-width 75%; :287-297 below md the breadcrumb column of a row with an action bar takes it, and the row has one below md (PageHeader.js:205 innerWidth / 16 < md, :310); probe PageHeader@375 default and breadcrumbs breadcrumbColumn 240, actionColumn 80, breadcrumbList 208 in a 320 body
+    'control.page_header_breadcrumb_back_offset': 1.90625, // BreadcrumbWithOverflow/_breadcrumb-with-overflow.scss:66-75 below md only the back link and the last item draw, inline-flex, vertical-align middle in the ol's body-compact-01 line box (@carbon/styles breadcrumb/_breadcrumb.scss:25-33 display inline below md); probe PageHeader@375 backItem y 13.906 in a list at y 12
+    'control.page_header_breadcrumb_back_height': 16.96875, // the same line box: probe PageHeader@375 backLink height 16.96875 (the 16 glyph in the link's 1lh icon box, link/_link.scss:139-143), breadcrumbList height 18.875 = 1.90625 + 16.96875
     // v10 amendment 6 (m6-amend-6, queued at U4)
     'control.tree_label_offset': 2, // form/_form.scss .cds--label is inline-block, so the tree's label sits in a line box with the page strut; fidelity every TreeView state label y 2, tree y 26 (ours 0 / 24)
     'type.page_header_breadcrumb': '{type.label01}', // PageHeader/_page-header.scss:320-324 __breadcrumb type-style label-01, :342-347 its items and links label-01; fidelity breadcrumb height 15.98
