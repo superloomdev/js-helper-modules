@@ -185,7 +185,15 @@
 // `type.page_header_breadcrumb`, `control.page_header_breadcrumb_padding_top`,
 // `control.page_header_title_icon_offset`). A seventh gives the page
 // header its breadcrumb section's share of the breadcrumb row
-// (`control.page_header_breadcrumb_ratio`, unitless, emits raw).
+// (`control.page_header_breadcrumb_ratio`, unitless, emits raw). An eighth
+// draws the page header below md and the interactive tile chevron's hover:
+// the breadcrumb section's share there
+// (`control.page_header_breadcrumb_ratio_sm`, unitless, emits raw), the
+// back link's place in the narrow trail's line box
+// (`control.page_header_breadcrumb_back_offset`,
+// `control.page_header_breadcrumb_back_height`), the back link's glyph
+// (`icon.arrow_left`) and the chevron's hover fill
+// (`color.tile_chevron_container_hover`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -479,6 +487,8 @@ const GRID = Object.freeze({
       'file_uploader_error_rule',
       // v10 amendment 5 (m6-amend-5)
       'date_picker_input_outline_disabled', 'date_picker_input_container_readonly', 'date_picker_input_outline_readonly',
+      // v10 amendment 8 (m6-amend-8)
+      'tile_chevron_container_hover',
       // v10: the card family
       'card_container', 'card_label', 'card_outline_clickable', 'card_container_hover', 'card_focus',
       'card_divider', 'card_action_divider', 'card_icon_container_hover', 'card_icon_active',
@@ -717,6 +727,8 @@ const GRID = Object.freeze({
     'tree_label_offset', 'page_header_breadcrumb_padding_top', 'page_header_title_icon_offset',
     // v10 amendment 7 (m6-amend-7)
     'page_header_breadcrumb_ratio',
+    // v10 amendment 8 (m6-amend-8)
+    'page_header_breadcrumb_ratio_sm', 'page_header_breadcrumb_back_offset', 'page_header_breadcrumb_back_height',
     // v10: the card family
     'card_border_width', 'card_focus_width', 'card_padding', 'card_header_padding_bottom_label',
     'card_actions_space', 'card_text_gap', 'card_body_padding_top', 'card_divider_width',
@@ -837,7 +849,9 @@ const GRID_CELL_DEFS = Object.freeze({
   // v10: the tearsheet description's width share - unitless, emits raw
   'control.tearsheet_description_max_ratio': Object.freeze({ emit: 'raw' }),
   // v10 amendment 7: the page header's breadcrumb section share - unitless, emits raw
-  'control.page_header_breadcrumb_ratio': Object.freeze({ emit: 'raw' })
+  'control.page_header_breadcrumb_ratio': Object.freeze({ emit: 'raw' }),
+  // v10 amendment 8: the same share below md - unitless, emits raw
+  'control.page_header_breadcrumb_ratio_sm': Object.freeze({ emit: 'raw' })
 });
 
 
@@ -1453,7 +1467,7 @@ function buildContract () {
     'control.option_height': Object.freeze({ group: 'control' }),
 
 
-    // ~~~~~~~~~~~~~~~~~~~~ icon.* (86 tokens) ~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~ icon.* (87 tokens) ~~~~~~~~~~~~~~~~~~~
     // One token per semantic glyph name, alphabetical. Values are icon
     // literals: { icon: true, viewBox, paths, sizes? }.
 
@@ -1461,6 +1475,7 @@ function buildContract () {
     'icon.add': Object.freeze({ group: 'icon' }),
     'icon.add_filled': Object.freeze({ group: 'icon' }),
     'icon.ai_label': Object.freeze({ group: 'icon' }),
+    'icon.arrow_left': Object.freeze({ group: 'icon' }),
     'icon.arrow_right': Object.freeze({ group: 'icon' }),
     'icon.arrow_up': Object.freeze({ group: 'icon' }),
     'icon.arrows_vertical': Object.freeze({ group: 'icon' }),

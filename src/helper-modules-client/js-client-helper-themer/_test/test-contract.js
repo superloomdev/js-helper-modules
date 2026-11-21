@@ -45,16 +45,16 @@ function minimalTheme () {
 
 describe('contract registry - structure', () => {
 
-  it('should expose exactly 1748 tokens', () => {
-    assert.equal(Object.keys(contract.tokens).length, 1748);
+  it('should expose exactly 1753 tokens', () => {
+    assert.equal(Object.keys(contract.tokens).length, 1753);
   });
 
   it('should expose exactly 19 groups', () => {
     assert.equal(Object.keys(contract.groups).length, 19);
   });
 
-  it('should expose exactly 1748 meta entries', () => {
-    assert.equal(Object.keys(contract.meta).length, 1748);
+  it('should expose exactly 1753 meta entries', () => {
+    assert.equal(Object.keys(contract.meta).length, 1753);
   });
 
   it('should report contract version 10', () => {
@@ -82,7 +82,7 @@ describe('contract registry - structure', () => {
 describe('contract registry - group counts', () => {
 
   const expected = {
-    color: 824,
+    color: 825,
     spacing: 17,
     size: 22,
     type: 128,
@@ -99,8 +99,8 @@ describe('contract registry - group counts', () => {
     tint: 5,
     stacking: 6,
     anatomy: 31,
-    icon: 86,
-    control: 491
+    icon: 87,
+    control: 494
   };
 
   for (const [group, count] of Object.entries(expected)) {
@@ -1357,8 +1357,8 @@ describe('contract v4 - icon group', () => {
     return Themer.validateContract({ tokens: { 'icon.close': value } }, {});
   };
 
-  it('should expose 86 value-tier icon tokens in alphabetical order with raw emission', () => {
-    assert.equal(iconTokens.length, 86);
+  it('should expose 87 value-tier icon tokens in alphabetical order with raw emission', () => {
+    assert.equal(iconTokens.length, 87);
     assert.deepEqual(iconTokens, iconTokens.slice().sort());
     assert.deepEqual(contract.groups.icon, { tier: 'value', type: 'icon', emit: 'raw' });
     assert.equal(contract.meta['icon.close'].group, 'raw');
@@ -1837,7 +1837,7 @@ describe('contract v5 amendment - the role grid', () => {
 
   it('should expose the grid by group and mark each cell', () => {
     assert.deepEqual(Object.keys(contract.grid), ['color', 'control', 'type', 'shadow', 'motion']);
-    assert.equal(gridNames.length, 1224);
+    assert.equal(gridNames.length, 1228);
     for (const group of Object.keys(contract.grid)) {
       for (const cell of contract.grid[group]) {
         assert.equal(contract.tokens[group + '.' + cell].group, group, group + '.' + cell);
