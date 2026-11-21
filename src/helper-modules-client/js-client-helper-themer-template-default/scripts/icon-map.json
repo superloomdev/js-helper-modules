@@ -1,6 +1,6 @@
 {
   "source": "rnw-components-v2/data/icons.json",
-  "source_sha256": "3a792b6d4955cba5fc6593cacd39d60486d703054d340434b5528c5e6ffaa04c",
+  "source_sha256": "e999ea430be9a68899f97a3d13a42fa2c59adfb6840e4bf4efbd0241e8726c55",
   "set": "carbon",
   "upstream": {
     "package": "@carbon/icons",
@@ -11,6 +11,7 @@
     "add": "add",
     "add_filled": "add--filled",
     "ai_label": "ai-label",
+    "arrow_left": "arrow--left",
     "arrow_right": "arrow--right",
     "arrow_up": "arrow--up",
     "arrows_vertical": "arrows--vertical",

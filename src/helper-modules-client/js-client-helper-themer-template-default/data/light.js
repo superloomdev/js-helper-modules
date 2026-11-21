@@ -2113,6 +2113,41 @@ export default Object.freeze({
         }
       }
     },
+    'icon.arrow_left': {
+      'icon': true,
+      'viewBox': '0 0 32 32',
+      'paths': [
+        {
+          'd': 'M14 26 15.41 24.59 7.83 17 28 17 28 15 7.83 15 15.41 7.41 14 6 4 16 14 26z'
+        }
+      ],
+      'sizes': {
+        '16': {
+          'viewBox': '0 0 16 16',
+          'paths': [
+            {
+              'd': 'M6.7 12.3 2.9 8.5 15 8.5 15 7.5 2.9 7.5 6.7 3.7 6 3 1 8 6 13z'
+            }
+          ]
+        },
+        '20': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M14 26 15.41 24.59 7.83 17 28 17 28 15 7.83 15 15.41 7.41 14 6 4 16 14 26z'
+            }
+          ]
+        },
+        '24': {
+          'viewBox': '0 0 32 32',
+          'paths': [
+            {
+              'd': 'M14 26 15.41 24.59 7.83 17 28 17 28 15 7.83 15 15.41 7.41 14 6 4 16 14 26z'
+            }
+          ]
+        }
+      }
+    },
     'icon.arrow_right': {
       'icon': true,
       'viewBox': '0 0 32 32',
@@ -6113,6 +6148,7 @@ export default Object.freeze({
     'color.date_picker_input_outline_disabled': 'rgba(0, 0, 0, 0)',
     'color.date_picker_input_container_readonly': 'rgba(0, 0, 0, 0)',
     'color.date_picker_input_outline_readonly': '{color.border_subtle_00}',
+    'color.tile_chevron_container_hover': '{color.layer_hover_01}',
     'color.card_container': '{color.layer_01}',
     'color.card_label': '{color.text_primary}',
     'color.card_outline_clickable': '{color.border_tile_01}',
@@ -6561,6 +6597,9 @@ export default Object.freeze({
     'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
     'control.page_header_title_icon_offset': 0.78125,
     'control.page_header_breadcrumb_ratio': 0.6,
+    'control.page_header_breadcrumb_ratio_sm': 0.75,
+    'control.page_header_breadcrumb_back_offset': 1.90625,
+    'control.page_header_breadcrumb_back_height': 16.96875,
     'control.card_border_width': '{border.width_01}',
     'control.card_focus_width': '{focus.width}',
     'control.card_padding': '{spacing.spacing_05}',
@@ -8135,6 +8174,9 @@ export default Object.freeze({
       'group': 'raw'
     },
     'icon.ai_label': {
+      'group': 'raw'
+    },
+    'icon.arrow_left': {
       'group': 'raw'
     },
     'icon.arrow_right': {
@@ -10192,6 +10234,9 @@ export default Object.freeze({
     'color.date_picker_input_outline_readonly': {
       'group': 'color'
     },
+    'color.tile_chevron_container_hover': {
+      'group': 'color'
+    },
     'color.card_container': {
       'group': 'color'
     },
@@ -11536,6 +11581,15 @@ export default Object.freeze({
     'control.page_header_breadcrumb_ratio': {
       'group': 'raw'
     },
+    'control.page_header_breadcrumb_ratio_sm': {
+      'group': 'raw'
+    },
+    'control.page_header_breadcrumb_back_offset': {
+      'group': 'dimension'
+    },
+    'control.page_header_breadcrumb_back_height': {
+      'group': 'dimension'
+    },
     'control.card_border_width': {
       'group': 'dimension'
     },
@@ -12110,9 +12164,9 @@ export default Object.freeze({
   'provenance': {
     'icons': {
       'package': '@carbon/icons',
-      'version': '11.89.0',
+      'version': '11.92.0',
       'map_source': 'rnw-components-v2/data/icons.json',
-      'map_sha256': '3a792b6d4955cba5fc6593cacd39d60486d703054d340434b5528c5e6ffaa04c',
+      'map_sha256': 'e999ea430be9a68899f97a3d13a42fa2c59adfb6840e4bf4efbd0241e8726c55',
       'drawings': {
         'switch_checked_indicator': '@carbon/react 1.115.0 Toggle/Toggle.js toggle__check'
       }

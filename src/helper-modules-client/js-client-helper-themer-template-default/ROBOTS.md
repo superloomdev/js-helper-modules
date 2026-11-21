@@ -10,7 +10,7 @@ None.
 
 ## Hand-picked values
 
-The hand-picked values are four hues: `color.interactive` (and the button, link and focus keys that alias it) and `color.support_error`, `color.support_success`, `color.support_warning` (error text and the danger buttons alias the error hue; on the dark scheme a hue drawn as text is its half mix toward `text_primary`). Text and icons on a colored fill are white, the shadow is translucent black and the secondary button fill is the ramp's dark gray on both schemes. Every other value is derived or an identity default, except the icon glyphs, which are Carbon's (`@carbon/icons@11.89.0`, redistributed under Apache-2.0 per `NOTICE`) until the Superloom set exists.
+The hand-picked values are four hues: `color.interactive` (and the button, link and focus keys that alias it) and `color.support_error`, `color.support_success`, `color.support_warning` (error text and the danger buttons alias the error hue; on the dark scheme a hue drawn as text is its half mix toward `text_primary`). Text and icons on a colored fill are white, the shadow is translucent black and the secondary button fill is the ramp's dark gray on both schemes. Every other value is derived or an identity default, except the icon glyphs, which are Carbon's (`@carbon/icons@11.92.0`, redistributed under Apache-2.0 per `NOTICE`) until the Superloom set exists.
 
 ## Regeneration
 

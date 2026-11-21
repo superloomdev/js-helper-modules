@@ -326,8 +326,8 @@ describe('default template - icon literals (v4)', () => {
   const iconMap = JSON.parse(readFileSync(resolve(moduleRoot, 'scripts', 'icon-map.json'), 'utf8'));
   const iconPkg = JSON.parse(readFileSync(resolve(moduleRoot, 'node_modules', '@carbon', 'icons', 'package.json'), 'utf8'));
 
-  it('should carry 86 icon tokens, every one a valid icon literal, in both schemes', () => {
-    assert.equal(iconKeys.length, 86);
+  it('should carry 87 icon tokens, every one a valid icon literal, in both schemes', () => {
+    assert.equal(iconKeys.length, 87);
     for (const schemeName of ['light', 'dark']) {
       const tokens = profile.schemes[schemeName].tokens;
       const subset = {};
@@ -392,7 +392,7 @@ describe('default template - icon literals (v4)', () => {
         }
       });
     }
-    assert.equal(iconPkg.version, '11.89.0');
+    assert.equal(iconPkg.version, '11.92.0');
     assert.deepEqual(Object.keys(iconMap.icons).map(function (name) { return 'icon.' + name; }), iconKeys);
   });
 
@@ -933,6 +933,10 @@ const V10_RAW = {
     'control.page_header_breadcrumb_padding_top': '{spacing.spacing_04}',
     'control.page_header_title_icon_offset': 0.78125,
     'control.page_header_breadcrumb_ratio': 0.6,
+    'control.page_header_breadcrumb_ratio_sm': 0.75,
+    'control.page_header_breadcrumb_back_offset': 1.90625,
+    'control.page_header_breadcrumb_back_height': 16.96875,
+    'color.tile_chevron_container_hover': '{color.layer_hover_01}',
     'color.date_picker_day_focus': '{color.button_primary}',
     'color.date_picker_day_focus_selected': '{color.layer_02}',
     'control.date_picker_day_focus_width_selected': '{border.width_01}',
@@ -1184,6 +1188,10 @@ const V10_BUILT = {
     'control.page_header_breadcrumb_padding_top': {a:'spacing.spacing_04'},
     'control.page_header_title_icon_offset': {v:0.78125},
     'control.page_header_breadcrumb_ratio': {v:0.6},
+    'control.page_header_breadcrumb_ratio_sm': {v:0.75},
+    'control.page_header_breadcrumb_back_offset': {v:1.90625},
+    'control.page_header_breadcrumb_back_height': {v:16.96875},
+    'color.tile_chevron_container_hover': {a:'color.layer_hover_01'},
     'color.date_picker_day_focus': {a:'color.button_primary'},
     'color.date_picker_day_focus_selected': {a:'color.layer_02'},
     'control.date_picker_day_focus_width_selected': {a:'border.width_01'},
@@ -1324,7 +1332,7 @@ describe('default template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1748, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1753, schemeName + ' token count');
     }
   });
 
