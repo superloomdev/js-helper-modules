@@ -6213,6 +6213,8 @@ export default Object.freeze({
     'color.header_panel_container': '{color.layer_01}',
     'color.header_panel_label': '{color.text_secondary}',
     'color.content_label': '{color.text_primary}',
+    'color.header_menu_arrow_hover': '{color.icon_primary}',
+    'color.header_menu_arrow_active': '{color.icon_primary}',
     'control.field_outline_width': '{border.width_01}',
     'control.field_outline_width_focus': '{border.width_01}',
     'control.field_invalid_ring_width': '{border.width_02}',
@@ -10485,6 +10487,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.content_label': {
+      'group': 'color'
+    },
+    'color.header_menu_arrow_hover': {
+      'group': 'color'
+    },
+    'color.header_menu_arrow_active': {
       'group': 'color'
     },
     'control.field_outline_width': {

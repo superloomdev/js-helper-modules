@@ -1399,6 +1399,8 @@ export default function buildGridRecipe (grid) {
     'color.header_action_container_selected': colorOf('layer_01'), // _header.scss:89-94 the active action background $layer
     'color.header_menu_button_icon': colorOf('icon_primary'), // _header.scss:132-141 .cds--header__menu-trigger > svg fill $icon-primary
     'color.header_menu_arrow': colorOf('icon_secondary'), // _header.scss:422-428
+    'color.header_menu_arrow_hover': colorOf('icon_primary'), // _header.scss:286-291 a.cds--header__menu-item:hover > svg fill $icon-primary (0,2,2) beats .cds--header__menu-arrow; the arrow is the link's own svg (HeaderMenu.js:134)
+    'color.header_menu_arrow_active': colorOf('icon_primary'), // _header.scss:282-284 a.cds--header__menu-item:active > svg fill $icon-primary
     'control.header_menu_arrow_gap': '{spacing.spacing_03}', // _header.scss:424 margin-inline-start mini-units(1)
     'color.header_menu_container': colorOf('layer_01'), // _header.scss:349-355 the open title, :369-387 the open list and its items, background-color $layer
     'control.header_menu_width': 200, // _header.scss:377 inline-size mini-units(25)
