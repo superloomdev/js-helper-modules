@@ -194,6 +194,21 @@
 // `control.page_header_breadcrumb_back_height`), the back link's glyph
 // (`icon.arrow_left`) and the chevron's hover fill
 // (`color.tile_chevron_container_hover`).
+//
+// Version 11 extends the role grid with the milestone-7 census's first
+// family, the UI shell header: the bar's fill, rule and height, the name's
+// type sets, paddings and focus border, the navigation's padding and
+// divider, the menu bar links' type, paddings, fills, labels and current
+// indicator, the header menu's arrow, container, width, rows, submenu
+// fills and shadow, the global actions' and the menu button's size, glyph
+// and fills, the header panel's width and fills, the side navigation's
+// header links' space and divider inset, and the content region's padding
+// and label. It also carries the narrow-screen cells the form classes
+// read: the stacked breadcrumb's row height
+// (`control.breadcrumb_stacked_item_min_height`), the toast's width from
+// the `max` breakpoint (`control.notification_toast_width_max`) and the
+// inline notification action's clearance of the close
+// (`control.notification_action_close_clearance`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -502,7 +517,18 @@ const GRID = Object.freeze({
       // v10: the tearsheet family
       'tearsheet_divider', 'tearsheet_main_container', 'tearsheet_actions_container',
       // v10 amendment 2 (m6-amend-2)
-      'tearsheet_header_container', 'tearsheet_influencer_container'
+      'tearsheet_header_container', 'tearsheet_influencer_container',
+      // v11: the header family
+      'header_container', 'header_border', 'header_name_label',
+      'header_menu_item_label', 'header_menu_item_label_hover', 'header_menu_item_label_active',
+      'header_menu_item_container', 'header_menu_item_container_hover', 'header_menu_item_container_active',
+      'header_menu_item_indicator',
+      'header_action_icon', 'header_action_icon_hover', 'header_action_icon_active', 'header_action_icon_selected',
+      'header_action_container_hover', 'header_action_container_active', 'header_action_container_selected',
+      'header_menu_button_icon', 'header_menu_arrow', 'header_menu_container',
+      'header_submenu_item_container_hover', 'header_submenu_item_container_active',
+      'header_submenu_item_container_selected', 'header_submenu_item_container_selected_hover',
+      'header_panel_container', 'header_panel_label', 'content_label'
     ]
   )),
   control: Object.freeze([
@@ -755,7 +781,18 @@ const GRID = Object.freeze({
     // v10 folded follow-ups: the remaining pagination skeleton widths,
     // the toggletip's focus geometry and the tag's large height
     'pagination_skeleton_width_medium', 'pagination_skeleton_width_long',
-    'toggletip_focus_width', 'toggletip_focus_offset', 'tag_height_large'
+    'toggletip_focus_width', 'toggletip_focus_offset', 'tag_height_large',
+    // v11: the header family
+    'header_height', 'header_action_size', 'header_action_icon_size',
+    'header_name_padding_start', 'header_name_padding_end', 'header_name_padding_end_sm',
+    'header_name_padding_start_toggle', 'header_name_focus_width',
+    'header_nav_padding_start', 'header_nav_divider_height',
+    'header_menu_item_padding_inline', 'header_menu_item_focus_width', 'header_menu_item_indicator_width',
+    'header_menu_arrow_gap', 'header_menu_width', 'header_menu_item_height',
+    'header_panel_width', 'header_side_nav_items_space', 'header_side_nav_divider_inset',
+    'content_padding',
+    // v11: the narrow-screen cells of the form classes
+    'breadcrumb_stacked_item_min_height', 'notification_toast_width_max', 'notification_action_close_clearance'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
@@ -801,7 +838,9 @@ const GRID = Object.freeze({
     // v10: the tearsheet family
     'tearsheet_heading',
     // v10 amendment 2 (m6-amend-2)
-    'tearsheet_description'
+    'tearsheet_description',
+    // v11: the header family
+    'header_name', 'header_name_prefix', 'header_menu_item'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
@@ -813,7 +852,9 @@ const GRID = Object.freeze({
     // v8: the slider's handle, the popover, the floating action button
     'slider_handle', 'slider_handle_disabled', 'popover', 'fab', 'fab_hover',
     // v10: the date_picker family's calendar
-    'date_picker_calendar'
+    'date_picker_calendar',
+    // v11: the header menu
+    'header_menu'
   ])),
   motion: Object.freeze([
     // v7: the two animated families' cycles
@@ -1579,7 +1620,7 @@ function buildContract () {
 
 
   return Object.freeze({
-    version: 10,
+    version: 11,
     grid: GRID,
     leveled: LEVELED_SETS,
     leveled_index: LEVELED_INDEX,
