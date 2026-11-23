@@ -6186,6 +6186,33 @@ export default Object.freeze({
     'color.tearsheet_actions_container': '{color.background}',
     'color.tearsheet_header_container': '{color.layer_01}',
     'color.tearsheet_influencer_container': '{color.layer_01}',
+    'color.header_container': '{color.background}',
+    'color.header_border': '{color.border_subtle_00}',
+    'color.header_name_label': '{color.text_primary}',
+    'color.header_menu_item_label': '{color.text_secondary}',
+    'color.header_menu_item_label_hover': '{color.text_primary}',
+    'color.header_menu_item_label_active': '{color.text_primary}',
+    'color.header_menu_item_container': '{color.background}',
+    'color.header_menu_item_container_hover': '{color.background_hover}',
+    'color.header_menu_item_container_active': '{color.background_active}',
+    'color.header_menu_item_indicator': '{color.border_interactive}',
+    'color.header_action_icon': '{color.icon_secondary}',
+    'color.header_action_icon_hover': '{color.icon_primary}',
+    'color.header_action_icon_active': '{color.icon_primary}',
+    'color.header_action_icon_selected': '{color.icon_primary}',
+    'color.header_action_container_hover': '{color.background_hover}',
+    'color.header_action_container_active': '{color.background_active}',
+    'color.header_action_container_selected': '{color.layer_01}',
+    'color.header_menu_button_icon': '{color.icon_primary}',
+    'color.header_menu_arrow': '{color.icon_secondary}',
+    'color.header_menu_container': '{color.layer_01}',
+    'color.header_submenu_item_container_hover': '{color.layer_hover_01}',
+    'color.header_submenu_item_container_active': '{color.layer_active_01}',
+    'color.header_submenu_item_container_selected': '{color.layer_selected_01}',
+    'color.header_submenu_item_container_selected_hover': '{color.layer_selected_hover_01}',
+    'color.header_panel_container': '{color.layer_01}',
+    'color.header_panel_label': '{color.text_secondary}',
+    'color.content_label': '{color.text_primary}',
     'control.field_outline_width': '{border.width_01}',
     'control.field_outline_width_focus': '{border.width_01}',
     'control.field_invalid_ring_width': '{border.width_02}',
@@ -6669,6 +6696,29 @@ export default Object.freeze({
     'control.toggletip_focus_width': '{border.width_01}',
     'control.toggletip_focus_offset': 0,
     'control.tag_height_large': 32,
+    'control.header_height': 48,
+    'control.header_action_size': 48,
+    'control.header_action_icon_size': '{size.icon_02}',
+    'control.header_name_padding_start': '{spacing.spacing_05}',
+    'control.header_name_padding_end': '{spacing.spacing_07}',
+    'control.header_name_padding_end_sm': '{spacing.spacing_05}',
+    'control.header_name_padding_start_toggle': '{spacing.spacing_03}',
+    'control.header_name_focus_width': '{border.width_02}',
+    'control.header_nav_padding_start': '{spacing.spacing_05}',
+    'control.header_nav_divider_height': 24,
+    'control.header_menu_item_padding_inline': '{spacing.spacing_05}',
+    'control.header_menu_item_focus_width': '{border.width_02}',
+    'control.header_menu_item_indicator_width': 3,
+    'control.header_menu_arrow_gap': '{spacing.spacing_03}',
+    'control.header_menu_width': 200,
+    'control.header_menu_item_height': 48,
+    'control.header_panel_width': 256,
+    'control.header_side_nav_items_space': '{spacing.spacing_07}',
+    'control.header_side_nav_divider_inset': '{spacing.spacing_05}',
+    'control.content_padding': '{spacing.spacing_07}',
+    'control.breadcrumb_stacked_item_min_height': 0,
+    'control.notification_toast_width_max': 352,
+    'control.notification_action_close_clearance': 0,
     'type.field_value': '{type.body_compact_01}',
     'type.field_label': '{type.label01}',
     'type.field_helper': '{type.helper_text_01}',
@@ -6779,6 +6829,30 @@ export default Object.freeze({
     'type.page_header_breadcrumb': '{type.label01}',
     'type.tearsheet_heading': '{type.heading04}',
     'type.tearsheet_description': '{type.body_compact_01}',
+    'type.header_name': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 600,
+      'font_family': 'sans'
+    },
+    'type.header_name_prefix': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.header_menu_item': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 18,
+      'letter_spacing': 0,
+      'weight': 400,
+      'font_family': 'sans'
+    },
     'shadow.level_00': {
       'shadow': true,
       'layers': [
@@ -6858,6 +6932,18 @@ export default Object.freeze({
     'shadow.fab': '{shadow.level_02}',
     'shadow.fab_hover': '{shadow.level_02}',
     'shadow.date_picker_calendar': '{shadow.level_01}',
+    'shadow.header_menu': {
+      'shadow': true,
+      'layers': [
+        {
+          'x': 0,
+          'y': 4,
+          'blur': 8,
+          'spread': 0,
+          'color': 'rgba(0, 0, 0, 0.5)'
+        }
+      ]
+    },
     'motion.loading_rotation': 690,
     'motion.loading_arc_cycle': 690,
     'motion.loading_arc_easing': '{motion.easing_standard_productive}',
@@ -10320,6 +10406,87 @@ export default Object.freeze({
     'color.tearsheet_influencer_container': {
       'group': 'color'
     },
+    'color.header_container': {
+      'group': 'color'
+    },
+    'color.header_border': {
+      'group': 'color'
+    },
+    'color.header_name_label': {
+      'group': 'color'
+    },
+    'color.header_menu_item_label': {
+      'group': 'color'
+    },
+    'color.header_menu_item_label_hover': {
+      'group': 'color'
+    },
+    'color.header_menu_item_label_active': {
+      'group': 'color'
+    },
+    'color.header_menu_item_container': {
+      'group': 'color'
+    },
+    'color.header_menu_item_container_hover': {
+      'group': 'color'
+    },
+    'color.header_menu_item_container_active': {
+      'group': 'color'
+    },
+    'color.header_menu_item_indicator': {
+      'group': 'color'
+    },
+    'color.header_action_icon': {
+      'group': 'color'
+    },
+    'color.header_action_icon_hover': {
+      'group': 'color'
+    },
+    'color.header_action_icon_active': {
+      'group': 'color'
+    },
+    'color.header_action_icon_selected': {
+      'group': 'color'
+    },
+    'color.header_action_container_hover': {
+      'group': 'color'
+    },
+    'color.header_action_container_active': {
+      'group': 'color'
+    },
+    'color.header_action_container_selected': {
+      'group': 'color'
+    },
+    'color.header_menu_button_icon': {
+      'group': 'color'
+    },
+    'color.header_menu_arrow': {
+      'group': 'color'
+    },
+    'color.header_menu_container': {
+      'group': 'color'
+    },
+    'color.header_submenu_item_container_hover': {
+      'group': 'color'
+    },
+    'color.header_submenu_item_container_active': {
+      'group': 'color'
+    },
+    'color.header_submenu_item_container_selected': {
+      'group': 'color'
+    },
+    'color.header_submenu_item_container_selected_hover': {
+      'group': 'color'
+    },
+    'color.header_panel_container': {
+      'group': 'color'
+    },
+    'color.header_panel_label': {
+      'group': 'color'
+    },
+    'color.content_label': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -11769,6 +11936,75 @@ export default Object.freeze({
     'control.tag_height_large': {
       'group': 'dimension'
     },
+    'control.header_height': {
+      'group': 'dimension'
+    },
+    'control.header_action_size': {
+      'group': 'dimension'
+    },
+    'control.header_action_icon_size': {
+      'group': 'dimension'
+    },
+    'control.header_name_padding_start': {
+      'group': 'dimension'
+    },
+    'control.header_name_padding_end': {
+      'group': 'dimension'
+    },
+    'control.header_name_padding_end_sm': {
+      'group': 'dimension'
+    },
+    'control.header_name_padding_start_toggle': {
+      'group': 'dimension'
+    },
+    'control.header_name_focus_width': {
+      'group': 'dimension'
+    },
+    'control.header_nav_padding_start': {
+      'group': 'dimension'
+    },
+    'control.header_nav_divider_height': {
+      'group': 'dimension'
+    },
+    'control.header_menu_item_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.header_menu_item_focus_width': {
+      'group': 'dimension'
+    },
+    'control.header_menu_item_indicator_width': {
+      'group': 'dimension'
+    },
+    'control.header_menu_arrow_gap': {
+      'group': 'dimension'
+    },
+    'control.header_menu_width': {
+      'group': 'dimension'
+    },
+    'control.header_menu_item_height': {
+      'group': 'dimension'
+    },
+    'control.header_panel_width': {
+      'group': 'dimension'
+    },
+    'control.header_side_nav_items_space': {
+      'group': 'dimension'
+    },
+    'control.header_side_nav_divider_inset': {
+      'group': 'dimension'
+    },
+    'control.content_padding': {
+      'group': 'dimension'
+    },
+    'control.breadcrumb_stacked_item_min_height': {
+      'group': 'dimension'
+    },
+    'control.notification_toast_width_max': {
+      'group': 'dimension'
+    },
+    'control.notification_action_close_clearance': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -11973,6 +12209,15 @@ export default Object.freeze({
     'type.tearsheet_description': {
       'group': 'typeSet'
     },
+    'type.header_name': {
+      'group': 'typeSet'
+    },
+    'type.header_name_prefix': {
+      'group': 'typeSet'
+    },
+    'type.header_menu_item': {
+      'group': 'typeSet'
+    },
     'shadow.level_00': {
       'group': 'shadow'
     },
@@ -12111,6 +12356,9 @@ export default Object.freeze({
     'shadow.date_picker_calendar': {
       'group': 'shadow'
     },
+    'shadow.header_menu': {
+      'group': 'shadow'
+    },
     'motion.loading_rotation': {
       'group': 'duration'
     },
@@ -12136,20 +12384,9 @@ export default Object.freeze({
         'control.checkbox_group_gap': 28,
         'control.radio_group_gap_vertical': 28,
         'type.selection_label': '{type.body01}',
-        'control.dialog_width_ratio': 1,
-        'control.dialog_width_ratio_xs': 1,
-        'control.dialog_width_ratio_sm': 1,
-        'control.dialog_width_ratio_lg': 1,
-        'control.dialog_height_ratio': 1,
-        'control.dialog_height_ratio_xs': 1,
-        'control.dialog_height_ratio_sm': 1,
-        'control.dialog_height_ratio_lg': 1,
-        'control.notification_inline_width': 288,
-        'control.notification_details_inset_end': 0,
-        'control.notification_action_inset': 40,
-        'control.tab_vertical_list_ratio': 0.5,
         'control.file_uploader_name_max_width': 216,
-        'control.accordion_content_end_ratio': 0
+        'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
+        'control.notification_action_close_clearance': '{control.icon_button_size}'
       }
     },
     'form.medium': {
@@ -12171,7 +12408,9 @@ export default Object.freeze({
         'control.dialog_height_ratio_xs': 0.48,
         'control.dialog_height_ratio_sm': 0.72,
         'control.dialog_height_ratio_lg': 0.96,
-        'control.notification_inline_width': 608
+        'control.notification_inline_width': 608,
+        'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
+        'control.notification_action_close_clearance': '{control.icon_button_size}'
       }
     }
   },
@@ -12186,8 +12425,8 @@ export default Object.freeze({
       }
     },
     'variants': {
-      'form.compact': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, `tabs/_tabs.scss:83-93,737-746`, `accordion/_accordion.scss:202-217` (v9-adaptive-contract.md section 4)',
-      'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51` (v9-adaptive-contract.md section 4)',
+      'form.compact': 'superloom_decision: Carbon Mobile touch set + `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` and `notification/_actionable-notification.scss:570-615` (decision 62) (v9-adaptive-contract.md section 4)',
+      'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` and `notification/_actionable-notification.scss:570-615` (decision 62) (v9-adaptive-contract.md section 4)',
       'not_applied': 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
     }
   }

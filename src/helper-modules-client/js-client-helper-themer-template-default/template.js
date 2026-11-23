@@ -10,7 +10,7 @@ import brands from './brands.js';
 
 export default Object.freeze({
   id: 'superloom-default',
-  contract_version: 10,
+  contract_version: 11,
   adaptive: {
     options: ['auto', 'fixed', 'form.compact', 'form.medium']
   },

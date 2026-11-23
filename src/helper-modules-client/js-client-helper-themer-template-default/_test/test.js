@@ -65,8 +65,8 @@ describe('default template - profile identity', () => {
     assert.equal(profile.id, 'superloom-default');
   });
 
-  it('should export contract_version 10', () => {
-    assert.equal(profile.contract_version, 10);
+  it('should export contract_version 11', () => {
+    assert.equal(profile.contract_version, 11);
   });
 
   it('should have light and dark schemes', () => {
@@ -706,11 +706,8 @@ describe('default template - v9 variants', () => {
   it('should carry the census pins in each form variant', () => {
     for (const schemeName of ['light', 'dark']) {
       const compact = profile.schemes[schemeName].variants['form.compact'].tokens;
-      assert.equal(compact['control.dialog_width_ratio'], 1);
-      assert.equal(compact['control.dialog_height_ratio_lg'], 1);
-      assert.equal(compact['control.notification_inline_width'], 288);
-      assert.equal(compact['control.tab_vertical_list_ratio'], 0.5);
-      assert.equal(compact['control.accordion_content_end_ratio'], 0);
+      assert.equal(compact['control.file_uploader_name_max_width'], 216);
+      assert.equal(compact['control.breadcrumb_stacked_item_min_height'], '{control.target_min}');
       const medium = profile.schemes[schemeName].variants['form.medium'].tokens;
       assert.equal(medium['control.dialog_width_ratio'], 0.84);
       assert.equal(medium['control.dialog_height_ratio'], 0.9);
@@ -725,7 +722,7 @@ describe('default template - v9 variants', () => {
     const base = Themer.buildTheme(scheme, [], 'native');
     const compact = Themer.buildTheme(scheme, [], 'native', { variant: { form: 'compact' } });
     assert.equal(compact.tokens['control.field_height'], 48);
-    assert.equal(compact.tokens['control.notification_inline_width'], 288);
+    assert.equal(compact.tokens['control.target_min'], 48);
     const branded = Themer.buildTheme(scheme,
       [{ name: 'brand', tokens: { 'control.field_height': 44 } }], 'native',
       { variant: { form: 'compact' } });
@@ -1332,7 +1329,7 @@ describe('default template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1753, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1807, schemeName + ' token count');
     }
   });
 
@@ -1368,6 +1365,70 @@ describe('default template - contract v10 census cells', () => {
     for (const schemeName of ['light', 'dark']) {
       const compact = Themer.buildTheme(profile.schemes[schemeName], [], 'native', { variant: { form: 'compact' } });
       assert.equal(compact.tokens['control.file_uploader_name_max_width'], 216, schemeName);
+    }
+  });
+
+});
+
+// --- contract v11: the header family and the narrow-screen cells ------------
+const V11_RAW = {
+  'color.header_container': '{color.background}',
+  'color.header_border': '{color.border_subtle_00}',
+  'control.header_height': 48,
+  'type.header_name': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 600, font_family: 'sans' },
+  'type.header_menu_item': { type_set: true, font_size: 14, line_height_px: 18, letter_spacing: 0, weight: 400, font_family: 'sans' },
+  'color.header_menu_item_label': '{color.text_secondary}',
+  'color.header_menu_item_container_hover': '{color.background_hover}',
+  'color.header_action_icon': '{color.icon_secondary}',
+  'color.header_action_container_selected': '{color.layer_01}',
+  'control.header_menu_width': 200,
+  'shadow.header_menu': { shadow: true, layers: [{ x: 0, y: 4, blur: 8, spread: 0, color: 'rgba(0, 0, 0, 0.5)' }] },
+  'control.header_panel_width': 256,
+  'control.content_padding': '{spacing.spacing_07}',
+  'control.breadcrumb_stacked_item_min_height': 0,
+  'control.notification_toast_width_max': 352,
+  'control.notification_action_close_clearance': 0
+};
+const V11_DEAD_COMPACT_PINS = [
+  'control.dialog_width_ratio', 'control.dialog_width_ratio_xs', 'control.dialog_width_ratio_sm', 'control.dialog_width_ratio_lg',
+  'control.dialog_height_ratio', 'control.dialog_height_ratio_xs', 'control.dialog_height_ratio_sm', 'control.dialog_height_ratio_lg',
+  'control.notification_inline_width', 'control.notification_details_inset_end', 'control.notification_action_inset',
+  'control.tab_vertical_list_ratio', 'control.accordion_content_end_ratio'
+];
+
+describe('default template - contract v11 header and narrow-screen cells', () => {
+
+  it('should answer the v11 cells identically in each scheme', () => {
+    for (const schemeName of ['light', 'dark']) {
+      const tokens = profile.schemes[schemeName].tokens;
+      for (const [name, expected] of Object.entries(V11_RAW)) {
+        assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
+      }
+      assert.equal(Object.keys(tokens).length, 1807, schemeName + ' token count');
+    }
+  });
+
+  it('should give the form classes the target floor and the close seat', () => {
+    for (const schemeName of ['light', 'dark']) {
+      const scheme = profile.schemes[schemeName];
+      for (const form of ['compact', 'medium']) {
+        const built = Themer.buildTheme(scheme, [], 'native', { variant: { form: form } });
+        assert.equal(built.tokens['control.breadcrumb_stacked_item_min_height'], built.tokens['control.target_min'], schemeName + ' ' + form);
+        assert.equal(built.tokens['control.breadcrumb_stacked_item_min_height'], 48, schemeName + ' ' + form);
+        assert.equal(built.tokens['control.notification_action_close_clearance'], built.tokens['control.icon_button_size'], schemeName + ' ' + form);
+        assert.equal(built.tokens['control.notification_action_close_clearance'], 48, schemeName + ' ' + form);
+      }
+      const base = Themer.buildTheme(scheme, [], 'native');
+      assert.equal(base.tokens['control.breadcrumb_stacked_item_min_height'], 0, schemeName);
+      assert.equal(base.tokens['control.notification_action_close_clearance'], 0, schemeName);
+    }
+  });
+
+  it('should carry none of the compact pins the components now read from the window', () => {
+    for (const schemeName of ['light', 'dark']) {
+      const compact = profile.schemes[schemeName].variants['form.compact'].tokens;
+      const left = V11_DEAD_COMPACT_PINS.filter(function (name) { return compact[name] !== undefined; });
+      assert.deepEqual(left, [], schemeName + ' ' + JSON.stringify(left));
     }
   });
 

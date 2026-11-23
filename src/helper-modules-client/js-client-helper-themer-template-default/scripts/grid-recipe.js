@@ -1363,6 +1363,62 @@ export default function buildGridRecipe (grid) {
     'control.toggletip_focus_width': '{border.width_01}', // utilities/_focus-outline.scss:16-21
     'control.toggletip_focus_offset': 0, // utilities/_focus-outline.scss:16-21
     'control.tag_height_large': 32, // tag/_tag.scss:30-42
+    // v11 Header family (`ui-shell/header/_header.scss:29-438`, `ui-shell/header-panel/_header-panel.scss:22-41`, `ui-shell/side-nav/_side-nav.scss:466-486`, `ui-shell/content/_content.scss:16-20`; probes `recipes/probe/Header*.cells.txt`, `Content.cells.txt`, U5)
+    'color.header_container': colorOf('background'), // _header.scss:37 .cds--header background-color $background
+    'color.header_border': colorOf('border_subtle_00'), // _header.scss:39 border-block-end 1px solid $border-subtle; :216-226 the nav divider; :89-94 the active action's inline borders; _header-panel.scss:36-38
+    'control.header_height': 48, // _header.scss:38 block-size mini-units(6), _functions.scss:11-19 0.5rem each
+    'type.header_name': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 600, font_family: 'sans' }, // _header.scss:158-176 body-compact-01 at weight 600, letter-spacing 0.1px, line-height 1.25rem; probe 14/20/600/0.1
+    'type.header_name_prefix': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 400, font_family: 'sans' }, // _header.scss:183-185 the prefix at weight 400 in the name's line
+    'color.header_name_label': colorOf('text_primary'), // _header.scss:187-195 color $text-primary at rest and on hover
+    'control.header_name_padding_start': '{spacing.spacing_05}', // _header.scss:163 padding 0 mini-units(4) 0 mini-units(2): start 16
+    'control.header_name_padding_end': '{spacing.spacing_07}', // _header.scss:163 end mini-units(4) = 32
+    'control.header_name_padding_end_sm': '{spacing.spacing_05}', // _header.scss:173-175 below md padding 0 $spacing-05; probe Header@375 16
+    'control.header_name_padding_start_toggle': '{spacing.spacing_03}', // _header.scss:197-200 after a shown menu toggle padding-inline-start 8px
+    'control.header_name_focus_width': '{border.width_02}', // _header.scss:164,178-181 border 2px solid transparent, $focus on focus
+    'control.header_nav_padding_start': '{spacing.spacing_05}', // _header.scss:205-213 padding-inline-start mini-units(2), drawn from lg
+    'control.header_nav_divider_height': 24, // _header.scss:216-226 ::before block-size 24px, inline-size 1px, centered on the block axis
+    'control.header_menu_item_padding_inline': '{spacing.spacing_05}', // _header.scss:239-262 padding 0 mini-units(2)
+    'control.header_menu_item_focus_width': '{border.width_02}', // _header.scss:245,277-280 border 2px solid transparent, $focus on focus
+    'control.header_menu_item_indicator_width': 3, // _header.scss:299-308 ::after block-size 3px, inline-size calc(100% + 4px) at -2px; :315-323 in a menu inline-size 3px
+    'type.header_menu_item': { type_set: true, font_size: 14, line_height_px: 18, letter_spacing: 0, weight: 400, font_family: 'sans' }, // _header.scss:250-254 14px, weight 400, letter-spacing 0, line-height 1.125rem
+    'color.header_menu_item_label': colorOf('text_secondary'), // _header.scss:249 color $text-secondary; :294-297 the current class (0,1,0) loses to a.cds--header__menu-item (0,1,1), probe current #525252
+    'color.header_menu_item_label_hover': colorOf('text_primary'), // _header.scss:264-269
+    'color.header_menu_item_label_active': colorOf('text_primary'), // _header.scss:271-275
+    'color.header_menu_item_container': colorOf('background'), // _header.scss:246
+    'color.header_menu_item_container_hover': colorOf('background_hover'), // _header.scss:264-269
+    'color.header_menu_item_container_active': colorOf('background_active'), // _header.scss:271-275
+    'color.header_menu_item_indicator': colorOf('border_interactive'), // _header.scss:299-308,315-334
+    'control.header_action_size': 48, // _header.scss:48-61 block-size and inline-size mini-units(6); below md min-inline-size $spacing-09, the same 48
+    'control.header_action_icon_size': '{size.icon_02}', // the 20px glyphs the actions and the menu button draw (HeaderMenuButton.tsx `<Menu size={20} />`); probe 20
+    'color.header_action_icon': colorOf('icon_secondary'), // _header.scss:114-116
+    'color.header_action_icon_hover': colorOf('icon_primary'), // _header.scss:125-130
+    'color.header_action_icon_active': colorOf('icon_primary'), // _header.scss:118-123
+    'color.header_action_icon_selected': colorOf('icon_primary'), // _header.scss:96-98,118-123
+    'color.header_action_container_hover': colorOf('background_hover'), // _header.scss:83-87
+    'color.header_action_container_active': colorOf('background_active'), // _header.scss:105-107
+    'color.header_action_container_selected': colorOf('layer_01'), // _header.scss:89-94 the active action background $layer
+    'color.header_menu_button_icon': colorOf('icon_primary'), // _header.scss:132-141 .cds--header__menu-trigger > svg fill $icon-primary
+    'color.header_menu_arrow': colorOf('icon_secondary'), // _header.scss:422-428
+    'control.header_menu_arrow_gap': '{spacing.spacing_03}', // _header.scss:424 margin-inline-start mini-units(1)
+    'color.header_menu_container': colorOf('layer_01'), // _header.scss:349-355 the open title, :369-387 the open list and its items, background-color $layer
+    'control.header_menu_width': 200, // _header.scss:377 inline-size mini-units(25)
+    'control.header_menu_item_height': 48, // _header.scss:418-420 block-size mini-units(6)
+    'shadow.header_menu': { shadow: true, layers: [{ x: 0, y: 4, blur: 8, spread: 0, color: 'rgba(0, 0, 0, 0.5)' }] }, // _header.scss:376 box-shadow 0 4px 8px 0 rgb(0 0 0 / 50%)
+    'color.header_submenu_item_container_hover': colorOf('layer_hover_01'), // _header.scss:389-396
+    'color.header_submenu_item_container_active': colorOf('layer_active_01'), // _header.scss:398-403
+    'color.header_submenu_item_container_selected': colorOf('layer_selected_01'), // _header.scss:405-416
+    'color.header_submenu_item_container_selected_hover': colorOf('layer_selected_hover_01'), // _header.scss:411-415
+    'color.header_panel_container': colorOf('layer_01'), // _header-panel.scss:27
+    'color.header_panel_label': colorOf('text_secondary'), // _header-panel.scss:28
+    'control.header_panel_width': 256, // _header-panel.scss:36-41 expanded inline-size mini-units(32)
+    'control.header_side_nav_items_space': '{spacing.spacing_07}', // _side-nav.scss:466-476 below lg margin-block-end 32px
+    'control.header_side_nav_divider_inset': '{spacing.spacing_05}', // _side-nav.scss:478-486 the divider 16px in from each side, 16px under the list
+    'control.content_padding': '{spacing.spacing_07}', // _content.scss:16-20 padding 2rem
+    'color.content_label': colorOf('text_primary'), // _content.scss:18
+    // v11 narrow-screen cells of the form classes (plan 0162 E14; `CONTRACT-REQUESTS.md`, U5's wave)
+    'control.breadcrumb_stacked_item_min_height': 0, // breadcrumb/_breadcrumb.scss:25-33 below md the items stack one line each, 18 apart: the base keeps the line; form.compact and form.medium give the target floor
+    'control.notification_toast_width_max': 352, // notification/_toast-notification.scss:28-46 inline-size 288px, from breakpoint(max) 22rem
+    'control.notification_action_close_clearance': 0, // notification/_actionable-notification.scss:570-615 below md the close is out of flow, 48 square, at the band's top end; the base keeps the action under it, the form classes clear it
     // No elevation
     'shadow.level_00': { shadow: true, layers: [{ x: 0, y: 0, blur: 0, spread: 0, color: NONE }] }
   };

@@ -120,20 +120,9 @@ const VARIANT_TOUCH_PINS = {
 const VARIANTS = Object.freeze({
   'form.compact': Object.freeze({
     tokens: Object.assign({}, VARIANT_TOUCH_PINS, {
-      'control.dialog_width_ratio': 1,
-      'control.dialog_width_ratio_xs': 1,
-      'control.dialog_width_ratio_sm': 1,
-      'control.dialog_width_ratio_lg': 1,
-      'control.dialog_height_ratio': 1,
-      'control.dialog_height_ratio_xs': 1,
-      'control.dialog_height_ratio_sm': 1,
-      'control.dialog_height_ratio_lg': 1,
-      'control.notification_inline_width': 288,
-      'control.notification_details_inset_end': 0,
-      'control.notification_action_inset': 40,
-      'control.tab_vertical_list_ratio': 0.5,
       'control.file_uploader_name_max_width': 216,
-      'control.accordion_content_end_ratio': 0
+      'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
+      'control.notification_action_close_clearance': '{control.icon_button_size}'
     })
   }),
   'form.medium': Object.freeze({
@@ -146,13 +135,15 @@ const VARIANTS = Object.freeze({
       'control.dialog_height_ratio_xs': 0.48,
       'control.dialog_height_ratio_sm': 0.72,
       'control.dialog_height_ratio_lg': 0.96,
-      'control.notification_inline_width': 608
+      'control.notification_inline_width': 608,
+      'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
+      'control.notification_action_close_clearance': '{control.icon_button_size}'
     })
   })
 });
 const PROVENANCE_VARIANTS = {
-  'form.compact': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, `tabs/_tabs.scss:83-93,737-746`, `accordion/_accordion.scss:202-217` (v9-adaptive-contract.md section 4)',
-  'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51` (v9-adaptive-contract.md section 4)',
+  'form.compact': 'superloom_decision: Carbon Mobile touch set + `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` and `notification/_actionable-notification.scss:570-615` (decision 62) (v9-adaptive-contract.md section 4)',
+  'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` and `notification/_actionable-notification.scss:570-615` (decision 62) (v9-adaptive-contract.md section 4)',
   not_applied: 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
 };
 PROVENANCE.variants = PROVENANCE_VARIANTS;
