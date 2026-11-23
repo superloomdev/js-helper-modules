@@ -5657,6 +5657,8 @@ export default Object.freeze({
     'color.header_action_container_selected': '{color.layer_01}',
     'color.header_menu_button_icon': '{color.icon_primary}',
     'color.header_menu_arrow': '{color.icon_secondary}',
+    'color.header_menu_arrow_hover': '{color.icon_primary}',
+    'color.header_menu_arrow_active': '{color.icon_primary}',
     'control.header_menu_arrow_gap': '{spacing.spacing_03}',
     'color.header_menu_container': '{color.layer_01}',
     'control.header_menu_width': 200,
@@ -9525,6 +9527,12 @@ export default Object.freeze({
       'group': 'color'
     },
     'color.content_label': {
+      'group': 'color'
+    },
+    'color.header_menu_arrow_hover': {
+      'group': 'color'
+    },
+    'color.header_menu_arrow_active': {
       'group': 'color'
     },
     'control.field_outline_width': {

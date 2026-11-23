@@ -1404,7 +1404,7 @@ describe('carbon template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1807, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1809, schemeName + ' token count');
     }
   });
 
@@ -1455,6 +1455,8 @@ const V11_RAW = {
   'color.header_menu_item_label': '{color.text_secondary}',
   'color.header_menu_item_container_hover': '{color.background_hover}',
   'color.header_action_icon': '{color.icon_secondary}',
+  'color.header_menu_arrow_hover': '{color.icon_primary}',
+  'color.header_menu_arrow_active': '{color.icon_primary}',
   'color.header_action_container_selected': '{color.layer_01}',
   'control.header_menu_width': 200,
   'shadow.header_menu': { shadow: true, layers: [{ x: 0, y: 4, blur: 8, spread: 0, color: 'rgba(0, 0, 0, 0.5)' }] },
@@ -1479,7 +1481,7 @@ describe('carbon template - contract v11 header and narrow-screen cells', () => 
       for (const [name, expected] of Object.entries(V11_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1807, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1809, schemeName + ' token count');
     }
   });
 
