@@ -208,7 +208,9 @@
 // (`control.breadcrumb_stacked_item_min_height`), the toast's width from
 // the `max` breakpoint (`control.notification_toast_width_max`) and the
 // inline notification action's clearance of the close
-// (`control.notification_action_close_clearance`).
+// (`control.notification_action_close_clearance`). Its first amendment
+// gives the header menu's arrow its hover and press inks
+// (`color.header_menu_arrow_hover`, `color.header_menu_arrow_active`).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -528,7 +530,9 @@ const GRID = Object.freeze({
       'header_menu_button_icon', 'header_menu_arrow', 'header_menu_container',
       'header_submenu_item_container_hover', 'header_submenu_item_container_active',
       'header_submenu_item_container_selected', 'header_submenu_item_container_selected_hover',
-      'header_panel_container', 'header_panel_label', 'content_label'
+      'header_panel_container', 'header_panel_label', 'content_label',
+      // v11 amendment 1 (U5)
+      'header_menu_arrow_hover', 'header_menu_arrow_active'
     ]
   )),
   control: Object.freeze([
