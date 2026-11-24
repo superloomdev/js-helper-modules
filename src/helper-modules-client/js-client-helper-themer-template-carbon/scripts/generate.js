@@ -159,6 +159,7 @@ const VARIANTS = Object.freeze({
       'control.file_uploader_name_max_width': 216,
       'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
       'control.side_nav_link_height': '{control.target_min}',
+      'control.structured_list_row_min_height': '{control.target_min}',
       'control.header_side_nav_item_min_height': '{control.target_min}',
       'control.notification_action_close_clearance': '{control.icon_button_size}'
     })
@@ -176,6 +177,7 @@ const VARIANTS = Object.freeze({
       'control.notification_inline_width': 608,
       'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
       'control.side_nav_link_height': '{control.target_min}',
+      'control.structured_list_row_min_height': '{control.target_min}',
       'control.header_side_nav_item_min_height': '{control.target_min}',
       'control.notification_action_close_clearance': '{control.icon_button_size}'
     })
@@ -184,8 +186,8 @@ const VARIANTS = Object.freeze({
 const PROVENANCE_VARIANTS = {
   'platform.ios': 'carbon_primary: @carbon/react-native 9.0.7 src/ (raw-carbon-mobile-variant.md)',
   'platform.android': 'carbon_primary: @carbon/react-native 9.0.7 src/ (raw-carbon-mobile-variant.md)',
-  'form.compact': 'carbon_primary @carbon/react-native touch set + carbon_primary `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` and `ui-shell/side-nav/_side-nav.scss:314-358` (decision 62)',
-  'form.medium': 'carbon_primary @carbon/react-native touch set + carbon_primary `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` and `ui-shell/side-nav/_side-nav.scss:314-358` (decision 62)',
+  'form.compact': 'carbon_primary @carbon/react-native touch set + carbon_primary `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` , `ui-shell/side-nav/_side-nav.scss:314-358` and `structured-list/_structured-list.scss:40-45` (decision 62)',
+  'form.medium': 'carbon_primary @carbon/react-native touch set + carbon_primary `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` , `ui-shell/side-nav/_side-nav.scss:314-358` and `structured-list/_structured-list.scss:40-45` (decision 62)',
   not_applied: 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
 };
 PROVENANCE.variants = PROVENANCE_VARIANTS;
