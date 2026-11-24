@@ -217,6 +217,12 @@
 // icons, the divider, and the header links' row height inside it
 // (`control.header_side_nav_item_min_height`, whose form classes give the
 // target floor).
+// Its third amendment gives the structured list its cells: the rules
+// between rows and their hover and selected inks, the head's and the
+// cells' labels, type sets and paddings (plain, condensed, flush and under
+// selection), the head's row floor, the marker column's width and the
+// glyph's top space, the selectable row's height (base 0, the form classes
+// give the target floor) and the skeleton's bar and column ratios.
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -543,7 +549,11 @@ const GRID = Object.freeze({
       'side_nav_container', 'side_nav_overlay',
       'side_nav_link_label', 'side_nav_link_label_hover', 'side_nav_link_label_selected',
       'side_nav_link_container_hover', 'side_nav_link_container_selected', 'side_nav_menu_container_selected_hover',
-      'side_nav_link_indicator', 'side_nav_icon', 'side_nav_icon_selected', 'side_nav_divider'
+      'side_nav_link_indicator', 'side_nav_icon', 'side_nav_icon_selected', 'side_nav_divider',
+      // v11 amendment 3 (U7): the structured list family
+      'structured_list_border', 'structured_list_row_container_hover', 'structured_list_row_container_selected',
+      'structured_list_head_label', 'structured_list_cell_label', 'structured_list_cell_label_selected',
+      'structured_list_check'
     ]
   )),
   control: Object.freeze([
@@ -813,7 +823,15 @@ const GRID = Object.freeze({
     'side_nav_link_height', 'side_nav_link_height_large', 'side_nav_link_padding_inline',
     'side_nav_menu_link_padding_start', 'side_nav_menu_link_padding_start_icon', 'side_nav_indicator_width',
     'side_nav_icon_size', 'side_nav_icon_gap', 'side_nav_divider_margin_block', 'side_nav_divider_inset',
-    'header_side_nav_item_min_height'
+    'header_side_nav_item_min_height',
+    // v11 amendment 3 (U7): the structured list family
+    'structured_list_head_padding_top', 'structured_list_head_padding_bottom', 'structured_list_head_height',
+    'structured_list_cell_padding_top', 'structured_list_cell_padding_bottom',
+    'structured_list_padding_inline', 'structured_list_padding_start', 'structured_list_padding_condensed',
+    'structured_list_flush_padding_end', 'structured_list_selection_padding_inline',
+    'structured_list_marker_column', 'structured_list_icon_top', 'structured_list_row_min_height',
+    'structured_list_skeleton_bar_height', 'structured_list_skeleton_bar_ratio',
+    'structured_list_skeleton_column_first', 'structured_list_skeleton_column_second', 'structured_list_skeleton_column_third'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
@@ -863,7 +881,9 @@ const GRID = Object.freeze({
     // v11: the header family
     'header_name', 'header_name_prefix', 'header_menu_item',
     // v11 amendment 2 (U6): the side navigation family
-    'side_nav_link', 'side_nav_menu_link', 'side_nav_menu_title'
+    'side_nav_link', 'side_nav_menu_link', 'side_nav_menu_title',
+    // v11 amendment 3 (U7): the structured list family
+    'structured_list_head', 'structured_list_cell'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
