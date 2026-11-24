@@ -6213,6 +6213,13 @@ export default Object.freeze({
     'color.side_nav_icon': '{color.icon_secondary}',
     'color.side_nav_icon_selected': '{color.icon_primary}',
     'color.side_nav_divider': '{color.border_subtle_00}',
+    'color.structured_list_border': '{color.border_subtle_00}',
+    'color.structured_list_row_container_hover': '{color.layer_hover_01}',
+    'color.structured_list_row_container_selected': '{color.layer_selected_01}',
+    'color.structured_list_head_label': '{color.text_primary}',
+    'color.structured_list_cell_label': '{color.text_secondary}',
+    'color.structured_list_cell_label_selected': '{color.text_primary}',
+    'color.structured_list_check': '{color.icon_primary}',
     'control.field_outline_width': '{border.width_01}',
     'control.field_outline_width_focus': '{border.width_01}',
     'control.field_invalid_ring_width': '{border.width_02}',
@@ -6733,6 +6740,24 @@ export default Object.freeze({
     'control.side_nav_divider_margin_block': '{spacing.spacing_03}',
     'control.side_nav_divider_inset': '{spacing.spacing_05}',
     'control.header_side_nav_item_min_height': 32,
+    'control.structured_list_head_padding_top': '{spacing.spacing_05}',
+    'control.structured_list_head_padding_bottom': '{spacing.spacing_03}',
+    'control.structured_list_head_height': 40,
+    'control.structured_list_cell_padding_top': '{spacing.spacing_05}',
+    'control.structured_list_cell_padding_bottom': '{spacing.spacing_06}',
+    'control.structured_list_padding_inline': '{spacing.spacing_03}',
+    'control.structured_list_padding_start': '{spacing.spacing_05}',
+    'control.structured_list_padding_condensed': '{spacing.spacing_03}',
+    'control.structured_list_flush_padding_end': '{spacing.spacing_05}',
+    'control.structured_list_selection_padding_inline': '{spacing.spacing_05}',
+    'control.structured_list_marker_column': '{spacing.spacing_07}',
+    'control.structured_list_icon_top': '{spacing.spacing_01}',
+    'control.structured_list_row_min_height': 0,
+    'control.structured_list_skeleton_bar_height': 16,
+    'control.structured_list_skeleton_bar_ratio': 0.75,
+    'control.structured_list_skeleton_column_first': 0.08,
+    'control.structured_list_skeleton_column_second': 0.3,
+    'control.structured_list_skeleton_column_third': 0.15,
     'type.field_value': '{type.body_compact_01}',
     'type.field_label': '{type.label01}',
     'type.field_helper': '{type.helper_text_01}',
@@ -6891,6 +6916,8 @@ export default Object.freeze({
       'weight': 600,
       'font_family': 'sans'
     },
+    'type.structured_list_head': '{type.heading_compact_01}',
+    'type.structured_list_cell': '{type.body01}',
     'shadow.level_00': {
       'shadow': true,
       'layers': [
@@ -10567,6 +10594,27 @@ export default Object.freeze({
     'color.side_nav_divider': {
       'group': 'color'
     },
+    'color.structured_list_border': {
+      'group': 'color'
+    },
+    'color.structured_list_row_container_hover': {
+      'group': 'color'
+    },
+    'color.structured_list_row_container_selected': {
+      'group': 'color'
+    },
+    'color.structured_list_head_label': {
+      'group': 'color'
+    },
+    'color.structured_list_cell_label': {
+      'group': 'color'
+    },
+    'color.structured_list_cell_label_selected': {
+      'group': 'color'
+    },
+    'color.structured_list_check': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -12127,6 +12175,60 @@ export default Object.freeze({
     'control.header_side_nav_item_min_height': {
       'group': 'dimension'
     },
+    'control.structured_list_head_padding_top': {
+      'group': 'dimension'
+    },
+    'control.structured_list_head_padding_bottom': {
+      'group': 'dimension'
+    },
+    'control.structured_list_head_height': {
+      'group': 'dimension'
+    },
+    'control.structured_list_cell_padding_top': {
+      'group': 'dimension'
+    },
+    'control.structured_list_cell_padding_bottom': {
+      'group': 'dimension'
+    },
+    'control.structured_list_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.structured_list_padding_start': {
+      'group': 'dimension'
+    },
+    'control.structured_list_padding_condensed': {
+      'group': 'dimension'
+    },
+    'control.structured_list_flush_padding_end': {
+      'group': 'dimension'
+    },
+    'control.structured_list_selection_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.structured_list_marker_column': {
+      'group': 'dimension'
+    },
+    'control.structured_list_icon_top': {
+      'group': 'dimension'
+    },
+    'control.structured_list_row_min_height': {
+      'group': 'dimension'
+    },
+    'control.structured_list_skeleton_bar_height': {
+      'group': 'dimension'
+    },
+    'control.structured_list_skeleton_bar_ratio': {
+      'group': 'dimension'
+    },
+    'control.structured_list_skeleton_column_first': {
+      'group': 'dimension'
+    },
+    'control.structured_list_skeleton_column_second': {
+      'group': 'dimension'
+    },
+    'control.structured_list_skeleton_column_third': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -12349,6 +12451,12 @@ export default Object.freeze({
     'type.side_nav_menu_title': {
       'group': 'typeSet'
     },
+    'type.structured_list_head': {
+      'group': 'typeSet'
+    },
+    'type.structured_list_cell': {
+      'group': 'typeSet'
+    },
     'shadow.level_00': {
       'group': 'shadow'
     },
@@ -12518,6 +12626,7 @@ export default Object.freeze({
         'control.file_uploader_name_max_width': 216,
         'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
         'control.side_nav_link_height': '{control.target_min}',
+        'control.structured_list_row_min_height': '{control.target_min}',
         'control.header_side_nav_item_min_height': '{control.target_min}',
         'control.notification_action_close_clearance': '{control.icon_button_size}'
       }
@@ -12544,6 +12653,7 @@ export default Object.freeze({
         'control.notification_inline_width': 608,
         'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
         'control.side_nav_link_height': '{control.target_min}',
+        'control.structured_list_row_min_height': '{control.target_min}',
         'control.header_side_nav_item_min_height': '{control.target_min}',
         'control.notification_action_close_clearance': '{control.icon_button_size}'
       }
@@ -12560,8 +12670,8 @@ export default Object.freeze({
       }
     },
     'variants': {
-      'form.compact': 'superloom_decision: Carbon Mobile touch set + `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` and `ui-shell/side-nav/_side-nav.scss:314-358` (decision 62) (v9-adaptive-contract.md section 4)',
-      'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` and `ui-shell/side-nav/_side-nav.scss:314-358` (decision 62) (v9-adaptive-contract.md section 4)',
+      'form.compact': 'superloom_decision: Carbon Mobile touch set + `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` , `ui-shell/side-nav/_side-nav.scss:314-358` and `structured-list/_structured-list.scss:40-45` (decision 62) (v9-adaptive-contract.md section 4)',
+      'form.medium': 'superloom_decision: Carbon Mobile touch set + `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` , `ui-shell/side-nav/_side-nav.scss:314-358` and `structured-list/_structured-list.scss:40-45` (decision 62) (v9-adaptive-contract.md section 4)',
       'not_applied': 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
     }
   }

@@ -1329,7 +1329,7 @@ describe('default template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1838, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1865, schemeName + ' token count');
     }
   });
 
@@ -1406,7 +1406,7 @@ describe('default template - contract v11 header and narrow-screen cells', () =>
       for (const [name, expected] of Object.entries(V11_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1838, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1865, schemeName + ' token count');
     }
   });
 
@@ -1477,6 +1477,48 @@ describe('default template - contract v11 amendment 2 side navigation cells', ()
       const base = Themer.buildTheme(scheme, [], 'native');
       assert.equal(base.tokens['control.side_nav_link_height'], 32, schemeName);
       assert.equal(base.tokens['control.header_side_nav_item_min_height'], 32, schemeName);
+    }
+  });
+
+});
+
+// Contract v11 amendment 3 (plan 0162 U7): the structured list family
+const V11_AMEND_3_RAW = {
+  'color.structured_list_border': '{color.border_subtle_00}',
+  'color.structured_list_row_container_hover': '{color.layer_hover_01}',
+  'color.structured_list_row_container_selected': '{color.layer_selected_01}',
+  'color.structured_list_cell_label': '{color.text_secondary}',
+  'color.structured_list_check': '{color.icon_primary}',
+  'control.structured_list_head_height': 40,
+  'control.structured_list_cell_padding_bottom': '{spacing.spacing_06}',
+  'control.structured_list_marker_column': '{spacing.spacing_07}',
+  'control.structured_list_row_min_height': 0,
+  'control.structured_list_skeleton_bar_ratio': 0.75,
+  'control.structured_list_skeleton_column_first': 0.08,
+  'type.structured_list_head': '{type.heading_compact_01}',
+  'type.structured_list_cell': '{type.body01}'
+};
+
+describe('default template - contract v11 amendment 3 structured list cells', () => {
+
+  it('should answer the amendment\'s cells identically in each scheme', () => {
+    for (const schemeName of ['light', 'dark']) {
+      const tokens = profile.schemes[schemeName].tokens;
+      for (const [name, expected] of Object.entries(V11_AMEND_3_RAW)) {
+        assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
+      }
+    }
+  });
+
+  it('should give a selectable row the target floor in the form classes', () => {
+    for (const schemeName of ['light', 'dark']) {
+      const scheme = profile.schemes[schemeName];
+      for (const form of ['compact', 'medium']) {
+        const built = Themer.buildTheme(scheme, [], 'native', { variant: { form: form } });
+        assert.equal(built.tokens['control.structured_list_row_min_height'], 48, schemeName + ' ' + form);
+      }
+      const base = Themer.buildTheme(scheme, [], 'native');
+      assert.equal(base.tokens['control.structured_list_row_min_height'], 0, schemeName);
     }
   });
 

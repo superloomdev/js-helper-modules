@@ -1447,6 +1447,34 @@ export default function buildGridRecipe (grid) {
     'type.side_nav_link': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 600, font_family: 'sans' }, // _side-nav.scss:346,364-375 heading-compact-01's weight 600 on the link, the text 14px, line-height 1.25rem, letter-spacing 0.1px
     'type.side_nav_menu_link': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 400, font_family: 'sans' }, // _side-nav.scss:314-319 font-weight 400 in a menu, :364-375 the text
     'type.side_nav_menu_title': { type_set: true, font_size: 14, line_height_px: 18, letter_spacing: 0.16, weight: 600, font_family: 'sans' }, // _side-nav.scss:206-222 heading-compact-01 on the menu's button; :339-358 on the header links inside the side navigation
+    // v11 amendment 3 (plan 0162 U7): the structured list family (`structured-list/_structured-list.scss`, `_mixins.scss`)
+    'color.structured_list_border': colorOf('border_subtle_00'), // _structured-list.scss:72-82 border-block-start / the last row's border-block-end 1px $border-subtle
+    'color.structured_list_row_container_hover': colorOf('layer_hover_01'), // _structured-list.scss:94-112 a selection row's :hover border-color and background-color $layer-hover
+    'color.structured_list_row_container_selected': colorOf('layer_selected_01'), // _structured-list.scss:114-125 the selected row's border-color and background-color $layer-selected, and the next row's rule
+    'color.structured_list_head_label': colorOf('text_primary'), // _structured-list.scss:157-169 .cds--structured-list-th color $text-primary
+    'color.structured_list_cell_label': colorOf('text_secondary'), // _structured-list.scss:176-187 .cds--structured-list-td color $text-secondary; the radio glyph takes it (currentColor)
+    'color.structured_list_cell_label_selected': colorOf('text_primary'), // _structured-list.scss:127-150 a selected or hovered selection row's cells $text-primary
+    'color.structured_list_check': colorOf('icon_primary'), // _structured-list.scss:194-201 the checked input's next cell's .cds--structured-list-svg fill $icon-primary (transparent otherwise, :207-209)
+    'control.structured_list_head_padding_top': '{spacing.spacing_05}', // _mixins.scss:41-43 padding-th $spacing-05 $spacing-03 $spacing-03
+    'control.structured_list_head_padding_bottom': '{spacing.spacing_03}', // _mixins.scss:41-43 padding-th
+    'control.structured_list_head_height': 40, // _structured-list.scss:157-169 .cds--structured-list-th block-size 2.5rem (a table cell's floor: condensed 8 + 18 + 8 draws 40)
+    'control.structured_list_cell_padding_top': '{spacing.spacing_05}', // _mixins.scss:49-51 padding-td $spacing-05 $spacing-03 $spacing-06 $spacing-03
+    'control.structured_list_cell_padding_bottom': '{spacing.spacing_06}', // _mixins.scss:49-51 padding-td
+    'control.structured_list_padding_inline': '{spacing.spacing_03}', // _mixins.scss:41-51 padding-inline $spacing-03 on the head and body cells
+    'control.structured_list_padding_start': '{spacing.spacing_05}', // _structured-list.scss:47-55 the first column's padding-inline-start 1rem
+    'control.structured_list_padding_condensed': '{spacing.spacing_03}', // _structured-list.scss:40-45, _mixins.scss:25-27 condensed padding $structured-list-padding * 0.25 all round
+    'control.structured_list_flush_padding_end': '{spacing.spacing_05}', // _structured-list.scss:57-69 flush padding-inline 0 1rem
+    'control.structured_list_selection_padding_inline': '{spacing.spacing_05}', // _structured-list.scss:22-25, _mixins.scss:30-36 selection padding-inline $structured-list-padding * 0.5
+    'control.structured_list_marker_column': '{spacing.spacing_07}', // _structured-list.scss:210-214 the checkmark cell inline-size $spacing-07; :275-281 the radio cell inline-size $spacing-07
+    'control.structured_list_icon_top': '{spacing.spacing_01}', // _structured-list.scss:189-192,270-273 the glyphs' margin-block-start $spacing-01
+    'control.structured_list_row_min_height': 0, // no upstream floor: a condensed selection row draws 8 + 20 + 8 (_structured-list.scss:40-45); form.compact and form.medium give the target floor
+    'control.structured_list_skeleton_bar_height': 16, // _structured-list.scss:247-254 the skeleton span block-size 1rem
+    'control.structured_list_skeleton_bar_ratio': 0.75, // _structured-list.scss:247-254 the skeleton span inline-size 75%
+    'control.structured_list_skeleton_column_first': 0.08, // _structured-list.scss:233-235 th:first-child inline-size 8% (the table scales the three to its width)
+    'control.structured_list_skeleton_column_second': 0.3, // _structured-list.scss:237-239 th:nth-child(3n + 2) inline-size 30%
+    'control.structured_list_skeleton_column_third': 0.15, // _structured-list.scss:241-243 th:nth-child(3n + 3) inline-size 15%
+    'type.structured_list_head': '{type.heading_compact_01}', // _structured-list.scss:157-169 type-style('heading-compact-01'), font-weight 600
+    'type.structured_list_cell': '{type.body01}', // _structured-list.scss:176-187 type-style('body-01')
     // v11 narrow-screen cells of the form classes (plan 0162 E14; `CONTRACT-REQUESTS.md`, U5's wave)
     'control.breadcrumb_stacked_item_min_height': 0, // breadcrumb/_breadcrumb.scss:25-33 below md the items stack one line each, 18 apart: the base keeps the line; form.compact and form.medium give the target floor
     'control.notification_toast_width_max': 352, // notification/_toast-notification.scss:28-46 inline-size 288px, from breakpoint(max) 22rem
