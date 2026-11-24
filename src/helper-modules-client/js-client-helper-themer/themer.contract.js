@@ -211,6 +211,12 @@
 // (`control.notification_action_close_clearance`). Its first amendment
 // gives the header menu's arrow its hover and press inks
 // (`color.header_menu_arrow_hover`, `color.header_menu_arrow_active`).
+// Its second amendment gives the side navigation its cells: the panel's
+// fill, widths and overlay, the list's top space, the links' and menus'
+// height, paddings, type sets, fills, labels, current indicator and
+// icons, the divider, and the header links' row height inside it
+// (`control.header_side_nav_item_min_height`, whose form classes give the
+// target floor).
 
 
 /////////////////////////// Module-Loader START ////////////////////////////////
@@ -532,7 +538,12 @@ const GRID = Object.freeze({
       'header_submenu_item_container_selected', 'header_submenu_item_container_selected_hover',
       'header_panel_container', 'header_panel_label', 'content_label',
       // v11 amendment 1 (U5)
-      'header_menu_arrow_hover', 'header_menu_arrow_active'
+      'header_menu_arrow_hover', 'header_menu_arrow_active',
+      // v11 amendment 2 (U6): the side navigation family
+      'side_nav_container', 'side_nav_overlay',
+      'side_nav_link_label', 'side_nav_link_label_hover', 'side_nav_link_label_selected',
+      'side_nav_link_container_hover', 'side_nav_link_container_selected', 'side_nav_menu_container_selected_hover',
+      'side_nav_link_indicator', 'side_nav_icon', 'side_nav_icon_selected', 'side_nav_divider'
     ]
   )),
   control: Object.freeze([
@@ -796,7 +807,13 @@ const GRID = Object.freeze({
     'header_panel_width', 'header_side_nav_items_space', 'header_side_nav_divider_inset',
     'content_padding',
     // v11: the narrow-screen cells of the form classes
-    'breadcrumb_stacked_item_min_height', 'notification_toast_width_max', 'notification_action_close_clearance'
+    'breadcrumb_stacked_item_min_height', 'notification_toast_width_max', 'notification_action_close_clearance',
+    // v11 amendment 2 (U6): the side navigation family
+    'side_nav_width', 'side_nav_rail_width', 'side_nav_items_padding_top',
+    'side_nav_link_height', 'side_nav_link_height_large', 'side_nav_link_padding_inline',
+    'side_nav_menu_link_padding_start', 'side_nav_menu_link_padding_start_icon', 'side_nav_indicator_width',
+    'side_nav_icon_size', 'side_nav_icon_gap', 'side_nav_divider_margin_block', 'side_nav_divider_inset',
+    'header_side_nav_item_min_height'
   ]),
   type: Object.freeze([
     'field_value', 'field_label', 'field_helper',
@@ -844,7 +861,9 @@ const GRID = Object.freeze({
     // v10 amendment 2 (m6-amend-2)
     'tearsheet_description',
     // v11: the header family
-    'header_name', 'header_name_prefix', 'header_menu_item'
+    'header_name', 'header_name_prefix', 'header_menu_item',
+    // v11 amendment 2 (U6): the side navigation family
+    'side_nav_link', 'side_nav_menu_link', 'side_nav_menu_title'
   ]),
   shadow: Object.freeze(['level_00'].concat(BUTTON_KINDS.flatMap(function (kind) {
     return BUTTON_ELEVATION_STATES.map(function (state) {
