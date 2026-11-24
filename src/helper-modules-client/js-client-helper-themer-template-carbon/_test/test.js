@@ -1404,7 +1404,7 @@ describe('carbon template - contract v10 census cells', () => {
       for (const [name, expected] of Object.entries(V10_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1809, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1838, schemeName + ' token count');
     }
   });
 
@@ -1481,7 +1481,7 @@ describe('carbon template - contract v11 header and narrow-screen cells', () => 
       for (const [name, expected] of Object.entries(V11_RAW)) {
         assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
       }
-      assert.equal(Object.keys(tokens).length, 1809, schemeName + ' token count');
+      assert.equal(Object.keys(tokens).length, 1838, schemeName + ' token count');
     }
   });
 
@@ -1514,6 +1514,52 @@ describe('carbon template - contract v11 header and narrow-screen cells', () => 
     for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
       const inherited = (profile.schemes[schemeName].from_default || []).filter(function (k) { return names.has(k); });
       assert.deepEqual(inherited, [], schemeName + ' from_default ' + JSON.stringify(inherited));
+    }
+  });
+
+});
+
+// Contract v11 amendment 2 (plan 0162 U6): the side navigation family
+const V11_AMEND_2_RAW = {
+  'color.side_nav_container': '{color.background}',
+  'color.side_nav_overlay': '{color.overlay}',
+  'color.side_nav_link_label': '{color.text_secondary}',
+  'color.side_nav_link_container_selected': '{color.background_selected}',
+  'color.side_nav_link_indicator': '{color.border_interactive}',
+  'color.side_nav_icon': '{color.icon_secondary}',
+  'color.side_nav_divider': '{color.border_subtle_00}',
+  'control.side_nav_width': 256,
+  'control.side_nav_rail_width': 48,
+  'control.side_nav_link_height': 32,
+  'control.side_nav_menu_link_padding_start_icon': 72,
+  'control.side_nav_indicator_width': 3,
+  'control.header_side_nav_item_min_height': 32,
+  'type.side_nav_link': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 600, font_family: 'sans' },
+  'type.side_nav_menu_title': { type_set: true, font_size: 14, line_height_px: 18, letter_spacing: 0.16, weight: 600, font_family: 'sans' }
+};
+
+describe('carbon template - contract v11 amendment 2 side navigation cells', () => {
+
+  it('should answer the amendment\'s cells identically in each scheme', () => {
+    for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+      const tokens = profile.schemes[schemeName].tokens;
+      for (const [name, expected] of Object.entries(V11_AMEND_2_RAW)) {
+        assert.deepEqual(tokens[name], expected, schemeName + ' ' + name);
+      }
+    }
+  });
+
+  it('should give the side navigation\'s rows the target floor in the form classes', () => {
+    for (const schemeName of ['white', 'g10', 'g90', 'g100']) {
+      const scheme = profile.schemes[schemeName];
+      for (const form of ['compact', 'medium']) {
+        const built = Themer.buildTheme(scheme, [], 'native', { variant: { form: form } });
+        assert.equal(built.tokens['control.side_nav_link_height'], 48, schemeName + ' ' + form);
+        assert.equal(built.tokens['control.header_side_nav_item_min_height'], 48, schemeName + ' ' + form);
+      }
+      const base = Themer.buildTheme(scheme, [], 'native');
+      assert.equal(base.tokens['control.side_nav_link_height'], 32, schemeName);
+      assert.equal(base.tokens['control.header_side_nav_item_min_height'], 32, schemeName);
     }
   });
 

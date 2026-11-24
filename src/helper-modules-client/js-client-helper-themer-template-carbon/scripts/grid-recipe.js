@@ -1471,6 +1471,36 @@ export default function buildGridRecipe (grid) {
     'control.header_side_nav_divider_inset': '{spacing.spacing_05}', // _side-nav.scss:478-486 the divider 16px in from each side, 16px under the list
     'control.content_padding': '{spacing.spacing_07}', // _content.scss:16-20 padding 2rem
     'color.content_label': colorOf('text_primary'), // _content.scss:18
+    // v11 amendment 2 Navigation family (`ui-shell/side-nav/_side-nav.scss:26-561`; probes `recipes/probe/SideNav*.cells.txt`, U6)
+    'color.side_nav_container': colorOf('background'), // _side-nav.scss:35 .cds--side-nav background-color $background
+    'color.side_nav_overlay': colorOf('overlay'), // _side-nav.scss:90-101 below lg the active overlay background-color $overlay
+    'color.side_nav_link_label': colorOf('text_secondary'), // _side-nav.scss:36,216,364-375 color $text-secondary
+    'color.side_nav_link_label_hover': colorOf('text_primary'), // _side-nav.scss:157-183 :hover color $text-primary
+    'color.side_nav_link_label_selected': colorOf('text_primary'), // _side-nav.scss:275-294,325-334,388-392 the current link and the active menu $text-primary
+    'color.side_nav_link_container_hover': colorOf('background_hover'), // _side-nav.scss:157-173,224-229 :hover background-color $background-hover
+    'color.side_nav_link_container_selected': colorOf('background_selected'), // _side-nav.scss:275-279,325-334,382-386 background-color $background-selected
+    'color.side_nav_menu_container_selected_hover': colorOf('background_selected'), // _side-nav.scss:268-272 the active menu's :hover keeps $background-selected
+    'color.side_nav_link_indicator': colorOf('border_interactive'), // _side-nav.scss:281-288,394-402 ::before 3px $border-interactive
+    'color.side_nav_icon': colorOf('icon_secondary'), // _side-nav.scss:420-424 .cds--side-nav__icon > svg fill $icon-secondary
+    'color.side_nav_icon_selected': colorOf('icon_primary'), // _side-nav.scss:296-298 the active menu's icons fill $icon-primary
+    'color.side_nav_divider': colorOf('border_subtle_00'), // _side-nav.scss:192-197 background-color $border-subtle
+    'control.side_nav_width': 256, // _side-nav.scss:48-50,73-75 inline-size mini-units(32)
+    'control.side_nav_rail_width': 48, // _side-nav.scss:37,65-67 inline-size mini-units(6)
+    'control.side_nav_items_padding_top': '{spacing.spacing_05}', // _side-nav.scss:130-135 padding 1rem 0 0
+    'control.side_nav_link_height': 32, // _side-nav.scss:214-215,314-319,352 block-size and min-block-size mini-units(4)
+    'control.side_nav_link_height_large': 48, // _side-nav.scss:259-261,360-362 the large item mini-units(6)
+    'control.side_nav_link_padding_inline': '{spacing.spacing_05}', // _side-nav.scss:214,351 padding 0 mini-units(2)
+    'control.side_nav_menu_link_padding_start': '{spacing.spacing_07}', // _side-nav.scss:314-319 padding-inline-start mini-units(4)
+    'control.side_nav_menu_link_padding_start_icon': 72, // _side-nav.scss:321-324 after the menu's icon padding-inline-start mini-units(9)
+    'control.side_nav_indicator_width': 3, // _side-nav.scss:281-288,394-402 ::before inline-size 3px
+    'control.side_nav_icon_size': '{size.icon_01}', // _side-nav.scss:247-251,420-424 the glyphs block-size and inline-size mini-units(2)
+    'control.side_nav_icon_gap': '{spacing.spacing_06}', // _side-nav.scss:416-418 margin-inline-end mini-units(3)
+    'control.side_nav_divider_margin_block': '{spacing.spacing_03}', // _side-nav.scss:192-197 margin $spacing-03 $spacing-05
+    'control.side_nav_divider_inset': '{spacing.spacing_05}', // _side-nav.scss:192-197 margin $spacing-03 $spacing-05
+    'control.header_side_nav_item_min_height': 32, // _side-nav.scss:339-358 .cds--side-nav a.cds--header__menu-item min-block-size mini-units(4); form.compact and form.medium give the target floor
+    'type.side_nav_link': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 600, font_family: 'sans' }, // _side-nav.scss:346,364-375 heading-compact-01's weight 600 on the link, the text 14px, line-height 1.25rem, letter-spacing 0.1px
+    'type.side_nav_menu_link': { type_set: true, font_size: 14, line_height_px: 20, letter_spacing: 0.1, weight: 400, font_family: 'sans' }, // _side-nav.scss:314-319 font-weight 400 in a menu, :364-375 the text
+    'type.side_nav_menu_title': { type_set: true, font_size: 14, line_height_px: 18, letter_spacing: 0.16, weight: 600, font_family: 'sans' }, // _side-nav.scss:206-222 heading-compact-01 on the menu's button; :339-358 on the header links inside the side navigation
     // v11 narrow-screen cells of the form classes (plan 0162 E14; `CONTRACT-REQUESTS.md`, U5's wave)
     'control.breadcrumb_stacked_item_min_height': 0, // breadcrumb/_breadcrumb.scss:25-33 below md the items stack one line each, 18 apart: the base keeps the line; form.compact and form.medium give the target floor
     'control.notification_toast_width_max': 352, // notification/_toast-notification.scss:28-46 inline-size 288px, from breakpoint(max) 22rem

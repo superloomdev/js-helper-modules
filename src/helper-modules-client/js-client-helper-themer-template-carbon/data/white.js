@@ -5686,6 +5686,56 @@ export default Object.freeze({
     'control.header_side_nav_divider_inset': '{spacing.spacing_05}',
     'control.content_padding': '{spacing.spacing_07}',
     'color.content_label': '{color.text_primary}',
+    'color.side_nav_container': '{color.background}',
+    'color.side_nav_overlay': '{color.overlay}',
+    'color.side_nav_link_label': '{color.text_secondary}',
+    'color.side_nav_link_label_hover': '{color.text_primary}',
+    'color.side_nav_link_label_selected': '{color.text_primary}',
+    'color.side_nav_link_container_hover': '{color.background_hover}',
+    'color.side_nav_link_container_selected': '{color.background_selected}',
+    'color.side_nav_menu_container_selected_hover': '{color.background_selected}',
+    'color.side_nav_link_indicator': '{color.border_interactive}',
+    'color.side_nav_icon': '{color.icon_secondary}',
+    'color.side_nav_icon_selected': '{color.icon_primary}',
+    'color.side_nav_divider': '{color.border_subtle_00}',
+    'control.side_nav_width': 256,
+    'control.side_nav_rail_width': 48,
+    'control.side_nav_items_padding_top': '{spacing.spacing_05}',
+    'control.side_nav_link_height': 32,
+    'control.side_nav_link_height_large': 48,
+    'control.side_nav_link_padding_inline': '{spacing.spacing_05}',
+    'control.side_nav_menu_link_padding_start': '{spacing.spacing_07}',
+    'control.side_nav_menu_link_padding_start_icon': 72,
+    'control.side_nav_indicator_width': 3,
+    'control.side_nav_icon_size': '{size.icon_01}',
+    'control.side_nav_icon_gap': '{spacing.spacing_06}',
+    'control.side_nav_divider_margin_block': '{spacing.spacing_03}',
+    'control.side_nav_divider_inset': '{spacing.spacing_05}',
+    'control.header_side_nav_item_min_height': 32,
+    'type.side_nav_link': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 600,
+      'font_family': 'sans'
+    },
+    'type.side_nav_menu_link': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 20,
+      'letter_spacing': 0.1,
+      'weight': 400,
+      'font_family': 'sans'
+    },
+    'type.side_nav_menu_title': {
+      'type_set': true,
+      'font_size': 14,
+      'line_height_px': 18,
+      'letter_spacing': 0.16,
+      'weight': 600,
+      'font_family': 'sans'
+    },
     'control.breadcrumb_stacked_item_min_height': 0,
     'control.notification_toast_width_max': 352,
     'control.notification_action_close_clearance': 0,
@@ -9535,6 +9585,42 @@ export default Object.freeze({
     'color.header_menu_arrow_active': {
       'group': 'color'
     },
+    'color.side_nav_container': {
+      'group': 'color'
+    },
+    'color.side_nav_overlay': {
+      'group': 'color'
+    },
+    'color.side_nav_link_label': {
+      'group': 'color'
+    },
+    'color.side_nav_link_label_hover': {
+      'group': 'color'
+    },
+    'color.side_nav_link_label_selected': {
+      'group': 'color'
+    },
+    'color.side_nav_link_container_hover': {
+      'group': 'color'
+    },
+    'color.side_nav_link_container_selected': {
+      'group': 'color'
+    },
+    'color.side_nav_menu_container_selected_hover': {
+      'group': 'color'
+    },
+    'color.side_nav_link_indicator': {
+      'group': 'color'
+    },
+    'color.side_nav_icon': {
+      'group': 'color'
+    },
+    'color.side_nav_icon_selected': {
+      'group': 'color'
+    },
+    'color.side_nav_divider': {
+      'group': 'color'
+    },
     'control.field_outline_width': {
       'group': 'dimension'
     },
@@ -11053,6 +11139,48 @@ export default Object.freeze({
     'control.notification_action_close_clearance': {
       'group': 'dimension'
     },
+    'control.side_nav_width': {
+      'group': 'dimension'
+    },
+    'control.side_nav_rail_width': {
+      'group': 'dimension'
+    },
+    'control.side_nav_items_padding_top': {
+      'group': 'dimension'
+    },
+    'control.side_nav_link_height': {
+      'group': 'dimension'
+    },
+    'control.side_nav_link_height_large': {
+      'group': 'dimension'
+    },
+    'control.side_nav_link_padding_inline': {
+      'group': 'dimension'
+    },
+    'control.side_nav_menu_link_padding_start': {
+      'group': 'dimension'
+    },
+    'control.side_nav_menu_link_padding_start_icon': {
+      'group': 'dimension'
+    },
+    'control.side_nav_indicator_width': {
+      'group': 'dimension'
+    },
+    'control.side_nav_icon_size': {
+      'group': 'dimension'
+    },
+    'control.side_nav_icon_gap': {
+      'group': 'dimension'
+    },
+    'control.side_nav_divider_margin_block': {
+      'group': 'dimension'
+    },
+    'control.side_nav_divider_inset': {
+      'group': 'dimension'
+    },
+    'control.header_side_nav_item_min_height': {
+      'group': 'dimension'
+    },
     'type.field_value': {
       'group': 'typeSet'
     },
@@ -11266,6 +11394,15 @@ export default Object.freeze({
     'type.header_menu_item': {
       'group': 'typeSet'
     },
+    'type.side_nav_link': {
+      'group': 'typeSet'
+    },
+    'type.side_nav_menu_link': {
+      'group': 'typeSet'
+    },
+    'type.side_nav_menu_title': {
+      'group': 'typeSet'
+    },
     'shadow.level_00': {
       'group': 'shadow'
     },
@@ -11447,6 +11584,8 @@ export default Object.freeze({
         'type.selection_label': '{type.body01}',
         'control.file_uploader_name_max_width': 216,
         'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
+        'control.side_nav_link_height': '{control.target_min}',
+        'control.header_side_nav_item_min_height': '{control.target_min}',
         'control.notification_action_close_clearance': '{control.icon_button_size}'
       }
     },
@@ -11472,6 +11611,8 @@ export default Object.freeze({
         'control.dialog_height_ratio_lg': 0.96,
         'control.notification_inline_width': 608,
         'control.breadcrumb_stacked_item_min_height': '{control.target_min}',
+        'control.side_nav_link_height': '{control.target_min}',
+        'control.header_side_nav_item_min_height': '{control.target_min}',
         'control.notification_action_close_clearance': '{control.icon_button_size}'
       }
     }
@@ -11543,8 +11684,8 @@ export default Object.freeze({
     'variants': {
       'platform.ios': 'carbon_primary: @carbon/react-native 9.0.7 src/ (raw-carbon-mobile-variant.md)',
       'platform.android': 'carbon_primary: @carbon/react-native 9.0.7 src/ (raw-carbon-mobile-variant.md)',
-      'form.compact': 'carbon_primary @carbon/react-native touch set + carbon_primary `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` and `notification/_actionable-notification.scss:570-615` (decision 62)',
-      'form.medium': 'carbon_primary @carbon/react-native touch set + carbon_primary `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` and `notification/_actionable-notification.scss:570-615` (decision 62)',
+      'form.compact': 'carbon_primary @carbon/react-native touch set + carbon_primary `file-uploader/_file-uploader.scss` name width, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` and `ui-shell/side-nav/_side-nav.scss:314-358` (decision 62)',
+      'form.medium': 'carbon_primary @carbon/react-native touch set + carbon_primary `modal/_modal.scss:80-264`, `notification/_inline-notification.scss:25-51`, the target floor over `breadcrumb/_breadcrumb.scss:25-33` , `notification/_actionable-notification.scss:570-615` and `ui-shell/side-nav/_side-nav.scss:314-358` (decision 62)',
       'not_applied': 'control.radio_dot_size (the mobile radio is a 20px glyph; no source states its dot), field padding 18/16 (horizontal web anatomy kept), Toggle track/thumb (OS-native, D25 system widget)'
     }
   }
